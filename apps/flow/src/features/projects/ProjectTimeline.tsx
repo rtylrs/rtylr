@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -58,6 +59,7 @@ const ProjectTimeline: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Timeline · rtylr" />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}

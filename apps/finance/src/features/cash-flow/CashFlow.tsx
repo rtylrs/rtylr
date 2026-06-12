@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
@@ -22,6 +23,7 @@ const CashFlow: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Cash flow · rtylr" />
       <PageHeader
         title="Cash Flow"
         breadcrumbs={[{ label: 'Reports' }, { label: 'Cash Flow' }]}

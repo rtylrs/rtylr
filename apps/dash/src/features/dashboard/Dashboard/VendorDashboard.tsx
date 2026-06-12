@@ -4,6 +4,7 @@ import { ResponsiveGridLayout, type Layout, type ResponsiveLayouts } from 'react
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings2, X, Plus, GripVertical } from 'lucide-react';
 import { ErrorBoundary } from '@voxire/ui';
+import { HelmetContainer } from '@voxire/components';
 import { useUserStore } from '../../../shared/stores/userStore';
 import {
   getWidgetComponent,
@@ -347,7 +348,12 @@ const VendorDashboard: React.FC = () => {
   const isAdmin = role === 'admin' || role === 'owner' || !role;
   const userApps: string[] = (user?.apps as string[] | undefined) ?? [];
   if (!isAdmin) return <StaffDashboard userApps={userApps} />;
-  return <AdminDashboard />;
+  return (
+    <>
+      <HelmetContainer title="Dashboard · rtylr" />
+      <AdminDashboard />
+    </>
+  );
 };
 
 export default VendorDashboard;

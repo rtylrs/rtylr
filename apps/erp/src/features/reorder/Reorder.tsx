@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ShoppingCart, TrendingUp } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -18,6 +19,7 @@ const Reorder: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Reorder suggestions · rtylr" />
       <PageHeader
         title="Reorder Suggestions"
         description="Smart recommendations based on sales velocity and lead times"

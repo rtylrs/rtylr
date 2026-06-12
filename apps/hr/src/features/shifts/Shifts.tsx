@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
+import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { Clock, CheckCircle2, Play, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Shift } from '../../shared/schemas/shifts';
@@ -93,7 +94,9 @@ const Shifts = (): React.JSX.Element => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <>
+      <HelmetContainer title="Shifts · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <SectionHeader
         title={t('shifts.title')}
         subtitle={t('shifts.weekOf', { start: formatDate(week.start), end: formatDate(week.end) })}

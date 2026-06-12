@@ -6,6 +6,7 @@ import { CheckCircle, Download, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import { ErrorBoundary } from '@voxire/ui';
+import { HelmetContainer } from '@voxire/components';
 import { SectionHeader, Button, Skeleton, Pill, Breadcrumbs } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {

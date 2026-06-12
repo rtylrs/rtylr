@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Plus,
 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
@@ -1019,6 +1020,7 @@ const FlowSettings: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
+      <HelmetContainer title="Settings · rtylr" />
       {/* Settings sidebar */}
       <div className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto">
         <div className="flex flex-row gap-1 p-3 md:flex-col md:gap-0 md:p-4">

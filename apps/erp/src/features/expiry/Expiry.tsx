@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { CalendarX, TrendingDown } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -21,6 +22,7 @@ const Expiry: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Expiry tracking · rtylr" />
       <PageHeader
         title="Expiry Tracking"
         description={`${items.length} batches with expiry dates`}

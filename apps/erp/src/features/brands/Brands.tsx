@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tag, Trash2 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useBrands, useCreateBrand, useDeleteBrand } from './useBrands';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
@@ -53,6 +54,7 @@ const Brands: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Brands · rtylr" />
       <PageHeader
         title="Brands"
         description={`${brands.length} brands across your catalog`}

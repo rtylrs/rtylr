@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Plus, Search, Trash2, Eye } from 'lucide-react';
@@ -101,294 +102,297 @@ const Leads: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
-      <PageHeader
-        title="Leads"
-        subtitle={`${leads.length} total leads`}
-        actions={
-          <Button variant="primary" onClick={() => setCreateOpen(true)}>
-            <Plus size={13} />
-            New lead
-          </Button>
-        }
-      />
+    <>
+      <HelmetContainer title="Leads · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
+        <PageHeader
+          title="Leads"
+          subtitle={`${leads.length} total leads`}
+          actions={
+            <Button variant="primary" onClick={() => setCreateOpen(true)}>
+              <Plus size={13} />
+              New lead
+            </Button>
+          }
+        />
 
-      {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-        {/* Search */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '0 12px',
-            height: '36px',
-            borderRadius: '8px',
-            background: 'var(--hub-input-bg)',
-            border: '1px solid var(--hub-border)',
-            flex: '1',
-            minWidth: '200px',
-            maxWidth: '300px',
-          }}
-        >
-          <Search size={14} style={{ color: 'var(--hub-text-muted)', flexShrink: 0 }} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by company..."
+        {/* Filters */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Search */}
+          <div
             style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontSize: '13px',
-              color: 'var(--hub-text)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '0 12px',
+              height: '36px',
+              borderRadius: '8px',
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              flex: '1',
+              minWidth: '200px',
+              maxWidth: '300px',
             }}
-          />
+          >
+            <Search size={14} style={{ color: 'var(--hub-text-muted)', flexShrink: 0 }} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by company..."
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: '13px',
+                color: 'var(--hub-text)',
+              }}
+            />
+          </div>
+
+          {/* Stage filter */}
+          <select
+            value={stageFilter}
+            onChange={(e) => setStageFilter(e.target.value as LeadStage | 'all')}
+            style={{
+              height: '36px',
+              padding: '0 10px',
+              borderRadius: '8px',
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+              fontSize: '13px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {ALL_STAGES.map((s) => (
+              <option key={s} value={s}>
+                {s === 'all' ? 'All stages' : STAGE_LABELS[s]}
+              </option>
+            ))}
+          </select>
+
+          {/* Source filter */}
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            style={{
+              height: '36px',
+              padding: '0 10px',
+              borderRadius: '8px',
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              color: 'var(--hub-text)',
+              fontSize: '13px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="all">All sources</option>
+            {sources.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Stage filter */}
-        <select
-          value={stageFilter}
-          onChange={(e) => setStageFilter(e.target.value as LeadStage | 'all')}
+        {/* Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
           style={{
-            height: '36px',
-            padding: '0 10px',
-            borderRadius: '8px',
-            background: 'var(--hub-input-bg)',
+            background: 'var(--hub-card)',
             border: '1px solid var(--hub-border)',
-            color: 'var(--hub-text)',
-            fontSize: '13px',
-            outline: 'none',
-            cursor: 'pointer',
+            borderRadius: '12px',
+            overflow: 'hidden',
           }}
         >
-          {ALL_STAGES.map((s) => (
-            <option key={s} value={s}>
-              {s === 'all' ? 'All stages' : STAGE_LABELS[s]}
-            </option>
-          ))}
-        </select>
-
-        {/* Source filter */}
-        <select
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          style={{
-            height: '36px',
-            padding: '0 10px',
-            borderRadius: '8px',
-            background: 'var(--hub-input-bg)',
-            border: '1px solid var(--hub-border)',
-            color: 'var(--hub-text)',
-            fontSize: '13px',
-            outline: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="all">All sources</option>
-          {sources.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
-        style={{
-          background: 'var(--hub-card)',
-          border: '1px solid var(--hub-border)',
-          borderRadius: '12px',
-          overflow: 'hidden',
-        }}
-      >
-        {isLoading ? (
-          <div style={{ padding: '16px' }}>
-            <SkeletonList count={5} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            icon={Search}
-            title="No leads found"
-            description={
-              search ? `No leads match "${search}"` : 'Create your first lead to get started.'
-            }
-            action={
-              <Button variant="primary" onClick={() => setCreateOpen(true)}>
-                <Plus size={13} />
-                New lead
-              </Button>
-            }
-          />
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {[
-                  'Company',
-                  'Industry',
-                  'Stage',
-                  'Source',
-                  'Assigned Rep',
-                  'MRR Potential',
-                  'Actions',
-                ].map((h, i) => (
-                  <th
-                    key={i}
-                    style={{
-                      padding: '11px 16px',
-                      textAlign: 'left',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: 'var(--hub-text-dim)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <AnimatePresence>
-                {filtered.map((lead: Lead) => (
-                  <motion.tr
-                    key={lead.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    style={{
-                      borderBottom: '1px solid var(--hub-border)',
-                      cursor: 'pointer',
-                      transition: 'background 0.12s',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'transparent';
-                    }}
-                    onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
-                  >
-                    <td style={{ padding: '12px 16px' }}>
-                      <p
+          {isLoading ? (
+            <div style={{ padding: '16px' }}>
+              <SkeletonList count={5} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="No leads found"
+              description={
+                search ? `No leads match "${search}"` : 'Create your first lead to get started.'
+              }
+              action={
+                <Button variant="primary" onClick={() => setCreateOpen(true)}>
+                  <Plus size={13} />
+                  New lead
+                </Button>
+              }
+            />
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                  {[
+                    'Company',
+                    'Industry',
+                    'Stage',
+                    'Source',
+                    'Assigned Rep',
+                    'MRR Potential',
+                    'Actions',
+                  ].map((h, i) => (
+                    <th
+                      key={i}
+                      style={{
+                        padding: '11px 16px',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        color: 'var(--hub-text-dim)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {filtered.map((lead: Lead) => (
+                    <motion.tr
+                      key={lead.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      style={{
+                        borderBottom: '1px solid var(--hub-border)',
+                        cursor: 'pointer',
+                        transition: 'background 0.12s',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      }}
+                      onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
+                    >
+                      <td style={{ padding: '12px 16px' }}>
+                        <p
+                          style={{
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            color: 'var(--hub-text)',
+                            margin: 0,
+                          }}
+                        >
+                          {lead.companyName ?? lead.company ?? '—'}
+                        </p>
+                      </td>
+                      <td
                         style={{
+                          padding: '12px 16px',
+                          fontSize: '12px',
+                          color: 'var(--hub-text-muted)',
+                        }}
+                      >
+                        {lead.industry}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <StageBadge stage={lead.stage} />
+                      </td>
+                      <td
+                        style={{
+                          padding: '12px 16px',
+                          fontSize: '12px',
+                          color: 'var(--hub-text-muted)',
+                        }}
+                      >
+                        {lead.source}
+                      </td>
+                      <td
+                        style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text)' }}
+                      >
+                        {lead.assignedRep}
+                      </td>
+                      <td
+                        style={{
+                          padding: '12px 16px',
                           fontSize: '13px',
                           fontWeight: 600,
                           color: 'var(--hub-text)',
-                          margin: 0,
                         }}
                       >
-                        {lead.companyName ?? lead.company ?? '—'}
-                      </p>
-                    </td>
-                    <td
-                      style={{
-                        padding: '12px 16px',
-                        fontSize: '12px',
-                        color: 'var(--hub-text-muted)',
-                      }}
-                    >
-                      {lead.industry}
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <StageBadge stage={lead.stage} />
-                    </td>
-                    <td
-                      style={{
-                        padding: '12px 16px',
-                        fontSize: '12px',
-                        color: 'var(--hub-text-muted)',
-                      }}
-                    >
-                      {lead.source}
-                    </td>
-                    <td
-                      style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text)' }}
-                    >
-                      {lead.assignedRep}
-                    </td>
-                    <td
-                      style={{
-                        padding: '12px 16px',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: 'var(--hub-text)',
-                      }}
-                    >
-                      ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}
-                    </td>
-                    <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <button
-                          aria-label="View lead"
-                          onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
-                          style={{
-                            height: '28px',
-                            width: '28px',
-                            borderRadius: '6px',
-                            background: 'transparent',
-                            border: '1px solid var(--hub-border)',
-                            cursor: 'pointer',
-                            color: 'var(--hub-text-muted)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Eye size={13} />
-                        </button>
-                        <button
-                          aria-label="Delete lead"
-                          onClick={() => setDeleteId(lead.id)}
-                          style={{
-                            height: '28px',
-                            width: '28px',
-                            borderRadius: '6px',
-                            background: 'transparent',
-                            border: '1px solid var(--hub-border)',
-                            cursor: 'pointer',
-                            color: '#ef4444',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        )}
-      </motion.div>
+                        ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}
+                      </td>
+                      <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            aria-label="View lead"
+                            onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
+                            style={{
+                              height: '28px',
+                              width: '28px',
+                              borderRadius: '6px',
+                              background: 'transparent',
+                              border: '1px solid var(--hub-border)',
+                              cursor: 'pointer',
+                              color: 'var(--hub-text-muted)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <button
+                            aria-label="Delete lead"
+                            onClick={() => setDeleteId(lead.id)}
+                            style={{
+                              height: '28px',
+                              width: '28px',
+                              borderRadius: '6px',
+                              background: 'transparent',
+                              border: '1px solid var(--hub-border)',
+                              cursor: 'pointer',
+                              color: '#ef4444',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          )}
+        </motion.div>
 
-      <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
+        <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
 
-      <ConfirmModal
-        open={deleteId !== null}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-        title="Delete lead"
-        description={
-          deleteTarget
-            ? `Delete "${deleteTarget.company}"? This will also remove all associated touchpoints and contacts.`
-            : 'Are you sure?'
-        }
-        confirmLabel="Delete"
-        variant="danger"
-      />
-    </div>
+        <ConfirmModal
+          open={deleteId !== null}
+          onClose={() => setDeleteId(null)}
+          onConfirm={handleDelete}
+          title="Delete lead"
+          description={
+            deleteTarget
+              ? `Delete "${deleteTarget.company}"? This will also remove all associated touchpoints and contacts.`
+              : 'Are you sure?'
+          }
+          confirmLabel="Delete"
+          variant="danger"
+        />
+      </div>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { LogOut } from 'lucide-react';
 import { useOffboardingChecklist, useToggleOffboardingTask } from '../../shared/hooks/useHrExtras';
 import {

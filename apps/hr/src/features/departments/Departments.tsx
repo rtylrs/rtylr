@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { HelmetContainer } from '@voxire/components';
 import {
   Users,
   UserCheck,

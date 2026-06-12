@@ -3,6 +3,7 @@ import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { Share2 } from 'lucide-react';
 import type {
   PerformanceReviewPayload,

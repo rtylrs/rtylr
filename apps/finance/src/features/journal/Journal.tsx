@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -79,6 +80,7 @@ const Journal: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Journal · rtylr" />
       <PageHeader
         title="Journal"
         subtitle={`${data.length} entries`}

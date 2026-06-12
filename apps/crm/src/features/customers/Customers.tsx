@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -193,367 +194,379 @@ const Customers: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
-      <PageHeader
-        title="Customers"
-        subtitle={`${customers.length} total customers`}
-        actions={
-          <>
-            <Button variant="outline" onClick={() => navigate({ to: '/customers/import' })}>
-              <Upload size={13} />
-              Import
-            </Button>
-            <Button variant="outline" onClick={exportCsv}>
-              Export CSV
-            </Button>
-            <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
-              <Plus size={13} />
-              New customer
-            </Button>
-          </>
-        }
-      />
-
-      {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '0 12px',
-            height: '36px',
-            borderRadius: '8px',
-            background: 'var(--hub-input-bg)',
-            border: '1px solid var(--hub-border)',
-            flex: '1',
-            minWidth: '220px',
-            maxWidth: '340px',
-          }}
-        >
-          <Search size={14} style={{ color: 'var(--hub-text-muted)', flexShrink: 0 }} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search customers..."
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontSize: '13px',
-              color: 'var(--hub-text)',
-            }}
-          />
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            gap: '4px',
-            background: 'var(--hub-card)',
-            border: '1px solid var(--hub-border)',
-            borderRadius: '8px',
-            padding: '3px',
-          }}
-        >
-          {tierFilters.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTierFilter(t)}
-              style={{
-                padding: '4px 12px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                border: 'none',
-                background:
-                  tierFilter === t ? (t === 'All' ? ACCENT : tierColor[t as Tier]) : 'transparent',
-                color: tierFilter === t ? '#fff' : 'var(--hub-text-muted)',
-                transition: 'all 0.15s',
-              }}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Bulk actions */}
-      {selected.size > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 14px',
-            background: 'rgba(59,130,246,0.08)',
-            border: '1px solid rgba(59,130,246,0.3)',
-            borderRadius: '10px',
-          }}
-        >
-          <span style={{ fontSize: '12px', color: 'var(--hub-text)', fontWeight: 600 }}>
-            {selected.size} selected
-          </span>
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginLeft: 'auto' }}>
-            <TagIcon size={12} style={{ color: 'var(--hub-text-muted)' }} />
-            <input
-              value={bulkTag}
-              onChange={(e) => setBulkTag(e.target.value)}
-              placeholder="Add tag..."
-              onKeyDown={(e) => e.key === 'Enter' && applyBulkTag()}
-              style={{
-                height: '30px',
-                padding: '0 10px',
-                borderRadius: '6px',
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-                fontSize: '12px',
-                outline: 'none',
-                width: '160px',
-              }}
-            />
-            <Button variant="primary" onClick={applyBulkTag} style={{ padding: '6px 12px' }}>
-              Apply
-            </Button>
-            <Button variant="ghost" onClick={() => setSelected(new Set())}>
-              Clear
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: 'easeOut' }}
-        style={{
-          background: 'var(--hub-card)',
-          border: '1px solid var(--hub-border)',
-          borderRadius: '12px',
-          overflow: 'hidden',
-        }}
-      >
-        {isLoading ? (
-          <div style={{ padding: '16px' }}>
-            <SkeletonList count={6} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            icon={UsersIcon}
-            title="No customers found"
-            description={
-              search
-                ? `No customers match "${search}"`
-                : 'Create your first customer to get started.'
-            }
-            action={
+    <>
+      <HelmetContainer title="Customers · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
+        <PageHeader
+          title="Customers"
+          subtitle={`${customers.length} total customers`}
+          actions={
+            <>
+              <Button variant="outline" onClick={() => navigate({ to: '/customers/import' })}>
+                <Upload size={13} />
+                Import
+              </Button>
+              <Button variant="outline" onClick={exportCsv}>
+                Export CSV
+              </Button>
               <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
                 <Plus size={13} />
                 New customer
               </Button>
-            }
-          />
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                <th style={{ padding: '11px 12px 11px 16px', width: '28px' }}>
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    onChange={toggleAll}
-                    style={{ accentColor: ACCENT, cursor: 'pointer' }}
-                  />
-                </th>
-                {[
-                  'Customer',
-                  'Email',
-                  'Phone',
-                  'Total Spent',
-                  'Visits',
-                  'Points',
-                  'Tags',
-                  'Last Visit',
-                  '',
-                ].map((h, i) => (
-                  <th
-                    key={i}
-                    style={{
-                      padding: '11px 16px',
-                      textAlign: 'left',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: 'var(--hub-text-dim)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {h}
+            </>
+          }
+        />
+
+        {/* Filters */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '0 12px',
+              height: '36px',
+              borderRadius: '8px',
+              background: 'var(--hub-input-bg)',
+              border: '1px solid var(--hub-border)',
+              flex: '1',
+              minWidth: '220px',
+              maxWidth: '340px',
+            }}
+          >
+            <Search size={14} style={{ color: 'var(--hub-text-muted)', flexShrink: 0 }} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search customers..."
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: '13px',
+                color: 'var(--hub-text)',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: '4px',
+              background: 'var(--hub-card)',
+              border: '1px solid var(--hub-border)',
+              borderRadius: '8px',
+              padding: '3px',
+            }}
+          >
+            {tierFilters.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTierFilter(t)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  border: 'none',
+                  background:
+                    tierFilter === t
+                      ? t === 'All'
+                        ? ACCENT
+                        : tierColor[t as Tier]
+                      : 'transparent',
+                  color: tierFilter === t ? '#fff' : 'var(--hub-text-muted)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Bulk actions */}
+        {selected.size > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 14px',
+              background: 'rgba(59,130,246,0.08)',
+              border: '1px solid rgba(59,130,246,0.3)',
+              borderRadius: '10px',
+            }}
+          >
+            <span style={{ fontSize: '12px', color: 'var(--hub-text)', fontWeight: 600 }}>
+              {selected.size} selected
+            </span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginLeft: 'auto' }}>
+              <TagIcon size={12} style={{ color: 'var(--hub-text-muted)' }} />
+              <input
+                value={bulkTag}
+                onChange={(e) => setBulkTag(e.target.value)}
+                placeholder="Add tag..."
+                onKeyDown={(e) => e.key === 'Enter' && applyBulkTag()}
+                style={{
+                  height: '30px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '12px',
+                  outline: 'none',
+                  width: '160px',
+                }}
+              />
+              <Button variant="primary" onClick={applyBulkTag} style={{ padding: '6px 12px' }}>
+                Apply
+              </Button>
+              <Button variant="ghost" onClick={() => setSelected(new Set())}>
+                Clear
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          style={{
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '12px',
+            overflow: 'hidden',
+          }}
+        >
+          {isLoading ? (
+            <div style={{ padding: '16px' }}>
+              <SkeletonList count={6} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={UsersIcon}
+              title="No customers found"
+              description={
+                search
+                  ? `No customers match "${search}"`
+                  : 'Create your first customer to get started.'
+              }
+              action={
+                <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
+                  <Plus size={13} />
+                  New customer
+                </Button>
+              }
+            />
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                  <th style={{ padding: '11px 12px 11px 16px', width: '28px' }}>
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                      style={{ accentColor: ACCENT, cursor: 'pointer' }}
+                    />
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <AnimatePresence>
-                {filtered.map((c) => {
-                  const tier = getTier(c.loyaltyPoints);
-                  const isExpanded = expandedId === c.id;
-                  const isSelected = selected.has(c.id);
-                  return (
-                    <React.Fragment key={c.id}>
-                      <tr
-                        style={{
-                          borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
-                          cursor: 'pointer',
-                          transition: 'background 0.12s',
-                          background:
-                            isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isExpanded)
-                            (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isExpanded)
-                            (e.currentTarget as HTMLElement).style.background = isSelected
-                              ? 'rgba(59,130,246,0.04)'
-                              : 'transparent';
-                        }}
-                      >
-                        <td
-                          style={{ padding: '12px 12px 12px 16px' }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleOne(c.id)}
-                            style={{ accentColor: ACCENT, cursor: 'pointer' }}
-                          />
-                        </td>
-                        <td
-                          style={{ padding: '12px 16px' }}
-                          onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <CustomerAvatar
-                              initials={c.initials}
-                              points={c.loyaltyPoints}
-                              size={32}
-                            />
-                            <div>
-                              <div
-                                style={{
-                                  fontSize: '13px',
-                                  fontWeight: 500,
-                                  color: 'var(--hub-text)',
-                                }}
-                              >
-                                {c.name}
-                              </div>
-                              <TierBadge tier={tier} />
-                            </div>
-                          </div>
-                        </td>
-                        <td
+                  {[
+                    'Customer',
+                    'Email',
+                    'Phone',
+                    'Total Spent',
+                    'Visits',
+                    'Points',
+                    'Tags',
+                    'Last Visit',
+                    '',
+                  ].map((h, i) => (
+                    <th
+                      key={i}
+                      style={{
+                        padding: '11px 16px',
+                        textAlign: 'left',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        color: 'var(--hub-text-dim)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {filtered.map((c) => {
+                    const tier = getTier(c.loyaltyPoints);
+                    const isExpanded = expandedId === c.id;
+                    const isSelected = selected.has(c.id);
+                    return (
+                      <React.Fragment key={c.id}>
+                        <tr
                           style={{
-                            padding: '12px 16px',
-                            fontSize: '12px',
-                            color: 'var(--hub-text-muted)',
+                            borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
+                            cursor: 'pointer',
+                            transition: 'background 0.12s',
+                            background:
+                              isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isExpanded)
+                              (e.currentTarget as HTMLElement).style.background =
+                                'var(--hub-hover)';
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isExpanded)
+                              (e.currentTarget as HTMLElement).style.background = isSelected
+                                ? 'rgba(59,130,246,0.04)'
+                                : 'transparent';
                           }}
                         >
-                          {c.email}
-                        </td>
-                        <td
-                          style={{
-                            padding: '12px 16px',
-                            fontSize: '12px',
-                            color: 'var(--hub-text-muted)',
-                          }}
-                        >
-                          {c.phone}
-                        </td>
-                        <td
-                          style={{
-                            padding: '12px 16px',
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: 'var(--hub-text)',
-                          }}
-                        >
-                          ${c.totalSpent.toLocaleString()}
-                        </td>
-                        <td
-                          style={{
-                            padding: '12px 16px',
-                            fontSize: '13px',
-                            color: 'var(--hub-text)',
-                          }}
-                        >
-                          {c.visits}
-                        </td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span
-                            style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}
+                          <td
+                            style={{ padding: '12px 12px 12px 16px' }}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            {c.loyaltyPoints.toLocaleString()}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <div
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleOne(c.id)}
+                              style={{ accentColor: ACCENT, cursor: 'pointer' }}
+                            />
+                          </td>
+                          <td
+                            style={{ padding: '12px 16px' }}
+                            onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <CustomerAvatar
+                                initials={c.initials}
+                                points={c.loyaltyPoints}
+                                size={32}
+                              />
+                              <div>
+                                <div
+                                  style={{
+                                    fontSize: '13px',
+                                    fontWeight: 500,
+                                    color: 'var(--hub-text)',
+                                  }}
+                                >
+                                  {c.name}
+                                </div>
+                                <TierBadge tier={tier} />
+                              </div>
+                            </div>
+                          </td>
+                          <td
                             style={{
-                              display: 'flex',
-                              gap: '4px',
-                              flexWrap: 'wrap',
-                              maxWidth: '160px',
+                              padding: '12px 16px',
+                              fontSize: '12px',
+                              color: 'var(--hub-text-muted)',
                             }}
                           >
-                            {(c.tags || []).slice(0, 2).map((t) => (
-                              <TagChip key={t} label={t} />
-                            ))}
-                          </div>
-                        </td>
-                        <td
-                          style={{
-                            padding: '12px 16px',
-                            fontSize: '12px',
-                            color: 'var(--hub-text-muted)',
-                          }}
-                        >
-                          {c.lastVisit}
-                        </td>
-                        <td
-                          style={{ padding: '12px 16px', textAlign: 'right' }}
-                          onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                        >
-                          {isExpanded ? (
-                            <ChevronUp size={14} style={{ color: ACCENT }} />
-                          ) : (
-                            <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                            {c.email}
+                          </td>
+                          <td
+                            style={{
+                              padding: '12px 16px',
+                              fontSize: '12px',
+                              color: 'var(--hub-text-muted)',
+                            }}
+                          >
+                            {c.phone}
+                          </td>
+                          <td
+                            style={{
+                              padding: '12px 16px',
+                              fontSize: '13px',
+                              fontWeight: 600,
+                              color: 'var(--hub-text)',
+                            }}
+                          >
+                            ${c.totalSpent.toLocaleString()}
+                          </td>
+                          <td
+                            style={{
+                              padding: '12px 16px',
+                              fontSize: '13px',
+                              color: 'var(--hub-text)',
+                            }}
+                          >
+                            {c.visits}
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <span
+                              style={{
+                                fontSize: '13px',
+                                color: 'var(--hub-text)',
+                                fontWeight: 500,
+                              }}
+                            >
+                              {c.loyaltyPoints.toLocaleString()}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                gap: '4px',
+                                flexWrap: 'wrap',
+                                maxWidth: '160px',
+                              }}
+                            >
+                              {(c.tags || []).slice(0, 2).map((t) => (
+                                <TagChip key={t} label={t} />
+                              ))}
+                            </div>
+                          </td>
+                          <td
+                            style={{
+                              padding: '12px 16px',
+                              fontSize: '12px',
+                              color: 'var(--hub-text-muted)',
+                            }}
+                          >
+                            {c.lastVisit}
+                          </td>
+                          <td
+                            style={{ padding: '12px 16px', textAlign: 'right' }}
+                            onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp size={14} style={{ color: ACCENT }} />
+                            ) : (
+                              <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                            )}
+                          </td>
+                        </tr>
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <ExpandedDetail
+                              customer={c}
+                              onView={() => navigate({ to: `/customers/${c.id}` })}
+                            />
                           )}
-                        </td>
-                      </tr>
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <ExpandedDetail
-                            customer={c}
-                            onView={() => navigate({ to: `/customers/${c.id}` })}
-                          />
-                        )}
-                      </AnimatePresence>
-                    </React.Fragment>
-                  );
-                })}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        )}
-      </motion.div>
-    </div>
+                        </AnimatePresence>
+                      </React.Fragment>
+                    );
+                  })}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          )}
+        </motion.div>
+      </div>
+    </>
   );
 };
 

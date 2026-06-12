@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Timer, ArrowRight, Plus } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatDate } from '../../shared/lib/utils';
@@ -30,6 +31,7 @@ const Cycles: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Cycles · rtylr" />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}

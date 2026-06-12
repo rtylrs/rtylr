@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -465,60 +466,63 @@ const SettingsScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('general');
 
   return (
-    <div>
-      <PageHeader title="Settings" subtitle="Configure your CRM defaults" />
+    <>
+      <HelmetContainer title="Settings · rtylr" />
+      <div>
+        <PageHeader title="Settings" subtitle="Configure your CRM defaults" />
 
-      {/* Tab bar */}
-      <div
-        style={{
-          display: 'flex',
-          borderBottom: '1px solid var(--hub-border)',
-          marginBottom: 24,
-        }}
-      >
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '10px 16px',
-                fontSize: 13,
-                fontWeight: isActive ? 600 : 500,
-                color: isActive ? 'var(--crm-accent, #3b82f6)' : 'var(--hub-text-muted)',
-                background: 'transparent',
-                border: 'none',
-                borderBottom: isActive
-                  ? '2px solid var(--crm-accent, #3b82f6)'
-                  : '2px solid transparent',
-                marginBottom: -1,
-                cursor: 'pointer',
-                transition: 'color 0.15s, border-color 0.15s',
-              }}
-            >
-              <Icon size={14} />
-              {tab.label}
-            </button>
-          );
-        })}
+        {/* Tab bar */}
+        <div
+          style={{
+            display: 'flex',
+            borderBottom: '1px solid var(--hub-border)',
+            marginBottom: 24,
+          }}
+        >
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '10px 16px',
+                  fontSize: 13,
+                  fontWeight: isActive ? 600 : 500,
+                  color: isActive ? 'var(--crm-accent, #3b82f6)' : 'var(--hub-text-muted)',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: isActive
+                    ? '2px solid var(--crm-accent, #3b82f6)'
+                    : '2px solid transparent',
+                  marginBottom: -1,
+                  cursor: 'pointer',
+                  transition: 'color 0.15s, border-color 0.15s',
+                }}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          {activeTab === 'general' && <GeneralTab />}
+          {activeTab === 'team' && <TeamTab />}
+        </motion.div>
       </div>
-
-      <motion.div
-        key={activeTab}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.15 }}
-      >
-        {activeTab === 'general' && <GeneralTab />}
-        {activeTab === 'team' && <TeamTab />}
-      </motion.div>
-    </div>
+    </>
   );
 };
 

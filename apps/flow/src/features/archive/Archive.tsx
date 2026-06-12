@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Archive as ArchiveIcon, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import type { ApiTask } from '../../shared/services/flowApi';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -21,6 +22,7 @@ const Archive: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Archive · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Archive

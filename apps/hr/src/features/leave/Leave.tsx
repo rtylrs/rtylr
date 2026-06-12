@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { Plus, Calendar, Clock } from 'lucide-react';
 import { useListLeaveRequests, useApproveLeave } from '../../shared/hooks/queries/useLeave';
 import {

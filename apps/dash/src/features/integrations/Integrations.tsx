@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { Plug2, Search, ExternalLink, Check } from 'lucide-react';
 import { Input } from '../../shared/components/ui';
 import {
@@ -36,141 +37,146 @@ const Integrations: React.FC = () => {
   }, [integrations, searchTerm, cat]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-            Integrations
-          </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-            Connect rtylr to the tools you already use
-          </p>
-        </div>
-        <div className="relative">
-          <Search
-            size={13}
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--dash-text-dim)' }}
-          />
-          <Input
-            className="pl-9 w-56"
-            placeholder="Search integrations..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Category pills */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.key}
-            onClick={() => setCat(c.key)}
-            className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
-            style={{
-              background: cat === c.key ? 'rgba(69,131,196,0.12)' : 'var(--dash-hover)',
-              color: cat === c.key ? '#4583C4' : 'var(--dash-text-muted)',
-              border:
-                cat === c.key ? '1px solid rgba(69,131,196,0.25)' : '1px solid var(--dash-border)',
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-32 rounded-xl animate-pulse"
-              style={{ background: 'var(--dash-hover)' }}
+    <>
+      <HelmetContainer title="Integrations · rtylr" />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+              Integrations
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
+              Connect rtylr to the tools you already use
+            </p>
+          </div>
+          <div className="relative">
+            <Search
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              style={{ color: 'var(--dash-text-dim)' }}
             />
+            <Input
+              className="pl-9 w-56"
+              placeholder="Search integrations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Category pills */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => setCat(c.key)}
+              className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                background: cat === c.key ? 'rgba(69,131,196,0.12)' : 'var(--dash-hover)',
+                color: cat === c.key ? '#4583C4' : 'var(--dash-text-muted)',
+                border:
+                  cat === c.key
+                    ? '1px solid rgba(69,131,196,0.25)'
+                    : '1px solid var(--dash-border)',
+              }}
+            >
+              {c.label}
+            </button>
           ))}
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Plug2 size={28} className="mb-2" style={{ color: 'var(--dash-text-dim)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-            No integrations match your search
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {filtered.map((i) => {
-            const isConnected = i.status === 'connected';
-            const name = i.name;
 
-            return (
+        {/* Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
               <div
-                key={i.id}
-                className="rounded-xl p-5 flex flex-col gap-4"
-                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-              >
-                <div className="flex items-start justify-between">
-                  <div
-                    className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(69,131,196,0.12)' }}
-                  >
-                    <Plug2 size={19} style={{ color: '#4583C4' }} />
+                key={i}
+                className="h-32 rounded-xl animate-pulse"
+                style={{ background: 'var(--dash-hover)' }}
+              />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Plug2 size={28} className="mb-2" style={{ color: 'var(--dash-text-dim)' }} />
+            <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+              No integrations match your search
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {filtered.map((i) => {
+              const isConnected = i.status === 'connected';
+              const name = i.name;
+
+              return (
+                <div
+                  key={i.id}
+                  className="rounded-xl p-5 flex flex-col gap-4"
+                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div
+                      className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: 'rgba(69,131,196,0.12)' }}
+                    >
+                      <Plug2 size={19} style={{ color: '#4583C4' }} />
+                    </div>
+                    {isConnected && (
+                      <span
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
+                      >
+                        Connected
+                      </span>
+                    )}
                   </div>
-                  {isConnected && (
-                    <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                      style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
-                    >
-                      Connected
-                    </span>
-                  )}
-                </div>
 
-                <div className="flex-1">
-                  <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                    {name}
-                  </p>
-                  {i.description && (
-                    <p
-                      className="text-xs mt-1 leading-relaxed"
-                      style={{ color: 'var(--dash-text-muted)' }}
-                    >
-                      {i.description}
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      {name}
                     </p>
-                  )}
-                </div>
+                    {i.description && (
+                      <p
+                        className="text-xs mt-1 leading-relaxed"
+                        style={{ color: 'var(--dash-text-muted)' }}
+                      >
+                        {i.description}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="flex items-center justify-end">
-                  {isConnected ? (
-                    <button
-                      onClick={() => disconnect.mutate(i.id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                      style={{
-                        background: 'var(--dash-hover)',
-                        color: 'var(--dash-text-muted)',
-                        border: '1px solid var(--dash-border)',
-                      }}
-                    >
-                      Disconnect
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => connect.mutate(i.id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: '#4583C4', color: '#fff' }}
-                    >
-                      Connect
-                    </button>
-                  )}
+                  <div className="flex items-center justify-end">
+                    {isConnected ? (
+                      <button
+                        onClick={() => disconnect.mutate(i.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        style={{
+                          background: 'var(--dash-hover)',
+                          color: 'var(--dash-text-muted)',
+                          border: '1px solid var(--dash-border)',
+                        }}
+                      >
+                        Disconnect
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => connect.mutate(i.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        style={{ background: '#4583C4', color: '#fff' }}
+                      >
+                        Connect
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

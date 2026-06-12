@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import {
   useGetSetupStatus,
@@ -166,69 +167,80 @@ const SetupWizard = (): React.JSX.Element => {
   }
 
   return (
-    <div>
-      <div className="mb-6 text-center">
-        <h1 className="text-xl font-bold" style={{ color: 'var(--hr-text)' }}>
-          {t('setup.title')}
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-          {t('setup.subtitle')}
-        </p>
+    <>
+      <HelmetContainer title="Setup wizard · rtylr" />
+      <div>
+        <div className="mb-6 text-center">
+          <h1 className="text-xl font-bold" style={{ color: 'var(--hr-text)' }}>
+            {t('setup.title')}
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--hr-text-muted)' }}>
+            {t('setup.subtitle')}
+          </p>
+        </div>
+
+        <WizardProgress
+          steps={steps}
+          currentStepIndex={currentStepIndex}
+          onStepClick={setCurrentStepIndex}
+        />
+
+        {currentKey === 'company_profile' && (
+          <CompanyProfileStep
+            onNext={handleCompanyProfile}
+            isFirst={isFirst}
+            isSubmitting={isSubmitting}
+          />
+        )}
+        {currentKey === 'work_schedule' && (
+          <WorkScheduleStep
+            onNext={handleWorkSchedule}
+            onBack={goBack}
+            isSubmitting={isSubmitting}
+          />
+        )}
+        {currentKey === 'org_structure' && (
+          <OrgStructureStep
+            onNext={handleOrgStructure}
+            onBack={goBack}
+            isSubmitting={isSubmitting}
+          />
+        )}
+        {currentKey === 'locations' && (
+          <LocationsStep onNext={handleLocations} onBack={goBack} isSubmitting={isSubmitting} />
+        )}
+        {currentKey === 'roles_permissions' && (
+          <RolesPermissionsStep
+            onNext={handleRolesPermissions}
+            onBack={goBack}
+            isSubmitting={isSubmitting}
+          />
+        )}
+        {currentKey === 'payroll' && (
+          <PayrollConfigStep
+            onNext={handlePayrollConfig}
+            onBack={goBack}
+            isSubmitting={isSubmitting}
+          />
+        )}
+        {currentKey === 'notifications' && (
+          <NotificationsStep
+            onNext={handleNotifications}
+            onBack={goBack}
+            isSubmitting={isSubmitting}
+          />
+        )}
+        {currentKey === 'employees' && (
+          <EmployeesStep
+            onNext={handleEmployees}
+            onBack={goBack}
+            onAddEmployee={() => setShowNewEmployee(true)}
+            isLast={isLast}
+            isSubmitting={isSubmitting}
+          />
+        )}
       </div>
-
-      <WizardProgress
-        steps={steps}
-        currentStepIndex={currentStepIndex}
-        onStepClick={setCurrentStepIndex}
-      />
-
-      {currentKey === 'company_profile' && (
-        <CompanyProfileStep
-          onNext={handleCompanyProfile}
-          isFirst={isFirst}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      {currentKey === 'work_schedule' && (
-        <WorkScheduleStep onNext={handleWorkSchedule} onBack={goBack} isSubmitting={isSubmitting} />
-      )}
-      {currentKey === 'org_structure' && (
-        <OrgStructureStep onNext={handleOrgStructure} onBack={goBack} isSubmitting={isSubmitting} />
-      )}
-      {currentKey === 'locations' && (
-        <LocationsStep onNext={handleLocations} onBack={goBack} isSubmitting={isSubmitting} />
-      )}
-      {currentKey === 'roles_permissions' && (
-        <RolesPermissionsStep
-          onNext={handleRolesPermissions}
-          onBack={goBack}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      {currentKey === 'payroll' && (
-        <PayrollConfigStep
-          onNext={handlePayrollConfig}
-          onBack={goBack}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      {currentKey === 'notifications' && (
-        <NotificationsStep
-          onNext={handleNotifications}
-          onBack={goBack}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      {currentKey === 'employees' && (
-        <EmployeesStep
-          onNext={handleEmployees}
-          onBack={goBack}
-          onAddEmployee={() => setShowNewEmployee(true)}
-          isLast={isLast}
-          isSubmitting={isSubmitting}
-        />
-      )}
-    </div>
+    </>
   );
 };
 

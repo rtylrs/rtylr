@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import {
   useCategories,
   useCreateCategory,
@@ -45,6 +46,7 @@ const Categories: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Categories · rtylr" />
       <PageHeader title="Categories" description="Organize products into hierarchical categories" />
 
       <div

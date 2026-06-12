@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStockTakes';
 import {
   stockTakeStatusLabel,
@@ -86,6 +87,7 @@ const StockTakes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Stock takes · rtylr" />
       <PageHeader
         title="Stock Takes"
         description="Periodic inventory counts and variance reports"

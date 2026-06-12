@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Plus, Mail, Phone, Package, BarChart3 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Supplier } from '../../shared/services/erpApi';
@@ -122,6 +123,7 @@ const Suppliers: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Suppliers · rtylr" />
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <div>

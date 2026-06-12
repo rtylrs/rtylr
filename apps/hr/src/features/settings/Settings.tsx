@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { INDUSTRIES } from '@voxire/config';
 import { useHrSettings, useUpdateHrSettings } from '../../shared/hooks/useHrExtras';
 import {

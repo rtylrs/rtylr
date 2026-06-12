@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, Users, Plus, X } from 'lucide-react';
@@ -144,362 +145,369 @@ const GroupDetail = (): React.JSX.Element => {
   }
 
   return (
-    <div className="space-y-5 max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate({ to: '/team/groups' })}
-            aria-label={t('team.groupDetail.backAriaLabel')}
-            className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
-            style={{ color: 'var(--dash-text-muted)' }}
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              {isNew ? t('team.groupDetail.newGroupTitle') : name}
-            </h1>
-            {!isNew && (
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                {t(
-                  (group?.memberCount ?? 0) === 1
-                    ? 'groupDetail.membersCountSingular'
-                    : 'groupDetail.membersCountPlural',
-                  { count: group?.memberCount ?? 0 }
-                )}
-              </p>
-            )}
-          </div>
-        </div>
-        <Button onClick={handleSave} disabled={isSaving || (!dirty && !isNew)}>
-          <Save size={14} />
-          {isSaving ? t('team.groupDetail.savingButton') : t('team.groupDetail.saveButton')}
-        </Button>
-      </div>
-
-      {/* General info */}
-      <div
-        className="rounded-xl p-5 space-y-4"
-        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-      >
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          {t('team.groupDetail.generalSection')}
-        </p>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('team.groupDetail.labelName')}
-            </label>
-            <Input
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setDirty(true);
-              }}
-              placeholder={t('team.groupDetail.namePlaceholder')}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('team.groupDetail.labelDescription')}
-            </label>
-            <Input
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-                setDirty(true);
-              }}
-              placeholder={t('team.groupDetail.descriptionPlaceholder')}
-            />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-            {t('team.groupDetail.labelColor')}
-          </label>
-          <div className="flex items-center gap-2 flex-wrap">
-            {PRESET_COLORS.map((c) => (
-              <button
-                key={c}
-                aria-label={t('team.groupDetail.colorAriaLabel', { color: c })}
-                onClick={() => {
-                  setColor(c);
-                  setDirty(true);
-                }}
-                className="h-6 w-6 rounded-full transition-transform hover:scale-110"
-                style={{
-                  background: c,
-                  outline: color === c ? `2px solid ${c}` : 'none',
-                  outlineOffset: '2px',
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      {!isNew && (
-        <div
-          className="flex items-center gap-1"
-          style={{ borderBottom: '1px solid var(--dash-border)' }}
-        >
-          {(['apps', 'members'] as const).map((tabKey) => (
+    <>
+      <HelmetContainer title="Group detail · rtylr" />
+      <div className="space-y-5 max-w-3xl">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <button
-              key={tabKey}
-              onClick={() => setTab(tabKey)}
-              className="px-4 py-2 text-sm font-medium transition-colors"
-              style={{
-                color: tab === tabKey ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-                borderBottom: tab === tabKey ? '2px solid var(--accent)' : '2px solid transparent',
-                marginBottom: '-1px',
-              }}
+              onClick={() => navigate({ to: '/team/groups' })}
+              aria-label={t('team.groupDetail.backAriaLabel')}
+              className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
+              style={{ color: 'var(--dash-text-muted)' }}
             >
-              {tabKey === 'apps'
-                ? t('team.groupDetail.tabApps', { count: activeSectionCount })
-                : t('team.groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
+              <ArrowLeft size={16} />
             </button>
-          ))}
+            <div>
+              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+                {isNew ? t('team.groupDetail.newGroupTitle') : name}
+              </h1>
+              {!isNew && (
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  {t(
+                    (group?.memberCount ?? 0) === 1
+                      ? 'groupDetail.membersCountSingular'
+                      : 'groupDetail.membersCountPlural',
+                    { count: group?.memberCount ?? 0 }
+                  )}
+                </p>
+              )}
+            </div>
+          </div>
+          <Button onClick={handleSave} disabled={isSaving || (!dirty && !isNew)}>
+            <Save size={14} />
+            {isSaving ? t('team.groupDetail.savingButton') : t('team.groupDetail.saveButton')}
+          </Button>
         </div>
-      )}
 
-      {/* Apps tab */}
-      {(isNew || tab === 'apps') && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="rounded-xl overflow-hidden"
+        {/* General info */}
+        <div
+          className="rounded-xl p-5 space-y-4"
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
-          {/* Column headers */}
-          <div
-            className="grid grid-cols-12 gap-2 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
-            style={{
-              color: 'var(--dash-text-dim)',
-              borderBottom: '1px solid var(--dash-border)',
-            }}
-          >
-            <div className="col-span-6">{t('team.groupDetail.columnSection')}</div>
-            {LEVELS.map((l) => (
-              <div key={l.value} className="col-span-2 text-center">
-                {t(l.tKey)}
-              </div>
-            ))}
+          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+            {t('team.groupDetail.generalSection')}
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+                {t('team.groupDetail.labelName')}
+              </label>
+              <Input
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setDirty(true);
+                }}
+                placeholder={t('team.groupDetail.namePlaceholder')}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+                {t('team.groupDetail.labelDescription')}
+              </label>
+              <Input
+                value={description}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  setDirty(true);
+                }}
+                placeholder={t('team.groupDetail.descriptionPlaceholder')}
+              />
+            </div>
           </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+              {t('team.groupDetail.labelColor')}
+            </label>
+            <div className="flex items-center gap-2 flex-wrap">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  aria-label={t('team.groupDetail.colorAriaLabel', { color: c })}
+                  onClick={() => {
+                    setColor(c);
+                    setDirty(true);
+                  }}
+                  className="h-6 w-6 rounded-full transition-transform hover:scale-110"
+                  style={{
+                    background: c,
+                    outline: color === c ? `2px solid ${c}` : 'none',
+                    outlineOffset: '2px',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
 
-          {APP_RESOURCES.map((app) => (
-            <React.Fragment key={app.id}>
-              {/* App header row */}
-              <div
-                className="px-5 py-2.5"
+        {/* Tabs */}
+        {!isNew && (
+          <div
+            className="flex items-center gap-1"
+            style={{ borderBottom: '1px solid var(--dash-border)' }}
+          >
+            {(['apps', 'members'] as const).map((tabKey) => (
+              <button
+                key={tabKey}
+                onClick={() => setTab(tabKey)}
+                className="px-4 py-2 text-sm font-medium transition-colors"
                 style={{
-                  background: 'var(--dash-hover)',
-                  borderBottom: '1px solid var(--dash-border)',
+                  color: tab === tabKey ? 'var(--dash-text)' : 'var(--dash-text-muted)',
+                  borderBottom:
+                    tab === tabKey ? '2px solid var(--accent)' : '2px solid transparent',
+                  marginBottom: '-1px',
                 }}
               >
-                <span
-                  className="text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--dash-text-muted)' }}
-                >
-                  {app.label}
-                </span>
-              </div>
-
-              {/* Section rows */}
-              {app.sections.map((section) => {
-                const current: LocalPermissionLevel = resourcePerms.get(section.key) ?? 'none';
-                return (
-                  <div
-                    key={section.key}
-                    className="grid grid-cols-12 gap-2 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
-                    style={{ borderBottom: '1px solid var(--dash-border)' }}
-                  >
-                    <div className="col-span-6 pl-3">
-                      <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                        {section.label}
-                      </span>
-                    </div>
-                    {LEVELS.map((l) => (
-                      <div key={l.value} className="col-span-2 flex justify-center">
-                        <button
-                          aria-label={t('team.groupDetail.radioAriaLabel', {
-                            section: section.label,
-                            level: t(l.tKey),
-                          })}
-                          onClick={() => setLevel(section.key, l.value)}
-                          className="h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all"
-                          style={{
-                            borderColor: current === l.value ? color : 'var(--dash-border)',
-                            background: current === l.value ? color : 'transparent',
-                          }}
-                        >
-                          {current === l.value && (
-                            <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                          )}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </React.Fragment>
-          ))}
-        </motion.div>
-      )}
-
-      {/* Members tab */}
-      {!isNew && tab === 'members' && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-              {t(
-                (group?.members?.length ?? 0) === 1
-                  ? 'groupDetail.membersCountSingular'
-                  : 'groupDetail.membersCountPlural',
-                { count: group?.members?.length ?? 0 }
-              )}
-            </p>
-            <button
-              onClick={() => setShowAddMembers(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{
-                background: 'var(--accent-muted)',
-                color: 'var(--accent)',
-                border: '1px solid var(--accent-border)',
-              }}
-            >
-              <Plus size={12} /> {t('team.groupDetail.addMembersButton')}
-            </button>
+                {tabKey === 'apps'
+                  ? t('team.groupDetail.tabApps', { count: activeSectionCount })
+                  : t('team.groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
+              </button>
+            ))}
           </div>
+        )}
 
-          <div
+        {/* Apps tab */}
+        {(isNew || tab === 'apps') && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className="rounded-xl overflow-hidden"
             style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
           >
-            {(group?.members?.length ?? 0) === 0 ? (
-              <div className="p-4">
-                <EmptyState
-                  icon={Users}
-                  title={t('team.groupDetail.noMembersTitle')}
-                  description={t('team.groupDetail.noMembersDescription')}
-                  actionLabel={t('team.groupDetail.addMembersButton')}
-                  onAction={() => setShowAddMembers(true)}
-                />
-              </div>
-            ) : (
-              group?.members?.map((m) => (
+            {/* Column headers */}
+            <div
+              className="grid grid-cols-12 gap-2 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                color: 'var(--dash-text-dim)',
+                borderBottom: '1px solid var(--dash-border)',
+              }}
+            >
+              <div className="col-span-6">{t('team.groupDetail.columnSection')}</div>
+              {LEVELS.map((l) => (
+                <div key={l.value} className="col-span-2 text-center">
+                  {t(l.tKey)}
+                </div>
+              ))}
+            </div>
+
+            {APP_RESOURCES.map((app) => (
+              <React.Fragment key={app.id}>
+                {/* App header row */}
                 <div
-                  key={m.userId}
-                  className="flex items-center justify-between px-5 py-3 hover:bg-[var(--dash-hover)] transition-colors"
-                  style={{ borderBottom: '1px solid var(--dash-border)' }}
+                  className="px-5 py-2.5"
+                  style={{
+                    background: 'var(--dash-hover)',
+                    borderBottom: '1px solid var(--dash-border)',
+                  }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                      style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
-                    >
-                      {(m.fullName || m.email || '?').charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                        {m.fullName || m.email}
-                      </p>
-                      <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                        {m.email}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    aria-label={t('team.groupDetail.removeMemberAriaLabel', {
-                      name: m.fullName || m.email,
-                    })}
-                    onClick={() => removeMember.mutate(m.userId)}
-                    className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
+                  <span
+                    className="text-xs font-semibold uppercase tracking-wider"
                     style={{ color: 'var(--dash-text-muted)' }}
                   >
-                    <X size={13} />
-                  </button>
+                    {app.label}
+                  </span>
                 </div>
-              ))
-            )}
-          </div>
 
-          {/* Add members panel */}
-          {showAddMembers && (
+                {/* Section rows */}
+                {app.sections.map((section) => {
+                  const current: LocalPermissionLevel = resourcePerms.get(section.key) ?? 'none';
+                  return (
+                    <div
+                      key={section.key}
+                      className="grid grid-cols-12 gap-2 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
+                      style={{ borderBottom: '1px solid var(--dash-border)' }}
+                    >
+                      <div className="col-span-6 pl-3">
+                        <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                          {section.label}
+                        </span>
+                      </div>
+                      {LEVELS.map((l) => (
+                        <div key={l.value} className="col-span-2 flex justify-center">
+                          <button
+                            aria-label={t('team.groupDetail.radioAriaLabel', {
+                              section: section.label,
+                              level: t(l.tKey),
+                            })}
+                            onClick={() => setLevel(section.key, l.value)}
+                            className="h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all"
+                            style={{
+                              borderColor: current === l.value ? color : 'var(--dash-border)',
+                              background: current === l.value ? color : 'transparent',
+                            }}
+                          >
+                            {current === l.value && (
+                              <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Members tab */}
+        {!isNew && tab === 'members' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                {t(
+                  (group?.members?.length ?? 0) === 1
+                    ? 'groupDetail.membersCountSingular'
+                    : 'groupDetail.membersCountPlural',
+                  { count: group?.members?.length ?? 0 }
+                )}
+              </p>
+              <button
+                onClick={() => setShowAddMembers(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={{
+                  background: 'var(--accent-muted)',
+                  color: 'var(--accent)',
+                  border: '1px solid var(--accent-border)',
+                }}
+              >
+                <Plus size={12} /> {t('team.groupDetail.addMembersButton')}
+              </button>
+            </div>
+
             <div
-              className="rounded-xl p-4 space-y-3"
+              className="rounded-xl overflow-hidden"
               style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                {t('team.groupDetail.addMembersTitle')}
-              </p>
-              {addableMembersList.length === 0 ? (
-                <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                  {t('team.groupDetail.allMembersInGroup')}
-                </p>
-              ) : (
-                <div className="space-y-1 max-h-48 overflow-y-auto">
-                  {addableMembersList.map((m) => {
-                    const mid = Number(m.id);
-                    const checked = selectedToAdd.includes(mid);
-                    return (
-                      <label
-                        key={m.id}
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-[var(--dash-hover)] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() =>
-                            setSelectedToAdd((prev) =>
-                              checked ? prev.filter((x) => x !== mid) : [...prev, mid]
-                            )
-                          }
-                          className="rounded"
-                          style={{ accentColor: 'var(--accent)' }}
-                        />
-                        <div>
-                          <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                            {m.name || m.email}
-                          </p>
-                          <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                            {m.email}
-                          </p>
-                        </div>
-                      </label>
-                    );
-                  })}
+              {(group?.members?.length ?? 0) === 0 ? (
+                <div className="p-4">
+                  <EmptyState
+                    icon={Users}
+                    title={t('team.groupDetail.noMembersTitle')}
+                    description={t('team.groupDetail.noMembersDescription')}
+                    actionLabel={t('team.groupDetail.addMembersButton')}
+                    onAction={() => setShowAddMembers(true)}
+                  />
                 </div>
+              ) : (
+                group?.members?.map((m) => (
+                  <div
+                    key={m.userId}
+                    className="flex items-center justify-between px-5 py-3 hover:bg-[var(--dash-hover)] transition-colors"
+                    style={{ borderBottom: '1px solid var(--dash-border)' }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                      >
+                        {(m.fullName || m.email || '?').charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                          {m.fullName || m.email}
+                        </p>
+                        <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+                          {m.email}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      aria-label={t('team.groupDetail.removeMemberAriaLabel', {
+                        name: m.fullName || m.email,
+                      })}
+                      onClick={() => removeMember.mutate(m.userId)}
+                      className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
+                      style={{ color: 'var(--dash-text-muted)' }}
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                ))
               )}
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setShowAddMembers(false);
-                    setSelectedToAdd([]);
-                  }}
-                  className="px-3 py-1.5 rounded-lg text-sm"
-                  style={{ color: 'var(--dash-text-muted)' }}
-                >
-                  {t('team.groupDetail.cancelButton')}
-                </button>
-                <Button
-                  onClick={handleAddMembers}
-                  disabled={selectedToAdd.length === 0 || addMembers.isPending}
-                >
-                  {t(
-                    selectedToAdd.length === 1
-                      ? 'groupDetail.addNButton'
-                      : 'groupDetail.addNButton_other',
-                    { count: selectedToAdd.length }
-                  )}
-                </Button>
-              </div>
             </div>
-          )}
-        </motion.div>
-      )}
-    </div>
+
+            {/* Add members panel */}
+            {showAddMembers && (
+              <div
+                className="rounded-xl p-4 space-y-3"
+                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+              >
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  {t('team.groupDetail.addMembersTitle')}
+                </p>
+                {addableMembersList.length === 0 ? (
+                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('team.groupDetail.allMembersInGroup')}
+                  </p>
+                ) : (
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {addableMembersList.map((m) => {
+                      const mid = Number(m.id);
+                      const checked = selectedToAdd.includes(mid);
+                      return (
+                        <label
+                          key={m.id}
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-[var(--dash-hover)] transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setSelectedToAdd((prev) =>
+                                checked ? prev.filter((x) => x !== mid) : [...prev, mid]
+                              )
+                            }
+                            className="rounded"
+                            style={{ accentColor: 'var(--accent)' }}
+                          />
+                          <div>
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: 'var(--dash-text)' }}
+                            >
+                              {m.name || m.email}
+                            </p>
+                            <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+                              {m.email}
+                            </p>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => {
+                      setShowAddMembers(false);
+                      setSelectedToAdd([]);
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-sm"
+                    style={{ color: 'var(--dash-text-muted)' }}
+                  >
+                    {t('team.groupDetail.cancelButton')}
+                  </button>
+                  <Button
+                    onClick={handleAddMembers}
+                    disabled={selectedToAdd.length === 0 || addMembers.isPending}
+                  >
+                    {t(
+                      selectedToAdd.length === 1
+                        ? 'groupDetail.addNButton'
+                        : 'groupDetail.addNButton_other',
+                      { count: selectedToAdd.length }
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
+    </>
   );
 };
 

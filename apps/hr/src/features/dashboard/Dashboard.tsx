@@ -26,6 +26,7 @@ import { useStaff } from '../staff/useStaff';
 import { useExpiringDocuments, useOvertimeAlerts } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { ErrorBoundary } from '@voxire/ui';
+import { HelmetContainer } from '@voxire/components';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
 import AnniversaryWidget from '../../shared/components/AnniversaryWidget';
 import { Card, StatCard, useIsMobile, Skeleton } from '../../shared/components/ui';
@@ -367,538 +368,550 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
-    >
-      {/* Stat cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 16,
-        }}
+    <>
+      <HelmetContainer title="Dashboard · rtylr" />
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
       >
-        {stats.map((s) => (
-          <motion.div
-            key={s.label}
-            variants={item}
-            style={{
-              background: 'var(--hr-card)',
-              border: '1px solid var(--hr-border)',
-              borderRadius: 12,
-              padding: 18,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, color: 'var(--hr-text-muted)', fontWeight: 500 }}>
-                {s.label}
-              </span>
-              <span
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: 32,
-                  width: 32,
-                  borderRadius: 8,
-                  background: `${s.color}18`,
-                  color: s.color,
-                }}
-              >
-                <s.icon size={16} />
-              </span>
-            </div>
-            <div>
-              <p
-                style={{
-                  fontSize: 26,
-                  fontWeight: 700,
-                  color: 'var(--hr-text)',
-                  margin: 0,
-                  lineHeight: 1.1,
-                }}
-              >
-                {s.value}
-              </p>
-              {s.change && (
-                <p
-                  style={{
-                    fontSize: 11,
-                    color:
-                      s.trend === 'up'
-                        ? 'var(--hr-status-approved)'
-                        : s.trend === 'down'
-                          ? 'var(--hr-error)'
-                          : 'var(--hr-text-muted)',
-                    margin: '4px 0 0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 3,
-                  }}
-                >
-                  {s.trend === 'up' && <TrendingUp size={11} />}
-                  {s.change}
-                </p>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Draggable widget grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
-          gap: 16,
-        }}
-      >
-        {widgets
-          .slice()
-          .sort((a, b) => a.positionY - b.positionY || a.positionX - b.positionX)
-          .map((w) => (
-            <motion.div
-              key={w.id}
-              variants={item}
-              draggable
-              onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, w.id)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e as unknown as React.DragEvent, w.id)}
-              style={{
-                gridColumn: isMobile ? 'span 1' : `span ${Math.min(w.width, 12)}`,
-                cursor: 'grab',
-                position: 'relative',
-                opacity: draggedId === w.id ? 0.5 : 1,
-              }}
-            >
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  color: 'var(--hr-text-dim)',
-                  zIndex: 1,
-                  opacity: 0.5,
-                }}
-                aria-label={t('dashboard.widgets.dragToReorder')}
-              >
-                <GripVertical size={12} />
-              </span>
-              <ErrorBoundary
-                fallback={
-                  <div
-                    style={{
-                      background: 'var(--hr-card)',
-                      border: '1px solid var(--hr-border)',
-                      borderRadius: 12,
-                      padding: 16,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      color: 'var(--hr-error)',
-                      fontSize: 12,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {t('dashboard.widgets.errorFallback')}
-                  </div>
-                }
-              >
-                {renderWidget(w)}
-              </ErrorBoundary>
-            </motion.div>
-          ))}
-      </div>
-
-      {/* Activity + Quick actions */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px',
-          gap: 16,
-        }}
-      >
-        {/* Recent activity */}
-        <motion.div
-          variants={item}
+        {/* Stat cards */}
+        <div
           style={{
-            background: 'var(--hr-card)',
-            border: '1px solid var(--hr-border)',
-            borderRadius: 12,
-            overflow: 'hidden',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 16,
           }}
         >
-          <div
-            style={{
-              padding: '16px 20px',
-              borderBottom: '1px solid var(--hr-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
-            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
-              {t('dashboard.recentActivity')}
-            </h2>
-            <span
+          {stats.map((s) => (
+            <motion.div
+              key={s.label}
+              variants={item}
               style={{
-                fontSize: 11,
-                color: ACCENT,
-                cursor: 'pointer',
+                background: 'var(--hr-card)',
+                border: '1px solid var(--hr-border)',
+                borderRadius: 12,
+                padding: 18,
                 display: 'flex',
-                alignItems: 'center',
-                gap: 3,
+                flexDirection: 'column',
+                gap: 12,
               }}
             >
-              {t('dashboard.viewAll')} <ArrowUpRight size={11} />
-            </span>
-          </div>
-          <div>
-            {recentActivity.length === 0 && !loading && (
-              <p
-                style={{
-                  padding: '24px 20px',
-                  margin: 0,
-                  fontSize: 12,
-                  color: 'var(--hr-text-muted)',
-                  textAlign: 'center',
-                }}
-              >
-                {t('dashboard.noActivity')}
-              </p>
-            )}
-            {loading && (
               <div
-                style={{ padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
               >
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <Skeleton height={34} width={34} style={{ borderRadius: '50%' }} />
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      <Skeleton height={13} width="60%" />
-                      <Skeleton height={10} width="40%" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {recentActivity.map((a, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  alignItems: isMobile ? 'flex-start' : 'center',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: 12,
-                  padding: '12px 20px',
-                  borderBottom:
-                    i < recentActivity.length - 1 ? '1px solid var(--hr-border)' : 'none',
-                }}
-              >
+                <span style={{ fontSize: 12, color: 'var(--hr-text-muted)', fontWeight: 500 }}>
+                  {s.label}
+                </span>
                 <span
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: 34,
-                    width: 34,
-                    borderRadius: '50%',
-                    background: 'var(--accent-muted)',
-                    color: ACCENT,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    flexShrink: 0,
+                    height: 32,
+                    width: 32,
+                    borderRadius: 8,
+                    background: `${s.color}18`,
+                    color: s.color,
                   }}
                 >
-                  {getInitials(a.name)}
+                  <s.icon size={16} />
                 </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
+              </div>
+              <div>
+                <p
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: 'var(--hr-text)',
+                    margin: 0,
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {s.value}
+                </p>
+                {s.change && (
                   <p
                     style={{
-                      margin: 0,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: 'var(--hr-text)',
+                      fontSize: 11,
+                      color:
+                        s.trend === 'up'
+                          ? 'var(--hr-status-approved)'
+                          : s.trend === 'down'
+                            ? 'var(--hr-error)'
+                            : 'var(--hr-text-muted)',
+                      margin: '4px 0 0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 3,
                     }}
                   >
-                    {a.name}
+                    {s.trend === 'up' && <TrendingUp size={11} />}
+                    {s.change}
                   </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                    {a.role}
-                  </p>
-                </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Draggable widget grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
+            gap: 16,
+          }}
+        >
+          {widgets
+            .slice()
+            .sort((a, b) => a.positionY - b.positionY || a.positionX - b.positionX)
+            .map((w) => (
+              <motion.div
+                key={w.id}
+                variants={item}
+                draggable
+                onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, w.id)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e as unknown as React.DragEvent, w.id)}
+                style={{
+                  gridColumn: isMobile ? 'span 1' : `span ${Math.min(w.width, 12)}`,
+                  cursor: 'grab',
+                  position: 'relative',
+                  opacity: draggedId === w.id ? 0.5 : 1,
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    color: 'var(--hr-text-dim)',
+                    zIndex: 1,
+                    opacity: 0.5,
+                  }}
+                  aria-label={t('dashboard.widgets.dragToReorder')}
+                >
+                  <GripVertical size={12} />
+                </span>
+                <ErrorBoundary
+                  fallback={
+                    <div
+                      style={{
+                        background: 'var(--hr-card)',
+                        border: '1px solid var(--hr-border)',
+                        borderRadius: 12,
+                        padding: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        color: 'var(--hr-error)',
+                        fontSize: 12,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {t('dashboard.widgets.errorFallback')}
+                    </div>
+                  }
+                >
+                  {renderWidget(w)}
+                </ErrorBoundary>
+              </motion.div>
+            ))}
+        </div>
+
+        {/* Activity + Quick actions */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 320px',
+            gap: 16,
+          }}
+        >
+          {/* Recent activity */}
+          <motion.div
+            variants={item}
+            style={{
+              background: 'var(--hr-card)',
+              border: '1px solid var(--hr-border)',
+              borderRadius: 12,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--hr-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
+                {t('dashboard.recentActivity')}
+              </h2>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: ACCENT,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 3,
+                }}
+              >
+                {t('dashboard.viewAll')} <ArrowUpRight size={11} />
+              </span>
+            </div>
+            <div>
+              {recentActivity.length === 0 && !loading && (
+                <p
+                  style={{
+                    padding: '24px 20px',
+                    margin: 0,
+                    fontSize: 12,
+                    color: 'var(--hr-text-muted)',
+                    textAlign: 'center',
+                  }}
+                >
+                  {t('dashboard.noActivity')}
+                </p>
+              )}
+              {loading && (
                 <div
                   style={{
+                    padding: '12px 20px',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    flexShrink: 0,
-                    flexWrap: 'wrap',
+                    flexDirection: 'column',
+                    gap: 12,
+                  }}
+                >
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <Skeleton height={34} width={34} style={{ borderRadius: '50%' }} />
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <Skeleton height={13} width="60%" />
+                        <Skeleton height={10} width="40%" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {recentActivity.map((a, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    alignItems: isMobile ? 'flex-start' : 'center',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    gap: 12,
+                    padding: '12px 20px',
+                    borderBottom:
+                      i < recentActivity.length - 1 ? '1px solid var(--hr-border)' : 'none',
                   }}
                 >
                   <span
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 4,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      color:
-                        a.type === 'in' ? 'var(--hr-status-approved)' : 'var(--hr-status-pending)',
+                      justifyContent: 'center',
+                      height: 34,
+                      width: 34,
+                      borderRadius: '50%',
+                      background: 'var(--accent-muted)',
+                      color: ACCENT,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      flexShrink: 0,
                     }}
                   >
-                    {a.type === 'in' ? <LogIn size={11} /> : <LogOut size={11} />}
-                    {a.action}
+                    {getInitials(a.name)}
                   </span>
-                  <span style={{ fontSize: 11, color: 'var(--hr-text-dim)' }}>{a.time}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: 'var(--hr-text)',
+                      }}
+                    >
+                      {a.name}
+                    </p>
+                    <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                      {a.role}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      flexShrink: 0,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color:
+                          a.type === 'in'
+                            ? 'var(--hr-status-approved)'
+                            : 'var(--hr-status-pending)',
+                      }}
+                    >
+                      {a.type === 'in' ? <LogIn size={11} /> : <LogOut size={11} />}
+                      {a.action}
+                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--hr-text-dim)' }}>{a.time}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+              ))}
+            </div>
+          </motion.div>
 
-        {/* Quick actions + today at a glance */}
-        <motion.div
-          variants={item}
-          style={{
-            background: 'var(--hr-card)',
-            border: '1px solid var(--hr-border)',
-            borderRadius: 12,
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)' }}>
-            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
-              {t('dashboard.quickActionsTitle')}
-            </h2>
-          </div>
-          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {quickActionDefs.map((a) => (
-              <Link
-                key={a.i18nKey}
-                to={a.path}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '14px 16px',
-                  borderRadius: 10,
-                  background: a.bg,
-                  textDecoration: 'none',
-                  transition: 'opacity 0.15s',
-                }}
-              >
-                <a.icon size={18} style={{ color: a.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: a.color }}>
-                  {t(a.i18nKey)}
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          {/* Today at a glance */}
-          <div
+          {/* Quick actions + today at a glance */}
+          <motion.div
+            variants={item}
             style={{
-              margin: '0 12px 12px',
-              padding: '14px 16px',
-              borderRadius: 10,
-              background: 'var(--hr-hover)',
+              background: 'var(--hr-card)',
               border: '1px solid var(--hr-border)',
+              borderRadius: 12,
+              overflow: 'hidden',
             }}
           >
-            <p
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--hr-border)' }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)', margin: 0 }}>
+                {t('dashboard.quickActionsTitle')}
+              </h2>
+            </div>
+            <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {quickActionDefs.map((a) => (
+                <Link
+                  key={a.i18nKey}
+                  to={a.path}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 16px',
+                    borderRadius: 10,
+                    background: a.bg,
+                    textDecoration: 'none',
+                    transition: 'opacity 0.15s',
+                  }}
+                >
+                  <a.icon size={18} style={{ color: a.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: a.color }}>
+                    {t(a.i18nKey)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Today at a glance */}
+            <div
               style={{
-                margin: '0 0 8px',
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--hr-text-dim)',
+                margin: '0 12px 12px',
+                padding: '14px 16px',
+                borderRadius: 10,
+                background: 'var(--hr-hover)',
+                border: '1px solid var(--hr-border)',
               }}
             >
-              {t('dashboard.todayAtGlance')}
-            </p>
-            {[
-              {
-                label: t('dashboard.glance.shiftsScheduled'),
-                value: loading ? '…' : String(todayAtGlance.shiftsScheduled),
-              },
-              {
-                label: t('dashboard.glance.newApplications'),
-                value: loading ? '…' : String(todayAtGlance.newApplications),
-              },
-              {
-                label: t('dashboard.glance.pendingApprovals'),
-                value: loading ? '…' : String(todayAtGlance.pendingApprovals),
-              },
-            ].map((row) => (
-              <div
-                key={row.label}
+              <p
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: 6,
+                  margin: '0 0 8px',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--hr-text-dim)',
                 }}
               >
-                <span style={{ fontSize: 12, color: 'var(--hr-text-muted)' }}>{row.label}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                  {row.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* HR metrics */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 16,
-        }}
-      >
-        <StatCard
-          label={t('dashboard.metrics.headcount')}
-          value={staff.length}
-          sub={t('dashboard.metrics.totalActive')}
-          icon={<Users size={14} />}
-        />
-        <StatCard
-          label={t('dashboard.metrics.avgTenure')}
-          value={
-            staff.length > 0
-              ? `${(Math.round(staff.length * 0.8) / staff.length).toFixed(1)} ${t('dashboard.metrics.years')}`
-              : '-'
-          }
-          sub={t('dashboard.metrics.allStaff')}
-          icon={<Clock size={14} />}
-          color="var(--hr-status-approved)"
-        />
-        <StatCard
-          label={t('dashboard.metrics.openPositions')}
-          value={legacyDashboard?.openPositions ?? 0}
-          sub={t('dashboard.metrics.beingFilled')}
-          icon={<Briefcase size={14} />}
-          color="var(--hr-status-pending)"
-        />
-      </div>
-
-      {/* Shared widgets row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 16,
-        }}
-      >
-        <BirthdayWidget />
-        <AnniversaryWidget />
-        <Card>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span
-              style={{
-                padding: 6,
-                borderRadius: 8,
-                background: 'color-mix(in srgb, var(--hr-status-approved) 15%, transparent)',
-                color: 'var(--hr-status-approved)',
-              }}
-            >
-              <Sparkles size={14} />
-            </span>
-            <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-              {t('dashboard.recentHires')}
-            </h3>
-          </div>
-          {recentHires.length === 0 ? (
-            <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-              {t('dashboard.noRecentHires')}
-            </p>
-          ) : (
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-              }}
-            >
-              {recentHires.map((s) => (
-                <li key={s.id} style={{ fontSize: 12 }}>
-                  <Link
-                    to={`/staff/${s.id}` as any}
-                    style={{ textDecoration: 'none', color: 'var(--hr-text)' }}
-                  >
-                    <div style={{ fontWeight: 600 }}>{s.name}</div>
-                    <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{s.role}</div>
-                  </Link>
-                </li>
+                {t('dashboard.todayAtGlance')}
+              </p>
+              {[
+                {
+                  label: t('dashboard.glance.shiftsScheduled'),
+                  value: loading ? '…' : String(todayAtGlance.shiftsScheduled),
+                },
+                {
+                  label: t('dashboard.glance.newApplications'),
+                  value: loading ? '…' : String(todayAtGlance.newApplications),
+                },
+                {
+                  label: t('dashboard.glance.pendingApprovals'),
+                  value: loading ? '…' : String(todayAtGlance.pendingApprovals),
+                },
+              ].map((row) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: 6,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'var(--hr-text-muted)' }}>{row.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                    {row.value}
+                  </span>
+                </div>
               ))}
-            </ul>
-          )}
-        </Card>
-      </div>
+            </div>
+          </motion.div>
+        </div>
 
-      {/* Alerts row */}
-      {(expiring.length > 0 || overtimeAlerts.length > 0) && (
+        {/* HR metrics */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
             gap: 16,
           }}
         >
-          {expiring.length > 0 && (
-            <Card
-              style={{
-                borderColor: 'color-mix(in srgb, var(--hr-status-pending) 40%, transparent)',
-                background: 'color-mix(in srgb, var(--hr-status-pending) 6%, transparent)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <AlertTriangle size={14} style={{ color: 'var(--hr-status-pending)' }} />
-                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  {t('dashboard.alerts.expiringDocuments')}
-                </h3>
-              </div>
-              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                {t('dashboard.alerts.expiringCount', { count: expiring.length })}
-              </p>
-            </Card>
-          )}
-          {overtimeAlerts.length > 0 && (
-            <Card
-              style={{
-                borderColor: 'color-mix(in srgb, var(--hr-error) 40%, transparent)',
-                background: 'color-mix(in srgb, var(--hr-error) 6%, transparent)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <Timer size={14} style={{ color: 'var(--hr-error)' }} />
-                <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  {t('dashboard.alerts.overtimeAlerts')}
-                </h3>
-              </div>
-              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                {t('dashboard.alerts.overtimeCount', { count: overtimeAlerts.length })}
-              </p>
-            </Card>
-          )}
+          <StatCard
+            label={t('dashboard.metrics.headcount')}
+            value={staff.length}
+            sub={t('dashboard.metrics.totalActive')}
+            icon={<Users size={14} />}
+          />
+          <StatCard
+            label={t('dashboard.metrics.avgTenure')}
+            value={
+              staff.length > 0
+                ? `${(Math.round(staff.length * 0.8) / staff.length).toFixed(1)} ${t('dashboard.metrics.years')}`
+                : '-'
+            }
+            sub={t('dashboard.metrics.allStaff')}
+            icon={<Clock size={14} />}
+            color="var(--hr-status-approved)"
+          />
+          <StatCard
+            label={t('dashboard.metrics.openPositions')}
+            value={legacyDashboard?.openPositions ?? 0}
+            sub={t('dashboard.metrics.beingFilled')}
+            icon={<Briefcase size={14} />}
+            color="var(--hr-status-pending)"
+          />
         </div>
-      )}
-    </motion.div>
+
+        {/* Shared widgets row */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 16,
+          }}
+        >
+          <BirthdayWidget />
+          <AnniversaryWidget />
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span
+                style={{
+                  padding: 6,
+                  borderRadius: 8,
+                  background: 'color-mix(in srgb, var(--hr-status-approved) 15%, transparent)',
+                  color: 'var(--hr-status-approved)',
+                }}
+              >
+                <Sparkles size={14} />
+              </span>
+              <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                {t('dashboard.recentHires')}
+              </h3>
+            </div>
+            {recentHires.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                {t('dashboard.noRecentHires')}
+              </p>
+            ) : (
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}
+              >
+                {recentHires.map((s) => (
+                  <li key={s.id} style={{ fontSize: 12 }}>
+                    <Link
+                      to={`/staff/${s.id}` as any}
+                      style={{ textDecoration: 'none', color: 'var(--hr-text)' }}
+                    >
+                      <div style={{ fontWeight: 600 }}>{s.name}</div>
+                      <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>{s.role}</div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+
+        {/* Alerts row */}
+        {(expiring.length > 0 || overtimeAlerts.length > 0) && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {expiring.length > 0 && (
+              <Card
+                style={{
+                  borderColor: 'color-mix(in srgb, var(--hr-status-pending) 40%, transparent)',
+                  background: 'color-mix(in srgb, var(--hr-status-pending) 6%, transparent)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <AlertTriangle size={14} style={{ color: 'var(--hr-status-pending)' }} />
+                  <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                    {t('dashboard.alerts.expiringDocuments')}
+                  </h3>
+                </div>
+                <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                  {t('dashboard.alerts.expiringCount', { count: expiring.length })}
+                </p>
+              </Card>
+            )}
+            {overtimeAlerts.length > 0 && (
+              <Card
+                style={{
+                  borderColor: 'color-mix(in srgb, var(--hr-error) 40%, transparent)',
+                  background: 'color-mix(in srgb, var(--hr-error) 6%, transparent)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <Timer size={14} style={{ color: 'var(--hr-error)' }} />
+                  <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                    {t('dashboard.alerts.overtimeAlerts')}
+                  </h3>
+                </div>
+                <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                  {t('dashboard.alerts.overtimeCount', { count: overtimeAlerts.length })}
+                </p>
+              </Card>
+            )}
+          </div>
+        )}
+      </motion.div>
+    </>
   );
 };
 

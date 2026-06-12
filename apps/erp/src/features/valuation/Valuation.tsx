@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { DollarSign, BarChart3, Boxes } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useValuation } from './useValuation';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -27,6 +28,7 @@ const Valuation: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Inventory valuation · rtylr" />
       <PageHeader title="Inventory Valuation" description="Total value of inventory on hand" />
 
       {isLoading ? (

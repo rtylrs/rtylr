@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -152,6 +153,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
+      <HelmetContainer title="Revenue · rtylr" />
       <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>

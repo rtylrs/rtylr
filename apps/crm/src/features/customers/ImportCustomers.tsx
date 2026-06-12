@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Upload, FileText, Check } from 'lucide-react';
@@ -65,191 +66,194 @@ const ImportCustomers: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '820px' }}>
-      <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'Import' }]} />
-      <PageHeader title="Import customers" subtitle="Upload a CSV and map the columns" />
+    <>
+      <HelmetContainer title="Import customers · rtylr" />
+      <div style={{ maxWidth: '820px' }}>
+        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'Import' }]} />
+        <PageHeader title="Import customers" subtitle="Upload a CSV and map the columns" />
 
-      <Card style={{ marginBottom: '16px' }}>
-        <label
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '32px',
-            borderRadius: '12px',
-            border: '1px dashed var(--hub-border)',
-            background: 'var(--hub-hover)',
-            cursor: 'pointer',
-            textAlign: 'center',
-          }}
-        >
-          <input
-            type="file"
-            accept=".csv"
-            style={{ display: 'none' }}
-            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-          />
-          <div
+        <Card style={{ marginBottom: '16px' }}>
+          <label
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              background: 'rgba(59,130,246,0.12)',
-              color: '#3b82f6',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '8px',
+              padding: '32px',
+              borderRadius: '12px',
+              border: '1px dashed var(--hub-border)',
+              background: 'var(--hub-hover)',
+              cursor: 'pointer',
+              textAlign: 'center',
             }}
           >
-            <Upload size={22} />
-          </div>
-          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
-            {fileName || 'Upload CSV file'}
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
-            Click to browse. Your file should have headers in the first row.
-          </div>
-        </label>
-      </Card>
-
-      {headers.length > 0 && (
-        <>
-          <Card style={{ marginBottom: '16px' }}>
-            <h4
+            <input
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            />
+            <div
               style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--hub-text)',
-                margin: '0 0 12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Column mapping
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {REQUIRED.map((req) => (
-                <div
-                  key={req}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '120px 1fr',
-                    gap: '12px',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--hub-text)',
-                      fontWeight: 600,
-                      textTransform: 'capitalize',
-                    }}
-                  >
-                    {req}
-                  </div>
-                  <Select
-                    value={mapping[req] || ''}
-                    onChange={(e) => setMapping((m) => ({ ...m, [req]: e.target.value }))}
-                  >
-                    <option value="">Select column...</option>
-                    {headers.map((h) => (
-                      <option key={h} value={h}>
-                        {h}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              ))}
-            </div>
-            <label
-              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: 'rgba(59,130,246,0.12)',
+                color: '#3b82f6',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                marginTop: '14px',
-                fontSize: '12px',
-                color: 'var(--hub-text)',
-                cursor: 'pointer',
+                justifyContent: 'center',
               }}
             >
-              <input
-                type="checkbox"
-                checked={dedupe}
-                onChange={(e) => setDedupe(e.target.checked)}
-                style={{ accentColor: '#3b82f6' }}
-              />
-              Deduplicate by email
-            </label>
-          </Card>
+              <Upload size={22} />
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
+              {fileName || 'Upload CSV file'}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+              Click to browse. Your file should have headers in the first row.
+            </div>
+          </label>
+        </Card>
 
-          <Card>
-            <h4
-              style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--hub-text)',
-                margin: '0 0 12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Preview ({rows.length} rows)
-            </h4>
-            <div style={{ maxHeight: '240px', overflow: 'auto' }}>
-              <table style={{ width: '100%', fontSize: '12px' }}>
-                <thead>
-                  <tr>
-                    {headers.map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          textAlign: 'left',
-                          padding: '6px 8px',
-                          color: 'var(--hub-text-dim)',
-                          borderBottom: '1px solid var(--hub-border)',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.slice(0, 10).map((r, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                      {r.map((c, j) => (
-                        <td key={j} style={{ padding: '6px 8px', color: 'var(--hub-text)' }}>
-                          {c}
-                        </td>
+        {headers.length > 0 && (
+          <>
+            <Card style={{ marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--hub-text)',
+                  margin: '0 0 12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Column mapping
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {REQUIRED.map((req) => (
+                  <div
+                    key={req}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '120px 1fr',
+                      gap: '12px',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--hub-text)',
+                        fontWeight: 600,
+                        textTransform: 'capitalize',
+                      }}
+                    >
+                      {req}
+                    </div>
+                    <Select
+                      value={mapping[req] || ''}
+                      onChange={(e) => setMapping((m) => ({ ...m, [req]: e.target.value }))}
+                    >
+                      <option value="">Select column...</option>
+                      {headers.map((h) => (
+                        <option key={h} value={h}>
+                          {h}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                ))}
+              </div>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '14px',
+                  fontSize: '12px',
+                  color: 'var(--hub-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={dedupe}
+                  onChange={(e) => setDedupe(e.target.checked)}
+                  style={{ accentColor: '#3b82f6' }}
+                />
+                Deduplicate by email
+              </label>
+            </Card>
+
+            <Card>
+              <h4
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--hub-text)',
+                  margin: '0 0 12px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Preview ({rows.length} rows)
+              </h4>
+              <div style={{ maxHeight: '240px', overflow: 'auto' }}>
+                <table style={{ width: '100%', fontSize: '12px' }}>
+                  <thead>
+                    <tr>
+                      {headers.map((h) => (
+                        <th
+                          key={h}
+                          style={{
+                            textAlign: 'left',
+                            padding: '6px 8px',
+                            color: 'var(--hub-text-dim)',
+                            borderBottom: '1px solid var(--hub-border)',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {h}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                  </thead>
+                  <tbody>
+                    {rows.slice(0, 10).map((r, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                        {r.map((c, j) => (
+                          <td key={j} style={{ padding: '6px 8px', color: 'var(--hub-text)' }}>
+                            {c}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
 
-          <div
-            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}
-          >
-            <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleImport}
-              disabled={importMut.isPending || rows.length === 0}
+            <div
+              style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}
             >
-              <Check size={13} />
-              {importMut.isPending ? 'Importing…' : `Import ${rows.length} customers`}
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
+              <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleImport}
+                disabled={importMut.isPending || rows.length === 0}
+              >
+                <Check size={13} />
+                {importMut.isPending ? 'Importing…' : `Import ${rows.length} customers`}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { FileText, Download, Loader2 } from 'lucide-react';
@@ -41,6 +42,7 @@ const Reports: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
+      <HelmetContainer title="Reports · rtylr" />
       <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.reports.title')}

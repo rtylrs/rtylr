@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import {
   DollarSign,
@@ -220,6 +221,7 @@ const Dashboard: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
     >
+      <HelmetContainer title="Dashboard · rtylr" />
       {/* Overdue alert */}
       {overdueInvoices.length > 0 && (
         <div

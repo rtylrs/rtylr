@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { Plus, Search } from 'lucide-react';
@@ -66,6 +67,7 @@ const ChartOfAccounts: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Chart of accounts · rtylr" />
       <PageHeader
         title="Chart of Accounts"
         subtitle={`${filtered.length} accounts`}

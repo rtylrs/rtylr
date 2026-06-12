@@ -3,6 +3,7 @@ import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { APP_URLS } from '@voxire/config';
 import { ExternalLink, RotateCcw, Palette, Type, ImageIcon, Layout, Search } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 
 import { useAdminCustomization, useUpsertCustomization } from '../../shared/hooks/queries/useAdmin';
 import type { TemplateId, FontPairingId } from '../../shared/lib/types';
@@ -182,354 +183,364 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header - title + preview link. Stays pinned above the tabs. */}
-      <div
-        className="sticky top-0 z-20 border-b px-10 py-6"
-        style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
-      >
-        <div className="flex items-baseline justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Page branding</h1>
-            <p className="mt-1 text-sm text-white/60">
-              What candidates see at {APP_URLS.recruit}/
-              <span className="text-white">{slug || 'your-slug'}</span>
-            </p>
-          </div>
-          {slug && (
-            <a
-              href={`${APP_URLS.recruit}/${slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Preview
-            </a>
-          )}
-        </div>
-
-        {/* Tabs. Icon + label so the admin doesn't have to guess what's
-            behind each. */}
-        <div className="mt-6 flex gap-1 text-sm">
-          <TabButton active={tab === 'brand'} onClick={() => setTab('brand')} icon={<Layout />}>
-            Brand
-          </TabButton>
-          <TabButton
-            active={tab === 'palette'}
-            onClick={() => setTab('palette')}
-            icon={<Palette />}
-          >
-            Palette
-          </TabButton>
-          <TabButton
-            active={tab === 'typography'}
-            onClick={() => setTab('typography')}
-            icon={<Type />}
-          >
-            Typography
-          </TabButton>
-          <TabButton active={tab === 'media'} onClick={() => setTab('media')} icon={<ImageIcon />}>
-            Media
-          </TabButton>
-          <TabButton active={tab === 'seo'} onClick={() => setTab('seo')} icon={<Search />}>
-            SEO &amp; legal
-          </TabButton>
-        </div>
-      </div>
-
-      <form onSubmit={onSubmit} className="flex-1">
-        <div className="px-10 py-8">
-          {tab === 'brand' && (
-            <Section maxWidth={640}>
-              <Row>
-                <Field label="URL slug" required hint="a–z, 0–9, dashes">
-                  <Input value={slug} onChange={setSlug} required />
-                </Field>
-                <Field label="Brand name" required>
-                  <Input value={brandName} onChange={setBrandName} required />
-                </Field>
-              </Row>
-              <Field label="Tagline">
-                <Input value={tagline} onChange={setTagline} />
-              </Field>
-              <Field label="About" hint="Short paragraph shown under the hero">
-                <Textarea value={aboutBlurb} onChange={setAboutBlurb} rows={4} />
-              </Field>
-              <Field label="Logo URL">
-                <Input value={logoUrl} onChange={setLogoUrl} type="url" />
-              </Field>
-              <Field
-                label="Custom header HTML"
-                hint="Advanced - raw HTML strip above the brand header"
-              >
-                <Textarea value={headerHtml} onChange={setHeaderHtml} rows={3} />
-              </Field>
-            </Section>
-          )}
-
-          {tab === 'palette' && (
-            <Section maxWidth={1000}>
-              <div className="flex items-baseline justify-between">
-                <p className="text-sm text-white/60">
-                  Pick a template first - it sets the structural layout. Then tune the palette.
-                  Empty fields fall back to the template's default.
-                </p>
-                <button
-                  type="button"
-                  onClick={resetPalette}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:bg-white/5"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  Reset to template defaults
-                </button>
-              </div>
-
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                {TEMPLATES.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTemplate(t.id)}
-                    className="block rounded-lg border p-4 text-left transition"
-                    style={{
-                      borderColor: template === t.id ? '#fff' : '#1f1f1f',
-                      background: template === t.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
-                    }}
-                  >
-                    <div className="font-semibold">{t.name}</div>
-                    <div className="mt-1 text-xs text-white/60">{t.blurb}</div>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-                <div className="space-y-4">
-                  <ColorField label="Primary" value={primaryColor} onChange={setPrimaryColor} />
-                  <ColorField
-                    label="Accent"
-                    value={accentColor}
-                    onChange={setAccentColor}
-                    hint="Secondary highlight. Empty → falls back to Primary"
-                  />
-                  <ColorField
-                    label="Background"
-                    value={bgColor}
-                    onChange={setBgColor}
-                    hint="Page canvas"
-                  />
-                  <ColorField label="Text" value={textColor} onChange={setTextColor} />
-                  <ColorField
-                    label="Muted text"
-                    value={mutedTextColor}
-                    onChange={setMutedTextColor}
-                    hint="Captions, metadata"
-                  />
-                </div>
-
-                {/* Live preview - shows a miniature hero so the admin
-                    can see the palette land without navigating away. */}
-                <PalettePreview
-                  primary={primaryColor || '#111111'}
-                  accent={accentColor || primaryColor || '#111111'}
-                  bg={bgColor || TEMPLATE_DEFAULTS[template].bg}
-                  fg={textColor || TEMPLATE_DEFAULTS[template].fg}
-                  muted={mutedTextColor || TEMPLATE_DEFAULTS[template].muted}
-                  brandName={brandName || 'Your brand'}
-                />
-              </div>
-            </Section>
-          )}
-
-          {tab === 'typography' && (
-            <Section maxWidth={720}>
-              <p className="text-sm text-white/60">
-                Five curated pairings. Fonts load on demand from Google Fonts - picking one doesn't
-                block the save.
-              </p>
-              <div className="mt-6 space-y-3">
-                {Object.values(FONT_PAIRINGS).map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setFontPairing(p.id)}
-                    className="block w-full rounded-lg border p-5 text-left transition"
-                    style={{
-                      borderColor: fontPairing === p.id ? '#fff' : '#1f1f1f',
-                      background: fontPairing === p.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-white/50">
-                          {p.label}
-                        </div>
-                        <div className="mt-2 text-3xl" style={{ fontFamily: p.heading }}>
-                          The quick brown fox
-                        </div>
-                        <div className="mt-1 text-sm text-white/70" style={{ fontFamily: p.body }}>
-                          jumps over the lazy dog.
-                        </div>
-                      </div>
-                      {fontPairing === p.id && (
-                        <div className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-black">
-                          Selected
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </Section>
-          )}
-
-          {tab === 'seo' && (
-            <Section maxWidth={640}>
-              <div>
-                <div className="text-sm font-semibold">Search &amp; social</div>
-                <div className="text-xs text-white/50">
-                  Override the defaults that LinkedIn, Google, and Twitter show. Blank fields fall
-                  back to your brand name + tagline.
-                </div>
-              </div>
-              <Field label="Meta title" hint="Overrides browser tab + search result title">
-                <Input value={metaTitle} onChange={setMetaTitle} />
-              </Field>
-              <Field label="Meta description" hint="1–2 sentences, under 160 chars">
-                <Textarea value={metaDescription} onChange={setMetaDescription} rows={3} />
-              </Field>
-
-              <div className="pt-4">
-                <div className="text-sm font-semibold">Legal</div>
-                <div className="text-xs text-white/50">
-                  Links shown on the apply form. Useful for GDPR / EEO disclosures.
-                </div>
-              </div>
-              <Row>
-                <Field label="Privacy policy URL">
-                  <Input value={privacyUrl} onChange={setPrivacyUrl} type="url" />
-                </Field>
-                <Field label="Terms URL">
-                  <Input value={termsUrl} onChange={setTermsUrl} type="url" />
-                </Field>
-              </Row>
-              <label className="flex items-center gap-2 pt-1 text-sm">
-                <input
-                  type="checkbox"
-                  checked={requireConsent}
-                  onChange={(e) => setRequireConsent(e.target.checked)}
-                  className="h-4 w-4"
-                />
-                Require explicit consent checkbox on the apply form (GDPR)
-              </label>
-
-              <div className="pt-4">
-                <div className="text-sm font-semibold">Analytics</div>
-                <div className="text-xs text-white/50">
-                  Only loaded when an ID is set. Leave blank to ship zero tracking.
-                </div>
-              </div>
-              <Row>
-                <Field label="GA4 measurement ID" hint="Starts with G-">
-                  <Input value={gaMeasurementId} onChange={setGaMeasurementId} />
-                </Field>
-                <Field label="Meta Pixel ID" hint="Numeric">
-                  <Input value={metaPixelId} onChange={setMetaPixelId} />
-                </Field>
-              </Row>
-
-              <div className="pt-4">
-                <div className="text-sm font-semibold">Email notifications</div>
-                <div className="text-xs text-white/50">
-                  Candidates always get a confirmation when they apply. You get a "new application"
-                  ping at the address below, if set.
-                </div>
-              </div>
-              <Field
-                label="HR notification inbox"
-                hint="Team alias works best (e.g. jobs@acme.com)"
-              >
-                <Input value={notificationEmail} onChange={setNotificationEmail} type="email" />
-              </Field>
-              <label className="flex items-center gap-2 pt-1 text-sm">
-                <input
-                  type="checkbox"
-                  checked={emailNotifications}
-                  onChange={(e) => setEmailNotifications(e.target.checked)}
-                  className="h-4 w-4"
-                />
-                Send me email notifications for new applications
-              </label>
-            </Section>
-          )}
-
-          {tab === 'media' && (
-            <Section maxWidth={640}>
-              <Field
-                label="Hero image URL"
-                hint="Shown in the bold / editorial templates above the job list"
-              >
-                <Input value={heroImageUrl} onChange={setHeroImageUrl} type="url" />
-                {heroImageUrl && (
-                  <img
-                    src={heroImageUrl}
-                    alt="Hero preview"
-                    className="mt-3 h-40 w-full rounded-md object-cover"
-                    style={{ background: '#1f1f1f' }}
-                  />
-                )}
-              </Field>
-
-              <Field label="Favicon URL" hint="Square image, ≥32px. Shown in browser tabs.">
-                <Input value={faviconUrl} onChange={setFaviconUrl} type="url" />
-                {faviconUrl && (
-                  <img
-                    src={faviconUrl}
-                    alt="Favicon preview"
-                    className="mt-3 h-10 w-10 rounded"
-                    style={{ background: '#1f1f1f' }}
-                  />
-                )}
-              </Field>
-
-              {/* OG card preview - a live PNG rendered by the backend
-                  from whatever is saved. The admin sees what LinkedIn
-                  will scrape when someone shares their URL. */}
-              {slug && (
-                <div className="mt-6">
-                  <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/70">
-                    Social preview
-                  </div>
-                  <img
-                    key={`${brandName}-${tagline}-${primaryColor}`}
-                    src={`${APP_URLS.api}/recruit/public/og?slug=${slug}&_=${Date.now()}`}
-                    alt="OG card"
-                    className="w-full rounded-md border"
-                    style={{ borderColor: '#1f1f1f' }}
-                  />
-                  <p className="mt-1.5 text-xs text-white/40">
-                    Refreshes after you save. This is the card LinkedIn, Slack, and iMessage use.
-                  </p>
-                </div>
-              )}
-            </Section>
-          )}
-        </div>
-
+    <>
+      <HelmetContainer title="Page branding · rtylr" />
+      <div className="flex min-h-screen flex-col">
+        {/* Header - title + preview link. Stays pinned above the tabs. */}
         <div
-          className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t px-10 py-4"
+          className="sticky top-0 z-20 border-b px-10 py-6"
           style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
         >
-          <button
-            type="submit"
-            disabled={save.isPending}
-            className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50"
-          >
-            {save.isPending ? 'Saving…' : 'Save changes'}
-          </button>
+          <div className="flex items-baseline justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">Page branding</h1>
+              <p className="mt-1 text-sm text-white/60">
+                What candidates see at {APP_URLS.recruit}/
+                <span className="text-white">{slug || 'your-slug'}</span>
+              </p>
+            </div>
+            {slug && (
+              <a
+                href={`${APP_URLS.recruit}/${slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Preview
+              </a>
+            )}
+          </div>
+
+          {/* Tabs. Icon + label so the admin doesn't have to guess what's
+            behind each. */}
+          <div className="mt-6 flex gap-1 text-sm">
+            <TabButton active={tab === 'brand'} onClick={() => setTab('brand')} icon={<Layout />}>
+              Brand
+            </TabButton>
+            <TabButton
+              active={tab === 'palette'}
+              onClick={() => setTab('palette')}
+              icon={<Palette />}
+            >
+              Palette
+            </TabButton>
+            <TabButton
+              active={tab === 'typography'}
+              onClick={() => setTab('typography')}
+              icon={<Type />}
+            >
+              Typography
+            </TabButton>
+            <TabButton
+              active={tab === 'media'}
+              onClick={() => setTab('media')}
+              icon={<ImageIcon />}
+            >
+              Media
+            </TabButton>
+            <TabButton active={tab === 'seo'} onClick={() => setTab('seo')} icon={<Search />}>
+              SEO &amp; legal
+            </TabButton>
+          </div>
         </div>
-      </form>
-    </div>
+
+        <form onSubmit={onSubmit} className="flex-1">
+          <div className="px-10 py-8">
+            {tab === 'brand' && (
+              <Section maxWidth={640}>
+                <Row>
+                  <Field label="URL slug" required hint="a–z, 0–9, dashes">
+                    <Input value={slug} onChange={setSlug} required />
+                  </Field>
+                  <Field label="Brand name" required>
+                    <Input value={brandName} onChange={setBrandName} required />
+                  </Field>
+                </Row>
+                <Field label="Tagline">
+                  <Input value={tagline} onChange={setTagline} />
+                </Field>
+                <Field label="About" hint="Short paragraph shown under the hero">
+                  <Textarea value={aboutBlurb} onChange={setAboutBlurb} rows={4} />
+                </Field>
+                <Field label="Logo URL">
+                  <Input value={logoUrl} onChange={setLogoUrl} type="url" />
+                </Field>
+                <Field
+                  label="Custom header HTML"
+                  hint="Advanced - raw HTML strip above the brand header"
+                >
+                  <Textarea value={headerHtml} onChange={setHeaderHtml} rows={3} />
+                </Field>
+              </Section>
+            )}
+
+            {tab === 'palette' && (
+              <Section maxWidth={1000}>
+                <div className="flex items-baseline justify-between">
+                  <p className="text-sm text-white/60">
+                    Pick a template first - it sets the structural layout. Then tune the palette.
+                    Empty fields fall back to the template's default.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={resetPalette}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:bg-white/5"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    Reset to template defaults
+                  </button>
+                </div>
+
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  {TEMPLATES.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTemplate(t.id)}
+                      className="block rounded-lg border p-4 text-left transition"
+                      style={{
+                        borderColor: template === t.id ? '#fff' : '#1f1f1f',
+                        background: template === t.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
+                      }}
+                    >
+                      <div className="font-semibold">{t.name}</div>
+                      <div className="mt-1 text-xs text-white/60">{t.blurb}</div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+                  <div className="space-y-4">
+                    <ColorField label="Primary" value={primaryColor} onChange={setPrimaryColor} />
+                    <ColorField
+                      label="Accent"
+                      value={accentColor}
+                      onChange={setAccentColor}
+                      hint="Secondary highlight. Empty → falls back to Primary"
+                    />
+                    <ColorField
+                      label="Background"
+                      value={bgColor}
+                      onChange={setBgColor}
+                      hint="Page canvas"
+                    />
+                    <ColorField label="Text" value={textColor} onChange={setTextColor} />
+                    <ColorField
+                      label="Muted text"
+                      value={mutedTextColor}
+                      onChange={setMutedTextColor}
+                      hint="Captions, metadata"
+                    />
+                  </div>
+
+                  {/* Live preview - shows a miniature hero so the admin
+                    can see the palette land without navigating away. */}
+                  <PalettePreview
+                    primary={primaryColor || '#111111'}
+                    accent={accentColor || primaryColor || '#111111'}
+                    bg={bgColor || TEMPLATE_DEFAULTS[template].bg}
+                    fg={textColor || TEMPLATE_DEFAULTS[template].fg}
+                    muted={mutedTextColor || TEMPLATE_DEFAULTS[template].muted}
+                    brandName={brandName || 'Your brand'}
+                  />
+                </div>
+              </Section>
+            )}
+
+            {tab === 'typography' && (
+              <Section maxWidth={720}>
+                <p className="text-sm text-white/60">
+                  Five curated pairings. Fonts load on demand from Google Fonts - picking one
+                  doesn't block the save.
+                </p>
+                <div className="mt-6 space-y-3">
+                  {Object.values(FONT_PAIRINGS).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setFontPairing(p.id)}
+                      className="block w-full rounded-lg border p-5 text-left transition"
+                      style={{
+                        borderColor: fontPairing === p.id ? '#fff' : '#1f1f1f',
+                        background: fontPairing === p.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-xs uppercase tracking-wider text-white/50">
+                            {p.label}
+                          </div>
+                          <div className="mt-2 text-3xl" style={{ fontFamily: p.heading }}>
+                            The quick brown fox
+                          </div>
+                          <div
+                            className="mt-1 text-sm text-white/70"
+                            style={{ fontFamily: p.body }}
+                          >
+                            jumps over the lazy dog.
+                          </div>
+                        </div>
+                        {fontPairing === p.id && (
+                          <div className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-black">
+                            Selected
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {tab === 'seo' && (
+              <Section maxWidth={640}>
+                <div>
+                  <div className="text-sm font-semibold">Search &amp; social</div>
+                  <div className="text-xs text-white/50">
+                    Override the defaults that LinkedIn, Google, and Twitter show. Blank fields fall
+                    back to your brand name + tagline.
+                  </div>
+                </div>
+                <Field label="Meta title" hint="Overrides browser tab + search result title">
+                  <Input value={metaTitle} onChange={setMetaTitle} />
+                </Field>
+                <Field label="Meta description" hint="1–2 sentences, under 160 chars">
+                  <Textarea value={metaDescription} onChange={setMetaDescription} rows={3} />
+                </Field>
+
+                <div className="pt-4">
+                  <div className="text-sm font-semibold">Legal</div>
+                  <div className="text-xs text-white/50">
+                    Links shown on the apply form. Useful for GDPR / EEO disclosures.
+                  </div>
+                </div>
+                <Row>
+                  <Field label="Privacy policy URL">
+                    <Input value={privacyUrl} onChange={setPrivacyUrl} type="url" />
+                  </Field>
+                  <Field label="Terms URL">
+                    <Input value={termsUrl} onChange={setTermsUrl} type="url" />
+                  </Field>
+                </Row>
+                <label className="flex items-center gap-2 pt-1 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={requireConsent}
+                    onChange={(e) => setRequireConsent(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  Require explicit consent checkbox on the apply form (GDPR)
+                </label>
+
+                <div className="pt-4">
+                  <div className="text-sm font-semibold">Analytics</div>
+                  <div className="text-xs text-white/50">
+                    Only loaded when an ID is set. Leave blank to ship zero tracking.
+                  </div>
+                </div>
+                <Row>
+                  <Field label="GA4 measurement ID" hint="Starts with G-">
+                    <Input value={gaMeasurementId} onChange={setGaMeasurementId} />
+                  </Field>
+                  <Field label="Meta Pixel ID" hint="Numeric">
+                    <Input value={metaPixelId} onChange={setMetaPixelId} />
+                  </Field>
+                </Row>
+
+                <div className="pt-4">
+                  <div className="text-sm font-semibold">Email notifications</div>
+                  <div className="text-xs text-white/50">
+                    Candidates always get a confirmation when they apply. You get a "new
+                    application" ping at the address below, if set.
+                  </div>
+                </div>
+                <Field
+                  label="HR notification inbox"
+                  hint="Team alias works best (e.g. jobs@acme.com)"
+                >
+                  <Input value={notificationEmail} onChange={setNotificationEmail} type="email" />
+                </Field>
+                <label className="flex items-center gap-2 pt-1 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications}
+                    onChange={(e) => setEmailNotifications(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  Send me email notifications for new applications
+                </label>
+              </Section>
+            )}
+
+            {tab === 'media' && (
+              <Section maxWidth={640}>
+                <Field
+                  label="Hero image URL"
+                  hint="Shown in the bold / editorial templates above the job list"
+                >
+                  <Input value={heroImageUrl} onChange={setHeroImageUrl} type="url" />
+                  {heroImageUrl && (
+                    <img
+                      src={heroImageUrl}
+                      alt="Hero preview"
+                      className="mt-3 h-40 w-full rounded-md object-cover"
+                      style={{ background: '#1f1f1f' }}
+                    />
+                  )}
+                </Field>
+
+                <Field label="Favicon URL" hint="Square image, ≥32px. Shown in browser tabs.">
+                  <Input value={faviconUrl} onChange={setFaviconUrl} type="url" />
+                  {faviconUrl && (
+                    <img
+                      src={faviconUrl}
+                      alt="Favicon preview"
+                      className="mt-3 h-10 w-10 rounded"
+                      style={{ background: '#1f1f1f' }}
+                    />
+                  )}
+                </Field>
+
+                {/* OG card preview - a live PNG rendered by the backend
+                  from whatever is saved. The admin sees what LinkedIn
+                  will scrape when someone shares their URL. */}
+                {slug && (
+                  <div className="mt-6">
+                    <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/70">
+                      Social preview
+                    </div>
+                    <img
+                      key={`${brandName}-${tagline}-${primaryColor}`}
+                      src={`${APP_URLS.api}/recruit/public/og?slug=${slug}&_=${Date.now()}`}
+                      alt="OG card"
+                      className="w-full rounded-md border"
+                      style={{ borderColor: '#1f1f1f' }}
+                    />
+                    <p className="mt-1.5 text-xs text-white/40">
+                      Refreshes after you save. This is the card LinkedIn, Slack, and iMessage use.
+                    </p>
+                  </div>
+                )}
+              </Section>
+            )}
+          </div>
+
+          <div
+            className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t px-10 py-4"
+            style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
+          >
+            <button
+              type="submit"
+              disabled={save.isPending}
+              className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50"
+            >
+              {save.isPending ? 'Saving…' : 'Save changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };
 

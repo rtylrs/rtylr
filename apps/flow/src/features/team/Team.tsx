@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useTeamWorkload } from './useTeamWorkload';
 import WorkloadBar from '../../shared/components/WorkloadBar';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -20,6 +21,7 @@ const Team: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Team · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center gap-2">
           <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />

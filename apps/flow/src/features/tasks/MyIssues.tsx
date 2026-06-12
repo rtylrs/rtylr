@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { ListTodo, Plus } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useMyIssues } from './useMyIssues';
 import { useCreateTask } from './useTasks';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -36,6 +37,7 @@ const MyIssues: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="My tasks · rtylr" />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}

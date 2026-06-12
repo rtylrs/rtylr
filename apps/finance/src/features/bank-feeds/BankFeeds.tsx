@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Link as LinkIcon, Building2, CreditCard, PiggyBank } from 'lucide-react';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ const BankFeeds: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Bank feeds · rtylr" />
       <PageHeader
         title="Bank Feeds"
         subtitle={

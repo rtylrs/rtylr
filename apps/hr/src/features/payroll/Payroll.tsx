@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { Play, DollarSign, TrendingUp, Users, Clock, Settings } from 'lucide-react';
 import { motion } from 'motion/react';

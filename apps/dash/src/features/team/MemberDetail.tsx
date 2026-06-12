@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import {
   Mail,
@@ -174,294 +175,300 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   };
 
   return (
-    <div className="space-y-5 max-w-4xl">
-      <div className="flex items-center gap-4">
-        <Avatar
-          initials={getInitials(member.name)}
-          size="lg"
-          className="shrink-0"
-          style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              {member.name}
-            </h1>
-            <RoleBadge role={member.role} />
-          </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-            {member.email}
-          </p>
-        </div>
-        {canEditMember && (
-          <div className="ml-auto flex items-center gap-2">
-            {isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setNameDraft(member.fullName || member.name || '');
-                    setRoleDraft(member.role || 'staff');
-                    setAppsDraft(member.apps ?? []);
-                  }}
-                >
-                  <X size={14} />
-                  Cancel
-                </Button>
-                <Button onClick={saveMember} disabled={updateMember.isPending}>
-                  <Save size={14} />
-                  Save
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={() => setIsEditing(true)}>
-                <Pencil size={14} />
-                Edit
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {isEditing && (
-        <SettingSection title="Member details" description="Edit this member's profile and access.">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="member-name">Name</Label>
-              <Input
-                id="member-name"
-                value={nameDraft}
-                onChange={(event) => setNameDraft(event.target.value)}
-              />
+    <>
+      <HelmetContainer title="Member detail · rtylr" />
+      <div className="space-y-5 max-w-4xl">
+        <div className="flex items-center gap-4">
+          <Avatar
+            initials={getInitials(member.name)}
+            size="lg"
+            className="shrink-0"
+            style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+                {member.name}
+              </h1>
+              <RoleBadge role={member.role} />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="member-role">Role</Label>
-              <select
-                id="member-role"
-                value={roleDraft}
-                onChange={(event) => setRoleDraft(event.target.value)}
-                className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{
-                  background: 'var(--dash-bg)',
-                  border: '1px solid var(--dash-border)',
-                  color: 'var(--dash-text)',
-                }}
-              >
-                {ROLES.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
-            {ALL_APPS.map((app) => {
-              const Icon = app.icon;
-              const selected = appsDraft.includes(app.key);
-              return (
-                <button
-                  key={app.key}
-                  type="button"
-                  onClick={() => toggleApp(app.key)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors"
-                  style={{
-                    background: selected ? `${app.color}10` : 'var(--dash-bg)',
-                    border: `1px solid ${selected ? `${app.color}45` : 'var(--dash-border)'}`,
-                    color: selected ? app.color : 'var(--dash-text-muted)',
-                  }}
-                >
-                  <Icon size={15} style={{ color: app.color }} />
-                  <span className="text-xs font-semibold">{app.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </SettingSection>
-      )}
-
-      <div className="grid grid-cols-3 gap-3">
-        <div
-          className="rounded-xl p-4"
-          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-        >
-          <div
-            className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--dash-text-dim)' }}
-          >
-            <Mail size={11} /> Email
-          </div>
-          <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
-            {member.email}
-          </p>
-        </div>
-        <div
-          className="rounded-xl p-4"
-          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-        >
-          <div
-            className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--dash-text-dim)' }}
-          >
-            <Shield size={11} /> Role
-          </div>
-          <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
-            {member.role}
-          </p>
-        </div>
-        <div
-          className="rounded-xl p-4"
-          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-        >
-          <div
-            className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--dash-text-dim)' }}
-          >
-            <Clock size={11} /> Status
-          </div>
-          <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
-            {member.status}
-          </p>
-        </div>
-      </div>
-
-      <SettingSection title="App access" description="Apps this member can launch.">
-        <div className="flex flex-wrap gap-2">
-          {(member.apps ?? []).length === 0 ? (
-            <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-              No apps assigned.
+            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+              {member.email}
             </p>
-          ) : (
-            (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
+          </div>
+          {canEditMember && (
+            <div className="ml-auto flex items-center gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setNameDraft(member.fullName || member.name || '');
+                      setRoleDraft(member.role || 'staff');
+                      setAppsDraft(member.apps ?? []);
+                    }}
+                  >
+                    <X size={14} />
+                    Cancel
+                  </Button>
+                  <Button onClick={saveMember} disabled={updateMember.isPending}>
+                    <Save size={14} />
+                    Save
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  <Pencil size={14} />
+                  Edit
+                </Button>
+              )}
+            </div>
           )}
         </div>
-      </SettingSection>
 
-      <SettingSection
-        title="Recent activity"
-        description="Recent actions performed by this member."
-      >
-        {memberActivity.length === 0 ? (
-          <p className="text-xs text-center py-6" style={{ color: 'var(--dash-text-dim)' }}>
-            No recent activity
-          </p>
-        ) : (
-          <div className="-mx-5">
-            {memberActivity.map((a, i) => (
-              <ActivityEntryRow key={a.id} entry={a} index={i} />
-            ))}
-          </div>
-        )}
-      </SettingSection>
-
-      <div
-        className="rounded-xl"
-        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-      >
-        <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--dash-border)' }}>
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Groups
-            </p>
-            <button
-              onClick={() => navigate({ to: '/team/groups' })}
-              className="text-xs"
-              style={{ color: '#4583C4' }}
-            >
-              Manage groups
-            </button>
-          </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-            Groups this member belongs to.
-          </p>
-        </div>
-        <div className="px-5 py-4">
-          {memberGroups.length === 0 ? (
-            <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-              Not in any group.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {memberGroups.map((g) => (
-                <div
-                  key={g.id}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+        {isEditing && (
+          <SettingSection
+            title="Member details"
+            description="Edit this member's profile and access."
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="member-name">Name</Label>
+                <Input
+                  id="member-name"
+                  value={nameDraft}
+                  onChange={(event) => setNameDraft(event.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="member-role">Role</Label>
+                <select
+                  id="member-role"
+                  value={roleDraft}
+                  onChange={(event) => setRoleDraft(event.target.value)}
+                  className="w-full rounded-lg px-3 py-2 text-sm"
                   style={{
-                    background: `${g.color}18`,
-                    border: `1px solid ${g.color}30`,
-                    color: g.color,
+                    background: 'var(--dash-bg)',
+                    border: '1px solid var(--dash-border)',
+                    color: 'var(--dash-text)',
                   }}
                 >
-                  <span>{g.name}</span>
+                  {ROLES.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
+              {ALL_APPS.map((app) => {
+                const Icon = app.icon;
+                const selected = appsDraft.includes(app.key);
+                return (
                   <button
-                    aria-label={`Remove from ${g.name}`}
-                    onClick={() => removeFromGroup.mutate({ groupId: g.id, userId: member.id })}
-                    className="hover:opacity-70 transition-opacity"
+                    key={app.key}
+                    type="button"
+                    onClick={() => toggleApp(app.key)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors"
+                    style={{
+                      background: selected ? `${app.color}10` : 'var(--dash-bg)',
+                      border: `1px solid ${selected ? `${app.color}45` : 'var(--dash-border)'}`,
+                      color: selected ? app.color : 'var(--dash-text-muted)',
+                    }}
                   >
-                    <X size={11} />
+                    <Icon size={15} style={{ color: app.color }} />
+                    <span className="text-xs font-semibold">{app.label}</span>
                   </button>
-                </div>
+                );
+              })}
+            </div>
+          </SettingSection>
+        )}
+
+        <div className="grid grid-cols-3 gap-3">
+          <div
+            className="rounded-xl p-4"
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+          >
+            <div
+              className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--dash-text-dim)' }}
+            >
+              <Mail size={11} /> Email
+            </div>
+            <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
+              {member.email}
+            </p>
+          </div>
+          <div
+            className="rounded-xl p-4"
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+          >
+            <div
+              className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--dash-text-dim)' }}
+            >
+              <Shield size={11} /> Role
+            </div>
+            <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
+              {member.role}
+            </p>
+          </div>
+          <div
+            className="rounded-xl p-4"
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+          >
+            <div
+              className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider mb-2"
+              style={{ color: 'var(--dash-text-dim)' }}
+            >
+              <Clock size={11} /> Status
+            </div>
+            <p className="text-xs font-medium capitalize" style={{ color: 'var(--dash-text)' }}>
+              {member.status}
+            </p>
+          </div>
+        </div>
+
+        <SettingSection title="App access" description="Apps this member can launch.">
+          <div className="flex flex-wrap gap-2">
+            {(member.apps ?? []).length === 0 ? (
+              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                No apps assigned.
+              </p>
+            ) : (
+              (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
+            )}
+          </div>
+        </SettingSection>
+
+        <SettingSection
+          title="Recent activity"
+          description="Recent actions performed by this member."
+        >
+          {memberActivity.length === 0 ? (
+            <p className="text-xs text-center py-6" style={{ color: 'var(--dash-text-dim)' }}>
+              No recent activity
+            </p>
+          ) : (
+            <div className="-mx-5">
+              {memberActivity.map((a, i) => (
+                <ActivityEntryRow key={a.id} entry={a} index={i} />
               ))}
             </div>
           )}
+        </SettingSection>
+
+        <div
+          className="rounded-xl"
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+        >
+          <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                Groups
+              </p>
+              <button
+                onClick={() => navigate({ to: '/team/groups' })}
+                className="text-xs"
+                style={{ color: '#4583C4' }}
+              >
+                Manage groups
+              </button>
+            </div>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+              Groups this member belongs to.
+            </p>
+          </div>
+          <div className="px-5 py-4">
+            {memberGroups.length === 0 ? (
+              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                Not in any group.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {memberGroups.map((g) => (
+                  <div
+                    key={g.id}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                    style={{
+                      background: `${g.color}18`,
+                      border: `1px solid ${g.color}30`,
+                      color: g.color,
+                    }}
+                  >
+                    <span>{g.name}</span>
+                    <button
+                      aria-label={`Remove from ${g.name}`}
+                      onClick={() => removeFromGroup.mutate({ groupId: g.id, userId: member.id })}
+                      className="hover:opacity-70 transition-opacity"
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {member.role !== 'owner' && (
-        <DangerZone
-          actions={[
-            {
-              label: 'Deactivate member',
-              description: 'Immediately revoke all access. Can be undone later.',
-              buttonLabel: 'Deactivate',
-              onClick: () => setConfirmOpen(true),
-            },
-          ]}
-        />
-      )}
+        {member.role !== 'owner' && (
+          <DangerZone
+            actions={[
+              {
+                label: 'Deactivate member',
+                description: 'Immediately revoke all access. Can be undone later.',
+                buttonLabel: 'Deactivate',
+                onClick: () => setConfirmOpen(true),
+              },
+            ]}
+          />
+        )}
 
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title={`Deactivate ${member.name}?`}
-        description={
-          <span className="flex flex-col gap-1.5">
-            <span>They will lose access to all apps immediately.</span>
-            {sub &&
-              sub.pricePerSeatCents > 0 &&
-              (() => {
-                const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                  computeSeatProration(sub.pricePerSeatCents);
-                return (
-                  <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
-                    Saves{' '}
-                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                      {centsToDisplay(proratedCents)}
-                    </span>{' '}
-                    this month ({daysRemaining}/{daysInMonth} days), then{' '}
-                    <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                      {centsToDisplay(sub.pricePerSeatCents)}/mo
-                    </span>{' '}
-                    from {nextMonthName} 1st.
-                  </span>
-                );
-              })()}
-          </span>
-        }
-        confirmLabel="Deactivate"
-        destructive
-        isLoading={deactivate.isPending}
-        onConfirm={async () => {
-          try {
-            await deactivate.mutateAsync(member.id);
-            navigate({ to: '/team' });
-          } catch {
-            // onError in hook handles toast
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title={`Deactivate ${member.name}?`}
+          description={
+            <span className="flex flex-col gap-1.5">
+              <span>They will lose access to all apps immediately.</span>
+              {sub &&
+                sub.pricePerSeatCents > 0 &&
+                (() => {
+                  const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                    computeSeatProration(sub.pricePerSeatCents);
+                  return (
+                    <span style={{ color: 'var(--dash-text-muted)', fontSize: '12px' }}>
+                      Saves{' '}
+                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                        {centsToDisplay(proratedCents)}
+                      </span>{' '}
+                      this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                        {centsToDisplay(sub.pricePerSeatCents)}/mo
+                      </span>{' '}
+                      from {nextMonthName} 1st.
+                    </span>
+                  );
+                })()}
+            </span>
           }
-        }}
-      />
-    </div>
+          confirmLabel="Deactivate"
+          destructive
+          isLoading={deactivate.isPending}
+          onConfirm={async () => {
+            try {
+              await deactivate.mutateAsync(member.id);
+              navigate({ to: '/team' });
+            } catch {
+              // onError in hook handles toast
+            }
+          }}
+        />
+      </div>
+    </>
   );
 };
 

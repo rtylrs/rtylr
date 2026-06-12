@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Users, ArrowRight } from 'lucide-react';
@@ -101,106 +102,109 @@ const MergeCustomers: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '680px' }}>
-      <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'Merge' }]} />
-      <PageHeader title="Merge customers" subtitle="Combine duplicate records" />
+    <>
+      <HelmetContainer title="Merge customers · rtylr" />
+      <div style={{ maxWidth: '680px' }}>
+        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'Merge' }]} />
+        <PageHeader title="Merge customers" subtitle="Combine duplicate records" />
 
-      <Card>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto 1fr',
-            gap: '12px',
-            alignItems: 'center',
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: '11px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 600,
-                marginBottom: '6px',
-              }}
-            >
-              Primary (keep)
-            </div>
-            <SearchableCustomerSelect
-              customers={customers}
-              value={primaryId}
-              onChange={setPrimaryId}
-            />
-            {primary && (
-              <div
-                style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}
-              >
-                <CustomerAvatar initials={primary.initials} points={primary.loyaltyPoints} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                    {primary.name}
-                  </div>
-                  <TierBadge tier={getTier(primary.loyaltyPoints)} />
-                </div>
-              </div>
-            )}
-          </div>
+        <Card>
           <div
-            style={{ display: 'flex', justifyContent: 'center', color: 'var(--hub-text-muted)' }}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto 1fr',
+              gap: '12px',
+              alignItems: 'center',
+            }}
           >
-            <ArrowRight size={18} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: '11px',
-                color: 'var(--hub-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontWeight: 600,
-                marginBottom: '6px',
-              }}
-            >
-              Secondary (merge in)
-            </div>
-            <SearchableCustomerSelect
-              customers={customers.filter((c) => c.id !== primaryId)}
-              value={secondaryId}
-              onChange={setSecondaryId}
-            />
-            {secondary && (
+            <div>
               <div
-                style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 600,
+                  marginBottom: '6px',
+                }}
               >
-                <CustomerAvatar initials={secondary.initials} points={secondary.loyaltyPoints} />
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                    {secondary.name}
-                  </div>
-                  <TierBadge tier={getTier(secondary.loyaltyPoints)} />
-                </div>
+                Primary (keep)
               </div>
-            )}
+              <SearchableCustomerSelect
+                customers={customers}
+                value={primaryId}
+                onChange={setPrimaryId}
+              />
+              {primary && (
+                <div
+                  style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}
+                >
+                  <CustomerAvatar initials={primary.initials} points={primary.loyaltyPoints} />
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                      {primary.name}
+                    </div>
+                    <TierBadge tier={getTier(primary.loyaltyPoints)} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div
+              style={{ display: 'flex', justifyContent: 'center', color: 'var(--hub-text-muted)' }}
+            >
+              <ArrowRight size={18} />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--hub-text-dim)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 600,
+                  marginBottom: '6px',
+                }}
+              >
+                Secondary (merge in)
+              </div>
+              <SearchableCustomerSelect
+                customers={customers.filter((c) => c.id !== primaryId)}
+                value={secondaryId}
+                onChange={setSecondaryId}
+              />
+              {secondary && (
+                <div
+                  style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}
+                >
+                  <CustomerAvatar initials={secondary.initials} points={secondary.loyaltyPoints} />
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                      {secondary.name}
+                    </div>
+                    <TierBadge tier={getTier(secondary.loyaltyPoints)} />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+        </Card>
+
+        {renderPreview()}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+          <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!primaryId || !secondaryId || merge.isPending}
+            onClick={handleMerge}
+          >
+            <Users size={13} /> {merge.isPending ? 'Merging…' : 'Merge customers'}
+          </Button>
         </div>
-      </Card>
-
-      {renderPreview()}
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
-        <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          disabled={!primaryId || !secondaryId || merge.isPending}
-          onClick={handleMerge}
-        >
-          <Users size={13} /> {merge.isPending ? 'Merging…' : 'Merge customers'}
-        </Button>
       </div>
-    </div>
+    </>
   );
 };
 

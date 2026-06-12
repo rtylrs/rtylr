@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { CalendarCheck, Clock } from 'lucide-react';
 import { useGetMyAttendance } from '../../shared/hooks/queries/useAttendance';

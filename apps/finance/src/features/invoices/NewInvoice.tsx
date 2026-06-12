@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
@@ -113,6 +114,7 @@ const NewInvoice: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="New invoice · rtylr" />
       <PageHeader
         title="New Invoice"
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'New' }]}

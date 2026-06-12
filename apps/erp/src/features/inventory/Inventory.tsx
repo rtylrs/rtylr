@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
+import { HelmetContainer } from '@voxire/components';
 import { Search, Plus } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -82,6 +83,7 @@ const Inventory: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Inventory · rtylr" />
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>

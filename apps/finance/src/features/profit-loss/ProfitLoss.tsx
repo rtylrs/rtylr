@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -172,6 +173,7 @@ const ProfitLoss: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Profit & loss · rtylr" />
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>

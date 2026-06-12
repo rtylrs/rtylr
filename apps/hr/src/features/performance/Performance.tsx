@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { BarChart3 } from 'lucide-react';
 import { ErrorBoundary } from '@voxire/ui';
+import { HelmetContainer } from '@voxire/components';
 import {
   SectionHeader,
   Button,

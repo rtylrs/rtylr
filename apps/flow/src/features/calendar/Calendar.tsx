@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { useTasks, useCreateTask } from '../tasks/useTasks';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -101,6 +102,7 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Calendar · rtylr" />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}

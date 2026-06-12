@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
 import { stockTransferStatusLabel, type StockTransferStatus } from './stockTransferSchema';
 import { useWarehouses } from '../warehouses/useWarehouses';
@@ -76,6 +77,7 @@ const StockTransfers: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Stock transfers · rtylr" />
       <PageHeader
         title="Stock Transfers"
         description="Move inventory between warehouses"

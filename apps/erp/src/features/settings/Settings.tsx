@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import {
   Settings as SettingsIcon,
@@ -442,6 +443,7 @@ const Settings: React.FC = () => {
 
   return (
     <div className="space-y-0">
+      <HelmetContainer title="Settings · rtylr" />
       <PageHeader title="Settings" description="Configure ERP defaults" />
 
       {/* Tab bar */}

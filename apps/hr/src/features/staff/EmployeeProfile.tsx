@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, Link } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import {
   Mail,
   Phone,
@@ -71,7 +72,9 @@ const EmployeeProfile: React.FC = () => {
   const myBenefits = enrollments.filter((e) => e.staffId === staff.id);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <>
+      <HelmetContainer title="Employee profile · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <Breadcrumbs items={[{ label: 'Staff', href: '/staff' }, { label: staff.name }]} />
 
       {/* Hero */}

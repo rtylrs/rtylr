@@ -16,6 +16,7 @@ import {
   Star,
   MousePointerClick,
 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 
 import {
   useAdminSections,
@@ -142,148 +143,151 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
   }
 
   return (
-    <div className="px-10 py-8">
-      <div className="flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Page sections</h1>
-          <p className="mt-1 text-sm text-white/60">
-            Content blocks between the hero and the jobs list. Drag to reorder.
-          </p>
-        </div>
-        <button
-          onClick={() => setAdding(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
-        >
-          <Plus className="h-4 w-4" />
-          Add section
-        </button>
-      </div>
-
-      {adding && (
-        <AddSectionPicker
-          onCancel={() => setAdding(false)}
-          onPick={(kind) => {
-            const body: SectionBody = { kind, enabled: true };
-            create.mutate(body, {
-              onSuccess: (res) => {
-                toast.success('Section added');
-                setAdding(false);
-                if (res?.section) setExpandedId(res.section.id);
-              },
-              onError: () => toast.error("Couldn't add"),
-            });
-          }}
-        />
-      )}
-
-      <div
-        className="mt-6 overflow-hidden rounded-lg border"
-        style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
-      >
-        {isLoading ? (
-          <div className="p-10 text-center text-sm text-white/60">Loading…</div>
-        ) : localOrder.length === 0 ? (
-          <div className="p-10 text-center text-sm text-white/60">
-            No sections yet. Click "Add section" to drop one in.
+    <>
+      <HelmetContainer title="Page sections · rtylr" />
+      <div className="px-10 py-8">
+        <div className="flex items-baseline justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Page sections</h1>
+            <p className="mt-1 text-sm text-white/60">
+              Content blocks between the hero and the jobs list. Drag to reorder.
+            </p>
           </div>
-        ) : (
-          <ul>
-            {localOrder.map((s) => (
-              <li
-                key={s.id}
-                draggable
-                onDragStart={() => onDragStart(s.id)}
-                onDragOver={(e) => onDragOver(e, s.id)}
-                onDragEnd={onDragEnd}
-                className="border-b last:border-b-0"
-                style={{
-                  borderColor: '#1f1f1f',
-                  opacity: dragId === s.id ? 0.4 : 1,
-                }}
-              >
-                <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/5">
-                  <GripVertical
-                    className="h-4 w-4 cursor-grab text-white/30 active:cursor-grabbing"
-                    aria-hidden
-                  />
-                  <span className="text-white/60">{lookupMeta(s.kind)?.icon}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">
-                      {s.title || lookupMeta(s.kind)?.label || s.kind}
-                    </div>
-                    <div className="truncate text-xs text-white/50">
-                      {lookupMeta(s.kind)?.label ?? s.kind}
-                      {!s.enabled && ' · hidden'}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() =>
-                      update.mutate(
-                        {
-                          id: s.id,
-                          kind: s.kind,
-                          title: s.title,
-                          body: s.body,
-                          mediaUrl: s.mediaUrl,
-                          itemsJson: s.itemsJson,
-                          position: s.position,
-                          enabled: !s.enabled,
-                        },
-                        { onError: () => toast.error("Couldn't toggle") }
-                      )
-                    }
-                    title={s.enabled ? 'Hide from public page' : 'Show on public page'}
-                    className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
-                  >
-                    {s.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  </button>
-                  <button
-                    onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
-                    className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
-                  >
-                    {expandedId === s.id ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm('Delete this section?')) {
-                        del.mutate(s.id, {
-                          onSuccess: () => toast.success('Section deleted'),
-                          onError: () => toast.error("Couldn't delete"),
-                        });
-                      }
-                    }}
-                    className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+          <button
+            onClick={() => setAdding(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
+          >
+            <Plus className="h-4 w-4" />
+            Add section
+          </button>
+        </div>
 
-                {expandedId === s.id && (
-                  <div
-                    className="border-t bg-black/40 px-4 py-5"
-                    style={{ borderColor: '#1f1f1f' }}
-                  >
-                    <SectionEditor
-                      section={s}
-                      onSave={(body) =>
-                        update.mutate(body, {
-                          onSuccess: () => toast.success('Section saved'),
-                          onError: () => toast.error("Couldn't save"),
-                        })
-                      }
-                    />
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+        {adding && (
+          <AddSectionPicker
+            onCancel={() => setAdding(false)}
+            onPick={(kind) => {
+              const body: SectionBody = { kind, enabled: true };
+              create.mutate(body, {
+                onSuccess: (res) => {
+                  toast.success('Section added');
+                  setAdding(false);
+                  if (res?.section) setExpandedId(res.section.id);
+                },
+                onError: () => toast.error("Couldn't add"),
+              });
+            }}
+          />
         )}
+
+        <div
+          className="mt-6 overflow-hidden rounded-lg border"
+          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+        >
+          {isLoading ? (
+            <div className="p-10 text-center text-sm text-white/60">Loading…</div>
+          ) : localOrder.length === 0 ? (
+            <div className="p-10 text-center text-sm text-white/60">
+              No sections yet. Click "Add section" to drop one in.
+            </div>
+          ) : (
+            <ul>
+              {localOrder.map((s) => (
+                <li
+                  key={s.id}
+                  draggable
+                  onDragStart={() => onDragStart(s.id)}
+                  onDragOver={(e) => onDragOver(e, s.id)}
+                  onDragEnd={onDragEnd}
+                  className="border-b last:border-b-0"
+                  style={{
+                    borderColor: '#1f1f1f',
+                    opacity: dragId === s.id ? 0.4 : 1,
+                  }}
+                >
+                  <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/5">
+                    <GripVertical
+                      className="h-4 w-4 cursor-grab text-white/30 active:cursor-grabbing"
+                      aria-hidden
+                    />
+                    <span className="text-white/60">{lookupMeta(s.kind)?.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">
+                        {s.title || lookupMeta(s.kind)?.label || s.kind}
+                      </div>
+                      <div className="truncate text-xs text-white/50">
+                        {lookupMeta(s.kind)?.label ?? s.kind}
+                        {!s.enabled && ' · hidden'}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() =>
+                        update.mutate(
+                          {
+                            id: s.id,
+                            kind: s.kind,
+                            title: s.title,
+                            body: s.body,
+                            mediaUrl: s.mediaUrl,
+                            itemsJson: s.itemsJson,
+                            position: s.position,
+                            enabled: !s.enabled,
+                          },
+                          { onError: () => toast.error("Couldn't toggle") }
+                        )
+                      }
+                      title={s.enabled ? 'Hide from public page' : 'Show on public page'}
+                      className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
+                    >
+                      {s.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    </button>
+                    <button
+                      onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
+                      className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
+                    >
+                      {expandedId === s.id ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('Delete this section?')) {
+                          del.mutate(s.id, {
+                            onSuccess: () => toast.success('Section deleted'),
+                            onError: () => toast.error("Couldn't delete"),
+                          });
+                        }
+                      }}
+                      className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {expandedId === s.id && (
+                    <div
+                      className="border-t bg-black/40 px-4 py-5"
+                      style={{ borderColor: '#1f1f1f' }}
+                    >
+                      <SectionEditor
+                        section={s}
+                        onSave={(body) =>
+                          update.mutate(body, {
+                            onSuccess: () => toast.success('Section saved'),
+                            onError: () => toast.error("Couldn't save"),
+                          })
+                        }
+                      />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

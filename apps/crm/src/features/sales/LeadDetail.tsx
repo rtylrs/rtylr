@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import {
@@ -245,512 +246,353 @@ const LeadDetail: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px' }}>
-      {/* Back + header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button
-          aria-label="Back to leads"
-          onClick={() => navigate({ to: '/sales/leads' })}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--hub-text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '4px',
-          }}
-        >
-          <ArrowLeft size={16} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-            {lead.company}
-          </h2>
-          <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-            {lead.industry} · {lead.source}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button variant="outline" onClick={() => setConfirmDeleteLead(true)}>
-            <Trash2 size={13} />
-            Delete
-          </Button>
-        </div>
-      </div>
-
-      {/* Two-column layout */}
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '1fr minmax(280px, 360px)', gap: '20px' }}
-      >
-        {/* Left: Touchpoint timeline */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-              Activity Timeline
-            </h3>
-            <Button variant="primary" onClick={() => setTpOpen((v) => !v)}>
-              <Plus size={13} />
-              Log touchpoint
+    <>
+      <HelmetContainer title="Lead detail · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px' }}>
+        {/* Back + header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            aria-label="Back to leads"
+            onClick={() => navigate({ to: '/sales/leads' })}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--hub-text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '4px',
+            }}
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              {lead.company}
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+              {lead.industry} · {lead.source}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="outline" onClick={() => setConfirmDeleteLead(true)}>
+              <Trash2 size={13} />
+              Delete
             </Button>
           </div>
+        </div>
 
-          {/* Touchpoint form */}
-          <AnimatePresence>
-            {tpOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
+        {/* Two-column layout */}
+        <div
+          style={{ display: 'grid', gridTemplateColumns: '1fr minmax(280px, 360px)', gap: '20px' }}
+        >
+          {/* Left: Touchpoint timeline */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
               >
-                <Card>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <p
-                      style={{
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: 'var(--hub-text)',
-                        margin: 0,
-                      }}
-                    >
-                      Log touchpoint
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <Select
-                        label="Type"
-                        value={tpForm.type}
-                        onChange={(e) =>
-                          setTpForm((f) => ({ ...f, type: e.target.value as TouchpointType }))
-                        }
-                      >
-                        <option value="phone">Phone</option>
-                        <option value="email">Email</option>
-                        <option value="meeting">Meeting</option>
-                      </Select>
-                      <Select
-                        label="Outcome"
-                        value={tpForm.outcome}
-                        onChange={(e) =>
-                          setTpForm((f) => ({ ...f, outcome: e.target.value as TouchpointOutcome }))
-                        }
-                      >
-                        <option value="positive">Positive</option>
-                        <option value="neutral">Neutral</option>
-                        <option value="negative">Negative</option>
-                        <option value="no_answer">No answer</option>
-                      </Select>
-                    </div>
-                    <Textarea
-                      label="Notes"
-                      value={tpForm.notes}
-                      onChange={(e) => setTpForm((f) => ({ ...f, notes: e.target.value }))}
-                      placeholder="What happened on this touchpoint?"
-                    />
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <Input
-                        label="Next Follow-up"
-                        type="date"
-                        value={tpForm.nextFollowUp}
-                        onChange={(e) => setTpForm((f) => ({ ...f, nextFollowUp: e.target.value }))}
-                      />
-                      <Select
-                        label="Contact (optional)"
-                        value={tpForm.contactId}
-                        onChange={(e) => setTpForm((f) => ({ ...f, contactId: e.target.value }))}
-                      >
-                        <option value="">None</option>
-                        {(contacts ?? []).map((c) => (
-                          <option key={c.id} value={String(c.id)}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <Button variant="ghost" onClick={() => setTpOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="primary"
-                        onClick={submitTouchpoint}
-                        disabled={createTouchpoint.isPending || !tpForm.notes.trim()}
-                      >
-                        {createTouchpoint.isPending ? 'Saving...' : 'Log'}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                Activity Timeline
+              </h3>
+              <Button variant="primary" onClick={() => setTpOpen((v) => !v)}>
+                <Plus size={13} />
+                Log touchpoint
+              </Button>
+            </div>
 
-          {/* Timeline */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {sortedTouchpoints.length === 0 && (
-              <div
-                style={{
-                  padding: '32px',
-                  textAlign: 'center',
-                  color: 'var(--hub-text-muted)',
-                  fontSize: '13px',
-                  background: 'var(--hub-card)',
-                  border: '1px solid var(--hub-border)',
-                  borderRadius: '10px',
-                }}
-              >
-                No touchpoints yet. Log the first one.
-              </div>
-            )}
-            {sortedTouchpoints.map((tp) => {
-              const outcomeStyle = OUTCOME_COLORS[tp.outcome];
-              return (
-                <Card key={tp.id}>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <div
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        background: 'var(--hub-hover)',
-                        color: 'var(--hub-text-muted)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {TOUCHPOINT_TYPE_ICONS[tp.type]}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          flexWrap: 'wrap',
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            padding: '2px 7px',
-                            borderRadius: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '3px',
-                            background: outcomeStyle.bg,
-                            color: outcomeStyle.color,
-                          }}
-                        >
-                          {OUTCOME_ICONS[tp.outcome]}
-                          {tp.outcome.replace('_', ' ')}
-                        </span>
-                        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-                          {formatDate(tp.createdAt)}
-                        </span>
-                        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-                          · {tp.repName}
-                        </span>
-                      </div>
+            {/* Touchpoint form */}
+            <AnimatePresence>
+              {tpOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                >
+                  <Card>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <p
                         style={{
                           fontSize: '13px',
+                          fontWeight: 600,
                           color: 'var(--hub-text)',
-                          margin: '6px 0 0',
-                          lineHeight: 1.5,
+                          margin: 0,
                         }}
                       >
-                        {tp.notes}
+                        Log touchpoint
                       </p>
-                      {tp.nextFollowUp && (
-                        <p
-                          style={{
-                            fontSize: '11px',
-                            color: 'var(--hub-text-muted)',
-                            margin: '4px 0 0',
-                          }}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <Select
+                          label="Type"
+                          value={tpForm.type}
+                          onChange={(e) =>
+                            setTpForm((f) => ({ ...f, type: e.target.value as TouchpointType }))
+                          }
                         >
-                          Follow up: {formatDate(tp.nextFollowUp)}
-                        </p>
-                      )}
+                          <option value="phone">Phone</option>
+                          <option value="email">Email</option>
+                          <option value="meeting">Meeting</option>
+                        </Select>
+                        <Select
+                          label="Outcome"
+                          value={tpForm.outcome}
+                          onChange={(e) =>
+                            setTpForm((f) => ({
+                              ...f,
+                              outcome: e.target.value as TouchpointOutcome,
+                            }))
+                          }
+                        >
+                          <option value="positive">Positive</option>
+                          <option value="neutral">Neutral</option>
+                          <option value="negative">Negative</option>
+                          <option value="no_answer">No answer</option>
+                        </Select>
+                      </div>
+                      <Textarea
+                        label="Notes"
+                        value={tpForm.notes}
+                        onChange={(e) => setTpForm((f) => ({ ...f, notes: e.target.value }))}
+                        placeholder="What happened on this touchpoint?"
+                      />
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <Input
+                          label="Next Follow-up"
+                          type="date"
+                          value={tpForm.nextFollowUp}
+                          onChange={(e) =>
+                            setTpForm((f) => ({ ...f, nextFollowUp: e.target.value }))
+                          }
+                        />
+                        <Select
+                          label="Contact (optional)"
+                          value={tpForm.contactId}
+                          onChange={(e) => setTpForm((f) => ({ ...f, contactId: e.target.value }))}
+                        >
+                          <option value="">None</option>
+                          {(contacts ?? []).map((c) => (
+                            <option key={c.id} value={String(c.id)}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <Button variant="ghost" onClick={() => setTpOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={submitTouchpoint}
+                          disabled={createTouchpoint.isPending || !tpForm.notes.trim()}
+                        >
+                          {createTouchpoint.isPending ? 'Saving...' : 'Log'}
+                        </Button>
+                      </div>
                     </div>
-                    <button
-                      aria-label="Delete touchpoint"
-                      onClick={() => setDeleteTpId(tp.id)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--hub-text-dim)',
-                        padding: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right: info panels */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* Lead info */}
-          <Card>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '14px',
-              }}
-            >
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-                Lead Info
-              </p>
-              <Edit2 size={13} style={{ color: 'var(--hub-text-dim)' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <InfoRow label="Company" value={lead.companyName ?? lead.company ?? '—'} />
-              <InfoRow label="Industry" value={lead.industry ?? '—'} />
-              <InfoRow label="Size" value={lead.size ?? '—'} />
-              <InfoRow label="Source" value={lead.source ?? '—'} />
-              <InfoRow
-                label="MRR Potential"
-                value={`$${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo`}
-              />
-              <InfoRow label="Assigned Rep" value={lead.assignedRep ?? '—'} />
-              <div>
-                <p
-                  style={{
-                    fontSize: '11px',
-                    color: 'var(--hub-text-dim)',
-                    marginBottom: '4px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontWeight: 600,
-                  }}
-                >
-                  Stage
-                </p>
-                <select
-                  value={lead.stage}
-                  onChange={(e) => handleStageChange(e.target.value as LeadStage)}
-                  style={{
-                    width: '100%',
-                    height: '34px',
-                    padding: '0 10px',
-                    borderRadius: '8px',
-                    background: 'var(--hub-input-bg)',
-                    border: '1px solid var(--hub-border)',
-                    color: 'var(--hub-text)',
-                    fontSize: '13px',
-                    outline: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {STAGE_OPTIONS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </Card>
-
-          {/* Contacts */}
-          <Card>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '12px',
-              }}
-            >
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-                Contacts
-              </p>
-              <button
-                aria-label="Add contact"
-                onClick={() => setContactOpen((v) => !v)}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--hub-border)',
-                  cursor: 'pointer',
-                  color: 'var(--hub-text-muted)',
-                  borderRadius: '6px',
-                  padding: '3px 8px',
-                  fontSize: '11px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                <Plus size={11} />
-                Add
-              </button>
-            </div>
-
-            <AnimatePresence>
-              {contactOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  style={{
-                    marginBottom: '12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                  }}
-                >
-                  <Input
-                    label="Name"
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm((f) => ({ ...f, name: e.target.value }))}
-                    placeholder="Jane Doe"
-                  />
-                  <Input
-                    label="Role"
-                    value={contactForm.role}
-                    onChange={(e) => setContactForm((f) => ({ ...f, role: e.target.value }))}
-                    placeholder="CTO"
-                  />
-                  <Input
-                    label="Phone"
-                    value={contactForm.phone}
-                    onChange={(e) => setContactForm((f) => ({ ...f, phone: e.target.value }))}
-                    placeholder="+1 555 000 0000"
-                  />
-                  <Input
-                    label="Email"
-                    type="email"
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))}
-                    placeholder="jane@company.com"
-                  />
-                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                    <Button variant="ghost" onClick={() => setContactOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={submitContact}
-                      disabled={createContact.isPending || !contactForm.name.trim()}
-                      style={{ padding: '6px 12px', fontSize: '12px' }}
-                    >
-                      {createContact.isPending ? 'Adding...' : 'Add'}
-                    </Button>
-                  </div>
+                  </Card>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {(contacts ?? []).length === 0 && !contactOpen && (
-              <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No contacts yet.</p>
-            )}
-            {(contacts ?? []).map((c) => (
-              <div
-                key={c.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  paddingBottom: '10px',
-                  borderBottom: '1px solid var(--hub-border)',
-                  marginBottom: '10px',
-                }}
-              >
+            {/* Timeline */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {sortedTouchpoints.length === 0 && (
                 <div
                   style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    background: 'rgba(59,130,246,0.12)',
-                    color: 'var(--hub-accent, #3b82f6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    flexShrink: 0,
+                    padding: '32px',
+                    textAlign: 'center',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '13px',
+                    background: 'var(--hub-card)',
+                    border: '1px solid var(--hub-border)',
+                    borderRadius: '10px',
                   }}
                 >
-                  {c.name[0]?.toUpperCase() ?? '?'}
+                  No touchpoints yet. Log the first one.
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+              )}
+              {sortedTouchpoints.map((tp) => {
+                const outcomeStyle = OUTCOME_COLORS[tp.outcome];
+                return (
+                  <Card key={tp.id}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <div
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: 'var(--hub-hover)',
+                          color: 'var(--hub-text-muted)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {TOUCHPOINT_TYPE_ICONS[tp.type]}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            flexWrap: 'wrap',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 7px',
+                              borderRadius: '5px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              background: outcomeStyle.bg,
+                              color: outcomeStyle.color,
+                            }}
+                          >
+                            {OUTCOME_ICONS[tp.outcome]}
+                            {tp.outcome.replace('_', ' ')}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                            {formatDate(tp.createdAt)}
+                          </span>
+                          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                            · {tp.repName}
+                          </span>
+                        </div>
+                        <p
+                          style={{
+                            fontSize: '13px',
+                            color: 'var(--hub-text)',
+                            margin: '6px 0 0',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {tp.notes}
+                        </p>
+                        {tp.nextFollowUp && (
+                          <p
+                            style={{
+                              fontSize: '11px',
+                              color: 'var(--hub-text-muted)',
+                              margin: '4px 0 0',
+                            }}
+                          >
+                            Follow up: {formatDate(tp.nextFollowUp)}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        aria-label="Delete touchpoint"
+                        onClick={() => setDeleteTpId(tp.id)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--hub-text-dim)',
+                          padding: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right: info panels */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Lead info */}
+            <Card>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '14px',
+                }}
+              >
+                <p
+                  style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
+                >
+                  Lead Info
+                </p>
+                <Edit2 size={13} style={{ color: 'var(--hub-text-dim)' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <InfoRow label="Company" value={lead.companyName ?? lead.company ?? '—'} />
+                <InfoRow label="Industry" value={lead.industry ?? '—'} />
+                <InfoRow label="Size" value={lead.size ?? '—'} />
+                <InfoRow label="Source" value={lead.source ?? '—'} />
+                <InfoRow
+                  label="MRR Potential"
+                  value={`$${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo`}
+                />
+                <InfoRow label="Assigned Rep" value={lead.assignedRep ?? '—'} />
+                <div>
                   <p
                     style={{
-                      fontSize: '12px',
+                      fontSize: '11px',
+                      color: 'var(--hub-text-dim)',
+                      marginBottom: '4px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
                       fontWeight: 600,
-                      color: 'var(--hub-text)',
-                      margin: 0,
                     }}
                   >
-                    {c.name}
+                    Stage
                   </p>
-                  <p
-                    style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '1px 0 0' }}
+                  <select
+                    value={lead.stage}
+                    onChange={(e) => handleStageChange(e.target.value as LeadStage)}
+                    style={{
+                      width: '100%',
+                      height: '34px',
+                      padding: '0 10px',
+                      borderRadius: '8px',
+                      background: 'var(--hub-input-bg)',
+                      border: '1px solid var(--hub-border)',
+                      color: 'var(--hub-text)',
+                      fontSize: '13px',
+                      outline: 'none',
+                      cursor: 'pointer',
+                    }}
                   >
-                    {c.role}
-                  </p>
-                  {c.phone && (
-                    <p
-                      style={{ fontSize: '11px', color: 'var(--hub-text-dim)', margin: '2px 0 0' }}
-                    >
-                      {c.phone}
-                    </p>
-                  )}
-                  {c.email && (
-                    <p
-                      style={{ fontSize: '11px', color: 'var(--hub-text-dim)', margin: '1px 0 0' }}
-                    >
-                      {c.email}
-                    </p>
-                  )}
+                    {STAGE_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <button
-                  aria-label="Delete contact"
-                  onClick={() => setDeleteContactId(c.id)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--hub-text-dim)',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Trash2 size={11} />
-                </button>
               </div>
-            ))}
-          </Card>
+            </Card>
 
-          {/* Contract */}
-          <Card>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '12px',
-              }}
-            >
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-                Contract
-              </p>
-              {!contract && (
+            {/* Contacts */}
+            <Card>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '12px',
+                }}
+              >
+                <p
+                  style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
+                >
+                  Contacts
+                </p>
                 <button
-                  aria-label="Add contract"
-                  onClick={() => setContractOpen((v) => !v)}
+                  aria-label="Add contact"
+                  onClick={() => setContactOpen((v) => !v)}
                   style={{
                     background: 'transparent',
                     border: '1px solid var(--hub-border)',
@@ -767,175 +609,368 @@ const LeadDetail: React.FC = () => {
                   <Plus size={11} />
                   Add
                 </button>
-              )}
-            </div>
+              </div>
 
-            {contract ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span
+              <AnimatePresence>
+                {contactOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
                     style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      padding: '2px 8px',
+                      marginBottom: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <Input
+                      label="Name"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder="Jane Doe"
+                    />
+                    <Input
+                      label="Role"
+                      value={contactForm.role}
+                      onChange={(e) => setContactForm((f) => ({ ...f, role: e.target.value }))}
+                      placeholder="CTO"
+                    />
+                    <Input
+                      label="Phone"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="+1 555 000 0000"
+                    />
+                    <Input
+                      label="Email"
+                      type="email"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))}
+                      placeholder="jane@company.com"
+                    />
+                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                      <Button variant="ghost" onClick={() => setContactOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={submitContact}
+                        disabled={createContact.isPending || !contactForm.name.trim()}
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        {createContact.isPending ? 'Adding...' : 'Add'}
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {(contacts ?? []).length === 0 && !contactOpen && (
+                <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No contacts yet.</p>
+              )}
+              {(contacts ?? []).map((c) => (
+                <div
+                  key={c.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                    paddingBottom: '10px',
+                    borderBottom: '1px solid var(--hub-border)',
+                    marginBottom: '10px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
                       borderRadius: '6px',
-                      background: 'rgba(16,185,129,0.12)',
-                      color: '#10b981',
-                      textTransform: 'capitalize',
+                      background: 'rgba(59,130,246,0.12)',
+                      color: 'var(--hub-accent, #3b82f6)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      flexShrink: 0,
                     }}
                   >
-                    {contract.plan}
-                  </span>
-                </div>
-                <InfoRow label="MRR" value={`$${contract.mrr.toLocaleString()}/mo`} />
-                <InfoRow label="Seats" value={String(contract.seats)} />
-                <InfoRow label="Signed" value={formatDate(contract.signedAt)} />
-                <InfoRow label="Signed by" value={contract.signedBy} />
-                <InfoRow label="Closed by" value={contract.closedBy} />
-                {contract.notes && (
-                  <p
+                    {c.name[0]?.toUpperCase() ?? '?'}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: 'var(--hub-text)',
+                        margin: 0,
+                      }}
+                    >
+                      {c.name}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: '11px',
+                        color: 'var(--hub-text-muted)',
+                        margin: '1px 0 0',
+                      }}
+                    >
+                      {c.role}
+                    </p>
+                    {c.phone && (
+                      <p
+                        style={{
+                          fontSize: '11px',
+                          color: 'var(--hub-text-dim)',
+                          margin: '2px 0 0',
+                        }}
+                      >
+                        {c.phone}
+                      </p>
+                    )}
+                    {c.email && (
+                      <p
+                        style={{
+                          fontSize: '11px',
+                          color: 'var(--hub-text-dim)',
+                          margin: '1px 0 0',
+                        }}
+                      >
+                        {c.email}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    aria-label="Delete contact"
+                    onClick={() => setDeleteContactId(c.id)}
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--hub-text-muted)',
-                      margin: '4px 0 0',
-                      lineHeight: 1.5,
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--hub-text-dim)',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
                     }}
                   >
-                    {contract.notes}
-                  </p>
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+            </Card>
+
+            {/* Contract */}
+            <Card>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '12px',
+                }}
+              >
+                <p
+                  style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
+                >
+                  Contract
+                </p>
+                {!contract && (
+                  <button
+                    aria-label="Add contract"
+                    onClick={() => setContractOpen((v) => !v)}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid var(--hub-border)',
+                      cursor: 'pointer',
+                      color: 'var(--hub-text-muted)',
+                      borderRadius: '6px',
+                      padding: '3px 8px',
+                      fontSize: '11px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <Plus size={11} />
+                    Add
+                  </button>
                 )}
               </div>
-            ) : (
-              <>
-                {!contractOpen && (
-                  <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No contract yet.</p>
-                )}
-                <AnimatePresence>
-                  {contractOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+
+              {contract ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        background: 'rgba(16,185,129,0.12)',
+                        color: '#10b981',
+                        textTransform: 'capitalize',
+                      }}
                     >
-                      <Select
-                        label="Plan"
-                        value={contractForm.plan}
-                        onChange={(e) =>
-                          setContractForm((f) => ({ ...f, plan: e.target.value as ContractPlan }))
-                        }
-                      >
-                        <option value="free">Free</option>
-                        <option value="pro">Pro</option>
-                        <option value="scale">Scale</option>
-                      </Select>
-                      <Input
-                        label="MRR ($)"
-                        type="number"
-                        value={contractForm.mrr}
-                        onChange={(e) => setContractForm((f) => ({ ...f, mrr: e.target.value }))}
-                        placeholder="500"
-                      />
-                      <Input
-                        label="Seats"
-                        type="number"
-                        value={contractForm.seats}
-                        onChange={(e) => setContractForm((f) => ({ ...f, seats: e.target.value }))}
-                        placeholder="5"
-                      />
-                      <Input
-                        label="Signed At"
-                        type="date"
-                        value={contractForm.signedAt}
-                        onChange={(e) =>
-                          setContractForm((f) => ({ ...f, signedAt: e.target.value }))
-                        }
-                      />
-                      <Input
-                        label="Signed By"
-                        value={contractForm.signedBy}
-                        onChange={(e) =>
-                          setContractForm((f) => ({ ...f, signedBy: e.target.value }))
-                        }
-                        placeholder="John Smith"
-                      />
-                      <Input
-                        label="Closed By (rep)"
-                        value={contractForm.closedBy}
-                        onChange={(e) =>
-                          setContractForm((f) => ({ ...f, closedBy: e.target.value }))
-                        }
-                        placeholder="Your name"
-                      />
-                      <Textarea
-                        label="Notes"
-                        value={contractForm.notes}
-                        onChange={(e) => setContractForm((f) => ({ ...f, notes: e.target.value }))}
-                        placeholder="Additional notes..."
-                      />
-                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                        <Button variant="ghost" onClick={() => setContractOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="primary"
-                          onClick={submitContract}
-                          disabled={createContract.isPending}
-                          style={{ padding: '6px 12px', fontSize: '12px' }}
-                        >
-                          {createContract.isPending ? 'Saving...' : 'Save'}
-                        </Button>
-                      </div>
-                    </motion.div>
+                      {contract.plan}
+                    </span>
+                  </div>
+                  <InfoRow label="MRR" value={`$${contract.mrr.toLocaleString()}/mo`} />
+                  <InfoRow label="Seats" value={String(contract.seats)} />
+                  <InfoRow label="Signed" value={formatDate(contract.signedAt)} />
+                  <InfoRow label="Signed by" value={contract.signedBy} />
+                  <InfoRow label="Closed by" value={contract.closedBy} />
+                  {contract.notes && (
+                    <p
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--hub-text-muted)',
+                        margin: '4px 0 0',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {contract.notes}
+                    </p>
                   )}
-                </AnimatePresence>
-              </>
-            )}
-          </Card>
+                </div>
+              ) : (
+                <>
+                  {!contractOpen && (
+                    <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>
+                      No contract yet.
+                    </p>
+                  )}
+                  <AnimatePresence>
+                    {contractOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                      >
+                        <Select
+                          label="Plan"
+                          value={contractForm.plan}
+                          onChange={(e) =>
+                            setContractForm((f) => ({ ...f, plan: e.target.value as ContractPlan }))
+                          }
+                        >
+                          <option value="free">Free</option>
+                          <option value="pro">Pro</option>
+                          <option value="scale">Scale</option>
+                        </Select>
+                        <Input
+                          label="MRR ($)"
+                          type="number"
+                          value={contractForm.mrr}
+                          onChange={(e) => setContractForm((f) => ({ ...f, mrr: e.target.value }))}
+                          placeholder="500"
+                        />
+                        <Input
+                          label="Seats"
+                          type="number"
+                          value={contractForm.seats}
+                          onChange={(e) =>
+                            setContractForm((f) => ({ ...f, seats: e.target.value }))
+                          }
+                          placeholder="5"
+                        />
+                        <Input
+                          label="Signed At"
+                          type="date"
+                          value={contractForm.signedAt}
+                          onChange={(e) =>
+                            setContractForm((f) => ({ ...f, signedAt: e.target.value }))
+                          }
+                        />
+                        <Input
+                          label="Signed By"
+                          value={contractForm.signedBy}
+                          onChange={(e) =>
+                            setContractForm((f) => ({ ...f, signedBy: e.target.value }))
+                          }
+                          placeholder="John Smith"
+                        />
+                        <Input
+                          label="Closed By (rep)"
+                          value={contractForm.closedBy}
+                          onChange={(e) =>
+                            setContractForm((f) => ({ ...f, closedBy: e.target.value }))
+                          }
+                          placeholder="Your name"
+                        />
+                        <Textarea
+                          label="Notes"
+                          value={contractForm.notes}
+                          onChange={(e) =>
+                            setContractForm((f) => ({ ...f, notes: e.target.value }))
+                          }
+                          placeholder="Additional notes..."
+                        />
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <Button variant="ghost" onClick={() => setContractOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={submitContract}
+                            disabled={createContract.isPending}
+                            style={{ padding: '6px 12px', fontSize: '12px' }}
+                          >
+                            {createContract.isPending ? 'Saving...' : 'Save'}
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
+            </Card>
+          </div>
         </div>
+
+        {/* Delete lead confirm */}
+        <ConfirmModal
+          open={confirmDeleteLead}
+          onClose={() => setConfirmDeleteLead(false)}
+          onConfirm={handleDeleteLead}
+          title="Delete lead"
+          description={`Permanently delete "${lead.company}" and all associated data?`}
+          confirmLabel="Delete"
+          variant="danger"
+        />
+
+        {/* Delete touchpoint confirm */}
+        <ConfirmModal
+          open={deleteTpId !== null}
+          onClose={() => setDeleteTpId(null)}
+          onConfirm={() => {
+            if (deleteTpId !== null) deleteTouchpoint.mutate(deleteTpId);
+            setDeleteTpId(null);
+          }}
+          title="Delete touchpoint"
+          description="Remove this touchpoint from the timeline?"
+          confirmLabel="Delete"
+          variant="danger"
+        />
+
+        {/* Delete contact confirm */}
+        <ConfirmModal
+          open={deleteContactId !== null}
+          onClose={() => setDeleteContactId(null)}
+          onConfirm={() => {
+            if (deleteContactId !== null && leadId !== undefined) {
+              deleteContact.mutate({ id: deleteContactId, leadId });
+            }
+            setDeleteContactId(null);
+          }}
+          title="Remove contact"
+          description="Remove this contact from the lead?"
+          confirmLabel="Remove"
+          variant="danger"
+        />
       </div>
-
-      {/* Delete lead confirm */}
-      <ConfirmModal
-        open={confirmDeleteLead}
-        onClose={() => setConfirmDeleteLead(false)}
-        onConfirm={handleDeleteLead}
-        title="Delete lead"
-        description={`Permanently delete "${lead.company}" and all associated data?`}
-        confirmLabel="Delete"
-        variant="danger"
-      />
-
-      {/* Delete touchpoint confirm */}
-      <ConfirmModal
-        open={deleteTpId !== null}
-        onClose={() => setDeleteTpId(null)}
-        onConfirm={() => {
-          if (deleteTpId !== null) deleteTouchpoint.mutate(deleteTpId);
-          setDeleteTpId(null);
-        }}
-        title="Delete touchpoint"
-        description="Remove this touchpoint from the timeline?"
-        confirmLabel="Delete"
-        variant="danger"
-      />
-
-      {/* Delete contact confirm */}
-      <ConfirmModal
-        open={deleteContactId !== null}
-        onClose={() => setDeleteContactId(null)}
-        onConfirm={() => {
-          if (deleteContactId !== null && leadId !== undefined) {
-            deleteContact.mutate({ id: deleteContactId, leadId });
-          }
-          setDeleteContactId(null);
-        }}
-        title="Remove contact"
-        description="Remove this contact from the lead?"
-        confirmLabel="Remove"
-        variant="danger"
-      />
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 
 interface Endpoint {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -82,59 +83,62 @@ const methodColors: Record<string, { bg: string; text: string }> = {
 
 const ApiReference: React.FC = () => {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--docs-text)' }}>
-        API Reference
-      </h1>
-      <p className="text-sm mb-8" style={{ color: 'var(--docs-text-muted)' }}>
-        The rtylr REST API. Base URL:{' '}
-        <code
-          className="text-xs px-1.5 py-0.5 rounded"
-          style={{ background: 'var(--docs-surface)', border: '1px solid var(--docs-border)' }}
-        >
-          https://api.rtylr.com/v1
-        </code>
-      </p>
-
-      {endpointGroups.map((group) => (
-        <div key={group.name} className="mb-8">
-          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--docs-text)' }}>
-            {group.name}
-          </h2>
-          <div
-            className="border rounded-lg overflow-hidden"
-            style={{ borderColor: 'var(--docs-border)' }}
+    <>
+      <HelmetContainer title="API reference · rtylr" />
+      <div>
+        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--docs-text)' }}>
+          API Reference
+        </h1>
+        <p className="text-sm mb-8" style={{ color: 'var(--docs-text-muted)' }}>
+          The rtylr REST API. Base URL:{' '}
+          <code
+            className="text-xs px-1.5 py-0.5 rounded"
+            style={{ background: 'var(--docs-surface)', border: '1px solid var(--docs-border)' }}
           >
-            {group.endpoints.map((endpoint, idx) => {
-              const colors = methodColors[endpoint.method];
-              return (
-                <div
-                  key={`${endpoint.method}-${endpoint.path}`}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm"
-                  style={{
-                    borderTop: idx > 0 ? `1px solid var(--docs-border)` : 'none',
-                    background: 'var(--docs-bg)',
-                  }}
-                >
-                  <span
-                    className="text-xs font-mono font-semibold px-2 py-0.5 rounded w-16 text-center flex-shrink-0"
-                    style={{ background: colors.bg, color: colors.text }}
+            https://api.rtylr.com/v1
+          </code>
+        </p>
+
+        {endpointGroups.map((group) => (
+          <div key={group.name} className="mb-8">
+            <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--docs-text)' }}>
+              {group.name}
+            </h2>
+            <div
+              className="border rounded-lg overflow-hidden"
+              style={{ borderColor: 'var(--docs-border)' }}
+            >
+              {group.endpoints.map((endpoint, idx) => {
+                const colors = methodColors[endpoint.method];
+                return (
+                  <div
+                    key={`${endpoint.method}-${endpoint.path}`}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm"
+                    style={{
+                      borderTop: idx > 0 ? `1px solid var(--docs-border)` : 'none',
+                      background: 'var(--docs-bg)',
+                    }}
                   >
-                    {endpoint.method}
-                  </span>
-                  <span className="font-mono text-sm" style={{ color: 'var(--docs-text)' }}>
-                    {endpoint.path}
-                  </span>
-                  <span className="ml-auto text-sm" style={{ color: 'var(--docs-text-muted)' }}>
-                    {endpoint.description}
-                  </span>
-                </div>
-              );
-            })}
+                    <span
+                      className="text-xs font-mono font-semibold px-2 py-0.5 rounded w-16 text-center flex-shrink-0"
+                      style={{ background: colors.bg, color: colors.text }}
+                    >
+                      {endpoint.method}
+                    </span>
+                    <span className="font-mono text-sm" style={{ color: 'var(--docs-text)' }}>
+                      {endpoint.path}
+                    </span>
+                    <span className="ml-auto text-sm" style={{ color: 'var(--docs-text-muted)' }}>
+                      {endpoint.description}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 };
 

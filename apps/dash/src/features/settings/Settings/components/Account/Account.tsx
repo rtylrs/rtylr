@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { signOut } from '@voxire/auth';
 import { useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
@@ -122,110 +123,113 @@ const Account: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-primary">Account</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Manage your personal account information</p>
-      </div>
+    <>
+      <HelmetContainer title="Account · rtylr" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold text-primary">Account</h1>
+          <p className="text-sm text-gray-400 mt-0.5">Manage your personal account information</p>
+        </div>
 
-      {/* Profile */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your personal details</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Full name</Label>
-              <Input id="name" name="name" value={formData.name} onChange={handleInputChange} />
+        {/* Profile */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile</CardTitle>
+            <CardDescription>Update your personal details</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Full name</Label>
+                <Input id="name" name="name" value={formData.name} onChange={handleInputChange} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  disabled
+                  readOnly
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                disabled
-                readOnly
-              />
+            <div className="flex justify-end gap-2 pt-1">
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={!isEditing || updateProfile.isPending}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={!isEditing || updateProfile.isPending}>
+                {updateProfile.isPending ? 'Saving…' : 'Save changes'}
+              </Button>
             </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={!isEditing || updateProfile.isPending}
-            >
-              Cancel
+          </CardContent>
+        </Card>
+
+        {/* Security */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Security</CardTitle>
+            <CardDescription>Manage your account sessions</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-gray-500 mb-3">
+              Invalidate all sessions for your account. This will log you out everywhere.
+            </p>
+            <Button variant="destructive" size="sm" onClick={() => setConfirmInvalidateOpen(true)}>
+              Invalidate all sessions
             </Button>
-            <Button onClick={handleSave} disabled={!isEditing || updateProfile.isPending}>
-              {updateProfile.isPending ? 'Saving…' : 'Save changes'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Security */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Security</CardTitle>
-          <CardDescription>Manage your account sessions</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <p className="text-sm text-gray-500 mb-3">
-            Invalidate all sessions for your account. This will log you out everywhere.
-          </p>
-          <Button variant="destructive" size="sm" onClick={() => setConfirmInvalidateOpen(true)}>
-            Invalidate all sessions
-          </Button>
-        </CardContent>
-      </Card>
+        <ConfirmDialog
+          open={confirmInvalidateOpen}
+          onOpenChange={setConfirmInvalidateOpen}
+          title="Invalidate all sessions?"
+          description="This will sign you out of Dash and revoke every active session for your account."
+          confirmLabel="Invalidate sessions"
+          destructive
+          isLoading={invalidateSessions.isPending}
+          onConfirm={async () => {
+            await invalidateSessions.mutateAsync();
+          }}
+        />
 
-      <ConfirmDialog
-        open={confirmInvalidateOpen}
-        onOpenChange={setConfirmInvalidateOpen}
-        title="Invalidate all sessions?"
-        description="This will sign you out of Dash and revoke every active session for your account."
-        confirmLabel="Invalidate sessions"
-        destructive
-        isLoading={invalidateSessions.isPending}
-        onConfirm={async () => {
-          await invalidateSessions.mutateAsync();
-        }}
-      />
-
-      {/* Login History */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Login history</CardTitle>
-          <CardDescription>Recent login activity for your account</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>IP Address</TableHead>
-                <TableHead>Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loginHistory.map((item, i) => (
-                <TableRow key={i}>
-                  <TableCell>{item.email}</TableCell>
-                  <TableCell className="text-gray-500">{item.method}</TableCell>
-                  <TableCell className="text-gray-500">{item.ip}</TableCell>
-                  <TableCell className="text-gray-400">{item.timeAgo}</TableCell>
+        {/* Login History */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Login history</CardTitle>
+            <CardDescription>Recent login activity for your account</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>IP Address</TableHead>
+                  <TableHead>Time</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+              </TableHeader>
+              <TableBody>
+                {loginHistory.map((item, i) => (
+                  <TableRow key={i}>
+                    <TableCell>{item.email}</TableCell>
+                    <TableCell className="text-gray-500">{item.method}</TableCell>
+                    <TableCell className="text-gray-500">{item.ip}</TableCell>
+                    <TableCell className="text-gray-400">{item.timeAgo}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 

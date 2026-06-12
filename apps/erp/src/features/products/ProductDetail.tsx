@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Truck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -115,6 +116,7 @@ const ProductDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Product detail · rtylr" />
       <Breadcrumbs items={[{ label: 'Products', to: '/products' }, { label: product.name }]} />
 
       <div className="flex items-start justify-between">

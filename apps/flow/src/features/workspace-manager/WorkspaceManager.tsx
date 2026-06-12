@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Users, Plus, Trash2, Shield, Eye, Crown, Search } from 'lucide-react';
 
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import {
@@ -177,6 +178,7 @@ const WorkspaceManager: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Workspace members · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

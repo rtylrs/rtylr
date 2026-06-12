@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { GraduationCap, Clock, Layers, Award } from 'lucide-react';
 import { useTraining, useTrainingProgress } from '../../shared/hooks/useHrExtras';
 import {

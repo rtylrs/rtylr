@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import useAsync from '../../shared/hooks/useAsync';
 import api from '../../shared/lib/api';
 const menuApi = { getMenuWithMenuId: ({ id }) => api.get(`/menu/${id}`) };
@@ -74,13 +75,16 @@ function MenuWithId() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-primary">{restaurant?.name}'s Menu</h1>
-      <div>
-        {categories &&
-          categories.filter((item) => item.type === 'category').map(renderCategorySection)}
+    <>
+      <HelmetContainer title="Menu editor · rtylr" />
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-primary">{restaurant?.name}'s Menu</h1>
+        <div>
+          {categories &&
+            categories.filter((item) => item.type === 'category').map(renderCategorySection)}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

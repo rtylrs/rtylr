@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
@@ -262,6 +263,7 @@ const ProjectBoard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Board · rtylr" />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}

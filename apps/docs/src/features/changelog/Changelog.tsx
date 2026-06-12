@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 
 interface ChangelogEntry {
   version: string;
@@ -82,45 +83,48 @@ const entries: ChangelogEntry[] = [
 
 const Changelog: React.FC = () => {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--docs-text)' }}>
-        Changelog
-      </h1>
-      <p className="text-sm mb-8" style={{ color: 'var(--docs-text-muted)' }}>
-        New features, improvements, and fixes for the rtylr platform.
-      </p>
+    <>
+      <HelmetContainer title="Changelog · rtylr" />
+      <div>
+        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--docs-text)' }}>
+          Changelog
+        </h1>
+        <p className="text-sm mb-8" style={{ color: 'var(--docs-text-muted)' }}>
+          New features, improvements, and fixes for the rtylr platform.
+        </p>
 
-      <div className="flex flex-col gap-8">
-        {entries.map((entry) => (
-          <div
-            key={entry.version}
-            className="relative pl-6 border-l-2"
-            style={{ borderColor: 'var(--docs-border)' }}
-          >
-            {/* Version dot */}
+        <div className="flex flex-col gap-8">
+          {entries.map((entry) => (
             <div
-              className="absolute -left-[7px] top-0.5 w-3 h-3 rounded-full border-2"
-              style={{ borderColor: 'var(--docs-accent)', background: 'var(--docs-bg)' }}
-            />
-            <div className="flex items-baseline gap-3 mb-2">
-              <span className="text-base font-semibold" style={{ color: 'var(--docs-text)' }}>
-                v{entry.version}
-              </span>
-              <span className="text-xs" style={{ color: 'var(--docs-text-dim)' }}>
-                {entry.date}
-              </span>
+              key={entry.version}
+              className="relative pl-6 border-l-2"
+              style={{ borderColor: 'var(--docs-border)' }}
+            >
+              {/* Version dot */}
+              <div
+                className="absolute -left-[7px] top-0.5 w-3 h-3 rounded-full border-2"
+                style={{ borderColor: 'var(--docs-accent)', background: 'var(--docs-bg)' }}
+              />
+              <div className="flex items-baseline gap-3 mb-2">
+                <span className="text-base font-semibold" style={{ color: 'var(--docs-text)' }}>
+                  v{entry.version}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--docs-text-dim)' }}>
+                  {entry.date}
+                </span>
+              </div>
+              <ul className="list-disc pl-5 flex flex-col gap-1">
+                {entry.changes.map((change, idx) => (
+                  <li key={idx} className="text-sm" style={{ color: 'var(--docs-text)' }}>
+                    {change}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="list-disc pl-5 flex flex-col gap-1">
-              {entry.changes.map((change, idx) => (
-                <li key={idx} className="text-sm" style={{ color: 'var(--docs-text)' }}>
-                  {change}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

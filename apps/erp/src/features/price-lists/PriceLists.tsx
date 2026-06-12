@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tags, Star } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { usePriceLists, useCreatePriceList } from './usePriceLists';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -56,6 +57,7 @@ const PriceLists: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Price lists · rtylr" />
       <PageHeader
         title="Price Lists"
         description="Currency-based pricing strategies"

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import {
   FileText,
   Calendar,

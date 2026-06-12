@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { ShoppingBag, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { useOrders, type HubOrder } from '../../shared/hooks/queries/useOrders';
 import {
@@ -164,107 +165,112 @@ const Orders: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-          Orders
-        </h1>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-          Incoming orders from your customer menus
-        </p>
-      </div>
-
-      {/* POS info banner */}
-      <div
-        className="flex items-start gap-3 rounded-xl p-4"
-        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-      >
-        <Info size={16} className="shrink-0 mt-0.5" style={{ color: '#4583C4' }} />
+    <>
+      <HelmetContainer title="Orders · rtylr" />
+      <div className="space-y-6">
+        {/* Header */}
         <div>
-          <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-            Orders are placed by customers
-          </p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            Orders
+          </h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-            Orders come in when customers scan your QR code or visit your menu link. Staff orders
-            are created through your POS system.
+            Incoming orders from your customer menus
           </p>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          {
-            label: 'Pending',
-            count: pendingOrders.length,
-            color: '#f59e0b',
-            bg: 'rgba(245,158,11,0.12)',
-            border: 'rgba(245,158,11,0.2)',
-            icon: Clock,
-          },
-          {
-            label: 'In Progress',
-            count: inProgressOrders.length,
-            color: '#4583C4',
-            bg: 'rgba(69,131,196,0.12)',
-            border: 'rgba(69,131,196,0.2)',
-            icon: Loader2,
-          },
-          {
-            label: 'Completed',
-            count: completedOrders.length,
-            color: '#10b981',
-            bg: 'rgba(16,185,129,0.12)',
-            border: 'rgba(16,185,129,0.2)',
-            icon: CheckCircle2,
-          },
-        ].map(({ label, count, color, bg, border, icon: Icon }) => (
-          <div
-            key={label}
-            className="rounded-xl p-4 flex items-center justify-between"
-            style={{ background: bg, border: `1px solid ${border}`, color }}
-          >
-            <div className="flex items-center gap-2">
-              <Icon size={16} />
-              <span className="text-sm font-semibold">{label}</span>
+        {/* POS info banner */}
+        <div
+          className="flex items-start gap-3 rounded-xl p-4"
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+        >
+          <Info size={16} className="shrink-0 mt-0.5" style={{ color: '#4583C4' }} />
+          <div>
+            <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+              Orders are placed by customers
+            </p>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
+              Orders come in when customers scan your QR code or visit your menu link. Staff orders
+              are created through your POS system.
+            </p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            {
+              label: 'Pending',
+              count: pendingOrders.length,
+              color: '#f59e0b',
+              bg: 'rgba(245,158,11,0.12)',
+              border: 'rgba(245,158,11,0.2)',
+              icon: Clock,
+            },
+            {
+              label: 'In Progress',
+              count: inProgressOrders.length,
+              color: '#4583C4',
+              bg: 'rgba(69,131,196,0.12)',
+              border: 'rgba(69,131,196,0.2)',
+              icon: Loader2,
+            },
+            {
+              label: 'Completed',
+              count: completedOrders.length,
+              color: '#10b981',
+              bg: 'rgba(16,185,129,0.12)',
+              border: 'rgba(16,185,129,0.2)',
+              icon: CheckCircle2,
+            },
+          ].map(({ label, count, color, bg, border, icon: Icon }) => (
+            <div
+              key={label}
+              className="rounded-xl p-4 flex items-center justify-between"
+              style={{ background: bg, border: `1px solid ${border}`, color }}
+            >
+              <div className="flex items-center gap-2">
+                <Icon size={16} />
+                <span className="text-sm font-semibold">{label}</span>
+              </div>
+              <span className="text-2xl font-bold">{count}</span>
             </div>
-            <span className="text-2xl font-bold">{count}</span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Tabs */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle>All Orders</CardTitle>
-            <Tabs value={tab} onValueChange={(v) => setTab(v as OrderStatus)}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="pending">
-                  <span className="flex items-center gap-1.5">{tabIcons.pending} Pending</span>
-                </TabsTrigger>
-                <TabsTrigger value="in_progress">
-                  <span className="flex items-center gap-1.5">
-                    {tabIcons.in_progress} In Progress
-                  </span>
-                </TabsTrigger>
-                <TabsTrigger value="completed">
-                  <span className="flex items-center gap-1.5">{tabIcons.completed} Completed</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <OrdersTable
-            orders={ordersForTab[tab]}
-            emptyLabel={tab === 'all' ? '' : tab.replace('_', ' ')}
-          />
-        </CardContent>
-      </Card>
-    </div>
+        {/* Tabs */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle>All Orders</CardTitle>
+              <Tabs value={tab} onValueChange={(v) => setTab(v as OrderStatus)}>
+                <TabsList>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="pending">
+                    <span className="flex items-center gap-1.5">{tabIcons.pending} Pending</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="in_progress">
+                    <span className="flex items-center gap-1.5">
+                      {tabIcons.in_progress} In Progress
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="completed">
+                    <span className="flex items-center gap-1.5">
+                      {tabIcons.completed} Completed
+                    </span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <OrdersTable
+              orders={ordersForTab[tab]}
+              emptyLabel={tab === 'all' ? '' : tab.replace('_', ' ')}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 

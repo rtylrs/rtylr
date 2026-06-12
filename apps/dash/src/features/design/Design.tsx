@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Plus, CaretDown } from 'phosphor-react';
 import {
@@ -607,78 +608,465 @@ const Design: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateRows: 'auto 1fr',
-        // Escape DefaultLayout's p-6 padding to fill edge-to-edge
-        margin: '-24px',
-        height: 'calc(100% + 48px)',
-        overflow: 'hidden',
-        background: 'var(--dash-bg)',
-      }}
-    >
-      {/* ── Header bar ─────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          padding: '0 16px',
-          height: 44,
-          borderBottom: '1px solid var(--dash-border)',
-          background: 'var(--dash-surface)',
-          flexShrink: 0,
-          gap: 12,
-        }}
-      >
-        {activePreset && (
-          <span style={{ fontSize: 12, color: 'var(--dash-text-dim)' }}>{activePreset.name}</span>
-        )}
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          onClick={handleSave}
-          style={{
-            padding: '5px 14px',
-            borderRadius: 8,
-            background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
-            color: saved ? '#4583C4' : '#fff',
-            fontSize: 13,
-            fontWeight: 600,
-            border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {saved ? 'Saved!' : 'Save'}
-        </motion.button>
-      </div>
-
-      {/* ── Body ───────────────────────────────────────────────────────────── */}
+    <>
+      <HelmetContainer title="Design · rtylr" />
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '200px 320px 1fr',
+          gridTemplateRows: 'auto 1fr',
+          // Escape DefaultLayout's p-6 padding to fill edge-to-edge
+          margin: '-24px',
+          height: 'calc(100% + 48px)',
           overflow: 'hidden',
-          height: '100%',
+          background: 'var(--dash-bg)',
         }}
       >
-        {/* ── Presets sidebar ──────────────────────────────────────────────── */}
-        <aside
+        {/* ── Header bar ─────────────────────────────────────────────────────── */}
+        <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            overflow: 'hidden',
-            borderRight: '1px solid var(--dash-border)',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            padding: '0 16px',
+            height: 44,
+            borderBottom: '1px solid var(--dash-border)',
             background: 'var(--dash-surface)',
+            flexShrink: 0,
+            gap: 12,
           }}
         >
+          {activePreset && (
+            <span style={{ fontSize: 12, color: 'var(--dash-text-dim)' }}>{activePreset.name}</span>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={handleSave}
+            style={{
+              padding: '5px 14px',
+              borderRadius: 8,
+              background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
+              color: saved ? '#4583C4' : '#fff',
+              fontSize: 13,
+              fontWeight: 600,
+              border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {saved ? 'Saved!' : 'Save'}
+          </motion.button>
+        </div>
+
+        {/* ── Body ───────────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '200px 320px 1fr',
+            overflow: 'hidden',
+            height: '100%',
+          }}
+        >
+          {/* ── Presets sidebar ──────────────────────────────────────────────── */}
+          <aside
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              overflow: 'hidden',
+              borderRight: '1px solid var(--dash-border)',
+              background: 'var(--dash-surface)',
+            }}
+          >
+            <div
+              style={{
+                padding: '12px 14px 8px',
+                borderBottom: '1px solid var(--dash-border)',
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: 'var(--dash-text-dim)',
+                }}
+              >
+                Layouts
+              </span>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', padding: '6px' }}>
+              {presets.map((preset) => (
+                <div
+                  key={preset.id}
+                  onClick={() => activatePreset(preset.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    background: preset.id === activePresetId ? 'var(--dash-active)' : 'transparent',
+                    marginBottom: 2,
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  {preset.id === activePresetId && (
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: '#4583C4',
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color:
+                        preset.id === activePresetId
+                          ? 'var(--dash-text)'
+                          : 'var(--dash-text-muted)',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {preset.name}
+                  </span>
+                  {presets.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deletePreset(preset.id);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 2,
+                        borderRadius: 4,
+                        color: 'var(--dash-text-dim)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        opacity: 0.6,
+                        transition: 'opacity 0.15s',
+                      }}
+                    >
+                      <X size={12} weight="bold" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                padding: '8px',
+                borderTop: '1px solid var(--dash-border)',
+                display: 'flex',
+                gap: 6,
+                flexShrink: 0,
+              }}
+            >
+              <input
+                placeholder="New layout…"
+                value={newPresetName}
+                onChange={(e) => setNewPresetName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
+                style={{
+                  flex: 1,
+                  background: 'var(--dash-input-bg)',
+                  border: '1px solid var(--dash-border)',
+                  borderRadius: 7,
+                  padding: '6px 10px',
+                  fontSize: 12,
+                  color: 'var(--dash-text)',
+                  outline: 'none',
+                }}
+              />
+              <button
+                onClick={handleAddPreset}
+                disabled={!newPresetName.trim()}
+                style={{
+                  padding: '6px 8px',
+                  background: newPresetName.trim() ? '#4583C4' : 'var(--dash-input-bg)',
+                  border: '1px solid var(--dash-border)',
+                  borderRadius: 7,
+                  color: newPresetName.trim() ? '#fff' : 'var(--dash-text-dim)',
+                  cursor: newPresetName.trim() ? 'pointer' : 'default',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Plus size={14} weight="bold" />
+              </button>
+            </div>
+          </aside>
+
+          {/* ── Controls panel ───────────────────────────────────────────────── */}
           <div
             style={{
-              padding: '12px 14px 8px',
-              borderBottom: '1px solid var(--dash-border)',
-              flexShrink: 0,
+              overflowY: 'auto',
+              padding: '16px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              borderRight: '1px solid var(--dash-border)',
+            }}
+          >
+            {/* Pages */}
+            <SectionCard title="Pages" index={0}>
+              {(
+                [
+                  ['About', 'about'],
+                  ['Gallery', 'gallery'],
+                  ['Reviews', 'reviews'],
+                  ['Offers', 'offers'],
+                ] as [string, keyof MenuLayoutConfig['pages']][]
+              ).map(([label, key]) => (
+                <ToggleRow
+                  key={key}
+                  label={label}
+                  checked={draftConfig.pages[key] === true}
+                  onChange={(v) => patchPages({ [key]: v })}
+                />
+              ))}
+            </SectionCard>
+
+            {/* Header */}
+            <SectionCard title="Header" index={1}>
+              <ControlRow label="Cover height">
+                <SegmentGroup<CoverHeight>
+                  value={draftConfig.header.coverHeight}
+                  options={[
+                    { label: 'None', value: 'none' },
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
+                  onChange={(v) => patchHeader({ coverHeight: v })}
+                />
+              </ControlRow>
+              <ToggleRow
+                label="Sticky header"
+                checked={draftConfig.header.sticky}
+                onChange={(v) => patchHeader({ sticky: v })}
+              />
+              <ToggleRow
+                label="Show logo"
+                checked={draftConfig.header.showLogo}
+                onChange={(v) => patchHeader({ showLogo: v })}
+              />
+              <ToggleRow
+                label="Show description"
+                checked={draftConfig.header.showDescription}
+                onChange={(v) => patchHeader({ showDescription: v })}
+              />
+              <ToggleRow
+                label="Show meta (address, hours)"
+                checked={draftConfig.header.showMeta}
+                onChange={(v) => patchHeader({ showMeta: v })}
+              />
+            </SectionCard>
+
+            {/* Nav Tabs */}
+            <SectionCard title="Nav Tabs" index={2}>
+              <ControlRow label="Style">
+                <SegmentGroup<NavStyle>
+                  value={draftConfig.nav.style}
+                  options={[
+                    { label: 'Underline', value: 'underline' },
+                    { label: 'Pill', value: 'pill' },
+                    { label: 'Flat', value: 'flat' },
+                  ]}
+                  onChange={(v) => patchNav({ style: v })}
+                />
+              </ControlRow>
+              <ControlRow label="Size">
+                <SegmentGroup<NavSize>
+                  value={draftConfig.nav.size}
+                  options={[
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
+                  onChange={(v) => patchNav({ size: v })}
+                />
+              </ControlRow>
+            </SectionCard>
+
+            {/* Item Cards */}
+            <SectionCard title="Item Cards" index={3}>
+              <ControlRow label="Layout">
+                <SegmentGroup<ItemLayout>
+                  value={draftConfig.items.layout}
+                  options={[
+                    { label: 'Grid', value: 'grid' },
+                    { label: 'List', value: 'list' },
+                    { label: 'Minimal', value: 'minimal' },
+                  ]}
+                  onChange={(v) => patchItems({ layout: v })}
+                />
+              </ControlRow>
+              <ControlRow label="Columns">
+                <SegmentGroup<string>
+                  value={String(draftConfig.items.columns)}
+                  options={[
+                    { label: '2', value: '2' },
+                    { label: '3', value: '3' },
+                    { label: '4', value: '4' },
+                  ]}
+                  onChange={(v) => patchItems({ columns: Number(v) as 2 | 3 | 4 })}
+                />
+              </ControlRow>
+              <ControlRow label="Image position">
+                <SegmentGroup<ImagePosition>
+                  value={draftConfig.items.imagePosition}
+                  options={[
+                    { label: 'Top', value: 'top' },
+                    { label: 'Right', value: 'right' },
+                    { label: 'Left', value: 'left' },
+                    { label: 'None', value: 'none' },
+                  ]}
+                  onChange={(v) => patchItems({ imagePosition: v })}
+                />
+              </ControlRow>
+              <ControlRow label="Image size">
+                <SegmentGroup<ImageSize>
+                  value={draftConfig.items.imageSize}
+                  options={[
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
+                  onChange={(v) => patchItems({ imageSize: v })}
+                />
+              </ControlRow>
+              <ControlRow label="Card radius">
+                <SegmentGroup<CardRadius>
+                  value={draftConfig.items.cardRadius}
+                  options={[
+                    { label: 'None', value: 'none' },
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
+                  onChange={(v) => patchItems({ cardRadius: v })}
+                />
+              </ControlRow>
+              <ToggleRow
+                label="Show description"
+                checked={draftConfig.items.showDescription}
+                onChange={(v) => patchItems({ showDescription: v })}
+              />
+              <ToggleRow
+                label="Show badges"
+                checked={draftConfig.items.showBadges}
+                onChange={(v) => patchItems({ showBadges: v })}
+              />
+            </SectionCard>
+
+            {/* Colors */}
+            <SectionCard title="Colors" index={4}>
+              <ColorRow
+                label="Primary"
+                value={colorPrimary}
+                onChange={(v) => {
+                  setColorPrimary(v);
+                  patchDraftConfig({
+                    colors: { ...draftConfig.colors, primary: v, accent: colorAccent, bg: colorBg },
+                  });
+                }}
+              />
+              <ColorRow
+                label="Accent"
+                value={colorAccent}
+                onChange={(v) => {
+                  setColorAccent(v);
+                  patchDraftConfig({
+                    colors: {
+                      primary: colorPrimary,
+                      ...draftConfig.colors,
+                      accent: v,
+                      bg: colorBg,
+                    },
+                  });
+                }}
+              />
+              <ColorRow
+                label="Background"
+                value={colorBg}
+                onChange={(v) => {
+                  setColorBg(v);
+                  patchDraftConfig({
+                    colors: {
+                      primary: colorPrimary,
+                      accent: colorAccent,
+                      ...draftConfig.colors,
+                      bg: v,
+                    },
+                  });
+                }}
+              />
+            </SectionCard>
+
+            {/* Typography */}
+            <SectionCard title="Typography" index={5}>
+              <ControlRow label="Font family">
+                <select
+                  value={fontFamily}
+                  onChange={(e) => setFontFamily(e.target.value)}
+                  style={{
+                    background: 'var(--dash-input-bg)',
+                    border: '1px solid var(--dash-border)',
+                    borderRadius: 7,
+                    padding: '5px 8px',
+                    fontSize: 12,
+                    color: 'var(--dash-text)',
+                    outline: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="system">System UI</option>
+                  <option value="inter">Inter</option>
+                  <option value="jakarta">Plus Jakarta Sans</option>
+                  <option value="merriweather">Merriweather</option>
+                  <option value="poppins">Poppins</option>
+                </select>
+              </ControlRow>
+              <ControlRow label="Font size">
+                <SegmentGroup<string>
+                  value={fontSize}
+                  options={[
+                    { label: 'S', value: 'sm' },
+                    { label: 'M', value: 'md' },
+                    { label: 'L', value: 'lg' },
+                  ]}
+                  onChange={setFontSize}
+                />
+              </ControlRow>
+            </SectionCard>
+          </div>
+
+          {/* ── Phone Preview ─────────────────────────────────────────────────── */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '20px 0 12px',
+              background: 'var(--dash-bg)',
+              overflow: 'hidden',
+              height: '100%',
             }}
           >
             <span
@@ -686,411 +1074,34 @@ const Design: React.FC = () => {
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: 'uppercase',
-                letterSpacing: '0.08em',
+                letterSpacing: '0.1em',
                 color: 'var(--dash-text-dim)',
+                marginBottom: 16,
+                flexShrink: 0,
               }}
             >
-              Layouts
+              Preview
             </span>
-          </div>
-
-          <div style={{ flex: 1, overflowY: 'auto', padding: '6px' }}>
-            {presets.map((preset) => (
-              <div
-                key={preset.id}
-                onClick={() => activatePreset(preset.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  background: preset.id === activePresetId ? 'var(--dash-active)' : 'transparent',
-                  marginBottom: 2,
-                  transition: 'background 0.15s',
-                }}
-              >
-                {preset.id === activePresetId && (
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background: '#4583C4',
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color:
-                      preset.id === activePresetId ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-                    flex: 1,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {preset.name}
-                </span>
-                {presets.length > 1 && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePreset(preset.id);
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 2,
-                      borderRadius: 4,
-                      color: 'var(--dash-text-dim)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      opacity: 0.6,
-                      transition: 'opacity 0.15s',
-                    }}
-                  >
-                    <X size={12} weight="bold" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              padding: '8px',
-              borderTop: '1px solid var(--dash-border)',
-              display: 'flex',
-              gap: 6,
-              flexShrink: 0,
-            }}
-          >
-            <input
-              placeholder="New layout…"
-              value={newPresetName}
-              onChange={(e) => setNewPresetName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
+            <div
               style={{
                 flex: 1,
-                background: 'var(--dash-input-bg)',
-                border: '1px solid var(--dash-border)',
-                borderRadius: 7,
-                padding: '6px 10px',
-                fontSize: 12,
-                color: 'var(--dash-text)',
-                outline: 'none',
-              }}
-            />
-            <button
-              onClick={handleAddPreset}
-              disabled={!newPresetName.trim()}
-              style={{
-                padding: '6px 8px',
-                background: newPresetName.trim() ? '#4583C4' : 'var(--dash-input-bg)',
-                border: '1px solid var(--dash-border)',
-                borderRadius: 7,
-                color: newPresetName.trim() ? '#fff' : 'var(--dash-text-dim)',
-                cursor: newPresetName.trim() ? 'pointer' : 'default',
+                width: '100%',
+                overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
-                transition: 'all 0.15s',
+                justifyContent: 'center',
               }}
             >
-              <Plus size={14} weight="bold" />
-            </button>
-          </div>
-        </aside>
-
-        {/* ── Controls panel ───────────────────────────────────────────────── */}
-        <div
-          style={{
-            overflowY: 'auto',
-            padding: '16px 14px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-            borderRight: '1px solid var(--dash-border)',
-          }}
-        >
-          {/* Pages */}
-          <SectionCard title="Pages" index={0}>
-            {(
-              [
-                ['About', 'about'],
-                ['Gallery', 'gallery'],
-                ['Reviews', 'reviews'],
-                ['Offers', 'offers'],
-              ] as [string, keyof MenuLayoutConfig['pages']][]
-            ).map(([label, key]) => (
-              <ToggleRow
-                key={key}
-                label={label}
-                checked={draftConfig.pages[key] === true}
-                onChange={(v) => patchPages({ [key]: v })}
+              <PhoneFrame
+                config={draftConfig}
+                businessInfo={businessInfo}
+                menuCategories={menuCategories}
               />
-            ))}
-          </SectionCard>
-
-          {/* Header */}
-          <SectionCard title="Header" index={1}>
-            <ControlRow label="Cover height">
-              <SegmentGroup<CoverHeight>
-                value={draftConfig.header.coverHeight}
-                options={[
-                  { label: 'None', value: 'none' },
-                  { label: 'S', value: 'sm' },
-                  { label: 'M', value: 'md' },
-                  { label: 'L', value: 'lg' },
-                ]}
-                onChange={(v) => patchHeader({ coverHeight: v })}
-              />
-            </ControlRow>
-            <ToggleRow
-              label="Sticky header"
-              checked={draftConfig.header.sticky}
-              onChange={(v) => patchHeader({ sticky: v })}
-            />
-            <ToggleRow
-              label="Show logo"
-              checked={draftConfig.header.showLogo}
-              onChange={(v) => patchHeader({ showLogo: v })}
-            />
-            <ToggleRow
-              label="Show description"
-              checked={draftConfig.header.showDescription}
-              onChange={(v) => patchHeader({ showDescription: v })}
-            />
-            <ToggleRow
-              label="Show meta (address, hours)"
-              checked={draftConfig.header.showMeta}
-              onChange={(v) => patchHeader({ showMeta: v })}
-            />
-          </SectionCard>
-
-          {/* Nav Tabs */}
-          <SectionCard title="Nav Tabs" index={2}>
-            <ControlRow label="Style">
-              <SegmentGroup<NavStyle>
-                value={draftConfig.nav.style}
-                options={[
-                  { label: 'Underline', value: 'underline' },
-                  { label: 'Pill', value: 'pill' },
-                  { label: 'Flat', value: 'flat' },
-                ]}
-                onChange={(v) => patchNav({ style: v })}
-              />
-            </ControlRow>
-            <ControlRow label="Size">
-              <SegmentGroup<NavSize>
-                value={draftConfig.nav.size}
-                options={[
-                  { label: 'S', value: 'sm' },
-                  { label: 'M', value: 'md' },
-                  { label: 'L', value: 'lg' },
-                ]}
-                onChange={(v) => patchNav({ size: v })}
-              />
-            </ControlRow>
-          </SectionCard>
-
-          {/* Item Cards */}
-          <SectionCard title="Item Cards" index={3}>
-            <ControlRow label="Layout">
-              <SegmentGroup<ItemLayout>
-                value={draftConfig.items.layout}
-                options={[
-                  { label: 'Grid', value: 'grid' },
-                  { label: 'List', value: 'list' },
-                  { label: 'Minimal', value: 'minimal' },
-                ]}
-                onChange={(v) => patchItems({ layout: v })}
-              />
-            </ControlRow>
-            <ControlRow label="Columns">
-              <SegmentGroup<string>
-                value={String(draftConfig.items.columns)}
-                options={[
-                  { label: '2', value: '2' },
-                  { label: '3', value: '3' },
-                  { label: '4', value: '4' },
-                ]}
-                onChange={(v) => patchItems({ columns: Number(v) as 2 | 3 | 4 })}
-              />
-            </ControlRow>
-            <ControlRow label="Image position">
-              <SegmentGroup<ImagePosition>
-                value={draftConfig.items.imagePosition}
-                options={[
-                  { label: 'Top', value: 'top' },
-                  { label: 'Right', value: 'right' },
-                  { label: 'Left', value: 'left' },
-                  { label: 'None', value: 'none' },
-                ]}
-                onChange={(v) => patchItems({ imagePosition: v })}
-              />
-            </ControlRow>
-            <ControlRow label="Image size">
-              <SegmentGroup<ImageSize>
-                value={draftConfig.items.imageSize}
-                options={[
-                  { label: 'S', value: 'sm' },
-                  { label: 'M', value: 'md' },
-                  { label: 'L', value: 'lg' },
-                ]}
-                onChange={(v) => patchItems({ imageSize: v })}
-              />
-            </ControlRow>
-            <ControlRow label="Card radius">
-              <SegmentGroup<CardRadius>
-                value={draftConfig.items.cardRadius}
-                options={[
-                  { label: 'None', value: 'none' },
-                  { label: 'S', value: 'sm' },
-                  { label: 'M', value: 'md' },
-                  { label: 'L', value: 'lg' },
-                ]}
-                onChange={(v) => patchItems({ cardRadius: v })}
-              />
-            </ControlRow>
-            <ToggleRow
-              label="Show description"
-              checked={draftConfig.items.showDescription}
-              onChange={(v) => patchItems({ showDescription: v })}
-            />
-            <ToggleRow
-              label="Show badges"
-              checked={draftConfig.items.showBadges}
-              onChange={(v) => patchItems({ showBadges: v })}
-            />
-          </SectionCard>
-
-          {/* Colors */}
-          <SectionCard title="Colors" index={4}>
-            <ColorRow
-              label="Primary"
-              value={colorPrimary}
-              onChange={(v) => {
-                setColorPrimary(v);
-                patchDraftConfig({
-                  colors: { ...draftConfig.colors, primary: v, accent: colorAccent, bg: colorBg },
-                });
-              }}
-            />
-            <ColorRow
-              label="Accent"
-              value={colorAccent}
-              onChange={(v) => {
-                setColorAccent(v);
-                patchDraftConfig({
-                  colors: { primary: colorPrimary, ...draftConfig.colors, accent: v, bg: colorBg },
-                });
-              }}
-            />
-            <ColorRow
-              label="Background"
-              value={colorBg}
-              onChange={(v) => {
-                setColorBg(v);
-                patchDraftConfig({
-                  colors: {
-                    primary: colorPrimary,
-                    accent: colorAccent,
-                    ...draftConfig.colors,
-                    bg: v,
-                  },
-                });
-              }}
-            />
-          </SectionCard>
-
-          {/* Typography */}
-          <SectionCard title="Typography" index={5}>
-            <ControlRow label="Font family">
-              <select
-                value={fontFamily}
-                onChange={(e) => setFontFamily(e.target.value)}
-                style={{
-                  background: 'var(--dash-input-bg)',
-                  border: '1px solid var(--dash-border)',
-                  borderRadius: 7,
-                  padding: '5px 8px',
-                  fontSize: 12,
-                  color: 'var(--dash-text)',
-                  outline: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value="system">System UI</option>
-                <option value="inter">Inter</option>
-                <option value="jakarta">Plus Jakarta Sans</option>
-                <option value="merriweather">Merriweather</option>
-                <option value="poppins">Poppins</option>
-              </select>
-            </ControlRow>
-            <ControlRow label="Font size">
-              <SegmentGroup<string>
-                value={fontSize}
-                options={[
-                  { label: 'S', value: 'sm' },
-                  { label: 'M', value: 'md' },
-                  { label: 'L', value: 'lg' },
-                ]}
-                onChange={setFontSize}
-              />
-            </ControlRow>
-          </SectionCard>
-        </div>
-
-        {/* ── Phone Preview ─────────────────────────────────────────────────── */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '20px 0 12px',
-            background: 'var(--dash-bg)',
-            overflow: 'hidden',
-            height: '100%',
-          }}
-        >
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              color: 'var(--dash-text-dim)',
-              marginBottom: 16,
-              flexShrink: 0,
-            }}
-          >
-            Preview
-          </span>
-          <div
-            style={{
-              flex: 1,
-              width: '100%',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <PhoneFrame
-              config={draftConfig}
-              businessInfo={businessInfo}
-              menuCategories={menuCategories}
-            />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

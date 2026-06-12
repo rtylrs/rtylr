@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { Rocket, AlertTriangle } from 'lucide-react';
 import { useGetEmployeeChecklist } from '../../shared/hooks/queries/useOnboarding';
 import type { EmployeeChecklistPayload } from '@voxire/contracts/hr/onboarding/v1/types';

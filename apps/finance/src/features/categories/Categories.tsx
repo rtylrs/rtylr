@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, Tag } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -17,6 +18,7 @@ const Categories: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Expense categories · rtylr" />
       <PageHeader
         title="Expense Categories"
         subtitle={`${data.length} categories`}

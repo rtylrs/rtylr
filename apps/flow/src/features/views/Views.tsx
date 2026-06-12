@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { Eye, Plus, Flame, Timer, CheckCircle2, Pencil, Trash2, Check, X } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, SavedView } from '../../shared/stores/flowStore';
 import {
   useViews,
@@ -74,6 +75,7 @@ const Views: React.FC = () => {
 
   return (
     <div className="flex h-full">
+      <HelmetContainer title="Views · rtylr" />
       <aside
         className="w-64 shrink-0 px-3 py-4"
         style={{

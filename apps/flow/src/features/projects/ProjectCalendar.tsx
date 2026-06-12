@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -76,6 +77,7 @@ const ProjectCalendar: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Calendar · rtylr" />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}

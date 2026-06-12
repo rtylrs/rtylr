@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { Palette, Upload } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button, Input, Label } from '../../shared/components/ui';
@@ -22,96 +23,99 @@ const ThemeCustomizer: React.FC = () => {
   const [logoUrl, setLogoUrl] = useState('');
 
   return (
-    <div className="space-y-5 max-w-3xl">
-      <div className="flex items-center gap-3">
-        <div
-          className="h-9 w-9 rounded-xl flex items-center justify-center"
-          style={{ background: 'rgba(139,92,246,0.15)' }}
-        >
-          <Palette size={16} style={{ color: '#8b5cf6' }} />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-            Theme
-          </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-            Your workspace branding.
-          </p>
-        </div>
-      </div>
-
-      <SettingSection
-        title="Accent color"
-        description="Applied to primary buttons, links, and highlights."
-        footer={
-          <Button size="sm" onClick={() => navigate({ to: '/design' })}>
-            Open full design editor
-          </Button>
-        }
-      >
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setAccent(c)}
-                className="h-9 w-9 rounded-lg transition-all"
-                style={{
-                  background: c,
-                  border:
-                    accent === c ? '2px solid var(--dash-text)' : '1px solid var(--dash-border)',
-                  transform: accent === c ? 'scale(1.1)' : 'scale(1)',
-                }}
-                aria-label={`Select ${c}`}
-              />
-            ))}
-          </div>
+    <>
+      <HelmetContainer title="Theme · rtylr" />
+      <div className="space-y-5 max-w-3xl">
+        <div className="flex items-center gap-3">
           <div
-            className="flex items-center gap-3 px-4 py-3 rounded-lg"
-            style={{ background: 'var(--dash-hover)' }}
+            className="h-9 w-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(139,92,246,0.15)' }}
           >
-            <div className="h-10 w-10 rounded-lg" style={{ background: accent }} />
-            <div className="flex-1">
-              <p className="text-xs font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Preview
-              </p>
-              <code className="text-[11px] font-mono" style={{ color: 'var(--dash-text-dim)' }}>
-                {accent}
-              </code>
-            </div>
-            <button
-              className="px-4 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: accent, color: 'white' }}
-            >
-              Sample button
-            </button>
+            <Palette size={16} style={{ color: '#8b5cf6' }} />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+              Theme
+            </h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+              Your workspace branding.
+            </p>
           </div>
         </div>
-      </SettingSection>
 
-      <SettingSection title="Brand" description="Your business name and logo.">
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <Label>Business name</Label>
-            <Input value={brandName} onChange={(e) => setBrandName(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Logo URL</Label>
-            <div className="flex gap-2">
-              <Input
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="https://..."
-              />
-              <Button variant="secondary" disabled title="Logo upload coming in a future update">
-                <Upload size={13} />
-                Upload
-              </Button>
+        <SettingSection
+          title="Accent color"
+          description="Applied to primary buttons, links, and highlights."
+          footer={
+            <Button size="sm" onClick={() => navigate({ to: '/design' })}>
+              Open full design editor
+            </Button>
+          }
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              {COLORS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setAccent(c)}
+                  className="h-9 w-9 rounded-lg transition-all"
+                  style={{
+                    background: c,
+                    border:
+                      accent === c ? '2px solid var(--dash-text)' : '1px solid var(--dash-border)',
+                    transform: accent === c ? 'scale(1.1)' : 'scale(1)',
+                  }}
+                  aria-label={`Select ${c}`}
+                />
+              ))}
+            </div>
+            <div
+              className="flex items-center gap-3 px-4 py-3 rounded-lg"
+              style={{ background: 'var(--dash-hover)' }}
+            >
+              <div className="h-10 w-10 rounded-lg" style={{ background: accent }} />
+              <div className="flex-1">
+                <p className="text-xs font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  Preview
+                </p>
+                <code className="text-[11px] font-mono" style={{ color: 'var(--dash-text-dim)' }}>
+                  {accent}
+                </code>
+              </div>
+              <button
+                className="px-4 py-2 rounded-lg text-xs font-semibold"
+                style={{ background: accent, color: 'white' }}
+              >
+                Sample button
+              </button>
             </div>
           </div>
-        </div>
-      </SettingSection>
-    </div>
+        </SettingSection>
+
+        <SettingSection title="Brand" description="Your business name and logo.">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Business name</Label>
+              <Input value={brandName} onChange={(e) => setBrandName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Logo URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  placeholder="https://..."
+                />
+                <Button variant="secondary" disabled title="Logo upload coming in a future update">
+                  <Upload size={13} />
+                  Upload
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SettingSection>
+      </div>
+    </>
   );
 };
 

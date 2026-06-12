@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Users, Calendar, Clock, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -66,6 +67,7 @@ const Operations: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
+      <HelmetContainer title="Operations · rtylr" />
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.operations.title')}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Play, Pause, RotateCcw, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
@@ -154,6 +155,7 @@ const RecurringInvoices: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Recurring invoices · rtylr" />
       <PageHeader
         title="Recurring Invoices"
         subtitle={`${data.length} active subscriptions`}

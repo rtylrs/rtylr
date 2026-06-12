@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { useUserStore } from '@voxire/auth';
 import {
   useListLeaveTypes,

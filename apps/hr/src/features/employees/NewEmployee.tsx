@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -111,7 +112,9 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
+      <HelmetContainer title="New employee · rtylr" />
+      <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <button
           type="button"

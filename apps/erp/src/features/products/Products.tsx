@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
+import { HelmetContainer } from '@voxire/components';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
@@ -80,6 +81,7 @@ const Products: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Products · rtylr" />
       <PageHeader
         title={t('erp.products.title')}
         description={t('erp.products.catalogCount', { count: products.length })}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { HelmetContainer } from '@voxire/components';
 import {
   Package,
   AlertTriangle,
@@ -131,6 +132,7 @@ const Dashboard: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-6"
     >
+      <HelmetContainer title="Dashboard · rtylr" />
       <motion.div
         variants={itemVariants as any}
         className="flex flex-wrap items-start justify-between gap-4"

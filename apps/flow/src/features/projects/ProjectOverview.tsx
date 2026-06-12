@@ -9,6 +9,7 @@ import {
   Users,
   Milestone as MilestoneIcon,
 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useProjectOverview } from './useProjectOverview';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
@@ -58,6 +59,7 @@ const ProjectOverview: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Overview · rtylr" />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}

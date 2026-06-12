@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Layers } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useVariants, useCreateVariant } from '../products/useVariants';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -65,6 +66,7 @@ const Variants: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Product variants · rtylr" />
       <PageHeader
         title="Product Variants"
         description="Individual SKUs for sizes, colors, flavors and more"

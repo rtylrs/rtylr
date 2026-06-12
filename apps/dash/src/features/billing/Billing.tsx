@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import {
   AlertCircle,
   ArrowRight,
@@ -687,13 +688,16 @@ const BillingHistoryCard: React.FC = () => {
 };
 
 const Billing: React.FC = (): React.JSX.Element => (
-  <div className="space-y-6 max-w-3xl">
-    <Breadcrumbs />
-    <PlanSelectionSection />
-    <CurrentMonthCard />
-    <PaymentMethodCard />
-    <BillingHistoryCard />
-  </div>
+  <>
+    <HelmetContainer title="Billing · rtylr" />
+    <div className="space-y-6 max-w-3xl">
+      <Breadcrumbs />
+      <PlanSelectionSection />
+      <CurrentMonthCard />
+      <PaymentMethodCard />
+      <BillingHistoryCard />
+    </div>
+  </>
 );
 
 export default Billing;

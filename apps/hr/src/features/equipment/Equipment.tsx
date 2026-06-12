@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { Package, Plus, CheckCircle, XCircle } from 'lucide-react';
 import {
   useListEquipmentRequests,

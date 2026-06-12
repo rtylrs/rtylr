@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { BarChart3, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { useInsights } from './useInsights';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { Skeleton, CardSkeleton } from '../../shared/components/Skeleton';
@@ -42,6 +43,7 @@ const Insights: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Insights · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Insights

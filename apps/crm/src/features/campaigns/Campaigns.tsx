@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -424,149 +425,152 @@ const Campaigns: React.FC = () => {
   const deleteTarget = campaigns.find((c) => c.id === confirmDeleteId);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-            Campaigns
-          </h2>
-          <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-            {campaigns.filter((c) => c.status === 'Active').length} active campaigns
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => navigate({ to: '/campaigns/sms' })}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
-              background: 'transparent',
-              color: 'var(--hub-text)',
-              border: '1px solid var(--hub-border)',
-              cursor: 'pointer',
-            }}
-          >
-            <MessageSquare size={14} /> New SMS
-          </button>
-          <button
-            onClick={() => navigate({ to: '/campaigns/email' })}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
-              background: ACCENT,
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <Plus size={15} /> New email campaign
-          </button>
-        </div>
-      </div>
-
-      {/* Filter tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
-          background: 'var(--hub-card)',
-          border: '1px solid var(--hub-border)',
-          borderRadius: '10px',
-          padding: '4px',
-          width: 'fit-content',
-        }}
-      >
-        {statusFilters.map((f) => (
-          <button
-            key={f}
-            onClick={() => setStatusFilter(f)}
-            style={{
-              padding: '6px 16px',
-              borderRadius: '7px',
-              fontSize: '12px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              border: 'none',
-              background: statusFilter === f ? ACCENT : 'transparent',
-              color: statusFilter === f ? '#fff' : 'var(--hub-text-muted)',
-              transition: 'all 0.15s',
-            }}
-          >
-            {f}
-            {f !== 'All' && (
-              <span
-                style={{
-                  marginLeft: '6px',
-                  padding: '1px 5px',
-                  borderRadius: '9999px',
-                  fontSize: '10px',
-                  background: statusFilter === f ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
-                }}
-              >
-                {campaigns.filter((c) => c.status === f).length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Campaign cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <AnimatePresence mode="popLayout">
-          {filtered.map((c, i) => (
-            <CampaignCard
-              key={c.id}
-              campaign={c}
-              index={i}
-              onClick={() => navigate({ to: `/campaigns/${c.id}` })}
-              onLaunch={() => handleLaunch(c.id)}
-              onPause={() => handlePause(c.id)}
-              onEdit={() => handleEdit(c)}
-              onDelete={() => setConfirmDeleteId(c.id)}
-              statusPending={updateStatus.isPending}
-              deletePending={removeCampaign.isPending}
-            />
-          ))}
-        </AnimatePresence>
-        {filtered.length === 0 && (
-          <div
-            style={{
-              padding: '60px',
-              textAlign: 'center',
-              color: 'var(--hub-text-muted)',
-              fontSize: '13px',
-            }}
-          >
-            No campaigns in this status.
+    <>
+      <HelmetContainer title="Campaigns · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              Campaigns
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+              {campaigns.filter((c) => c.status === 'Active').length} active campaigns
+            </p>
           </div>
-        )}
-      </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => navigate({ to: '/campaigns/sms' })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: 'transparent',
+                color: 'var(--hub-text)',
+                border: '1px solid var(--hub-border)',
+                cursor: 'pointer',
+              }}
+            >
+              <MessageSquare size={14} /> New SMS
+            </button>
+            <button
+              onClick={() => navigate({ to: '/campaigns/email' })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: ACCENT,
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <Plus size={15} /> New email campaign
+            </button>
+          </div>
+        </div>
 
-      <ConfirmModal
-        open={confirmDeleteId !== null}
-        onClose={() => setConfirmDeleteId(null)}
-        onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
-        title="Delete campaign?"
-        description={
-          deleteTarget
-            ? `Are you sure you want to delete ${deleteTarget.name}? This action cannot be undone.`
-            : ''
-        }
-        confirmLabel="Delete"
-        variant="danger"
-      />
-    </div>
+        {/* Filter tabs */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '4px',
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '10px',
+            padding: '4px',
+            width: 'fit-content',
+          }}
+        >
+          {statusFilters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                border: 'none',
+                background: statusFilter === f ? ACCENT : 'transparent',
+                color: statusFilter === f ? '#fff' : 'var(--hub-text-muted)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {f}
+              {f !== 'All' && (
+                <span
+                  style={{
+                    marginLeft: '6px',
+                    padding: '1px 5px',
+                    borderRadius: '9999px',
+                    fontSize: '10px',
+                    background: statusFilter === f ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
+                  }}
+                >
+                  {campaigns.filter((c) => c.status === f).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Campaign cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <AnimatePresence mode="popLayout">
+            {filtered.map((c, i) => (
+              <CampaignCard
+                key={c.id}
+                campaign={c}
+                index={i}
+                onClick={() => navigate({ to: `/campaigns/${c.id}` })}
+                onLaunch={() => handleLaunch(c.id)}
+                onPause={() => handlePause(c.id)}
+                onEdit={() => handleEdit(c)}
+                onDelete={() => setConfirmDeleteId(c.id)}
+                statusPending={updateStatus.isPending}
+                deletePending={removeCampaign.isPending}
+              />
+            ))}
+          </AnimatePresence>
+          {filtered.length === 0 && (
+            <div
+              style={{
+                padding: '60px',
+                textAlign: 'center',
+                color: 'var(--hub-text-muted)',
+                fontSize: '13px',
+              }}
+            >
+              No campaigns in this status.
+            </div>
+          )}
+        </div>
+
+        <ConfirmModal
+          open={confirmDeleteId !== null}
+          onClose={() => setConfirmDeleteId(null)}
+          onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+          title="Delete campaign?"
+          description={
+            deleteTarget
+              ? `Are you sure you want to delete ${deleteTarget.name}? This action cannot be undone.`
+              : ''
+          }
+          confirmLabel="Delete"
+          variant="danger"
+        />
+      </div>
+    </>
   );
 };
 

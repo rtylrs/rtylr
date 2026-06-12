@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { Send, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';

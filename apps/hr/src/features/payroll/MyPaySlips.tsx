@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { FileText, DollarSign } from 'lucide-react';
 import { useListPayrollRuns } from '../../shared/hooks/queries/usePayroll';

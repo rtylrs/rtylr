@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -552,71 +553,77 @@ const Segments: React.FC = () => {
   const deleteTarget = segments.find((s) => s.id === confirmDeleteId);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-            Segments
-          </h2>
-          <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-            {segments.length} active segments ·{' '}
-            {segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers total
-          </p>
+    <>
+      <HelmetContainer title="Segments · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              Segments
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+              {segments.length} active segments ·{' '}
+              {segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers
+              total
+            </p>
+          </div>
+          <button
+            onClick={() => setBuilderOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              background: ACCENT,
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <Plus size={15} />
+            New Segment
+          </button>
         </div>
-        <button
-          onClick={() => setBuilderOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: 600,
-            background: ACCENT,
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <Plus size={15} />
-          New Segment
-        </button>
+
+        {/* Segment grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+          {segments.map((segment, i) => (
+            <SegmentCard
+              key={segment.id}
+              segment={segment}
+              index={i}
+              onClick={() => navigate({ to: `/segments/${segment.id}` })}
+              onDelete={() => setConfirmDeleteId(segment.id)}
+              deletePending={removeSegment.isPending}
+            />
+          ))}
+        </div>
+
+        <ConfirmModal
+          open={confirmDeleteId !== null}
+          onClose={() => setConfirmDeleteId(null)}
+          onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+          title="Delete segment?"
+          description={
+            deleteTarget
+              ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
+              : ''
+          }
+          confirmLabel="Delete"
+          variant="danger"
+        />
+
+        <AnimatePresence>
+          {builderOpen && (
+            <RuleBuilder onClose={() => setBuilderOpen(false)} onSave={handleCreate} />
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Segment grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-        {segments.map((segment, i) => (
-          <SegmentCard
-            key={segment.id}
-            segment={segment}
-            index={i}
-            onClick={() => navigate({ to: `/segments/${segment.id}` })}
-            onDelete={() => setConfirmDeleteId(segment.id)}
-            deletePending={removeSegment.isPending}
-          />
-        ))}
-      </div>
-
-      <ConfirmModal
-        open={confirmDeleteId !== null}
-        onClose={() => setConfirmDeleteId(null)}
-        onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
-        title="Delete segment?"
-        description={
-          deleteTarget
-            ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
-            : ''
-        }
-        confirmLabel="Delete"
-        variant="danger"
-      />
-
-      <AnimatePresence>
-        {builderOpen && <RuleBuilder onClose={() => setBuilderOpen(false)} onSave={handleCreate} />}
-      </AnimatePresence>
-    </div>
+    </>
   );
 };
 

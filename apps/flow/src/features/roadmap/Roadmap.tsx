@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Link } from '@tanstack/react-router';
 import { Map as MapIcon } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useRoadmap } from './useRoadmap';
 import { formatDate } from '../../shared/lib/utils';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
@@ -19,6 +20,7 @@ const Roadmap: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Roadmap · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: 'Roadmap' }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>

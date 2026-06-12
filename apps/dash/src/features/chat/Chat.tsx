@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { cn } from '@voxire/ui';
+import { HelmetContainer } from '@voxire/components';
 import { Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCaretStore, useCaretStream } from '@voxire/caret';
@@ -42,179 +43,185 @@ const Chat: React.FC = () => {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col overflow-hidden -m-6" style={{ height: 'calc(100vh - 44px)' }}>
-      {/* Messages or empty state */}
-      <div className="flex-1 overflow-y-auto" aria-live="polite" aria-atomic="false">
-        {isEmpty ? (
-          <div className="flex flex-col items-center justify-center h-full px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-center max-w-md"
-            >
-              <div
-                className="h-12 w-12 rounded-2xl flex items-center justify-center mx-auto mb-5"
-                style={{ background: 'rgba(139,92,246,0.1)' }}
-              >
-                <Sparkles size={24} style={{ color: '#8b5cf6' }} />
-              </div>
-              <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--dash-text)' }}>
-                Chat with Caret
-              </h1>
-              <p
-                className="text-sm leading-relaxed mb-8"
-                style={{ color: 'var(--dash-text-muted)' }}
-              >
-                Your AI assistant with access to all your business data.
-              </p>
-
-              <div className="grid grid-cols-2 gap-2">
-                {SUGGESTIONS.map((s, i) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.05 }}
-                    onClick={() => send(s)}
-                    className="text-left px-4 py-3 rounded-xl text-sm transition-all"
-                    style={{
-                      background: 'var(--dash-card)',
-                      border: '1px solid var(--dash-border)',
-                      color: 'var(--dash-text)',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--dash-border)';
-                    }}
-                  >
-                    {s}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
-            <AnimatePresence>
-              {messages.map((msg, index) => {
-                const isLastStreaming =
-                  index === messages.length - 1 && msg.role === 'assistant' && isStreaming;
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}
-                  >
-                    {msg.role === 'assistant' && (
-                      <div
-                        className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mr-3 mt-1"
-                        style={{ background: 'rgba(139,92,246,0.1)' }}
-                      >
-                        <Sparkles size={14} style={{ color: '#8b5cf6' }} />
-                      </div>
-                    )}
-                    <div
-                      className="rounded-2xl px-4 py-3 max-w-[80%]"
-                      style={{
-                        background: msg.role === 'user' ? '#4583C4' : 'var(--dash-card)',
-                        color: msg.role === 'user' ? '#fff' : 'var(--dash-text)',
-                        border: msg.role === 'user' ? 'none' : '1px solid var(--dash-border)',
-                      }}
-                    >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                      {isLastStreaming && (
-                        <span
-                          className="inline-block h-3 w-0.5 ml-0.5 rounded-sm animate-pulse"
-                          style={{ background: '#8b5cf6' }}
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-
-            {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
+    <>
+      <HelmetContainer title="Chat · rtylr" />
+      <div className="flex flex-col overflow-hidden -m-6" style={{ height: 'calc(100vh - 44px)' }}>
+        {/* Messages or empty state */}
+        <div className="flex-1 overflow-y-auto" aria-live="polite" aria-atomic="false">
+          {isEmpty ? (
+            <div className="flex flex-col items-center justify-center h-full px-6">
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center max-w-md"
               >
                 <div
-                  className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
+                  className="h-12 w-12 rounded-2xl flex items-center justify-center mx-auto mb-5"
                   style={{ background: 'rgba(139,92,246,0.1)' }}
                 >
-                  <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                  <Sparkles size={24} style={{ color: '#8b5cf6' }} />
                 </div>
-                <div
-                  className="flex items-center gap-1.5 px-4 py-3 rounded-2xl"
-                  style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+                <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--dash-text)' }}>
+                  Chat with Caret
+                </h1>
+                <p
+                  className="text-sm leading-relaxed mb-8"
+                  style={{ color: 'var(--dash-text-muted)' }}
                 >
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
+                  Your AI assistant with access to all your business data.
+                </p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {SUGGESTIONS.map((s, i) => (
+                    <motion.button
                       key={i}
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{ background: '#8b5cf6' }}
-                      animate={{ opacity: [0.2, 1, 0.2] }}
-                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
-                    />
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + i * 0.05 }}
+                      onClick={() => send(s)}
+                      className="text-left px-4 py-3 rounded-xl text-sm transition-all"
+                      style={{
+                        background: 'var(--dash-card)',
+                        border: '1px solid var(--dash-border)',
+                        color: 'var(--dash-text)',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = 'var(--dash-border)';
+                      }}
+                    >
+                      {s}
+                    </motion.button>
                   ))}
                 </div>
               </motion.div>
-            )}
-            <div ref={bottomRef} />
-          </div>
-        )}
-      </div>
+            </div>
+          ) : (
+            <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
+              <AnimatePresence>
+                {messages.map((msg, index) => {
+                  const isLastStreaming =
+                    index === messages.length - 1 && msg.role === 'assistant' && isStreaming;
+                  return (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}
+                    >
+                      {msg.role === 'assistant' && (
+                        <div
+                          className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mr-3 mt-1"
+                          style={{ background: 'rgba(139,92,246,0.1)' }}
+                        >
+                          <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                        </div>
+                      )}
+                      <div
+                        className="rounded-2xl px-4 py-3 max-w-[80%]"
+                        style={{
+                          background: msg.role === 'user' ? '#4583C4' : 'var(--dash-card)',
+                          color: msg.role === 'user' ? '#fff' : 'var(--dash-text)',
+                          border: msg.role === 'user' ? 'none' : '1px solid var(--dash-border)',
+                        }}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        {isLastStreaming && (
+                          <span
+                            className="inline-block h-3 w-0.5 ml-0.5 rounded-sm animate-pulse"
+                            style={{ background: '#8b5cf6' }}
+                          />
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
 
-      {/* Input bar */}
-      <div className="px-6 pb-6 pt-2">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            send(input);
-          }}
-          className="max-w-2xl mx-auto relative"
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Message Caret..."
-            aria-label="Message Caret"
-            disabled={isStreaming}
-            className="w-full h-12 rounded-xl pl-4 pr-12 text-sm outline-none transition-colors"
-            style={{
-              background: 'var(--dash-card)',
-              border: '1px solid var(--dash-border)',
-              color: 'var(--dash-text)',
-              fontSize: '16px',
+              {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center gap-3"
+                >
+                  <div
+                    className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(139,92,246,0.1)' }}
+                  >
+                    <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                  </div>
+                  <div
+                    className="flex items-center gap-1.5 px-4 py-3 rounded-2xl"
+                    style={{
+                      background: 'var(--dash-card)',
+                      border: '1px solid var(--dash-border)',
+                    }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ background: '#8b5cf6' }}
+                        animate={{ opacity: [0.2, 1, 0.2] }}
+                        transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+          )}
+        </div>
+
+        {/* Input bar */}
+        <div className="px-6 pb-6 pt-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              send(input);
             }}
-            onFocus={(e) => {
-              (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
-            }}
-            onBlur={(e) => {
-              (e.target as HTMLElement).style.borderColor = 'var(--dash-border)';
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isStreaming}
-            aria-label="Send message"
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
-            style={{
-              background: input.trim() && !isStreaming ? '#8b5cf6' : 'transparent',
-              color: input.trim() && !isStreaming ? '#fff' : 'var(--dash-text-dim)',
-            }}
+            className="max-w-2xl mx-auto relative"
           >
-            <Send size={15} />
-          </button>
-        </form>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Message Caret..."
+              aria-label="Message Caret"
+              disabled={isStreaming}
+              className="w-full h-12 rounded-xl pl-4 pr-12 text-sm outline-none transition-colors"
+              style={{
+                background: 'var(--dash-card)',
+                border: '1px solid var(--dash-border)',
+                color: 'var(--dash-text)',
+                fontSize: '16px',
+              }}
+              onFocus={(e) => {
+                (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
+              }}
+              onBlur={(e) => {
+                (e.target as HTMLElement).style.borderColor = 'var(--dash-border)';
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isStreaming}
+              aria-label="Send message"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
+              style={{
+                background: input.trim() && !isStreaming ? '#8b5cf6' : 'transparent',
+                color: input.trim() && !isStreaming ? '#fff' : 'var(--dash-text-dim)',
+              }}
+            >
+              <Send size={15} />
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

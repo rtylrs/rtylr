@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, type Project, type Milestone } from '../../shared/stores/flowStore';
 import { useProjects } from '../projects/useProjects';
 import { useMilestones } from '../milestones/useMilestones';
@@ -40,6 +41,7 @@ const Timeline: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Timeline · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: 'Timeline' }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>

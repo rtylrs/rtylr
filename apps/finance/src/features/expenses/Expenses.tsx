@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
@@ -135,6 +136,7 @@ const Expenses: React.FC = () => {
       transition={{ duration: 0.25 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Expenses · rtylr" />
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>

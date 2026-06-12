@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { Gift, Package, Plus, X } from 'lucide-react';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
@@ -173,121 +174,130 @@ const LoyaltyRewards: React.FC = () => {
   const [showAdd, setShowAdd] = useState(false);
 
   return (
-    <div style={{ maxWidth: '1100px' }}>
-      <PageHeader
-        title="Rewards catalog"
-        subtitle="What customers can redeem their points for"
-        actions={
-          <Button variant="primary" aria-label="Add reward" onClick={() => setShowAdd(true)}>
-            <Plus size={13} />
-            Add reward
-          </Button>
-        }
-      />
+    <>
+      <HelmetContainer title="Rewards catalog · rtylr" />
+      <div style={{ maxWidth: '1100px' }}>
+        <PageHeader
+          title="Rewards catalog"
+          subtitle="What customers can redeem their points for"
+          actions={
+            <Button variant="primary" aria-label="Add reward" onClick={() => setShowAdd(true)}>
+              <Plus size={13} />
+              Add reward
+            </Button>
+          }
+        />
 
-      {showAdd && <AddRewardModal onClose={() => setShowAdd(false)} />}
+        {showAdd && <AddRewardModal onClose={() => setShowAdd(false)} />}
 
-      {isLoading ? (
-        <Card>
-          <SkeletonList count={4} />
-        </Card>
-      ) : rewards.length === 0 ? (
-        <Card>
-          <EmptyState
-            icon={Gift}
-            title="No rewards yet"
-            description="Add your first reward to the catalog."
-          />
-        </Card>
-      ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: '14px',
-          }}
-        >
-          {rewards.map((r) => (
-            <div
-              key={r.id}
-              style={{
-                background: 'var(--hub-card)',
-                border: '1px solid var(--hub-border)',
-                borderRadius: '14px',
-                padding: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                position: 'relative',
-              }}
-            >
+        {isLoading ? (
+          <Card>
+            <SkeletonList count={4} />
+          </Card>
+        ) : rewards.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={Gift}
+              title="No rewards yet"
+              description="Add your first reward to the catalog."
+            />
+          </Card>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+              gap: '14px',
+            }}
+          >
+            {rewards.map((r) => (
               <div
+                key={r.id}
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '12px',
-                  background: 'rgba(232,121,249,0.14)',
-                  color: '#e879f9',
+                  background: 'var(--hub-card)',
+                  border: '1px solid var(--hub-border)',
+                  borderRadius: '14px',
+                  padding: '16px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  position: 'relative',
                 }}
               >
-                <Gift size={20} />
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hub-text)' }}>
-                  {r.name}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
-                  {r.description}
-                </div>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingTop: '10px',
-                  borderTop: '1px solid var(--hub-border)',
-                }}
-              >
-                <span
-                  style={{ fontSize: '16px', fontWeight: 700, color: 'var(--crm-accent, #3b82f6)' }}
-                >
-                  {r.pointsCost.toLocaleString()} pts
-                </span>
-                <span
+                <div
                   style={{
-                    fontSize: '10px',
-                    padding: '2px 8px',
-                    borderRadius: '9999px',
-                    background: 'var(--hub-hover)',
-                    color: 'var(--hub-text-muted)',
-                    display: 'inline-flex',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'rgba(232,121,249,0.14)',
+                    color: '#e879f9',
+                    display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    justifyContent: 'center',
                   }}
                 >
-                  <Package size={9} />
-                  {r.stock} left
-                </span>
+                  <Gift size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--hub-text)' }}>
+                    {r.name}
+                  </div>
+                  <div
+                    style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}
+                  >
+                    {r.description}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: '10px',
+                    borderTop: '1px solid var(--hub-border)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: 700,
+                      color: 'var(--crm-accent, #3b82f6)',
+                    }}
+                  >
+                    {r.pointsCost.toLocaleString()} pts
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      padding: '2px 8px',
+                      borderRadius: '9999px',
+                      background: 'var(--hub-hover)',
+                      color: 'var(--hub-text-muted)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <Package size={9} />
+                    {r.stock} left
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--hub-text-dim)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {r.category}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: '10px',
-                  color: 'var(--hub-text-dim)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {r.category}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

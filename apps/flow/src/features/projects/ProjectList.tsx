@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   ChevronDown,
 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -240,6 +241,7 @@ const ProjectList: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="List · rtylr" />
       {/* Header */}
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"

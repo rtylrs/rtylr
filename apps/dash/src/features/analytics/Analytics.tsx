@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { DollarSign, ShoppingBag, TrendingUp, Star, BarChart2, Loader2 } from 'lucide-react';
@@ -77,150 +78,153 @@ const Analytics: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-primary">Analytics</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Track your business performance</p>
+    <>
+      <HelmetContainer title="Analytics · rtylr" />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-primary">Analytics</h1>
+            <p className="text-sm text-gray-400 mt-0.5">Track your business performance</p>
+          </div>
+          <Tabs value={range} onValueChange={setRange}>
+            <TabsList>
+              <TabsTrigger value="7d">Last 7 days</TabsTrigger>
+              <TabsTrigger value="30d">Last 30 days</TabsTrigger>
+              <TabsTrigger value="90d">Last 90 days</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-        <Tabs value={range} onValueChange={setRange}>
-          <TabsList>
-            <TabsTrigger value="7d">Last 7 days</TabsTrigger>
-            <TabsTrigger value="30d">Last 30 days</TabsTrigger>
-            <TabsTrigger value="90d">Last 90 days</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-4">
-        {statCards.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.label}>
-              <CardContent className="pt-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                      {stat.label}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      {isLoading ? (
-                        <Loader2 size={16} className="animate-spin text-gray-400" />
-                      ) : (
-                        <p className="text-2xl font-bold text-primary">{stat.value}</p>
+        {/* Stats Row */}
+        <div className="grid grid-cols-4 gap-4">
+          {statCards.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.label}>
+                <CardContent className="pt-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                        {stat.label}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        {isLoading ? (
+                          <Loader2 size={16} className="animate-spin text-gray-400" />
+                        ) : (
+                          <p className="text-2xl font-bold text-primary">{stat.value}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div
+                      className={cn(
+                        'h-10 w-10 rounded-xl flex items-center justify-center',
+                        stat.iconClass
                       )}
+                    >
+                      <Icon size={20} />
                     </div>
                   </div>
-                  <div
-                    className={cn(
-                      'h-10 w-10 rounded-xl flex items-center justify-center',
-                      stat.iconClass
-                    )}
-                  >
-                    <Icon size={20} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-      {/* Revenue sparkline */}
-      {kpis && kpis.revenueSeries.length > 1 && (
+        {/* Revenue sparkline */}
+        {kpis && kpis.revenueSeries.length > 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue Trend</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div style={{ height: 80, position: 'relative' }}>
+                <svg
+                  width="100%"
+                  height="80"
+                  viewBox={`0 0 ${kpis.revenueSeries.length - 1} 100`}
+                  preserveAspectRatio="none"
+                >
+                  {(() => {
+                    const vals = kpis.revenueSeries;
+                    const max = Math.max(...vals);
+                    const min = Math.min(...vals);
+                    const range = max - min || 1;
+                    const pts = vals
+                      .map((v, i) => `${i},${100 - ((v - min) / range) * 90}`)
+                      .join(' ');
+                    return (
+                      <>
+                        <polyline
+                          fill="none"
+                          stroke="#10b981"
+                          strokeWidth="2"
+                          vectorEffect="non-scaling-stroke"
+                          points={pts}
+                        />
+                        <polyline
+                          fill="rgba(16,185,129,0.12)"
+                          stroke="none"
+                          points={`0,100 ${pts} ${vals.length - 1},100`}
+                        />
+                      </>
+                    );
+                  })()}
+                </svg>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+            <CardTitle>Top Items</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div style={{ height: 80, position: 'relative' }}>
-              <svg
-                width="100%"
-                height="80"
-                viewBox={`0 0 ${kpis.revenueSeries.length - 1} 100`}
-                preserveAspectRatio="none"
-              >
-                {(() => {
-                  const vals = kpis.revenueSeries;
-                  const max = Math.max(...vals);
-                  const min = Math.min(...vals);
-                  const range = max - min || 1;
-                  const pts = vals
-                    .map((v, i) => `${i},${100 - ((v - min) / range) * 90}`)
-                    .join(' ');
-                  return (
-                    <>
-                      <polyline
-                        fill="none"
-                        stroke="#10b981"
-                        strokeWidth="2"
-                        vectorEffect="non-scaling-stroke"
-                        points={pts}
-                      />
-                      <polyline
-                        fill="rgba(16,185,129,0.12)"
-                        stroke="none"
-                        points={`0,100 ${pts} ${vals.length - 1},100`}
-                      />
-                    </>
-                  );
-                })()}
-              </svg>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Units Sold</TableHead>
+                  <TableHead>Revenue</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sellersLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={3}>
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 size={18} className="animate-spin text-gray-300" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : bestSellers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3}>
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <BarChart2 size={28} className="text-gray-200 mb-3" />
+                        <p className="text-sm font-medium text-gray-400">No data yet</p>
+                        <p className="text-xs text-gray-300 mt-1">
+                          Top performing items will appear here
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  bestSellers.map((item) => (
+                    <TableRow key={item.productId}>
+                      <TableCell className="font-medium">{item.name}</TableCell>
+                      <TableCell>{item.unitsSold.toLocaleString()}</TableCell>
+                      <TableCell>${(item.revenueMinorUnits / 100).toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Items</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Units Sold</TableHead>
-                <TableHead>Revenue</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sellersLoading ? (
-                <TableRow>
-                  <TableCell colSpan={3}>
-                    <div className="flex items-center justify-center py-6">
-                      <Loader2 size={18} className="animate-spin text-gray-300" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : bestSellers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3}>
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <BarChart2 size={28} className="text-gray-200 mb-3" />
-                      <p className="text-sm font-medium text-gray-400">No data yet</p>
-                      <p className="text-xs text-gray-300 mt-1">
-                        Top performing items will appear here
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                bestSellers.map((item) => (
-                  <TableRow key={item.productId}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.unitsSold.toLocaleString()}</TableCell>
-                    <TableCell>${(item.revenueMinorUnits / 100).toFixed(2)}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { AlertTriangle, RefreshCw, ShoppingCart } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useLowStock } from '../inventory/useInventory';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -26,6 +27,7 @@ const LowStockAlerts: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Low stock alerts · rtylr" />
       <PageHeader
         title="Low Stock Alerts"
         description={`${items.length} items below minimum stock levels`}

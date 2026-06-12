@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { Plus, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -170,146 +171,149 @@ const Pipeline: React.FC = () => {
   }, [pipelineCols, leadsByStage]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
-      <PageHeader
-        title="Sales Pipeline"
-        subtitle="Track deals from cold outreach to closed contracts"
-        actions={
-          <Button variant="primary" onClick={() => setCreateOpen(true)}>
-            <Plus size={13} />
-            Add lead
-          </Button>
-        }
-      />
+    <>
+      <HelmetContainer title="Sales pipeline · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
+        <PageHeader
+          title="Sales Pipeline"
+          subtitle="Track deals from cold outreach to closed contracts"
+          actions={
+            <Button variant="primary" onClick={() => setCreateOpen(true)}>
+              <Plus size={13} />
+              Add lead
+            </Button>
+          }
+        />
 
-      {isLoading ? (
-        <div style={{ padding: '16px' }}>
-          <SkeletonList count={4} />
-        </div>
-      ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, minmax(200px, 1fr))',
-            gap: '12px',
-            overflowX: 'auto',
-            paddingBottom: '8px',
-          }}
-        >
-          {STAGES.map(({ key, label }) => {
-            const summary = colSummary[key];
-            const columnLeads = leadsByStage[key] ?? [];
-            const stageColor = STAGE_COLORS[key];
-            return (
-              <div
-                key={key}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  minWidth: '200px',
-                }}
-              >
-                {/* Column header */}
+        {isLoading ? (
+          <div style={{ padding: '16px' }}>
+            <SkeletonList count={4} />
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, minmax(200px, 1fr))',
+              gap: '12px',
+              overflowX: 'auto',
+              paddingBottom: '8px',
+            }}
+          >
+            {STAGES.map(({ key, label }) => {
+              const summary = colSummary[key];
+              const columnLeads = leadsByStage[key] ?? [];
+              const stageColor = STAGE_COLORS[key];
+              return (
                 <div
+                  key={key}
                   style={{
-                    padding: '10px 12px',
-                    background: 'var(--hub-card)',
-                    border: '1px solid var(--hub-border)',
-                    borderRadius: '10px',
-                    borderTop: `3px solid ${stageColor}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    minWidth: '200px',
                   }}
                 >
+                  {/* Column header */}
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '4px',
+                      padding: '10px 12px',
+                      background: 'var(--hub-card)',
+                      border: '1px solid var(--hub-border)',
+                      borderRadius: '10px',
+                      borderTop: `3px solid ${stageColor}`,
                     }}
                   >
-                    <p
+                    <div
                       style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: 'var(--hub-text)',
+                          margin: 0,
+                        }}
+                      >
+                        {label}
+                      </p>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          background: 'var(--hub-hover)',
+                          color: 'var(--hub-text-muted)',
+                        }}
+                      >
+                        {summary.count}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <TrendingUp size={10} style={{ color: stageColor }} />
+                      <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                        ${summary.mrr.toLocaleString()}/mo
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Lead cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+                    {columnLeads.map((lead) => (
+                      <LeadCard
+                        key={lead.id}
+                        lead={lead}
+                        onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Add button - only on Cold column */}
+                  {key === 'cold' && (
+                    <button
+                      onClick={() => setCreateOpen(true)}
+                      aria-label="Add new lead"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        padding: '8px',
+                        borderRadius: '8px',
+                        background: 'transparent',
+                        border: '1px dashed var(--hub-border)',
+                        cursor: 'pointer',
+                        color: 'var(--hub-text-dim)',
                         fontSize: '12px',
-                        fontWeight: 600,
-                        color: 'var(--hub-text)',
-                        margin: 0,
+                        transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                        (e.currentTarget as HTMLElement).style.color = 'var(--hub-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'transparent';
+                        (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-dim)';
                       }}
                     >
-                      {label}
-                    </p>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        padding: '1px 6px',
-                        borderRadius: '4px',
-                        background: 'var(--hub-hover)',
-                        color: 'var(--hub-text-muted)',
-                      }}
-                    >
-                      {summary.count}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <TrendingUp size={10} style={{ color: stageColor }} />
-                    <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      ${summary.mrr.toLocaleString()}/mo
-                    </span>
-                  </div>
+                      <Plus size={12} />
+                      Add lead
+                    </button>
+                  )}
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                {/* Lead cards */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
-                  {columnLeads.map((lead) => (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
-                    />
-                  ))}
-                </div>
-
-                {/* Add button - only on Cold column */}
-                {key === 'cold' && (
-                  <button
-                    onClick={() => setCreateOpen(true)}
-                    aria-label="Add new lead"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      background: 'transparent',
-                      border: '1px dashed var(--hub-border)',
-                      cursor: 'pointer',
-                      color: 'var(--hub-text-dim)',
-                      fontSize: '12px',
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                      (e.currentTarget as HTMLElement).style.color = 'var(--hub-text)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'transparent';
-                      (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-dim)';
-                    }}
-                  >
-                    <Plus size={12} />
-                    Add lead
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
-    </div>
+        <CreateLeadModal open={createOpen} onClose={() => setCreateOpen(false)} />
+      </div>
+    </>
   );
 };
 

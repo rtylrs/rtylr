@@ -23,6 +23,7 @@ import {
   useTransferProjectOwnership,
   useInviteProjectMember,
 } from './useProjectMembers';
+import { HelmetContainer } from '@voxire/components';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
@@ -107,6 +108,7 @@ const ProjectSettings: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Project settings · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
           items={[

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
@@ -95,317 +96,325 @@ const Checkout = (): React.JSX.Element => {
 
   if (items.length === 0) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 16,
-          padding: '0 20px',
-        }}
-      >
-        <p style={{ fontSize: '18px', fontWeight: 600, color: 'rgba(0,0,0,0.7)' }}>
-          Your cart is empty
-        </p>
-        <button
-          onClick={() => window.history.back()}
+      <>
+        <HelmetContainer title="Checkout · rtylr" />
+        <div
           style={{
-            background: 'var(--menu-accent, #03aed2)',
-            color: 'var(--menu-accent-text, #ffffff)',
-            border: 'none',
-            borderRadius: 12,
-            padding: '12px 24px',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            minHeight: 44,
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            padding: '0 20px',
           }}
         >
-          Back to Menu
-        </button>
-      </div>
+          <p style={{ fontSize: '18px', fontWeight: 600, color: 'rgba(0,0,0,0.7)' }}>
+            Your cart is empty
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              background: 'var(--menu-accent, #03aed2)',
+              color: 'var(--menu-accent-text, #ffffff)',
+              border: 'none',
+              borderRadius: 12,
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              minHeight: 44,
+            }}
+          >
+            Back to Menu
+          </button>
+        </div>
+      </>
     );
   }
 
   return (
-    <div
-      style={{
-        maxWidth: 520,
-        margin: '0 auto',
-        padding: '24px 20px 40px',
-        background: 'var(--menu-bg, #ffffff)',
-        minHeight: '100vh',
-      }}
-    >
-      {/* Back */}
-      <button
-        onClick={() => window.history.back()}
-        aria-label="Go back"
+    <>
+      <HelmetContainer title="Checkout · rtylr" />
+      <div
         style={{
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: '14px',
-          color: 'rgba(0,0,0,0.5)',
-          padding: '0 0 16px 0',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
+          maxWidth: 520,
+          margin: '0 auto',
+          padding: '24px 20px 40px',
+          background: 'var(--menu-bg, #ffffff)',
+          minHeight: '100vh',
         }}
       >
-        &larr; Back
-      </button>
-
-      <h1 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 24px' }}>Checkout</h1>
-
-      <form onSubmit={(e) => void handleSubmit(e)} noValidate>
-        {/* Cart summary */}
-        <section
-          style={{
-            border: '1px solid rgba(0,0,0,0.1)',
-            borderRadius: 16,
-            padding: '16px',
-            marginBottom: 24,
-          }}
-        >
-          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>Order Summary</h2>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {items.map((item) => (
-              <li
-                key={item.menuItemId}
-                style={{
-                  padding: '8px 0',
-                  borderBottom: '1px solid rgba(0,0,0,0.05)',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <span style={{ fontSize: '15px' }}>
-                    {item.name}
-                    <span
-                      style={{
-                        fontSize: '13px',
-                        color: 'rgba(0,0,0,0.45)',
-                        marginLeft: 6,
-                      }}
-                    >
-                      x{item.quantity}
-                    </span>
-                  </span>
-                  <span style={{ fontSize: '15px', fontWeight: 600 }}>
-                    {formatPrice(item.unitPrice * item.quantity)}
-                  </span>
-                </div>
-
-                {/* Expandable item note */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExpandedItemId((prev) => (prev === item.menuItemId ? null : item.menuItemId))
-                  }
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    color: 'var(--menu-accent, #03aed2)',
-                    padding: '4px 0 0',
-                  }}
-                >
-                  {item.notes
-                    ? 'Edit note'
-                    : expandedItemId === item.menuItemId
-                      ? 'Cancel'
-                      : '+ Add note'}
-                </button>
-
-                {expandedItemId === item.menuItemId && (
-                  <textarea
-                    value={item.notes}
-                    onChange={(e) => setItemNote(item.menuItemId, e.target.value)}
-                    placeholder="e.g. no pickles, extra sauce..."
-                    rows={2}
-                    style={{
-                      width: '100%',
-                      marginTop: 6,
-                      padding: '8px 10px',
-                      fontSize: '14px',
-                      border: '1px solid rgba(0,0,0,0.15)',
-                      borderRadius: 8,
-                      resize: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                )}
-              </li>
-            ))}
-          </ul>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              paddingTop: 12,
-              fontWeight: 700,
-              fontSize: '16px',
-            }}
-          >
-            <span>Total</span>
-            <span>{formatPrice(total())}</span>
-          </div>
-        </section>
-
-        {/* Customer info */}
-        <section style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>Your Info</h2>
-
-          <label
-            htmlFor="checkout-name"
-            style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
-          >
-            Name *
-          </label>
-          <input
-            id="checkout-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="John Doe"
-            required
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              fontSize: '16px',
-              border: '1px solid rgba(0,0,0,0.15)',
-              borderRadius: 10,
-              marginBottom: 14,
-              boxSizing: 'border-box',
-            }}
-          />
-
-          <label
-            htmlFor="checkout-phone"
-            style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
-          >
-            Phone *
-          </label>
-          <input
-            id="checkout-phone"
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+1 234 567 8900"
-            required
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              fontSize: '16px',
-              border: '1px solid rgba(0,0,0,0.15)',
-              borderRadius: 10,
-              marginBottom: 14,
-              boxSizing: 'border-box',
-            }}
-          />
-
-          <label
-            htmlFor="checkout-email"
-            style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
-          >
-            Email <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.4)' }}>(optional)</span>
-          </label>
-          <input
-            id="checkout-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="john@example.com"
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              fontSize: '16px',
-              border: '1px solid rgba(0,0,0,0.15)',
-              borderRadius: 10,
-              marginBottom: 14,
-              boxSizing: 'border-box',
-            }}
-          />
-        </section>
-
-        {/* Order notes */}
-        <section style={{ marginBottom: 28 }}>
-          <label
-            htmlFor="checkout-notes"
-            style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
-          >
-            Order Notes{' '}
-            <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.4)' }}>(optional)</span>
-          </label>
-          <textarea
-            id="checkout-notes"
-            value={orderNotes}
-            onChange={(e) => setOrderNotes(e.target.value)}
-            placeholder="Any special instructions for the whole order..."
-            rows={3}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              fontSize: '16px',
-              border: '1px solid rgba(0,0,0,0.15)',
-              borderRadius: 10,
-              resize: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        </section>
-
-        {/* Error */}
-        {errorMessage && (
-          <p
-            role="alert"
-            style={{
-              color: '#dc2626',
-              fontSize: '14px',
-              marginBottom: 16,
-              padding: '10px 14px',
-              background: '#fef2f2',
-              borderRadius: 8,
-            }}
-          >
-            {errorMessage}
-          </p>
-        )}
-
-        {/* Submit */}
+        {/* Back */}
         <button
-          type="submit"
-          disabled={submitting}
+          onClick={() => window.history.back()}
+          aria-label="Go back"
           style={{
-            width: '100%',
-            background: submitting ? 'rgba(0,0,0,0.2)' : 'var(--menu-accent, #03aed2)',
-            color: 'var(--menu-accent-text, #ffffff)',
+            background: 'transparent',
             border: 'none',
-            borderRadius: 14,
-            padding: '16px',
-            fontSize: '17px',
-            fontWeight: 700,
-            cursor: submitting ? 'not-allowed' : 'pointer',
-            minHeight: 52,
+            cursor: 'pointer',
+            fontSize: '14px',
+            color: 'rgba(0,0,0,0.5)',
+            padding: '0 0 16px 0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
+            gap: 4,
           }}
         >
-          {submitting ? 'Placing Order...' : `Place Order · ${formatPrice(total())}`}
+          &larr; Back
         </button>
-      </form>
-    </div>
+
+        <h1 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 24px' }}>Checkout</h1>
+
+        <form onSubmit={(e) => void handleSubmit(e)} noValidate>
+          {/* Cart summary */}
+          <section
+            style={{
+              border: '1px solid rgba(0,0,0,0.1)',
+              borderRadius: 16,
+              padding: '16px',
+              marginBottom: 24,
+            }}
+          >
+            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>Order Summary</h2>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {items.map((item) => (
+                <li
+                  key={item.menuItemId}
+                  style={{
+                    padding: '8px 0',
+                    borderBottom: '1px solid rgba(0,0,0,0.05)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span style={{ fontSize: '15px' }}>
+                      {item.name}
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          color: 'rgba(0,0,0,0.45)',
+                          marginLeft: 6,
+                        }}
+                      >
+                        x{item.quantity}
+                      </span>
+                    </span>
+                    <span style={{ fontSize: '15px', fontWeight: 600 }}>
+                      {formatPrice(item.unitPrice * item.quantity)}
+                    </span>
+                  </div>
+
+                  {/* Expandable item note */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedItemId((prev) =>
+                        prev === item.menuItemId ? null : item.menuItemId
+                      )
+                    }
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      color: 'var(--menu-accent, #03aed2)',
+                      padding: '4px 0 0',
+                    }}
+                  >
+                    {item.notes
+                      ? 'Edit note'
+                      : expandedItemId === item.menuItemId
+                        ? 'Cancel'
+                        : '+ Add note'}
+                  </button>
+
+                  {expandedItemId === item.menuItemId && (
+                    <textarea
+                      value={item.notes}
+                      onChange={(e) => setItemNote(item.menuItemId, e.target.value)}
+                      placeholder="e.g. no pickles, extra sauce..."
+                      rows={2}
+                      style={{
+                        width: '100%',
+                        marginTop: 6,
+                        padding: '8px 10px',
+                        fontSize: '14px',
+                        border: '1px solid rgba(0,0,0,0.15)',
+                        borderRadius: 8,
+                        resize: 'none',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                paddingTop: 12,
+                fontWeight: 700,
+                fontSize: '16px',
+              }}
+            >
+              <span>Total</span>
+              <span>{formatPrice(total())}</span>
+            </div>
+          </section>
+
+          {/* Customer info */}
+          <section style={{ marginBottom: 24 }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 12px' }}>Your Info</h2>
+
+            <label
+              htmlFor="checkout-name"
+              style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
+            >
+              Name *
+            </label>
+            <input
+              id="checkout-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              required
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: '16px',
+                border: '1px solid rgba(0,0,0,0.15)',
+                borderRadius: 10,
+                marginBottom: 14,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <label
+              htmlFor="checkout-phone"
+              style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
+            >
+              Phone *
+            </label>
+            <input
+              id="checkout-phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 234 567 8900"
+              required
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: '16px',
+                border: '1px solid rgba(0,0,0,0.15)',
+                borderRadius: 10,
+                marginBottom: 14,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <label
+              htmlFor="checkout-email"
+              style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
+            >
+              Email <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.4)' }}>(optional)</span>
+            </label>
+            <input
+              id="checkout-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="john@example.com"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: '16px',
+                border: '1px solid rgba(0,0,0,0.15)',
+                borderRadius: 10,
+                marginBottom: 14,
+                boxSizing: 'border-box',
+              }}
+            />
+          </section>
+
+          {/* Order notes */}
+          <section style={{ marginBottom: 28 }}>
+            <label
+              htmlFor="checkout-notes"
+              style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: 4 }}
+            >
+              Order Notes{' '}
+              <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.4)' }}>(optional)</span>
+            </label>
+            <textarea
+              id="checkout-notes"
+              value={orderNotes}
+              onChange={(e) => setOrderNotes(e.target.value)}
+              placeholder="Any special instructions for the whole order..."
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: '16px',
+                border: '1px solid rgba(0,0,0,0.15)',
+                borderRadius: 10,
+                resize: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </section>
+
+          {/* Error */}
+          {errorMessage && (
+            <p
+              role="alert"
+              style={{
+                color: '#dc2626',
+                fontSize: '14px',
+                marginBottom: 16,
+                padding: '10px 14px',
+                background: '#fef2f2',
+                borderRadius: 8,
+              }}
+            >
+              {errorMessage}
+            </p>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              width: '100%',
+              background: submitting ? 'rgba(0,0,0,0.2)' : 'var(--menu-accent, #03aed2)',
+              color: 'var(--menu-accent-text, #ffffff)',
+              border: 'none',
+              borderRadius: 14,
+              padding: '16px',
+              fontSize: '17px',
+              fontWeight: 700,
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              minHeight: 52,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            {submitting ? 'Placing Order...' : `Place Order · ${formatPrice(total())}`}
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { FullScreenLoader } from '@voxire/components';
+import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import { useCartStore } from '../../../shared/stores/cartStore';
@@ -91,13 +91,16 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   };
 
   return (
-    <GridLayout
-      business={businessInfo}
-      categories={categories}
-      onAddToCart={onlineOrderingEnabled ? onAddToCart : undefined}
-      onPlaceOrder={onlineOrderingEnabled ? onPlaceOrder : undefined}
-      onClearCart={onlineOrderingEnabled ? clearCart : undefined}
-    />
+    <>
+      <HelmetContainer title="Menu · rtylr" />
+      <GridLayout
+        business={businessInfo}
+        categories={categories}
+        onAddToCart={onlineOrderingEnabled ? onAddToCart : undefined}
+        onPlaceOrder={onlineOrderingEnabled ? onPlaceOrder : undefined}
+        onClearCart={onlineOrderingEnabled ? clearCart : undefined}
+      />
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Warehouse as WarehouseIcon, MapPin, User, Trash2 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useWarehouses, useCreateWarehouse, useDeleteWarehouse } from './useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
@@ -63,6 +64,7 @@ const Warehouses: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Warehouses · rtylr" />
       <PageHeader
         title="Warehouses"
         description={`${warehouses.length} active storage locations`}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { Plus, Calendar } from 'lucide-react';
 import { useTimeOff, useApproveTimeOff } from '../../shared/hooks/useHrExtras';

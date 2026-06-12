@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -163,6 +164,7 @@ const Bills: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Bills to pay · rtylr" />
       <PageHeader
         title="Bills to Pay"
         subtitle={

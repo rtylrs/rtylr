@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { ScrollText, Download, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button, Input } from '../../shared/components/ui';
 import { ActivityEntryRow, EmptyState, SkeletonList } from '../../shared/components/dash';
@@ -61,115 +62,120 @@ const Audit: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 max-w-5xl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(239,68,68,0.15)' }}
-          >
-            <ScrollText size={16} style={{ color: '#ef4444' }} />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Audit log
-            </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-              Tamper-evident history of security-relevant events.
-            </p>
-          </div>
-        </div>
-        <Button variant="secondary" onClick={exportCsv}>
-          <Download size={14} />
-          Export CSV
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 max-w-sm">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--dash-text-dim)' }}
-          />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search actor, action, IP..."
-            className="pl-9"
-          />
-        </div>
-        <div className="flex items-center gap-1">
-          {(['all', 'info', 'warning', 'critical'] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setSeverity(s)}
-              className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
-              style={{
-                background: severity === s ? 'rgba(239,68,68,0.15)' : 'var(--dash-hover)',
-                color: severity === s ? '#ef4444' : 'var(--dash-text-muted)',
-                border:
-                  severity === s ? '1px solid rgba(239,68,68,0.3)' : '1px solid var(--dash-border)',
-              }}
+    <>
+      <HelmetContainer title="Audit log · rtylr" />
+      <div className="space-y-5 max-w-5xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="h-9 w-9 rounded-xl flex items-center justify-center"
+              style={{ background: 'rgba(239,68,68,0.15)' }}
             >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-      >
-        {isLoading ? (
-          <div className="p-2">
-            <SkeletonList rows={10} />
+              <ScrollText size={16} style={{ color: '#ef4444' }} />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+                Audit log
+              </h1>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                Tamper-evident history of security-relevant events.
+              </p>
+            </div>
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="p-4">
-            <EmptyState
-              icon={ScrollText}
-              title="No audit entries"
-              description="Security-relevant events will appear here."
+          <Button variant="secondary" onClick={exportCsv}>
+            <Download size={14} />
+            Export CSV
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 max-w-sm">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: 'var(--dash-text-dim)' }}
+            />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search actor, action, IP..."
+              className="pl-9"
             />
           </div>
-        ) : (
-          <div className="p-2">
-            {filtered.map((e, i) => (
-              <ActivityEntryRow key={e.id} entry={e} index={i} showIp />
+          <div className="flex items-center gap-1">
+            {(['all', 'info', 'warning', 'critical'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSeverity(s)}
+                className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"
+                style={{
+                  background: severity === s ? 'rgba(239,68,68,0.15)' : 'var(--dash-hover)',
+                  color: severity === s ? '#ef4444' : 'var(--dash-text-muted)',
+                  border:
+                    severity === s
+                      ? '1px solid rgba(239,68,68,0.3)'
+                      : '1px solid var(--dash-border)',
+                }}
+              >
+                {s}
+              </button>
             ))}
           </div>
-        )}
-      </div>
+        </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-          {total === 0 ? 'No entries' : `Showing ${rangeStart}–${rangeEnd} of ${total}`}
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            disabled={page <= 1 || isFetching}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            <ChevronLeft size={14} />
-            Previous
-          </Button>
-          <span className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            variant="secondary"
-            disabled={page >= totalPages || isFetching}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Next
-            <ChevronRight size={14} />
-          </Button>
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+        >
+          {isLoading ? (
+            <div className="p-2">
+              <SkeletonList rows={10} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="p-4">
+              <EmptyState
+                icon={ScrollText}
+                title="No audit entries"
+                description="Security-relevant events will appear here."
+              />
+            </div>
+          ) : (
+            <div className="p-2">
+              {filtered.map((e, i) => (
+                <ActivityEntryRow key={e.id} entry={e} index={i} showIp />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+            {total === 0 ? 'No entries' : `Showing ${rangeStart}–${rangeEnd} of ${total}`}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              <ChevronLeft size={14} />
+              Previous
+            </Button>
+            <span className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="secondary"
+              disabled={page >= totalPages || isFetching}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next
+              <ChevronRight size={14} />
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

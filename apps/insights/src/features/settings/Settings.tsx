@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { Clock, Loader2, Trash2 } from 'lucide-react';
@@ -72,6 +73,7 @@ const Settings: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-3xl"
     >
+      <HelmetContainer title="Settings · rtylr" />
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.settings.title')}

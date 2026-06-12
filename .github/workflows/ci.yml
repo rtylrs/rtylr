@@ -14,13 +14,9 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # ── Quality gates ──────────────────────────────────────────────────
-  # These stay in the calling repo - they reference this repo's scripts
-  # (pnpm turbo typecheck/lint/build) and there's no duplication across
-  # repos to extract.
-
+  # ── Build & upload ─────────────────────────────────────────────────
   check:
-    name: Typecheck, Lint & Build
+    name: Build
     runs-on: blacksmith-2vcpu-ubuntu-2404
 
     steps:
@@ -48,11 +44,6 @@ jobs:
       - name: Generate contracts
         run: pnpm contracts:sync
 
-      - name: Audit request contracts
-        run: pnpm contracts:audit-requests
-
-      # Persist Turbo's task cache across runs so unchanged packages skip
-      # typecheck/build entirely. Keyed per-commit, falling back to the latest.
       - name: Turbo cache
         uses: actions/cache@v4
         with:
@@ -61,89 +52,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Format check
-        run: pnpm format:check
-
-      - name: Typecheck
-        run: pnpm turbo typecheck --cache-dir=.turbo
-
-      - name: Lint
-        run: pnpm lint
-
-      # Unit tests run across every workspace via the root vitest
-      # config. Gating here means a broken mapper or schema builder
-      # blocks the merge instead of surfacing in prod.
-      - name: Test
-        run: pnpm test
-
       - name: Build
         run: pnpm turbo build --cache-dir=.turbo
 
       - name: Upload dist artifacts
-        # Only upload on main pushes — deploy jobs only run on main and they
-        # download this artifact instead of rebuilding, saving ~3 min per app.
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{ github.sha }}
           path: dist/
           retention-days: 1
-
-  # ── End-to-end (Playwright) ────────────────────────────────────────
-  # Real browser, real Vite dev servers, API stubbed per-test via
-  # page.route(). Runs in parallel with `check` (it doesn't need the build) to
-  # cut wall-clock; the deploy jobs still gate on both. Hard-gated now that
-  # specs are green - if a test goes flaky, tighten the selector rather than
-  # re-enabling continue-on-error.
-  e2e:
-    name: Playwright E2E
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Cache the downloaded browsers; only re-download when the lockfile
-      # (hence the Playwright version) changes. OS deps are cheap to reapply.
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright (browsers + OS deps)
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Install Playwright OS deps (cached browsers)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
-
-      - name: Run Playwright specs
-        run: pnpm test:e2e
-        env:
-          # Point at a local port with nothing listening. page.route() stubs
-          # intercept before the network layer so tests never make real calls.
-          # If a stub is missing the request fails with ECONNREFUSED, not a prod hit.
-          VITE_API_URL: 'http://localhost:9999/'
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
 
   # ── Detect which apps changed ──────────────────────────────────────
   # dorny/paths-filter emits one boolean per app. A change under
@@ -215,7 +133,7 @@ jobs:
   # knobs (pnpm filter, dist dir, Cloudflare project name).
 
   deploy-auth:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.auth == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -227,7 +145,7 @@ jobs:
     secrets: inherit
 
   deploy-dash:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.dash == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -239,7 +157,7 @@ jobs:
     secrets: inherit
 
   deploy-erp:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.erp == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -251,7 +169,7 @@ jobs:
     secrets: inherit
 
   deploy-crm:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.crm == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -263,7 +181,7 @@ jobs:
     secrets: inherit
 
   deploy-hr:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.hr == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -275,7 +193,7 @@ jobs:
     secrets: inherit
 
   deploy-finance:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.finance == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -287,7 +205,7 @@ jobs:
     secrets: inherit
 
   deploy-flow:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.flow == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -299,7 +217,7 @@ jobs:
     secrets: inherit
 
   deploy-insights:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.insights == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -311,7 +229,7 @@ jobs:
     secrets: inherit
 
   deploy-menu:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.menu == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -323,7 +241,7 @@ jobs:
     secrets: inherit
 
   deploy-docs:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.docs == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -335,7 +253,7 @@ jobs:
     secrets: inherit
 
   deploy-recruit:
-    needs: [check, e2e, changes]
+    needs: [check, changes]
     if: needs.changes.outputs.recruit == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:

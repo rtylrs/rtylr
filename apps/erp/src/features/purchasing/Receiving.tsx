@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { usePurchaseOrders, useUpdatePurchaseOrderStatus } from './usePurchaseOrders';
 import type { PurchaseOrder } from '../../shared/services/erpApi';
 import PageHeader from '../../shared/components/PageHeader';
@@ -76,6 +77,7 @@ const Receiving: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Goods receiving · rtylr" />
       <PageHeader
         title="Goods Receiving"
         description="Receive items against open purchase orders"

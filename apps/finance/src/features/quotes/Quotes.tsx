@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -176,6 +177,7 @@ const Quotes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Quotes & estimates · rtylr" />
       <PageHeader
         title="Quotes & Estimates"
         subtitle={

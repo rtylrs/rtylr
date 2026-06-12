@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
@@ -63,6 +64,7 @@ const ExpenseDetail: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Expense detail · rtylr" />
       <PageHeader
         title={`Expense ${expense.id}`}
         subtitle={

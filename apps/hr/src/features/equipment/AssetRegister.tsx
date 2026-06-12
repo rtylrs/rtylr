@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { HardDrive } from 'lucide-react';
 import { useListAssets } from '../../shared/hooks/queries/useEquipment';
 import { SectionHeader, Card, EmptyState, Skeleton, Pill } from '../../shared/components/ui';

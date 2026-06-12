@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Package, TrendingDown, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +77,7 @@ const Products: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
+      <HelmetContainer title="Products · rtylr" />
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.title')}

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { FullScreenLoader } from '@voxire/components';
+import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
 import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import { useCartStore } from '../../../shared/stores/cartStore';
@@ -115,12 +115,15 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   }
 
   return (
-    <GridLayout
-      categories={categories}
-      business={business}
-      enableCart={onlineOrderingEnabled}
-      onCheckout={onlineOrderingEnabled ? handleCheckout : undefined}
-    />
+    <>
+      <HelmetContainer title="Menu · rtylr" />
+      <GridLayout
+        categories={categories}
+        business={business}
+        enableCart={onlineOrderingEnabled}
+        onCheckout={onlineOrderingEnabled ? handleCheckout : undefined}
+      />
+    </>
   );
 };
 

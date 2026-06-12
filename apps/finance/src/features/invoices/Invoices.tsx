@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
@@ -86,6 +87,7 @@ const Invoices: React.FC = () => {
       transition={{ duration: 0.2 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Invoices · rtylr" />
       <PageHeader
         title="Invoices"
         subtitle={

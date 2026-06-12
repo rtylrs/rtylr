@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Network } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useStaff } from '../staff/useStaff';
 import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
 import OrgNode, { OrgTreeNode } from '../../shared/components/OrgNode';

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
@@ -282,389 +283,394 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   );
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-          Invite member
-        </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--dash-text-muted)' }}>
-          Add a new member to your organization.
-        </p>
-      </div>
+    <>
+      <HelmetContainer title="Invite member · rtylr" />
+      <div className="space-y-6 max-w-2xl">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            Invite member
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+            Add a new member to your organization.
+          </p>
+        </div>
 
-      {/* Tabs */}
-      <div
-        className="flex items-center gap-1"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        {(['single', 'bulk'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className="px-4 py-2 text-sm font-medium capitalize transition-colors"
-            style={{
-              color: tab === t ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-              borderBottom: tab === t ? '2px solid #4583C4' : '2px solid transparent',
-              marginBottom: '-1px',
-            }}
-          >
-            {t === 'single' ? 'Single' : 'Bulk'}
-          </button>
-        ))}
-      </div>
-
-      {/* Single tab */}
-      {tab === 'single' && (
-        <form onSubmit={submitSingle} className="space-y-6">
-          {/* Personal details */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Personal details
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="inv-name">Full name</Label>
-                <Input
-                  id="inv-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="inv-email">Email address</Label>
-                <Input
-                  id="inv-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jane@example.com"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Authentication */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Authentication
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setAuthMethod('invite')}
-                className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
-                style={{
-                  background: authMethod === 'invite' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
-                  border: `1px solid ${
-                    authMethod === 'invite' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
-                  }`,
-                  color: authMethod === 'invite' ? '#4583C4' : 'var(--dash-text-muted)',
-                }}
-              >
-                <p className="font-semibold">Send invitation email</p>
-                <p
-                  className="text-[11px] mt-0.5 font-normal"
-                  style={{ color: 'var(--dash-text-dim)' }}
-                >
-                  Member sets their own password
-                </p>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAuthMethod('manual')}
-                className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
-                style={{
-                  background: authMethod === 'manual' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
-                  border: `1px solid ${
-                    authMethod === 'manual' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
-                  }`,
-                  color: authMethod === 'manual' ? '#4583C4' : 'var(--dash-text-muted)',
-                }}
-              >
-                <p className="font-semibold">Set password manually</p>
-                <p
-                  className="text-[11px] mt-0.5 font-normal"
-                  style={{ color: 'var(--dash-text-dim)' }}
-                >
-                  You share credentials directly
-                </p>
-              </button>
-            </div>
-
-            {authMethod === 'manual' && (
-              <div className="space-y-1.5">
-                <Label htmlFor="inv-password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="inv-password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 8 characters"
-                    required={authMethod === 'manual'}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2"
-                    style={{ color: 'var(--dash-text-dim)' }}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Role */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Role
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Controls what this member can see and do
-              </p>
-            </div>
-            {renderRoleSelector(role, (r) => setRole(r as TeamMember['role']))}
-          </div>
-
-          {/* Licenses */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Assign licenses
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Choose which apps this member can access
-              </p>
-            </div>
-            {renderAppSelector(selectedApps, toggleApp)}
-
-            {/* Seat cost preview */}
-            {sub &&
-              sub.pricePerSeatCents > 0 &&
-              (() => {
-                const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                  computeSeatProration(sub.pricePerSeatCents);
-                return (
-                  <div
-                    className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
-                    style={{
-                      background: 'var(--accent-muted)',
-                      border: '1px solid var(--accent-border)',
-                    }}
-                  >
-                    <CreditCard
-                      size={12}
-                      style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}
-                    />
-                    <p style={{ color: 'var(--dash-text-muted)' }}>
-                      Adding this member adds{' '}
-                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                        +{centsToDisplay(proratedCents)}
-                      </span>{' '}
-                      to this month ({daysRemaining} of {daysInMonth} days remaining), then{' '}
-                      <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
-                        +{centsToDisplay(sub.pricePerSeatCents)}/mo
-                      </span>{' '}
-                      from {nextMonthName} 1st.
-                    </p>
-                  </div>
-                );
-              })()}
-          </div>
-
-          {/* Group */}
-          {renderGroupSelector(singleGroupId, setSingleGroupId)}
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+        {/* Tabs */}
+        <div
+          className="flex items-center gap-1"
+          style={{ borderBottom: '1px solid var(--dash-border)' }}
+        >
+          {(['single', 'bulk'] as const).map((t) => (
             <button
-              type="button"
-              onClick={() => navigate({ to: '/team' })}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ color: 'var(--dash-text-muted)' }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={invite.isPending || !email.trim() || !name.trim()}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-              style={{ background: '#4583C4', color: '#fff' }}
-            >
-              <Send size={14} />
-              {authMethod === 'invite' ? 'Send invitation' : 'Create member'}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Bulk tab */}
-      {tab === 'bulk' && (
-        <div className="space-y-6">
-          {/* Email list */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Email addresses
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Paste one email per line
-              </p>
-            </div>
-            <textarea
-              value={bulkEmailsRaw}
-              onChange={(e) => setBulkEmailsRaw(e.target.value)}
-              placeholder="jane@example.com&#10;john@example.com&#10;alex@example.com"
-              rows={6}
-              className="w-full rounded-lg px-3 py-2.5 text-sm resize-y"
+              key={t}
+              onClick={() => setTab(t)}
+              className="px-4 py-2 text-sm font-medium capitalize transition-colors"
               style={{
-                background: 'var(--dash-bg)',
-                border: '1px solid var(--dash-border)',
-                color: 'var(--dash-text)',
-                fontFamily: 'monospace',
+                color: tab === t ? 'var(--dash-text)' : 'var(--dash-text-muted)',
+                borderBottom: tab === t ? '2px solid #4583C4' : '2px solid transparent',
+                marginBottom: '-1px',
               }}
-            />
-            {parsedEmails.length > 0 && (
-              <p className="text-[11px]" style={{ color: '#10b981' }}>
-                {parsedEmails.length} valid email{parsedEmails.length !== 1 ? 's' : ''} detected
-              </p>
-            )}
-          </div>
-
-          {/* Role */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Role
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Applied to all invited members
-              </p>
-            </div>
-            {renderRoleSelector(bulkRole, setBulkRole)}
-          </div>
-
-          {/* Licenses */}
-          <div
-            className="rounded-xl p-5 space-y-4"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Assign licenses
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Applied to all invited members
-              </p>
-            </div>
-            {renderAppSelector(bulkApps, toggleBulkApp)}
-          </div>
-
-          {/* Group */}
-          {renderGroupSelector(bulkGroupId, setBulkGroupId)}
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/team' })}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ color: 'var(--dash-text-muted)' }}
             >
-              Cancel
+              {t === 'single' ? 'Single' : 'Bulk'}
             </button>
-            <button
-              type="button"
-              disabled={bulkInvite.isPending || parsedEmails.length === 0}
-              onClick={submitBulk}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-              style={{ background: '#4583C4', color: '#fff' }}
-            >
-              <Send size={14} />
-              {bulkInvite.isPending
-                ? 'Sending...'
-                : `Send ${parsedEmails.length > 0 ? parsedEmails.length : ''} invitation${parsedEmails.length !== 1 ? 's' : ''}`}
-            </button>
-          </div>
+          ))}
+        </div>
 
-          {/* Bulk results */}
-          {bulkResults && (
+        {/* Single tab */}
+        {tab === 'single' && (
+          <form onSubmit={submitSingle} className="space-y-6">
+            {/* Personal details */}
             <div
-              className="rounded-xl overflow-hidden"
+              className="rounded-xl p-5 space-y-4"
               style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
-              <div
-                className="px-5 py-3 text-[10px] font-semibold uppercase tracking-wider grid grid-cols-12 gap-3"
-                style={{
-                  color: 'var(--dash-text-dim)',
-                  borderBottom: '1px solid var(--dash-border)',
-                }}
-              >
-                <div className="col-span-6">Email</div>
-                <div className="col-span-3">Status</div>
-                <div className="col-span-3">Note</div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                Personal details
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="inv-name">Full name</Label>
+                  <Input
+                    id="inv-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Jane Doe"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="inv-email">Email address</Label>
+                  <Input
+                    id="inv-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="jane@example.com"
+                    required
+                  />
+                </div>
               </div>
-              {bulkResults.map((r, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-12 gap-3 px-5 py-3 items-center"
-                  style={{ borderBottom: '1px solid var(--dash-border)' }}
+            </div>
+
+            {/* Authentication */}
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+            >
+              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                Authentication
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod('invite')}
+                  className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
+                  style={{
+                    background:
+                      authMethod === 'invite' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
+                    border: `1px solid ${
+                      authMethod === 'invite' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
+                    }`,
+                    color: authMethod === 'invite' ? '#4583C4' : 'var(--dash-text-muted)',
+                  }}
                 >
-                  <div
-                    className="col-span-6 text-sm truncate"
-                    style={{ color: 'var(--dash-text)' }}
-                  >
-                    {r.email}
-                  </div>
-                  <div className="col-span-3">
-                    <span
-                      className="text-[10px] px-1.5 py-0.5 rounded-md font-medium capitalize"
-                      style={{
-                        background: `${STATUS_COLORS[r.status]}18`,
-                        color: STATUS_COLORS[r.status],
-                      }}
-                    >
-                      {r.status}
-                    </span>
-                  </div>
-                  <div
-                    className="col-span-3 text-[11px] truncate"
+                  <p className="font-semibold">Send invitation email</p>
+                  <p
+                    className="text-[11px] mt-0.5 font-normal"
                     style={{ color: 'var(--dash-text-dim)' }}
                   >
-                    {r.message}
+                    Member sets their own password
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod('manual')}
+                  className="flex-1 px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors"
+                  style={{
+                    background:
+                      authMethod === 'manual' ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
+                    border: `1px solid ${
+                      authMethod === 'manual' ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'
+                    }`,
+                    color: authMethod === 'manual' ? '#4583C4' : 'var(--dash-text-muted)',
+                  }}
+                >
+                  <p className="font-semibold">Set password manually</p>
+                  <p
+                    className="text-[11px] mt-0.5 font-normal"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  >
+                    You share credentials directly
+                  </p>
+                </button>
+              </div>
+
+              {authMethod === 'manual' && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="inv-password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="inv-password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="At least 8 characters"
+                      required={authMethod === 'manual'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2"
+                      style={{ color: 'var(--dash-text-dim)' }}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
-      )}
-    </div>
+
+            {/* Role */}
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+            >
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  Role
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Controls what this member can see and do
+                </p>
+              </div>
+              {renderRoleSelector(role, (r) => setRole(r as TeamMember['role']))}
+            </div>
+
+            {/* Licenses */}
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+            >
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  Assign licenses
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Choose which apps this member can access
+                </p>
+              </div>
+              {renderAppSelector(selectedApps, toggleApp)}
+
+              {/* Seat cost preview */}
+              {sub &&
+                sub.pricePerSeatCents > 0 &&
+                (() => {
+                  const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                    computeSeatProration(sub.pricePerSeatCents);
+                  return (
+                    <div
+                      className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+                      style={{
+                        background: 'var(--accent-muted)',
+                        border: '1px solid var(--accent-border)',
+                      }}
+                    >
+                      <CreditCard
+                        size={12}
+                        style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }}
+                      />
+                      <p style={{ color: 'var(--dash-text-muted)' }}>
+                        Adding this member adds{' '}
+                        <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                          +{centsToDisplay(proratedCents)}
+                        </span>{' '}
+                        to this month ({daysRemaining} of {daysInMonth} days remaining), then{' '}
+                        <span className="font-semibold" style={{ color: 'var(--dash-text)' }}>
+                          +{centsToDisplay(sub.pricePerSeatCents)}/mo
+                        </span>{' '}
+                        from {nextMonthName} 1st.
+                      </p>
+                    </div>
+                  );
+                })()}
+            </div>
+
+            {/* Group */}
+            {renderGroupSelector(singleGroupId, setSingleGroupId)}
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => navigate({ to: '/team' })}
+                className="px-4 py-2 rounded-lg text-sm font-medium"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={invite.isPending || !email.trim() || !name.trim()}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
+                style={{ background: '#4583C4', color: '#fff' }}
+              >
+                <Send size={14} />
+                {authMethod === 'invite' ? 'Send invitation' : 'Create member'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Bulk tab */}
+        {tab === 'bulk' && (
+          <div className="space-y-6">
+            {/* Email list */}
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+            >
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  Email addresses
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Paste one email per line
+                </p>
+              </div>
+              <textarea
+                value={bulkEmailsRaw}
+                onChange={(e) => setBulkEmailsRaw(e.target.value)}
+                placeholder="jane@example.com&#10;john@example.com&#10;alex@example.com"
+                rows={6}
+                className="w-full rounded-lg px-3 py-2.5 text-sm resize-y"
+                style={{
+                  background: 'var(--dash-bg)',
+                  border: '1px solid var(--dash-border)',
+                  color: 'var(--dash-text)',
+                  fontFamily: 'monospace',
+                }}
+              />
+              {parsedEmails.length > 0 && (
+                <p className="text-[11px]" style={{ color: '#10b981' }}>
+                  {parsedEmails.length} valid email{parsedEmails.length !== 1 ? 's' : ''} detected
+                </p>
+              )}
+            </div>
+
+            {/* Role */}
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+            >
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  Role
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Applied to all invited members
+                </p>
+              </div>
+              {renderRoleSelector(bulkRole, setBulkRole)}
+            </div>
+
+            {/* Licenses */}
+            <div
+              className="rounded-xl p-5 space-y-4"
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+            >
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  Assign licenses
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Applied to all invited members
+                </p>
+              </div>
+              {renderAppSelector(bulkApps, toggleBulkApp)}
+            </div>
+
+            {/* Group */}
+            {renderGroupSelector(bulkGroupId, setBulkGroupId)}
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => navigate({ to: '/team' })}
+                className="px-4 py-2 rounded-lg text-sm font-medium"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={bulkInvite.isPending || parsedEmails.length === 0}
+                onClick={submitBulk}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
+                style={{ background: '#4583C4', color: '#fff' }}
+              >
+                <Send size={14} />
+                {bulkInvite.isPending
+                  ? 'Sending...'
+                  : `Send ${parsedEmails.length > 0 ? parsedEmails.length : ''} invitation${parsedEmails.length !== 1 ? 's' : ''}`}
+              </button>
+            </div>
+
+            {/* Bulk results */}
+            {bulkResults && (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+              >
+                <div
+                  className="px-5 py-3 text-[10px] font-semibold uppercase tracking-wider grid grid-cols-12 gap-3"
+                  style={{
+                    color: 'var(--dash-text-dim)',
+                    borderBottom: '1px solid var(--dash-border)',
+                  }}
+                >
+                  <div className="col-span-6">Email</div>
+                  <div className="col-span-3">Status</div>
+                  <div className="col-span-3">Note</div>
+                </div>
+                {bulkResults.map((r, idx) => (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-12 gap-3 px-5 py-3 items-center"
+                    style={{ borderBottom: '1px solid var(--dash-border)' }}
+                  >
+                    <div
+                      className="col-span-6 text-sm truncate"
+                      style={{ color: 'var(--dash-text)' }}
+                    >
+                      {r.email}
+                    </div>
+                    <div className="col-span-3">
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-md font-medium capitalize"
+                        style={{
+                          background: `${STATUS_COLORS[r.status]}18`,
+                          color: STATUS_COLORS[r.status],
+                        }}
+                      >
+                        {r.status}
+                      </span>
+                    </div>
+                    <div
+                      className="col-span-3 text-[11px] truncate"
+                      style={{ color: 'var(--dash-text-dim)' }}
+                    >
+                      {r.message}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Printer, Check } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -39,6 +40,7 @@ const Barcodes: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Barcode generator · rtylr" />
       <PageHeader
         title="Barcode Generator"
         description="Select products, choose copy count, and print labels"

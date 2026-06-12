@@ -28,6 +28,7 @@ import {
   Type,
   Plus,
 } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { useTask } from './useTask';
 import {
   useUpdateTask,
@@ -346,6 +347,7 @@ const TaskDetail: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+      <HelmetContainer title="Task · rtylr" />
       {/* Main area */}
       <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
         <div

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Eye } from 'lucide-react';
 import type { Task } from '../../shared/stores/flowStore';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { HelmetContainer } from '@voxire/components';
 import { useTasks } from '../tasks/useTasks';
 import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
@@ -24,6 +25,7 @@ const Triage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <HelmetContainer title="Triage · rtylr" />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Triage

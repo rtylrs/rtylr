@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { FileText, Trash2, AlertTriangle } from 'lucide-react';
 import {
   useDocuments,

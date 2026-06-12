@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
 import { useMyIssues } from '../tasks/useMyIssues';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
@@ -52,6 +53,7 @@ const FocusToday: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
+      <HelmetContainer title="Today · rtylr" />
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-2 mb-1">
           <Sun size={22} style={{ color: ACCENT_VAR }} strokeWidth={2} />

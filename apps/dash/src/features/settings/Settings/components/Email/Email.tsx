@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -190,207 +191,210 @@ const Email: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-          Email Settings
-        </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-          Configure how emails are sent to your customers.
-        </p>
-      </div>
+    <>
+      <HelmetContainer title="Email settings · rtylr" />
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            Email Settings
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
+            Configure how emails are sent to your customers.
+          </p>
+        </div>
 
-      {/* Section 1, Sender Identity */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Mail size={15} style={{ color: 'var(--dash-text-dim)' }} />
-            <CardTitle>Sender Identity</CardTitle>
-          </div>
-          <CardDescription>Control how your business appears in outgoing emails.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="senderName">Sender Name</Label>
-            <Input
-              id="senderName"
-              name="senderName"
-              placeholder="The Golden Fork"
-              value={sender.senderName}
-              onChange={handleSenderChange}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="fromEmail">From Email</Label>
-            <Input
-              id="fromEmail"
-              name="fromEmail"
-              type="email"
-              placeholder="hello@mybusiness.com"
-              value={sender.fromEmail}
-              onChange={handleSenderChange}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="replyTo">Reply-to Email</Label>
-            <Input
-              id="replyTo"
-              name="replyTo"
-              type="email"
-              placeholder="support@mybusiness.com"
-              value={sender.replyTo}
-              onChange={handleSenderChange}
-            />
-          </div>
-          <div className="flex justify-end pt-1">
-            <Button size="sm" onClick={handleSaveSender}>
-              Save changes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Section 2, SMTP Configuration */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Server size={15} style={{ color: 'var(--dash-text-dim)' }} />
-            <CardTitle>SMTP Configuration</CardTitle>
-          </div>
-          <CardDescription>
-            Optional: use your own SMTP server for full control over email delivery.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          {/* Toggle row */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                Use custom SMTP server
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                Send emails through your own mail server
-              </p>
+        {/* Section 1, Sender Identity */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Mail size={15} style={{ color: 'var(--dash-text-dim)' }} />
+              <CardTitle>Sender Identity</CardTitle>
             </div>
-            <ToggleSwitch id="smtp-toggle" checked={useSmtp} onChange={setUseSmtp} />
-          </div>
+            <CardDescription>Control how your business appears in outgoing emails.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="senderName">Sender Name</Label>
+              <Input
+                id="senderName"
+                name="senderName"
+                placeholder="The Golden Fork"
+                value={sender.senderName}
+                onChange={handleSenderChange}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="fromEmail">From Email</Label>
+              <Input
+                id="fromEmail"
+                name="fromEmail"
+                type="email"
+                placeholder="hello@mybusiness.com"
+                value={sender.fromEmail}
+                onChange={handleSenderChange}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="replyTo">Reply-to Email</Label>
+              <Input
+                id="replyTo"
+                name="replyTo"
+                type="email"
+                placeholder="support@mybusiness.com"
+                value={sender.replyTo}
+                onChange={handleSenderChange}
+              />
+            </div>
+            <div className="flex justify-end pt-1">
+              <Button size="sm" onClick={handleSaveSender}>
+                Save changes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          {useSmtp && (
-            <>
-              <Separator />
+        {/* Section 2, SMTP Configuration */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Server size={15} style={{ color: 'var(--dash-text-dim)' }} />
+              <CardTitle>SMTP Configuration</CardTitle>
+            </div>
+            <CardDescription>
+              Optional: use your own SMTP server for full control over email delivery.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-4">
+            {/* Toggle row */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                  Use custom SMTP server
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Send emails through your own mail server
+                </p>
+              </div>
+              <ToggleSwitch id="smtp-toggle" checked={useSmtp} onChange={setUseSmtp} />
+            </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                {/* SMTP Host spans 2 cols */}
-                <div className="col-span-2 space-y-1.5">
-                  <Label htmlFor="smtpHost">SMTP Host</Label>
-                  <Input
-                    id="smtpHost"
-                    name="host"
-                    placeholder="smtp.example.com"
-                    value={smtp.host}
-                    onChange={handleSmtpChange}
-                  />
+            {useSmtp && (
+              <>
+                <Separator />
+
+                <div className="grid grid-cols-3 gap-3">
+                  {/* SMTP Host spans 2 cols */}
+                  <div className="col-span-2 space-y-1.5">
+                    <Label htmlFor="smtpHost">SMTP Host</Label>
+                    <Input
+                      id="smtpHost"
+                      name="host"
+                      placeholder="smtp.example.com"
+                      value={smtp.host}
+                      onChange={handleSmtpChange}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="smtpPort">Port</Label>
+                    <Input
+                      id="smtpPort"
+                      name="port"
+                      type="number"
+                      placeholder="587"
+                      value={smtp.port}
+                      onChange={handleSmtpChange}
+                    />
+                  </div>
                 </div>
+
                 <div className="space-y-1.5">
-                  <Label htmlFor="smtpPort">Port</Label>
+                  <Label htmlFor="smtpUsername">Username</Label>
                   <Input
-                    id="smtpPort"
-                    name="port"
-                    type="number"
-                    placeholder="587"
-                    value={smtp.port}
+                    id="smtpUsername"
+                    name="username"
+                    placeholder="smtp-user@example.com"
+                    value={smtp.username}
                     onChange={handleSmtpChange}
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="smtpUsername">Username</Label>
-                <Input
-                  id="smtpUsername"
-                  name="username"
-                  placeholder="smtp-user@example.com"
-                  value={smtp.username}
-                  onChange={handleSmtpChange}
-                />
-              </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="smtpPassword">Password</Label>
+                  <Input
+                    id="smtpPassword"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={smtp.password}
+                    onChange={handleSmtpChange}
+                  />
+                </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="smtpPassword">Password</Label>
-                <Input
-                  id="smtpPassword"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={smtp.password}
-                  onChange={handleSmtpChange}
-                />
-              </div>
+                <div className="space-y-1.5">
+                  <Label>Encryption</Label>
+                  <SegmentGroup
+                    options={ENCRYPTION_OPTIONS}
+                    value={smtp.encryption}
+                    onChange={(v) => setSmtp((prev) => ({ ...prev, encryption: v }))}
+                  />
+                </div>
 
-              <div className="space-y-1.5">
-                <Label>Encryption</Label>
-                <SegmentGroup
-                  options={ENCRYPTION_OPTIONS}
-                  value={smtp.encryption}
-                  onChange={(v) => setSmtp((prev) => ({ ...prev, encryption: v }))}
-                />
-              </div>
+                <div className="flex items-center gap-2 justify-end pt-1">
+                  <Button variant="outline" size="sm" onClick={handleTestSmtp}>
+                    Test Connection
+                  </Button>
+                  <Button size="sm" onClick={handleSaveSmtp}>
+                    Save changes
+                  </Button>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-              <div className="flex items-center gap-2 justify-end pt-1">
-                <Button variant="outline" size="sm" onClick={handleTestSmtp}>
-                  Test Connection
-                </Button>
-                <Button size="sm" onClick={handleSaveSmtp}>
-                  Save changes
-                </Button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Section 3, Email Notifications */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Bell size={15} style={{ color: 'var(--dash-text-dim)' }} />
-            <CardTitle>Email Notifications</CardTitle>
-          </div>
-          <CardDescription>Choose which events trigger an email notification.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--dash-border)' }}>
-          <NotificationRow
-            id="notif-new-order"
-            label="New order received"
-            description="Get an email each time a customer places an order."
-            checked={notifications.newOrder}
-            onChange={toggleNotification('newOrder')}
-          />
-          <NotificationRow
-            id="notif-status"
-            label="Order status updates"
-            description="Notify customers when their order status changes."
-            checked={notifications.statusUpdates}
-            onChange={toggleNotification('statusUpdates')}
-          />
-          <NotificationRow
-            id="notif-weekly"
-            label="Weekly summary"
-            description="A weekly digest of orders, revenue, and trends."
-            checked={notifications.weeklySummary}
-            onChange={toggleNotification('weeklySummary')}
-          />
-          <NotificationRow
-            id="notif-feedback"
-            label="Customer feedback"
-            description="Receive an email when a customer submits a review."
-            checked={notifications.feedback}
-            onChange={toggleNotification('feedback')}
-          />
-        </CardContent>
-      </Card>
-    </div>
+        {/* Section 3, Email Notifications */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Bell size={15} style={{ color: 'var(--dash-text-dim)' }} />
+              <CardTitle>Email Notifications</CardTitle>
+            </div>
+            <CardDescription>Choose which events trigger an email notification.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0 divide-y" style={{ borderColor: 'var(--dash-border)' }}>
+            <NotificationRow
+              id="notif-new-order"
+              label="New order received"
+              description="Get an email each time a customer places an order."
+              checked={notifications.newOrder}
+              onChange={toggleNotification('newOrder')}
+            />
+            <NotificationRow
+              id="notif-status"
+              label="Order status updates"
+              description="Notify customers when their order status changes."
+              checked={notifications.statusUpdates}
+              onChange={toggleNotification('statusUpdates')}
+            />
+            <NotificationRow
+              id="notif-weekly"
+              label="Weekly summary"
+              description="A weekly digest of orders, revenue, and trends."
+              checked={notifications.weeklySummary}
+              onChange={toggleNotification('weeklySummary')}
+            />
+            <NotificationRow
+              id="notif-feedback"
+              label="Customer feedback"
+              description="Receive an email when a customer submits a review."
+              checked={notifications.feedback}
+              onChange={toggleNotification('feedback')}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 

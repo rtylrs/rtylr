@@ -1,5 +1,6 @@
 import React from 'react';
 import { toast } from 'sonner';
+import { HelmetContainer } from '@voxire/components';
 import { Shield } from 'lucide-react';
 import {
   useBenefits,

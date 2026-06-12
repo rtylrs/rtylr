@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Save, ArrowLeft } from 'lucide-react';
@@ -55,6 +56,7 @@ const NewExpense: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
+      <HelmetContainer title="Submit expense · rtylr" />
       <PageHeader
         title="Submit Expense"
         breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: 'New' }]}

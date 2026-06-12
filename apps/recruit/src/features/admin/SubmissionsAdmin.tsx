@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { Mail, Phone, FileText } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 
 import {
   useAdminSubmissions,
@@ -26,127 +27,130 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
   const submissions = data?.submissions ?? [];
 
   return (
-    <div className="px-10 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Submissions</h1>
-      <p className="mt-1 text-sm text-white/60">
-        {submissions.length} {submissions.length === 1 ? 'application' : 'applications'}
-        {filter && ` in "${filter}"`}
-      </p>
+    <>
+      <HelmetContainer title="Submissions · rtylr" />
+      <div className="px-10 py-8">
+        <h1 className="text-2xl font-semibold tracking-tight">Submissions</h1>
+        <p className="mt-1 text-sm text-white/60">
+          {submissions.length} {submissions.length === 1 ? 'application' : 'applications'}
+          {filter && ` in "${filter}"`}
+        </p>
 
-      <div className="mt-6 flex items-center gap-2 text-sm">
-        <FilterChip active={filter === ''} onClick={() => setFilter('')}>
-          All
-        </FilterChip>
-        {STATUSES.map((s) => (
-          <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)}>
-            {s}
+        <div className="mt-6 flex items-center gap-2 text-sm">
+          <FilterChip active={filter === ''} onClick={() => setFilter('')}>
+            All
           </FilterChip>
-        ))}
-      </div>
+          {STATUSES.map((s) => (
+            <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)}>
+              {s}
+            </FilterChip>
+          ))}
+        </div>
 
-      <div
-        className="mt-6 overflow-hidden rounded-lg border"
-        style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
-      >
-        {isLoading ? (
-          <div className="p-10 text-center text-sm text-white/60">Loading…</div>
-        ) : submissions.length === 0 ? (
-          <div className="p-10 text-center text-sm text-white/60">
-            No applications yet{filter && ` at this stage`}.
-          </div>
-        ) : (
-          <ul className="divide-y" style={{ borderColor: '#1f1f1f' }}>
-            {submissions.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-start gap-6 px-6 py-5 transition hover:bg-white/5"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-3">
-                    <div className="font-semibold">{s.candidateName}</div>
-                    <div className="text-xs text-white/50">
-                      {new Date(s.createdAt).toLocaleDateString()}
+        <div
+          className="mt-6 overflow-hidden rounded-lg border"
+          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+        >
+          {isLoading ? (
+            <div className="p-10 text-center text-sm text-white/60">Loading…</div>
+          ) : submissions.length === 0 ? (
+            <div className="p-10 text-center text-sm text-white/60">
+              No applications yet{filter && ` at this stage`}.
+            </div>
+          ) : (
+            <ul className="divide-y" style={{ borderColor: '#1f1f1f' }}>
+              {submissions.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-start gap-6 px-6 py-5 transition hover:bg-white/5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline gap-3">
+                      <div className="font-semibold">{s.candidateName}</div>
+                      <div className="text-xs text-white/50">
+                        {new Date(s.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-0.5 text-sm text-white/70">
-                    Applied for <span className="text-white">{s.careerTitle || '-'}</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60">
-                    <a
-                      href={`mailto:${s.email}`}
-                      className="inline-flex items-center gap-1 hover:text-white"
-                    >
-                      <Mail className="h-3 w-3" />
-                      {s.email}
-                    </a>
-                    {s.phone && (
-                      <span className="inline-flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {s.phone}
-                      </span>
-                    )}
-                    {s.resumeUrl && (
-                      <button
-                        onClick={async () => {
-                          try {
-                            const url = await fetchResumeURL(s.id);
-                            window.open(url, '_blank', 'noopener,noreferrer');
-                          } catch {
-                            toast.error("Couldn't open resume");
-                          }
-                        }}
+                    <div className="mt-0.5 text-sm text-white/70">
+                      Applied for <span className="text-white">{s.careerTitle || '-'}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60">
+                      <a
+                        href={`mailto:${s.email}`}
                         className="inline-flex items-center gap-1 hover:text-white"
                       >
-                        <FileText className="h-3 w-3" />
-                        Resume
-                      </button>
+                        <Mail className="h-3 w-3" />
+                        {s.email}
+                      </a>
+                      {s.phone && (
+                        <span className="inline-flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {s.phone}
+                        </span>
+                      )}
+                      {s.resumeUrl && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const url = await fetchResumeURL(s.id);
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                            } catch {
+                              toast.error("Couldn't open resume");
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 hover:text-white"
+                        >
+                          <FileText className="h-3 w-3" />
+                          Resume
+                        </button>
+                      )}
+                    </div>
+                    {s.coverLetter && (
+                      <p className="mt-3 line-clamp-3 text-sm text-white/70">{s.coverLetter}</p>
                     )}
-                  </div>
-                  {s.coverLetter && (
-                    <p className="mt-3 line-clamp-3 text-sm text-white/70">{s.coverLetter}</p>
-                  )}
 
-                  {/* Custom question answers - shown after the cover
+                    {/* Custom question answers - shown after the cover
                       letter so the reviewer sees them in reading order.
                       We render labels only once we've fetched the field
                       definitions for this submission's career. */}
-                  <CustomAnswers submission={s} />
-                </div>
+                    <CustomAnswers submission={s} />
+                  </div>
 
-                <select
-                  value={s.status}
-                  onChange={(e) => {
-                    const newStatus = e.target.value;
-                    if (
-                      s.status === 'hired' &&
-                      newStatus !== 'hired' &&
-                      !confirm(`Move ${s.candidateName} from "hired" back to "${newStatus}"?`)
-                    ) {
-                      return;
-                    }
-                    update.mutate(
-                      { id: s.id, status: newStatus },
-                      {
-                        onSuccess: () => toast.success('Status updated'),
-                        onError: () => toast.error("Couldn't update"),
+                  <select
+                    value={s.status}
+                    onChange={(e) => {
+                      const newStatus = e.target.value;
+                      if (
+                        s.status === 'hired' &&
+                        newStatus !== 'hired' &&
+                        !confirm(`Move ${s.candidateName} from "hired" back to "${newStatus}"?`)
+                      ) {
+                        return;
                       }
-                    );
-                  }}
-                  className="rounded-md border bg-black/40 px-3 py-1.5 text-sm outline-none focus:border-white/40"
-                  style={{ borderColor: '#2a2a2a' }}
-                >
-                  {STATUSES.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </li>
-            ))}
-          </ul>
-        )}
+                      update.mutate(
+                        { id: s.id, status: newStatus },
+                        {
+                          onSuccess: () => toast.success('Status updated'),
+                          onError: () => toast.error("Couldn't update"),
+                        }
+                      );
+                    }}
+                    className="rounded-md border bg-black/40 px-3 py-1.5 text-sm outline-none focus:border-white/40"
+                    style={{ borderColor: '#2a2a2a' }}
+                  >
+                    {STATUSES.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

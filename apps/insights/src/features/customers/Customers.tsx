@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
 import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -102,6 +103,7 @@ const Customers: React.FC = (): React.JSX.Element => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
+      <HelmetContainer title="Customers · rtylr" />
       <motion.div variants={itemVariants}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.title')}

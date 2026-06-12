@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Plus, FileText, Send, CheckCircle, Clock as ClockIcon, ThumbsUp } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
 import { PurchaseOrder } from '../../shared/services/erpApi';
 import {
   usePurchaseOrders,
@@ -131,6 +132,7 @@ const Purchasing: React.FC = () => {
       animate="show"
       className="w-full min-w-0 space-y-5"
     >
+      <HelmetContainer title="Purchase orders · rtylr" />
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           Purchase Orders

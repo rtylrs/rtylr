@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
 import { useBusinessStore } from '../../../../../shared/stores/businessStore';
 import {
   useUpdateBusiness,
@@ -86,118 +87,121 @@ const General: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-          General
-        </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-          Manage your store details and business information.
-        </p>
-      </div>
+    <>
+      <HelmetContainer title="General settings · rtylr" />
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            General
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
+            Manage your store details and business information.
+          </p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Business Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Business details</CardTitle>
-            <CardDescription>Your store profile information</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-4">
-            <div className="space-y-1.5">
-              <Label>Store name</Label>
-              <Input name="storeName" value={formData.storeName} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Contact email</Label>
-              <Input
-                type="email"
-                name="contactEmail"
-                value={formData.contactEmail}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Sender email</Label>
-              <Input
-                type="email"
-                name="senderEmail"
-                value={formData.senderEmail}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Public slug</Label>
-              <div className="flex gap-2 items-center">
-                <span
-                  className="text-xs whitespace-nowrap"
-                  style={{ color: 'var(--dash-text-muted)' }}
-                >
-                  menu.rtylr.com/
-                </span>
-                <Input
-                  name="slug"
-                  value={slug}
-                  placeholder="your-business"
-                  onChange={(e) =>
-                    setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
-                  }
-                />
-                <Button
-                  type="button"
-                  className="shrink-0 whitespace-nowrap"
-                  disabled={!slug || setSlug.isPending}
-                  onClick={() => setSlug.mutate(slug)}
-                >
-                  {setSlug.isPending ? 'Saving...' : 'Save slug'}
-                </Button>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Business Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Business details</CardTitle>
+              <CardDescription>Your store profile information</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-4">
+              <div className="space-y-1.5">
+                <Label>Store name</Label>
+                <Input name="storeName" value={formData.storeName} onChange={handleInputChange} />
               </div>
-              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                Lowercase letters, numbers, and hyphens. Up to 80 chars.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Business Address */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Business address</CardTitle>
-            <CardDescription>Your physical business location</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-4">
-            {[
-              { label: 'Company Name', name: 'companyName' },
-              { label: 'Website', name: 'website' },
-              { label: 'Telephone', name: 'telephone' },
-              { label: 'Maps URL', name: 'mapsUrl' },
-              { label: 'Address', name: 'address' },
-              { label: 'City', name: 'city' },
-              { label: 'Zipcode', name: 'zipcode' },
-            ].map((field) => (
-              <div key={field.name} className="space-y-1.5">
-                <Label>{field.label}</Label>
+              <div className="space-y-1.5">
+                <Label>Contact email</Label>
                 <Input
-                  name={field.name}
-                  value={(formData as any)[field.name]}
+                  type="email"
+                  name="contactEmail"
+                  value={formData.contactEmail}
                   onChange={handleInputChange}
                 />
               </div>
-            ))}
-            <div className="space-y-1.5">
-              <Label>Country</Label>
-              <Input name="country" value={formData.country} onChange={handleInputChange} />
-            </div>
-          </CardContent>
-        </Card>
+              <div className="space-y-1.5">
+                <Label>Sender email</Label>
+                <Input
+                  type="email"
+                  name="senderEmail"
+                  value={formData.senderEmail}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Public slug</Label>
+                <div className="flex gap-2 items-center">
+                  <span
+                    className="text-xs whitespace-nowrap"
+                    style={{ color: 'var(--dash-text-muted)' }}
+                  >
+                    menu.rtylr.com/
+                  </span>
+                  <Input
+                    name="slug"
+                    value={slug}
+                    placeholder="your-business"
+                    onChange={(e) =>
+                      setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                    }
+                  />
+                  <Button
+                    type="button"
+                    className="shrink-0 whitespace-nowrap"
+                    disabled={!slug || setSlug.isPending}
+                    onClick={() => setSlug.mutate(slug)}
+                  >
+                    {setSlug.isPending ? 'Saving...' : 'Save slug'}
+                  </Button>
+                </div>
+                <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                  Lowercase letters, numbers, and hyphens. Up to 80 chars.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={updateBusiness.isPending}>
-            {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
-          </Button>
-        </div>
-      </form>
-    </div>
+          {/* Business Address */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Business address</CardTitle>
+              <CardDescription>Your physical business location</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-4">
+              {[
+                { label: 'Company Name', name: 'companyName' },
+                { label: 'Website', name: 'website' },
+                { label: 'Telephone', name: 'telephone' },
+                { label: 'Maps URL', name: 'mapsUrl' },
+                { label: 'Address', name: 'address' },
+                { label: 'City', name: 'city' },
+                { label: 'Zipcode', name: 'zipcode' },
+              ].map((field) => (
+                <div key={field.name} className="space-y-1.5">
+                  <Label>{field.label}</Label>
+                  <Input
+                    name={field.name}
+                    value={(formData as any)[field.name]}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              ))}
+              <div className="space-y-1.5">
+                <Label>Country</Label>
+                <Input name="country" value={formData.country} onChange={handleInputChange} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={updateBusiness.isPending}>
+              {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };
 

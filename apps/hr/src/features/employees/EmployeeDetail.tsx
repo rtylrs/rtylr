@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
+import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { useGetEmployee } from '../../shared/hooks/queries/useEmployees';
@@ -69,89 +70,97 @@ const EmployeeDetail = (): React.JSX.Element => {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate({ to: '/employees' })}
-          className="rounded-lg p-2 transition-colors"
-          style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
-          aria-label={t('common.back')}
-        >
-          <ArrowLeft size={16} />
-        </button>
-        <div>
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
-            {employee.jobTitle}
-          </h1>
-          <span
-            className="rounded-full px-2 py-0.5 text-xs font-medium"
-            style={{
-              background: employee.status === 'active' ? 'rgba(34,197,94,0.15)' : 'var(--hr-hover)',
-              color: employee.status === 'active' ? '#22c55e' : 'var(--hr-text-muted)',
-            }}
+    <>
+      <HelmetContainer title="Employee detail · rtylr" />
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate({ to: '/employees' })}
+            className="rounded-lg p-2 transition-colors"
+            style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
+            aria-label={t('common.back')}
           >
-            {t(`employees.statuses.${employee.status}` as const)}
-          </span>
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
+              {employee.jobTitle}
+            </h1>
+            <span
+              className="rounded-full px-2 py-0.5 text-xs font-medium"
+              style={{
+                background:
+                  employee.status === 'active' ? 'rgba(34,197,94,0.15)' : 'var(--hr-hover)',
+                color: employee.status === 'active' ? '#22c55e' : 'var(--hr-text-muted)',
+              }}
+            >
+              {t(`employees.statuses.${employee.status}` as const)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex gap-1 rounded-lg p-1" style={{ background: 'var(--hr-hover)' }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('personal')}
+            style={tabStyle('personal')}
+          >
+            {t('employees.personalInfo')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('employment')}
+            style={tabStyle('employment')}
+          >
+            {t('employees.employmentInfo')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('documents')}
+            style={tabStyle('documents')}
+          >
+            {t('employees.documentsTab')}
+          </button>
+        </div>
+
+        <div
+          className="rounded-xl p-6"
+          style={{ background: 'var(--hr-card)', border: '1px solid var(--hr-border)' }}
+        >
+          {activeTab === 'personal' && (
+            <div className="flex flex-col">
+              {infoRow(t('employees.form.userId'), employee.userId)}
+              {infoRow(t('employees.form.jobTitle'), employee.jobTitle)}
+              {infoRow(t('employees.form.currency'), employee.currency)}
+            </div>
+          )}
+
+          {activeTab === 'employment' && (
+            <div className="flex flex-col">
+              {infoRow(
+                t('employees.contractType'),
+                t(`employees.contractTypes.${employee.contractType}` as const)
+              )}
+              {infoRow(t('employees.hireDate'), employee.hireDate)}
+              {infoRow(t('employees.form.probationEndDate'), employee.probationEndDate)}
+              {infoRow(
+                t('employees.salary'),
+                employee.monthlySalary != null
+                  ? `${employee.monthlySalary} ${employee.currency}/mo`
+                  : employee.hourlyRate != null
+                    ? `${employee.hourlyRate} ${employee.currency}/hr`
+                    : '-'
+              )}
+              {infoRow(t('employees.form.accountCreationMode'), employee.accountCreationMode)}
+            </div>
+          )}
+
+          {activeTab === 'documents' && employeeId != null && (
+            <DocumentVault employeeId={employeeId} />
+          )}
         </div>
       </div>
-
-      <div className="flex gap-1 rounded-lg p-1" style={{ background: 'var(--hr-hover)' }}>
-        <button type="button" onClick={() => setActiveTab('personal')} style={tabStyle('personal')}>
-          {t('employees.personalInfo')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('employment')}
-          style={tabStyle('employment')}
-        >
-          {t('employees.employmentInfo')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('documents')}
-          style={tabStyle('documents')}
-        >
-          {t('employees.documentsTab')}
-        </button>
-      </div>
-
-      <div
-        className="rounded-xl p-6"
-        style={{ background: 'var(--hr-card)', border: '1px solid var(--hr-border)' }}
-      >
-        {activeTab === 'personal' && (
-          <div className="flex flex-col">
-            {infoRow(t('employees.form.userId'), employee.userId)}
-            {infoRow(t('employees.form.jobTitle'), employee.jobTitle)}
-            {infoRow(t('employees.form.currency'), employee.currency)}
-          </div>
-        )}
-
-        {activeTab === 'employment' && (
-          <div className="flex flex-col">
-            {infoRow(
-              t('employees.contractType'),
-              t(`employees.contractTypes.${employee.contractType}` as const)
-            )}
-            {infoRow(t('employees.hireDate'), employee.hireDate)}
-            {infoRow(t('employees.form.probationEndDate'), employee.probationEndDate)}
-            {infoRow(
-              t('employees.salary'),
-              employee.monthlySalary != null
-                ? `${employee.monthlySalary} ${employee.currency}/mo`
-                : employee.hourlyRate != null
-                  ? `${employee.hourlyRate} ${employee.currency}/hr`
-                  : '-'
-            )}
-            {infoRow(t('employees.form.accountCreationMode'), employee.accountCreationMode)}
-          </div>
-        )}
-
-        {activeTab === 'documents' && employeeId != null && (
-          <DocumentVault employeeId={employeeId} />
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
