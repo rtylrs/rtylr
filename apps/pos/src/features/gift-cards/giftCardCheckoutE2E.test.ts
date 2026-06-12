@@ -5,8 +5,22 @@
  * correct remaining balance is tracked after the sale.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { ResultAsync } from 'neverthrow';
+
+vi.mock('../../shared/services/api/posService', () => ({
+  posService: {
+    createGiftCard: vi.fn(() =>
+      ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as never)
+    ),
+  },
+}));
+
+vi.mock('@voxire/api', () => ({
+  unwrap: vi.fn((p) => p),
+}));
+
 import { issueGiftCard } from './giftCardWorkflow';
-import { buildCheckoutOrder, processCheckout } from '../payment/checkoutWorkflow';
+import { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } from '../payment/checkoutWorkflow';
 import type { CartItem } from '../../shared/stores/cartStore';
 import type { GiftCard } from '../../shared/types/pos';
 
@@ -60,7 +74,7 @@ function makeStore() {
 describe('gift card → checkout', () => {
   it('$20 gift card covers partial $50 order - customer pays $30 remaining', async () => {
     const store = makeStore();
-    issueGiftCard({ codeInput: 'GC-PAY', amountInput: '20', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-PAY', amountInput: '20', issue: store.issue });
 
     const orderTotal = 50;
     const redeemResult = store.redeem('GC-PAY', 20);
@@ -76,12 +90,15 @@ describe('gift card → checkout', () => {
       subtotal: 50,
       tax: 0,
       total: remainingToPay,
-      employeeId: 1,
+      customerId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
+
     const result = await processCheckout({
       order,
+      payload,
       method: 'cash',
       createOrder: vi.fn(() => Promise.resolve({ id: 300 })),
       chargeOrder,
@@ -98,11 +115,11 @@ describe('gift card → checkout', () => {
 
   it('gift card with enough balance covers full order - charge is $0 remainder', async () => {
     const store = makeStore();
-    issueGiftCard({ codeInput: 'GC-FULL', amountInput: '100', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-FULL', amountInput: '100', issue: store.issue });
 
     const redeemResult = store.redeem('GC-FULL', 50);
     expect(redeemResult.ok).toBe(true);
-    expect(redeemResult.remaining).toBe(50); // $50 left on card
+    expect(redeemResult.remaining).toBe(50);
 
     const chargeOrder = vi.fn(async () => undefined);
     const order = buildCheckoutOrder({
@@ -110,13 +127,16 @@ describe('gift card → checkout', () => {
       items: [item],
       subtotal: 50,
       tax: 0,
-      total: 0, // fully covered by gift card
-      employeeId: 1,
+      total: 0,
+      customerId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'gift_card' });
+
     const result = await processCheckout({
       order,
+      payload,
       method: 'gift_card',
       createOrder: vi.fn(() => Promise.resolve({ id: 301 })),
       chargeOrder,
@@ -131,24 +151,23 @@ describe('gift card → checkout', () => {
     );
   });
 
-  it('gift card redemption fails gracefully when balance is insufficient', () => {
+  it('gift card redemption fails gracefully when balance is insufficient', async () => {
     const store = makeStore();
-    issueGiftCard({ codeInput: 'GC-SMALL', amountInput: '10', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-SMALL', amountInput: '10', issue: store.issue });
 
     const result = store.redeem('GC-SMALL', 50);
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe('Insufficient balance');
 
-    // Card balance unchanged
     const card = store.cards.find((c) => c.code === 'GC-SMALL');
     expect(card?.balance).toBe(10);
   });
 
   it('multiple gift cards can be applied to a single order (split across cards)', async () => {
     const store = makeStore();
-    issueGiftCard({ codeInput: 'GC-A', amountInput: '15', issue: store.issue });
-    issueGiftCard({ codeInput: 'GC-B', amountInput: '15', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-A', amountInput: '15', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-B', amountInput: '15', issue: store.issue });
 
     const orderTotal = 50;
     const r1 = store.redeem('GC-A', 15);
@@ -168,12 +187,15 @@ describe('gift card → checkout', () => {
       subtotal: 50,
       tax: 0,
       total: remainingToPay,
-      employeeId: 1,
+      customerId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
+
     await processCheckout({
       order,
+      payload,
       method: 'cash',
       createOrder: vi.fn(() => Promise.resolve({ id: 302 })),
       chargeOrder,

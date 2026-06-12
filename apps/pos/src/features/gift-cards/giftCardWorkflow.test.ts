@@ -1,4 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ResultAsync } from 'neverthrow';
+
+vi.mock('../../shared/services/api/posService', () => ({
+  posService: {
+    createGiftCard: vi.fn(() =>
+      ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as never)
+    ),
+  },
+}));
+
+vi.mock('@voxire/api', () => ({
+  unwrap: vi.fn((p) => p),
+}));
+
 import { issueGiftCard } from './giftCardWorkflow';
 import type { GiftCard } from '../../shared/types/pos';
 
@@ -11,25 +25,45 @@ const card: GiftCard = {
 };
 
 describe('issueGiftCard', () => {
-  it('returns the issued card when store issuance succeeds', () => {
-    expect(
+  it('returns the issued card when store issuance succeeds', async () => {
+    await expect(
       issueGiftCard({
         codeInput: ' GC-1 ',
         amountInput: '25',
         issue: vi.fn(() => card),
       })
-    ).toEqual({ ok: true, card });
+    ).resolves.toEqual({ ok: true, card });
   });
 
-  it('returns a validation error when issuance fails', () => {
-    expect(
+  it('returns a validation error for negative amounts', async () => {
+    await expect(
       issueGiftCard({
         codeInput: 'GC-1',
         amountInput: '-10',
+        issue: vi.fn(),
+      })
+    ).resolves.toEqual({ ok: false, error: 'Gift card amount must be greater than zero' });
+  });
+
+  it('returns a validation error for empty code', async () => {
+    await expect(
+      issueGiftCard({
+        codeInput: '  ',
+        amountInput: '25',
+        issue: vi.fn(),
+      })
+    ).resolves.toEqual({ ok: false, error: 'Code and amount required' });
+  });
+
+  it('captures store issuance errors and returns ok: false', async () => {
+    await expect(
+      issueGiftCard({
+        codeInput: 'GC-1',
+        amountInput: '25',
         issue: vi.fn(() => {
           throw new Error('Gift card amount must be greater than zero');
         }),
       })
-    ).toEqual({ ok: false, error: 'Gift card amount must be greater than zero' });
+    ).resolves.toEqual({ ok: false, error: 'Gift card amount must be greater than zero' });
   });
 });

@@ -24,29 +24,37 @@ const item = (overrides: Partial<CartItem> = {}): CartItem => ({
 });
 
 describe('kitchenWorkflow', () => {
-  it('builds a create-order payload for sending a local cart to kitchen', () => {
+  it('builds a CreateOrderPayload for sending a local cart to kitchen', () => {
     expect(
       buildKitchenOrderPayload({
         items: [item()],
-        subtotal: 20,
-        tax: 2,
-        total: 22,
-        employeeId: 5,
-        now: () => '2026-01-01T10:00:00.000Z',
-        localId: () => 'local-1',
+        locationId: 2,
+        customerId: 5,
+        kitchenNotes: 'Seat 3',
       }),
     ).toEqual({
-      id: 'local-1',
-      status: 'open',
-      items: [{ id: '7::', name: 'Burger', price: 10, quantity: 2, notes: 'No onions' }],
-      subtotal: 20,
-      tax: 2,
-      tip: 0,
-      discount: 0,
-      total: 22,
-      createdAt: '2026-01-01T10:00:00.000Z',
-      customerId: '5',
+      location_id: 2,
+      table_id: undefined,
+      customer_id: 5,
+      customer_name: undefined,
+      kitchen_notes: 'Seat 3',
+      items: [{
+        menu_item_id: 7,
+        name: 'Burger',
+        quantity: 2,
+        unit_price: 10,
+        discount_pct: 0,
+        tax_rate: 0,
+        notes: 'No onions',
+      }],
     });
+  });
+
+  it('omits undefined optional fields gracefully', () => {
+    const result = buildKitchenOrderPayload({ items: [item()] });
+    expect(result.location_id).toBeUndefined();
+    expect(result.customer_id).toBeUndefined();
+    expect(result.items).toHaveLength(1);
   });
 
   it('extracts positive integer order IDs from create responses', () => {

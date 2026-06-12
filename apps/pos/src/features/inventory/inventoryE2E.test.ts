@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     receiveStock: vi.fn(),
     adjustStock: vi.fn(),
@@ -22,14 +22,14 @@ vi.mock('@voxire/api', () => ({
 
 import { buildStockAction, mapInventoryItems } from './inventoryWorkflow';
 import type { StockAction } from './inventoryWorkflow';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { unwrap } from '@voxire/api';
 
-// Helper that mirrors what the inventory UI does: build → dispatch.
 async function applyStockAction(params: {
   itemId: number;
   action: StockAction;
   quantityInput: string;
+  branchId: number;
   reason?: string;
 }) {
   const { payload, action } = buildStockAction(params);
@@ -53,13 +53,15 @@ describe('inventory end-to-end flow', () => {
   it('receive stock calls receiveStock with correct payload', async () => {
     vi.mocked(posService.receiveStock).mockResolvedValue(undefined as never);
 
-    await applyStockAction({ itemId: 10, action: 'receive', quantityInput: '50', reason: 'delivery' });
+    await applyStockAction({ itemId: 10, action: 'receive', quantityInput: '50', branchId: 1, reason: 'delivery' });
 
     expect(posService.receiveStock).toHaveBeenCalledTimes(1);
     expect(posService.receiveStock).toHaveBeenCalledWith({
-      itemId: 10,
+      branch_id: 1,
+      product_id: 10,
       quantity: 50,
-      reason: 'delivery',
+      note: 'delivery',
+      employee_id: null,
     });
 
     expect(posService.adjustStock).not.toHaveBeenCalled();
@@ -70,13 +72,15 @@ describe('inventory end-to-end flow', () => {
   it('waste stock calls wasteStock with item id and quantity', async () => {
     vi.mocked(posService.wasteStock).mockResolvedValue(undefined as never);
 
-    await applyStockAction({ itemId: 5, action: 'waste', quantityInput: '3', reason: 'spoiled' });
+    await applyStockAction({ itemId: 5, action: 'waste', quantityInput: '3', branchId: 1, reason: 'spoiled' });
 
     expect(posService.wasteStock).toHaveBeenCalledTimes(1);
     expect(posService.wasteStock).toHaveBeenCalledWith({
-      itemId: 5,
+      branch_id: 1,
+      product_id: 5,
       quantity: 3,
-      reason: 'spoiled',
+      note: 'spoiled',
+      employee_id: null,
     });
 
     expect(posService.receiveStock).not.toHaveBeenCalled();
@@ -85,19 +89,21 @@ describe('inventory end-to-end flow', () => {
   it('adjust stock calls adjustStock', async () => {
     vi.mocked(posService.adjustStock).mockResolvedValue(undefined as never);
 
-    await applyStockAction({ itemId: 7, action: 'adjust', quantityInput: '10', reason: 'count correction' });
+    await applyStockAction({ itemId: 7, action: 'adjust', quantityInput: '10', branchId: 1, reason: 'count correction' });
 
     expect(posService.adjustStock).toHaveBeenCalledTimes(1);
     expect(posService.adjustStock).toHaveBeenCalledWith({
-      itemId: 7,
+      branch_id: 1,
+      product_id: 7,
       quantity: 10,
-      reason: 'count correction',
+      note: 'count correction',
+      employee_id: null,
     });
   });
 
   it('zero quantity is rejected before any service call', () => {
     expect(() =>
-      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '0' }),
+      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '0', branchId: 1 }),
     ).toThrow('Quantity must be greater than zero');
 
     expect(posService.receiveStock).not.toHaveBeenCalled();
@@ -117,18 +123,15 @@ describe('inventory end-to-end flow', () => {
     expect(items).toHaveLength(3);
 
     const lowStock = items.filter((i) => i.currentQty < i.lowStockThreshold);
-    // Milk (2 < 10) and Coffee (0 < 2) are low; Sugar (50 >= 5) is not.
     expect(lowStock).toHaveLength(2);
     expect(lowStock.map((i) => i.name)).toContain('Milk');
     expect(lowStock.map((i) => i.name)).toContain('Coffee');
     expect(lowStock.map((i) => i.name)).not.toContain('Sugar');
   });
 
-  it('low-stock detection uses both snake_case id/qty fields and camelCase id/qty fields from server', () => {
+  it('low-stock detection uses both snake_case and camelCase fields from server', () => {
     const rawMixed = [
-      // snake_case id + qty + threshold (typical server response)
       { item_id: 10, name: 'Oat Milk', current_qty: 1, unit: 'L', low_stock_threshold: 5 },
-      // camelCase id + qty with snake_case threshold (hybrid - clients that normalise some fields)
       { itemId: 11, name: 'Syrup', currentQty: 3, unit: 'bottles', low_stock_threshold: 10 },
     ];
 
@@ -137,13 +140,11 @@ describe('inventory end-to-end flow', () => {
 
     const [oatMilk, syrup] = items;
 
-    // snake_case fields resolved correctly
     expect(oatMilk.itemId).toBe(10);
     expect(oatMilk.currentQty).toBe(1);
     expect(oatMilk.lowStockThreshold).toBe(5);
     expect(oatMilk.currentQty).toBeLessThan(oatMilk.lowStockThreshold);
 
-    // camelCase id + qty resolved correctly, threshold via snake_case key
     expect(syrup.itemId).toBe(11);
     expect(syrup.currentQty).toBe(3);
     expect(syrup.lowStockThreshold).toBe(10);

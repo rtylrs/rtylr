@@ -2,6 +2,20 @@
  * End-to-end: gift card issue → redeem → apply discount in checkout.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { ResultAsync } from 'neverthrow';
+
+vi.mock('../../shared/services/api/posService', () => ({
+  posService: {
+    createGiftCard: vi.fn(() =>
+      ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as never)
+    ),
+  },
+}));
+
+vi.mock('@voxire/api', () => ({
+  unwrap: vi.fn((p) => p),
+}));
+
 import { issueGiftCard } from './giftCardWorkflow';
 import type { GiftCard } from '../../shared/types/pos';
 
@@ -43,10 +57,10 @@ function makeStore() {
 }
 
 describe('gift card issue → redeem', () => {
-  it('issues a $50 gift card and redeems $30 leaving $20 remaining', () => {
+  it('issues a $50 gift card and redeems $30 leaving $20 remaining', async () => {
     const store = makeStore();
 
-    const result = issueGiftCard({
+    const result = await issueGiftCard({
       codeInput: 'GC-ALPHA',
       amountInput: '50',
       issue: store.issue,
@@ -58,26 +72,26 @@ describe('gift card issue → redeem', () => {
     expect(redeemResult).toEqual({ ok: true, remaining: 20 });
   });
 
-  it('rejects duplicate card codes', () => {
+  it('rejects duplicate card codes', async () => {
     const store = makeStore();
 
-    issueGiftCard({ codeInput: 'DUPE', amountInput: '25', issue: store.issue });
-    const second = issueGiftCard({ codeInput: 'DUPE', amountInput: '25', issue: store.issue });
+    await issueGiftCard({ codeInput: 'DUPE', amountInput: '25', issue: store.issue });
+    const second = await issueGiftCard({ codeInput: 'DUPE', amountInput: '25', issue: store.issue });
 
     expect(second).toEqual({ ok: false, error: 'Gift card code already exists' });
   });
 
-  it('rejects issue with zero or negative amount', () => {
+  it('rejects issue with zero or negative amount', async () => {
     const store = makeStore();
 
-    const result = issueGiftCard({ codeInput: 'GC-BAD', amountInput: '-10', issue: store.issue });
+    const result = await issueGiftCard({ codeInput: 'GC-BAD', amountInput: '-10', issue: store.issue });
     expect(result).toEqual({ ok: false, error: 'Gift card amount must be greater than zero' });
   });
 
-  it('fails redemption when balance is insufficient', () => {
+  it('fails redemption when balance is insufficient', async () => {
     const store = makeStore();
 
-    issueGiftCard({ codeInput: 'GC-SMALL', amountInput: '10', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-SMALL', amountInput: '10', issue: store.issue });
     const result = store.redeem('GC-SMALL', 20);
 
     expect(result).toEqual({ ok: false, error: 'Insufficient balance' });
@@ -89,10 +103,10 @@ describe('gift card issue → redeem', () => {
     expect(result).toEqual({ ok: false, error: 'Card not found' });
   });
 
-  it('applies gift card as discount - reduces order total', () => {
+  it('applies gift card as discount - reduces order total', async () => {
     const store = makeStore();
 
-    issueGiftCard({ codeInput: 'GC-PROMO', amountInput: '15', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-PROMO', amountInput: '15', issue: store.issue });
 
     const orderTotal = 42.0;
     const redeemResult = store.redeem('GC-PROMO', 15);
@@ -103,10 +117,10 @@ describe('gift card issue → redeem', () => {
     expect(redeemResult.remaining).toBe(0);
   });
 
-  it('partial redemption leaves remaining balance for future use', () => {
+  it('partial redemption leaves remaining balance for future use', async () => {
     const store = makeStore();
 
-    issueGiftCard({ codeInput: 'GC-PARTIAL', amountInput: '100', issue: store.issue });
+    await issueGiftCard({ codeInput: 'GC-PARTIAL', amountInput: '100', issue: store.issue });
 
     store.redeem('GC-PARTIAL', 30);
     store.redeem('GC-PARTIAL', 25);

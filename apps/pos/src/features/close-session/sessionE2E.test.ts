@@ -2,11 +2,11 @@
  * End-to-end: session lifecycle - open → cash movement → close with variance.
  *
  * Chains posService.openSession → posService.cashDrop → buildCloseSessionPayload
- * → closeSessionWithFallback → posService.closeSession in the correct order.
+ * → closeSessionWithFallback in the correct order.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     openSession: vi.fn(),
     cashDrop: vi.fn(),
@@ -19,7 +19,7 @@ vi.mock('@voxire/api', () => ({
 }));
 
 import { buildCloseSessionPayload, closeSessionWithFallback } from './closeSessionWorkflow';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { unwrap } from '@voxire/api';
 
 beforeEach(() => {
@@ -28,42 +28,33 @@ beforeEach(() => {
 
 describe('session lifecycle end-to-end', () => {
   it('openSession → cashDrop → closeSession completes the full shift lifecycle', async () => {
-    vi.mocked(posService.openSession).mockResolvedValue({ sessionId: 'sess-1' } as never);
+    vi.mocked(posService.openSession).mockResolvedValue({ sessionId: 1 } as never);
     vi.mocked(posService.cashDrop).mockResolvedValue(undefined as never);
     vi.mocked(posService.closeSession).mockResolvedValue(undefined as never);
 
-    // 1. Open the session.
     await unwrap(posService.openSession({ openingBalance: 200 }));
     expect(posService.openSession).toHaveBeenCalledWith({ openingBalance: 200 });
 
-    // 2. Record a cash drop during the shift.
     await unwrap(posService.cashDrop({ amount: 50, reason: 'mid-shift drop' }));
     expect(posService.cashDrop).toHaveBeenCalledWith({ amount: 50, reason: 'mid-shift drop' });
 
-    // 3. Build close payload and close the session.
-    const payload = buildCloseSessionPayload({
-      sessionId: 'sess-1',
-      expected: 150,
-      actualInput: '145',
-    });
-
-    // variance should be actual - expected = 145 - 150 = -5
+    const payload = buildCloseSessionPayload({ expected: 150, actualInput: '145' });
     expect(payload.variance).toBe(-5);
+    expect(payload.closing_float).toBe(145);
 
-    const closeSession = vi.fn(() => unwrap(posService.closeSession(payload)));
+    const closeSession = vi.fn(async (_id: number, p: { closing_float: number }) =>
+      unwrap(posService.closeSession(p))
+    );
     const result = await closeSessionWithFallback({
       payload,
       closeSession,
       enqueue: vi.fn(),
+      resolveSessionId: async () => 1,
     });
 
     expect(result).toEqual({ status: 'online' });
-    expect(posService.closeSession).toHaveBeenCalledTimes(1);
-    expect(posService.closeSession).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: 'sess-1', variance: -5 }),
-    );
+    expect(closeSession).toHaveBeenCalledWith(1, { closing_float: 145 });
 
-    // Verify call ordering: open → cashDrop → closeSession.
     const openOrder = vi.mocked(posService.openSession).mock.invocationCallOrder[0];
     const dropOrder = vi.mocked(posService.cashDrop).mock.invocationCallOrder[0];
     const closeOrder = vi.mocked(posService.closeSession).mock.invocationCallOrder[0];
@@ -73,33 +64,22 @@ describe('session lifecycle end-to-end', () => {
   });
 
   it('session close with overage variance records the surplus', () => {
-    const payload = buildCloseSessionPayload({
-      sessionId: 'sess-2',
-      expected: 100,
-      actualInput: '115',
-    });
+    const payload = buildCloseSessionPayload({ expected: 100, actualInput: '115' });
 
-    // Actual is $15 over expected → positive variance.
     expect(payload.variance).toBe(15);
-    expect(payload.actual).toBe(115);
+    expect(payload.closing_float).toBe(115);
     expect(payload.expected).toBe(100);
   });
 
   it('session close with shortage variance records the deficit', () => {
-    const payload = buildCloseSessionPayload({
-      sessionId: 'sess-3',
-      expected: 200,
-      actualInput: '185',
-    });
+    const payload = buildCloseSessionPayload({ expected: 200, actualInput: '185' });
 
-    // Actual is $15 short → negative variance.
     expect(payload.variance).toBe(-15);
-    expect(payload.actual).toBe(185);
+    expect(payload.closing_float).toBe(185);
     expect(payload.expected).toBe(200);
   });
 
   it('cash movement is queued when backend is unreachable during shift', async () => {
-    // cashDrop throws - should be caught by the caller and enqueued.
     vi.mocked(posService.cashDrop).mockRejectedValue(new Error('Network Error') as never);
     vi.mocked(posService.closeSession).mockResolvedValue(undefined as never);
 
@@ -119,42 +99,40 @@ describe('session lifecycle end-to-end', () => {
       expect.objectContaining({ action: 'drop' }),
     );
 
-    // Session can still close even though the movement was queued.
-    const closePayload = buildCloseSessionPayload({
-      sessionId: 'sess-4',
-      expected: 100,
-      actualInput: '100',
-    });
+    const closePayload = buildCloseSessionPayload({ expected: 100, actualInput: '100' });
 
-    const closeSession = vi.fn(() => unwrap(posService.closeSession(closePayload)));
+    const closeSession = vi.fn(async (_id: number, p: { closing_float: number }) =>
+      unwrap(posService.closeSession(p))
+    );
     const result = await closeSessionWithFallback({
       payload: closePayload,
       closeSession,
       enqueue: vi.fn(),
+      resolveSessionId: async () => 1,
     });
 
     expect(result).toEqual({ status: 'online' });
   });
 
   it('closeSessionWithFallback queues close payload when API fails', async () => {
-    const payload = buildCloseSessionPayload({
-      sessionId: 'sess-5',
-      expected: 300,
-      actualInput: '295',
-    });
+    const payload = buildCloseSessionPayload({ expected: 300, actualInput: '295' });
 
-    // Verify the payload is correctly built before passing to fallback.
     expect(payload.variance).toBe(-5);
 
     const enqueue = vi.fn();
     const closeSession = vi.fn(() => Promise.reject(new Error('503 Service Unavailable')));
 
-    const result = await closeSessionWithFallback({ payload, closeSession, enqueue });
+    const result = await closeSessionWithFallback({
+      payload,
+      closeSession,
+      enqueue,
+      resolveSessionId: async () => 1,
+    });
 
     expect(result).toEqual({ status: 'queued' });
     expect(enqueue).toHaveBeenCalledTimes(1);
     expect(enqueue).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: 'sess-5', variance: -5 }),
+      expect.objectContaining({ closing_float: 295, variance: -5 }),
     );
   });
 });

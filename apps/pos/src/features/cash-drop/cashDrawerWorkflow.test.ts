@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { processCashDrawerAction, recordCashDrawerAction } from './cashDrawerWorkflow';
+import type { CashMovementPayload } from '../../shared/services/api/posService';
 
 const actions = () => ({
   openDrawer: vi.fn(),
@@ -7,6 +8,13 @@ const actions = () => ({
   paidOut: vi.fn(),
   paidIn: vi.fn(),
 });
+
+const context = {
+  branchId: 1,
+  terminalId: 2,
+  employeeId: 3,
+  resolveSessionId: vi.fn(async () => 10),
+};
 
 describe('recordCashDrawerAction', () => {
   it('opens the drawer for a valid float', () => {
@@ -57,30 +65,44 @@ describe('processCashDrawerAction', () => {
     const syncMovement = vi.fn(async () => undefined);
     const enqueueMovement = vi.fn();
 
+    const resolveSessionId = vi.fn(async () => 10);
+
     const result = await processCashDrawerAction({
       action: 'paid_out',
       amountInput: '15',
       reason: 'Petty cash',
       drawer,
+      context: { branchId: 1, terminalId: 2, employeeId: 3, resolveSessionId },
       syncMovement,
       enqueueMovement,
     });
 
     expect(result).toEqual({ amount: 15, message: 'Paid out', queued: false });
     expect(drawer.paidOut).toHaveBeenCalledWith(15, 'Petty cash');
-    expect(syncMovement).toHaveBeenCalledWith('paid_out', { amount: 15, reason: 'Petty cash' });
+
+    const expectedPayload: CashMovementPayload = {
+      branch_id: 1,
+      terminal_id: 2,
+      session_id: 10,
+      employee_id: 3,
+      amount: 15,
+      reason: 'Petty cash',
+    };
+    expect(syncMovement).toHaveBeenCalledWith('paid_out', expectedPayload);
     expect(enqueueMovement).not.toHaveBeenCalled();
   });
 
   it('enqueues manual cash movements when backend sync fails', async () => {
     const drawer = actions();
     const enqueueMovement = vi.fn();
+    const resolveSessionId = vi.fn(async () => 10);
 
     const result = await processCashDrawerAction({
       action: 'drop',
       amountInput: '20',
       reason: 'Safe deposit',
       drawer,
+      context: { branchId: 1, terminalId: 2, employeeId: 3, resolveSessionId },
       syncMovement: vi.fn(async () => {
         throw new Error('offline');
       }),
@@ -91,7 +113,7 @@ describe('processCashDrawerAction', () => {
     expect(drawer.cashDrop).toHaveBeenCalledWith(20, 'Safe deposit');
     expect(enqueueMovement).toHaveBeenCalledWith({
       action: 'drop',
-      payload: { amount: 20, reason: 'Safe deposit' },
+      payload: expect.objectContaining({ branch_id: 1, amount: 20, session_id: 0 }),
     });
   });
 
@@ -104,6 +126,7 @@ describe('processCashDrawerAction', () => {
       amountInput: '100',
       reason: '',
       drawer,
+      context,
       syncMovement,
       enqueueMovement: vi.fn(),
     });

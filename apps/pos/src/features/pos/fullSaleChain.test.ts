@@ -5,9 +5,9 @@
  * and a failure at any hardware stage must not roll back the payment.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { buildCheckoutOrder, processCheckout } from '../payment/checkoutWorkflow';
+import { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } from '../payment/checkoutWorkflow';
 import { printReceiptAndOpenDrawer } from '../payment/paymentHardware';
-import { sendKdsTicket } from '../../shared/hardware/kdsHardware';
+import { sendKdsTicket } from '../../shared/services/hardware/kdsHardware';
 import { buildStockAction } from '../inventory/inventoryWorkflow';
 import type { CartItem } from '../../shared/stores/cartStore';
 import type { KdsHardwareSettings, PrinterSettings } from '../../shared/stores/settingsStore';
@@ -15,16 +15,16 @@ import type { KdsHardwareSettings, PrinterSettings } from '../../shared/stores/s
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
-vi.mock('../../shared/hardware/receiptPrinter', () => ({ printReceipt: vi.fn() }));
-vi.mock('../../shared/hardware/cashDrawerHardware', () => ({ openConfiguredCashDrawer: vi.fn() }));
-vi.mock('../../shared/hardware/crossPlatformDrawer', () => ({
+vi.mock('../../shared/services/hardware/receiptPrinter', () => ({ printReceipt: vi.fn() }));
+vi.mock('../../shared/services/hardware/cashDrawerHardware', () => ({ openConfiguredCashDrawer: vi.fn() }));
+vi.mock('../../shared/services/hardware/crossPlatformDrawer', () => ({
   openDrawerSerial: vi.fn(),
   openDrawerNetwork: vi.fn(),
 }));
 
 import { invoke } from '@tauri-apps/api/core';
-import { printReceipt } from '../../shared/hardware/receiptPrinter';
-import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
+import { printReceipt } from '../../shared/services/hardware/receiptPrinter';
+import { openConfiguredCashDrawer } from '../../shared/services/hardware/cashDrawerHardware';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -71,22 +71,23 @@ beforeEach(() => {
 // ── Helper: run the complete sale chain ───────────────────────────────────────
 
 async function runCompleteSale() {
-  // Stage 1 - Process checkout (create + charge order on server)
   const order = buildCheckoutOrder({
     id: 'local-chain-1',
     items: [item],
     subtotal: 29,
     tax: 2.32,
     total: 31.32,
-    employeeId: 3,
+    customerId: 3,
     createdAt: '2026-05-13T12:00:00.000Z',
   });
 
+  const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
   const createOrder = vi.fn(() => Promise.resolve({ id: 999 }));
   const chargeOrder = vi.fn(() => Promise.resolve());
 
   const checkoutResult = await processCheckout({
     order,
+    payload,
     method: 'cash',
     createOrder,
     chargeOrder,
@@ -94,7 +95,6 @@ async function runCompleteSale() {
     recordCashSale: vi.fn(),
   });
 
-  // Stage 2 - Print receipt + kick cash drawer
   const hardwareResult = await printReceiptAndOpenDrawer({
     printer,
     items: [item],
@@ -111,7 +111,6 @@ async function runCompleteSale() {
     kickDrawer: true,
   });
 
-  // Stage 3 - Send ticket to kitchen display
   const kdsResult = await sendKdsTicket(kds, {
     orderNumber: `ORD-${(checkoutResult as { orderId: number }).orderId}`,
     station: 'KITCHEN',
@@ -128,11 +127,11 @@ async function runCompleteSale() {
     createdAt: '2026-05-13T12:00:00.000Z',
   });
 
-  // Stage 4 - Decrement inventory for sold items
   const stockAction = buildStockAction({
     itemId: item.productId,
     action: 'adjust',
     quantityInput: String(item.quantity),
+    branchId: 1,
     reason: `Sold in ORD-${(checkoutResult as { orderId: number }).orderId}`,
   });
 
@@ -149,22 +148,18 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
 
     const { checkoutResult, hardwareResult, kdsResult, stockAction } = await runCompleteSale();
 
-    // Stage 1: payment confirmed
     expect(checkoutResult).toEqual({ status: 'online', orderId: 999 });
 
-    // Stage 2: receipt printed + drawer kicked
     expect(hardwareResult).toEqual({ kind: 'ok' });
     expect(printReceipt).toHaveBeenCalledOnce();
     expect(openConfiguredCashDrawer).toHaveBeenCalledOnce();
 
-    // Stage 3: KDS ticket dispatched
     expect(kdsResult.status).toBe('sent');
 
-    // Stage 4: inventory decrement payload is valid
     expect(stockAction.action).toBe('adjust');
-    expect(stockAction.payload.itemId).toBe(5);
+    expect(stockAction.payload.product_id).toBe(5);
     expect(stockAction.payload.quantity).toBe(2);
-    expect(stockAction.payload.reason).toContain('ORD-999');
+    expect(stockAction.payload.note).toContain('ORD-999');
   });
 
   it('server order id propagates through all stages', async () => {
@@ -172,7 +167,7 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
     vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
     vi.mocked(invoke).mockResolvedValue('ok');
 
-    const { checkoutResult, hardwareResult } = await runCompleteSale();
+    const { checkoutResult } = await runCompleteSale();
 
     const orderId = (checkoutResult as { orderId: number }).orderId;
     expect(orderId).toBe(999);
@@ -187,9 +182,7 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
 
     const { checkoutResult, hardwareResult } = await runCompleteSale();
 
-    // Payment still went through
     expect(checkoutResult).toEqual({ status: 'online', orderId: 999 });
-    // Hardware failed independently - payment not rolled back
     expect(hardwareResult).toEqual({ kind: 'print_failed', error: 'printer offline' });
   });
 
@@ -203,12 +196,15 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
       subtotal: 29,
       tax: 2.32,
       total: 31.32,
-      employeeId: 1,
+      customerId: 1,
       createdAt: '2026-05-13T12:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'card' });
+
     const checkoutResult = await processCheckout({
       order,
+      payload,
       method: 'card',
       createOrder: vi.fn(() => Promise.resolve({ id: 1000 })),
       chargeOrder: vi.fn(() => Promise.resolve()),
@@ -223,7 +219,6 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
 
     expect(checkoutResult).toEqual({ status: 'online', orderId: 1000 });
     expect(kdsResult).toEqual({ status: 'skipped' });
-    // No Tauri KDS invoke was made
     expect(invoke).not.toHaveBeenCalled();
   });
 
@@ -238,14 +233,16 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
       subtotal: 29,
       tax: 2.32,
       total: 31.32,
-      employeeId: 1,
+      customerId: 1,
       createdAt: '2026-05-13T12:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
     const enqueueOffline = vi.fn();
 
     const checkoutResult = await processCheckout({
       order,
+      payload,
       method: 'cash',
       createOrder: vi.fn(async () => { throw new Error('Network Error'); }),
       chargeOrder: vi.fn(),
@@ -254,9 +251,8 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
     });
 
     expect(checkoutResult).toEqual({ status: 'queued' });
-    expect(enqueueOffline).toHaveBeenCalledWith(order);
+    expect(enqueueOffline).toHaveBeenCalledWith(payload);
 
-    // Hardware still fires - customer gets receipt even offline
     const hardwareResult = await printReceiptAndOpenDrawer({
       printer,
       items: [item],

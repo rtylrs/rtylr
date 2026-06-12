@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildCashTender, buildCheckoutOrder, processCheckout } from './checkoutWorkflow';
+import { buildCashTender, buildCheckoutOrder, buildCreateOrderPayload, processCheckout } from './checkoutWorkflow';
 import type { CartItem } from '../../shared/stores/cartStore';
 
 const items: CartItem[] = [
@@ -19,6 +19,8 @@ const items: CartItem[] = [
   },
 ];
 
+const basePayload = buildCreateOrderPayload({ items, method: 'cash' });
+
 describe('buildCheckoutOrder', () => {
   it('builds a paid local order from the cart snapshot', () => {
     const order = buildCheckoutOrder({
@@ -27,7 +29,7 @@ describe('buildCheckoutOrder', () => {
       subtotal: 20,
       tax: 1.6,
       total: 21.6,
-      employeeId: 7,
+      customerId: 7,
       createdAt: '2026-05-06T00:00:00.000Z',
     });
 
@@ -59,9 +61,10 @@ describe('processCheckout', () => {
         subtotal: 20,
         tax: 1.6,
         total: 21.6,
-        employeeId: 7,
+        customerId: 7,
         createdAt: '2026-05-06T00:00:00.000Z',
       }),
+      payload: basePayload,
       method: 'cash',
       createOrder,
       chargeOrder,
@@ -82,7 +85,7 @@ describe('processCheckout', () => {
       subtotal: 20,
       tax: 1.6,
       total: 21.6,
-      employeeId: 7,
+      customerId: 7,
       createdAt: '2026-05-06T00:00:00.000Z',
     });
     const enqueueOffline = vi.fn();
@@ -90,6 +93,7 @@ describe('processCheckout', () => {
 
     const result = await processCheckout({
       order,
+      payload: basePayload,
       method: 'cash',
       createOrder: vi.fn(() => Promise.reject(new Error('Network Error'))),
       chargeOrder: vi.fn(),
@@ -98,7 +102,7 @@ describe('processCheckout', () => {
     });
 
     expect(result).toEqual({ status: 'queued' });
-    expect(enqueueOffline).toHaveBeenCalledWith(order);
+    expect(enqueueOffline).toHaveBeenCalledWith(basePayload);
     expect(recordCashSale).toHaveBeenCalledWith(21.6, 'local-1');
   });
 
@@ -111,9 +115,10 @@ describe('processCheckout', () => {
           subtotal: 20,
           tax: 1.6,
           total: 21.6,
-          employeeId: 7,
+          customerId: 7,
           createdAt: '2026-05-06T00:00:00.000Z',
         }),
+        payload: basePayload,
         method: 'card',
         createOrder: vi.fn(() => Promise.reject(new Error('Network Error'))),
         chargeOrder: vi.fn(),
@@ -135,9 +140,10 @@ describe('processCheckout', () => {
           subtotal: 20,
           tax: 1.6,
           total: 21.6,
-          employeeId: 7,
+          customerId: 7,
           createdAt: '2026-05-06T00:00:00.000Z',
         }),
+        payload: basePayload,
         method: 'card',
         createOrder: vi.fn(() => Promise.resolve({})),
         chargeOrder,

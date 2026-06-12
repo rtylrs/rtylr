@@ -7,12 +7,13 @@ describe('buildStockAction', () => {
       itemId: 1,
       action: 'receive',
       quantityInput: '50',
+      branchId: 1,
       reason: 'Weekly delivery',
     });
 
     expect(result).toEqual({
       action: 'receive',
-      payload: { itemId: 1, quantity: 50, reason: 'Weekly delivery' },
+      payload: { branch_id: 1, product_id: 1, quantity: 50, note: 'Weekly delivery', employee_id: null },
     });
   });
 
@@ -21,32 +22,39 @@ describe('buildStockAction', () => {
       itemId: 3,
       action: 'adjust',
       quantityInput: '2.5',
+      branchId: 1,
     });
 
     expect(result.payload.quantity).toBe(2.5);
-    expect(result.payload.reason).toBeUndefined();
+    expect(result.payload.note).toBeNull();
   });
 
   it('throws when quantity is zero or negative', () => {
     expect(() =>
-      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '0' })
+      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '0', branchId: 1 })
     ).toThrow('Quantity must be greater than zero.');
 
     expect(() =>
-      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '-5' })
+      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '-5', branchId: 1 })
     ).toThrow('Quantity must be greater than zero.');
   });
 
   it('throws when quantity is non-numeric', () => {
     expect(() =>
-      buildStockAction({ itemId: 1, action: 'receive', quantityInput: 'abc' })
+      buildStockAction({ itemId: 1, action: 'receive', quantityInput: 'abc', branchId: 1 })
     ).toThrow('Quantity must be greater than zero.');
   });
 
   it('throws when item id is invalid', () => {
     expect(() =>
-      buildStockAction({ itemId: 0, action: 'receive', quantityInput: '10' })
+      buildStockAction({ itemId: 0, action: 'receive', quantityInput: '10', branchId: 1 })
     ).toThrow('Select a valid inventory item.');
+  });
+
+  it('throws when branch id is missing', () => {
+    expect(() =>
+      buildStockAction({ itemId: 1, action: 'receive', quantityInput: '10' })
+    ).toThrow('Select a terminal location before recording stock movements.');
   });
 
   it('uses note as reason fallback when reason is absent', () => {
@@ -54,9 +62,10 @@ describe('buildStockAction', () => {
       itemId: 1,
       action: 'waste',
       quantityInput: '3',
+      branchId: 1,
       note: 'Spoilage',
     });
-    expect(result.payload.reason).toBe('Spoilage');
+    expect(result.payload.note).toBe('Spoilage');
   });
 });
 

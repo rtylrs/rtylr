@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { finalizeMultiPayment } from './multiPaymentWorkflow';
+import { collapsePayments, finalizeMultiPayment } from './multiPaymentWorkflow';
 import type { PaymentEntry } from '../../shared/types/pos';
 
 const payments: PaymentEntry[] = [
@@ -10,6 +10,37 @@ const payments: PaymentEntry[] = [
     createdAt: '2026-05-06T00:00:00.000Z',
   },
 ];
+
+describe('collapsePayments', () => {
+  it('collapses single-method payments into one payload', () => {
+    expect(collapsePayments(payments, 0)).toEqual({
+      payment_method: 'card',
+      amount_paid: 20,
+    });
+  });
+
+  it('picks dominant method and sums all amounts plus tip', () => {
+    const split: PaymentEntry[] = [
+      { id: 'p1', method: 'cash', amount: 30, createdAt: '2026-05-06T00:00:00.000Z' },
+      { id: 'p2', method: 'card', amount: 20, createdAt: '2026-05-06T00:00:00.000Z' },
+    ];
+    expect(collapsePayments(split, 5)).toEqual({
+      payment_method: 'cash',
+      amount_paid: 55,
+    });
+  });
+
+  it('throws when payments array is empty', () => {
+    expect(() => collapsePayments([], 0)).toThrow('Add at least one payment before charging.');
+  });
+
+  it('throws when all payment amounts are zero', () => {
+    const zeroed: PaymentEntry[] = [
+      { id: 'z1', method: 'cash', amount: 0, createdAt: '2026-05-06T00:00:00.000Z' },
+    ];
+    expect(() => collapsePayments(zeroed, 0)).toThrow('Payment amounts must be greater than zero.');
+  });
+});
 
 describe('finalizeMultiPayment', () => {
   it('rejects invalid order ids before charging', async () => {
@@ -28,7 +59,7 @@ describe('finalizeMultiPayment', () => {
     expect(chargeOrder).not.toHaveBeenCalled();
   });
 
-  it('charges a valid order with the full multi-payment payload', async () => {
+  it('charges a valid order with a collapsed single-method payload', async () => {
     const chargeOrder = vi.fn(async () => undefined);
 
     await finalizeMultiPayment({
@@ -39,6 +70,6 @@ describe('finalizeMultiPayment', () => {
       chargeOrder,
     });
 
-    expect(chargeOrder).toHaveBeenCalledWith(42, { payments, tip: 2, total: 22 });
+    expect(chargeOrder).toHaveBeenCalledWith(42, { payment_method: 'card', amount_paid: 22 });
   });
 });

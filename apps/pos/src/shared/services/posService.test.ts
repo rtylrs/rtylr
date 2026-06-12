@@ -1,17 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ResultAsync } from 'neverthrow';
 
-vi.mock('../lib/api', () => ({
+vi.mock('./api/api', () => ({
   safe: {
     get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
     post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
     put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
+    patch: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
     delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
   },
 }));
 
-import { posService } from './posService';
-import { safe } from '../lib/api';
+import { posService } from './api/posService';
+import { safe } from './api/api';
 
 describe('posService', () => {
   beforeEach(() => {
@@ -287,9 +288,9 @@ describe('posService', () => {
     expect(safe.get).toHaveBeenCalledWith('/pos/users', { params: { location_id: 3 } });
   });
 
-  it('deactivatePOSUser calls POST /pos/users/deactivate', () => {
+  it('deactivatePOSUser calls PATCH /pos/users/deactivate', () => {
     posService.deactivatePOSUser(5);
-    expect(safe.post).toHaveBeenCalledWith('/pos/users/deactivate', { id: 5 });
+    expect(safe.patch).toHaveBeenCalledWith('/pos/users/deactivate', { id: 5 });
   });
 
   it('verifyPIN calls POST /pos/users/verify-pin', () => {

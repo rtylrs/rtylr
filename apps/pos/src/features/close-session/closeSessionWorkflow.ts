@@ -16,6 +16,7 @@ interface CloseSessionWithFallbackParams {
   payload: SessionClosePayload;
   closeSession: (sessionId: number, payload: CloseSessionPayload) => Promise<void>;
   enqueue: (payload: SessionClosePayload) => unknown;
+  resolveSessionId?: () => Promise<number>;
 }
 
 type CloseSessionResult = { status: 'online' } | { status: 'queued' };
@@ -59,9 +60,10 @@ export async function closeSessionWithFallback({
   payload,
   closeSession,
   enqueue,
+  resolveSessionId = resolveOpenSessionId,
 }: CloseSessionWithFallbackParams): Promise<CloseSessionResult> {
   try {
-    const sessionId = await resolveOpenSessionId();
+    const sessionId = await resolveSessionId();
     await closeSession(sessionId, { closing_float: payload.closing_float });
     return { status: 'online' };
   } catch {

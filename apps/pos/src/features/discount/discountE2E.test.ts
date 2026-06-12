@@ -6,7 +6,7 @@
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { buildDiscountRequest } from './discountWorkflow';
-import { buildCheckoutOrder, processCheckout } from '../payment/checkoutWorkflow';
+import { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } from '../payment/checkoutWorkflow';
 import type { CartItem } from '../../shared/stores/cartStore';
 
 beforeEach(() => {
@@ -31,30 +31,29 @@ const item: CartItem = {
 
 describe('discount → checkout chain', () => {
   it('flat discount reduces the charge amount sent to the payment endpoint', async () => {
-    // Validate and build discount
     const discount = buildDiscountRequest({ orderId: '99', mode: 'flat', valueInput: '5' });
-    expect(discount).toEqual({ orderId: 99, payload: { mode: 'flat', value: 5 } });
+    expect(discount).toEqual({ orderId: 99, payload: { discount_type: 'flat', discount_value: 5 } });
 
-    // Apply discount to order total
     const originalTotal = 40;
-    const discountedTotal = originalTotal - discount.payload.value;
+    const discountedTotal = originalTotal - discount.payload.discount_value;
     expect(discountedTotal).toBe(35);
 
-    // Build and charge order at discounted total
     const order = buildCheckoutOrder({
       id: 'local-1',
       items: [item],
       subtotal: 40,
       tax: 0,
       total: discountedTotal,
-      employeeId: 1,
+      customerId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
     const chargeOrder = vi.fn(async () => undefined);
 
     const result = await processCheckout({
       order,
+      payload,
       method: 'cash',
       createOrder: vi.fn(() => Promise.resolve({ id: 200 })),
       chargeOrder,
@@ -63,7 +62,6 @@ describe('discount → checkout chain', () => {
     });
 
     expect(result).toEqual({ status: 'online', orderId: 200 });
-    // Charge was for the discounted amount, not the original
     expect(chargeOrder).toHaveBeenCalledWith(
       200,
       expect.objectContaining({ amount_paid: 35 }),
@@ -72,7 +70,7 @@ describe('discount → checkout chain', () => {
 
   it('percent discount is capped at 100% maximum', () => {
     const discount = buildDiscountRequest({ orderId: '99', mode: 'percent', valueInput: '150' });
-    expect(discount.payload.value).toBe(100);
+    expect(discount.payload.discount_value).toBe(100);
   });
 
   it('zero discount value is rejected before checkout', () => {
@@ -90,7 +88,7 @@ describe('discount → checkout chain', () => {
   it('10% percent discount on $80 order charges $72', async () => {
     const discount = buildDiscountRequest({ orderId: '50', mode: 'percent', valueInput: '10' });
     const originalTotal = 80;
-    const discountedTotal = originalTotal * (1 - discount.payload.value / 100);
+    const discountedTotal = originalTotal * (1 - discount.payload.discount_value / 100);
     expect(discountedTotal).toBeCloseTo(72, 2);
 
     const chargeOrder = vi.fn(async () => undefined);
@@ -100,12 +98,14 @@ describe('discount → checkout chain', () => {
       subtotal: 80,
       tax: 0,
       total: discountedTotal,
-      employeeId: 1,
+      customerId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'card' });
     const result = await processCheckout({
       order,
+      payload,
       method: 'card',
       createOrder: vi.fn(() => Promise.resolve({ id: 201 })),
       chargeOrder,

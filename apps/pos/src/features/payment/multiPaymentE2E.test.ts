@@ -2,24 +2,26 @@
  * End-to-end: split-tender (multi-payment) → charge → receipt → drawer.
  *
  * Customer pays $30 cash + $20 card on a $50 order.
+ * The backend takes a single {payment_method, amount_paid} so the dominant
+ * method (cash, $30) is selected and the full amount including tip is summed.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
 import { printReceiptAndOpenDrawer } from './paymentHardware';
 
-vi.mock('../../shared/hardware/receiptPrinter', () => ({
+vi.mock('../../shared/services/hardware/receiptPrinter', () => ({
   printReceipt: vi.fn(),
 }));
-vi.mock('../../shared/hardware/cashDrawerHardware', () => ({
+vi.mock('../../shared/services/hardware/cashDrawerHardware', () => ({
   openConfiguredCashDrawer: vi.fn(),
 }));
-vi.mock('../../shared/hardware/crossPlatformDrawer', () => ({
+vi.mock('../../shared/services/hardware/crossPlatformDrawer', () => ({
   openDrawerSerial: vi.fn(),
   openDrawerNetwork: vi.fn(),
 }));
 
-import { printReceipt } from '../../shared/hardware/receiptPrinter';
-import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
+import { printReceipt } from '../../shared/services/hardware/receiptPrinter';
+import { openConfiguredCashDrawer } from '../../shared/services/hardware/cashDrawerHardware';
 import type { CartItem } from '../../shared/stores/cartStore';
 
 const item: CartItem = {
@@ -56,11 +58,11 @@ beforeEach(() => {
 
 describe('split-tender checkout: $30 cash + $20 card', () => {
   const payments = [
-    { method: 'cash', amount: 30 },
-    { method: 'card', amount: 20 },
+    { id: 'p1', method: 'cash' as const, amount: 30, createdAt: '2026-05-06T00:00:00.000Z' },
+    { id: 'p2', method: 'card' as const, amount: 20, createdAt: '2026-05-06T00:00:00.000Z' },
   ];
 
-  it('finalizeMultiPayment calls chargeOrder with payment entries and total', async () => {
+  it('finalizeMultiPayment calls chargeOrder with collapsed dominant-method payload', async () => {
     const chargeOrder = vi.fn(async () => undefined);
 
     await finalizeMultiPayment({
@@ -71,10 +73,10 @@ describe('split-tender checkout: $30 cash + $20 card', () => {
       chargeOrder,
     });
 
+    // cash ($30) dominates card ($20); total = 30+20+5 tip = 55
     expect(chargeOrder).toHaveBeenCalledWith(99, {
-      payments,
-      tip: 5,
-      total: 55,
+      payment_method: 'cash',
+      amount_paid: 55,
     });
   });
 

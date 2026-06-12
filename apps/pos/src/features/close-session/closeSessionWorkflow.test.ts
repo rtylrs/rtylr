@@ -1,32 +1,39 @@
 import { describe, expect, it, vi } from 'vitest';
 import { buildCloseSessionPayload, closeSessionWithFallback } from './closeSessionWorkflow';
 
-const payload = {
-  sessionId: 'current',
-  expected: 100,
-  actual: 95,
-  variance: -5,
-};
+const mockResolveSessionId = async (): Promise<number> => 42;
 
 describe('closeSessionWithFallback', () => {
   it('closes online without queueing when the API succeeds', async () => {
     const closeSession = vi.fn(async () => undefined);
     const enqueue = vi.fn();
 
-    const result = await closeSessionWithFallback({ payload, closeSession, enqueue });
+    const payload = buildCloseSessionPayload({ expected: 100, actualInput: '95' });
+    const result = await closeSessionWithFallback({
+      payload,
+      closeSession,
+      enqueue,
+      resolveSessionId: mockResolveSessionId,
+    });
 
     expect(result).toEqual({ status: 'online' });
-    expect(closeSession).toHaveBeenCalledWith(payload);
+    expect(closeSession).toHaveBeenCalledWith(42, { closing_float: 95 });
     expect(enqueue).not.toHaveBeenCalled();
   });
 
   it('durably queues the close payload when the API fails', async () => {
+    const payload = buildCloseSessionPayload({ expected: 100, actualInput: '95' });
     const closeSession = vi.fn(async () => {
       throw new Error('offline');
     });
     const enqueue = vi.fn();
 
-    const result = await closeSessionWithFallback({ payload, closeSession, enqueue });
+    const result = await closeSessionWithFallback({
+      payload,
+      closeSession,
+      enqueue,
+      resolveSessionId: mockResolveSessionId,
+    });
 
     expect(result).toEqual({ status: 'queued' });
     expect(enqueue).toHaveBeenCalledWith(payload);
@@ -35,25 +42,23 @@ describe('closeSessionWithFallback', () => {
 
 describe('buildCloseSessionPayload', () => {
   it('builds a finite close payload and variance from cash input', () => {
-    expect(buildCloseSessionPayload({ sessionId: 'current', expected: 100, actualInput: '95.50' })).toEqual({
-      sessionId: 'current',
+    expect(buildCloseSessionPayload({ expected: 100, actualInput: '95.50' })).toEqual({
+      closing_float: 95.5,
       expected: 100,
-      actual: 95.5,
       variance: -4.5,
     });
   });
 
   it('rejects malformed actual cash input', () => {
     expect(() =>
-      buildCloseSessionPayload({ sessionId: 'current', expected: 100, actualInput: 'abc' })
+      buildCloseSessionPayload({ expected: 100, actualInput: 'abc' })
     ).toThrow('Enter a valid counted cash amount.');
   });
 
   it('normalizes invalid expected cash to zero', () => {
-    expect(buildCloseSessionPayload({ sessionId: 'current', expected: Number.NaN, actualInput: '10' })).toEqual({
-      sessionId: 'current',
+    expect(buildCloseSessionPayload({ expected: Number.NaN, actualInput: '10' })).toEqual({
+      closing_float: 10,
       expected: 0,
-      actual: 10,
       variance: 10,
     });
   });

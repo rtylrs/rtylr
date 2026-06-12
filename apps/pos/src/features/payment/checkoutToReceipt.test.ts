@@ -6,23 +6,23 @@
  * stage does not silently swallow the error.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { buildCheckoutOrder, processCheckout } from './checkoutWorkflow';
+import { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } from './checkoutWorkflow';
 import { printReceiptAndOpenDrawer } from './paymentHardware';
 import type { CartItem } from '../../shared/stores/cartStore';
 
-vi.mock('../../shared/hardware/receiptPrinter', () => ({
+vi.mock('../../shared/services/hardware/receiptPrinter', () => ({
   printReceipt: vi.fn(),
 }));
-vi.mock('../../shared/hardware/cashDrawerHardware', () => ({
+vi.mock('../../shared/services/hardware/cashDrawerHardware', () => ({
   openConfiguredCashDrawer: vi.fn(),
 }));
-vi.mock('../../shared/hardware/crossPlatformDrawer', () => ({
+vi.mock('../../shared/services/hardware/crossPlatformDrawer', () => ({
   openDrawerSerial: vi.fn(),
   openDrawerNetwork: vi.fn(),
 }));
 
-import { printReceipt } from '../../shared/hardware/receiptPrinter';
-import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
+import { printReceipt } from '../../shared/services/hardware/receiptPrinter';
+import { openConfiguredCashDrawer } from '../../shared/services/hardware/cashDrawerHardware';
 
 const item: CartItem = {
   lineId: '1::',
@@ -57,19 +57,21 @@ beforeEach(() => {
 });
 
 async function runFullSale() {
-  // Stage 1: process checkout (creates order on server)
   const order = buildCheckoutOrder({
     id: 'local-42',
     items: [item],
     subtotal: 9,
     tax: 0.72,
     total: 9.72,
-    employeeId: 3,
+    customerId: 3,
     createdAt: '2026-05-13T10:00:00.000Z',
   });
 
+  const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
+
   const checkoutResult = await processCheckout({
     order,
+    payload,
     method: 'cash',
     createOrder: vi.fn(() => Promise.resolve({ id: 500 })),
     chargeOrder: vi.fn(() => Promise.resolve()),
@@ -77,7 +79,6 @@ async function runFullSale() {
     recordCashSale: vi.fn(),
   });
 
-  // Stage 2: print receipt + kick drawer
   const hardwareResult = await printReceiptAndOpenDrawer({
     printer: printerWindows,
     items: [item],
@@ -127,9 +128,7 @@ describe('full sale flow: order → receipt → drawer', () => {
 
     const { checkoutResult, hardwareResult } = await runFullSale();
 
-    // Payment went through
     expect(checkoutResult).toEqual({ status: 'online', orderId: 500 });
-    // Hardware failed - but the payment is not rolled back
     expect(hardwareResult).toEqual({ kind: 'print_failed', error: 'printer offline' });
   });
 
@@ -143,14 +142,16 @@ describe('full sale flow: order → receipt → drawer', () => {
       subtotal: 9,
       tax: 0.72,
       total: 9.72,
-      employeeId: 3,
+      customerId: 3,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
     const enqueueOffline = vi.fn();
 
     const checkoutResult = await processCheckout({
       order,
+      payload,
       method: 'cash',
       createOrder: vi.fn(() => Promise.reject(new Error('Network Error'))),
       chargeOrder: vi.fn(),
@@ -158,11 +159,9 @@ describe('full sale flow: order → receipt → drawer', () => {
       recordCashSale: vi.fn(),
     });
 
-    // Order queued for sync
     expect(checkoutResult).toEqual({ status: 'queued' });
-    expect(enqueueOffline).toHaveBeenCalledWith(order);
+    expect(enqueueOffline).toHaveBeenCalledWith(payload);
 
-    // Receipt can still be printed (caller decides; simulate it being called)
     const hardwareResult = await printReceiptAndOpenDrawer({
       printer: printerWindows,
       items: [item],
