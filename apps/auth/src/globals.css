@@ -70,7 +70,7 @@
 }
 
 button.voxire-button.auth-provider-button {
-  border: 1.5px solid var(--auth-border);
+  border: 2px solid var(--auth-border);
   background: var(--auth-card);
   color: var(--auth-text);
   box-shadow: 0 1px 2px rgb(17 17 17 / 0.04);
