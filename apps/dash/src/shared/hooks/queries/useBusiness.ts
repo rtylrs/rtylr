@@ -38,6 +38,13 @@ export const useUpdateBusiness = () => {
       if (data.aboutContent) payload.aboutContent = data.aboutContent;
       if (data.logoUrl) payload.logoUrl = data.logoUrl;
       if (data.instagram) payload.instagram = data.instagram;
+      if (data.senderEmail) payload.senderEmail = data.senderEmail;
+      if (data.mapsUrl) payload.mapsUrl = data.mapsUrl;
+      if (data.website) payload.website = data.website;
+      if (data.address) payload.address = data.address;
+      if (data.city) payload.city = data.city;
+      if (data.zipcode) payload.zipcode = data.zipcode;
+      if (data.country) payload.country = data.country;
       if (data.maintenanceMode !== undefined) payload.maintenanceMode = data.maintenanceMode;
 
       return unwrap(safe.put('/config/update', payload));

@@ -38,9 +38,9 @@ export const useRevokeSession = () => {
       await unwrap(safe.post('/security/invalidate-sessions', { exceptSessionId: id }));
     },
     onSuccess: () => {
-      toast.success('Session revoked');
+      toast.success('Signed out of all sessions');
       qc.invalidateQueries({ queryKey: ['security'] });
     },
-    onError: () => toast.error('Failed to revoke session'),
+    onError: () => toast.error('Failed to sign out sessions'),
   });
 };

@@ -56,7 +56,7 @@ const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }>
       {!session.current && (
         <Button size="sm" variant="secondary" onClick={() => onRevoke(session.id)}>
           <LogOut size={12} />
-          Revoke
+          Sign out everywhere
         </Button>
       )}
     </div>

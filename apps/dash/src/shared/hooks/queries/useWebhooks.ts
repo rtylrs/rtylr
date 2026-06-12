@@ -40,7 +40,7 @@ export const useDeleteWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.delete('/webhooks', { data: { id } }));
+      await unwrap(safe.delete('/webhooks', { data: { id: Number(id) } }));
       return id;
     },
     onSuccess: () => {

@@ -108,6 +108,7 @@ export const useInviteMember = () => {
       role: TeamMember['role'];
       apps: string[];
       groupId?: number;
+      password?: string;
     }) => {
       const res = await unwrap(safe.post('/team/invite', payload));
       return res;

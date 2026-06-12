@@ -144,6 +144,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         fullName: name,
         role,
         apps: selectedApps,
+        ...(authMethod === 'manual' ? { password } : {}),
         ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
       });
       navigate({ to: '/team' });

@@ -24,7 +24,6 @@ import {
   AppBadge,
   SettingSection,
   DangerZone,
-  ActivityEntryRow,
   ConfirmDialog,
   EmptyState,
 } from '../../shared/components/dash';
@@ -33,7 +32,6 @@ import {
   useDeactivateMember,
   useUpdateMember,
 } from '../../shared/hooks/queries/useTeam';
-import { useActivity } from '../../shared/hooks/queries/useActivity';
 import {
   useMySubscription,
   centsToDisplay,
@@ -77,7 +75,6 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { data: member, isLoading } = useMember(id);
-  const { data: activity = [] } = useActivity(10);
   const deactivate = useDeactivateMember();
   const updateMember = useUpdateMember();
   const currentUser = useUserStore((state) => state.user);
@@ -141,7 +138,6 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     );
   }
 
-  const memberActivity = activity.filter((a) => a.actor === member.name);
   const currentRole = currentUser?.role;
   const canEditMember =
     (currentRole === 'owner' || currentRole === 'admin' || currentUser?.isOwner === true) &&
@@ -342,23 +338,6 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
             )}
           </div>
-        </SettingSection>
-
-        <SettingSection
-          title="Recent activity"
-          description="Recent actions performed by this member."
-        >
-          {memberActivity.length === 0 ? (
-            <p className="text-xs text-center py-6" style={{ color: 'var(--dash-text-dim)' }}>
-              No recent activity
-            </p>
-          ) : (
-            <div className="-mx-5">
-              {memberActivity.map((a, i) => (
-                <ActivityEntryRow key={a.id} entry={a} index={i} />
-              ))}
-            </div>
-          )}
         </SettingSection>
 
         <div
