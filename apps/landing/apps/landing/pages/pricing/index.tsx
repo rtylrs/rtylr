@@ -9,7 +9,8 @@ import HelmetContainer from '../../components/HelmetContainer';
 import { pricingPageSchema } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
-import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { blurFadeIn, staggerBlur, viewportOnce, SPRING_SMOOTH } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import PricingCards from '../../components/pricing/PricingCards';
 import type { BillingCycle, Plan } from '../../components/pricing/pricingData';
 import styles from './pricing.module.scss';
@@ -146,11 +147,12 @@ const PricingPage = (): React.JSX.Element => {
             animate="visible"
             variants={staggerBlur}
           >
-            <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-              Pay per seat, per day.
-              <br />
-              Not per month.
-            </motion.h1>
+            <SplitWords
+              as="h1"
+              className={styles.heroTitle}
+              text={'Pay per seat, per day.\nNot per month.'}
+              delay={0.1}
+            />
             <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
               All 7 apps on every plan. Daily proration: add a seat for 10 days, pay for 10 days. No
               per-location fees, no module upsells.
@@ -161,14 +163,30 @@ const PricingPage = (): React.JSX.Element => {
                 className={cn(styles.toggleOption, billing === 'monthly' && styles.toggleActive)}
                 onClick={() => setBilling('monthly')}
               >
-                Monthly
+                {billing === 'monthly' && (
+                  <motion.span
+                    layoutId="billingPill"
+                    className={styles.togglePill}
+                    transition={SPRING_SMOOTH}
+                  />
+                )}
+                <span className={styles.toggleLabel}>Monthly</span>
               </button>
               <button
                 className={cn(styles.toggleOption, billing === 'annual' && styles.toggleActive)}
                 onClick={() => setBilling('annual')}
               >
-                Annual
-                <span className={styles.savingsBadge}>Save 20%</span>
+                {billing === 'annual' && (
+                  <motion.span
+                    layoutId="billingPill"
+                    className={styles.togglePill}
+                    transition={SPRING_SMOOTH}
+                  />
+                )}
+                <span className={styles.toggleLabel}>
+                  Annual
+                  <span className={styles.savingsBadge}>Save 20%</span>
+                </span>
               </button>
             </motion.div>
           </motion.section>

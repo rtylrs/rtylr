@@ -1,8 +1,8 @@
 import React from 'react';
 import { cn } from '../../lib/cn';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { HiCheck } from 'react-icons/hi';
-import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { blurFadeIn, staggerBlur, viewportOnce, SPRING_SMOOTH } from '../../lib/animations';
 import { PLANS, type BillingCycle, type Plan } from './pricingData';
 import styles from './PricingCards.module.scss';
 
@@ -27,7 +27,7 @@ const PricingCards = ({ billing = 'monthly', onCta }: PricingCardsProps): React.
           key={plan.name}
           className={cn(styles.pricingCard, plan.featured && styles.featured)}
           variants={blurFadeIn}
-          whileHover={{ y: -8, transition: { duration: 0.25, ease: 'easeOut' } }}
+          whileHover={{ y: -8, transition: SPRING_SMOOTH }}
         >
           {plan.featured && <div className={styles.popularBadge}>Most Popular</div>}
           <div className={styles.planHeader}>
@@ -35,7 +35,20 @@ const PricingCards = ({ billing = 'monthly', onCta }: PricingCardsProps): React.
             <p className={styles.planDescription}>{plan.description}</p>
           </div>
           <div className={styles.priceContainer}>
-            <span className={styles.amount}>{price}</span>
+            <span className={styles.amount}>
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={price}
+                  style={{ display: 'inline-block' }}
+                  initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                >
+                  {price}
+                </motion.span>
+              </AnimatePresence>
+            </span>
             <span className={styles.priceSuffix}>{plan.priceSuffix}</span>
           </div>
           <p className={styles.priceNote}>{priceNote ?? ' '}</p>
