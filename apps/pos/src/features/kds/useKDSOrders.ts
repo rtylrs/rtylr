@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useCallback, useEffect, useState } from 'react';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useUserStore } from '../../shared/stores/userStore';
 import { buildKdsStatusUpdate, mapKdsOrders, parsePositiveInteger } from './kdsWorkflow';
 import { useKdsStream } from './useKdsStream';

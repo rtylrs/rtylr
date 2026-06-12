@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CashMovementPayload } from '../services/posService';
+import type { CashMovementPayload } from '../services/api/posService';
 
 export type QueuedCashMovementAction = 'drop' | 'paid_out' | 'paid_in';
 

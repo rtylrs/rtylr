@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useEffect } from 'react';
-import { posService } from '../services/posService';
+import { posService } from '../api/posService';
 import { startTerminalHeartbeat } from './terminalHeartbeat';
 
 export function useTerminalHeartbeat(active: boolean): void {

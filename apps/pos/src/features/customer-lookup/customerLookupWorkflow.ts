@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { customerSchema } from '../../shared/schemas/customers';
+import { customerSchema } from '../../shared/utils/schemas/customers';
 import type { Customer } from '../../shared/types/pos';
 
 export const CUSTOMER_ATTACHMENT_ERROR = 'Select a valid customer before attaching it to the order.';

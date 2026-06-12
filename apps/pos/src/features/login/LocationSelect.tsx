@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MapPin, Monitor, Plus, Loader2 } from 'lucide-react';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import {
   extractCreatedTerminalId,
   filterTerminalsForLocation,

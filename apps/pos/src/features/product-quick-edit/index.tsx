@@ -6,7 +6,7 @@ import SearchBar from '../../shared/components/SearchBar';
 import Skeleton from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { useMenuItems } from '../menu-items/useMenuItems';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import type { MenuItem } from '../../shared/types/pos';
 import { formatCurrency } from '../../shared/utils/format';
 import { buildMenuItemUpdate } from './productQuickEditWorkflow';

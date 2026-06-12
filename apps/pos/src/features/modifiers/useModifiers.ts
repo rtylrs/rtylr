@@ -1,9 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import type { ModifierGroup } from '../../shared/types/pos';
-import { modifierGroupSchema } from '../../shared/schemas/modifiers';
+import { modifierGroupSchema } from '../../shared/utils/schemas/modifiers';
 
 export function useModifiers() {
   const query = useQuery({

@@ -1,5 +1,5 @@
-import type { Combo, MenuItem } from '../types/pos';
-import type { CartItemModifier } from '../stores/cartStore';
+import type { Combo, MenuItem } from '../../types/pos';
+import type { CartItemModifier } from '../../stores/cartStore';
 
 export const MENU_ITEM_CART_ERROR = 'Select a valid menu item before adding it.';
 export const COMBO_CART_ERROR = 'Select a valid combo before adding it.';

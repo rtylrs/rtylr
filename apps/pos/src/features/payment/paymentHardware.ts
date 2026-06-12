@@ -1,7 +1,7 @@
-import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
-import { openDrawerSerial, openDrawerNetwork } from '../../shared/hardware/crossPlatformDrawer';
-import { printReceipt } from '../../shared/hardware/receiptPrinter';
-import type { ReceiptData, PrinterTransport } from '../../shared/hardware/receiptPrinter';
+import { openConfiguredCashDrawer } from '../../shared/services/hardware/cashDrawerHardware';
+import { openDrawerSerial, openDrawerNetwork } from '../../shared/services/hardware/crossPlatformDrawer';
+import { printReceipt } from '../../shared/services/hardware/receiptPrinter';
+import type { ReceiptData, PrinterTransport } from '../../shared/services/hardware/receiptPrinter';
 import type { PrinterSettings } from '../../shared/stores/settingsStore';
 import type { CartItem } from '../../shared/stores/cartStore';
 

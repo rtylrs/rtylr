@@ -6,7 +6,7 @@ import Skeleton from '../../shared/components/Skeleton';
 import { useCombos } from './useCombos';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { formatCurrency } from '../../shared/utils/format';
-import { buildComboCartProduct } from '../../shared/cart/cartProduct';
+import { buildComboCartProduct } from '../../shared/utils/cart/cartProduct';
 
 const CombosScreen: React.FC = () => {
   const { combos, loading, error } = useCombos();

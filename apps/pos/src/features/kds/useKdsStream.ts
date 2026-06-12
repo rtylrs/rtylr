@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import type { RealtimeEvent } from '@voxire/api';
-import { posRealtime } from '../../shared/lib/realtime';
-import { KDS_EVENT_TYPES } from '../../shared/lib/realtimeEvents';
+import { posRealtime } from '../../shared/services/api/realtime';
+import { KDS_EVENT_TYPES } from '../../shared/services/api/realtimeEvents';
 
 export function useKdsStream(ownerID: number | undefined, onInvalidate: () => void): void {
   useEffect(() => {

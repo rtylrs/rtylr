@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     verifyManagerPin: vi.fn(),
     reopenOrder: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((p) => p),
 }));
 
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { unwrap } from '@voxire/api';
 
 // Pure workflow helper that mirrors what useOverride + calling code would do.

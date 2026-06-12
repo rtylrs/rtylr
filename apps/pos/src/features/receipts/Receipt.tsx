@@ -6,8 +6,8 @@ import POSLayout from '../../layouts/POSLayout';
 import ReceiptPreview from '../../shared/components/ReceiptPreview';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { printReceipt } from '../../shared/hardware/receiptPrinter';
-import type { PrinterTransport } from '../../shared/hardware/receiptPrinter';
+import { printReceipt } from '../../shared/services/hardware/receiptPrinter';
+import type { PrinterTransport } from '../../shared/services/hardware/receiptPrinter';
 
 const Receipt: React.FC = () => {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import PinPad from '../../shared/components/PinPad';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useOverride } from '../override/useOverride';
 import { formatCurrency } from '../../shared/utils/format';
 import { buildDiscountRequest, type DiscountMode } from './discountWorkflow';

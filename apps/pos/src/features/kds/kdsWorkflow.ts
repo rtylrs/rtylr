@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { kdsOrderSchema } from '../../shared/schemas/kdsOrders';
+import { kdsOrderSchema } from '../../shared/utils/schemas/kdsOrders';
 import type { KDSOrder } from './useKDSOrders';
 
 export const KDS_ITEM_ID_ERROR = 'Select a valid KDS item before updating status.';

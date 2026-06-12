@@ -8,7 +8,7 @@ import {
   sortKdsOrdersOldestFirst,
   uniqueStations,
 } from './kdsUtils';
-import type { KDSOrderRaw } from '../schemas/kdsOrders';
+import type { KDSOrderRaw } from './schemas/kdsOrders';
 
 const makeOrder = (overrides: Partial<KDSOrderRaw> = {}): KDSOrderRaw => ({
   id: '1',

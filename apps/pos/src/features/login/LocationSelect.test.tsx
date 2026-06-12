@@ -22,7 +22,7 @@ vi.mock('sonner', () => ({
   toast: mockToast,
 }));
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     getMyLocations: (...args: unknown[]) => mockPosService.getMyLocations(...args),
     getBranches: (...args: unknown[]) => mockPosService.getBranches(...args),

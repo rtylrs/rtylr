@@ -1,4 +1,4 @@
-import type { MenuItemUpdatePayload } from '../../shared/services/posService';
+import type { MenuItemUpdatePayload } from '../../shared/services/api/posService';
 
 interface ProductQuickEditDraft {
   price: number;

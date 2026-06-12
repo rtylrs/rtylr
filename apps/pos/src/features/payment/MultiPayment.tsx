@@ -9,7 +9,7 @@ import { formatCurrency } from '../../shared/utils/format';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
 
 const MultiPaymentScreen: React.FC = () => {

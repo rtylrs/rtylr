@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import type { RealtimeEvent } from '@voxire/api';
-import { posRealtime } from '../lib/realtime';
+import { posRealtime } from '../services/api/realtime';
 import { useUserStore } from '../stores/userStore';
 
 /**

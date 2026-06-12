@@ -1,6 +1,6 @@
 // Pure helpers for KDS (Kitchen Display System) order management.
 
-import type { KDSOrderRaw } from '../schemas/kdsOrders';
+import type { KDSOrderRaw } from './schemas/kdsOrders';
 
 /** Return true if a KDS order is still in an active/open state. */
 export function isKdsOrderActive(order: KDSOrderRaw): boolean {

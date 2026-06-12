@@ -19,7 +19,7 @@ vi.mock('@voxire/api', () => {
   };
 });
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     getKDSOrders: (...args: unknown[]) => mockPosService.getKDSOrders(...args),
     updateKDSItemStatus: (...args: unknown[]) => mockPosService.updateKDSItemStatus(...args),

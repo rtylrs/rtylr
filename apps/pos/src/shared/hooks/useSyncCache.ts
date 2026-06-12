@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { unwrap } from '@voxire/api';
-import { db } from '../db';
-import { posService } from '../services/posService';
+import { db } from '../services/db';
+import { posService } from '../services/api/posService';
 import {
   normalizeCachedCombos,
   normalizeCachedModifiers,

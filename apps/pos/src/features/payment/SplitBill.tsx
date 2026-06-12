@@ -5,7 +5,7 @@ import { unwrap } from '@voxire/api';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCartStore } from '../../shared/stores/cartStore';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { buildSplitBillRequest } from './splitBillWorkflow';
 
 type SplitMode = 'seat' | 'amount' | 'items';

@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     updateKDSItemStatus: vi.fn(),
   },
@@ -18,7 +18,7 @@ vi.mock('@voxire/api', () => ({
 }));
 
 import { mapKdsOrders, buildKdsStatusUpdate, KDS_ITEM_ID_ERROR } from './kdsWorkflow';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { unwrap } from '@voxire/api';
 
 // Raw API shape (snake_case + numeric id) - as the server returns it.

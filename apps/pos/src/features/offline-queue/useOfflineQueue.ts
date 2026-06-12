@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
 import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { syncQueuedOrders } from './syncOfflineQueue';
 import {
   retrySessionClose,

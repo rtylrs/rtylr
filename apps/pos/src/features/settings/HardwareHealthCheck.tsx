@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { checkHardwareHealth } from '../../shared/hardware/hardwareHealth';
-import type { HardwareHealthReport, DeviceStatus } from '../../shared/hardware/hardwareHealth';
+import { checkHardwareHealth } from '../../shared/services/hardware/hardwareHealth';
+import type { HardwareHealthReport, DeviceStatus } from '../../shared/services/hardware/hardwareHealth';
 import type { PrinterSettings, KdsHardwareSettings } from '../../shared/stores/settingsStore';
 
 interface Props {

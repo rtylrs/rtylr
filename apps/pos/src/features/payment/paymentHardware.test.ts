@@ -4,20 +4,20 @@ import type { CartItem } from '../../shared/stores/cartStore';
 import type { PrinterSettings } from '../../shared/stores/settingsStore';
 
 // Mock all hardware modules so tests never hit Tauri invoke
-vi.mock('../../shared/hardware/receiptPrinter', () => ({
+vi.mock('../../shared/services/hardware/receiptPrinter', () => ({
   printReceipt: vi.fn(),
 }));
-vi.mock('../../shared/hardware/cashDrawerHardware', () => ({
+vi.mock('../../shared/services/hardware/cashDrawerHardware', () => ({
   openConfiguredCashDrawer: vi.fn(),
 }));
-vi.mock('../../shared/hardware/crossPlatformDrawer', () => ({
+vi.mock('../../shared/services/hardware/crossPlatformDrawer', () => ({
   openDrawerSerial: vi.fn(),
   openDrawerNetwork: vi.fn(),
 }));
 
-import { printReceipt } from '../../shared/hardware/receiptPrinter';
-import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
-import { openDrawerSerial, openDrawerNetwork } from '../../shared/hardware/crossPlatformDrawer';
+import { printReceipt } from '../../shared/services/hardware/receiptPrinter';
+import { openConfiguredCashDrawer } from '../../shared/services/hardware/cashDrawerHardware';
+import { openDrawerSerial, openDrawerNetwork } from '../../shared/services/hardware/crossPlatformDrawer';
 
 const item: CartItem = {
   lineId: '1::',

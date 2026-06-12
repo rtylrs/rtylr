@@ -17,7 +17,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v) => v),
 }));
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     getReceipts: (...args: unknown[]) => mockPosService.getReceipts(...args),
     emailReceipt: (...args: unknown[]) => mockPosService.emailReceipt(...args),

@@ -4,8 +4,8 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
-import { listPrinters, listSerialPorts } from '../../shared/hardware/hardwareDiscovery';
-import type { PrinterInfo, SerialPortInfo } from '../../shared/hardware/hardwareDiscovery';
+import { listPrinters, listSerialPorts } from '../../shared/services/hardware/hardwareDiscovery';
+import type { PrinterInfo, SerialPortInfo } from '../../shared/services/hardware/hardwareDiscovery';
 import appConfig from '../../app.json';
 import { HardwareHealthCheck } from './HardwareHealthCheck';
 

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import ConfirmModal from '../../shared/components/ConfirmModal';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { formatCurrency } from '../../shared/utils/format';

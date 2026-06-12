@@ -12,7 +12,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     getGiftCards: (...args: unknown[]) => mockPosService.getGiftCards(...args),
     getGiftCardBalance: (...args: unknown[]) => mockPosService.getGiftCardBalance(...args),

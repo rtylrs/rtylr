@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import type { DaySummary } from '../../shared/types/pos';
 import { buildLocalDaySummary, normalizeDaySummaryResponse } from './cashDrawerSummary';

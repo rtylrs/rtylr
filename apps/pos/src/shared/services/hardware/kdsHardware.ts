@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { KdsHardwareSettings } from '../stores/settingsStore';
+import type { KdsHardwareSettings } from '../../stores/settingsStore';
 
 export interface KdsTicketItem {
   name: string;
@@ -74,5 +74,7 @@ export async function sendKdsTicket(
       } catch (err) {
         return { status: 'failed', error: err instanceof Error ? err.message : String(err) };
       }
+    default:
+      return { status: 'skipped' };
   }
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useCartStore } from '../../../../shared/stores/cartStore';
-import { buildMenuItemCartProduct } from '../../../../shared/cart/cartProduct';
+import { buildMenuItemCartProduct } from '../../../../shared/utils/cart/cartProduct';
 import type { MenuItem } from '../../../../shared/types/pos';
 
 type Product = MenuItem;

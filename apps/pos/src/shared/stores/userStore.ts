@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '../lib/api';
+import api from '../services/api/api';
 
 interface Addons {
   feedback: boolean;

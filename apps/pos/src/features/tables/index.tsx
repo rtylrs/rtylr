@@ -5,7 +5,7 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import TableCard from '../../shared/components/TableCard';
 import Skeleton from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { normalizeTablesResponse, type TableRow } from './tablesWorkflow';
 
 const TablesScreen: React.FC = () => {

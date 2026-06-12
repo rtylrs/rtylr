@@ -1,4 +1,4 @@
-import type { SplitPayload } from '../../shared/services/posService';
+import type { SplitPayload } from '../../shared/services/api/posService';
 import type { CartItem } from '../../shared/stores/cartStore';
 
 export const SPLIT_UNSYNCED_ITEM_ERROR = 'Sync this order before splitting by item.';

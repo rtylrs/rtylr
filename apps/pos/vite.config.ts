@@ -10,7 +10,6 @@ export default defineConfig(() => ({
   base: '/',
   plugins: [react(), versionPlugin()],
   resolve: {
-    tsconfigPaths: true,
     alias: {
       '@app': path.resolve(__dirname, './src'),
       '@features': path.resolve(__dirname, './src/features'),
@@ -19,6 +18,8 @@ export default defineConfig(() => ({
       '@hooks': path.resolve(__dirname, './src/shared/hooks'),
       '@layouts': path.resolve(__dirname, './src/layouts'),
       '@styles': path.resolve(__dirname, './src/styles'),
+      '@services': path.resolve(__dirname, './src/shared/services'),
+      '@utils': path.resolve(__dirname, './src/shared/utils'),
     },
     dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
   },

@@ -1,10 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useCallback, useEffect, useState } from 'react';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import type { Receipt } from '../../shared/types/pos';
-import { receiptSchema } from '../../shared/schemas/receipts';
+import { receiptSchema } from '../../shared/utils/schemas/receipts';
 
 function parseRemoteReceiptId(id: string): number | null {
   const parsed = Number(id);

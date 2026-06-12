@@ -1,9 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import type { MenuItem } from '../../shared/types/pos';
-import { menuItemSchema } from '../../shared/schemas/menuItems';
+import { menuItemSchema } from '../../shared/utils/schemas/menuItems';
 
 interface UseMenuItemsResult {
   items: MenuItem[];

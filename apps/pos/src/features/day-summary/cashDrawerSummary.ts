@@ -1,6 +1,6 @@
 import type { DaySummary } from '../../shared/types/pos';
 import type { CashMovement } from '../../shared/stores/cashDrawerStore';
-import { daySummarySchema } from '../../shared/schemas/daySummary';
+import { daySummarySchema } from '../../shared/utils/schemas/daySummary';
 
 interface BuildLocalDaySummaryParams {
   date: string;

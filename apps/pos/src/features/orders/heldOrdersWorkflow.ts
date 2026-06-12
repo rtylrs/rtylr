@@ -1,4 +1,4 @@
-import type { CartProductInput } from '../../shared/cart/cartProduct';
+import type { CartProductInput } from '../../shared/utils/cart/cartProduct';
 import type { HeldOrder } from '../../shared/stores/heldOrdersStore';
 
 export const HELD_ORDER_ITEM_ERROR = 'This held order contains an item that cannot be restored.';

@@ -12,7 +12,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     getCombos: (...args: unknown[]) => mockPosService.getCombos(...args),
   },

@@ -9,7 +9,7 @@ import { SkeletonGrid } from '../../shared/components/Skeleton';
 import { useMenuItems } from './useMenuItems';
 import { useCartStore } from '../../shared/stores/cartStore';
 import type { MenuItem } from '../../shared/types/pos';
-import { buildMenuItemCartProduct } from '../../shared/cart/cartProduct';
+import { buildMenuItemCartProduct } from '../../shared/utils/cart/cartProduct';
 
 const MenuItemsScreen: React.FC = () => {
   const { items, categories, loading, error, reload } = useMenuItems();

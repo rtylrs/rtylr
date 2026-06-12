@@ -1,4 +1,4 @@
-import type { CachedCombo, CachedModifier, CachedProduct } from '../db';
+import type { CachedCombo, CachedModifier, CachedProduct } from '../services/db';
 
 type RawRecord = Record<string, unknown>;
 

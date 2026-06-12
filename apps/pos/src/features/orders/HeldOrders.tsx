@@ -8,7 +8,7 @@ import EmptyState from '../../shared/components/EmptyState';
 import { useHeldOrdersStore } from '../../shared/stores/heldOrdersStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { formatDate, formatCurrency } from '../../shared/utils/format';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import {
   buildHeldOrderCartProducts,
   buildServerHeldOrderResume,

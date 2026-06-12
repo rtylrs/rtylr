@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { PrinterSettings, KdsHardwareSettings } from '../stores/settingsStore';
+import type { PrinterSettings, KdsHardwareSettings } from '../../stores/settingsStore';
 
 export interface DeviceStatus {
   name: string;

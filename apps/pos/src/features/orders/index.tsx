@@ -7,7 +7,7 @@ import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import OrderStatusBadge from '../../shared/components/OrderStatusBadge';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import type { Order } from '../../shared/types/pos';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
 import { normalizeOrdersResponse } from './ordersWorkflow';

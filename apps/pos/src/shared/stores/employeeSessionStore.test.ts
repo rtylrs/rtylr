@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useEmployeeSessionStore } from './employeeSessionStore';
 
 // Mock the api module
-vi.mock('../lib/api', () => ({
+vi.mock('../services/api/api', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),
@@ -10,7 +10,7 @@ vi.mock('../lib/api', () => ({
   },
 }));
 
-import api from '../lib/api';
+import api from '../services/api/api';
 
 const { getState, setState } = useEmployeeSessionStore;
 const act = (fn: () => void) => {

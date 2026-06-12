@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useEffect, useState } from 'react';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import type { Customer } from '../../shared/types/pos';
 import { mapCustomers } from './customerLookupWorkflow';
 

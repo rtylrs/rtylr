@@ -2,7 +2,7 @@ import type {
   QueuedCashMovement,
   QueuedCashMovementAction,
 } from '../../shared/stores/cashMovementQueueStore';
-import type { CashMovementPayload } from '../../shared/services/posService';
+import type { CashMovementPayload } from '../../shared/services/api/posService';
 
 interface SyncQueuedCashMovementsParams {
   entries: QueuedCashMovement[];

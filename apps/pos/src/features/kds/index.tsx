@@ -5,7 +5,7 @@ import Skeleton from '../../shared/components/Skeleton';
 import { useKDSOrders, KDSOrder } from './useKDSOrders';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { useKdsTick, formatElapsed, elapsedSeconds } from './useKdsTimer';
-import { sendKdsTicket } from '../../shared/hardware/kdsHardware';
+import { sendKdsTicket } from '../../shared/services/hardware/kdsHardware';
 
 const STATUS_ORDER: KDSOrder['status'][] = ['new', 'cooking', 'ready', 'served'];
 

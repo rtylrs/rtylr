@@ -4,23 +4,17 @@ import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
-import { useUserStore } from './shared/stores';
-import { useEmployeeSessionStore } from './shared/stores/employeeSessionStore';
-import { useCartStore } from './shared/stores/cartStore';
+import { useUserStore, useEmployeeSessionStore, useCartStore, useTerminalContextStore } from './shared/stores';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
 import CommandPalette from './shared/components/CommandPalette';
 import HelpOverlay from './shared/components/HelpOverlay';
-import { useKeyboardShortcuts } from './shared/hooks';
-import { useAutoLogout } from './shared/hooks';
-import { useOnlineStatus } from './shared/hooks/useOnlineStatus';
-import { restoreUserSessionFromCookie } from './shared/auth/sessionRestore';
+import { useKeyboardShortcuts, useAutoLogout, useOnlineStatus, useStockAlerts } from './shared/hooks';
+import { restoreUserSessionFromCookie } from './shared/services/auth/sessionRestore';
 import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueueAutoSync';
-import { reportReactError } from './shared/observability/appErrors';
-import { useTerminalHeartbeat } from './shared/terminal/useTerminalHeartbeat';
-import { useTerminalContextStore } from './shared/stores/terminalContextStore';
-import { buildCartContext } from './shared/terminal/cartContext';
-import { useStockAlerts } from './shared/hooks/useStockAlerts';
+import { reportReactError } from './shared/services/observability/appErrors';
+import { useTerminalHeartbeat } from './shared/services/terminal/useTerminalHeartbeat';
+import { buildCartContext } from './shared/services/terminal/cartContext';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie

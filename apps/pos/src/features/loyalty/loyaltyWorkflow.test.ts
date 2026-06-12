@@ -7,7 +7,7 @@ import {
   redeemPointsForDiscount,
 } from './loyaltyWorkflow';
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     earnLoyaltyPoints: vi.fn(),
     redeemLoyaltyPoints: vi.fn(),
@@ -18,7 +18,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((p) => p),
 }));
 
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 
 beforeEach(() => {
   vi.clearAllMocks();

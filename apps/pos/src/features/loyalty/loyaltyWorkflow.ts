@@ -1,5 +1,5 @@
 import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 
 // Points-per-dollar earned (configurable via /pos/loyalty/config, default 1 point per $1)
 export const DEFAULT_POINTS_PER_DOLLAR = 1;

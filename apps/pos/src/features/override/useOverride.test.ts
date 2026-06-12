@@ -10,7 +10,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     verifyManagerPin: (...args: unknown[]) => mockPosService.verifyManagerPin(...args),
   },

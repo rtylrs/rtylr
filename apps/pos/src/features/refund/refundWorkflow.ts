@@ -1,5 +1,5 @@
 import type { Receipt } from '../../shared/types/pos';
-import type { VoidRefundPayload } from '../../shared/services/posService';
+import type { VoidRefundPayload } from '../../shared/services/api/posService';
 
 interface BuildRefundRequestParams {
   orderId: string | undefined;

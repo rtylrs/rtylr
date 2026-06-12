@@ -8,7 +8,7 @@ import { buildCheckoutOrder, processCheckout } from '../payment/checkoutWorkflow
 import { earnPointsAfterPayment, redeemPointsForDiscount } from './loyaltyWorkflow';
 import type { CartItem } from '../../shared/stores/cartStore';
 
-vi.mock('../../shared/services/posService', () => ({
+vi.mock('../../shared/services/api/posService', () => ({
   posService: {
     earnLoyaltyPoints: vi.fn(),
     redeemLoyaltyPoints: vi.fn(),
@@ -19,7 +19,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((p) => p),
 }));
 
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 
 const item: CartItem = {
   lineId: '1::',

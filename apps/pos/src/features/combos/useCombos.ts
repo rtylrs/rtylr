@@ -1,9 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import type { Combo } from '../../shared/types/pos';
-import { comboSchema } from '../../shared/schemas/combos';
+import { comboSchema } from '../../shared/utils/schemas/combos';
 
 export function useCombos() {
   const query = useQuery({

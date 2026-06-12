@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useCallback, useState } from 'react';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 
 export function useOverride() {
   const [verifying, setVerifying] = useState(false);
