@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../lib/navigation';
 import { blurFadeInSlow, viewportOnce } from '../../../lib/animations';
+import { SplitWords } from '../../motion/SplitWords';
 import PricingCards from '../../pricing/PricingCards';
 import type { Plan } from '../../pricing/pricingData';
 import styles from './PricingSection.module.scss';
@@ -32,11 +33,12 @@ const PricingSection = (): React.JSX.Element => {
           variants={blurFadeInSlow}
         >
           <span className={styles.badge}>Pricing</span>
-          <h2 className={styles.sectionTitle}>
-            Simple pricing.
-            <br />
-            All 7 apps, one price.
-          </h2>
+          <SplitWords
+            as="h2"
+            className={styles.sectionTitle}
+            text={'Simple pricing.\nAll 7 apps, one price.'}
+            trigger="view"
+          />
           <p className={styles.sectionDescription}>
             Start free. Upgrade when you need more. No per-location fees, no module upsells.
           </p>

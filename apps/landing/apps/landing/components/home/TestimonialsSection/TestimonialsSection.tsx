@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../../../lib/cn';
 import { motion } from 'motion/react';
-import { fadeInUp, viewportOnce } from '../../../lib/animations';
+import { SplitWords } from '../../motion/SplitWords';
 import styles from './TestimonialsSection.module.scss';
 
 const testimonials = [
@@ -67,15 +67,12 @@ const TestimonialsSection: React.FC = () => {
   return (
     <section className={styles.testimonialsSection}>
       <div className={styles.container}>
-        <motion.h2
+        <SplitWords
+          as="h2"
           className={styles.sectionTitle}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-          variants={fadeInUp}
-        >
-          What operators say about it.
-        </motion.h2>
+          text="What operators say about it."
+          trigger="view"
+        />
         <motion.div
           className={styles.tickersWrapper}
           initial={{ opacity: 0 }}

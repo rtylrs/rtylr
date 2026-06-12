@@ -1,6 +1,13 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { fadeInUp, staggerBlur, blurFadeIn, viewportOnce } from '../../../lib/animations';
+import {
+  fadeInUp,
+  staggerBlur,
+  blurFadeIn,
+  viewportOnce,
+  SPRING_SMOOTH,
+} from '../../../lib/animations';
+import { SplitWords } from '../../motion/SplitWords';
 import styles from './IntegrationsSection.module.scss';
 
 interface Integration {
@@ -96,11 +103,12 @@ const IntegrationsSection: React.FC = () => {
           variants={fadeInUp}
         >
           <span className={styles.badge}>INTEGRATIONS</span>
-          <h2 className={styles.sectionTitle}>
-            Plugs into everything
-            <br />
-            you already run on.
-          </h2>
+          <SplitWords
+            as="h2"
+            className={styles.sectionTitle}
+            text={'Plugs into everything\nyou already run on.'}
+            trigger="view"
+          />
           <p className={styles.sectionDescription}>
             Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in
             minutes. No API keys to chase. No engineer required.
@@ -119,10 +127,7 @@ const IntegrationsSection: React.FC = () => {
               key={index}
               className={styles.integrationCard}
               variants={blurFadeIn}
-              whileHover={{
-                y: -6,
-                transition: { duration: 0.25, ease: 'easeOut' },
-              }}
+              whileHover={{ y: -6, transition: SPRING_SMOOTH }}
             >
               <div
                 className={styles.iconWrapper}
