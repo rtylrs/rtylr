@@ -4,6 +4,7 @@ import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { posService } from '../../shared/services/api/posService';
 import { useUserStore } from '../../shared/stores/userStore';
+import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
 import {
   extractCreatedLocationId,
   extractCreatedTerminalId,
@@ -176,7 +177,7 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-pos-text">rtylr POS</h1>
+          <RtylrWordmark suffix="POS" className="text-2xl" />
           <p className="text-sm text-pos-muted mt-1">{subtitle}</p>
         </div>
 

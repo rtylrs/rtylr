@@ -3,9 +3,9 @@ import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { Loader2, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
-import { useThemeStore } from '../../shared/stores/themeStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import { posService } from '../../shared/services/api/posService';
+import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
 import { mapRoster, isCompletePin, PIN_LENGTH, type RosterMember } from './rosterWorkflow';
 
 const KEYS = [
@@ -20,7 +20,6 @@ type Step = 'roster' | 'enter' | 'setup';
 const PinLogin: React.FC = () => {
   const locationId = useTerminalContextStore((s) => s.locationId);
   const { authenticatePin, loading, error, clearError } = useEmployeeSessionStore();
-  const theme = useThemeStore((s) => s.theme);
 
   const [roster, setRoster] = useState<RosterMember[]>([]);
   const [rosterLoading, setRosterLoading] = useState(true);
@@ -30,6 +29,7 @@ const PinLogin: React.FC = () => {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [settingPin, setSettingPin] = useState(false);
+  const [revealPin, setRevealPin] = useState(false);
   const [shake, setShake] = useState(false);
 
   const loadRoster = useCallback(async () => {
@@ -119,6 +119,17 @@ const PinLogin: React.FC = () => {
 
   // The active field for the keypad: PIN first, then confirm during setup.
   const activeValue = step === 'setup' && isCompletePin(pin) ? confirmPin : pin;
+
+  useEffect(() => {
+    if (step !== 'setup' || activeValue.length === 0) {
+      setRevealPin(false);
+      return;
+    }
+    setRevealPin(true);
+    const timeout = window.setTimeout(() => setRevealPin(false), 900);
+    return () => window.clearTimeout(timeout);
+  }, [activeValue, step]);
+
   const setActive = (updater: (prev: string) => string): void => {
     if (step === 'setup' && isCompletePin(pin)) setConfirmPin(updater);
     else setPin(updater);
@@ -156,18 +167,13 @@ const PinLogin: React.FC = () => {
     else if (key !== '') pushDigit(key);
   };
 
-  const logo =
-    theme === 'dark'
-      ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
-      : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp';
-
   // ── Roster step ────────────────────────────────────────────────
   if (step === 'roster') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pos-bg p-6">
         <div className="w-full max-w-md">
           <div className="flex flex-col items-center gap-1 text-center mb-8">
-            <img src={logo} alt="rtylr" className="h-8 w-auto" />
+            <RtylrWordmark className="text-2xl" />
             <h1 className="text-lg font-bold text-pos-text mt-2">Who's working?</h1>
             <p className="text-xs text-pos-muted">Tap your name to sign in</p>
           </div>
@@ -250,19 +256,20 @@ const PinLogin: React.FC = () => {
           <p className="text-xs text-pos-muted">{subtitle}</p>
         </div>
 
-        {/* PIN dots */}
-        <div className={`flex gap-3 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+        <div className={`flex gap-2 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
           {Array.from({ length: PIN_LENGTH }).map((_, i) => (
             <span
               key={i}
-              className={`w-3 h-3 rounded-full border-2 transition-colors ${
+              className={`w-11 h-12 rounded-xl border flex items-center justify-center text-lg font-bold tabular-nums transition-colors ${
                 error
-                  ? 'border-destructive bg-destructive/30'
+                  ? 'border-destructive bg-destructive/15 text-destructive'
                   : i < activeValue.length
-                    ? 'border-pos-text bg-pos-text'
-                    : 'border-pos-muted bg-transparent'
+                    ? 'border-pos-text/70 bg-white/8 text-pos-text'
+                    : 'border-pos-border bg-transparent text-pos-muted'
               }`}
-            />
+            >
+              {i < activeValue.length ? (isSetup && revealPin ? activeValue[i] : '•') : ''}
+            </span>
           ))}
         </div>
 

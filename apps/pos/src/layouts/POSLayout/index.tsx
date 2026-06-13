@@ -2,6 +2,7 @@ import React from 'react';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
+import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
 
 interface POSLayoutProps {
   children: React.ReactNode;
@@ -17,15 +18,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
     <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>
       <header className="flex items-center justify-between px-5 py-3 bg-pos-card border-b border-pos-border shrink-0">
         <div className="flex items-center gap-2.5">
-          <img
-            src={
-              theme === 'dark'
-                ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
-                : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp'
-            }
-            alt="rtylr"
-            className="h-5 w-auto"
-          />
+          <RtylrWordmark className="text-base" />
           <span className="text-sm font-semibold">{user?.name ?? 'POS Terminal'}</span>
         </div>
         <div className="flex items-center gap-1">

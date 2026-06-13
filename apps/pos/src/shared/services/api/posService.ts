@@ -19,6 +19,10 @@ export interface FloorPayload {
 export interface TerminalPayload {
   name: string;
   branchId?: number;
+  branch_id?: number;
+  deviceId?: string | null;
+  device_id?: string | null;
+  is_active?: boolean;
   [key: string]: unknown;
 }
 
@@ -178,8 +182,12 @@ export interface POSUserPayload {
 }
 
 export interface MemberLocationPayload {
-  memberId: string;
+  userId?: number;
+  user_id?: number;
   locationId: number;
+  canManagePosUsers?: boolean;
+  canManageTerminals?: boolean;
+  canViewReports?: boolean;
   [key: string]: unknown;
 }
 
@@ -216,6 +224,16 @@ export interface AuditFilterParams {
   [key: string]: unknown;
 }
 
+function toTerminalPayload(data: Partial<TerminalPayload>) {
+  const deviceId = data.device_id ?? data.deviceId;
+  return {
+    name: data.name,
+    branch_id: data.branch_id ?? data.branchId,
+    ...(deviceId ? { device_id: deviceId } : {}),
+    ...(typeof data.is_active === 'boolean' ? { is_active: data.is_active } : {}),
+  };
+}
+
 // ── Service ────────────────────────────────────────────────────────────────
 
 export const posService = {
@@ -233,10 +251,11 @@ export const posService = {
 
   // ── Terminals ─────────────────────────────────────────────────
   getTerminals: () => safe.get('/pos/terminals'),
-  createTerminal: (data: TerminalPayload) => safe.post('/pos/terminals', data),
+  createTerminal: (data: TerminalPayload) => safe.post('/pos/terminals', toTerminalPayload(data)),
   updateTerminal: (id: number, data: Partial<TerminalPayload>) =>
-    safe.put(`/pos/terminals/${id}`, data),
-  heartbeat: () => safe.post('/pos/terminals/heartbeat'),
+    safe.put(`/pos/terminals/${id}`, toTerminalPayload(data)),
+  heartbeat: (terminalId: number) =>
+    safe.post('/pos/terminals/heartbeat', { terminal_id: terminalId }),
 
   // ── Tables ────────────────────────────────────────────────────
   getTables: () => safe.get('/pos/tables'),
@@ -368,6 +387,13 @@ export const posService = {
   // The sign-in roster for a location: assigned members + has_pin + role.
   getLocationRoster: (locationId: number) =>
     safe.get('/pos/access/location-roster', { params: { location_id: locationId } }),
-  assignMemberToLocation: (data: MemberLocationPayload) => safe.post('/pos/access/assign', data),
+  assignMemberToLocation: (data: MemberLocationPayload) =>
+    safe.post('/pos/access/assign', {
+      user_id: data.user_id ?? data.userId,
+      location_id: data.locationId,
+      can_manage_pos_users: Boolean(data.canManagePosUsers),
+      can_manage_terminals: Boolean(data.canManageTerminals),
+      can_view_reports: Boolean(data.canViewReports),
+    }),
   removeMemberFromLocation: (id: number) => safe.post('/pos/access/remove', { id }),
 };

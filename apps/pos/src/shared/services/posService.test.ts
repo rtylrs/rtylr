@@ -59,9 +59,32 @@ describe('posService', () => {
     expect(safe.get).toHaveBeenCalledWith('/pos/terminals');
   });
 
-  it('heartbeat calls POST /pos/terminals/heartbeat', () => {
-    posService.heartbeat();
-    expect(safe.post).toHaveBeenCalledWith('/pos/terminals/heartbeat');
+  it('createTerminal calls POST /pos/terminals with backend field names', () => {
+    posService.createTerminal({ name: 'Register 1', branchId: 3, type: 'pos' });
+    expect(safe.post).toHaveBeenCalledWith('/pos/terminals', {
+      name: 'Register 1',
+      branch_id: 3,
+    });
+  });
+
+  it('updateTerminal calls PUT /pos/terminals/:id with backend field names', () => {
+    posService.updateTerminal(5, {
+      name: 'Front Register',
+      branchId: 3,
+      deviceId: 'terminal-a',
+      is_active: true,
+    });
+    expect(safe.put).toHaveBeenCalledWith('/pos/terminals/5', {
+      name: 'Front Register',
+      branch_id: 3,
+      device_id: 'terminal-a',
+      is_active: true,
+    });
+  });
+
+  it('heartbeat calls POST /pos/terminals/heartbeat with terminal id', () => {
+    posService.heartbeat(9);
+    expect(safe.post).toHaveBeenCalledWith('/pos/terminals/heartbeat', { terminal_id: 9 });
   });
 
   // Tables
@@ -323,6 +346,23 @@ describe('posService', () => {
   it('getMyLocations calls GET /pos/access/my-locations', () => {
     posService.getMyLocations();
     expect(safe.get).toHaveBeenCalledWith('/pos/access/my-locations');
+  });
+
+  it('assignMemberToLocation calls POST /pos/access/assign with snake_case payload', () => {
+    posService.assignMemberToLocation({
+      userId: 42,
+      locationId: 3,
+      canManagePosUsers: true,
+      canManageTerminals: false,
+      canViewReports: true,
+    });
+    expect(safe.post).toHaveBeenCalledWith('/pos/access/assign', {
+      user_id: 42,
+      location_id: 3,
+      can_manage_pos_users: true,
+      can_manage_terminals: false,
+      can_view_reports: true,
+    });
   });
 
   it('removeMemberFromLocation calls POST /pos/access/remove', () => {
