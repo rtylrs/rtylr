@@ -152,13 +152,9 @@ func (h *CreateStockTakeHandler) Validate(_ context.Context, req *CreateStockTak
 		}
 	}
 
-	if len(req.Items) == 0 {
-		return &errorModels.ServerError{
-			Code:     http.StatusBadRequest,
-			HTTPCode: http.StatusBadRequest,
-			Message:  "At least one item is required",
-		}
-	}
+	// A stock take is created as a draft for a warehouse; items are populated and
+	// counted later via the Update handler (which already allows zero items), so
+	// requiring items at creation is wrong and blocks the create flow.
 
 	return nil
 }

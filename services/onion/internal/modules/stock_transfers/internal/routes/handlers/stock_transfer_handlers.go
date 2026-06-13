@@ -156,13 +156,9 @@ func (h *CreateStockTransferHandler) Validate(_ context.Context, req *CreateStoc
 		}
 	}
 
-	if len(req.Items) == 0 {
-		return &errorModels.ServerError{
-			Code:     http.StatusBadRequest,
-			HTTPCode: http.StatusBadRequest,
-			Message:  "At least one item is required",
-		}
-	}
+	// A transfer is created as a draft and its line items are added/counted
+	// afterwards, so zero items is valid at creation. The non-empty requirement
+	// belongs on the status transition that actually ships the transfer.
 
 	return nil
 }
