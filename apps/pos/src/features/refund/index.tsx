@@ -4,7 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import ConfirmModal from '../../shared/components/ConfirmModal';
+import ManagerRequired from '../../shared/components/ManagerRequired';
 import { posService } from '../../shared/services/api/posService';
+import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { formatCurrency } from '../../shared/utils/format';
@@ -29,6 +31,7 @@ const RefundScreen: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const receipt = useReceiptsStore((s) => (orderId ? s.byOrder(orderId) : undefined));
   const recordCashRefund = useCashDrawerStore((s) => s.recordCashRefund);
+  const { canRefund } = useCapabilities();
 
   const submit = async () => {
     setBusy(true);
@@ -53,6 +56,14 @@ const RefundScreen: React.FC = () => {
       setConfirm(false);
     }
   };
+
+  if (!canRefund) {
+    return (
+      <ScreenLayout title="Refund" subtitle={`Order #${orderId ?? 'current'}`}>
+        <ManagerRequired action="issue refunds" />
+      </ScreenLayout>
+    );
+  }
 
   return (
     <ScreenLayout title="Refund" subtitle={`Order #${orderId ?? 'current'}`}>

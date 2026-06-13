@@ -3,23 +3,27 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
-import PinPad from '../../shared/components/PinPad';
+import ManagerRequired from '../../shared/components/ManagerRequired';
 import { posService } from '../../shared/services/api/posService';
-import { useOverride } from '../override/useOverride';
+import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import { formatCurrency } from '../../shared/utils/format';
 import { buildDiscountRequest, type DiscountMode } from './discountWorkflow';
 
 const DiscountScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { canApplyDiscount, maxDiscountPct } = useCapabilities();
   const [mode, setMode] = useState<DiscountMode>('percent');
   const [value, setValue] = useState('');
-  const [verified, setVerified] = useState(false);
-  const { verify, error } = useOverride();
 
   const submit = async () => {
     try {
       const request = buildDiscountRequest({ orderId, mode, valueInput: value });
+      // Enforce the operator's discount ceiling for percent discounts.
+      if (mode === 'percent' && maxDiscountPct > 0 && request.payload.discount_value > maxDiscountPct) {
+        toast.error(`Your discount limit is ${maxDiscountPct}%`);
+        return;
+      }
       await unwrap(posService.applyDiscount(request.orderId, request.payload));
       toast.success('Discount applied');
       navigate(-1);
@@ -34,18 +38,8 @@ const DiscountScreen: React.FC = () => {
   return (
     <ScreenLayout title="Apply Discount" subtitle={`Order #${orderId ?? 'current'}`}>
       <div className="p-5 max-w-md space-y-5">
-        {!verified ? (
-          <div className="space-y-3">
-            <p className="text-sm text-pos-muted">Manager PIN required to apply discount.</p>
-            <PinPad
-              label="Enter manager PIN"
-              error={error}
-              onComplete={async (pin) => {
-                const ok = await verify(pin);
-                if (ok) setVerified(true);
-              }}
-            />
-          </div>
+        {!canApplyDiscount ? (
+          <ManagerRequired action="apply discounts" />
         ) : (
           <>
             <div className="grid grid-cols-2 gap-2">

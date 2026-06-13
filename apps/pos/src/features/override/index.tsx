@@ -1,79 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { ChevronRight, ShieldCheck, ShieldAlert } from 'lucide-react';
 import ScreenLayout from '../../layouts/ScreenLayout';
-import PinPad from '../../shared/components/PinPad';
-import { useOverride } from './useOverride';
+import { useCapabilities } from '../../shared/hooks/useCapabilities';
 
-const ACTIONS = [
-  { id: 'void', label: 'Void order', route: '/void' },
-  { id: 'refund', label: 'Process refund', route: '/refund' },
-  { id: 'discount', label: 'Apply discount', route: '/discount' },
-  { id: 'price', label: 'Override price', route: '/products/quick' },
-  { id: 'reopen', label: 'Reopen paid order', route: '/orders?reopen=1' },
+// Each action is gated by a capability flag. There is no separate manager PIN
+// in the unified identity model: the signed-in operator either holds the
+// capability or a manager signs in via the roster. The destination screens
+// self-gate too (defence in depth), so this menu is purely navigational.
+const ACTIONS: { id: string; label: string; route: string; cap: keyof ReturnType<typeof useCapabilities> }[] = [
+  { id: 'void', label: 'Void order', route: '/orders?reopen=1', cap: 'canVoid' },
+  { id: 'refund', label: 'Process refund', route: '/orders?refund=1', cap: 'canRefund' },
+  { id: 'discount', label: 'Apply discount', route: '/discount/current', cap: 'canApplyDiscount' },
+  { id: 'reopen', label: 'Reopen paid order', route: '/orders?reopen=1', cap: 'canVoid' },
 ];
 
 const OverrideScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { verify, error, clearError } = useOverride();
-  const [action, setAction] = useState(ACTIONS[0].id);
-  const [verified, setVerified] = useState(false);
+  const caps = useCapabilities();
 
   return (
-    <ScreenLayout title="Manager Override">
-      <div className="p-5 max-w-xl space-y-4">
+    <ScreenLayout title="Manager Actions">
+      <div className="p-5 max-w-xl space-y-3">
         <p className="text-sm text-pos-muted">
-          Select the action and enter your manager PIN to approve.
+          Actions available to{' '}
+          <span className="text-pos-text font-medium capitalize">{caps.role || 'this operator'}</span>.
+          Locked actions require a manager to sign in.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {ACTIONS.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => {
-                setAction(a.id);
-                setVerified(false);
-                clearError();
-              }}
-              className={`h-12 rounded-lg text-sm font-semibold ${
-                action === a.id ? 'bg-pos-text text-pos-bg' : 'bg-white/8 text-pos-text'
-              }`}
-            >
-              {a.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-1 gap-2">
+          {ACTIONS.map((a) => {
+            const allowed = Boolean(caps[a.cap]);
+            return (
+              <button
+                key={a.id}
+                disabled={!allowed}
+                onClick={() => allowed && navigate(a.route)}
+                className={`flex items-center justify-between h-14 px-4 rounded-xl text-sm font-semibold transition-colors ${
+                  allowed
+                    ? 'bg-white/8 text-pos-text hover:bg-white/14'
+                    : 'bg-white/4 text-pos-muted cursor-not-allowed'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  {allowed ? (
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <ShieldAlert className="w-4 h-4 text-amber-500" />
+                  )}
+                  {a.label}
+                </span>
+                {allowed && <ChevronRight className="w-4 h-4" />}
+              </button>
+            );
+          })}
         </div>
-        <PinPad
-          label="Manager PIN"
-          error={error}
-          onComplete={async (pin) => {
-            const ok = await verify(pin);
-            if (ok) {
-              setVerified(true);
-              toast.success('Approved');
-              const actionDef = ACTIONS.find((a) => a.id === action);
-              if (actionDef?.route) {
-                setTimeout(() => navigate(actionDef.route!), 600);
-              }
-            }
-          }}
-        />
-        {verified && (
-          <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm space-y-1">
-            <div className="font-semibold">
-              {ACTIONS.find((a) => a.id === action)?.label} - approved
-            </div>
-            {action === 'price' && (
-              <div className="text-xs text-emerald-400/70">
-                Redirecting to quick edit - you can now modify item prices on the current order.
-              </div>
-            )}
-            {action === 'reopen' && (
-              <div className="text-xs text-emerald-400/70">
-                Redirecting to order history - select the order and tap Reopen.
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </ScreenLayout>
   );
