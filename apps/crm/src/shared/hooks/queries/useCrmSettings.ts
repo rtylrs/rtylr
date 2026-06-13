@@ -17,7 +17,8 @@ export const useCrmSettings = (): UseQueryResult<Settings> =>
     queryKey: ['crm-settings'],
     queryFn: async (): Promise<Settings> => {
       const res = await unwrap(safe.get<unknown>('/crm/settings'));
-      return settingsSchema.parse(res);
+      const envelope = res as { settings?: unknown };
+      return settingsSchema.parse(envelope?.settings ?? res);
     },
   });
 

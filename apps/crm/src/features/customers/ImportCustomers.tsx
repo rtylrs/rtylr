@@ -49,7 +49,13 @@ const ImportCustomers: React.FC = () => {
           if (idx >= 0) o[req] = r[idx];
         }
       });
-      return o;
+      // The backend reads first_name/last_name, not a single `name`. Split the
+      // mapped name on the first whitespace so imported customers keep a name.
+      const fullName = (o.name ?? '').trim();
+      const firstSpace = fullName.indexOf(' ');
+      const first_name = firstSpace === -1 ? fullName : fullName.slice(0, firstSpace);
+      const last_name = firstSpace === -1 ? '' : fullName.slice(firstSpace + 1).trim();
+      return { first_name, last_name, email: o.email ?? '', phone: o.phone ?? '' };
     });
     importMut.mutate(
       { customers: payload, dedupe },

@@ -65,8 +65,9 @@ export const useLead = (id: number | undefined): UseQueryResult<Lead> =>
   useQuery<Lead>({
     queryKey: ['crm-sales-lead', id],
     queryFn: async (): Promise<Lead> => {
-      const res = await unwrap(safe.get<Lead>(`/crm/sales/leads/${id}`));
-      return res as Lead;
+      const res = await unwrap(safe.get<unknown>(`/crm/sales/leads/${id}`));
+      const envelope = (res ?? {}) as { lead?: Lead };
+      return (envelope.lead ?? res) as Lead;
     },
     enabled: !!id,
   });
