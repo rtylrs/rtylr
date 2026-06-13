@@ -96,6 +96,57 @@ func isOwnerOrAdmin(u *authPkg.AuthUser) bool {
 	return u.UserID == u.BusinessID || u.Role == "owner" || u.Role == "admin"
 }
 
+// ── Member locations (admin: view one member's assignments) ─────
+
+func MemberLocationsRoutes() []string { return []string{"/pos/access/member-locations"} }
+
+type MemberLocationEntry struct {
+	ID                 int64 `json:"id"`
+	LocationID         int64 `json:"location_id"`
+	CanManagePOSUsers  bool  `json:"can_manage_pos_users"`
+	CanManageTerminals bool  `json:"can_manage_terminals"`
+	CanViewReports     bool  `json:"can_view_reports"`
+}
+
+type (
+	GetMemberLocationsHandler struct{ Service *application.Service }
+	GetMemberLocationsRequest struct {
+		UserID int64 `json:"user_id" schema:"user_id"`
+	}
+	GetMemberLocationsResponse struct {
+		Locations []MemberLocationEntry `json:"locations"`
+	}
+)
+
+func (h *GetMemberLocationsHandler) Serve(ctx context.Context, req *GetMemberLocationsRequest) (GetMemberLocationsResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	// Viewing another member's assignments is a team-admin action.
+	if !isOwnerOrAdmin(authUser) {
+		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if req.UserID == 0 {
+		return GetMemberLocationsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "userId required"}
+	}
+	locs, err := h.Service.ListForUser(ctx, authUser.BusinessID, req.UserID)
+	if err != nil {
+		return GetMemberLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
+	}
+	out := make([]MemberLocationEntry, 0, len(locs))
+	for _, l := range locs {
+		out = append(out, MemberLocationEntry{
+			ID:                 l.ID,
+			LocationID:         l.LocationID,
+			CanManagePOSUsers:  l.CanManagePOSUsers,
+			CanManageTerminals: l.CanManageTerminals,
+			CanViewReports:     l.CanViewReports,
+		})
+	}
+	return GetMemberLocationsResponse{Locations: out}, nil
+}
+
 func AssignRoutes() []string { return []string{"/pos/access/assign"} }
 
 type (

@@ -17,6 +17,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 	http.RegisterGET[handlers.GetLocationRosterRequest, handlers.GetLocationRosterResponse](
 		ctx, router, handlers.LocationRosterRoutes(), &handlers.GetLocationRosterHandler{Service: svc},
 	)
+	http.RegisterGET[handlers.GetMemberLocationsRequest, handlers.GetMemberLocationsResponse](
+		ctx, router, handlers.MemberLocationsRoutes(), &handlers.GetMemberLocationsHandler{Service: svc},
+	)
 	http.RegisterPOSTWithValidation[handlers.AssignLocationRequest, handlers.AssignLocationResponse](
 		ctx, router, handlers.AssignRoutes(), &handlers.AssignLocationHandler{Service: svc},
 	)
