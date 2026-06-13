@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
@@ -82,7 +83,7 @@ const GiftCardsScreen: React.FC = () => {
               enableVoice={false}
             />
             {filtered.length === 0 ? (
-              <EmptyState icon="🎁" title="No gift cards yet" />
+              <EmptyState icon={Gift} title="No gift cards yet" />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filtered.map((c) => (

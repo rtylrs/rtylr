@@ -1,4 +1,5 @@
 import React from 'react';
+import { WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
@@ -50,7 +51,7 @@ const OfflineQueueScreen: React.FC = () => {
       <div className="p-5 max-w-4xl">
         {totalQueued === 0 ? (
           <EmptyState
-            icon="📶"
+            icon={WifiOff}
             title="Nothing queued"
             message="Offline orders, session closes, and cash movements will appear here."
           />

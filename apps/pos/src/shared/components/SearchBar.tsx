@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Mic, Search } from 'lucide-react';
 
 interface SearchBarProps {
   value: string;
@@ -55,7 +56,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className="relative flex items-center w-full">
-      <span className="absolute left-3 text-pos-muted text-sm">🔍</span>
+      <Search className="absolute left-3 h-4 w-4 text-pos-muted" aria-hidden="true" />
       <input
         ref={inputRef}
         type="search"
@@ -77,7 +78,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           aria-label="Voice search"
           title="Voice search"
         >
-          🎙
+          <Mic className="h-4 w-4" aria-hidden="true" />
         </button>
       )}
     </div>

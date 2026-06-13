@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ReceiptText, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -119,7 +120,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <span className="text-3xl">🧾</span>
+              <ReceiptText className="h-8 w-8" aria-hidden="true" strokeWidth={1.8} />
               <p className="text-sm font-medium">No items added yet</p>
               <span className="text-xs">Tap a product to add it</span>
             </motion.div>
@@ -160,7 +161,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
                       className="w-6 h-6 flex items-center justify-center rounded text-pos-muted hover:text-destructive transition-colors text-xs ml-1"
                       onClick={() => removeItem(item.id)}
                     >
-                      ✕
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   </div>
                 </div>

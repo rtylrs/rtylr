@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
+import { Check } from 'lucide-react';
 
 interface QrPayPanelProps {
   orderId: string;
@@ -54,9 +55,10 @@ const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed })
         <button
           type="button"
           onClick={copyLink}
-          className="h-9 px-3 rounded-lg border border-pos-border text-pos-muted text-xs hover:border-white/20 transition-colors"
+          className="inline-flex h-9 items-center justify-center gap-1.5 px-3 rounded-lg border border-pos-border text-pos-muted text-xs hover:border-white/20 transition-colors"
         >
-          {copied ? '✓ Copied' : 'Copy link'}
+          {copied && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+          {copied ? 'Copied' : 'Copy link'}
         </button>
         {onConfirmed && (
           <button

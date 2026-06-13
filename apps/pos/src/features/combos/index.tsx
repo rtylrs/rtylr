@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
@@ -28,9 +29,9 @@ const CombosScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={6} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Failed to load" message={error} />
+          <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
         ) : combos.length === 0 ? (
-          <EmptyState icon="🍔" title="No combos yet" message="Create combos to bundle items." />
+          <EmptyState icon={ShoppingBag} title="No combos yet" message="Create combos to bundle items." />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {combos.map((c) => (

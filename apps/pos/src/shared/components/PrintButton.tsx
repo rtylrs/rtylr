@@ -1,4 +1,5 @@
 import React from 'react';
+import { Printer } from 'lucide-react';
 
 interface PrintButtonProps {
   label?: string;
@@ -25,9 +26,10 @@ const PrintButton: React.FC<PrintButtonProps> = ({
     <button
       type="button"
       onClick={handlePrint}
-      className={`h-12 px-5 rounded-lg bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition ${className}`}
+      className={`inline-flex h-12 items-center justify-center gap-2 px-5 rounded-lg bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition ${className}`}
     >
-      🖨 {label}
+      <Printer className="h-4 w-4" aria-hidden="true" strokeWidth={2} />
+      {label}
     </button>
   );
 };

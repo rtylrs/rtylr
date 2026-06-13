@@ -1,4 +1,5 @@
 import React from 'react';
+import { Moon, Power, Sun } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
@@ -28,7 +29,11 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
             onClick={toggleTheme}
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? '☀︎' : '◑'}
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Moon className="h-4 w-4" aria-hidden="true" />
+            )}
           </button>
           <button
             className="w-8 h-8 flex items-center justify-center rounded-lg text-pos-muted hover:bg-white/8 transition-colors"
@@ -36,7 +41,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
             aria-label="End session"
             title="End employee session"
           >
-            ⏻
+            <Power className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </header>

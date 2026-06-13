@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Banknote, CreditCard, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -158,10 +160,10 @@ const Payment: React.FC = () => {
     return null;
   }
 
-  const methods: { id: CheckoutPaymentMethod; label: string }[] = [
-    { id: 'card', label: '💳 Card' },
-    { id: 'cash', label: '💵 Cash' },
-    { id: 'qr', label: '📱 QR Pay' },
+  const methods: { id: CheckoutPaymentMethod; label: string; icon: LucideIcon }[] = [
+    { id: 'card', label: 'Card', icon: CreditCard },
+    { id: 'cash', label: 'Cash', icon: Banknote },
+    { id: 'qr', label: 'QR Pay', icon: Smartphone },
   ];
 
   return (
@@ -229,19 +231,23 @@ const Payment: React.FC = () => {
 
           {/* Method selector */}
           <div className="flex gap-2">
-            {methods.map((m) => (
-              <button
-                key={m.id}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                  method === m.id
-                    ? 'bg-pos-text text-pos-bg border-transparent'
-                    : 'border-pos-border text-pos-muted hover:border-white/20'
-                }`}
-                onClick={() => setMethod(m.id)}
-              >
-                {m.label}
-              </button>
-            ))}
+            {methods.map((m) => {
+              const Icon = m.icon;
+              return (
+                <button
+                  key={m.id}
+                  className={`flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                    method === m.id
+                      ? 'bg-pos-text text-pos-bg border-transparent'
+                      : 'border-pos-border text-pos-muted hover:border-white/20'
+                  }`}
+                  onClick={() => setMethod(m.id)}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  {m.label}
+                </button>
+              );
+            })}
           </div>
 
           {method === 'card' && (

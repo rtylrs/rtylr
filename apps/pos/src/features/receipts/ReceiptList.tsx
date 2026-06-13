@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Calculator, Pointer } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
@@ -38,7 +39,7 @@ const ReceiptsScreen: React.FC = () => {
           {loading ? (
             <Skeleton rows={8} />
           ) : filtered.length === 0 ? (
-            <EmptyState icon="🧮" title="No receipts" />
+            <EmptyState icon={Calculator} title="No receipts" />
           ) : (
             <ul className="space-y-2">
               {filtered.map((r) => (
@@ -85,7 +86,7 @@ const ReceiptsScreen: React.FC = () => {
               </div>
             </>
           ) : (
-            <EmptyState icon="👈" title="Select a receipt" />
+            <EmptyState icon={Pointer} title="Select a receipt" />
           )}
         </div>
       </div>

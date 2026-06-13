@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle, SlidersHorizontal } from 'lucide-react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
@@ -14,10 +15,10 @@ const ModifiersScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={6} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Failed to load" message={error} />
+          <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
         ) : groups.length === 0 ? (
           <EmptyState
-            icon="🧂"
+            icon={SlidersHorizontal}
             title="No modifier groups"
             message="Create groups in your back office to see them here."
           />

@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Check, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -86,7 +87,7 @@ const Receipt: React.FC = () => {
               animate={{ scale: 1 }}
               transition={{ type: 'spring', damping: 14, delay: 0.15 }}
             >
-              ✓
+              <Check className="h-8 w-8" aria-hidden="true" strokeWidth={2.4} />
             </motion.div>
           </div>
 
@@ -106,7 +107,14 @@ const Receipt: React.FC = () => {
               onClick={handlePrint}
               disabled={printing}
             >
-              {printing ? '...' : '🖨 Print'}
+              {printing ? (
+                '...'
+              ) : (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Printer className="h-4 w-4" aria-hidden="true" />
+                  Print
+                </span>
+              )}
             </button>
             <button
               className="flex-1 py-2.5 rounded-xl bg-pos-text text-pos-bg text-sm font-semibold hover:opacity-90 transition-opacity"

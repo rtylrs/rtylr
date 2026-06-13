@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle, Search, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -37,11 +38,11 @@ const CustomerLookupScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={5} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Search failed" message={error} />
+          <EmptyState icon={AlertTriangle} title="Search failed" message={error} />
         ) : !query ? (
-          <EmptyState icon="👤" title="Start typing to search" />
+          <EmptyState icon={User} title="Start typing to search" />
         ) : results.length === 0 ? (
-          <EmptyState icon="🔍" title="No matches" />
+          <EmptyState icon={Search} title="No matches" />
         ) : (
           <ul className="space-y-2">
             {results.map((c) => (

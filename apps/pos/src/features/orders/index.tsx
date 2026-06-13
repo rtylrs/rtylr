@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
+import { AlertTriangle, ReceiptText } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -103,9 +104,9 @@ const OrdersScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={8} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Failed to load" message={error} />
+          <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
         ) : filtered.length === 0 ? (
-          <EmptyState icon="🧾" title="No orders" />
+          <EmptyState icon={ReceiptText} title="No orders" />
         ) : (
           <ul className="space-y-2">
             {filtered.map((o) => (

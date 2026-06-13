@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
+import { AlertTriangle, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
@@ -60,9 +61,9 @@ const ProductQuickEditScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={8} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Failed to load" message={error} />
+          <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
         ) : filtered.length === 0 ? (
-          <EmptyState icon="📦" title="No products" />
+          <EmptyState icon={Package} title="No products" />
         ) : (
           <table className="w-full text-sm">
             <thead>

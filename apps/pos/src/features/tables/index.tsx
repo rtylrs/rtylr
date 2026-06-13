@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
+import { AlertTriangle, Armchair } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import TableCard from '../../shared/components/TableCard';
@@ -35,9 +36,9 @@ const TablesScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={6} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Failed to load" message={error} />
+          <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
         ) : tables.length === 0 ? (
-          <EmptyState icon="🪑" title="No tables configured" />
+          <EmptyState icon={Armchair} title="No tables configured" />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {tables.map((t) => (

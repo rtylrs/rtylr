@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertTriangle, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
@@ -52,10 +53,10 @@ const MenuItemsScreen: React.FC = () => {
         {loading ? (
           <SkeletonGrid count={12} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Failed to load menu" message={error} />
+          <EmptyState icon={AlertTriangle} title="Failed to load menu" message={error} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon="🔍"
+            icon={Search}
             title="No items match"
             message="Try a different search or category."
           />

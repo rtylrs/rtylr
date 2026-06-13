@@ -1,4 +1,5 @@
 import React from 'react';
+import { CirclePause } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { unwrap } from '@voxire/api';
@@ -72,7 +73,7 @@ const HeldOrdersScreen: React.FC = () => {
     <ScreenLayout title="Held Orders">
       <div className="p-5 max-w-3xl space-y-4">
         {isEmpty ? (
-          <EmptyState icon="⏸" title="No held orders" />
+          <EmptyState icon={CirclePause} title="No held orders" />
         ) : (
           <>
             {serverOrders.length > 0 && (

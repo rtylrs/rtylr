@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Package, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
@@ -199,9 +200,9 @@ const InventoryScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={8} />
         ) : !branchId ? (
-          <EmptyState icon="🏪" title="No branch selected" message="Assign a terminal first." />
+          <EmptyState icon={Store} title="No branch selected" message="Assign a terminal first." />
         ) : filtered.length === 0 ? (
-          <EmptyState icon="📦" title="No items found" />
+          <EmptyState icon={Package} title="No items found" />
         ) : (
           <div className="space-y-2">
             {filtered.map((item) => (

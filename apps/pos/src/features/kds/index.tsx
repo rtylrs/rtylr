@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChefHat } from 'lucide-react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
@@ -132,7 +133,7 @@ const KDSScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={6} />
         ) : orders.length === 0 ? (
-          <EmptyState icon="🍳" title="No active tickets" />
+          <EmptyState icon={ChefHat} title="No active tickets" />
         ) : (
           <>
             <p className="text-[10px] text-pos-muted mb-3">

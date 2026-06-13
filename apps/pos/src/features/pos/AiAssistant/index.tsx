@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCartStore } from '../../../shared/stores/cartStore';
 
@@ -80,7 +81,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.12 }}
             >
-              ✕
+              <X className="h-5 w-5" aria-hidden="true" />
             </motion.span>
           ) : (
             <motion.span
@@ -90,7 +91,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.12 }}
             >
-              ✦
+              <Sparkles className="h-5 w-5" aria-hidden="true" />
             </motion.span>
           )}
         </AnimatePresence>
@@ -107,7 +108,10 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onSendMessage }) => {
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-pos-border shrink-0">
-              <span className="text-sm font-semibold text-pos-text">✦ POS Assistant</span>
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-pos-text">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                POS Assistant
+              </span>
               {cartItems.length > 0 && (
                 <span className="text-xs text-pos-muted">
                   {cartItems.length} item{cartItems.length > 1 ? 's' : ''} in cart

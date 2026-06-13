@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle, ChartNoAxesCombined } from 'lucide-react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import Skeleton from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
@@ -35,7 +36,7 @@ const DaySummaryScreen: React.FC = () => {
         {loading ? (
           <Skeleton rows={8} />
         ) : error ? (
-          <EmptyState icon="⚠" title="Unable to load" message={error} />
+          <EmptyState icon={AlertTriangle} title="Unable to load" message={error} />
         ) : summary ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl">
             <Stat label="Gross sales" value={formatCurrency(summary.grossSales)} tone="positive" />
@@ -51,7 +52,7 @@ const DaySummaryScreen: React.FC = () => {
             <Stat label="Expected cash" value={formatCurrency(summary.closingCash)} />
           </div>
         ) : (
-          <EmptyState icon="📈" title="No data" />
+          <EmptyState icon={ChartNoAxesCombined} title="No data" />
         )}
       </div>
     </ScreenLayout>
