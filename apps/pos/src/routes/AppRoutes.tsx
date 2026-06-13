@@ -25,6 +25,7 @@ const Settings = React.lazy(() => import('../features/settings'));
 const HeldOrders = React.lazy(() => import('../features/orders/HeldOrders'));
 const CashDrop = React.lazy(() => import('../features/cash-drop'));
 const Inventory = React.lazy(() => import('../features/inventory'));
+const Staff = React.lazy(() => import('../features/staff'));
 
 const AppRoutes = [
   { path: '/', element: <POS /> },
@@ -52,6 +53,7 @@ const AppRoutes = [
   { path: '/held-orders', element: <HeldOrders /> },
   { path: '/cash-drop', element: <CashDrop /> },
   { path: '/inventory', element: <Inventory /> },
+  { path: '/staff', element: <Staff /> },
 ];
 
 export default AppRoutes;

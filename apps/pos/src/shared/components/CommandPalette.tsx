@@ -117,9 +117,15 @@ const CommandPalette: React.FC = () => {
       },
       {
         id: 'nav-override',
-        label: 'Manager Override',
+        label: 'Manager Actions',
         category: 'Navigate',
         action: () => navigate('/override'),
+      },
+      {
+        id: 'nav-staff',
+        label: 'Staff & Permissions',
+        category: 'Navigate',
+        action: () => navigate('/staff'),
       },
     ],
     [navigate]
