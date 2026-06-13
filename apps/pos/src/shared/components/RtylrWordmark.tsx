@@ -7,10 +7,9 @@ export function RtylrWordmark({ className = '', suffix }: RtylrWordmarkProps) {
   return (
     <span
       aria-label={suffix ? `rtylr ${suffix}` : 'rtylr'}
-      className={`inline-flex items-baseline gap-1 font-extrabold tracking-normal text-pos-text ${className}`}
+      className={`inline-flex items-center ${className}`}
     >
-      <span>rtylr</span>
-      {suffix ? <span className="font-semibold text-pos-muted">{suffix}</span> : null}
+      <img src="/logo.png" alt="" className="h-[1.35em] w-auto object-contain" />
     </span>
   );
 }

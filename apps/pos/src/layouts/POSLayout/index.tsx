@@ -1,6 +1,5 @@
 import React from 'react';
 import { Moon, Power, Sun } from 'lucide-react';
-import { useUserStore } from '../../shared/stores/userStore';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
@@ -10,7 +9,6 @@ interface POSLayoutProps {
 }
 
 const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
-  const user = useUserStore((s) => s.user);
   const { theme, toggleTheme } = useThemeStore();
   const endSession = useEmployeeSessionStore((s) => s.endSession);
   const employee = useEmployeeSessionStore((s) => s.employee);
@@ -19,8 +17,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
     <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>
       <header className="flex items-center justify-between px-5 py-3 bg-pos-card border-b border-pos-border shrink-0">
         <div className="flex items-center gap-2.5">
-          <RtylrWordmark className="text-base" />
-          <span className="text-sm font-semibold">{user?.name ?? 'POS Terminal'}</span>
+          <RtylrWordmark className="text-xl" />
         </div>
         <div className="flex items-center gap-1">
           {employee && <span className="text-xs text-pos-muted mr-2">{employee.name}</span>}
