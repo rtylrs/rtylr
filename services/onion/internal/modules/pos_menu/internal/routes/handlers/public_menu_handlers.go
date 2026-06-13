@@ -19,8 +19,8 @@ import (
 // either way, so we keep scope small here.
 //
 // Trust boundary: this handler MUST only return data that's OK to
-// show the public internet. `pos_menu_items` already only carries
-// public-safe fields (name, SKU, sale price, active flag). If a
+// show the public internet. Product media URLs are public storefront
+// assets; keep private cost/supplier fields out of MenuItemPayload. If a
 // future column adds cost-price or supplier info, the `toProto` in
 // menu_handlers.go becomes a privacy hole — add a separate
 // `toPublicProto` when that happens.

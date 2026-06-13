@@ -31,19 +31,29 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			p.category_id,
 			COALESCE(c.name, 'Other') AS category_name,
 			p.name,
-			p.sku,
-			p.sale_price,
-			p.description,
-			p.stock_quantity,
-			p.is_active,
-			p.created_at,
-			p.updated_at
+				p.sku,
+				p.sale_price,
+				p.description,
+				COALESCE(img.url, '') AS image_url,
+				p.stock_quantity,
+				p.is_active,
+				p.created_at,
+				p.updated_at
 		FROM erp_products p
-		LEFT JOIN erp_categories c
-		  ON c.id = p.category_id
-		 AND c.owner_id = p.owner_id
-		WHERE p.owner_id = ?
-		  AND p.is_active = TRUE
+			LEFT JOIN erp_categories c
+			  ON c.id = p.category_id
+			 AND c.owner_id = p.owner_id
+			LEFT JOIN erp_product_images img
+			  ON img.id = (
+				SELECT i.id
+				FROM erp_product_images i
+				WHERE i.owner_id = p.owner_id
+				  AND i.product_id = p.id
+				ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
+				LIMIT 1
+			  )
+			WHERE p.owner_id = ?
+			  AND p.is_active = TRUE
 		ORDER BY c.name, p.name
 	`, ownerID)
 	if err != nil {
@@ -60,6 +70,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			sku        sql.NullString
 			salePrice  string
 			desc       sql.NullString
+			imageURL   sql.NullString
 			stock      string
 			active     sql.NullBool
 			createdAt  sql.NullTime
@@ -75,6 +86,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			&sku,
 			&salePrice,
 			&desc,
+			&imageURL,
 			&stock,
 			&active,
 			&createdAt,
@@ -98,6 +110,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 		if desc.Valid {
 			item.Description = desc.String
 		}
+		if imageURL.Valid {
+			item.ImageURL = imageURL.String
+		}
 		item.Stock = decimalToFloat(stock)
 		item.IsActive = active.Valid && active.Bool
 		if createdAt.Valid {
@@ -115,6 +130,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			SKU:         item.SKU,
 			SalePrice:   item.SalePrice,
 			Description: item.Description,
+			ImageURL:    item.ImageURL,
 			Stock:       item.Stock,
 			IsActive:    item.IsActive,
 			CreatedAt:   item.CreatedAt,

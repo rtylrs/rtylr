@@ -11,6 +11,7 @@ type MenuItem struct {
 	SKU         string    `json:"sku"`
 	SalePrice   float64   `json:"sale_price"`
 	Description string    `json:"description"`
+	ImageURL    string    `json:"image_url"`
 	Stock       float64   `json:"stock"`
 	IsActive    bool      `json:"is_active"`
 	CreatedAt   time.Time `json:"created_at"`

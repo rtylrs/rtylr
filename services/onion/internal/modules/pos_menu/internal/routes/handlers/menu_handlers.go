@@ -21,6 +21,8 @@ type MenuItemPayload struct {
 	SKU          string  `json:"sku"`
 	Price        float64 `json:"price"`
 	SalePrice    float64 `json:"sale_price"`
+	Image        string  `json:"image,omitempty"`
+	ImageURL     string  `json:"image_url,omitempty"`
 	Available    bool    `json:"available"`
 	IsActive     bool    `json:"is_active"`
 	Stock        float64 `json:"stock"`
@@ -49,6 +51,8 @@ func toMenuItemPayload(item domain.MenuItem) MenuItemPayload {
 		SKU:          item.SKU,
 		Price:        item.SalePrice,
 		SalePrice:    item.SalePrice,
+		Image:        item.ImageURL,
+		ImageURL:     item.ImageURL,
 		Available:    item.IsActive,
 		IsActive:     item.IsActive,
 		Stock:        item.Stock,
