@@ -1,6 +1,19 @@
 import type { Order, OrderLineItem, OrderStatus } from '../../shared/types/pos';
 
-const statuses: OrderStatus[] = ['open', 'sent', 'ready', 'paid', 'voided', 'refunded'];
+const statuses: OrderStatus[] = [
+  'pending',
+  'confirmed',
+  'preparing',
+  'ready',
+  'served',
+  'paid',
+  'cancelled',
+  'voided',
+  'refunded',
+  'held',
+  'open',
+  'sent',
+];
 
 function textOrUndefined(value: unknown): string | undefined {
   const trimmed = String(value ?? '').trim();
@@ -36,7 +49,7 @@ function positiveInteger(value: unknown): number {
 }
 
 function orderStatus(value: unknown): OrderStatus {
-  return statuses.includes(value as OrderStatus) ? (value as OrderStatus) : 'open';
+  return statuses.includes(value as OrderStatus) ? (value as OrderStatus) : 'pending';
 }
 
 function normalizeItems(items: unknown): OrderLineItem[] {

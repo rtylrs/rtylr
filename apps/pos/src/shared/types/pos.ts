@@ -57,7 +57,19 @@ export interface Customer {
   lastVisit?: string;
 }
 
-export type OrderStatus = 'open' | 'sent' | 'ready' | 'paid' | 'voided' | 'refunded';
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'served'
+  | 'paid'
+  | 'cancelled'
+  | 'voided'
+  | 'refunded'
+  | 'held'
+  | 'open'
+  | 'sent';
 
 export interface OrderLineItem {
   id: string;

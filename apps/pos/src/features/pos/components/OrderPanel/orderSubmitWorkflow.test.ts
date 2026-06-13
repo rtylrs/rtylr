@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-  KITCHEN_ORDER_ID_ERROR,
-  buildKitchenOrderPayload,
+  ORDER_SUBMIT_ID_ERROR,
+  buildOrderSubmitPayload,
   extractCreatedOrderId,
-} from './kitchenWorkflow';
+} from './orderSubmitWorkflow';
 import type { CartItem } from '../../../../shared/stores/cartStore';
 
 const item = (overrides: Partial<CartItem> = {}): CartItem => ({
@@ -23,21 +23,24 @@ const item = (overrides: Partial<CartItem> = {}): CartItem => ({
   ...overrides,
 });
 
-describe('kitchenWorkflow', () => {
-  it('builds a CreateOrderPayload for sending a local cart to kitchen', () => {
+describe('orderSubmitWorkflow', () => {
+  it('builds a CreateOrderPayload for submitting a local cart to Orders', () => {
     expect(
-      buildKitchenOrderPayload({
+      buildOrderSubmitPayload({
         items: [item()],
         locationId: 2,
+        tableId: 9,
         customerId: 5,
-        kitchenNotes: 'Seat 3',
+        orderType: 'takeaway',
+        notes: 'Pickup shelf',
       }),
     ).toEqual({
       location_id: 2,
-      table_id: undefined,
+      table_id: 9,
       customer_id: 5,
       customer_name: undefined,
-      kitchen_notes: 'Seat 3',
+      type: 'takeaway',
+      notes: 'Pickup shelf',
       items: [{
         menu_item_id: 7,
         name: 'Burger',
@@ -51,7 +54,7 @@ describe('kitchenWorkflow', () => {
   });
 
   it('omits undefined optional fields gracefully', () => {
-    const result = buildKitchenOrderPayload({ items: [item()] });
+    const result = buildOrderSubmitPayload({ items: [item()] });
     expect(result.location_id).toBeUndefined();
     expect(result.customer_id).toBeUndefined();
     expect(result.items).toHaveLength(1);
@@ -63,6 +66,6 @@ describe('kitchenWorkflow', () => {
   });
 
   it('rejects create responses without a valid server order ID', () => {
-    expect(() => extractCreatedOrderId({ id: 'local-1' })).toThrow(KITCHEN_ORDER_ID_ERROR);
+    expect(() => extractCreatedOrderId({ id: 'local-1' })).toThrow(ORDER_SUBMIT_ID_ERROR);
   });
 });

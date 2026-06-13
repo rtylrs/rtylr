@@ -1,15 +1,16 @@
 import type { CreateOrderPayload } from '../../../../shared/services/api/posService';
 import type { CartItem } from '../../../../shared/stores/cartStore';
 
-export const KITCHEN_ORDER_ID_ERROR = 'Order must sync before it can be sent to kitchen.';
+export const ORDER_SUBMIT_ID_ERROR = 'Order was saved, but no server order ID was returned.';
 
-interface BuildKitchenOrderPayloadInput {
+interface BuildOrderSubmitPayloadInput {
   items: CartItem[];
   locationId?: number | null;
   tableId?: number | null;
   customerId?: string | number | null;
   customerName?: string | null;
-  kitchenNotes?: string;
+  orderType?: string;
+  notes?: string;
 }
 
 function positiveInteger(value: unknown): number | undefined {
@@ -20,13 +21,14 @@ function positiveInteger(value: unknown): number | undefined {
 
 // Builds a backend CreateOrderRequest-shaped payload. The backend computes
 // totals from the per-line unit_price/tax_rate, so no totals are sent.
-export function buildKitchenOrderPayload(input: BuildKitchenOrderPayloadInput): CreateOrderPayload {
+export function buildOrderSubmitPayload(input: BuildOrderSubmitPayloadInput): CreateOrderPayload {
   return {
     location_id: positiveInteger(input.locationId),
     table_id: positiveInteger(input.tableId),
     customer_id: positiveInteger(input.customerId),
     customer_name: input.customerName ?? undefined,
-    kitchen_notes: input.kitchenNotes,
+    type: input.orderType,
+    notes: input.notes,
     items: input.items.map((item) => ({
       menu_item_id: item.productId,
       name: item.name,
@@ -46,7 +48,7 @@ export function extractCreatedOrderId(created: unknown): number {
     positiveInteger(response.order_id) ??
     positiveInteger(response.orderId);
   if (orderId == null) {
-    throw new Error(KITCHEN_ORDER_ID_ERROR);
+    throw new Error(ORDER_SUBMIT_ID_ERROR);
   }
 
   return orderId;

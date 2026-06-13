@@ -40,6 +40,7 @@ interface ProcessCheckoutParams {
   order: Order;
   payload: CreateOrderPayload;
   method: CheckoutPaymentMethod;
+  existingOrderId?: number | null;
   // The API client camelCases responses, so the backend's order_id arrives as
   // orderId; accept all shapes so neither the runtime contract nor older mocks break.
   createOrder: (payload: CreateOrderPayload) => Promise<{ orderId?: number; id?: number; order_id?: number }>;
@@ -137,16 +138,21 @@ export async function processCheckout({
   order,
   payload,
   method,
+  existingOrderId,
   createOrder,
   chargeOrder,
   enqueueOffline,
   recordCashSale,
 }: ProcessCheckoutParams): Promise<ProcessCheckoutResult> {
+  const persistedOrderId = positiveInteger(existingOrderId);
   try {
-    const createRes = await createOrder(payload);
-    const orderId = createRes.orderId ?? createRes.id ?? createRes.order_id;
-    if (!orderId || orderId <= 0) {
-      throw new Error('Order was not accepted by the server.');
+    let orderId = persistedOrderId;
+    if (!orderId) {
+      const createRes = await createOrder(payload);
+      orderId = createRes.orderId ?? createRes.id ?? createRes.order_id;
+      if (!orderId || orderId <= 0) {
+        throw new Error('Order was not accepted by the server.');
+      }
     }
 
     await chargeOrder(orderId, {
@@ -160,7 +166,7 @@ export async function processCheckout({
 
     return { status: 'online', orderId };
   } catch {
-    if (method === 'cash') {
+    if (method === 'cash' && !persistedOrderId) {
       enqueueOffline(payload);
       recordCashSale(order.total, order.id);
       return { status: 'queued' };

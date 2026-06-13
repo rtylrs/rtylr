@@ -81,6 +81,7 @@ const Payment: React.FC = () => {
         order,
         payload,
         method,
+        existingOrderId: serverOrderId,
         createOrder: async (payload) => unwrap(posService.createOrder(payload)),
         chargeOrder: async (orderId, payload) => {
           await unwrap(posService.chargeOrder(orderId, payload));

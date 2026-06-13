@@ -9,16 +9,20 @@ import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import OrderStatusBadge from '../../shared/components/OrderStatusBadge';
 import { posService } from '../../shared/services/api/posService';
-import type { Order } from '../../shared/types/pos';
+import type { Order, OrderStatus } from '../../shared/types/pos';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
+import { isVoidable, orderStatusLabel } from '../../shared/utils/orderStatus';
 import { normalizeOrdersResponse } from './ordersWorkflow';
+
+const FILTERS = ['all', 'pending', 'preparing', 'ready', 'paid', 'voided', 'refunded'] as const;
+type OrderFilter = (typeof FILTERS)[number];
 
 const OrdersScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<'all' | 'open' | 'paid' | 'voided'>('all');
+  const [filter, setFilter] = useState<OrderFilter>('all');
   const [reopening, setReopening] = useState<string | null>(null);
   const [voiding, setVoiding] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -45,7 +49,7 @@ const OrdersScreen: React.FC = () => {
     setReopening(String(order.id));
     try {
       await unwrap(posService.reopenOrder(Number(order.id)));
-      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'open' } : o)));
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'pending' } : o)));
       toast.success(`Order #${order.number ?? order.id} reopened`);
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } }; message?: string };
@@ -89,7 +93,7 @@ const OrdersScreen: React.FC = () => {
         )}
         <SearchBar value={search} onChange={setSearch} placeholder="Search orders..." />
         <div className="flex gap-2">
-          {(['all', 'open', 'paid', 'voided'] as const).map((f) => (
+          {FILTERS.map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -97,7 +101,7 @@ const OrdersScreen: React.FC = () => {
                 filter === f ? 'bg-pos-text text-pos-bg' : 'bg-white/8 text-pos-text'
               }`}
             >
-              {f}
+              {f === 'all' ? 'All' : orderStatusLabel(f as OrderStatus)}
             </button>
           ))}
         </div>
@@ -135,7 +139,7 @@ const OrdersScreen: React.FC = () => {
                         {reopening === String(o.id) ? '...' : 'Reopen'}
                       </button>
                     )}
-                    {!reopenMode && o.status === 'open' && (
+                    {!reopenMode && isVoidable(o.status) && (
                       <button
                         type="button"
                         disabled={voiding === String(o.id)}

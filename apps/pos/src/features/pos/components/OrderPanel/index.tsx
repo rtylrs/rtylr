@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReceiptText, X } from 'lucide-react';
+import { CheckCircle2, ReceiptText, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
 import OfflineBadge from '../../../../shared/components/OfflineBadge';
 import { posService } from '../../../../shared/services/api/posService';
 import { formatCurrency } from '../../../../shared/utils/format';
-import { buildKitchenOrderPayload, extractCreatedOrderId } from './kitchenWorkflow';
+import { buildOrderSubmitPayload, extractCreatedOrderId } from './orderSubmitWorkflow';
 
 interface OrderPanelProps {
   tableNumber?: string;
@@ -29,7 +29,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
     updateItemNotes,
     total,
     serverOrderId,
-    setServerOrderId,
+    tableId,
+    orderType,
+    notes,
   } = useCartStore();
   const hold = useHeldOrdersStore((s) => s.hold);
   const taxRate = useSettingsStore((s) => s.taxRate);
@@ -43,7 +45,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
 
   const [confirmClear, setConfirmClear] = useState(false);
   const [notingItemId, setNotingItemId] = useState<string | null>(null);
-  const [sendingToKitchen, setSendingToKitchen] = useState(false);
+  const [submittingOrder, setSubmittingOrder] = useState(false);
 
   const onHold = () => {
     if (items.length === 0) return;
@@ -64,31 +66,33 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
 
   const notingItem = notingItemId ? items.find((i) => i.id === notingItemId) : null;
 
-  const handleSendToKitchen = async (): Promise<void> => {
+  const handleCompleteOrder = async (): Promise<void> => {
     if (items.length === 0) return;
-    setSendingToKitchen(true);
+    setSubmittingOrder(true);
     try {
-      let orderId = serverOrderId;
-      if (!orderId) {
+      if (!serverOrderId) {
         const created = await unwrap(
           posService.createOrder(
-            buildKitchenOrderPayload({
+            buildOrderSubmitPayload({
               items,
               locationId,
+              tableId,
               customerId,
               customerName,
+              orderType,
+              notes,
             })
           )
         );
-        orderId = extractCreatedOrderId(created);
-        setServerOrderId(orderId);
+        extractCreatedOrderId(created);
       }
-      await unwrap(posService.sendToKitchen(orderId));
-      toast.success('Sent to kitchen');
+      clearCart();
+      toast.success('Order saved to Orders');
+      navigate('/orders');
     } catch {
-      toast.error('Failed to send to kitchen');
+      toast.error('Failed to complete order');
     } finally {
-      setSendingToKitchen(false);
+      setSubmittingOrder(false);
     }
   };
 
@@ -210,11 +214,12 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
             </button>
           </div>
           <button
-            className="w-full h-11 rounded-xl bg-orange-500/20 text-orange-300 font-semibold text-sm hover:bg-orange-500/30 transition disabled:opacity-40"
-            onClick={handleSendToKitchen}
-            disabled={sendingToKitchen}
+            className="w-full h-11 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition disabled:opacity-40 inline-flex items-center justify-center gap-2"
+            onClick={handleCompleteOrder}
+            disabled={submittingOrder}
           >
-            {sendingToKitchen ? 'Sending…' : 'Send to Kitchen'}
+            {!submittingOrder && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
+            {submittingOrder ? 'Saving…' : 'Complete Order'}
           </button>
           <button
             className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition-opacity active:scale-[0.98]"
