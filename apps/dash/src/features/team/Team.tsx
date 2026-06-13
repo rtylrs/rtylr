@@ -405,16 +405,14 @@ const Team: React.FC = (): React.JSX.Element => {
                           >
                             <Pencil size={12} /> Edit member
                           </button>
-                          <button
+                          <a
+                            href={`mailto:${m.email}`}
                             className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                             style={{ color: 'var(--dash-text-muted)' }}
-                            onClick={() => {
-                              window.location.href = `mailto:${m.email}`;
-                              setMenuOpen(null);
-                            }}
+                            onClick={() => setMenuOpen(null)}
                           >
                             <Mail size={12} /> Send email
-                          </button>
+                          </a>
                           <button
                             className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                             style={{ color: 'var(--dash-text-muted)' }}

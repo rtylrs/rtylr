@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from '@tanstack/react-router';
-import { FullScreenLoader } from '@voxire/components';
+import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import {
   GridLayout,
   ListLayout,
@@ -100,7 +100,6 @@ const Menu: React.FC = () => {
       setLayout(theme.layout ?? 'grid');
       applyTheme(theme);
 
-      document.title = details.business?.name ?? 'Menu';
       setStatus('succeeded');
     },
     onError: () => {
@@ -159,13 +158,21 @@ const Menu: React.FC = () => {
     onAiMessage: handleAiMessage,
   };
 
-  if (layout === 'list') {
-    return <ListLayout {...layoutProps} />;
-  }
-  if (layout === 'minimal') {
-    return <MinimalLayout {...layoutProps} enableCart={false} />;
-  }
-  return <GridLayout {...layoutProps} />;
+  const content =
+    layout === 'list' ? (
+      <ListLayout {...layoutProps} />
+    ) : layout === 'minimal' ? (
+      <MinimalLayout {...layoutProps} enableCart={false} />
+    ) : (
+      <GridLayout {...layoutProps} />
+    );
+
+  return (
+    <>
+      <HelmetContainer title={business.name} />
+      {content}
+    </>
+  );
 };
 
 export default Menu;

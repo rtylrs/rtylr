@@ -1,5 +1,11 @@
 import React, { Suspense } from 'react';
-import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router';
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  useNavigate,
+} from '@tanstack/react-router';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { AppGuard } from '@voxire/auth';
 import { ErrorBoundary } from '@voxire/ui';
@@ -34,9 +40,10 @@ function wrap(component: React.ReactNode) {
 }
 
 function CatchAllRedirect(): null {
+  const navigate = useNavigate();
   React.useEffect(() => {
-    window.location.replace('/');
-  }, []);
+    void navigate({ to: '/', replace: true });
+  }, [navigate]);
   return null;
 }
 

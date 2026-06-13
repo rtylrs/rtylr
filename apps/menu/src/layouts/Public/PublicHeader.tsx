@@ -114,7 +114,7 @@ const Header: React.FC = () => {
 
   const handleExternalLink = useCallback(() => {
     setDropdown(false);
-    window.open('https://voxire.com/careers', '_blank');
+    window.open('https://voxire.com/careers', '_blank', 'noopener,noreferrer');
   }, []);
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
