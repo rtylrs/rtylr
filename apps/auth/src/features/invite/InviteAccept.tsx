@@ -64,8 +64,14 @@ const InviteAccept: React.FC = () => {
       await unwrap(safe.post('/auth/invite/accept', request));
       setSuccess(true);
     } catch (err) {
-      const e = err as { response?: { data?: { error?: { message?: string } } } };
-      setError(e.response?.data?.error?.message || 'Failed to set password');
+      // unwrap throws an ApiError; the axios error (with the { error: { message } }
+      // envelope) is on .cause, and ApiError.message carries the parsed string.
+      const e = err as {
+        message?: string;
+        cause?: { response?: { data?: { error?: { message?: string } } } };
+      };
+      const fromBody = e?.cause?.response?.data?.error?.message;
+      setError(fromBody || e?.message || 'Failed to set password');
     } finally {
       setLoading(false);
     }

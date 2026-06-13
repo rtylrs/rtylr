@@ -277,6 +277,7 @@ const Register: React.FC = (): React.JSX.Element => {
               !email ||
               !!emailError ||
               emailTaken ||
+              password.length < 8 ||
               pwScore < 2 ||
               !!matchError ||
               !businessName.trim()
