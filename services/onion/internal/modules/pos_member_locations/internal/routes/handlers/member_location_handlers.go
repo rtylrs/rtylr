@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/application"
@@ -35,7 +36,15 @@ func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequ
 	if !ok {
 		return GetMyLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	locs, err := h.Service.GetMyLocations(ctx, authUser.BusinessID, authUser.UserID)
+	var (
+		locs []infrastructure.MyLocation
+		err  error
+	)
+	if isOwnerOrAdmin(authUser) {
+		locs, err = h.Service.GetBusinessLocations(ctx, authUser.BusinessID)
+	} else {
+		locs, err = h.Service.GetMyLocations(ctx, authUser.BusinessID, authUser.UserID)
+	}
 	if err != nil {
 		return GetMyLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
@@ -63,7 +72,7 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 	if !ok {
 		return GetLocationRosterResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if req.LocationID == 0 {
+	if req.LocationID <= 0 {
 		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "locationId required"}
 	}
 
@@ -85,7 +94,7 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 }
 
 func isOwnerOrAdmin(u *authPkg.AuthUser) bool {
-	return u.UserID == u.BusinessID || u.Role == "owner" || u.Role == "admin"
+	return u.Role == "owner" || u.Role == "admin"
 }
 
 func MemberLocationsRoutes() []string { return []string{"/pos/access/member-locations"} }
@@ -116,7 +125,7 @@ func (h *GetMemberLocationsHandler) Serve(ctx context.Context, req *GetMemberLoc
 	if !isOwnerOrAdmin(authUser) {
 		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if req.UserID == 0 {
+	if req.UserID <= 0 {
 		return GetMemberLocationsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "userId required"}
 	}
 	locs, err := h.Service.ListForUser(ctx, authUser.BusinessID, req.UserID)
@@ -142,10 +151,16 @@ type (
 	AssignLocationHandler struct{ Service *application.Service }
 	AssignLocationRequest struct {
 		UserID             int64 `json:"user_id"`
+		UserIDCamel        int64 `json:"userId"`
 		LocationID         int64 `json:"location_id"`
+		LocationIDCamel    int64 `json:"locationId"`
 		CanManagePOSUsers  bool  `json:"can_manage_pos_users"`
 		CanManageTerminals bool  `json:"can_manage_terminals"`
 		CanViewReports     bool  `json:"can_view_reports"`
+
+		CanManagePOSUsersCamel  *bool `json:"canManagePosUsers,omitempty"`
+		CanManageTerminalsCamel *bool `json:"canManageTerminals,omitempty"`
+		CanViewReportsCamel     *bool `json:"canViewReports,omitempty"`
 	}
 )
 
@@ -153,20 +168,46 @@ type AssignLocationResponse struct {
 	ID int64 `json:"id"`
 }
 
+func (req *AssignLocationRequest) normalizeAliases() {
+	if req.UserID == 0 {
+		req.UserID = req.UserIDCamel
+	}
+	if req.LocationID == 0 {
+		req.LocationID = req.LocationIDCamel
+	}
+	if req.CanManagePOSUsersCamel != nil {
+		req.CanManagePOSUsers = *req.CanManagePOSUsersCamel
+	}
+	if req.CanManageTerminalsCamel != nil {
+		req.CanManageTerminals = *req.CanManageTerminalsCamel
+	}
+	if req.CanViewReportsCamel != nil {
+		req.CanViewReports = *req.CanViewReportsCamel
+	}
+}
+
 func (h *AssignLocationHandler) Validate(_ context.Context, req *AssignLocationRequest) *errorModels.ServerError {
-	if req.UserID == 0 || req.LocationID == 0 {
+	req.normalizeAliases()
+	if req.UserID <= 0 || req.LocationID <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "userId and locationId required"}
 	}
 	return nil
 }
 
 func (h *AssignLocationHandler) Serve(ctx context.Context, req *AssignLocationRequest) (AssignLocationResponse, *errorModels.ServerError) {
+	req.normalizeAliases()
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	if !isOwnerOrAdmin(authUser) {
+		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.Assign(ctx, authUser.BusinessID, req.UserID, req.LocationID, req.CanManagePOSUsers, req.CanManageTerminals, req.CanViewReports)
 	if err != nil {
+		if errors.Is(err, application.ErrInvalidAssignment) {
+			return AssignLocationResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid POS location assignment"}
+		}
 		return AssignLocationResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return AssignLocationResponse{ID: id}, nil
@@ -186,7 +227,7 @@ type RemoveLocationResponse struct {
 }
 
 func (h *RemoveLocationHandler) Validate(_ context.Context, req *RemoveLocationRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "ID required"}
 	}
 	return nil
@@ -195,6 +236,9 @@ func (h *RemoveLocationHandler) Validate(_ context.Context, req *RemoveLocationR
 func (h *RemoveLocationHandler) Serve(ctx context.Context, req *RemoveLocationRequest) (RemoveLocationResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !isOwnerOrAdmin(authUser) {
 		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	err := h.Service.Remove(ctx, authUser.BusinessID, req.ID)

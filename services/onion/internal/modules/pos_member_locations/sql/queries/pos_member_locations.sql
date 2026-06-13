@@ -15,6 +15,7 @@ INSERT INTO pos_member_locations (business_id, user_id, location_id,
     can_manage_pos_users, can_manage_terminals, can_view_reports)
 VALUES (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
+    id = LAST_INSERT_ID(id),
     can_manage_pos_users = VALUES(can_manage_pos_users),
     can_manage_terminals = VALUES(can_manage_terminals),
     can_view_reports = VALUES(can_view_reports);
@@ -26,7 +27,15 @@ DELETE FROM pos_member_locations WHERE business_id = ? AND id = ?;
 SELECT ml.location_id, l.name, l.address, l.phone
 FROM pos_member_locations ml
 JOIN pos_locations l ON l.id = ml.location_id
-WHERE ml.business_id = ? AND ml.user_id = ?;
+WHERE ml.business_id = ? AND ml.user_id = ?
+ORDER BY l.name ASC;
+
+-- name: ListBusinessLocations :many
+SELECT l.id AS location_id, l.name, l.address, l.phone
+FROM pos_locations l
+JOIN businesses b ON b.owner_id = l.owner_id
+WHERE b.id = ? AND l.is_active = TRUE
+ORDER BY l.name ASC;
 
 -- name: GetLocationRoster :many
 -- The operator sign-in roster for a location: every assigned team member, their
@@ -45,3 +54,18 @@ LEFT JOIN pos_users pu
       AND pu.is_active = TRUE
 WHERE ml.business_id = ? AND ml.location_id = ?
 ORDER BY u.full_name ASC;
+
+-- name: UserBelongsToBusiness :one
+SELECT EXISTS (
+    SELECT 1
+    FROM users
+    WHERE id = ? AND business_id = ?
+);
+
+-- name: LocationBelongsToBusiness :one
+SELECT EXISTS (
+    SELECT 1
+    FROM pos_locations l
+    JOIN businesses b ON b.owner_id = l.owner_id
+    WHERE b.id = ? AND l.id = ?
+);

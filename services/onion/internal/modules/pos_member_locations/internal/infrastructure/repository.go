@@ -23,13 +23,22 @@ type MyLocation struct {
 	Phone      string `json:"phone"`
 }
 
+func myLocationFromValues(locationID int64, name string, address, phone sql.NullString) MyLocation {
+	return MyLocation{
+		LocationID: locationID,
+		Name:       name,
+		Address:    address.String,
+		Phone:      phone.String,
+	}
+}
+
 // RosterEntry is one team member on a location's POS sign-in roster.
 type RosterEntry struct {
-	UserID            int64  `json:"user_id"`
-	Name              string `json:"name"`
-	HasPIN            bool   `json:"has_pin"`
-	IsManager         bool   `json:"is_manager"`
-	POSRole           string `json:"pos_role"`
+	UserID    int64  `json:"user_id"`
+	Name      string `json:"name"`
+	HasPIN    bool   `json:"has_pin"`
+	IsManager bool   `json:"is_manager"`
+	POSRole   string `json:"pos_role"`
 }
 
 func (r *Repository) GetLocationRoster(ctx context.Context, businessID, locationID int64) ([]RosterEntry, error) {
@@ -77,12 +86,32 @@ func (r *Repository) GetMyLocations(ctx context.Context, businessID, userID int6
 	}
 	out := make([]MyLocation, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, MyLocation{
-			LocationID: row.LocationID, Name: row.Name,
-			Address: row.Address.String, Phone: row.Phone.String,
-		})
+		out = append(out, myLocationFromValues(row.LocationID, row.Name, row.Address, row.Phone))
 	}
 	return out, nil
+}
+
+func (r *Repository) GetBusinessLocations(ctx context.Context, businessID int64) ([]MyLocation, error) {
+	q := sqlc.New(r.pool)
+	rows, err := q.ListBusinessLocations(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]MyLocation, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, myLocationFromValues(row.LocationID, row.Name, row.Address, row.Phone))
+	}
+	return out, nil
+}
+
+func (r *Repository) UserBelongsToBusiness(ctx context.Context, businessID, userID int64) (bool, error) {
+	q := sqlc.New(r.pool)
+	return q.UserBelongsToBusiness(ctx, sqlc.UserBelongsToBusinessParams{ID: userID, BusinessID: sql.NullInt64{Int64: businessID, Valid: true}})
+}
+
+func (r *Repository) LocationBelongsToBusiness(ctx context.Context, businessID, locationID int64) (bool, error) {
+	q := sqlc.New(r.pool)
+	return q.LocationBelongsToBusiness(ctx, sqlc.LocationBelongsToBusinessParams{ID: businessID, ID_2: locationID})
 }
 
 func (r *Repository) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
@@ -98,8 +127,7 @@ func (r *Repository) Assign(ctx context.Context, businessID, userID, locationID 
 	if err != nil {
 		return 0, err
 	}
-	id, _ := res.LastInsertId()
-	return id, nil
+	return res.LastInsertId()
 }
 
 func (r *Repository) Remove(ctx context.Context, businessID, id int64) error {

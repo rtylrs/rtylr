@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,6 +17,8 @@ const (
 	posMemberLocsScope = "pos_member_locations"
 	posMemberLocsTTL   = 5 * time.Minute
 )
+
+var ErrInvalidAssignment = errors.New("invalid POS location assignment")
 
 type Service struct{ repo *infrastructure.Repository }
 
@@ -44,6 +47,16 @@ func (s *Service) GetMyLocations(ctx context.Context, businessID, userID int64) 
 	return cacher.Of[[]infrastructure.MyLocation]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]infrastructure.MyLocation, error) {
 			return s.repo.GetMyLocations(ctx, businessID, userID)
+		},
+		cacher.WithExpiry(ctx, posMemberLocsTTL),
+	)
+}
+
+func (s *Service) GetBusinessLocations(ctx context.Context, businessID int64) ([]infrastructure.MyLocation, error) {
+	key := cacheKeys.Scoped(posMemberLocsScope, businessID, "business_locations")
+	return cacher.Of[[]infrastructure.MyLocation]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]infrastructure.MyLocation, error) {
+			return s.repo.GetBusinessLocations(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, posMemberLocsTTL),
 	)
@@ -78,6 +91,21 @@ func (s *Service) IsAssignedToLocation(ctx context.Context, businessID, userID, 
 }
 
 func (s *Service) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
+	if businessID <= 0 || userID <= 0 || locationID <= 0 {
+		return 0, ErrInvalidAssignment
+	}
+	userOK, err := s.repo.UserBelongsToBusiness(ctx, businessID, userID)
+	if err != nil {
+		return 0, err
+	}
+	locationOK, err := s.repo.LocationBelongsToBusiness(ctx, businessID, locationID)
+	if err != nil {
+		return 0, err
+	}
+	if !userOK || !locationOK {
+		return 0, ErrInvalidAssignment
+	}
+
 	id, err := s.repo.Assign(ctx, businessID, userID, locationID, canManagePOSUsers, canManageTerminals, canViewReports)
 	if err != nil {
 		return 0, err

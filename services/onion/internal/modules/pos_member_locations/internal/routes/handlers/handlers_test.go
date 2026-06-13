@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"context"
+	"net/http"
 	"testing"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
 // ─── AssignLocationHandler.Validate ─────────────────────────────────────────
@@ -36,6 +39,16 @@ func TestAssign_Validate_RejectsBothZero(t *testing.T) {
 	}
 }
 
+func TestAssign_Validate_RejectsNegativeIDs(t *testing.T) {
+	h := &AssignLocationHandler{}
+	if err := h.Validate(context.Background(), &AssignLocationRequest{UserID: -1, LocationID: 2}); err == nil {
+		t.Error("expected error for negative user_id")
+	}
+	if err := h.Validate(context.Background(), &AssignLocationRequest{UserID: 1, LocationID: -2}); err == nil {
+		t.Error("expected error for negative location_id")
+	}
+}
+
 func TestAssign_Validate_PermissionsDefaultFalse(t *testing.T) {
 	req := &AssignLocationRequest{}
 	if req.CanManagePOSUsers || req.CanManageTerminals || req.CanViewReports {
@@ -57,6 +70,30 @@ func TestAssign_Validate_PermissionsCanBeTrue(t *testing.T) {
 	}
 }
 
+func TestAssign_Validate_AcceptsLegacyCamelCaseRequest(t *testing.T) {
+	h := &AssignLocationHandler{}
+	canManagePOSUsers := true
+	canManageTerminals := true
+	canViewReports := true
+	req := &AssignLocationRequest{
+		UserIDCamel:             5,
+		LocationIDCamel:         10,
+		CanManagePOSUsersCamel:  &canManagePOSUsers,
+		CanManageTerminalsCamel: &canManageTerminals,
+		CanViewReportsCamel:     &canViewReports,
+	}
+
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("camelCase request should pass: %v", err.Message)
+	}
+	if req.UserID != 5 || req.LocationID != 10 {
+		t.Fatalf("aliases not normalized: user=%d location=%d", req.UserID, req.LocationID)
+	}
+	if !req.CanManagePOSUsers || !req.CanManageTerminals || !req.CanViewReports {
+		t.Fatal("camelCase management flags were not normalized")
+	}
+}
+
 // ─── RemoveLocationHandler.Validate ─────────────────────────────────────────
 
 func TestRemove_Validate_AcceptsNonZeroID(t *testing.T) {
@@ -74,12 +111,41 @@ func TestRemove_Validate_RejectsZeroID(t *testing.T) {
 }
 
 func TestRemove_Validate_RejectsNegativeID(t *testing.T) {
-	// The guard checks == 0; negative IDs are int64 so non-zero but invalid in
-	// practice. Confirm the zero-guard fires only on zero, not negative.
 	h := &RemoveLocationHandler{}
-	// -1 is non-zero, so Validate passes (guard is ID == 0).
-	if err := h.Validate(context.Background(), &RemoveLocationRequest{ID: -1}); err != nil {
-		t.Logf("negative id rejected at validation (acceptable): %v", err.Message)
+	if err := h.Validate(context.Background(), &RemoveLocationRequest{ID: -1}); err == nil {
+		t.Error("expected error for negative ID")
+	}
+}
+
+func TestAssign_Serve_RejectsNonAdminUser(t *testing.T) {
+	h := &AssignLocationHandler{}
+	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "store_manager"})
+
+	_, err := h.Serve(ctx, &AssignLocationRequest{UserID: 3, LocationID: 4})
+	if err == nil || err.Code != http.StatusForbidden {
+		t.Fatalf("expected forbidden, got %+v", err)
+	}
+}
+
+func TestRemove_Serve_RejectsNonAdminUser(t *testing.T) {
+	h := &RemoveLocationHandler{}
+	ctx := authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "staff"})
+
+	_, err := h.Serve(ctx, &RemoveLocationRequest{ID: 4})
+	if err == nil || err.Code != http.StatusForbidden {
+		t.Fatalf("expected forbidden, got %+v", err)
+	}
+}
+
+func TestIsOwnerOrAdmin_UsesRoleNotIDCollision(t *testing.T) {
+	if isOwnerOrAdmin(&authPkg.AuthUser{UserID: 1, BusinessID: 1, Role: "staff"}) {
+		t.Fatal("staff user must not be privileged just because user_id matches business_id")
+	}
+	if !isOwnerOrAdmin(&authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "admin"}) {
+		t.Fatal("admin should be privileged")
+	}
+	if !isOwnerOrAdmin(&authPkg.AuthUser{UserID: 1, BusinessID: 1, Role: "owner"}) {
+		t.Fatal("owner should be privileged")
 	}
 }
 
@@ -87,6 +153,8 @@ func TestRemove_Validate_RejectsNegativeID(t *testing.T) {
 
 func TestHandlers_CanBeInstantiated(_ *testing.T) {
 	_ = &GetMyLocationsHandler{}
+	_ = &GetLocationRosterHandler{}
+	_ = &GetMemberLocationsHandler{}
 	_ = &AssignLocationHandler{}
 	_ = &RemoveLocationHandler{}
 }
@@ -95,9 +163,11 @@ func TestHandlers_CanBeInstantiated(_ *testing.T) {
 
 func TestRoutes_NonEmpty(t *testing.T) {
 	for name, fn := range map[string]func() []string{
-		"MyLocations": MyLocationsRoutes,
-		"Assign":      AssignRoutes,
-		"Remove":      RemoveRoutes,
+		"MyLocations":     MyLocationsRoutes,
+		"LocationRoster":  LocationRosterRoutes,
+		"MemberLocations": MemberLocationsRoutes,
+		"Assign":          AssignRoutes,
+		"Remove":          RemoveRoutes,
 	} {
 		if len(fn()) == 0 {
 			t.Errorf("%s: expected at least one route", name)
