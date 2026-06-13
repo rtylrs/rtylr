@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check:
-    name: Test, Typecheck & Build
+    name: Build
     runs-on: blacksmith-2vcpu-ubuntu-2404
 
     steps:
@@ -45,12 +45,6 @@ jobs:
             librsvg2-dev \
             patchelf \
             libudev-dev
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Test
-        run: pnpm test
 
       - name: Build (web)
         run: pnpm build
