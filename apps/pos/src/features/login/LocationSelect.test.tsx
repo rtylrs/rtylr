@@ -15,6 +15,13 @@ const mockToast = vi.hoisted(() => ({
   error: vi.fn(),
 }));
 
+const mockUser = vi.hoisted(() => ({ role: 'owner' as string | null }));
+
+vi.mock('../../shared/stores/userStore', () => ({
+  useUserStore: (selector: (s: { role: string | null }) => unknown) =>
+    selector({ role: mockUser.role }),
+}));
+
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
@@ -36,6 +43,7 @@ vi.mock('../../shared/services/api/posService', () => ({
 describe('LocationSelect', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUser.role = 'owner';
   });
 
   afterEach(() => {
@@ -158,6 +166,33 @@ describe('LocationSelect', () => {
     expect(screen.getByText('Add a new location')).toBeTruthy();
     fireEvent.click(screen.getByText('← Back to locations'));
     expect(screen.getByText('Main')).toBeTruthy();
+  });
+
+  it('does not offer location creation to a store manager', async () => {
+    mockUser.role = 'store_manager';
+    mockPosService.getMyLocations.mockResolvedValue({
+      locations: [
+        { id: 1, name: 'Main' },
+        { id: 2, name: 'Uptown' },
+      ],
+    });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    expect(await screen.findByText('Main')).toBeTruthy();
+    expect(screen.queryByText('Add location')).toBeNull();
+  });
+
+  it('tells an unassigned store manager to ask their owner instead of showing a create form', async () => {
+    mockUser.role = 'store_manager';
+    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    expect(await screen.findByText('No locations assigned yet')).toBeTruthy();
+    expect(screen.queryByPlaceholderText('Location name (e.g. Downtown Cafe)')).toBeNull();
   });
 
   it('shows a terminal load error when terminals cannot be loaded for a location', async () => {

@@ -3,6 +3,7 @@ import { MapPin, Monitor, Plus, Loader2 } from 'lucide-react';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { posService } from '../../shared/services/api/posService';
+import { useUserStore } from '../../shared/stores/userStore';
 import {
   extractCreatedLocationId,
   extractCreatedTerminalId,
@@ -21,6 +22,10 @@ interface Props {
 type Step = 'location' | 'create' | 'terminal';
 
 const LocationSelect: React.FC<Props> = ({ onComplete }) => {
+  // Only the business owner/admin may create POS locations; store managers and
+  // staff work at locations they're assigned to.
+  const role = useUserStore((s) => s.role);
+  const canCreateLocation = role === 'owner' || role === 'admin';
   const [step, setStep] = useState<Step>('location');
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [terminals, setTerminals] = useState<TerminalOption[]>([]);
@@ -65,7 +70,9 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
 
       if (merged.length === 1) {
         await handleLocationSelect(merged[0]);
-      } else if (merged.length === 0) {
+      } else if (merged.length === 0 && canCreateLocation) {
+        // Owner/admin first-run onboarding. Staff/store managers with no
+        // assignments stay on the location step and see the "ask your owner" note.
         setStep('create');
       }
       setLoading(false);
@@ -94,6 +101,7 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
   };
 
   const handleCreateLocation = async () => {
+    if (!canCreateLocation) return;
     if (!newLocationName.trim()) return;
     setCreatingLocation(true);
     try {
@@ -180,6 +188,15 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
                 <p className="text-sm text-destructive">{locationError}</p>
               </div>
             )}
+            {!locationError && locations.length === 0 && !canCreateLocation && (
+              <div className="text-center py-12">
+                <MapPin className="w-10 h-10 mx-auto text-pos-muted mb-3" />
+                <p className="text-sm text-pos-text font-medium">No locations assigned yet</p>
+                <p className="text-xs text-pos-muted mt-1">
+                  Ask your business owner to assign you to a location.
+                </p>
+              </div>
+            )}
             {locations.map((loc) => (
               <button
                 key={loc.locationId}
@@ -197,7 +214,7 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
                 </div>
               </button>
             ))}
-            {!locationError && (
+            {!locationError && canCreateLocation && (
               <button
                 onClick={() => setStep('create')}
                 className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-dashed border-pos-border text-pos-muted hover:text-pos-text hover:border-blue-500/50 transition-colors text-sm"
