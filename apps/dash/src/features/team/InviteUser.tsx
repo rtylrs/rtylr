@@ -20,7 +20,11 @@ import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
-import { usePOSLocations, useAssignPOSLocation } from '../../shared/hooks/queries/usePOSAccess';
+import {
+  usePOSLocations,
+  useAssignPOSLocation,
+  locationFlagsForRole,
+} from '../../shared/hooks/queries/usePOSAccess';
 import {
   useMySubscription,
   centsToDisplay,
@@ -62,16 +66,6 @@ const ROLES = [
   { id: 'staff', label: 'Staff', desc: 'Use assigned apps only, no admin access' },
   { id: 'viewer', label: 'Viewer', desc: 'Read-only access to assigned apps' },
 ];
-
-// store_manager gets full management of its assigned POS locations; everyone
-// else is a regular operator (access only). The backend re-derives capabilities,
-// so this only seeds the pos_member_locations management flags.
-const locationFlagsForRole = (
-  role: string
-): { canManagePosUsers: boolean; canManageTerminals: boolean; canViewReports: boolean } =>
-  role === 'store_manager'
-    ? { canManagePosUsers: true, canManageTerminals: true, canViewReports: true }
-    : { canManagePosUsers: false, canManageTerminals: false, canViewReports: false };
 
 const STATUS_COLORS: Record<BulkResult['status'], string> = {
   invited: '#10b981',
