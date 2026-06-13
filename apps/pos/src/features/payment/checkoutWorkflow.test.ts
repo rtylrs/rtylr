@@ -48,6 +48,35 @@ describe('buildCheckoutOrder', () => {
 });
 
 describe('processCheckout', () => {
+  // The real api client camelCases responses, so the backend's order_id arrives
+  // as orderId. This asserts the runtime contract (regression guard for the
+  // checkout that threw because it only read id/order_id).
+  it('reads the camelCased orderId the api client actually returns', async () => {
+    const createOrder = vi.fn(() => Promise.resolve({ orderId: 555, orderNumber: 'ORD-555' }));
+    const chargeOrder = vi.fn(() => Promise.resolve());
+
+    const result = await processCheckout({
+      order: buildCheckoutOrder({
+        id: 'local-1',
+        items,
+        subtotal: 20,
+        tax: 1.6,
+        total: 21.6,
+        customerId: 7,
+        createdAt: '2026-05-06T00:00:00.000Z',
+      }),
+      payload: basePayload,
+      method: 'card',
+      createOrder,
+      chargeOrder,
+      enqueueOffline: vi.fn(),
+      recordCashSale: vi.fn(),
+    });
+
+    expect(result).toEqual({ status: 'online', orderId: 555 });
+    expect(chargeOrder).toHaveBeenCalledWith(555, { payment_method: 'card', amount_paid: 21.6 });
+  });
+
   it('creates and charges the order online', async () => {
     const createOrder = vi.fn(() => Promise.resolve({ id: 123 }));
     const chargeOrder = vi.fn(() => Promise.resolve());

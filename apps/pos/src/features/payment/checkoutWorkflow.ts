@@ -40,7 +40,9 @@ interface ProcessCheckoutParams {
   order: Order;
   payload: CreateOrderPayload;
   method: CheckoutPaymentMethod;
-  createOrder: (payload: CreateOrderPayload) => Promise<{ id?: number; order_id?: number }>;
+  // The API client camelCases responses, so the backend's order_id arrives as
+  // orderId; accept all shapes so neither the runtime contract nor older mocks break.
+  createOrder: (payload: CreateOrderPayload) => Promise<{ orderId?: number; id?: number; order_id?: number }>;
   chargeOrder: (orderId: number, payload: PaymentPayload) => Promise<void>;
   enqueueOffline: (payload: CreateOrderPayload) => void;
   recordCashSale: (amount: number, orderId: string) => void;
@@ -142,7 +144,7 @@ export async function processCheckout({
 }: ProcessCheckoutParams): Promise<ProcessCheckoutResult> {
   try {
     const createRes = await createOrder(payload);
-    const orderId = createRes.id ?? createRes.order_id;
+    const orderId = createRes.orderId ?? createRes.id ?? createRes.order_id;
     if (!orderId || orderId <= 0) {
       throw new Error('Order was not accepted by the server.');
     }
