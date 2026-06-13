@@ -267,18 +267,12 @@ func POSUserVerifyPINRoutes() []string { return []string{"/pos/users/verify-pin"
 
 type VerifyPINHandler struct{ Service *application.Service }
 
-// VerifyPINRequest identifies the roster operator (user_id) at a location and
-// carries their PIN. PIN is never logged, never echoed, and is zeroed on the
-// struct as soon as the service call returns.
 type VerifyPINRequest struct {
 	LocationID int64  `json:"location_id"`
 	UserID     int64  `json:"user_id"`
 	PIN        string `json:"pin"`
 }
 
-// VerifyPINResponse carries the team user id, pos_user id, role, and the
-// effective capability flags the POS client uses to gate manager-only actions.
-// Neither the plaintext PIN nor the bcrypt hash can ever appear here.
 type VerifyPINResponse struct {
 	UserID           int64   `json:"user_id"`
 	POSUserID        int64   `json:"pos_user_id"`
@@ -313,9 +307,6 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 	ownerID := device.User.BusinessID
 
 	result, err := h.Service.VerifyPIN(ctx, ownerID, req.LocationID, req.UserID, req.PIN)
-	// Zero the PIN immediately after the service call so any later
-	// logging of the request struct (by middleware, request loggers,
-	// crash dumps, etc.) cannot surface it.
 	req.PIN = ""
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidPIN) {
@@ -343,16 +334,10 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 	}, nil
 }
 
-// ── Set PIN (self-service onboarding) ───────────────────────────
-
 func POSUserSetPINRoutes() []string { return []string{"/pos/users/set-pin"} }
 
 type SetPINHandler struct{ Service *application.Service }
 
-// SetPINRequest is sent when an operator picked from the location roster sets
-// or rotates their own PIN. user_id + name come from the roster selection;
-// role and capabilities are resolved server-side from the member's location
-// access, never trusted from this payload.
 type SetPINRequest struct {
 	UserID     int64  `json:"user_id"`
 	LocationID int64  `json:"location_id"`

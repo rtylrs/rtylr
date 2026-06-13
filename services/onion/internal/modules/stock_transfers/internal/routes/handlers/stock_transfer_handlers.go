@@ -156,10 +156,6 @@ func (h *CreateStockTransferHandler) Validate(_ context.Context, req *CreateStoc
 		}
 	}
 
-	// A transfer is created as a draft and its line items are added/counted
-	// afterwards, so zero items is valid at creation. The non-empty requirement
-	// belongs on the status transition that actually ships the transfer.
-
 	return nil
 }
 

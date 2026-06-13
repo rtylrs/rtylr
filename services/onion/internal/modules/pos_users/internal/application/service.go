@@ -26,20 +26,10 @@ func invalidatePosUsersScope(ctx context.Context, ownerID int64) {
 	}
 }
 
-// ErrInvalidInput signals that a caller-supplied field (e.g. empty PIN on
-// a create call) violates a service-layer invariant. Handlers translate
-// this into a 400.
 var ErrInvalidInput = errors.New("invalid input")
 
-// ErrForbidden signals the actor may not perform the operation on the target
-// (e.g. setting another operator's PIN without being a location manager).
-// Handlers translate this into a 403.
 var ErrForbidden = errors.New("forbidden")
 
-// ErrPINAlreadySet signals an attempt to onboard a PIN for an operator who
-// already has one at the location. Rotations go through the manager-gated
-// staff screen, never the self-service set-pin path. Handlers translate this
-// into a 409.
 var ErrPINAlreadySet = errors.New("pin already set")
 
 type Service struct {
@@ -78,8 +68,6 @@ func (s *Service) ListByLocation(ctx context.Context, ownerID, locationID int64)
 	)
 }
 
-// Create hashes the plaintext PIN with bcrypt cost 12 before persisting and
-// never passes the plaintext to the repository.
 func (s *Service) Create(ctx context.Context, ownerID, createdBy int64, input domain.CreatePOSUserInput) (int64, error) {
 	if strings.TrimSpace(input.Name) == "" {
 		return 0, ErrInvalidInput
@@ -91,8 +79,6 @@ func (s *Service) Create(ctx context.Context, ownerID, createdBy int64, input do
 	if err != nil {
 		return 0, err
 	}
-	// Zero the plaintext on the input struct so a slip further down the
-	// call stack (logging, error-wrap) cannot surface it.
 	input.PIN = ""
 	id, err := s.repo.Create(ctx, ownerID, createdBy, input, hashed)
 	if err != nil {
@@ -102,9 +88,6 @@ func (s *Service) Create(ctx context.Context, ownerID, createdBy int64, input do
 	return id, nil
 }
 
-// Update rewrites a pos_user's profile fields. If the caller supplied a new
-// PIN, it is hashed and written via the dedicated PIN-hash query; the
-// plaintext never reaches the repository layer.
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.UpdatePOSUserInput) error {
 	newPIN := input.PIN
 	input.PIN = ""
@@ -132,20 +115,6 @@ func (s *Service) Deactivate(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-// SetPIN is the self-service onboarding path: an operator picked from a
-// location's roster sets or rotates their own 4-digit PIN. The operator's
-// identity (userID) and the location come from the roster selection, not a
-// trusted session, so the member's assignment to the location is re-verified
-// here. Role and capabilities are resolved server-side from the member's
-// location access — never trusted from the client.
-//
-// First-time setup creates the pos_users row with role-defaulted capabilities;
-// a rotation only rewrites the PIN hash and preserves any admin overrides.
-// SetPINActor identifies the authenticated device session driving a set-pin
-// call. A session may onboard its own PIN, or — if it manages the location —
-// provision a PIN for another rostered operator (the manager-provisioned-iPad
-// flow). It may never overwrite an existing PIN: rotations are a separate,
-// role-gated reset on the staff screen.
 type SetPINActor struct {
 	UserID   int64
 	IsOwner  bool
@@ -160,7 +129,6 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 		return ErrInvalidInput
 	}
 
-	// The target operator must be assigned to the location to hold a PIN there.
 	access, err := s.repo.GetMemberLocationAccess(ctx, ownerID, input.UserID, input.LocationID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrUserNotFound) {
@@ -169,15 +137,12 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 		return err
 	}
 
-	// Authorisation: you may set your own PIN; setting someone else's requires
-	// the actor to manage this location (owner/admin, or can_manage_pos_users).
 	if input.UserID != actor.UserID {
 		if mgrErr := s.requireLocationManager(ctx, ownerID, actor, input.LocationID); mgrErr != nil {
 			return mgrErr
 		}
 	}
 
-	// Onboarding only — never silently overwrite an existing PIN.
 	existing, err := s.repo.FindByUserAndLocation(ctx, ownerID, input.UserID, input.LocationID)
 	if err != nil && !errors.Is(err, infrastructure.ErrUserNotFound) {
 		return err
@@ -212,9 +177,6 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 	return nil
 }
 
-// requireLocationManager returns nil if the actor may manage POS users at the
-// location: business owner, team admin, or a member whose location assignment
-// carries can_manage_pos_users (store_manager). Otherwise ErrForbidden.
 func (s *Service) requireLocationManager(ctx context.Context, ownerID int64, actor SetPINActor, locationID int64) error {
 	if actor.IsOwner || actor.TeamRole == "owner" || actor.TeamRole == "admin" {
 		return nil
@@ -232,9 +194,6 @@ func (s *Service) requireLocationManager(ctx context.Context, ownerID int64, act
 	return ErrForbidden
 }
 
-// roleForAccess maps a member's location management flag to a POS role. A
-// member who can manage POS users at the location (owner/admin/store_manager
-// assignment) operates as a manager; everyone else defaults to cashier.
 func roleForAccess(access *infrastructure.LocationAccess) domain.POSUserRole {
 	if access != nil && access.CanManagePOSUsers {
 		return domain.RoleManager
@@ -242,10 +201,6 @@ func roleForAccess(access *infrastructure.LocationAccess) domain.POSUserRole {
 	return domain.RoleCashier
 }
 
-// VerifyPIN authenticates a roster operator by (ownerID, locationID, userID,
-// pin) and returns a projection carrying the effective capabilities so the POS
-// client can gate manager-only actions. A generic domain.ErrInvalidPIN is
-// returned for every failure mode so callers cannot distinguish causes.
 func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int64, pin string) (*domain.VerifiedPOSUser, error) {
 	if locationID <= 0 || userID <= 0 || pin == "" {
 		return nil, domain.ErrInvalidPIN
@@ -279,10 +234,6 @@ func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int
 	}, nil
 }
 
-// scrubSecrets returns the same slice with PIN and PINHash zeroed so that
-// list endpoints cannot accidentally leak either value through the handler
-// layer. The domain.POSUser shape still carries these fields for the
-// dual-path verify flow that needs them.
 func scrubSecrets(users []domain.POSUser) []domain.POSUser {
 	for i := range users {
 		users[i].PIN = ""
