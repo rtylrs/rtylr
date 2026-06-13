@@ -10,7 +10,7 @@ import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
-import { useCreateInvoice } from './useInvoices';
+import { useCreateInvoice, useUpdateInvoiceStatus } from './useInvoices';
 import {
   cardStyle,
   ghostBtn,
@@ -41,6 +41,7 @@ const NewInvoice: React.FC = () => {
   const [notes, setNotes] = useState(settings.invoiceNotes);
   const [discount, setDiscount] = useState(0);
   const createInvoice = useCreateInvoice();
+  const updateInvoiceStatus = useUpdateInvoiceStatus();
 
   const addItem = () =>
     setItems((prev) => [
@@ -100,8 +101,26 @@ const NewInvoice: React.FC = () => {
       items: mappedItems,
     };
     createInvoice.mutate(payload, {
-      onSuccess: () => {
-        toast.success(`Invoice ${invoiceNumber} saved as ${status}`);
+      onSuccess: (created) => {
+        // Create always persists a Draft. For "Save & Send", transition it to
+        // Sent so the toast isn't lying about what happened.
+        if (status === 'Sent' && created?.id) {
+          updateInvoiceStatus.mutate(
+            { id: created.id, status: 'Sent' },
+            {
+              onSuccess: () => {
+                toast.success(`Invoice ${invoiceNumber} sent`);
+                navigate({ to: '/invoices' });
+              },
+              onError: () => {
+                toast.error(`Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`);
+                navigate({ to: '/invoices' });
+              },
+            }
+          );
+          return;
+        }
+        toast.success(`Invoice ${invoiceNumber} saved as Draft`);
         navigate({ to: '/invoices' });
       },
       onError: () => toast.error('Failed to save invoice'),

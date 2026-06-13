@@ -33,7 +33,15 @@ export const useListInvoices = (params: ListInvoicesParams) => {
   return useQuery<ListInvoicesResponse>({
     queryKey: ['invoices', 'filter', params],
     queryFn: async (): Promise<ListInvoicesResponse> => {
-      const res = await unwrap(safe.get<ListInvoicesResponse>('/finance/invoices', { params }));
+      // The list handler reads page/page_size, not limit/offset; translate so
+      // callers asking for more than the default 50 actually get them.
+      const { limit, offset, ...rest } = params;
+      const page = Math.floor(offset / Math.max(1, limit)) + 1;
+      const res = await unwrap(
+        safe.get<ListInvoicesResponse>('/finance/invoices', {
+          params: { ...rest, page, pageSize: limit },
+        })
+      );
       return res as ListInvoicesResponse;
     },
   });

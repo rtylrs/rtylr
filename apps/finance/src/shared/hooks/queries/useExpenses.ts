@@ -128,8 +128,9 @@ export const useApproveExpense = () => {
     mutationFn: async (id: string): Promise<void> => {
       await unwrap(safe.post<void>(`/finance/expenses/${id}/approve`, {}));
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['expense', id] });
       toast.success(t('expenses.approved'));
     },
     onError: () => {
@@ -146,8 +147,9 @@ export const useRejectExpense = () => {
     mutationFn: async (id: string): Promise<void> => {
       await unwrap(safe.post<void>(`/finance/expenses/${id}/reject`, {}));
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['expense', id] });
       toast.success(t('expenses.rejected'));
     },
     onError: () => {
