@@ -15,6 +15,7 @@ import {
   Users,
   CreditCard,
   Layers,
+  MapPin,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
@@ -38,6 +39,13 @@ import {
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  usePOSLocations,
+  useMemberLocations,
+  useAssignPOSLocation,
+  useRemovePOSLocation,
+  locationFlagsForRole,
+} from '../../shared/hooks/queries/usePOSAccess';
 import { toast } from 'sonner';
 import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
 import { safe } from '../../shared/lib/api';
@@ -85,6 +93,13 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const [nameDraft, setNameDraft] = useState('');
   const [roleDraft, setRoleDraft] = useState('staff');
   const [appsDraft, setAppsDraft] = useState<string[]>([]);
+  const [locationsDraft, setLocationsDraft] = useState<number[]>([]);
+
+  const posSelected = appsDraft.includes('pos');
+  const assignLocation = useAssignPOSLocation();
+  const removeLocation = useRemovePOSLocation();
+  const { data: allLocations = [] } = usePOSLocations(isEditing && posSelected);
+  const { data: memberLocations = [] } = useMemberLocations(id, isEditing && posSelected);
 
   const { data: memberGroups = [] } = useQuery<GroupSummary[]>({
     queryKey: ['user-groups', id],
@@ -114,6 +129,11 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     setRoleDraft(member.role || 'staff');
     setAppsDraft(member.apps ?? []);
   }, [member]);
+
+  // Seed the location selection from the member's current assignments when they load.
+  useEffect(() => {
+    setLocationsDraft(memberLocations.map((l) => l.locationId));
+  }, [memberLocations]);
 
   if (isLoading) {
     return (
@@ -150,6 +170,42 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     );
   };
 
+  const toggleLocation = (locationId: number): void => {
+    setLocationsDraft((prev) =>
+      prev.includes(locationId) ? prev.filter((l) => l !== locationId) : [...prev, locationId]
+    );
+  };
+
+  // Diff the location selection against current assignments: assign newly-added,
+  // remove unchecked. Only relevant when POS is one of the member's apps.
+  const syncLocations = async (): Promise<void> => {
+    if (!posSelected) return;
+    const current = memberLocations;
+    const currentIds = new Set(current.map((l) => l.locationId));
+    const draftIds = new Set(locationsDraft);
+    const flags = locationFlagsForRole(roleDraft);
+
+    const toAdd = locationsDraft.filter((locId) => !currentIds.has(locId));
+    const toRemove = current.filter((l) => !draftIds.has(l.locationId));
+    // Re-assign kept locations too, so a role change updates their manage flags.
+    const toUpdate = current.filter((l) => draftIds.has(l.locationId));
+
+    await Promise.allSettled([
+      ...toAdd.map((locationId) =>
+        assignLocation.mutateAsync({ userId: Number(member.id), locationId, ...flags })
+      ),
+      ...toUpdate.map((l) =>
+        assignLocation.mutateAsync({
+          userId: Number(member.id),
+          locationId: l.locationId,
+          ...flags,
+        })
+      ),
+      ...toRemove.map((l) => removeLocation.mutateAsync(l.id)),
+    ]);
+    qc.invalidateQueries({ queryKey: ['pos-member-locations', member.id] });
+  };
+
   const saveMember = async (): Promise<void> => {
     if (!nameDraft.trim()) {
       toast.error('Name is required');
@@ -165,6 +221,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           apps: appsDraft,
         },
       });
+      await syncLocations();
       setIsEditing(false);
     } catch {
       // onError in hook handles toast
@@ -204,6 +261,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                       setNameDraft(member.fullName || member.name || '');
                       setRoleDraft(member.role || 'staff');
                       setAppsDraft(member.apps ?? []);
+                      setLocationsDraft(memberLocations.map((l) => l.locationId));
                     }}
                   >
                     <X size={14} />
@@ -281,6 +339,51 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                 );
               })}
             </div>
+
+            {posSelected && (
+              <div className="mt-4 space-y-2">
+                <Label>POS locations</Label>
+                <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+                  {roleDraft === 'store_manager'
+                    ? 'Locations this manager runs (staff PINs, voids, refunds, reports)'
+                    : 'Locations this member can work at'}
+                </p>
+                {allLocations.length === 0 ? (
+                  <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+                    No POS locations yet.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {allLocations.map((loc) => {
+                      const checked = locationsDraft.includes(loc.id);
+                      return (
+                        <button
+                          key={loc.id}
+                          type="button"
+                          onClick={() => toggleLocation(loc.id)}
+                          className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors"
+                          style={{
+                            background: checked ? 'rgba(69,131,196,0.08)' : 'var(--dash-bg)',
+                            border: `1px solid ${checked ? 'rgba(69,131,196,0.4)' : 'var(--dash-border)'}`,
+                          }}
+                        >
+                          <MapPin
+                            size={14}
+                            style={{ color: checked ? '#4583C4' : 'var(--dash-text-dim)' }}
+                          />
+                          <span
+                            className="text-xs font-medium truncate"
+                            style={{ color: checked ? '#4583C4' : 'var(--dash-text)' }}
+                          >
+                            {loc.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </SettingSection>
         )}
 
