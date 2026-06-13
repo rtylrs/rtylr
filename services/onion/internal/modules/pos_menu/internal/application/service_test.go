@@ -22,6 +22,10 @@ func (m *mockRepo) QuickCreate(_ context.Context, _ int64, _ domain.MenuItemInpu
 	return m.createID, m.createErr
 }
 
+func (m *mockRepo) BusinessOwnerID(_ context.Context, businessID int64) (int64, error) {
+	return businessID, nil
+}
+
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{list: []domain.MenuItem{{}}}}
 	got, _ := s.List(context.Background(), 1)

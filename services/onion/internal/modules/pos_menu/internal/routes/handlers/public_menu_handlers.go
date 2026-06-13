@@ -6,7 +6,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
 // Public read path for the customer-facing menu app. This endpoint
@@ -43,7 +42,7 @@ type PublicListMenuItemsRequest struct {
 }
 
 type PublicListMenuItemsResponse struct {
-	Items []*posmenuitemv1.MenuItem `json:"items"`
+	Items []MenuItemPayload `json:"items"`
 }
 
 func (h *PublicListMenuItemsHandler) Validate(_ context.Context, req *PublicListMenuItemsRequest) *errorModels.ServerError {
@@ -58,10 +57,18 @@ func (h *PublicListMenuItemsHandler) Validate(_ context.Context, req *PublicList
 }
 
 func (h *PublicListMenuItemsHandler) Serve(ctx context.Context, req *PublicListMenuItemsRequest) (PublicListMenuItemsResponse, *errorModels.ServerError) {
-	// No auth check — this is the whole point of the endpoint. The
-	// caller-provided business_id is the tenant key; every record
-	// `List` returns is already filtered by owner_id inside the repo.
-	items, err := h.Service.List(ctx, req.BusinessID)
+	// No auth check — this is the whole point of the endpoint. Resolve
+	// business_id to the canonical owner tenant before reading products.
+	ownerID, err := h.Service.BusinessOwnerID(ctx, req.BusinessID, req.BusinessID)
+	if err != nil {
+		return PublicListMenuItemsResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to resolve public menu",
+		}
+	}
+
+	items, err := h.Service.List(ctx, ownerID)
 	if err != nil {
 		return PublicListMenuItemsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -70,9 +77,9 @@ func (h *PublicListMenuItemsHandler) Serve(ctx context.Context, req *PublicListM
 		}
 	}
 
-	payloads := make([]*posmenuitemv1.MenuItem, len(items))
+	payloads := make([]MenuItemPayload, len(items))
 	for i, item := range items {
-		payloads[i] = toProtoMenuItem(item)
+		payloads[i] = toMenuItemPayload(item)
 	}
 	return PublicListMenuItemsResponse{Items: payloads}, nil
 }

@@ -9,21 +9,66 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
-func toProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
-	return &posmenuitemv1.MenuItem{
-		Id:         item.ID,
-		OwnerId:    item.OwnerID,
-		CategoryId: item.CategoryID,
-		Name:       item.Name,
-		Sku:        item.SKU,
-		SalePrice:  item.SalePrice,
-		IsActive:   item.IsActive,
-		CreatedAt:  item.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:  item.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+type MenuItemPayload struct {
+	ID           int64   `json:"id"`
+	OwnerID      int64   `json:"owner_id"`
+	CategoryID   int64   `json:"category_id"`
+	Category     string  `json:"category"`
+	CategoryName string  `json:"category_name"`
+	Name         string  `json:"name"`
+	SKU          string  `json:"sku"`
+	Price        float64 `json:"price"`
+	SalePrice    float64 `json:"sale_price"`
+	Available    bool    `json:"available"`
+	IsActive     bool    `json:"is_active"`
+	Stock        float64 `json:"stock"`
+	Description  string  `json:"description,omitempty"`
+	CreatedAt    string  `json:"created_at"`
+	UpdatedAt    string  `json:"updated_at"`
+}
+
+func toMenuItemPayload(item domain.MenuItem) MenuItemPayload {
+	createdAt := ""
+	if !item.CreatedAt.IsZero() {
+		createdAt = item.CreatedAt.Format("2006-01-02T15:04:05Z")
 	}
+	updatedAt := ""
+	if !item.UpdatedAt.IsZero() {
+		updatedAt = item.UpdatedAt.Format("2006-01-02T15:04:05Z")
+	}
+
+	return MenuItemPayload{
+		ID:           item.ID,
+		OwnerID:      item.OwnerID,
+		CategoryID:   item.CategoryID,
+		Category:     item.Category,
+		CategoryName: item.Category,
+		Name:         item.Name,
+		SKU:          item.SKU,
+		Price:        item.SalePrice,
+		SalePrice:    item.SalePrice,
+		Available:    item.IsActive,
+		IsActive:     item.IsActive,
+		Stock:        item.Stock,
+		Description:  item.Description,
+		CreatedAt:    createdAt,
+		UpdatedAt:    updatedAt,
+	}
+}
+
+func resolveAuthenticatedMenuOwnerID(ctx context.Context, svc *application.Service) (int64, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil {
+		return 0, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID, err := svc.BusinessOwnerID(ctx, authUser.UserID, authUser.BusinessID)
+	if err != nil {
+		return 0, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to resolve business owner"}
+	}
+	return ownerID, nil
 }
 
 // --- List ---
@@ -34,22 +79,22 @@ type (
 	ListMenuItemsHandler  struct{ Service *application.Service }
 	ListMenuItemsRequest  struct{}
 	ListMenuItemsResponse struct {
-		Items []*posmenuitemv1.MenuItem `json:"items"`
+		Items []MenuItemPayload `json:"items"`
 	}
 )
 
 func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsRequest) (ListMenuItemsResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ListMenuItemsResponse{}, errorModels.PermissionDeniedServerError()
+	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx, h.Service)
+	if ownerErr != nil {
+		return ListMenuItemsResponse{}, ownerErr
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	items, err := h.Service.List(ctx, ownerID)
 	if err != nil {
 		return ListMenuItemsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list menu items"}
 	}
-	payloads := make([]*posmenuitemv1.MenuItem, len(items))
+	payloads := make([]MenuItemPayload, len(items))
 	for i, item := range items {
-		payloads[i] = toProtoMenuItem(item)
+		payloads[i] = toMenuItemPayload(item)
 	}
 	return ListMenuItemsResponse{Items: payloads}, nil
 }
@@ -83,11 +128,11 @@ func (h *CreateMenuItemHandler) Validate(_ context.Context, req *CreateMenuItemR
 }
 
 func (h *CreateMenuItemHandler) Serve(ctx context.Context, req *CreateMenuItemRequest) (CreateMenuItemResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return CreateMenuItemResponse{}, errorModels.PermissionDeniedServerError()
+	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx, h.Service)
+	if ownerErr != nil {
+		return CreateMenuItemResponse{}, ownerErr
 	}
-	id, err := h.Service.QuickCreate(ctx, device.User.UserID, domain.MenuItemInput{
+	id, err := h.Service.QuickCreate(ctx, ownerID, domain.MenuItemInput{
 		Name:      req.Name,
 		SKU:       req.SKU,
 		SalePrice: req.SalePrice,

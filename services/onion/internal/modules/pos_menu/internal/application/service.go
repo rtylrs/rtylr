@@ -16,6 +16,7 @@ const menuCacheTTL = 5 * time.Minute
 type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error)
 	QuickCreate(ctx context.Context, ownerID int64, input domain.MenuItemInput) (int64, error)
+	BusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
 }
 
 type Service struct {
@@ -49,4 +50,11 @@ func (s *Service) QuickCreate(ctx context.Context, ownerID int64, input domain.M
 	}
 	invalidateMenuScope(ctx, ownerID)
 	return id, nil
+}
+
+func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {
+	if businessID == 0 {
+		return fallbackOwnerID, nil
+	}
+	return s.repo.BusinessOwnerID(ctx, businessID)
 }
