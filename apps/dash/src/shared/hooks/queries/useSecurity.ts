@@ -10,8 +10,8 @@ export const useSecurity = () => {
   return useQuery({
     queryKey: ['security'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/security'));
-      return securityStateSchema.parse(res);
+      const res = await unwrap(safe.get<{ state?: unknown }>('/security'));
+      return securityStateSchema.parse(res?.state ?? res);
     },
   });
 };

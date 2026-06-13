@@ -23,8 +23,11 @@ export const useCreateWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
+      // The create endpoint returns an ack ({ id, message }), not a full webhook;
+      // don't run it through webhookSchema (which threw and made success look
+      // like failure). The ['webhooks'] refetch below surfaces the new row.
       const res = await unwrap(safe.post('/webhooks', payload));
-      return webhookSchema.parse(res);
+      return res as { id: number; message?: string };
     },
     onSuccess: () => {
       toast.success('Webhook created');

@@ -51,13 +51,7 @@ function KpiCard({
 export const KpiRevenue: React.FC = () => {
   const { data: kpis } = useKpis();
   return (
-    <KpiCard
-      label="Revenue today"
-      value={fmt(kpis?.revenueToday)}
-      sub="vs yesterday"
-      icon={DollarSign}
-      color="#4583C4"
-    />
+    <KpiCard label="Revenue" value={fmt(kpis?.revenue)} sub="" icon={DollarSign} color="#4583C4" />
   );
 };
 
@@ -65,9 +59,9 @@ export const KpiOrders: React.FC = () => {
   const { data: kpis } = useKpis();
   return (
     <KpiCard
-      label="Orders today"
-      value={kpis?.ordersToday ?? 0}
-      sub="vs yesterday"
+      label="Orders"
+      value={kpis?.orderCount ?? 0}
+      sub=""
       icon={ShoppingBag}
       color="#8b5cf6"
     />
@@ -77,23 +71,19 @@ export const KpiOrders: React.FC = () => {
 export const KpiTeam: React.FC = () => {
   const { data: kpis } = useKpis();
   return (
-    <KpiCard
-      label="Team"
-      value={`${kpis?.activeStaff ?? 0}/${kpis?.headcount ?? 0}`}
-      sub="on shift"
-      icon={Users}
-      color="#f59e0b"
-    />
+    <KpiCard label="Team" value={kpis?.staffCount ?? 0} sub="staff" icon={Users} color="#f59e0b" />
   );
 };
 
+// Widget key stays 'kpi-invoices' (registry/layout key); shows Customers, since
+// the backend KPI response has no open-invoices figure.
 export const KpiInvoices: React.FC = () => {
   const { data: kpis } = useKpis();
   return (
     <KpiCard
-      label="Open invoices"
-      value={kpis?.openInvoices ?? 0}
-      sub="unpaid"
+      label="Customers"
+      value={kpis?.customerCount ?? 0}
+      sub="total"
       icon={TrendingUp}
       color="#10b981"
     />
