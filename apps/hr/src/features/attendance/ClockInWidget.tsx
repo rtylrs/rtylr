@@ -380,7 +380,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => alert(t('attendance.qrComingSoon'))}
+                onClick={() => toast.info(t('attendance.qrComingSoon'))}
                 icon={<QrCode size={14} />}
               >
                 {t('attendance.clockWidget.clockInQR')}

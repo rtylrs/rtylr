@@ -120,11 +120,23 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                     value={s.status}
                     onChange={(e) => {
                       const newStatus = e.target.value;
-                      if (
-                        s.status === 'hired' &&
-                        newStatus !== 'hired' &&
-                        !confirm(`Move ${s.candidateName} from "hired" back to "${newStatus}"?`)
-                      ) {
+                      if (s.status === 'hired' && newStatus !== 'hired') {
+                        toast.warning(
+                          `Move ${s.candidateName} from "hired" back to "${newStatus}"?`,
+                          {
+                            action: {
+                              label: 'Confirm',
+                              onClick: () =>
+                                update.mutate(
+                                  { id: s.id, status: newStatus },
+                                  {
+                                    onSuccess: () => toast.success('Status updated'),
+                                    onError: () => toast.error("Couldn't update"),
+                                  }
+                                ),
+                            },
+                          }
+                        );
                         return;
                       }
                       update.mutate(

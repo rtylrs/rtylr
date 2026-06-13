@@ -188,9 +188,15 @@ const Schedule: React.FC = () => {
                         key={sh.id}
                         shift={sh}
                         onClick={() => {
-                          if (confirm(`Delete shift for ${sh.staffName}?`)) {
-                            del.mutate(sh.id, { onSuccess: () => toast.success('Shift removed') });
-                          }
+                          toast.warning(`Delete shift for ${sh.staffName}?`, {
+                            action: {
+                              label: 'Delete',
+                              onClick: () =>
+                                del.mutate(sh.id, {
+                                  onSuccess: () => toast.success('Shift removed'),
+                                }),
+                            },
+                          });
                         }}
                       />
                     ))}

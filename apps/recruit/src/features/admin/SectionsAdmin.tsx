@@ -252,12 +252,16 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm('Delete this section?')) {
-                          del.mutate(s.id, {
-                            onSuccess: () => toast.success('Section deleted'),
-                            onError: () => toast.error("Couldn't delete"),
-                          });
-                        }
+                        toast.warning('Delete this section?', {
+                          action: {
+                            label: 'Delete',
+                            onClick: () =>
+                              del.mutate(s.id, {
+                                onSuccess: () => toast.success('Section deleted'),
+                                onError: () => toast.error("Couldn't delete"),
+                              }),
+                          },
+                        });
                       }}
                       className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
                     >

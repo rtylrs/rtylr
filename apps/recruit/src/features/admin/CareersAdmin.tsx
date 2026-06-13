@@ -132,12 +132,16 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                               openCount > 0
                                 ? `Archive "${c.title}"? It has ${openCount} open application(s).`
                                 : `Archive "${c.title}"?`;
-                            if (confirm(message)) {
-                              del.mutate(c.id, {
-                                onSuccess: () => toast.success('Role archived'),
-                                onError: () => toast.error("Couldn't archive"),
-                              });
-                            }
+                            toast.warning(message, {
+                              action: {
+                                label: 'Archive',
+                                onClick: () =>
+                                  del.mutate(c.id, {
+                                    onSuccess: () => toast.success('Role archived'),
+                                    onError: () => toast.error("Couldn't archive"),
+                                  }),
+                              },
+                            });
                           }}
                           title="Archive"
                         >

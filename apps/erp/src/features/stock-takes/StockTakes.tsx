@@ -65,20 +65,21 @@ const StockTakes: React.FC = () => {
 
   const handleComplete = async (id: number, items: CreateStockTakeItemInput[]): Promise<void> => {
     const uncounted = items.filter((item) => item.expectedQty > 0 && !item.countedQty).length;
-    if (
-      uncounted > 0 &&
-      !window.confirm(
-        `You have ${uncounted} uncounted item${uncounted === 1 ? '' : 's'}. Complete anyway?`
-      )
-    ) {
+    const doComplete = async (): Promise<void> => {
+      try {
+        await updateMut.mutateAsync({ id, status: 'completed', items });
+        toast.success('Stock take completed');
+      } catch {
+        toast.error('Failed to complete stock take');
+      }
+    };
+    if (uncounted > 0) {
+      toast.warning(`${uncounted} uncounted item${uncounted === 1 ? '' : 's'}. Complete anyway?`, {
+        action: { label: 'Complete', onClick: () => void doComplete() },
+      });
       return;
     }
-    try {
-      await updateMut.mutateAsync({ id, status: 'completed', items });
-      toast.success('Stock take completed');
-    } catch {
-      toast.error('Failed to complete stock take');
-    }
+    await doComplete();
   };
 
   return (

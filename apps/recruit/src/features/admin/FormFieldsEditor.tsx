@@ -253,8 +253,9 @@ const FormFieldRow: React.FC<{
         <button
           type="button"
           onClick={() => {
-            if (!window.confirm('Remove this field?')) return;
-            onDelete();
+            toast.warning('Remove this field?', {
+              action: { label: 'Remove', onClick: onDelete },
+            });
           }}
           className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
         >
