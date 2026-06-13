@@ -1,37 +1,62 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate, useParams, useRouterState } from '@tanstack/react-router';
+import { useParams, useRouterState } from '@tanstack/react-router';
 import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
-type OrderStatusValue = 'received' | 'preparing' | 'ready' | 'done';
+// The backend returns the internal pos_orders enum, not the FE's display steps.
+type BackendOrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'served'
+  | 'paid'
+  | 'held'
+  | 'cancelled'
+  | 'refunded'
+  | 'voided';
 
 interface OrderStatusResponse {
   order_number: string;
-  status: OrderStatusValue;
+  status: BackendOrderStatus | string;
 }
 
 const POLL_INTERVAL_MS = 30_000;
 
-const STATUS_STEPS: { key: OrderStatusValue; label: string }[] = [
-  { key: 'received', label: 'Received' },
-  { key: 'preparing', label: 'Preparing' },
-  { key: 'ready', label: 'Ready' },
-  { key: 'done', label: 'Done' },
+const STATUS_STEPS: { label: string }[] = [
+  { label: 'Received' },
+  { label: 'Preparing' },
+  { label: 'Ready' },
+  { label: 'Done' },
 ];
 
-const statusIndex = (s: OrderStatusValue): number =>
-  STATUS_STEPS.findIndex((step) => step.key === s);
+// Map each backend status onto one of the 4 display steps.
+const STEP_FOR_STATUS: Record<string, number> = {
+  pending: 0,
+  confirmed: 0,
+  preparing: 1,
+  held: 1,
+  ready: 2,
+  served: 3,
+  paid: 3,
+};
+
+const CANCELLED_STATUSES = new Set(['cancelled', 'refunded', 'voided']);
+
+const stepForStatus = (s: string): number => STEP_FOR_STATUS[s] ?? 0;
+const isCancelled = (s: string | null): boolean => s != null && CANCELLED_STATUSES.has(s);
+const isTerminal = (s: string | null): boolean =>
+  s != null && (isCancelled(s) || stepForStatus(s) === STATUS_STEPS.length - 1);
 
 const OrderStatus = (): React.JSX.Element => {
   const { id } = useParams({ strict: false });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const navigate = useNavigate();
   const { clearCart } = useCartStore();
 
   const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
 
-  const [status, setStatus] = useState<OrderStatusValue | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -43,8 +68,8 @@ const OrderStatus = (): React.JSX.Element => {
       setStatus(res.data.status);
       setFetchError(false);
 
-      // Stop polling when order is done
-      if (res.data.status === 'done' && intervalRef.current) {
+      // Stop polling once the order reaches a terminal state (done/cancelled).
+      if (isTerminal(res.data.status) && intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
@@ -66,7 +91,8 @@ const OrderStatus = (): React.JSX.Element => {
     window.history.back();
   };
 
-  const currentIndex = status != null ? statusIndex(status) : -1;
+  const cancelled = isCancelled(status);
+  const currentIndex = status != null && !cancelled ? stepForStatus(status) : -1;
 
   return (
     <>
@@ -110,14 +136,21 @@ const OrderStatus = (): React.JSX.Element => {
           </h1>
         </div>
 
+        {/* Cancelled / refunded / voided terminal state */}
+        {cancelled && !fetchError && (
+          <p style={{ textAlign: 'center', fontSize: '18px', fontWeight: 700, color: '#dc2626' }}>
+            {status === 'refunded' ? 'Order refunded' : 'Order cancelled'}
+          </p>
+        )}
+
         {/* Progress bar */}
-        {status != null && !fetchError && (
+        {status != null && !fetchError && !cancelled && (
           <div style={{ width: '100%' }}>
             {/* Step labels */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               {STATUS_STEPS.map((step, i) => (
                 <span
-                  key={step.key}
+                  key={step.label}
                   style={{
                     fontSize: '12px',
                     fontWeight: i <= currentIndex ? 700 : 400,
@@ -156,13 +189,13 @@ const OrderStatus = (): React.JSX.Element => {
                 marginTop: 16,
                 fontSize: '18px',
                 fontWeight: 700,
-                color: status === 'done' ? '#16a34a' : 'rgba(0,0,0,0.8)',
+                color: currentIndex === STATUS_STEPS.length - 1 ? '#16a34a' : 'rgba(0,0,0,0.8)',
               }}
             >
-              {status === 'received' && 'Order received!'}
-              {status === 'preparing' && 'Being prepared...'}
-              {status === 'ready' && 'Ready for pickup!'}
-              {status === 'done' && 'Order complete!'}
+              {currentIndex === 0 && 'Order received!'}
+              {currentIndex === 1 && 'Being prepared...'}
+              {currentIndex === 2 && 'Ready for pickup!'}
+              {currentIndex === 3 && 'Order complete!'}
             </p>
           </div>
         )}
@@ -196,7 +229,7 @@ const OrderStatus = (): React.JSX.Element => {
         )}
 
         {/* Poll notice */}
-        {status !== 'done' && (
+        {!isTerminal(status) && !fetchError && (
           <p
             style={{
               fontSize: '12px',

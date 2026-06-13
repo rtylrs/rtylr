@@ -29,7 +29,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     isLoading: menuLoading,
     isError: menuError,
   } = usePublicMenu(businessId, location?.id ?? null);
-  const { clearCart, setBusinessId, addItem } = useCartStore();
+  const { clearCart, setBusinessId, addItem, updateQuantity } = useCartStore();
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];
@@ -83,14 +83,19 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       <GridLayout
         business={businessInfo}
         categories={categories}
+        enableCart={onlineOrderingEnabled}
         onCheckout={
           onlineOrderingEnabled
             ? (cartItems) => {
                 clearCart();
                 setBusinessId(biz.business.id);
-                cartItems.forEach((item) =>
-                  addItem({ menuItemId: Number(item.id), name: item.name, unitPrice: item.price })
-                );
+                cartItems.forEach((item) => {
+                  const menuItemId = Number(item.id);
+                  addItem({ menuItemId, name: item.name, unitPrice: item.price });
+                  // addItem seeds quantity 1; carry the real line quantity over.
+                  const qty = Number(item.quantity);
+                  if (Number.isFinite(qty) && qty > 1) updateQuantity(menuItemId, qty);
+                });
                 void navigate({ to: '/checkout' });
               }
             : undefined
