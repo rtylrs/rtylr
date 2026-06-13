@@ -1,31 +1,68 @@
 import { unwrap } from '@voxire/api';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import PaymentMethodTile from '../../shared/components/PaymentMethodTile';
 import TipSelector from '../../shared/components/TipSelector';
 import { formatCurrency } from '../../shared/utils/format';
-import { useCartStore } from '../../shared/stores/cartStore';
-import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
 import { posService } from '../../shared/services/api/posService';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
 
+interface OrderTotals {
+  subtotal: number;
+  tax: number;
+  total: number;
+}
+
 const MultiPaymentScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const subtotal = useCartStore((s) => s.total());
-  const clear = useCartStore((s) => s.clearCart);
-  const taxRate = useSettingsStore((s) => s.taxRate);
-  const tax = subtotal * taxRate;
+  // MultiPayment pays a PERSISTED order (route /payment/:orderId), so totals
+  // come from that order — never the live cart, which is unrelated.
+  const [order, setOrder] = useState<OrderTotals | null>(null);
+  const [loadingOrder, setLoadingOrder] = useState(true);
   const [tip, setTip] = useState(0);
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
   const [method, setMethod] = useState<PaymentMethod>('cash');
   const [amount, setAmount] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const total = subtotal + tax + tip;
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const id = Number(orderId);
+      if (!Number.isInteger(id) || id <= 0) {
+        if (active) setLoadingOrder(false);
+        return;
+      }
+      try {
+        const res = await unwrap(posService.getOrder(id));
+        const o = ((res as { order?: Record<string, unknown> })?.order ??
+          res) as Record<string, unknown>;
+        if (active) {
+          setOrder({
+            subtotal: Number(o.subtotal ?? 0),
+            tax: Number(o.taxAmount ?? o.tax ?? 0),
+            total: Number(o.total ?? 0),
+          });
+        }
+      } catch {
+        if (active) toast.error('Could not load the order to charge');
+      } finally {
+        if (active) setLoadingOrder(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [orderId]);
+
+  const subtotal = order?.subtotal ?? 0;
+  const tax = order?.tax ?? 0;
+  const total = (order?.total ?? 0) + tip;
   const paid = payments.reduce((sum, p) => sum + p.amount, 0);
   const remaining = useMemo(() => Math.max(0, total - paid), [total, paid]);
 
@@ -63,7 +100,6 @@ const MultiPaymentScreen: React.FC = () => {
         },
       });
       toast.success('Payment complete');
-      clear();
       navigate('/receipts');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
@@ -72,8 +108,28 @@ const MultiPaymentScreen: React.FC = () => {
     }
   };
 
+  if (loadingOrder) {
+    return (
+      <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? ''}`}>
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-7 h-7 animate-spin text-pos-muted" />
+        </div>
+      </ScreenLayout>
+    );
+  }
+
+  if (!order) {
+    return (
+      <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? ''}`}>
+        <p className="p-5 text-sm text-pos-muted">
+          Couldn't load this order. Go back and reopen it from the order list.
+        </p>
+      </ScreenLayout>
+    );
+  }
+
   return (
-    <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? 'current'}`}>
+    <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? ''}`}>
       <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-6xl">
         <div className="space-y-5">
           <div className="rounded-xl bg-pos-card border border-pos-border p-4">
