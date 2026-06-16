@@ -2,6 +2,8 @@ import React from 'react';
 import { Moon, Power, Sun } from 'lucide-react';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
+import { useUserStore, businessDisplayName } from '../../shared/stores/userStore';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
 
 interface POSLayoutProps {
@@ -11,7 +13,9 @@ interface POSLayoutProps {
 const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
   const { theme, toggleTheme } = useThemeStore();
   const endSession = useEmployeeSessionStore((s) => s.endSession);
-  const employee = useEmployeeSessionStore((s) => s.employee);
+  const businessProfile = useUserStore((s) => s.businessProfile);
+  const fallbackBusinessName = useSettingsStore((s) => s.business.name);
+  const businessName = businessDisplayName(businessProfile) ?? fallbackBusinessName;
 
   return (
     <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>
@@ -20,7 +24,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
           <RtylrWordmark className="text-xl" />
         </div>
         <div className="flex items-center gap-1">
-          {employee && <span className="text-xs text-pos-muted mr-2">{employee.name}</span>}
+          {businessName && <span className="text-xs text-pos-muted mr-2">{businessName}</span>}
           <button
             className="w-8 h-8 flex items-center justify-center rounded-lg text-pos-muted hover:bg-white/8 transition-colors"
             onClick={toggleTheme}

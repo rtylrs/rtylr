@@ -4,7 +4,13 @@ import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
-import { useUserStore, useEmployeeSessionStore, useCartStore, useTerminalContextStore } from './shared/stores';
+import {
+  useUserStore,
+  useEmployeeSessionStore,
+  useCartStore,
+  useTerminalContextStore,
+  useSettingsStore,
+} from './shared/stores';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
 import CommandPalette from './shared/components/CommandPalette';
@@ -15,6 +21,11 @@ import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueu
 import { reportReactError } from './shared/services/observability/appErrors';
 import { useTerminalHeartbeat } from './shared/services/terminal/useTerminalHeartbeat';
 import { buildCartContext } from './shared/services/terminal/cartContext';
+import {
+  businessAddress,
+  businessContactPhone,
+  businessDisplayName,
+} from './shared/stores/userStore';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie
@@ -49,8 +60,10 @@ const AppInner = (): React.JSX.Element => {
 
 const AppShell = (): React.JSX.Element => {
   const { token, setToken, getUserInfo } = useUserStore();
+  const businessProfile = useUserStore((s) => s.businessProfile);
   const { isActive, employee, endSession } = useEmployeeSessionStore();
   const setContext = useCartStore((s) => s.setContext);
+  const setBusiness = useSettingsStore((s) => s.setBusiness);
   const { locationId, terminalId, setTerminalContext } = useTerminalContextStore();
   const hasRestoredSession = useRef(false);
 
@@ -70,6 +83,17 @@ const AppShell = (): React.JSX.Element => {
       },
     });
   }, [getUserInfo, setToken, token]);
+
+  useEffect(() => {
+    const name = businessDisplayName(businessProfile);
+    if (!name) return;
+
+    setBusiness({
+      name,
+      address: businessAddress(businessProfile) ?? '',
+      phone: businessContactPhone(businessProfile) ?? '',
+    });
+  }, [businessProfile, setBusiness]);
 
   useEffect(() => {
     if (!locationId || !terminalId || !isActive || !employee) return;
