@@ -31,6 +31,38 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 		return profile, errors.New("ownerID must be non-zero")
 	}
 
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT
+			b.id,
+			b.name,
+			COALESCE(NULLIF(c.site_name, ''), b.name) AS site_name,
+			COALESCE(NULLIF(c.logo_url, ''), COALESCE(b.logo_url, '')) AS logo_url,
+			COALESCE(c.contact_email, '') AS contact_email,
+			COALESCE(c.contact_number, '') AS contact_number,
+			COALESCE(b.currency, 'USD') AS currency,
+			COALESCE(b.timezone, 'UTC') AS timezone
+		FROM businesses b
+		LEFT JOIN config c ON c.owner_id = b.owner_id
+		WHERE (b.id = ? OR b.owner_id = ?) AND b.is_active = TRUE
+		ORDER BY b.id ASC
+		LIMIT 1
+	`, ownerID, ownerID).Scan(
+		&profile.ID,
+		&profile.Name,
+		&profile.SiteName,
+		&profile.LogoURL,
+		&profile.ContactEmail,
+		&profile.ContactPhone,
+		&profile.Currency,
+		&profile.Timezone,
+	); err == nil {
+		profile.Plan = "free"
+		return profile, nil
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
+		return profile, err
+	}
+
 	row, err := r.queries.GetBusinessProfile(ctx, int32(ownerID))
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
@@ -38,6 +70,7 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 	}
 
 	profile.ID = ownerID
+	profile.Name = row.SiteName
 	profile.SiteName = row.SiteName
 	profile.LogoURL = row.LogoUrl
 	profile.ContactEmail = row.ContactEmail

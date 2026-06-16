@@ -18,6 +18,7 @@ type (
 
 type GetProfileResponse struct {
 	ID           int64  `json:"id"`
+	Name         string `json:"name"`
 	SiteName     string `json:"site_name"`
 	LogoURL      string `json:"logo_url"`
 	ContactEmail string `json:"contact_email"`
@@ -34,7 +35,12 @@ func (h *GetProfileHandler) Serve(ctx context.Context, _ *GetProfileRequest) (Ge
 		return GetProfileResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	profile, err := h.Service.GetProfile(ctx, device.User.UserID)
+	profileScopeID := device.User.BusinessID
+	if profileScopeID == 0 {
+		profileScopeID = device.User.UserID
+	}
+
+	profile, err := h.Service.GetProfile(ctx, profileScopeID)
 	if err != nil {
 		return GetProfileResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -45,6 +51,7 @@ func (h *GetProfileHandler) Serve(ctx context.Context, _ *GetProfileRequest) (Ge
 
 	return GetProfileResponse{
 		ID:           profile.ID,
+		Name:         profile.Name,
 		SiteName:     profile.SiteName,
 		LogoURL:      profile.LogoURL,
 		ContactEmail: profile.ContactEmail,

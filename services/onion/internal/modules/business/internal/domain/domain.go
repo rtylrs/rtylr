@@ -2,6 +2,7 @@ package domain
 
 type BusinessProfile struct {
 	ID           int64  `json:"id"`
+	Name         string `json:"name"`
 	SiteName     string `json:"site_name"`
 	LogoURL      string `json:"logo_url"`
 	ContactEmail string `json:"contact_email"`
