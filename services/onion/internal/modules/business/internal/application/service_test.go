@@ -39,6 +39,18 @@ func (m *mockRepo) UpdateSlug(_ context.Context, ownerID int64, slug string) err
 	return m.err
 }
 
+func (m *mockRepo) ListUserBusinesses(_ context.Context, _ int64) ([]domain.OwnedBusiness, error) {
+	return nil, m.err
+}
+
+func (m *mockRepo) CreateSubBusiness(_ context.Context, _ string, _, _ int64) (int64, error) {
+	return 0, m.err
+}
+
+func (m *mockRepo) CheckSubBusinessOwnership(_ context.Context, _, _ int64) (bool, error) {
+	return false, m.err
+}
+
 func TestGetProfile_Delegates(t *testing.T) {
 	want := domain.BusinessProfile{SiteName: "Acme", Currency: "USD"}
 	m := &mockRepo{profile: want}

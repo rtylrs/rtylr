@@ -32,4 +32,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.BusinessSlugRoutes(),
 		&handlers.SetSlugHandler{Service: service},
 	)
+
+	serverHttp.RegisterGET[handlers.ListMyBusinessesRequest, handlers.ListMyBusinessesResponse](
+		ctx, router, handlers.ListMyBusinessesRoutes(),
+		&handlers.ListMyBusinessesHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateSubBusinessRequest, handlers.CreateSubBusinessResponse](
+		ctx, router, handlers.CreateSubBusinessRoutes(),
+		&handlers.CreateSubBusinessHandler{Service: service},
+	)
 }

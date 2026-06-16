@@ -35,3 +35,11 @@ type SlugLookupResult struct {
 	Business  PublicBusiness   `json:"business"`
 	Locations []PublicLocation `json:"locations"`
 }
+
+type OwnedBusiness struct {
+	ID       int64
+	Name     string
+	LogoURL  string
+	ParentID int64
+	IsActive bool
+}

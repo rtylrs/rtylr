@@ -172,3 +172,85 @@ func (r *Repository) UpdateSlug(ctx context.Context, businessID int64, slug stri
 	_, err = r.db.ExecContext(ctx, q, args...)
 	return err
 }
+
+// ListUserBusinesses returns all businesses the user owns (businesses.owner_id = userID)
+// or has explicit access to via user_business_access.
+func (r *Repository) ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error) {
+	// cross-schema read from user_business_access — multi-business ownership
+	q, args, err := sq.Select(
+		"b.id", "b.name", "COALESCE(b.logo_url, '')", "COALESCE(b.parent_id, 0)", "b.is_active",
+	).
+		From("businesses b").
+		Where(sq.Or{
+			sq.Eq{"b.owner_id": userID},
+			sq.Expr("EXISTS (SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = b.id)", userID),
+		}).
+		Where(sq.Eq{"b.is_active": true}).
+		OrderBy("b.id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var result []domain.OwnedBusiness
+	for rows.Next() {
+		var b domain.OwnedBusiness
+		if err := rows.Scan(&b.ID, &b.Name, &b.LogoURL, &b.ParentID, &b.IsActive); err != nil {
+			return nil, err
+		}
+		result = append(result, b)
+	}
+	return result, rows.Err()
+}
+
+// CreateSubBusiness creates a new child business and grants the owner access to it.
+func (r *Repository) CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	res, err := tx.ExecContext(ctx, `INSERT INTO businesses (name, owner_id, parent_id) VALUES (?, ?, ?)`,
+		name, ownerUserID, parentBusinessID)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	businessID, err := res.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	// cross-schema write to user_business_access — grant owner access to the new sub-business
+	_, err = tx.ExecContext(ctx, `INSERT INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner')`,
+		ownerUserID, businessID)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	return businessID, tx.Commit()
+}
+
+// CheckSubBusinessOwnership validates that parentBusinessID is owned by ownerUserID.
+func (r *Repository) CheckSubBusinessOwnership(ctx context.Context, ownerUserID, parentBusinessID int64) (bool, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM businesses WHERE id = ? AND owner_id = ? AND is_active = TRUE`,
+		parentBusinessID, ownerUserID).Scan(&count)
+	return count > 0, err
+}

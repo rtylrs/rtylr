@@ -3,6 +3,8 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/business/internal/domain"
@@ -18,6 +20,9 @@ type repository interface {
 	GetPublicBusiness(ctx context.Context, businessID int64) (domain.PublicBusiness, error)
 	LookupBySlug(ctx context.Context, slug string) (domain.SlugLookupResult, error)
 	UpdateSlug(ctx context.Context, businessID int64, slug string) error
+	ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error)
+	CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error)
+	CheckSubBusinessOwnership(ctx context.Context, ownerUserID, parentBusinessID int64) (bool, error)
 }
 
 type Service struct {
@@ -57,4 +62,26 @@ func (s *Service) UpdateSlug(ctx context.Context, businessID int64, slug string)
 		cache.Delete(ctx, []string{cacheKeys.BusinessConfig(businessID)})
 	}
 	return nil
+}
+
+func (s *Service) ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error) {
+	return s.repo.ListUserBusinesses(ctx, userID)
+}
+
+var ErrSubBusinessNotOwned = errors.New("parent business not found or not owned by user")
+var ErrSubBusinessNameEmpty = errors.New("business name is required")
+
+func (s *Service) CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return 0, ErrSubBusinessNameEmpty
+	}
+	ok, err := s.repo.CheckSubBusinessOwnership(ctx, ownerUserID, parentBusinessID)
+	if err != nil {
+		return 0, err
+	}
+	if !ok {
+		return 0, ErrSubBusinessNotOwned
+	}
+	return s.repo.CreateSubBusiness(ctx, name, ownerUserID, parentBusinessID)
 }

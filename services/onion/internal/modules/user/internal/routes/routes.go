@@ -112,6 +112,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		handlers.PasswordResetConfirmRoutes(),
 		&handlers.PasswordResetConfirmHandler{UserService: userService},
 	)
+
+	http.RegisterPOSTWithValidation[handlers.SwitchBusinessRequest, handlers.SwitchBusinessResponse](
+		ctx,
+		router,
+		handlers.SwitchBusinessRoutes(),
+		&handlers.SwitchBusinessHandler{UserService: userService},
+	)
 	http.RegisterGET[handlers.VerifyEmailRequest, handlers.VerifyEmailResponse](
 		ctx,
 		router,

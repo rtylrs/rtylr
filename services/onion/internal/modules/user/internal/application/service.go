@@ -32,10 +32,11 @@ func invalidateUserScope(ctx context.Context, userID int64) {
 }
 
 var (
-	ErrInvalidCredentials = infrastructure.ErrInvalidCredentials
-	ErrUserAlreadyExists  = infrastructure.ErrUserAlreadyExists
-	ErrWeakPassword       = infrastructure.ErrWeakPassword
-	ErrInvalidEmail       = infrastructure.ErrInvalidEmail
+	ErrInvalidCredentials  = infrastructure.ErrInvalidCredentials
+	ErrUserAlreadyExists   = infrastructure.ErrUserAlreadyExists
+	ErrWeakPassword        = infrastructure.ErrWeakPassword
+	ErrInvalidEmail        = infrastructure.ErrInvalidEmail
+	ErrBusinessAccessDenied = errors.New("business access denied")
 )
 
 type Service struct {
@@ -377,4 +378,23 @@ func (s *Service) RecordLogin(ctx context.Context, userID int64, email, method, 
 
 func (s *Service) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
 	return s.repo.AssignSubscription(ctx, ownerID, planSlug)
+}
+
+// SwitchBusiness validates the user's access to businessID and issues
+// a new JWT scoped to that business.
+func (s *Service) SwitchBusiness(ctx context.Context, userID, businessID int64) (string, error) {
+	hasAccess, err := s.repo.CheckBusinessAccess(ctx, userID, businessID)
+	if err != nil {
+		return "", err
+	}
+	if !hasAccess {
+		return "", ErrBusinessAccessDenied
+	}
+
+	claims := &AccessTokenClaims{
+		UserID:     userID,
+		BusinessID: businessID,
+	}
+	s.hydrateAccessTokenClaims(ctx, claims)
+	return s.JWT.CreateJWT(claims)
 }
