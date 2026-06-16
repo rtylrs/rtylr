@@ -26,12 +26,12 @@ const config: Omit<Config, 'content'> = {
         },
         // POS
         pos: {
-          bg: '#111111',
-          card: '#1e1e1e',
-          border: 'rgba(255,255,255,0.06)',
-          muted: 'rgba(240,240,238,0.45)',
-          text: '#f0f0ee',
-          input: 'rgba(255,255,255,0.06)',
+          bg: 'var(--pos-bg)',
+          card: 'var(--pos-card)',
+          border: 'var(--pos-border)',
+          muted: 'var(--pos-muted)',
+          text: 'var(--pos-text)',
+          input: 'var(--pos-input)',
         },
         // Semantic
         destructive: {
