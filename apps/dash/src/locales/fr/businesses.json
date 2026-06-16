@@ -1,0 +1,14 @@
+{
+  "businesses": {
+    "switchBusiness": "Changer d'entreprise",
+    "addBusiness": "Ajouter une entreprise",
+    "myBusinesses": "Mes entreprises",
+    "createSubBusiness": "Créer une entreprise",
+    "businessName": "Nom de l'entreprise",
+    "creating": "Création en cours...",
+    "switchSuccess": "Basculé vers {{name}}",
+    "switchError": "Échec du changement d'entreprise",
+    "createError": "Échec de la création de l'entreprise",
+    "parentRequired": "L'entreprise parente est requise"
+  }
+}

@@ -48,6 +48,7 @@ import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
+import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 
 interface NavItem {
   label: string;
@@ -351,6 +352,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     : 'brightness(0)',
               }}
             />
+          </div>
+
+          {/* Business switcher — only visible when user has multiple businesses */}
+          <div className="px-2 py-1.5" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+            <BusinessSwitcher />
           </div>
 
           {/* Navigation */}
