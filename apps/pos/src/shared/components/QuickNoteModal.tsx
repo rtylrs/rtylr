@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface QuickNoteModalProps {
   open: boolean;
@@ -8,8 +8,6 @@ interface QuickNoteModalProps {
   onCancel: () => void;
 }
 
-const QUICK_CHIPS = ['No onions', 'Extra spicy', 'Gluten free', 'Allergy', 'To go', 'Rush'];
-
 const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
   open,
   initialValue = '',
@@ -18,6 +16,13 @@ const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
   onCancel,
 }) => {
   const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    if (open) {
+      setValue(initialValue);
+    }
+  }, [initialValue, open]);
+
   if (!open) return null;
   return (
     <div
@@ -27,17 +32,6 @@ const QuickNoteModal: React.FC<QuickNoteModalProps> = ({
     >
       <div className="w-full max-w-md rounded-2xl bg-pos-card border border-pos-border p-5 space-y-4">
         <h2 className="text-lg font-bold text-pos-text">{title}</h2>
-        <div className="flex flex-wrap gap-2">
-          {QUICK_CHIPS.map((chip) => (
-            <button
-              key={chip}
-              onClick={() => setValue((v) => (v ? `${v}, ${chip}` : chip))}
-              className="px-3 h-9 rounded-full bg-white/8 text-xs font-semibold text-pos-text hover:bg-white/14"
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
         <textarea
           rows={4}
           value={value}
