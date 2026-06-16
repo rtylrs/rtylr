@@ -8,6 +8,36 @@
  * auto content scanner in monorepo setups. */
 @source '../packages/**/*.{ts,tsx}';
 
+@theme inline {
+  --color-pos-bg: var(--pos-bg);
+  --color-pos-card: var(--pos-card);
+  --color-pos-border: var(--pos-border);
+  --color-pos-muted: var(--pos-muted);
+  --color-pos-text: var(--pos-text);
+  --color-pos-input: var(--pos-input);
+}
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --pos-bg: #151515;
+  --pos-card: #1c1b1a;
+  --pos-border: rgba(232, 230, 225, 0.12);
+  --pos-muted: rgba(232, 230, 225, 0.6);
+  --pos-text: #e8e6e1;
+  --pos-input: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --pos-bg: #f6f4ef;
+  --pos-card: #ffffff;
+  --pos-border: rgba(10, 10, 10, 0.12);
+  --pos-muted: rgba(10, 10, 10, 0.6);
+  --pos-text: #0a0a0a;
+  --pos-input: rgba(10, 10, 10, 0.06);
+}
+
 @layer base {
   *,
   *::before,
@@ -20,7 +50,7 @@
   body {
     margin: 0;
     padding: 0;
-    background: #111;
-    color: #f0f0ee;
+    background: var(--pos-bg);
+    color: var(--pos-text);
   }
 }
