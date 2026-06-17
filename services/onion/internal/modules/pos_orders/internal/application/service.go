@@ -10,8 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
-	settingsapp "github.com/voxire/onion/internal/modules/pos_settings/internal/application"
-	settingsdomain "github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_settings"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -41,18 +40,18 @@ type PaddlePaymentResult struct {
 
 type Service struct {
 	repo     *infrastructure.Repository
-	settings *settingsapp.Service
+	settings *pos_settings.Service
 }
 
 func NewService(ctx context.Context, db *sql.DB) *Service {
 	return &Service{
 		repo:     infrastructure.NewRepository(db),
-		settings: settingsapp.NewService(ctx, db),
+		settings: pos_settings.NewService(ctx, db),
 	}
 }
 
 func defaultOrderTypeForProfile(profile string) domain.OrderType {
-	if profile == settingsdomain.ProfileRestaurant {
+	if profile == pos_settings.ProfileRestaurant {
 		return domain.OrderTypeDineIn
 	}
 	return domain.OrderTypeTakeaway
