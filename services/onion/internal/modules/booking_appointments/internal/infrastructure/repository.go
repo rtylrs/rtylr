@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -64,7 +65,27 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 		logger.Ctx(ctx).Error("Failed to parse end_time", logger.Error(err))
 		return 0, err
 	}
-	result, err := r.queries.CreateAppointment(ctx, sqlc.CreateAppointmentParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin appointment transaction", logger.Error(err))
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+		Phone: input.CustomerPhone,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync appointment customer", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.queries.WithTx(tx).CreateAppointment(ctx, sqlc.CreateAppointmentParams{
 		OwnerID:       ownerID,
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		ResourceID:    sql.NullInt64{Int64: input.ResourceID, Valid: input.ResourceID != 0},
@@ -85,6 +106,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 		logger.Ctx(ctx).Error("Failed to retrieve last insert ID for appointment", logger.Error(err))
 		return 0, err
 	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit appointment transaction", logger.Error(err))
+		return 0, err
+	}
 	return id, nil
 }
 
@@ -99,7 +124,27 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		logger.Ctx(ctx).Error("Failed to parse end_time", logger.Error(err))
 		return err
 	}
-	err = r.queries.UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin appointment update transaction", logger.Error(err))
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+		Phone: input.CustomerPhone,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync appointment customer", logger.Error(err))
+		return err
+	}
+
+	err = r.queries.WithTx(tx).UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		ResourceID:    sql.NullInt64{Int64: input.ResourceID, Valid: input.ResourceID != 0},
 		StaffID:       sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
@@ -113,6 +158,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update appointment", logger.Error(err))
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit appointment update transaction", logger.Error(err))
 		return err
 	}
 	return nil

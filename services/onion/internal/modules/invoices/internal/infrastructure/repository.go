@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -110,7 +111,26 @@ func (r *Repository) GetInvoiceByID(ctx context.Context, ownerID, invoiceID int6
 }
 
 func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) (int64, error) {
-	result, err := r.queries.CreateInvoice(ctx, sqlc.CreateInvoiceParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin invoice transaction", logger.Error(err))
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  inv.ClientName,
+		Email: inv.ClientEmail,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync invoice customer", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.queries.WithTx(tx).CreateInvoice(ctx, sqlc.CreateInvoiceParams{
 		OwnerID:        ownerID,
 		InvoiceNumber:  inv.InvoiceNumber,
 		ClientName:     inv.ClientName,
@@ -143,6 +163,11 @@ func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domai
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to read created invoice ID", logger.Error(err))
 
+		return 0, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit invoice transaction", logger.Error(err))
 		return 0, err
 	}
 
@@ -218,7 +243,26 @@ func (r *Repository) DeleteInvoiceItems(ctx context.Context, invoiceID int64) er
 }
 
 func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) error {
-	err := r.queries.UpdateInvoice(ctx, sqlc.UpdateInvoiceParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin invoice update transaction", logger.Error(err))
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  inv.ClientName,
+		Email: inv.ClientEmail,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync invoice customer", logger.Error(err))
+		return err
+	}
+
+	err = r.queries.WithTx(tx).UpdateInvoice(ctx, sqlc.UpdateInvoiceParams{
 		ClientName:     inv.ClientName,
 		ClientEmail:    sqlNullString(inv.ClientEmail),
 		ClientAddress:  sqlNullString(inv.ClientAddress),
@@ -241,9 +285,15 @@ func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domai
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice", logger.Error(err))
+		return err
 	}
 
-	return err
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit invoice update transaction", logger.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func (r *Repository) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error {

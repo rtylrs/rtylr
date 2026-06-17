@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -54,7 +55,27 @@ func (r *Repository) ServiceBelongsToOwner(ctx context.Context, ownerID, service
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.WaitlistInput) (int64, error) {
-	result, err := r.queries.CreateWaitlistEntry(ctx, sqlc.CreateWaitlistEntryParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin waitlist transaction", logger.Error(err))
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+		Phone: input.CustomerPhone,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync waitlist customer", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.queries.WithTx(tx).CreateWaitlistEntry(ctx, sqlc.CreateWaitlistEntryParams{
 		OwnerID:       ownerID,
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		CustomerName:  sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
@@ -76,11 +97,35 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Wai
 		)
 		return 0, err
 	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit waitlist transaction", logger.Error(err))
+		return 0, err
+	}
 	return id, nil
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.WaitlistInput) error {
-	err := r.queries.UpdateWaitlistEntry(ctx, sqlc.UpdateWaitlistEntryParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin waitlist update transaction", logger.Error(err))
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+		Phone: input.CustomerPhone,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync waitlist customer", logger.Error(err))
+		return err
+	}
+
+	err = r.queries.WithTx(tx).UpdateWaitlistEntry(ctx, sqlc.UpdateWaitlistEntryParams{
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		CustomerName:  sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
@@ -93,6 +138,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update waitlist entry", logger.Error(err))
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit waitlist update transaction", logger.Error(err))
 		return err
 	}
 	return nil

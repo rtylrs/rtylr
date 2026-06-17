@@ -6,16 +6,19 @@ import (
 
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
 	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 
@@ -85,6 +88,30 @@ func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (*domain
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int64, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin support ticket transaction", logger.Error(err))
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, input.BusinessID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync support customer to CRM", logger.Error(err))
+		return 0, err
+	}
+
+	if err = upsertSupportCustomer(ctx, tx, input.BusinessID, input.CustomerName, input.CustomerEmail); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync support customer summary", logger.Error(err))
+		return 0, err
+	}
+
 	params := sqlc.CreateTicketParams{
 		BusinessID:    input.BusinessID,
 		CustomerName:  input.CustomerName,
@@ -103,12 +130,57 @@ func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int6
 	if input.Channel != "" {
 		params.Channel = sql.NullString{String: input.Channel, Valid: true}
 	}
-	result, err := r.queries.CreateTicket(ctx, params)
+	result, err := r.queries.WithTx(tx).CreateTicket(ctx, params)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create support ticket", logger.Error(err))
 		return 0, err
 	}
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit support ticket transaction", logger.Error(err))
+		return 0, err
+	}
+	return id, nil
+}
+
+func upsertSupportCustomer(ctx context.Context, tx *sql.Tx, businessID int64, name, email string) error {
+	var customerID int64
+	err := tx.QueryRowContext(ctx,
+		`SELECT id FROM support_customers
+		 WHERE business_id = ? AND LOWER(email) = LOWER(?)
+		 LIMIT 1`,
+		businessID, email,
+	).Scan(&customerID)
+	if err == sql.ErrNoRows {
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO support_customers
+			 (business_id, name, email, total_tickets, last_ticket_at)
+			 VALUES (?, ?, ?, 1, NOW())`,
+			businessID,
+			name,
+			sql.NullString{String: email, Valid: email != ""},
+		)
+		return err
+	}
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE support_customers
+		 SET name = CASE WHEN ? <> '' THEN ? ELSE name END,
+		     email = CASE WHEN ? <> '' THEN ? ELSE email END,
+		     total_tickets = total_tickets + 1,
+		     last_ticket_at = NOW()
+		 WHERE business_id = ? AND id = ?`,
+		name, name,
+		email, email,
+		businessID, customerID,
+	)
+	return err
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TicketUpdateInput) error {

@@ -597,7 +597,7 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		items = append(items, item)
 	}
 
-	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerPhone, input.Notes, items)
+	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerEmail, input.CustomerPhone, input.Notes, items)
 	if err != nil {
 		return 0, "", fmt.Errorf("create public order: %w", err)
 	}

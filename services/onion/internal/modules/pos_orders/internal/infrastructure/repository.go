@@ -13,6 +13,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
@@ -1432,7 +1433,7 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, ownerID, menuItemID 
 	return item, nil
 }
 
-func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
+func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, orderNumber, customerName, customerEmail, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
@@ -1450,14 +1451,26 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, order
 		subtotal += item.UnitPrice * item.Quantity
 	}
 
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:       customerName,
+		Email:      customerEmail,
+		Phone:      customerPhone,
+		TotalSpent: subtotal,
+		CountVisit: true,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to sync public order customer", logger.Error(err))
+		return 0, err
+	}
+
 	orderQuery, orderArgs, err := sq.
 		Insert("pos_orders").
 		Columns(
-			"owner_id", "order_number", "type", "status", "customer_name", "customer_phone",
+			"owner_id", "order_number", "type", "status", "customer_id", "customer_name", "customer_phone",
 			"subtotal", "total", "payment_status", "notes", "created_at", "updated_at",
 		).
 		Values(
-			ownerID, orderNumber, "online", "pending", nullableString(customerName), nullableString(customerPhone),
+			ownerID, orderNumber, "online", "pending", nullableInt64(customerID), nullableString(customerName), nullableString(customerPhone),
 			floatToDecimal(subtotal), floatToDecimal(subtotal), "unpaid", nullableString(notes), sq.Expr("NOW()"), sq.Expr("NOW()"),
 		).
 		PlaceholderFormat(sq.Question).
