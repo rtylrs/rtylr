@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -202,6 +203,7 @@ func roleForAccess(access *infrastructure.LocationAccess) domain.POSUserRole {
 }
 
 func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int64, pin string) (*domain.VerifiedPOSUser, error) {
+	pin = strings.TrimSpace(pin)
 	if locationID <= 0 || userID <= 0 || pin == "" {
 		return nil, domain.ErrInvalidPIN
 	}
@@ -214,8 +216,11 @@ func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int
 		return nil, err
 	}
 
-	if user.PINHash == "" || !passwordutils.CheckPINHash(pin, user.PINHash) {
-		return nil, domain.ErrInvalidPIN
+	if err := s.verifyAndMigratePIN(ctx, ownerID, user, pin); err != nil {
+		if errors.Is(err, domain.ErrInvalidPIN) {
+			return nil, domain.ErrInvalidPIN
+		}
+		return nil, err
 	}
 
 	return &domain.VerifiedPOSUser{
@@ -232,6 +237,35 @@ func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int
 			MaxDiscountPct:   user.MaxDiscountPct,
 		},
 	}, nil
+}
+
+func (s *Service) verifyAndMigratePIN(ctx context.Context, ownerID int64, user *domain.POSUser, pin string) error {
+	hashMatches := user.PINHash != "" && passwordutils.CheckPINHash(pin, user.PINHash)
+	legacyPIN := strings.TrimSpace(user.PIN)
+	legacyMatches := legacyPIN != "" && subtle.ConstantTimeCompare([]byte(legacyPIN), []byte(pin)) == 1
+
+	if !hashMatches && !legacyMatches {
+		return domain.ErrInvalidPIN
+	}
+
+	// Live rows created before hashed PINs may still have plaintext in the
+	// legacy column. Accept the matching PIN once and clear it immediately.
+	if legacyPIN != "" {
+		hash := user.PINHash
+		if !hashMatches {
+			var err error
+			hash, err = passwordutils.HashPIN(pin)
+			if err != nil {
+				return err
+			}
+		}
+		if err := s.repo.UpdatePINHash(ctx, ownerID, user.ID, hash); err != nil {
+			return err
+		}
+		invalidatePosUsersScope(ctx, ownerID)
+	}
+
+	return nil
 }
 
 func scrubSecrets(users []domain.POSUser) []domain.POSUser {
