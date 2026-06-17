@@ -19,6 +19,18 @@ describe('posService', () => {
     vi.clearAllMocks();
   });
 
+  // Settings
+  it('getPOSSettings calls GET /pos/settings', () => {
+    posService.getPOSSettings();
+    expect(safe.get).toHaveBeenCalledWith('/pos/settings');
+  });
+
+  it('updatePOSSettings calls PUT /pos/settings', () => {
+    const data = { business_profile: 'retail' as const, theme: 'dark' as const };
+    posService.updatePOSSettings(data);
+    expect(safe.put).toHaveBeenCalledWith('/pos/settings', data);
+  });
+
   // Branches
   it('getBranches calls GET /pos/locations', () => {
     posService.getBranches();

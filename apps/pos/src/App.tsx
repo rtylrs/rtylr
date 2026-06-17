@@ -1,6 +1,7 @@
 import React, { useEffect, Suspense, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
+import { unwrap } from '@voxire/api';
 import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
@@ -10,6 +11,7 @@ import {
   useCartStore,
   useTerminalContextStore,
   useSettingsStore,
+  useThemeStore,
 } from './shared/stores';
 import PinLogin from './features/login';
 import LocationSelect from './features/login/LocationSelect';
@@ -21,6 +23,7 @@ import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueu
 import { reportReactError } from './shared/services/observability/appErrors';
 import { useTerminalHeartbeat } from './shared/services/terminal/useTerminalHeartbeat';
 import { buildCartContext } from './shared/services/terminal/cartContext';
+import { posService, type POSBusinessSettingsResponse } from './shared/services/api/posService';
 import {
   businessAddress,
   businessContactPhone,
@@ -71,12 +74,17 @@ const AppInner = (): React.JSX.Element => {
 
 const AppShell = (): React.JSX.Element => {
   const { token, setToken, getUserInfo } = useUserStore();
-  const businessProfile = useUserStore((s) => s.businessProfile);
+  const userBusinessProfile = useUserStore((s) => s.businessProfile);
   const { isActive, employee, endSession } = useEmployeeSessionStore();
   const setContext = useCartStore((s) => s.setContext);
   const setBusiness = useSettingsStore((s) => s.setBusiness);
+  const setPOSBusinessProfile = useSettingsStore((s) => s.setBusinessProfile);
+  const setPOSFeatures = useSettingsStore((s) => s.setFeatures);
+  const setReceiptFooter = useSettingsStore((s) => s.setReceiptFooter);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const { locationId, terminalId, setTerminalContext } = useTerminalContextStore();
   const hasRestoredSession = useRef(false);
+  const hasLoadedPOSSettings = useRef(false);
 
   // Check auth
   useEffect(() => {
@@ -96,15 +104,34 @@ const AppShell = (): React.JSX.Element => {
   }, [getUserInfo, setToken, token]);
 
   useEffect(() => {
-    const name = businessDisplayName(businessProfile);
+    const name = businessDisplayName(userBusinessProfile);
     if (!name) return;
 
     setBusiness({
       name,
-      address: businessAddress(businessProfile) ?? '',
-      phone: businessContactPhone(businessProfile) ?? '',
+      address: businessAddress(userBusinessProfile) ?? '',
+      phone: businessContactPhone(userBusinessProfile) ?? '',
     });
-  }, [businessProfile, setBusiness]);
+  }, [setBusiness, userBusinessProfile]);
+
+  useEffect(() => {
+    if (hasLoadedPOSSettings.current) return;
+    if (!token && !getTokenFromCookie()) return;
+
+    hasLoadedPOSSettings.current = true;
+    void unwrap(posService.getPOSSettings())
+      .then((data) => {
+        const settings = (data as POSBusinessSettingsResponse).settings;
+        if (!settings) return;
+        setPOSBusinessProfile(settings.business_profile);
+        setPOSFeatures(settings.features);
+        setReceiptFooter(settings.receipt_footer);
+        setTheme(settings.theme);
+      })
+      .catch(() => {
+        hasLoadedPOSSettings.current = false;
+      });
+  }, [setPOSBusinessProfile, setPOSFeatures, setReceiptFooter, setTheme, token]);
 
   useEffect(() => {
     if (!locationId || !terminalId || !isActive || !employee) return;

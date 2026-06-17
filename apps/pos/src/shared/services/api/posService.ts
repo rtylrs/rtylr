@@ -157,6 +157,44 @@ export interface LoyaltyPayload {
   [key: string]: unknown;
 }
 
+export type POSBusinessProfile = 'retail' | 'restaurant' | 'quick_service';
+export type POSTheme = 'dark' | 'light';
+
+export interface POSFeatureSettingsPayload {
+  tables: boolean;
+  kitchenDisplay: boolean;
+  modifiers: boolean;
+  combos: boolean;
+  tips: boolean;
+  giftCards: boolean;
+  customers: boolean;
+  inventory: boolean;
+  cashDrawer: boolean;
+}
+
+export interface POSBusinessSettingsPayload {
+  id?: number;
+  business_id?: number;
+  business_profile: POSBusinessProfile;
+  theme: POSTheme;
+  features: POSFeatureSettingsPayload;
+  receipt_footer: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface POSBusinessSettingsResponse {
+  settings: POSBusinessSettingsPayload;
+  message?: string;
+}
+
+export interface POSBusinessSettingsUpdatePayload {
+  business_profile?: POSBusinessProfile;
+  theme?: POSTheme;
+  features?: POSFeatureSettingsPayload;
+  receipt_footer?: string;
+}
+
 /** Matches the backend stock movement contracts (receive/adjust/waste). */
 export interface StockPayload {
   branch_id: number;
@@ -237,6 +275,10 @@ function toTerminalPayload(data: Partial<TerminalPayload>) {
 // ── Service ────────────────────────────────────────────────────────────────
 
 export const posService = {
+  // ── Business POS settings ─────────────────────────────────────
+  getPOSSettings: () => safe.get('/pos/settings'),
+  updatePOSSettings: (data: POSBusinessSettingsUpdatePayload) => safe.put('/pos/settings', data),
+
   // ── Branches (locations) ──────────────────────────────────────
   getBranches: () => safe.get('/pos/locations'),
   createBranch: (data: BranchPayload) => safe.post('/pos/locations', data),

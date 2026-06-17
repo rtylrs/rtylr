@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { unwrap } from '@voxire/api';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { POSBusinessProfile, POSFeatureKey } from '../../shared/stores/settingsStore';
+import { useThemeStore } from '../../shared/stores/themeStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import {
+  posService,
+  type POSBusinessSettingsResponse,
+  type POSTheme,
+} from '../../shared/services/api/posService';
 import { listPrinters, listSerialPorts } from '../../shared/services/hardware/hardwareDiscovery';
 import type { PrinterInfo, SerialPortInfo } from '../../shared/services/hardware/hardwareDiscovery';
 import appConfig from '../../app.json';
@@ -35,12 +42,15 @@ const FEATURE_OPTIONS: { key: POSFeatureKey; label: string }[] = [
 
 const SettingsScreen: React.FC = () => {
   const s = useSettingsStore();
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
   const { locationId, terminalId, clearTerminalContext } = useTerminalContextStore();
   const clearCart = useCartStore((state) => state.clearCart);
 
   const [printers, setPrinters] = useState<PrinterInfo[]>([]);
   const [serialPorts, setSerialPorts] = useState<SerialPortInfo[]>([]);
   const [discovering, setDiscovering] = useState(false);
+  const [savingPOSSettings, setSavingPOSSettings] = useState(false);
 
   const discover = async () => {
     setDiscovering(true);
@@ -69,6 +79,33 @@ const SettingsScreen: React.FC = () => {
     const next = [...s.tipPresets];
     next[index] = value / 100;
     s.setTipPresets(next);
+  };
+
+  const savePOSSettings = async () => {
+    setSavingPOSSettings(true);
+    try {
+      const selectedTheme: POSTheme = theme === 'light' ? 'light' : 'dark';
+      const response = await unwrap(
+        posService.updatePOSSettings({
+          business_profile: s.businessProfile,
+          theme: selectedTheme,
+          features: s.features,
+          receipt_footer: s.receiptFooter,
+        })
+      );
+      const settings = (response as POSBusinessSettingsResponse).settings;
+      if (settings) {
+        s.setBusinessProfile(settings.business_profile);
+        s.setFeatures(settings.features);
+        s.setReceiptFooter(settings.receipt_footer);
+        setTheme(settings.theme);
+      }
+      toast.success('POS settings saved');
+    } catch {
+      toast.error('Failed to save POS settings');
+    } finally {
+      setSavingPOSSettings(false);
+    }
   };
 
   return (
@@ -119,6 +156,17 @@ const SettingsScreen: React.FC = () => {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="text-xs text-pos-muted">Default theme</label>
+              <select
+                value={theme === 'light' ? 'light' : 'dark'}
+                onChange={(e) => setTheme(e.target.value)}
+                className={SELECT_CLS}
+              >
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {FEATURE_OPTIONS.map((feature) => (
                 <label
@@ -135,6 +183,14 @@ const SettingsScreen: React.FC = () => {
                 </label>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={savePOSSettings}
+              disabled={savingPOSSettings}
+              className="h-10 px-4 rounded-lg bg-pos-text text-pos-bg text-sm font-bold disabled:opacity-50"
+            >
+              {savingPOSSettings ? 'Saving...' : 'Save Business Settings'}
+            </button>
           </div>
         </Section>
 
