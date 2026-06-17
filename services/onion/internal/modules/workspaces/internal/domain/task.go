@@ -138,6 +138,8 @@ type ListTasksFilter struct {
 	Status      string
 	AssigneeID  *int64
 	Priority    string
+	ActiveOnly  bool
+	Compact     bool
 }
 
 type Label struct {

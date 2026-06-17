@@ -324,12 +324,14 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 }
 
 func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	builder := enrichedTaskSelect().
+	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(sq.Eq{"t.project_id": filter.ProjectID}).
 		Where("t.parent_task_id IS NULL")
 
 	if filter.Status != "" {
 		builder = builder.Where(sq.Eq{"t.status": filter.Status})
+	} else if filter.ActiveOnly {
+		builder = builder.Where("t.status NOT IN ('done', 'cancelled')")
 	}
 	if filter.AssigneeID != nil {
 		builder = builder.Where(sq.Eq{"t.assignee_id": *filter.AssigneeID})
@@ -344,12 +346,14 @@ func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTa
 }
 
 func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	builder := enrichedTaskSelect().
+	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(sq.Eq{"t.workspace_id": filter.WorkspaceID}).
 		Where("t.parent_task_id IS NULL")
 
 	if filter.Status != "" {
 		builder = builder.Where(sq.Eq{"t.status": filter.Status})
+	} else if filter.ActiveOnly {
+		builder = builder.Where("t.status NOT IN ('done', 'cancelled')")
 	}
 	if filter.AssigneeID != nil {
 		builder = builder.Where(sq.Eq{"t.assignee_id": *filter.AssigneeID})
@@ -953,24 +957,35 @@ func marshalLabels(labels []int64) (json.RawMessage, error) {
 //
 // Keep this list, scanEnrichedTask, and the JOINs in
 // enrichedTaskSelect in sync.
-var enrichedTaskColumns = []string{
-	"t.id", "t.project_id", "t.workspace_id", "t.owner_id", "t.parent_task_id", "t.section_id",
-	"t.title", "t.description", "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
-	"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
-	"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
-	"t.created_at", "t.updated_at",
-	"COALESCE(p.name, '')  AS project_name",
-	"COALESCE(p.color, '') AS project_color",
-	"COALESCE(u.full_name, '') AS assignee_name",
-	"COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count",
+func enrichedTaskColumns(includeDescription bool) []string {
+	descriptionColumn := "t.description"
+	if !includeDescription {
+		descriptionColumn = "'' AS description"
+	}
+
+	return []string{
+		"t.id", "t.project_id", "t.workspace_id", "t.owner_id", "t.parent_task_id", "t.section_id",
+		"t.title", descriptionColumn, "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
+		"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
+		"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
+		"t.created_at", "t.updated_at",
+		"COALESCE(p.name, '')  AS project_name",
+		"COALESCE(p.color, '') AS project_color",
+		"COALESCE(u.full_name, '') AS assignee_name",
+		"COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count",
+	}
 }
 
 // enrichedTaskSelect returns a squirrel builder with the enriched task
 // SELECT + JOINs preconfigured. Callers add WHERE/ORDER/LIMIT clauses.
 // All tenant-scope filtering is the caller's responsibility.
 func enrichedTaskSelect() sq.SelectBuilder {
+	return enrichedTaskSelectForList(false)
+}
+
+func enrichedTaskSelectForList(compact bool) sq.SelectBuilder {
 	return sq.
-		Select(enrichedTaskColumns...).
+		Select(enrichedTaskColumns(!compact)...).
 		From("flow_tasks t").
 		LeftJoin("flow_projects p ON p.id = t.project_id").
 		LeftJoin("users u ON u.id = t.assignee_id").

@@ -175,6 +175,8 @@ type ListTasksRequest struct {
 	Status      string           `json:"status"`
 	AssigneeID  *int64           `json:"assignee_id"`
 	Priority    string           `json:"priority"`
+	ActiveOnly  bool             `json:"active_only"`
+	Compact     bool             `json:"compact"`
 }
 
 type ListTasksResponse struct {
@@ -217,6 +219,8 @@ func (h *ListTasksHandler) Serve(ctx context.Context, req *ListTasksRequest) (Li
 		Status:      req.Status,
 		AssigneeID:  req.AssigneeID,
 		Priority:    req.Priority,
+		ActiveOnly:  req.ActiveOnly,
+		Compact:     req.Compact,
 	}
 
 	tasks, err := h.FlowService.ListTasks(ctx, filter)
