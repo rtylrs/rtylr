@@ -228,3 +228,16 @@ CREATE TABLE IF NOT EXISTS pos_customers (
     INDEX idx_pos_customers_business (business_id),
     INDEX idx_pos_customers_phone (phone)
 );
+
+CREATE TABLE IF NOT EXISTS pos_business_settings (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    business_profile ENUM('retail','restaurant','quick_service') NOT NULL DEFAULT 'retail',
+    theme ENUM('dark','light') NOT NULL DEFAULT 'dark',
+    features JSON NOT NULL,
+    receipt_footer TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_pos_business_settings_business (business_id),
+    INDEX idx_pos_business_settings_profile (business_profile)
+);
