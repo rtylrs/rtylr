@@ -208,6 +208,16 @@ export interface StockPayload {
   employee_id?: number | null;
 }
 
+/** Matches the backend POS stock transfer contract. */
+export interface StockTransferPayload {
+  from_branch_id: number;
+  to_branch_id: number;
+  product_id: number;
+  quantity: number;
+  note?: string | null;
+  employee_id?: number | null;
+}
+
 /** Matches the backend CreatePOSUserRequest contract (snake_case). */
 export interface POSUserPayload {
   name: string;
@@ -412,7 +422,7 @@ export const posService = {
   receiveStock: (data: StockPayload) => safe.post('/pos/stock/receive', data),
   adjustStock: (data: StockPayload) => safe.post('/pos/stock/adjust', data),
   wasteStock: (data: StockPayload) => safe.post('/pos/stock/waste', data),
-  transferStock: (data: StockPayload) => safe.post('/pos/stock/transfer', data),
+  transferStock: (data: StockTransferPayload) => safe.post('/pos/stock/transfer', data),
 
   // ── Audit ─────────────────────────────────────────────────────
   getAuditLog: (params?: AuditFilterParams) => safe.get('/pos/audit', { params }),

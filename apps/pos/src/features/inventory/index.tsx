@@ -8,8 +8,8 @@ import Skeleton from '../../shared/components/Skeleton';
 import { posService } from '../../shared/services/api/posService';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
-import { buildStockAction, mapInventoryItems } from './inventoryWorkflow';
-import type { InventoryItem, StockAction } from './inventoryWorkflow';
+import { buildStockAction, mapInventoryItems, mapInventoryLocations } from './inventoryWorkflow';
+import type { InventoryItem, InventoryLocation, StockAction } from './inventoryWorkflow';
 
 const ACTION_LABELS: Record<StockAction, string> = {
   receive: 'Receive',
@@ -28,19 +28,37 @@ const ACTION_COLORS: Record<StockAction, string> = {
 interface ActionModalProps {
   item: InventoryItem;
   action: StockAction;
+  locations: InventoryLocation[];
+  currentBranchId: number;
   onClose: () => void;
-  onSubmit: (itemId: number, action: StockAction, qty: string, reason: string) => Promise<void>;
+  onSubmit: (
+    itemId: number,
+    action: StockAction,
+    qty: string,
+    reason: string,
+    toBranchId?: number | null,
+  ) => Promise<void>;
 }
 
-function ActionModal({ item, action, onClose, onSubmit }: ActionModalProps) {
+function ActionModal({
+  item,
+  action,
+  locations,
+  currentBranchId,
+  onClose,
+  onSubmit,
+}: ActionModalProps) {
   const [qty, setQty] = useState('');
   const [reason, setReason] = useState('');
+  const [toBranchId, setToBranchId] = useState('');
   const [busy, setBusy] = useState(false);
+  const destinationLocations = locations.filter((location) => location.id !== currentBranchId);
+  const needsDestination = action === 'transfer';
 
   const submit = async () => {
     setBusy(true);
     try {
-      await onSubmit(item.itemId, action, qty, reason);
+      await onSubmit(item.itemId, action, qty, reason, Number(toBranchId) || null);
       onClose();
     } finally {
       setBusy(false);
@@ -56,6 +74,23 @@ function ActionModal({ item, action, onClose, onSubmit }: ActionModalProps) {
         <p className="text-xs text-pos-muted">
           Current stock: {item.currentQty} {item.unit}
         </p>
+        {needsDestination && (
+          <div className="space-y-1">
+            <label className="text-xs text-pos-muted">Destination location</label>
+            <select
+              value={toBranchId}
+              onChange={(e) => setToBranchId(e.target.value)}
+              className="w-full h-12 px-4 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
+            >
+              <option value="">Select location</option>
+              {destinationLocations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="space-y-1">
           <label className="text-xs text-pos-muted">Quantity ({item.unit})</label>
           <input
@@ -86,7 +121,7 @@ function ActionModal({ item, action, onClose, onSubmit }: ActionModalProps) {
           </button>
           <button
             onClick={submit}
-            disabled={busy || !qty}
+            disabled={busy || !qty || (needsDestination && !toBranchId)}
             className={`flex-1 h-11 rounded-lg text-white text-sm font-semibold transition disabled:opacity-50 ${ACTION_COLORS[action]}`}
           >
             {busy ? 'Saving…' : ACTION_LABELS[action]}
@@ -102,6 +137,7 @@ const InventoryScreen: React.FC = () => {
   const employee = useEmployeeSessionStore((s) => s.employee);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [lowStock, setLowStock] = useState<InventoryItem[]>([]);
+  const [locations, setLocations] = useState<InventoryLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState<{ item: InventoryItem; action: StockAction } | null>(null);
@@ -129,29 +165,46 @@ const InventoryScreen: React.FC = () => {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    void Promise.allSettled([unwrap(posService.getMyLocations()), unwrap(posService.getBranches())]).then(
+      (results) => {
+        const merged = new Map<number, InventoryLocation>();
+        for (const result of results) {
+          if (result.status !== 'fulfilled') continue;
+          for (const location of mapInventoryLocations(result.value)) {
+            if (!merged.has(location.id)) merged.set(location.id, location);
+          }
+        }
+        setLocations([...merged.values()]);
+      },
+    );
+  }, []);
+
   const handleAction = async (
     itemId: number,
     action: StockAction,
     quantityInput: string,
     reason: string,
+    toBranchId?: number | null,
   ) => {
     try {
-      const { payload } = buildStockAction({
+      const built = buildStockAction({
         itemId,
         action,
         quantityInput,
         reason,
         branchId,
+        toBranchId,
         employeeId: Number(employee?.id) || null,
       });
       const call =
-        action === 'receive'
-          ? posService.receiveStock(payload)
-          : action === 'adjust'
-            ? posService.adjustStock(payload)
-            : action === 'waste'
-              ? posService.wasteStock(payload)
-              : posService.transferStock(payload);
+        built.action === 'receive'
+          ? posService.receiveStock(built.payload)
+          : built.action === 'adjust'
+            ? posService.adjustStock(built.payload)
+            : built.action === 'waste'
+              ? posService.wasteStock(built.payload)
+              : posService.transferStock(built.payload);
       await unwrap(call);
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
@@ -171,6 +224,7 @@ const InventoryScreen: React.FC = () => {
   });
 
   const lowStockIds = new Set(lowStock.map((l) => l.itemId));
+  const hasTransferDestinations = locations.some((location) => location.id !== branchId);
 
   return (
     <ScreenLayout
@@ -241,15 +295,19 @@ const InventoryScreen: React.FC = () => {
                   <span className="ml-1 text-xs text-pos-muted">{item.unit}</span>
                 </div>
                 <div className="shrink-0 flex gap-1">
-                  {(['receive', 'adjust', 'waste'] as StockAction[]).map((action) => (
-                    <button
-                      key={action}
-                      onClick={() => setModal({ item, action })}
-                      className={`h-8 px-2 rounded-lg text-white text-xs font-medium transition ${ACTION_COLORS[action]}`}
-                    >
-                      {ACTION_LABELS[action]}
-                    </button>
-                  ))}
+                  {(['receive', 'adjust', 'waste', 'transfer'] as StockAction[]).map((action) => {
+                    const transferDisabled = action === 'transfer' && !hasTransferDestinations;
+                    return (
+                      <button
+                        key={action}
+                        onClick={() => setModal({ item, action })}
+                        disabled={transferDisabled}
+                        className={`h-8 px-2 rounded-lg text-white text-xs font-medium transition disabled:opacity-40 ${ACTION_COLORS[action]}`}
+                      >
+                        {ACTION_LABELS[action]}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -261,6 +319,8 @@ const InventoryScreen: React.FC = () => {
         <ActionModal
           item={modal.item}
           action={modal.action}
+          locations={locations}
+          currentBranchId={branchId}
           onClose={() => setModal(null)}
           onSubmit={handleAction}
         />

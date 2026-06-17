@@ -30,18 +30,19 @@ async function applyStockAction(params: {
   action: StockAction;
   quantityInput: string;
   branchId: number;
+  toBranchId?: number;
   reason?: string;
 }) {
-  const { payload, action } = buildStockAction(params);
-  switch (action) {
+  const built = buildStockAction(params);
+  switch (built.action) {
     case 'receive':
-      return unwrap(posService.receiveStock(payload));
+      return unwrap(posService.receiveStock(built.payload));
     case 'adjust':
-      return unwrap(posService.adjustStock(payload));
+      return unwrap(posService.adjustStock(built.payload));
     case 'waste':
-      return unwrap(posService.wasteStock(payload));
+      return unwrap(posService.wasteStock(built.payload));
     case 'transfer':
-      return unwrap(posService.transferStock(payload));
+      return unwrap(posService.transferStock(built.payload));
   }
 }
 
@@ -99,6 +100,37 @@ describe('inventory end-to-end flow', () => {
       note: 'count correction',
       employee_id: null,
     });
+  });
+
+  it('transfer stock calls transferStock with source and destination branches', async () => {
+    vi.mocked(posService.transferStock).mockResolvedValue(undefined as never);
+
+    await applyStockAction({
+      itemId: 7,
+      action: 'transfer',
+      quantityInput: '5',
+      branchId: 1,
+      toBranchId: 2,
+      reason: 'restock front counter',
+    });
+
+    expect(posService.transferStock).toHaveBeenCalledTimes(1);
+    expect(posService.transferStock).toHaveBeenCalledWith({
+      from_branch_id: 1,
+      to_branch_id: 2,
+      product_id: 7,
+      quantity: 5,
+      note: 'restock front counter',
+      employee_id: null,
+    });
+  });
+
+  it('transfer stock requires a destination branch', () => {
+    expect(() =>
+      buildStockAction({ itemId: 1, action: 'transfer', quantityInput: '1', branchId: 1 }),
+    ).toThrow('Select a destination location before transferring stock');
+
+    expect(posService.transferStock).not.toHaveBeenCalled();
   });
 
   it('zero quantity is rejected before any service call', () => {

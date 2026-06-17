@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildStockAction, mapInventoryItems } from './inventoryWorkflow';
+import { buildStockAction, mapInventoryItems, mapInventoryLocations } from './inventoryWorkflow';
 
 describe('buildStockAction', () => {
   it('builds a receive action from valid input', () => {
@@ -66,6 +66,46 @@ describe('buildStockAction', () => {
       note: 'Spoilage',
     });
     expect(result.payload.note).toBe('Spoilage');
+  });
+
+  it('builds a transfer action with source and destination branches', () => {
+    const result = buildStockAction({
+      itemId: 12,
+      action: 'transfer',
+      quantityInput: '4',
+      branchId: 1,
+      toBranchId: 2,
+      reason: 'Move to warehouse',
+      employeeId: 9,
+    });
+
+    expect(result).toEqual({
+      action: 'transfer',
+      payload: {
+        from_branch_id: 1,
+        to_branch_id: 2,
+        product_id: 12,
+        quantity: 4,
+        note: 'Move to warehouse',
+        employee_id: 9,
+      },
+    });
+  });
+
+  it('rejects transfer without a distinct destination branch', () => {
+    expect(() =>
+      buildStockAction({ itemId: 1, action: 'transfer', quantityInput: '2', branchId: 1 }),
+    ).toThrow('Select a destination location before transferring stock.');
+
+    expect(() =>
+      buildStockAction({
+        itemId: 1,
+        action: 'transfer',
+        quantityInput: '2',
+        branchId: 1,
+        toBranchId: 1,
+      }),
+    ).toThrow('Destination location must be different from the current location.');
   });
 });
 
@@ -147,5 +187,27 @@ describe('mapInventoryItems', () => {
     expect(mapInventoryItems(null)).toEqual([]);
     expect(mapInventoryItems('string')).toEqual([]);
     expect(mapInventoryItems({})).toEqual([]);
+  });
+});
+
+describe('mapInventoryLocations', () => {
+  it('maps location envelope responses', () => {
+    expect(
+      mapInventoryLocations({
+        locations: [
+          { id: 1, name: 'Main' },
+          { location_id: 2, label: 'Warehouse' },
+        ],
+      }),
+    ).toEqual([
+      { id: 1, name: 'Main' },
+      { id: 2, name: 'Warehouse' },
+    ]);
+  });
+
+  it('filters invalid locations and falls back to generated names', () => {
+    expect(mapInventoryLocations([{ id: 0, name: 'Bad' }, { locationId: 3 }])).toEqual([
+      { id: 3, name: 'Location 3' },
+    ]);
   });
 });

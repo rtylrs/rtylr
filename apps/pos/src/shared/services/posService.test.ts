@@ -318,15 +318,21 @@ describe('posService', () => {
   });
 
   it('receiveStock calls POST /pos/stock/receive', () => {
-    const data = { items: [] };
+    const data = { branch_id: 1, product_id: 2, quantity: 5 };
     posService.receiveStock(data);
     expect(safe.post).toHaveBeenCalledWith('/pos/stock/receive', data);
   });
 
   it('wasteStock calls POST /pos/stock/waste', () => {
-    const data = { itemId: 1 };
+    const data = { branch_id: 1, product_id: 2, quantity: 1 };
     posService.wasteStock(data);
     expect(safe.post).toHaveBeenCalledWith('/pos/stock/waste', data);
+  });
+
+  it('transferStock calls POST /pos/stock/transfer', () => {
+    const data = { from_branch_id: 1, to_branch_id: 2, product_id: 3, quantity: 4 };
+    posService.transferStock(data);
+    expect(safe.post).toHaveBeenCalledWith('/pos/stock/transfer', data);
   });
 
   // Audit
