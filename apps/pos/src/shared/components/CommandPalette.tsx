@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useShortcutStore } from '../stores/shortcutStore';
+import { useSettingsStore } from '../stores/settingsStore';
+import type { POSFeatureKey } from '../stores/settingsStore';
 
 interface Command {
   id: string;
@@ -8,6 +10,7 @@ interface Command {
   shortcut?: string;
   action: () => void;
   category?: string;
+  feature?: POSFeatureKey;
 }
 
 const CommandPalette: React.FC = () => {
@@ -15,13 +18,15 @@ const CommandPalette: React.FC = () => {
   const setOpen = useShortcutStore((s) => s.setCommand);
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const features = useSettingsStore((s) => s.features);
+  const businessProfile = useSettingsStore((s) => s.businessProfile);
 
   const commands: Command[] = useMemo(
     () => [
       { id: 'nav-pos', label: 'Go to Terminal', category: 'Navigate', action: () => navigate('/') },
       {
         id: 'nav-menu',
-        label: 'Go to Menu Items',
+        label: businessProfile === 'retail' ? 'Go to Products' : 'Go to Menu Items',
         category: 'Navigate',
         action: () => navigate('/menu'),
       },
@@ -36,36 +41,42 @@ const CommandPalette: React.FC = () => {
         label: 'Go to Tables',
         category: 'Navigate',
         action: () => navigate('/tables'),
+        feature: 'tables',
       },
       {
         id: 'nav-combos',
         label: 'Go to Combos',
         category: 'Navigate',
         action: () => navigate('/combos'),
+        feature: 'combos',
       },
       {
         id: 'nav-modifiers',
         label: 'Go to Modifiers',
         category: 'Navigate',
         action: () => navigate('/modifiers'),
+        feature: 'modifiers',
       },
       {
         id: 'nav-gift',
         label: 'Go to Gift Cards',
         category: 'Navigate',
         action: () => navigate('/gift-cards'),
+        feature: 'giftCards',
       },
       {
         id: 'nav-kds',
         label: 'Kitchen Display',
         category: 'Navigate',
         action: () => navigate('/kds'),
+        feature: 'kitchenDisplay',
       },
       {
         id: 'nav-customer',
         label: 'Customer Lookup',
         category: 'Navigate',
         action: () => navigate('/customer-lookup'),
+        feature: 'customers',
       },
       {
         id: 'nav-receipts',
@@ -102,18 +113,21 @@ const CommandPalette: React.FC = () => {
         label: 'Cash Drop / Paid Out',
         category: 'Navigate',
         action: () => navigate('/cash-drop'),
+        feature: 'cashDrawer',
       },
       {
         id: 'nav-inventory',
         label: 'Inventory Management',
         category: 'Navigate',
         action: () => navigate('/inventory'),
+        feature: 'inventory',
       },
       {
         id: 'nav-products',
         label: 'Product Quick Edit',
         category: 'Navigate',
         action: () => navigate('/products/quick'),
+        feature: 'inventory',
       },
       {
         id: 'nav-override',
@@ -128,12 +142,15 @@ const CommandPalette: React.FC = () => {
         action: () => navigate('/staff'),
       },
     ],
-    [navigate]
+    [businessProfile, navigate]
   );
 
+  const availableCommands = commands.filter(
+    (command) => !command.feature || features[command.feature]
+  );
   const filtered = query
-    ? commands.filter((c) => c.label.toLowerCase().includes(query.toLowerCase()))
-    : commands;
+    ? availableCommands.filter((c) => c.label.toLowerCase().includes(query.toLowerCase()))
+    : availableCommands;
 
   useEffect(() => {
     if (!open) setQuery('');

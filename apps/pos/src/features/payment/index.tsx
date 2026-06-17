@@ -40,6 +40,8 @@ const Payment: React.FC = () => {
   const taxRate = useSettingsStore((s) => s.taxRate);
   const printer = useSettingsStore((s) => s.printer);
   const business = useSettingsStore((s) => s.business);
+  const tipsEnabled = useSettingsStore((s) => s.features.tips);
+  const cashDrawerEnabled = useSettingsStore((s) => s.features.cashDrawer);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
   const addReceipt = useReceiptsStore((s) => s.add);
   const recordCashSale = useCashDrawerStore((s) => s.recordCashSale);
@@ -51,7 +53,8 @@ const Payment: React.FC = () => {
 
   const subtotal = total();
   const tax = subtotal * taxRate;
-  const grandTotal = subtotal + tax + tip;
+  const appliedTip = tipsEnabled ? tip : 0;
+  const grandTotal = subtotal + tax + appliedTip;
   const cashTender = buildCashTender(cashAmount, grandTotal);
   const serverOrderId = useCartStore((s) => s.serverOrderId);
 
@@ -64,7 +67,7 @@ const Payment: React.FC = () => {
         subtotal,
         tax,
         total: grandTotal,
-        tip,
+        tip: appliedTip,
         customerId,
         createdAt: new Date().toISOString(),
       });
@@ -124,7 +127,7 @@ const Payment: React.FC = () => {
         subtotal,
         taxAmount: tax,
         discountAmount: 0,
-        tipAmount: tip,
+        tipAmount: appliedTip,
         total: grandTotal,
         paymentMethod: method,
         amountPaid: isCash ? (cashTender.received || grandTotal) : grandTotal,
@@ -132,13 +135,13 @@ const Payment: React.FC = () => {
         orderNumber: order.id,
         businessName: business.name,
         footerMessage: undefined,
-        kickDrawer: isCash && printer.cashDrawerKick,
+        kickDrawer: isCash && cashDrawerEnabled && printer.cashDrawerKick,
       });
 
       if (hwResult.kind === 'print_failed') {
         toast.warning(`Receipt not printed: ${hwResult.error}`);
         // Still open drawer if printing failed but drawer was requested
-        if (isCash && printer.cashDrawerKick) {
+        if (isCash && cashDrawerEnabled && printer.cashDrawerKick) {
           const dr = await openDrawer(printer);
           if (dr.kind === 'drawer_failed') {
             toast.warning(`Cash drawer did not open: ${dr.error}`);
@@ -216,10 +219,10 @@ const Payment: React.FC = () => {
               <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
               <span>{fmt(tax)}</span>
             </div>
-            {tip > 0 && (
+            {appliedTip > 0 && (
               <div className="flex justify-between text-pos-muted">
                 <span>Tip</span>
-                <span>{fmt(tip)}</span>
+                <span>{fmt(appliedTip)}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-pos-text text-base pt-1">
@@ -228,7 +231,7 @@ const Payment: React.FC = () => {
             </div>
           </div>
 
-          <TipSelector subtotal={subtotal} onTipChange={setTip} />
+          {tipsEnabled && <TipSelector subtotal={subtotal} onTipChange={setTip} />}
 
           {/* Method selector */}
           <div className="flex gap-2">

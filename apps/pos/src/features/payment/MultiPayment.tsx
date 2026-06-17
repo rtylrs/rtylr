@@ -10,6 +10,7 @@ import { formatCurrency } from '../../shared/utils/format';
 import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
 import { posService } from '../../shared/services/api/posService';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
 
 interface OrderTotals {
   subtotal: number;
@@ -29,6 +30,7 @@ const MultiPaymentScreen: React.FC = () => {
   const [method, setMethod] = useState<PaymentMethod>('cash');
   const [amount, setAmount] = useState('');
   const [busy, setBusy] = useState(false);
+  const tipsEnabled = useSettingsStore((s) => s.features.tips);
 
   useEffect(() => {
     let active = true;
@@ -62,7 +64,8 @@ const MultiPaymentScreen: React.FC = () => {
 
   const subtotal = order?.subtotal ?? 0;
   const tax = order?.tax ?? 0;
-  const total = (order?.total ?? 0) + tip;
+  const appliedTip = tipsEnabled ? tip : 0;
+  const total = (order?.total ?? 0) + appliedTip;
   const paid = payments.reduce((sum, p) => sum + p.amount, 0);
   const remaining = useMemo(() => Math.max(0, total - paid), [total, paid]);
 
@@ -93,7 +96,7 @@ const MultiPaymentScreen: React.FC = () => {
       await finalizeMultiPayment({
         orderId,
         payments,
-        tip,
+        tip: appliedTip,
         total,
         chargeOrder: async (id, payload) => {
           await unwrap(posService.chargeOrder(id, payload));
@@ -141,10 +144,12 @@ const MultiPaymentScreen: React.FC = () => {
               <span>Tax</span>
               <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="flex justify-between text-sm text-pos-muted">
-              <span>Tip</span>
-              <span>{formatCurrency(tip)}</span>
-            </div>
+            {tipsEnabled && (
+              <div className="flex justify-between text-sm text-pos-muted">
+                <span>Tip</span>
+                <span>{formatCurrency(appliedTip)}</span>
+              </div>
+            )}
             <div className="flex justify-between pt-2 mt-2 border-t border-pos-border">
               <span className="text-base font-bold text-pos-text">Total</span>
               <span className="text-base font-bold text-pos-text">{formatCurrency(total)}</span>
@@ -158,7 +163,7 @@ const MultiPaymentScreen: React.FC = () => {
               <span>{formatCurrency(remaining)}</span>
             </div>
           </div>
-          <TipSelector subtotal={subtotal + tax} onTipChange={setTip} />
+          {tipsEnabled && <TipSelector subtotal={subtotal + tax} onTipChange={setTip} />}
         </div>
 
         <div className="space-y-4">

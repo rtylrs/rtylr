@@ -6,6 +6,8 @@ import type { PrinterSettings, KdsHardwareSettings } from '../../shared/stores/s
 interface Props {
   printer: PrinterSettings;
   kds: KdsHardwareSettings;
+  showCashDrawer?: boolean;
+  showKds?: boolean;
 }
 
 type CheckState = 'idle' | 'checking' | 'done' | 'error';
@@ -45,7 +47,12 @@ function DeviceRow({ label, device }: { label: string; device: DeviceStatus }) {
   );
 }
 
-export function HardwareHealthCheck({ printer, kds }: Props) {
+export function HardwareHealthCheck({
+  printer,
+  kds,
+  showCashDrawer = true,
+  showKds = true,
+}: Props) {
   const [state, setState] = useState<CheckState>('idle');
   const [report, setReport] = useState<HardwareHealthReport | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,8 +87,8 @@ export function HardwareHealthCheck({ printer, kds }: Props) {
       {state === 'done' && report && (
         <div className="space-y-2">
           <DeviceRow label="Printer" device={report.printer} />
-          <DeviceRow label="Cash drawer" device={report.drawer} />
-          <DeviceRow label="KDS display" device={report.kds} />
+          {showCashDrawer && <DeviceRow label="Cash drawer" device={report.drawer} />}
+          {showKds && <DeviceRow label="KDS display" device={report.kds} />}
         </div>
       )}
 

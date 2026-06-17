@@ -1,4 +1,5 @@
 import React from 'react';
+import type { POSFeatureKey } from '../shared/stores/settingsStore';
 
 const POS = React.lazy(() => import('../features/pos'));
 const Payment = React.lazy(() => import('../features/payment'));
@@ -27,32 +28,38 @@ const CashDrop = React.lazy(() => import('../features/cash-drop'));
 const Inventory = React.lazy(() => import('../features/inventory'));
 const Staff = React.lazy(() => import('../features/staff'));
 
-const AppRoutes = [
+export type AppRoute = {
+  path: string;
+  element: React.ReactElement;
+  feature?: POSFeatureKey;
+};
+
+const AppRoutes: AppRoute[] = [
   { path: '/', element: <POS /> },
   { path: '/menu', element: <MenuItems /> },
-  { path: '/modifiers', element: <Modifiers /> },
-  { path: '/combos', element: <Combos /> },
+  { path: '/modifiers', element: <Modifiers />, feature: 'modifiers' },
+  { path: '/combos', element: <Combos />, feature: 'combos' },
   { path: '/split-bill/:orderId', element: <SplitBill /> },
   { path: '/payment', element: <Payment /> },
   { path: '/payment/:orderId', element: <MultiPayment /> },
   { path: '/refund/:orderId', element: <Refund /> },
   { path: '/discount/:orderId', element: <Discount /> },
-  { path: '/gift-cards', element: <GiftCards /> },
-  { path: '/kds', element: <KDS /> },
-  { path: '/customer-lookup', element: <CustomerLookup /> },
+  { path: '/gift-cards', element: <GiftCards />, feature: 'giftCards' },
+  { path: '/kds', element: <KDS />, feature: 'kitchenDisplay' },
+  { path: '/customer-lookup', element: <CustomerLookup />, feature: 'customers' },
   { path: '/receipts', element: <Receipts /> },
   { path: '/receipt', element: <Receipt /> },
   { path: '/day-summary', element: <DaySummary /> },
   { path: '/override', element: <Override /> },
-  { path: '/products/quick', element: <ProductQuickEdit /> },
+  { path: '/products/quick', element: <ProductQuickEdit />, feature: 'inventory' },
   { path: '/offline', element: <OfflineQueue /> },
   { path: '/orders', element: <Orders /> },
-  { path: '/tables', element: <Tables /> },
+  { path: '/tables', element: <Tables />, feature: 'tables' },
   { path: '/close-session', element: <CloseSession /> },
   { path: '/settings', element: <Settings /> },
   { path: '/held-orders', element: <HeldOrders /> },
-  { path: '/cash-drop', element: <CashDrop /> },
-  { path: '/inventory', element: <Inventory /> },
+  { path: '/cash-drop', element: <CashDrop />, feature: 'cashDrawer' },
+  { path: '/inventory', element: <Inventory />, feature: 'inventory' },
   { path: '/staff', element: <Staff /> },
 ];
 

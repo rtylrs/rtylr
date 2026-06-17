@@ -27,6 +27,22 @@ export interface BusinessInfo {
   phone: string;
 }
 
+export type POSBusinessProfile = 'retail' | 'restaurant' | 'quick_service';
+
+export interface POSFeatureSettings {
+  tables: boolean;
+  kitchenDisplay: boolean;
+  modifiers: boolean;
+  combos: boolean;
+  tips: boolean;
+  giftCards: boolean;
+  customers: boolean;
+  inventory: boolean;
+  cashDrawer: boolean;
+}
+
+export type POSFeatureKey = keyof POSFeatureSettings;
+
 export type KdsHardwareTransport = 'none' | 'serial' | 'network';
 
 export interface KdsHardwareSettings {
@@ -44,6 +60,8 @@ interface SettingsState {
   currency: string;
   currencySymbol: string;
   receiptFooter: string;
+  businessProfile: POSBusinessProfile;
+  features: POSFeatureSettings;
   printer: PrinterSettings;
   business: BusinessInfo;
   kdsHardware: KdsHardwareSettings;
@@ -60,6 +78,9 @@ interface SettingsActions {
   setTipPresets: (presets: number[]) => void;
   setCurrency: (code: string, symbol: string) => void;
   setReceiptFooter: (footer: string) => void;
+  setBusinessProfile: (profile: POSBusinessProfile) => void;
+  setFeature: (feature: POSFeatureKey, enabled: boolean) => void;
+  setFeatures: (partial: Partial<POSFeatureSettings>) => void;
   setPrinter: (partial: Partial<PrinterSettings>) => void;
   setBusiness: (partial: Partial<BusinessInfo>) => void;
   setKdsHardware: (partial: Partial<KdsHardwareSettings>) => void;
@@ -71,12 +92,50 @@ interface SettingsActions {
   reset: () => void;
 }
 
+const profileFeatureDefaults: Record<POSBusinessProfile, POSFeatureSettings> = {
+  retail: {
+    tables: false,
+    kitchenDisplay: false,
+    modifiers: false,
+    combos: false,
+    tips: false,
+    giftCards: true,
+    customers: true,
+    inventory: true,
+    cashDrawer: true,
+  },
+  restaurant: {
+    tables: true,
+    kitchenDisplay: true,
+    modifiers: true,
+    combos: true,
+    tips: true,
+    giftCards: true,
+    customers: true,
+    inventory: true,
+    cashDrawer: true,
+  },
+  quick_service: {
+    tables: false,
+    kitchenDisplay: true,
+    modifiers: true,
+    combos: true,
+    tips: true,
+    giftCards: true,
+    customers: true,
+    inventory: true,
+    cashDrawer: true,
+  },
+};
+
 const defaults: SettingsState = {
   taxRate: 0.08,
   tipPresets: [0.1, 0.15, 0.18, 0.2],
   currency: 'USD',
   currencySymbol: '$',
-  receiptFooter: 'Thank you for your visit!',
+  receiptFooter: 'Thank you for your purchase!',
+  businessProfile: 'retail',
+  features: { ...profileFeatureDefaults.retail },
   printer: {
     name: 'Default',
     copies: 1,
@@ -89,7 +148,7 @@ const defaults: SettingsState = {
     networkPort: 9100,
   },
   business: {
-    name: 'My Restaurant',
+    name: 'My Business',
     address: '',
     phone: '',
   },
@@ -131,6 +190,39 @@ function normalizeCurrency(currency: string, currencySymbol: string) {
   return { currency: normalizedCurrency, currencySymbol: normalizedSymbol };
 }
 
+function isPOSBusinessProfile(value: unknown): value is POSBusinessProfile {
+  return value === 'retail' || value === 'restaurant' || value === 'quick_service';
+}
+
+function mergeSettings(
+  persistedState: unknown,
+  currentState: SettingsState & SettingsActions
+): SettingsState & SettingsActions {
+  const persisted = (persistedState ?? {}) as Partial<SettingsState>;
+  const businessProfile = isPOSBusinessProfile(persisted.businessProfile)
+    ? persisted.businessProfile
+    : currentState.businessProfile;
+  return {
+    ...currentState,
+    ...persisted,
+    businessProfile,
+    printer: { ...currentState.printer, ...(persisted.printer ?? {}) },
+    business: { ...currentState.business, ...(persisted.business ?? {}) },
+    kdsHardware: { ...currentState.kdsHardware, ...(persisted.kdsHardware ?? {}) },
+    features: { ...profileFeatureDefaults[businessProfile], ...(persisted.features ?? {}) },
+  };
+}
+
+function freshDefaults(): SettingsState {
+  return {
+    ...defaults,
+    printer: { ...defaults.printer },
+    business: { ...defaults.business },
+    kdsHardware: { ...defaults.kdsHardware },
+    features: { ...defaults.features },
+  };
+}
+
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
     (set) => ({
@@ -139,6 +231,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setTipPresets: (tipPresets) => set({ tipPresets: normalizeTipPresets(tipPresets) }),
       setCurrency: (currency, currencySymbol) => set(normalizeCurrency(currency, currencySymbol)),
       setReceiptFooter: (receiptFooter) => set({ receiptFooter }),
+      setBusinessProfile: (businessProfile) =>
+        set({ businessProfile, features: { ...profileFeatureDefaults[businessProfile] } }),
+      setFeature: (feature, enabled) =>
+        set((s) => ({ features: { ...s.features, [feature]: enabled } })),
+      setFeatures: (partial) =>
+        set((s) => ({ features: { ...s.features, ...partial } })),
       setPrinter: (partial) =>
         set((s) => ({ printer: { ...s.printer, ...normalizePrinter(partial) } })),
       setBusiness: (partial) =>
@@ -151,8 +249,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setBarMode: (barMode) => set({ barMode }),
       setQuickAccessSidebar: (quickAccessSidebar) => set({ quickAccessSidebar }),
       setKdsStation: (kdsStation) => set({ kdsStation }),
-      reset: () => set(defaults),
+      reset: () => set(freshDefaults()),
     }),
-    { name: 'pos-settings' }
+    { name: 'pos-settings', merge: mergeSettings }
   )
 );

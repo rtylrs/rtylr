@@ -9,6 +9,7 @@ import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonGrid } from '../../shared/components/Skeleton';
 import { useMenuItems } from './useMenuItems';
 import { useCartStore } from '../../shared/stores/cartStore';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { MenuItem } from '../../shared/types/pos';
 import { buildMenuItemCartProduct } from '../../shared/utils/cart/cartProduct';
 
@@ -17,6 +18,9 @@ const MenuItemsScreen: React.FC = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const addItem = useCartStore((s) => s.addItem);
+  const businessProfile = useSettingsStore((s) => s.businessProfile);
+  const catalogLabel = businessProfile === 'retail' ? 'Products' : 'Menu Items';
+  const catalogSearchLabel = businessProfile === 'retail' ? 'products' : 'menu';
 
   const filtered = items.filter((it) => {
     const matchesCat = category === 'All' || it.category === category;
@@ -28,7 +32,7 @@ const MenuItemsScreen: React.FC = () => {
     try {
       addItem(buildMenuItemCartProduct(item));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to add menu item');
+      toast.error(error instanceof Error ? error.message : `Failed to add ${catalogSearchLabel}`);
       return;
     }
     toast.success(`Added ${item.name}`);
@@ -36,7 +40,7 @@ const MenuItemsScreen: React.FC = () => {
 
   return (
     <ScreenLayout
-      title="Menu Items"
+      title={catalogLabel}
       subtitle={`${items.length} items`}
       actions={
         <button
@@ -48,12 +52,20 @@ const MenuItemsScreen: React.FC = () => {
       }
     >
       <div className="p-5 space-y-4">
-        <SearchBar value={search} onChange={setSearch} placeholder="Search menu..." />
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder={`Search ${catalogSearchLabel}...`}
+        />
         <CategoryTabs categories={categories} active={category} onChange={setCategory} />
         {loading ? (
           <SkeletonGrid count={12} />
         ) : error ? (
-          <EmptyState icon={AlertTriangle} title="Failed to load menu" message={error} />
+          <EmptyState
+            icon={AlertTriangle}
+            title={`Failed to load ${catalogSearchLabel}`}
+            message={error}
+          />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Search}

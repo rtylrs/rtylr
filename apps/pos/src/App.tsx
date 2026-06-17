@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense, useRef } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
@@ -42,12 +42,23 @@ const AppInner = (): React.JSX.Element => {
   useTerminalHeartbeat(true);
   useStockAlerts();
   const location = useLocation();
+  const features = useSettingsStore((s) => s.features);
   return (
     <Suspense fallback={null}>
       <AppFlagGuard flag={FLAG_KEYS.APP_POS}>
         <Routes key={location.pathname} location={location}>
           {AppRoutes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
+            <Route
+              key={index}
+              path={route.path}
+              element={
+                route.feature && !features[route.feature] ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  route.element
+                )
+              }
+            />
           ))}
           <Route path="*" element={<NoMatch />} />
         </Routes>

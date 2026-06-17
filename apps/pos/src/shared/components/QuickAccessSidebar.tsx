@@ -2,6 +2,7 @@ import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Armchair,
+  Boxes,
   Calculator,
   ChartNoAxesCombined,
   ChefHat,
@@ -16,15 +17,28 @@ import {
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useSettingsStore } from '../stores/settingsStore';
+import type { POSBusinessProfile, POSFeatureKey } from '../stores/settingsStore';
 
-const LINKS: { to: string; label: string; icon: LucideIcon }[] = [
+type QuickLink = {
+  to: string;
+  label: string | ((profile: POSBusinessProfile) => string);
+  icon: LucideIcon;
+  feature?: POSFeatureKey;
+};
+
+const LINKS: QuickLink[] = [
   { to: '/', label: 'Terminal', icon: Monitor },
-  { to: '/menu', label: 'Menu', icon: ClipboardList },
+  {
+    to: '/menu',
+    label: (profile) => (profile === 'retail' ? 'Products' : 'Menu'),
+    icon: ClipboardList,
+  },
+  { to: '/inventory', label: 'Inventory', icon: Boxes, feature: 'inventory' },
   { to: '/orders', label: 'Orders', icon: ReceiptText },
-  { to: '/tables', label: 'Tables', icon: Armchair },
-  { to: '/kds', label: 'KDS', icon: ChefHat },
-  { to: '/customer-lookup', label: 'Customers', icon: User },
-  { to: '/gift-cards', label: 'Gift Cards', icon: Gift },
+  { to: '/tables', label: 'Tables', icon: Armchair, feature: 'tables' },
+  { to: '/kds', label: 'KDS', icon: ChefHat, feature: 'kitchenDisplay' },
+  { to: '/customer-lookup', label: 'Customers', icon: User, feature: 'customers' },
+  { to: '/gift-cards', label: 'Gift Cards', icon: Gift, feature: 'giftCards' },
   { to: '/receipts', label: 'Receipts', icon: Calculator },
   { to: '/day-summary', label: 'Day', icon: ChartNoAxesCombined },
   { to: '/held-orders', label: 'Held', icon: CirclePause },
@@ -34,11 +48,14 @@ const LINKS: { to: string; label: string; icon: LucideIcon }[] = [
 
 const QuickAccessSidebar: React.FC = () => {
   const enabled = useSettingsStore((s) => s.quickAccessSidebar);
+  const features = useSettingsStore((s) => s.features);
+  const businessProfile = useSettingsStore((s) => s.businessProfile);
   if (!enabled) return null;
   return (
     <aside className="hidden md:flex shrink-0 w-[4.5rem] flex-col border-r border-pos-border bg-pos-card overflow-y-auto">
-      {LINKS.map((l) => {
+      {LINKS.filter((l) => !l.feature || features[l.feature]).map((l) => {
         const Icon = l.icon;
+        const label = typeof l.label === 'function' ? l.label(businessProfile) : l.label;
         return (
           <NavLink
             key={l.to}
@@ -53,7 +70,7 @@ const QuickAccessSidebar: React.FC = () => {
             }
           >
             <Icon className="h-5 w-5" aria-hidden="true" strokeWidth={2} />
-            <span>{l.label}</span>
+            <span>{label}</span>
           </NavLink>
         );
       })}

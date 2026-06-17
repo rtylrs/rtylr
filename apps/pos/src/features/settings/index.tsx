@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
+import type { POSBusinessProfile, POSFeatureKey } from '../../shared/stores/settingsStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import { listPrinters, listSerialPorts } from '../../shared/services/hardware/hardwareDiscovery';
@@ -13,6 +14,24 @@ const INPUT_CLS =
   'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
 const SELECT_CLS =
   'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
+
+const PROFILE_OPTIONS: { value: POSBusinessProfile; label: string }[] = [
+  { value: 'retail', label: 'Retail' },
+  { value: 'quick_service', label: 'Quick service' },
+  { value: 'restaurant', label: 'Restaurant' },
+];
+
+const FEATURE_OPTIONS: { key: POSFeatureKey; label: string }[] = [
+  { key: 'tables', label: 'Tables' },
+  { key: 'kitchenDisplay', label: 'Kitchen display' },
+  { key: 'modifiers', label: 'Modifiers' },
+  { key: 'combos', label: 'Combos' },
+  { key: 'tips', label: 'Tips' },
+  { key: 'giftCards', label: 'Gift cards' },
+  { key: 'customers', label: 'Customers' },
+  { key: 'inventory', label: 'Inventory' },
+  { key: 'cashDrawer', label: 'Cash drawer' },
+];
 
 const SettingsScreen: React.FC = () => {
   const s = useSettingsStore();
@@ -84,6 +103,41 @@ const SettingsScreen: React.FC = () => {
           </div>
         </Section>
 
+        <Section title="POS Experience">
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-pos-muted">Workflow</label>
+              <select
+                value={s.businessProfile}
+                onChange={(e) => s.setBusinessProfile(e.target.value as POSBusinessProfile)}
+                className={SELECT_CLS}
+              >
+                {PROFILE_OPTIONS.map((profile) => (
+                  <option key={profile.value} value={profile.value}>
+                    {profile.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {FEATURE_OPTIONS.map((feature) => (
+                <label
+                  key={feature.key}
+                  className="flex items-center gap-2 rounded-lg bg-white/5 border border-pos-border p-3 text-sm text-pos-text"
+                >
+                  <input
+                    type="checkbox"
+                    checked={s.features[feature.key]}
+                    onChange={(e) => s.setFeature(feature.key, e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                  {feature.label}
+                </label>
+              ))}
+            </div>
+          </div>
+        </Section>
+
         <Section title="Tax">
           <label className="text-xs text-pos-muted">Tax rate (%)</label>
           <input
@@ -95,20 +149,22 @@ const SettingsScreen: React.FC = () => {
           />
         </Section>
 
-        <Section title="Tip Presets">
-          <div className="grid grid-cols-4 gap-2">
-            {s.tipPresets.map((pct, i) => (
-              <input
-                key={i}
-                type="number"
-                step="1"
-                value={Math.round(pct * 100)}
-                onChange={(e) => updateTip(i, Number(e.target.value))}
-                className="h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25 text-center"
-              />
-            ))}
-          </div>
-        </Section>
+        {s.features.tips && (
+          <Section title="Tip Presets">
+            <div className="grid grid-cols-4 gap-2">
+              {s.tipPresets.map((pct, i) => (
+                <input
+                  key={i}
+                  type="number"
+                  step="1"
+                  value={Math.round(pct * 100)}
+                  onChange={(e) => updateTip(i, Number(e.target.value))}
+                  className="h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25 text-center"
+                />
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="Receipt">
           <label className="text-xs text-pos-muted">Footer message</label>
@@ -261,125 +317,133 @@ const SettingsScreen: React.FC = () => {
             />
           </div>
 
-          {/* Cash drawer */}
-          <div className="space-y-2 pt-1">
-            <label className="flex items-center gap-2 text-sm text-pos-text">
-              <input
-                type="checkbox"
-                checked={s.printer.cashDrawerKick}
-                onChange={(e) => s.setPrinter({ cashDrawerKick: e.target.checked })}
-                className="w-5 h-5"
-              />
-              Kick cash drawer on print
-            </label>
-            {s.printer.cashDrawerKick && (
-              <div>
-                <label className="text-xs text-pos-muted">Drawer pin</label>
-                <select
-                  value={s.printer.drawerPin}
-                  onChange={(e) =>
-                    s.setPrinter({ drawerPin: Number(e.target.value) as 2 | 5 })
-                  }
-                  className={SELECT_CLS}
-                >
-                  <option value={2}>Pin 2 (most printers)</option>
-                  <option value={5}>Pin 5</option>
-                </select>
-              </div>
-            )}
-          </div>
-        </Section>
-
-        <Section title="KDS Hardware Display">
-          <p className="text-xs text-pos-muted">
-            Connect a dedicated hardware KDS display (VFD, kitchen screen) via serial or network.
-            Set to None to use the browser-based KDS only.
-          </p>
-          <div>
-            <label className="text-xs text-pos-muted">Transport</label>
-            <select
-              value={s.kdsHardware.transport}
-              onChange={(e) =>
-                s.setKdsHardware({
-                  transport: e.target.value as 'none' | 'serial' | 'network',
-                })
-              }
-              className={SELECT_CLS}
-            >
-              <option value="none">None (software KDS only)</option>
-              <option value="serial">Serial / USB-Serial</option>
-              <option value="network">Network (TCP/IP)</option>
-            </select>
-          </div>
-          {s.kdsHardware.transport === 'serial' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label className="text-xs text-pos-muted">Serial port</label>
-                {serialPorts.length > 0 ? (
+          {s.features.cashDrawer && (
+            <div className="space-y-2 pt-1">
+              <label className="flex items-center gap-2 text-sm text-pos-text">
+                <input
+                  type="checkbox"
+                  checked={s.printer.cashDrawerKick}
+                  onChange={(e) => s.setPrinter({ cashDrawerKick: e.target.checked })}
+                  className="w-5 h-5"
+                />
+                Kick cash drawer on print
+              </label>
+              {s.printer.cashDrawerKick && (
+                <div>
+                  <label className="text-xs text-pos-muted">Drawer pin</label>
                   <select
-                    value={s.kdsHardware.serialPort}
-                    onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                    value={s.printer.drawerPin}
+                    onChange={(e) =>
+                      s.setPrinter({ drawerPin: Number(e.target.value) as 2 | 5 })
+                    }
                     className={SELECT_CLS}
                   >
-                    <option value="">- select port -</option>
-                    {serialPorts.map((p) => (
-                      <option key={p.portName} value={p.portName}>
-                        {p.portName}
-                        {p.product ? ` (${p.product})` : ''}
+                    <option value={2}>Pin 2 (most printers)</option>
+                    <option value={5}>Pin 5</option>
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
+        </Section>
+
+        {s.features.kitchenDisplay && (
+          <Section title="KDS Hardware Display">
+            <p className="text-xs text-pos-muted">
+              Connect a dedicated hardware KDS display (VFD, kitchen screen) via serial or network.
+              Set to None to use the browser-based KDS only.
+            </p>
+            <div>
+              <label className="text-xs text-pos-muted">Transport</label>
+              <select
+                value={s.kdsHardware.transport}
+                onChange={(e) =>
+                  s.setKdsHardware({
+                    transport: e.target.value as 'none' | 'serial' | 'network',
+                  })
+                }
+                className={SELECT_CLS}
+              >
+                <option value="none">None (software KDS only)</option>
+                <option value="serial">Serial / USB-Serial</option>
+                <option value="network">Network (TCP/IP)</option>
+              </select>
+            </div>
+            {s.kdsHardware.transport === 'serial' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="text-xs text-pos-muted">Serial port</label>
+                  {serialPorts.length > 0 ? (
+                    <select
+                      value={s.kdsHardware.serialPort}
+                      onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                      className={SELECT_CLS}
+                    >
+                      <option value="">- select port -</option>
+                      {serialPorts.map((p) => (
+                        <option key={p.portName} value={p.portName}>
+                          {p.portName}
+                          {p.product ? ` (${p.product})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      value={s.kdsHardware.serialPort}
+                      placeholder="e.g. /dev/tty.usbserial-1420"
+                      onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                      className={INPUT_CLS}
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="text-xs text-pos-muted">Baud rate</label>
+                  <select
+                    value={s.kdsHardware.serialBaudRate}
+                    onChange={(e) => s.setKdsHardware({ serialBaudRate: Number(e.target.value) })}
+                    className={SELECT_CLS}
+                  >
+                    {[9600, 19200, 38400, 115200].map((b) => (
+                      <option key={b} value={b}>
+                        {b}
                       </option>
                     ))}
                   </select>
-                ) : (
+                </div>
+              </div>
+            )}
+            {s.kdsHardware.transport === 'network' && (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="text-xs text-pos-muted">Host / IP</label>
                   <input
-                    value={s.kdsHardware.serialPort}
-                    placeholder="e.g. /dev/tty.usbserial-1420"
-                    onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                    value={s.kdsHardware.networkHost}
+                    placeholder="e.g. 192.168.1.200"
+                    onChange={(e) => s.setKdsHardware({ networkHost: e.target.value })}
                     className={INPUT_CLS}
                   />
-                )}
+                </div>
+                <div>
+                  <label className="text-xs text-pos-muted">Port</label>
+                  <input
+                    type="number"
+                    value={s.kdsHardware.networkPort}
+                    onChange={(e) => s.setKdsHardware({ networkPort: Number(e.target.value) })}
+                    className={INPUT_CLS}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-xs text-pos-muted">Baud rate</label>
-                <select
-                  value={s.kdsHardware.serialBaudRate}
-                  onChange={(e) => s.setKdsHardware({ serialBaudRate: Number(e.target.value) })}
-                  className={SELECT_CLS}
-                >
-                  {[9600, 19200, 38400, 115200].map((b) => (
-                    <option key={b} value={b}>
-                      {b}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-          {s.kdsHardware.transport === 'network' && (
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="text-xs text-pos-muted">Host / IP</label>
-                <input
-                  value={s.kdsHardware.networkHost}
-                  placeholder="e.g. 192.168.1.200"
-                  onChange={(e) => s.setKdsHardware({ networkHost: e.target.value })}
-                  className={INPUT_CLS}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-pos-muted">Port</label>
-                <input
-                  type="number"
-                  value={s.kdsHardware.networkPort}
-                  onChange={(e) => s.setKdsHardware({ networkPort: Number(e.target.value) })}
-                  className={INPUT_CLS}
-                />
-              </div>
-            </div>
-          )}
-        </Section>
+            )}
+          </Section>
+        )}
 
         <Section title="Hardware Status">
-          <HardwareHealthCheck printer={s.printer} kds={s.kdsHardware} />
+          <HardwareHealthCheck
+            printer={s.printer}
+            kds={s.kdsHardware}
+            showCashDrawer={s.features.cashDrawer}
+            showKds={s.features.kitchenDisplay}
+          />
         </Section>
 
         <Section title="Workstation">

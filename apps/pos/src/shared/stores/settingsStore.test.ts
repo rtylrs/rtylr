@@ -11,7 +11,19 @@ const defaults = {
   tipPresets: [0.1, 0.15, 0.18, 0.2],
   currency: 'USD',
   currencySymbol: '$',
-  receiptFooter: 'Thank you for your visit!',
+  receiptFooter: 'Thank you for your purchase!',
+  businessProfile: 'retail',
+  features: {
+    tables: false,
+    kitchenDisplay: false,
+    modifiers: false,
+    combos: false,
+    tips: false,
+    giftCards: true,
+    customers: true,
+    inventory: true,
+    cashDrawer: true,
+  },
   printer: {
     name: 'Default',
     copies: 1,
@@ -43,7 +55,19 @@ describe('settingsStore', () => {
     expect(getState().tipPresets).toEqual([0.1, 0.15, 0.18, 0.2]);
     expect(getState().currency).toBe('USD');
     expect(getState().currencySymbol).toBe('$');
-    expect(getState().receiptFooter).toBe('Thank you for your visit!');
+    expect(getState().receiptFooter).toBe('Thank you for your purchase!');
+    expect(getState().businessProfile).toBe('retail');
+    expect(getState().features).toEqual({
+      tables: false,
+      kitchenDisplay: false,
+      modifiers: false,
+      combos: false,
+      tips: false,
+      giftCards: true,
+      customers: true,
+      inventory: true,
+      cashDrawer: true,
+    });
     expect(getState().printer).toEqual({
       name: 'Default',
       copies: 1,
@@ -134,6 +158,22 @@ describe('settingsStore', () => {
   it('sets empty receipt footer', () => {
     act(() => getState().setReceiptFooter(''));
     expect(getState().receiptFooter).toBe('');
+  });
+
+  // ── POS Experience ────────────────────────────────────────────
+
+  it('applies restaurant profile feature defaults', () => {
+    act(() => getState().setBusinessProfile('restaurant'));
+    expect(getState().businessProfile).toBe('restaurant');
+    expect(getState().features.tables).toBe(true);
+    expect(getState().features.kitchenDisplay).toBe(true);
+    expect(getState().features.tips).toBe(true);
+  });
+
+  it('updates individual POS features', () => {
+    act(() => getState().setFeature('tables', true));
+    expect(getState().features.tables).toBe(true);
+    expect(getState().features.kitchenDisplay).toBe(false);
   });
 
   // ── setPrinter ─────────────────────────────────────────────────
