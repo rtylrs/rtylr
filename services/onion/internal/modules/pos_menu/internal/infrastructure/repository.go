@@ -31,29 +31,32 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			p.category_id,
 			COALESCE(c.name, 'Other') AS category_name,
 			p.name,
-				p.sku,
-				p.sale_price,
-				p.description,
-				COALESCE(img.url, '') AS image_url,
-				p.stock_quantity,
-				p.is_active,
-				p.created_at,
-				p.updated_at
+			p.sku,
+			p.sale_price,
+			p.description,
+			COALESCE(img.url, '') AS image_url,
+			COALESCE(pst.total_quantity, p.stock_quantity) AS stock_quantity,
+			p.is_active,
+			p.created_at,
+			p.updated_at
 		FROM erp_products p
-			LEFT JOIN erp_categories c
-			  ON c.id = p.category_id
-			 AND c.owner_id = p.owner_id
-			LEFT JOIN erp_product_images img
-			  ON img.id = (
+		LEFT JOIN erp_categories c
+		  ON c.id = p.category_id
+		 AND c.owner_id = p.owner_id
+		LEFT JOIN product_stock_total pst
+		  ON pst.owner_id = p.owner_id
+		 AND pst.product_id = p.id
+		LEFT JOIN erp_product_images img
+		  ON img.id = (
 				SELECT i.id
 				FROM erp_product_images i
 				WHERE i.owner_id = p.owner_id
 				  AND i.product_id = p.id
 				ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
 				LIMIT 1
-			  )
-			WHERE p.owner_id = ?
-			  AND p.is_active = TRUE
+		  )
+		WHERE p.owner_id = ?
+		  AND p.is_active = TRUE
 		ORDER BY c.name, p.name
 	`, ownerID)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type MenuItemPayload struct {
@@ -62,17 +63,13 @@ func toMenuItemPayload(item domain.MenuItem) MenuItemPayload {
 	}
 }
 
-func resolveAuthenticatedMenuOwnerID(ctx context.Context, svc *application.Service) (int64, *errorModels.ServerError) {
+func resolveAuthenticatedMenuOwnerID(ctx context.Context) (int64, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil {
 		return 0, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID, err := svc.BusinessOwnerID(ctx, authUser.UserID, authUser.BusinessID)
-	if err != nil {
-		return 0, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to resolve business owner"}
-	}
-	return ownerID, nil
+	return tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID), nil
 }
 
 // --- List ---
@@ -88,7 +85,7 @@ type (
 )
 
 func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsRequest) (ListMenuItemsResponse, *errorModels.ServerError) {
-	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx, h.Service)
+	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx)
 	if ownerErr != nil {
 		return ListMenuItemsResponse{}, ownerErr
 	}
@@ -132,7 +129,7 @@ func (h *CreateMenuItemHandler) Validate(_ context.Context, req *CreateMenuItemR
 }
 
 func (h *CreateMenuItemHandler) Serve(ctx context.Context, req *CreateMenuItemRequest) (CreateMenuItemResponse, *errorModels.ServerError) {
-	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx, h.Service)
+	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx)
 	if ownerErr != nil {
 		return CreateMenuItemResponse{}, ownerErr
 	}
