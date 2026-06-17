@@ -27,9 +27,13 @@ export interface TerminalPayload {
 }
 
 export interface TablePayload {
-  name: string;
+  name?: string;
+  label?: string;
+  location_id?: number;
+  locationId?: number;
   floorId?: number;
   seats?: number;
+  capacity?: number;
   [key: string]: unknown;
 }
 
@@ -272,6 +276,14 @@ function toTerminalPayload(data: Partial<TerminalPayload>) {
   };
 }
 
+function toTablePayload(data: Partial<TablePayload>) {
+  return {
+    label: data.label ?? data.name,
+    location_id: data.location_id ?? data.locationId ?? data.floorId,
+    seats: data.seats ?? data.capacity,
+  };
+}
+
 // ── Service ────────────────────────────────────────────────────────────────
 
 export const posService = {
@@ -301,8 +313,9 @@ export const posService = {
 
   // ── Tables ────────────────────────────────────────────────────
   getTables: () => safe.get('/pos/tables'),
-  createTable: (data: TablePayload) => safe.post('/pos/tables', data),
-  updateTable: (id: number, data: Partial<TablePayload>) => safe.put(`/pos/tables/${id}`, data),
+  createTable: (data: TablePayload) => safe.post('/pos/tables', toTablePayload(data)),
+  updateTable: (id: number, data: Partial<TablePayload>) =>
+    safe.put(`/pos/tables/${id}`, toTablePayload(data)),
   updateTableStatus: (id: number, status: string) =>
     safe.put(`/pos/tables/${id}/status`, { status }),
   deleteTable: (id: number) => safe.delete(`/pos/tables/${id}`),

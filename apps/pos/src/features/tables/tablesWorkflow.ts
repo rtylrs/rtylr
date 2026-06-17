@@ -45,6 +45,8 @@ function record(value: unknown): Record<string, unknown> | null {
 
 function tableStatus(value: unknown): TableStatus {
   if (value === 'occupied') return 'seated';
+  if (value === 'reserved') return 'ordered';
+  if (value === 'cleaning') return 'dirty';
   return statuses.includes(value as TableStatus) ? (value as TableStatus) : 'available';
 }
 
@@ -59,7 +61,7 @@ export function mapRemoteTables(rawTables: unknown[]): TableRow[] {
     return [
       {
         id,
-        number: textOrUndefined(raw.number ?? raw.name) ?? String(id),
+        number: textOrUndefined(raw.number ?? raw.label ?? raw.name) ?? String(id),
         seats: positiveInteger(raw.seats) ?? 4,
         status: tableStatus(raw.status),
         guests: optionalNonNegativeInteger(raw.guests),

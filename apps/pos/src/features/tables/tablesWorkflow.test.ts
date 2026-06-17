@@ -46,6 +46,34 @@ describe('mapRemoteTables', () => {
     ]);
   });
 
+  it('maps dedicated table API labels and statuses', () => {
+    expect(
+      mapRemoteTables([
+        { id: 2, label: ' Window ', seats: 3, status: 'reserved' },
+        { id: 3, label: ' Patio ', seats: 5, status: 'cleaning' },
+      ]),
+    ).toEqual([
+      {
+        id: 2,
+        number: 'Window',
+        seats: 3,
+        status: 'ordered',
+        guests: undefined,
+        total: undefined,
+        server: undefined,
+      },
+      {
+        id: 3,
+        number: 'Patio',
+        seats: 5,
+        status: 'dirty',
+        guests: undefined,
+        total: undefined,
+        server: undefined,
+      },
+    ]);
+  });
+
   it('normalizes common table API response envelopes', () => {
     expect(
       normalizeTablesResponse({

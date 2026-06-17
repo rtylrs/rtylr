@@ -105,6 +105,24 @@ describe('posService', () => {
     expect(safe.get).toHaveBeenCalledWith('/pos/tables');
   });
 
+  it('createTable maps UI names to backend labels', () => {
+    posService.createTable({ name: 'Patio 1', locationId: 2, seats: 4 });
+    expect(safe.post).toHaveBeenCalledWith('/pos/tables', {
+      label: 'Patio 1',
+      location_id: 2,
+      seats: 4,
+    });
+  });
+
+  it('updateTable maps UI names to backend labels', () => {
+    posService.updateTable(7, { name: 'Window 2', location_id: 3, capacity: 6 });
+    expect(safe.put).toHaveBeenCalledWith('/pos/tables/7', {
+      label: 'Window 2',
+      location_id: 3,
+      seats: 6,
+    });
+  });
+
   it('updateTableStatus calls PUT /pos/tables/:id/status', () => {
     posService.updateTableStatus(4, 'occupied');
     expect(safe.put).toHaveBeenCalledWith('/pos/tables/4/status', { status: 'occupied' });
