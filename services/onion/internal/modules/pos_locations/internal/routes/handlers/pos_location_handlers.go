@@ -79,7 +79,7 @@ type CreateLocationRequest struct {
 	Name     string `json:"name"`
 	Address  string `json:"address"`
 	Phone    string `json:"phone"`
-	IsActive bool   `json:"is_active"`
+	IsActive *bool  `json:"is_active"`
 }
 
 type CreateLocationResponse struct {
@@ -101,12 +101,16 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 		return CreateLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	isActive := true
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
 	id, err := h.Service.Create(ctx, domain.LocationInput{
 		OwnerID:  ownerID,
 		Name:     req.Name,
 		Address:  req.Address,
 		Phone:    req.Phone,
-		IsActive: req.IsActive,
+		IsActive: isActive,
 	})
 	if err != nil {
 		return CreateLocationResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create location"}
@@ -124,7 +128,7 @@ type UpdateLocationRequest struct {
 	Name     string `json:"name"`
 	Address  string `json:"address"`
 	Phone    string `json:"phone"`
-	IsActive bool   `json:"is_active"`
+	IsActive *bool  `json:"is_active"`
 }
 
 type UpdateLocationResponse struct {

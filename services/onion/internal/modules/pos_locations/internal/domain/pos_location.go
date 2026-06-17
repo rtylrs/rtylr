@@ -32,5 +32,5 @@ type LocationUpdateInput struct {
 	Name     string
 	Address  string
 	Phone    string
-	IsActive bool
+	IsActive *bool
 }

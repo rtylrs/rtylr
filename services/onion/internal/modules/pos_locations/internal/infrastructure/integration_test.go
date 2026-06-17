@@ -182,6 +182,7 @@ func TestLocations_Update_ChangesName(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	active := true
 
 	newID, err := repo.Create(ctx, domain.LocationInput{
 		OwnerID:  testutil.OwnerID,
@@ -196,7 +197,7 @@ func TestLocations_Update_ChangesName(t *testing.T) {
 		ID:       newID,
 		OwnerID:  testutil.OwnerID,
 		Name:     "After Update",
-		IsActive: true,
+		IsActive: &active,
 	})
 	if err != nil {
 		t.Fatalf("Update: %v", err)
@@ -221,12 +222,13 @@ func TestLocations_Update_UnknownIDReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	active := true
 
 	err := repo.Update(ctx, domain.LocationUpdateInput{
 		ID:       9999999,
 		OwnerID:  testutil.OwnerID,
 		Name:     "Ghost",
-		IsActive: true,
+		IsActive: &active,
 	})
 	if err == nil {
 		t.Fatal("expected error for unknown location, got nil")

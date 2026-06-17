@@ -61,11 +61,15 @@ func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInput) error {
+	isActive := sql.NullBool{}
+	if input.IsActive != nil {
+		isActive = sql.NullBool{Bool: *input.IsActive, Valid: true}
+	}
 	result, err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
 		Name:     input.Name,
 		Address:  sql.NullString{String: input.Address, Valid: input.Address != ""},
 		Phone:    sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
+		IsActive: isActive,
 		ID:       input.ID,
 		OwnerID:  input.OwnerID,
 	})

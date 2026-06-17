@@ -17,21 +17,6 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.GetCurrentSessionHandler{Service: service},
 	)
 
-	serverHttp.RegisterPOSTWithValidation[handlers.OpenSessionRequest, handlers.OpenSessionResponse](
-		ctx, router, handlers.OpenSessionRoutes(),
-		&handlers.OpenSessionHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.CloseSessionRequest, handlers.CloseSessionResponse](
-		ctx, router, handlers.CloseSessionRoutes(),
-		&handlers.CloseSessionHandler{Service: service},
-	)
-
-	serverHttp.RegisterGETWithValidation[handlers.ListSessionsRequest, handlers.ListSessionsResponse](
-		ctx, router, handlers.ListSessionsRoutes(),
-		&handlers.ListSessionsHandler{Service: service},
-	)
-
 	// Orders
 	serverHttp.RegisterGETWithValidation[handlers.ListOrdersRequest, handlers.ListOrdersResponse](
 		ctx, router, handlers.ListOrdersRoutes(),
@@ -66,17 +51,6 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.ProcessRefundRequest, handlers.ProcessRefundResponse](
 		ctx, router, handlers.ProcessRefundRoutes(),
 		&handlers.ProcessRefundHandler{Service: service},
-	)
-
-	// Locations
-	serverHttp.RegisterGET[handlers.ListLocationsRequest, handlers.ListLocationsResponse](
-		ctx, router, handlers.ListLocationsRoutes(),
-		&handlers.ListLocationsHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateLocationRequest, handlers.CreateLocationResponse](
-		ctx, router, handlers.ListLocationsRoutes(),
-		&handlers.CreateLocationHandler{Service: service},
 	)
 
 	// Dashboard

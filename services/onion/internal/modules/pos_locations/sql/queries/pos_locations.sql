@@ -7,5 +7,5 @@ INSERT INTO pos_locations (owner_id, name, address, phone, is_active)
 VALUES (?, ?, ?, ?, ?);
 
 -- name: UpdateLocation :execresult
-UPDATE pos_locations SET name = ?, address = ?, phone = ?, is_active = ?
+UPDATE pos_locations SET name = ?, address = ?, phone = ?, is_active = COALESCE(?, is_active)
 WHERE id = ? AND owner_id = ?;
