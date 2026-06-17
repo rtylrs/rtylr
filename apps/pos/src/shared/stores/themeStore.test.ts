@@ -54,7 +54,7 @@ describe('themeStore', () => {
 
   it('sets an arbitrary theme name', () => {
     act(() => getState().setTheme('solarized'));
-    expect(getState().theme).toBe('solarized');
+    expect(getState().theme).toBe('dark');
   });
 
   // ── Edge cases ─────────────────────────────────────────────────
@@ -70,10 +70,9 @@ describe('themeStore', () => {
     expect(getState().theme).toBe('dark');
   });
 
-  it('toggle with custom theme treats non-light as dark path', () => {
-    act(() => getState().setTheme('solarized'));
+  it('toggle with custom dark theme goes to light', () => {
+    act(() => getState().setTheme('aurora'));
     act(() => getState().toggleTheme());
-    // 'solarized' !== 'light', so toggle goes to 'light'
     expect(getState().theme).toBe('light');
   });
 });

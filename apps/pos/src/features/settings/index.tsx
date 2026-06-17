@@ -4,7 +4,11 @@ import { unwrap } from '@voxire/api';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { POSBusinessProfile, POSFeatureKey } from '../../shared/stores/settingsStore';
-import { useThemeStore } from '../../shared/stores/themeStore';
+import {
+  normalizePOSTheme,
+  POS_THEME_OPTIONS,
+  useThemeStore,
+} from '../../shared/stores/themeStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import {
@@ -84,7 +88,7 @@ const SettingsScreen: React.FC = () => {
   const savePOSSettings = async () => {
     setSavingPOSSettings(true);
     try {
-      const selectedTheme: POSTheme = theme === 'light' ? 'light' : 'dark';
+      const selectedTheme: POSTheme = normalizePOSTheme(theme);
       const response = await unwrap(
         posService.updatePOSSettings({
           business_profile: s.businessProfile,
@@ -159,12 +163,15 @@ const SettingsScreen: React.FC = () => {
             <div>
               <label className="text-xs text-pos-muted">Default theme</label>
               <select
-                value={theme === 'light' ? 'light' : 'dark'}
+                value={normalizePOSTheme(theme)}
                 onChange={(e) => setTheme(e.target.value)}
                 className={SELECT_CLS}
               >
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
+                {POS_THEME_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

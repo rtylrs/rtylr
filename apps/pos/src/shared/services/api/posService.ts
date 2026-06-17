@@ -162,7 +162,7 @@ export interface LoyaltyPayload {
 }
 
 export type POSBusinessProfile = 'retail' | 'restaurant' | 'quick_service';
-export type POSTheme = 'dark' | 'light';
+export type POSTheme = 'dark' | 'light' | 'midnight' | 'slate' | 'aurora';
 
 export interface POSFeatureSettingsPayload {
   tables: boolean;
