@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Brands -------------------------------------------------------------
@@ -61,7 +62,8 @@ func (h *ListBrandsHandler) Serve(ctx context.Context, _ *ListBrandsRequest) (Li
 		}
 	}
 
-	brands, err := h.Service.ListBrands(ctx, authUser.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	brands, err := h.Service.ListBrands(ctx, ownerID)
 	if err != nil {
 		return ListBrandsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -127,7 +129,8 @@ func (h *CreateBrandHandler) Serve(ctx context.Context, req *CreateBrandRequest)
 		Description: req.Description,
 	}
 
-	id, err := h.Service.CreateBrand(ctx, authUser.UserID, input)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreateBrand(ctx, ownerID, input)
 	if err != nil {
 		return CreateBrandResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -196,7 +199,8 @@ func (h *UpdateBrandHandler) Serve(ctx context.Context, req *UpdateBrandRequest)
 		Description: req.Description,
 	}
 
-	if err := h.Service.UpdateBrand(ctx, authUser.UserID, req.ID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateBrand(ctx, ownerID, req.ID, input); err != nil {
 		return UpdateBrandResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -247,7 +251,8 @@ func (h *DeleteBrandHandler) Serve(ctx context.Context, req *DeleteBrandRequest)
 		}
 	}
 
-	if err := h.Service.DeleteBrand(ctx, authUser.UserID, req.ID); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.DeleteBrand(ctx, ownerID, req.ID); err != nil {
 		return DeleteBrandResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

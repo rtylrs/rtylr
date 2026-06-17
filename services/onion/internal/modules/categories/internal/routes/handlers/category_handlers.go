@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/categories/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Categories ---------------------------------------------------------
@@ -56,7 +57,8 @@ func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequ
 		}
 	}
 
-	categories, err := h.Service.ListCategories(ctx, authUser.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	categories, err := h.Service.ListCategories(ctx, ownerID)
 	if err != nil {
 		return ListCategoriesResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -120,7 +122,8 @@ func (h *CreateCategoryHandler) Serve(ctx context.Context, req *CreateCategoryRe
 		Description: req.Description,
 	}
 
-	id, err := h.Service.CreateCategory(ctx, authUser.UserID, input)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreateCategory(ctx, ownerID, input)
 	if err != nil {
 		return CreateCategoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -187,7 +190,8 @@ func (h *UpdateCategoryHandler) Serve(ctx context.Context, req *UpdateCategoryRe
 		Description: req.Description,
 	}
 
-	if err := h.Service.UpdateCategory(ctx, authUser.UserID, req.ID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateCategory(ctx, ownerID, req.ID, input); err != nil {
 		return UpdateCategoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -238,7 +242,8 @@ func (h *DeleteCategoryHandler) Serve(ctx context.Context, req *DeleteCategoryRe
 		}
 	}
 
-	if err := h.Service.DeleteCategory(ctx, authUser.UserID, req.ID); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.DeleteCategory(ctx, ownerID, req.ID); err != nil {
 		return DeleteCategoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

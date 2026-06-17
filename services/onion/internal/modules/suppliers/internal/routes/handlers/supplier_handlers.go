@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
 )
 
@@ -64,7 +65,8 @@ func (h *ListSuppliersHandler) Serve(ctx context.Context, req *ListSuppliersRequ
 		}
 	}
 
-	suppliers, hasMore, err := h.Service.ListSuppliers(ctx, authUser.UserID, req.Page, req.PageSize)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	suppliers, hasMore, err := h.Service.ListSuppliers(ctx, ownerID, req.Page, req.PageSize)
 	if err != nil {
 		return ListSuppliersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -152,7 +154,8 @@ func (h *CreateSupplierHandler) Serve(ctx context.Context, req *CreateSupplierRe
 		IsActive:     req.IsActive,
 	}
 
-	id, err := h.Service.CreateSupplier(ctx, authUser.UserID, input)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreateSupplier(ctx, ownerID, input)
 	if err != nil {
 		return CreateSupplierResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -234,7 +237,8 @@ func (h *UpdateSupplierHandler) Serve(ctx context.Context, req *UpdateSupplierRe
 		IsActive:     req.IsActive,
 	}
 
-	if err := h.Service.UpdateSupplier(ctx, authUser.UserID, req.ID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateSupplier(ctx, ownerID, req.ID, input); err != nil {
 		if errors.Is(err, domain.ErrSupplierNotFound) {
 			return UpdateSupplierResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,

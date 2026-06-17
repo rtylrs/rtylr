@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Variants -----------------------------------------------------------
@@ -73,7 +74,8 @@ func (h *ListVariantsHandler) Serve(ctx context.Context, req *ListVariantsReques
 		}
 	}
 
-	variants, err := h.Service.ListVariants(ctx, authUser.UserID, req.ProductID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	variants, err := h.Service.ListVariants(ctx, ownerID, req.ProductID)
 	if err != nil {
 		return ListVariantsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -159,7 +161,8 @@ func (h *CreateVariantHandler) Serve(ctx context.Context, req *CreateVariantRequ
 		IsActive:      req.IsActive,
 	}
 
-	id, err := h.Service.CreateVariant(ctx, authUser.UserID, input)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreateVariant(ctx, ownerID, input)
 	if err != nil {
 		return CreateVariantResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -240,7 +243,8 @@ func (h *UpdateVariantHandler) Serve(ctx context.Context, req *UpdateVariantRequ
 		IsActive:      req.IsActive,
 	}
 
-	if err := h.Service.UpdateVariant(ctx, authUser.UserID, req.ID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateVariant(ctx, ownerID, req.ID, input); err != nil {
 		return UpdateVariantResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -291,7 +295,8 @@ func (h *DeleteVariantHandler) Serve(ctx context.Context, req *DeleteVariantRequ
 		}
 	}
 
-	if err := h.Service.DeleteVariant(ctx, authUser.UserID, req.ID); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.DeleteVariant(ctx, ownerID, req.ID); err != nil {
 		return DeleteVariantResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

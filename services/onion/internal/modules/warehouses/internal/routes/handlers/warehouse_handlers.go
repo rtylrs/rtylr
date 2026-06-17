@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Warehouses ---------------------------------------------------------
@@ -69,7 +70,8 @@ func (h *ListWarehousesHandler) Serve(ctx context.Context, _ *ListWarehousesRequ
 		}
 	}
 
-	warehouses, err := h.Service.ListWarehouses(ctx, authUser.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	warehouses, err := h.Service.ListWarehouses(ctx, ownerID)
 	if err != nil {
 		return ListWarehousesResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -145,7 +147,8 @@ func (h *CreateWarehouseHandler) Serve(ctx context.Context, req *CreateWarehouse
 		IsActive:    req.IsActive,
 	}
 
-	id, err := h.Service.CreateWarehouse(ctx, authUser.UserID, input)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreateWarehouse(ctx, ownerID, input)
 	if err != nil {
 		return CreateWarehouseResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -224,7 +227,8 @@ func (h *UpdateWarehouseHandler) Serve(ctx context.Context, req *UpdateWarehouse
 		IsActive:    req.IsActive,
 	}
 
-	if err := h.Service.UpdateWarehouse(ctx, authUser.UserID, req.ID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateWarehouse(ctx, ownerID, req.ID, input); err != nil {
 		return UpdateWarehouseResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -275,7 +279,8 @@ func (h *DeleteWarehouseHandler) Serve(ctx context.Context, req *DeleteWarehouse
 		}
 	}
 
-	if err := h.Service.DeleteWarehouse(ctx, authUser.UserID, req.ID); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.DeleteWarehouse(ctx, ownerID, req.ID); err != nil {
 		return DeleteWarehouseResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

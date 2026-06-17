@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── Update Supplier by Path ID ───────────────────────────────────────────────
@@ -88,7 +89,8 @@ func (h *UpdateSupplierByIDHandler) Serve(ctx context.Context, req *UpdateSuppli
 		IsActive:     req.IsActive,
 	}
 
-	if err := h.Service.UpdateSupplier(ctx, authUser.UserID, id, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateSupplier(ctx, ownerID, id, input); err != nil {
 		if errors.Is(err, domain.ErrSupplierNotFound) {
 			return UpdateSupplierByIDResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,
@@ -144,7 +146,8 @@ func (h *DeleteSupplierByIDHandler) Serve(ctx context.Context, _ *DeleteSupplier
 		}
 	}
 
-	if err := h.Service.DeleteSupplier(ctx, authUser.UserID, id); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.DeleteSupplier(ctx, ownerID, id); err != nil {
 		if errors.Is(err, domain.ErrSupplierNotFound) {
 			return DeleteSupplierByIDResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,

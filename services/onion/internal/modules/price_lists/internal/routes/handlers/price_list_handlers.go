@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/price_lists/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── List Price Lists ─────────────────────────────────────────────────────────
@@ -59,7 +60,8 @@ func (h *ListPriceListsHandler) Serve(ctx context.Context, _ *ListPriceListsRequ
 		}
 	}
 
-	lists, err := h.Service.ListPriceLists(ctx, authUser.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	lists, err := h.Service.ListPriceLists(ctx, ownerID)
 	if err != nil {
 		return ListPriceListsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -119,7 +121,8 @@ func (h *CreatePriceListHandler) Serve(ctx context.Context, req *CreatePriceList
 		}
 	}
 
-	id, err := h.Service.CreatePriceList(ctx, authUser.UserID, domain.PriceListInput{
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreatePriceList(ctx, ownerID, domain.PriceListInput{
 		Name:      req.Name,
 		Currency:  req.Currency,
 		IsDefault: req.IsDefault,
