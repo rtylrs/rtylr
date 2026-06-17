@@ -138,4 +138,34 @@ describe('useMenuItems', () => {
     expect(result.current.items[0].available).toBe(false);
     expect(result.current.items[1].available).toBe(true);
   });
+
+  it('normalizes ERP-backed product aliases', async () => {
+    mockPosService.getMenuItems.mockResolvedValue({
+      items: [
+        {
+          id: 11,
+          name: 'Creatine Biotech',
+          sale_price: '30.00',
+          category_name: 'Creatine',
+          image_url: 'https://example.com/creatine.webp',
+          is_active: true,
+          sku: 'SUPLAB-CREATINE-BIOTECH',
+          stock: '22.000',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useMenuItems(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.items[0]).toMatchObject({
+      id: '11',
+      price: 30,
+      category: 'Creatine',
+      image: 'https://example.com/creatine.webp',
+      available: true,
+      sku: 'SUPLAB-CREATINE-BIOTECH',
+      stock: 22,
+    });
+  });
 });
