@@ -228,7 +228,7 @@ interface FlowLayoutProps {
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { workspaceId } = useParams({ strict: false });
+  const { workspaceId, projectId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
 
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
@@ -863,7 +863,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           <div className="flex flex-col gap-px pt-px">
                             {workspaceProjects.map((project) => {
                               const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
-                              const isActive = location.pathname.startsWith(boardPath);
+                              const isActive = projectId === project.id;
                               return (
                                 <Link
                                   key={project.id}
