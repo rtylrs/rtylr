@@ -22,6 +22,7 @@ import { useDeleteTask } from '../../features/tasks/useTasks';
 interface TaskCardProps {
   task: Task;
   compact?: boolean;
+  showProject?: boolean;
   draggable?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   selected?: boolean;
@@ -135,14 +136,16 @@ const TaskContextMenu: React.FC<{
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   compact,
+  showProject,
   draggable,
   onDragStart,
   selected,
   onSelect,
 }) => {
   const navigate = useNavigate();
-  const { labels, comments, attachments, subtasks } = useFlowStore();
+  const { labels, comments, attachments, subtasks, projects } = useFlowStore();
   const taskLabels = labels.filter((l) => task.labelIds?.includes(l.id));
+  const project = projects.find((p) => p.id === task.projectId);
   const commentCount = comments.filter((c) => c.taskId === task.id).length;
   const attachmentCount = attachments.filter((a) => a.taskId === task.id).length;
   const taskSubtasks = subtasks.filter((s) => s.taskId === task.id);
@@ -192,14 +195,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         whileHover={{ y: -1 }}
       >
         {/* Header row */}
-        <div className="flex items-start gap-2 mb-2">
-          <PriorityIcon priority={task.priority} />
-          <span
-            className="text-[10px] font-mono shrink-0"
-            style={{ color: 'var(--flow-text-dim)' }}
-          >
-            {task.identifier}
-          </span>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <PriorityIcon priority={task.priority} />
+            <span
+              className="text-[10px] font-mono shrink-0"
+              style={{ color: 'var(--flow-text-dim)' }}
+            >
+              {task.identifier}
+            </span>
+          </div>
+          {showProject && (project || task.projectName) && (
+            <span
+              className="min-w-0 max-w-[8rem] truncate rounded px-1.5 py-0.5 text-[10px] font-semibold"
+              style={{
+                background: `${project?.color ?? '#64C5B9'}22`,
+                color: project?.color ?? 'var(--accent)',
+              }}
+              title={project?.name ?? task.projectName}
+            >
+              {project?.name ?? task.projectName}
+            </span>
+          )}
         </div>
 
         {/* Title */}

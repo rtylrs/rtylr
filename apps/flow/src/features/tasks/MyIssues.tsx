@@ -7,7 +7,7 @@ import { useMyIssues } from './useMyIssues';
 import { useCreateTask } from './useTasks';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
-import TaskRow from '../../shared/components/TaskRow';
+import TaskCard from '../../shared/components/TaskCard';
 import EmptyState from '../../shared/components/EmptyState';
 
 // Backlog lives here as the leftmost column instead of as its own
@@ -115,16 +115,13 @@ const MyIssues: React.FC = () => {
                       </p>
                     ) : (
                       colTasks.map((t) => (
-                        <div
+                        <TaskCard
                           key={t.id}
-                          className="rounded-lg overflow-hidden"
-                          style={{
-                            background: 'var(--flow-bg)',
-                            border: '1px solid var(--flow-border)',
-                          }}
-                        >
-                          <TaskRow task={t} showProject selected={selectedTaskIds.includes(t.id)} />
-                        </div>
+                          task={t}
+                          compact
+                          showProject
+                          selected={selectedTaskIds.includes(t.id)}
+                        />
                       ))
                     )}
                   </div>
