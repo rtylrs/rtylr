@@ -11,8 +11,11 @@ const (
 	ProfileRestaurant   = "restaurant"
 	ProfileQuickService = "quick_service"
 
-	ThemeDark  = "dark"
-	ThemeLight = "light"
+	ThemeDark     = "dark"
+	ThemeLight    = "light"
+	ThemeMidnight = "midnight"
+	ThemeSlate    = "slate"
+	ThemeAurora   = "aurora"
 )
 
 var ErrSettingsNotFound = errors.New("pos settings not found")
@@ -114,7 +117,7 @@ func NormalizeProfile(profile string) string {
 
 func NormalizeTheme(theme string) string {
 	switch strings.TrimSpace(theme) {
-	case ThemeDark, ThemeLight:
+	case ThemeDark, ThemeLight, ThemeMidnight, ThemeSlate, ThemeAurora:
 		return strings.TrimSpace(theme)
 	default:
 		return ThemeDark
