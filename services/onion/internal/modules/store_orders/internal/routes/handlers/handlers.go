@@ -96,6 +96,9 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Monetary amounts cannot be negative"}
 	}
 	for _, item := range req.Items {
+		if item.Quantity <= 0 {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Item quantity must be positive"}
+		}
 		if item.Price < 0 || item.Total < 0 {
 			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Item amounts cannot be negative"}
 		}

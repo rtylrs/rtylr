@@ -58,7 +58,7 @@ func validateOrder(input domain.StoreOrderInput) error {
 		return domain.ErrInvalidAmount
 	}
 	for _, item := range input.Items {
-		if item.Price < 0 || item.Total < 0 {
+		if item.Quantity <= 0 || item.Price < 0 || item.Total < 0 {
 			return domain.ErrInvalidAmount
 		}
 	}

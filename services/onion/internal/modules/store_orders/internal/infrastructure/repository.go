@@ -3,11 +3,15 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -52,7 +56,14 @@ func (r *Repository) GetDetail(ctx context.Context, ownerID, orderID int64) (dom
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.StoreOrderInput) (int64, error) {
-	result, err := r.queries.CreateStoreOrder(ctx, sqlc.CreateStoreOrderParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.CreateStoreOrder(ctx, sqlc.CreateStoreOrderParams{
 		OwnerID:         ownerID,
 		CustomerEmail:   sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerName:    sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
@@ -70,8 +81,21 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Sto
 		return 0, err
 	}
 	id, _ := result.LastInsertId()
+	if err := r.upsertOrderCustomerTx(ctx, tx, ownerID, input); err != nil {
+		return 0, err
+	}
+
+	var stockLocationID int64
+	deductStock := shouldDeductStoreOrderStock(input.Status) && hasProductItems(input.Items)
+	if deductStock {
+		stockLocationID, err = stock_core.DefaultLocationID(ctx, tx, ownerID)
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	for _, item := range input.Items {
-		_, err := r.queries.CreateStoreOrderItem(ctx, sqlc.CreateStoreOrderItemParams{
+		_, err := qtx.CreateStoreOrderItem(ctx, sqlc.CreateStoreOrderItemParams{
 			OrderID:   id,
 			ProductID: sql.NullInt64{Int64: item.ProductID, Valid: item.ProductID != 0},
 			Name:      item.Name,
@@ -83,8 +107,147 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Sto
 			logger.Ctx(ctx).Error("Failed to create store order item", logger.Error(err))
 			return 0, err
 		}
+		if deductStock && item.ProductID != 0 {
+			if err := r.deductStoreOrderItemTx(ctx, tx, ownerID, stockLocationID, id, item); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
 	}
 	return id, nil
+}
+
+func shouldDeductStoreOrderStock(status string) bool {
+	switch strings.ToLower(strings.TrimSpace(status)) {
+	case "cancelled", "refunded":
+		return false
+	default:
+		return true
+	}
+}
+
+func hasProductItems(items []domain.OrderItemInput) bool {
+	for _, item := range items {
+		if item.ProductID != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, ownerID, locationID, orderID int64, item domain.OrderItemInput) error {
+	tracked, err := r.productTracksInventory(ctx, tx, ownerID, item.ProductID)
+	if err != nil {
+		return err
+	}
+	if !tracked {
+		return nil
+	}
+
+	_, _, err = stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
+		OwnerID:       ownerID,
+		LocationID:    locationID,
+		ProductID:     item.ProductID,
+		EntryType:     stock_core.EntrySale,
+		Change:        -float64(item.Quantity),
+		ReferenceID:   int64Ptr(orderID),
+		ReferenceType: "store_order",
+		Channel:       "erp",
+		Note:          "store order sale",
+	})
+	if err != nil {
+		return fmt.Errorf("deduct store order stock: %w", err)
+	}
+	return nil
+}
+
+func (r *Repository) productTracksInventory(ctx context.Context, tx *sql.Tx, ownerID, productID int64) (bool, error) {
+	var tracked sql.NullBool
+	err := tx.QueryRowContext(ctx,
+		`SELECT track_inventory FROM erp_products WHERE owner_id = ? AND id = ?`,
+		ownerID, productID).Scan(&tracked)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, fmt.Errorf("store order product %d not found for owner %d", productID, ownerID)
+	}
+	if err != nil {
+		return false, err
+	}
+	return !tracked.Valid || tracked.Bool, nil
+}
+
+func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, ownerID int64, input domain.StoreOrderInput) error {
+	email := strings.TrimSpace(input.CustomerEmail)
+	phone := strings.TrimSpace(input.CustomerPhone)
+	name := strings.TrimSpace(input.CustomerName)
+	if email == "" && phone == "" && name == "" {
+		return nil
+	}
+
+	firstName, lastName := splitCustomerName(name, email, phone)
+	var customerID int64
+	err := tx.QueryRowContext(ctx,
+		`SELECT id FROM crm_customers
+		 WHERE owner_id = ?
+		   AND ((? <> '' AND email = ?) OR (? <> '' AND phone = ?))
+		 ORDER BY CASE WHEN ? <> '' AND email = ? THEN 0 ELSE 1 END
+		 LIMIT 1`,
+		ownerID, email, email, phone, phone, email, email).Scan(&customerID)
+	if errors.Is(err, sql.ErrNoRows) {
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO crm_customers
+			 (owner_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
+			 VALUES (?, ?, ?, ?, ?, ?, 1, NOW(), 'bronze', JSON_ARRAY(), TRUE)`,
+			ownerID, firstName, nullString(lastName), nullString(email), nullString(phone), strconv.FormatFloat(input.Total, 'f', 2, 64))
+		return err
+	}
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE crm_customers
+		 SET first_name = CASE WHEN ? <> '' THEN ? ELSE first_name END,
+		     last_name = CASE WHEN ? <> '' THEN ? ELSE last_name END,
+		     email = CASE WHEN ? <> '' THEN ? ELSE email END,
+		     phone = CASE WHEN ? <> '' THEN ? ELSE phone END,
+		     total_spent = total_spent + ?,
+		     visit_count = visit_count + 1,
+		     last_visit_at = NOW(),
+		     is_active = TRUE
+		 WHERE owner_id = ? AND id = ?`,
+		firstName, firstName,
+		lastName, lastName,
+		email, email,
+		phone, phone,
+		strconv.FormatFloat(input.Total, 'f', 2, 64),
+		ownerID, customerID)
+	return err
+}
+
+func splitCustomerName(name, email, phone string) (string, string) {
+	if name == "" {
+		if email != "" {
+			name = strings.Split(email, "@")[0]
+		} else if phone != "" {
+			name = phone
+		} else {
+			name = "Store customer"
+		}
+	}
+	parts := strings.Fields(name)
+	if len(parts) == 0 {
+		return "Store customer", ""
+	}
+	if len(parts) == 1 {
+		return parts[0], ""
+	}
+	return parts[0], strings.Join(parts[1:], " ")
+}
+
+func int64Ptr(v int64) *int64 {
+	return &v
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.StoreOrderInput) error {
@@ -169,4 +332,8 @@ func nullJSON(s string) []byte {
 		return []byte("{}")
 	}
 	return []byte(s)
+}
+
+func nullString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
 }
