@@ -78,6 +78,26 @@ func (r *Repository) Update(ctx context.Context, input domain.TableUpdateInput) 
 	return nil
 }
 
+func (r *Repository) UpdateStatus(ctx context.Context, input domain.TableStatusInput) error {
+	result, err := r.pool.ExecContext(ctx, `
+		UPDATE pos_tables
+		SET status = ?
+		WHERE id = ? AND owner_id = ?
+	`, input.Status, input.ID, input.OwnerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update table status", logger.Error(err))
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrTableNotFound
+	}
+	return nil
+}
+
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	_, err := r.queries.DeleteTable(ctx, sqlc.DeleteTableParams{
 		ID:      id,

@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	postablev1 "github.com/voxire/voxie/gen/go/pos/table/v1"
 )
 
@@ -47,7 +48,8 @@ func (h *ListTablesHandler) Serve(ctx context.Context, _ *ListTablesRequest) (Li
 	if device.User == nil {
 		return ListTablesResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	tables, err := h.Service.List(ctx, device.User.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	tables, err := h.Service.List(ctx, ownerID)
 	if err != nil {
 		return ListTablesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list tables"}
 	}
@@ -87,8 +89,9 @@ func (h *CreateTableHandler) Serve(ctx context.Context, req *CreateTableRequest)
 	if device.User == nil {
 		return CreateTableResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.Create(ctx, domain.TableInput{
-		OwnerID:    device.User.UserID,
+		OwnerID:    ownerID,
 		LocationID: req.LocationID,
 		Label:      req.Label,
 		Seats:      req.Seats,
@@ -128,6 +131,7 @@ func (h *UpdateTableHandler) Serve(ctx context.Context, req *UpdateTableRequest)
 	if device.User == nil {
 		return UpdateTableResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -139,7 +143,7 @@ func (h *UpdateTableHandler) Serve(ctx context.Context, req *UpdateTableRequest)
 	}
 	if updateErr := h.Service.Update(ctx, domain.TableUpdateInput{
 		ID:         id,
-		OwnerID:    device.User.UserID,
+		OwnerID:    ownerID,
 		LocationID: req.LocationID,
 		Label:      req.Label,
 		Seats:      req.Seats,
@@ -151,6 +155,64 @@ func (h *UpdateTableHandler) Serve(ctx context.Context, req *UpdateTableRequest)
 		return UpdateTableResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update table"}
 	}
 	return UpdateTableResponse{Message: "Table updated successfully"}, nil
+}
+
+// ─── Update Status ────────────────────────────────────────────────────────────
+
+func TableUpdateStatusRoutes() []string { return []string{"/pos/tables/{id}/status"} }
+
+type UpdateTableStatusHandler struct{ Service *application.Service }
+
+type UpdateTableStatusRequest struct {
+	Status string `json:"status"`
+}
+
+type UpdateTableStatusResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateTableStatusHandler) Validate(_ context.Context, req *UpdateTableStatusRequest) *errorModels.ServerError {
+	status := strings.TrimSpace(req.Status)
+	if status == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Status is required"}
+	}
+	if !validTableStatus(status) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid table status"}
+	}
+	return nil
+}
+
+func (h *UpdateTableStatusHandler) Serve(ctx context.Context, req *UpdateTableStatusRequest) (UpdateTableStatusResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdateTableStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return UpdateTableStatusResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid table ID"}
+	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	if updateErr := h.Service.UpdateStatus(ctx, domain.TableStatusInput{
+		ID:      id,
+		OwnerID: ownerID,
+		Status:  strings.TrimSpace(req.Status),
+	}); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrTableNotFound) {
+			return UpdateTableStatusResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Table not found"}
+		}
+		return UpdateTableStatusResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update table status"}
+	}
+	return UpdateTableStatusResponse{Message: "Table status updated successfully"}, nil
+}
+
+func validTableStatus(status string) bool {
+	for _, allowed := range domain.ValidTableStatuses {
+		if status == allowed {
+			return true
+		}
+	}
+	return false
 }
 
 // ─── Delete ───────────────────────────────────────────────────────────────────
@@ -170,12 +232,13 @@ func (h *DeleteTableHandler) Serve(ctx context.Context, _ *DeleteTableRequest) (
 	if device.User == nil {
 		return DeleteTableResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteTableResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid table ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, ownerID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrTableNotFound) {
 			return DeleteTableResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Table not found"}
 		}

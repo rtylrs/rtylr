@@ -26,6 +26,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.UpdateTableHandler{Service: svc},
 	)
 
+	http.RegisterPUTWithValidation[handlers.UpdateTableStatusRequest, handlers.UpdateTableStatusResponse](
+		ctx, router, handlers.TableUpdateStatusRoutes(),
+		&handlers.UpdateTableStatusHandler{Service: svc},
+	)
+
 	http.RegisterDELETEWithValidation[handlers.DeleteTableRequest, handlers.DeleteTableResponse](
 		ctx, router, handlers.TableDeleteRoutes(),
 		&handlers.DeleteTableHandler{Service: svc},

@@ -11,32 +11,6 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
-	// Tables
-	serverHttp.RegisterGET[handlers.ListTablesRequest, handlers.ListTablesResponse](
-		ctx, router, handlers.ListTablesRoutes(),
-		&handlers.ListTablesHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateTableRequest, handlers.CreateTableResponse](
-		ctx, router, handlers.ListTablesRoutes(),
-		&handlers.CreateTableHandler{Service: service},
-	)
-
-	serverHttp.RegisterPUTWithValidation[handlers.UpdateTableRequest, handlers.UpdateTableResponse](
-		ctx, router, handlers.ListTablesRoutes(),
-		&handlers.UpdateTableHandler{Service: service},
-	)
-
-	serverHttp.RegisterPUTWithValidation[handlers.UpdateTableStatusRequest, handlers.UpdateTableStatusResponse](
-		ctx, router, handlers.UpdateTableStatusRoutes(),
-		&handlers.UpdateTableStatusHandler{Service: service},
-	)
-
-	serverHttp.RegisterDELETEWithValidation[handlers.DeleteTableRequest, handlers.DeleteTableResponse](
-		ctx, router, handlers.ListTablesRoutes(),
-		&handlers.DeleteTableHandler{Service: service},
-	)
-
 	// Sessions
 	serverHttp.RegisterGET[handlers.GetCurrentSessionRequest, handlers.GetCurrentSessionResponse](
 		ctx, router, handlers.GetCurrentSessionRoutes(),

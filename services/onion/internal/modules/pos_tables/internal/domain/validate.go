@@ -41,6 +41,21 @@ func ValidateTableUpdateInput(input TableUpdateInput) error {
 	return nil
 }
 
+func ValidateTableStatusInput(input TableStatusInput) error {
+	if input.ID == 0 {
+		return fmt.Errorf("table id is required")
+	}
+	if input.OwnerID == 0 {
+		return fmt.Errorf("owner id is required")
+	}
+	for _, status := range ValidTableStatuses {
+		if input.Status == status {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid status %q", input.Status)
+}
+
 // IsAvailable reports whether the table can accept new customers.
 func (t Table) IsAvailable() bool {
 	return t.Status == "available"

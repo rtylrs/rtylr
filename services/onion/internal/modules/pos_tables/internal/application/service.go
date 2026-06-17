@@ -20,6 +20,7 @@ type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.Table, error)
 	Create(ctx context.Context, input domain.TableInput) (int64, error)
 	Update(ctx context.Context, input domain.TableUpdateInput) error
+	UpdateStatus(ctx context.Context, input domain.TableStatusInput) error
 	Delete(ctx context.Context, ownerID, id int64) error
 }
 
@@ -64,6 +65,17 @@ func (s *Service) Update(ctx context.Context, input domain.TableUpdateInput) err
 		return err
 	}
 	if err := s.repo.Update(ctx, input); err != nil {
+		return err
+	}
+	invalidatePosTablesScope(ctx, input.OwnerID)
+	return nil
+}
+
+func (s *Service) UpdateStatus(ctx context.Context, input domain.TableStatusInput) error {
+	if err := domain.ValidateTableStatusInput(input); err != nil {
+		return err
+	}
+	if err := s.repo.UpdateStatus(ctx, input); err != nil {
 		return err
 	}
 	invalidatePosTablesScope(ctx, input.OwnerID)

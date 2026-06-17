@@ -33,3 +33,9 @@ type TableUpdateInput struct {
 	Seats      int
 	Status     string
 }
+
+type TableStatusInput struct {
+	ID      int64
+	OwnerID int64
+	Status  string
+}
