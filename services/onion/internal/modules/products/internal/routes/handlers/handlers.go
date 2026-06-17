@@ -170,6 +170,14 @@ func (h *CreateProductHandler) Validate(_ context.Context, req *CreateProductReq
 		}
 	}
 
+	if req.StockQuantity < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Stock quantity must not be negative",
+		}
+	}
+
 	return nil
 }
 
@@ -194,6 +202,7 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 		CostPrice:         req.CostPrice,
 		SalePrice:         req.SalePrice,
 		StockQuantity:     req.StockQuantity,
+		StockQuantitySet:  true,
 		BrandID:           req.BrandID,
 		CompareAtPrice:    req.CompareAtPrice,
 		TaxRate:           req.TaxRate,
@@ -244,35 +253,35 @@ type UpdateProductHandler struct {
 }
 
 type UpdateProductRequest struct {
-	ID                int64   `json:"id"`
-	CategoryID        int64   `json:"category_id"`
-	SupplierID        int64   `json:"supplier_id"`
-	Name              string  `json:"name"`
-	SKU               string  `json:"sku"`
-	Barcode           string  `json:"barcode"`
-	Description       string  `json:"description"`
-	Unit              string  `json:"unit"`
-	CostPrice         float64 `json:"cost_price"`
-	SalePrice         float64 `json:"sale_price"`
-	StockQuantity     float64 `json:"stock_quantity"`
-	BrandID           int64   `json:"brand_id"`
-	CompareAtPrice    float64 `json:"compare_at_price"`
-	TaxRate           float64 `json:"tax_rate"`
-	Currency          string  `json:"currency"`
-	Weight            float64 `json:"weight"`
-	WeightUnit        string  `json:"weight_unit"`
-	Length            float64 `json:"length"`
-	Width             float64 `json:"width"`
-	Height            float64 `json:"height"`
-	DimensionUnit     string  `json:"dimension_unit"`
-	CountryOfOrigin   string  `json:"country_of_origin"`
-	HSCode            string  `json:"hs_code"`
-	AllowBackorder    bool    `json:"allow_backorder"`
-	LeadTimeDays      int     `json:"lead_time_days"`
-	LowStockThreshold float64 `json:"low_stock_threshold"`
-	ReorderQuantity   float64 `json:"reorder_quantity"`
-	IsActive          *bool   `json:"is_active"`
-	TrackInventory    *bool   `json:"track_inventory"`
+	ID                int64    `json:"id"`
+	CategoryID        int64    `json:"category_id"`
+	SupplierID        int64    `json:"supplier_id"`
+	Name              string   `json:"name"`
+	SKU               string   `json:"sku"`
+	Barcode           string   `json:"barcode"`
+	Description       string   `json:"description"`
+	Unit              string   `json:"unit"`
+	CostPrice         float64  `json:"cost_price"`
+	SalePrice         float64  `json:"sale_price"`
+	StockQuantity     *float64 `json:"stock_quantity"`
+	BrandID           int64    `json:"brand_id"`
+	CompareAtPrice    float64  `json:"compare_at_price"`
+	TaxRate           float64  `json:"tax_rate"`
+	Currency          string   `json:"currency"`
+	Weight            float64  `json:"weight"`
+	WeightUnit        string   `json:"weight_unit"`
+	Length            float64  `json:"length"`
+	Width             float64  `json:"width"`
+	Height            float64  `json:"height"`
+	DimensionUnit     string   `json:"dimension_unit"`
+	CountryOfOrigin   string   `json:"country_of_origin"`
+	HSCode            string   `json:"hs_code"`
+	AllowBackorder    bool     `json:"allow_backorder"`
+	LeadTimeDays      int      `json:"lead_time_days"`
+	LowStockThreshold float64  `json:"low_stock_threshold"`
+	ReorderQuantity   float64  `json:"reorder_quantity"`
+	IsActive          *bool    `json:"is_active"`
+	TrackInventory    *bool    `json:"track_inventory"`
 
 	Attributes []domain.ProductAttributeInput `json:"attributes"`
 }
@@ -315,6 +324,14 @@ func (h *UpdateProductHandler) Validate(_ context.Context, req *UpdateProductReq
 		}
 	}
 
+	if req.StockQuantity != nil && *req.StockQuantity < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Stock quantity must not be negative",
+		}
+	}
+
 	return nil
 }
 
@@ -348,7 +365,6 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		Unit:              req.Unit,
 		CostPrice:         req.CostPrice,
 		SalePrice:         req.SalePrice,
-		StockQuantity:     req.StockQuantity,
 		BrandID:           req.BrandID,
 		CompareAtPrice:    req.CompareAtPrice,
 		TaxRate:           req.TaxRate,
@@ -367,6 +383,10 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		ReorderQuantity:   req.ReorderQuantity,
 		IsActive:          isActive,
 		TrackInventory:    trackInventory,
+	}
+	if req.StockQuantity != nil {
+		input.StockQuantity = *req.StockQuantity
+		input.StockQuantitySet = true
 	}
 
 	if err := h.Service.UpdateProduct(ctx, ownerID, req.ID, input); err != nil {

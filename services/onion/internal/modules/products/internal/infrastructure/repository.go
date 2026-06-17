@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/Masterminds/squirrel"
@@ -11,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -130,7 +132,14 @@ func (r *Repository) GetProductByBarcode(ctx context.Context, ownerID int64, bar
 }
 
 func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {
-	result, err := r.queries.CreateProduct(ctx, sqlc.CreateProductParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.CreateProduct(ctx, sqlc.CreateProductParams{
 		OwnerID:           ownerID,
 		CategoryID:        nullInt64(input.CategoryID),
 		SupplierID:        nullInt64(input.SupplierID),
@@ -141,7 +150,6 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		Unit:              nullString(input.Unit),
 		CostPrice:         strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:         strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
-		StockQuantity:     strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
 		BrandID:           nullInt64(input.BrandID),
 		CompareAtPrice:    strconv.FormatFloat(input.CompareAtPrice, 'f', -1, 64),
 		TaxRate:           strconv.FormatFloat(input.TaxRate, 'f', -1, 64),
@@ -172,11 +180,36 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		return 0, err
 	}
 
+	if input.StockQuantity != 0 {
+		if err := r.applyProductStockTotal(ctx, tx, ownerID, id, 0, input.StockQuantity, stock_core.EntryOpening, "product opening stock"); err != nil {
+			return 0, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
 	return id, nil
 }
 
 func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input domain.ProductInput) error {
-	err := r.queries.UpdateProduct(ctx, sqlc.UpdateProductParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	currentStock, err := r.lockProductStock(ctx, tx, ownerID, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrProductNotFound
+		}
+		return err
+	}
+
+	qtx := r.queries.WithTx(tx)
+	err = qtx.UpdateProduct(ctx, sqlc.UpdateProductParams{
 		CategoryID:        nullInt64(input.CategoryID),
 		SupplierID:        nullInt64(input.SupplierID),
 		Name:              input.Name,
@@ -186,7 +219,6 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		Unit:              nullString(input.Unit),
 		CostPrice:         strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:         strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
-		StockQuantity:     strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
 		BrandID:           nullInt64(input.BrandID),
 		CompareAtPrice:    strconv.FormatFloat(input.CompareAtPrice, 'f', -1, 64),
 		TaxRate:           strconv.FormatFloat(input.TaxRate, 'f', -1, 64),
@@ -214,6 +246,58 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		return err
 	}
 
+	if input.StockQuantitySet && input.StockQuantity != currentStock {
+		if err := r.applyProductStockTotal(ctx, tx, ownerID, id, currentStock, input.StockQuantity, stock_core.EntryAdjustment, "product stock edit"); err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Repository) lockProductStock(ctx context.Context, tx *sql.Tx, ownerID, productID int64) (float64, error) {
+	var stock string
+	if err := tx.QueryRowContext(ctx,
+		`SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE`,
+		ownerID, productID).Scan(&stock); err != nil {
+		return 0, err
+	}
+	return parseDecimal(stock), nil
+}
+
+func (r *Repository) applyProductStockTotal(
+	ctx context.Context,
+	tx *sql.Tx,
+	ownerID int64,
+	productID int64,
+	currentTotal float64,
+	targetTotal float64,
+	entryType stock_core.EntryType,
+	note string,
+) error {
+	locationID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
+		OwnerID:       ownerID,
+		LocationID:    locationID,
+		ProductID:     productID,
+		EntryType:     entryType,
+		Change:        targetTotal - currentTotal,
+		ReferenceID:   int64Ptr(productID),
+		ReferenceType: "product",
+		Channel:       "erp",
+		Note:          note,
+	})
+	if err != nil {
+		return fmt.Errorf("sync product stock: %w", err)
+	}
 	return nil
 }
 
@@ -483,6 +567,10 @@ func defaultStr(s, def string) string {
 
 func nullInt64(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
+}
+
+func int64Ptr(v int64) *int64 {
+	return &v
 }
 
 func nullStringFromFloat(v float64) sql.NullString {

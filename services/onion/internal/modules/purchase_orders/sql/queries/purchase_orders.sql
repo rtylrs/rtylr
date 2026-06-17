@@ -61,12 +61,6 @@ INSERT INTO erp_inventory_transactions
  reference_id, reference_type, created_by, notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: GetProductStockForUpdate :one
-SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE;
-
--- name: UpdateProductStock :exec
-UPDATE erp_products SET stock_quantity = ? WHERE owner_id = ? AND id = ?;
-
 -- name: InsertInventoryTransaction :execresult
 INSERT INTO erp_inventory_transactions
 (owner_id, product_id, type, quantity_change, quantity_before, quantity_after, notes)

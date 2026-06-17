@@ -11,16 +11,16 @@ WHERE owner_id = ? AND id = ?;
 INSERT INTO erp_products
 (owner_id, category_id, supplier_id, brand_id, name, sku, barcode, description,
  unit, cost_price, sale_price, compare_at_price, tax_rate, currency,
- stock_quantity, low_stock_threshold, reorder_quantity, allow_backorder, lead_time_days,
+ low_stock_threshold, reorder_quantity, allow_backorder, lead_time_days,
  weight, weight_unit, length, width, height, dimension_unit,
  country_of_origin, hs_code, is_active, track_inventory)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateProduct :exec
 UPDATE erp_products
 SET category_id = ?, supplier_id = ?, brand_id = ?, name = ?, sku = ?, barcode = ?,
     description = ?, unit = ?, cost_price = ?, sale_price = ?, compare_at_price = ?,
-    tax_rate = ?, currency = ?, stock_quantity = ?, low_stock_threshold = ?,
+    tax_rate = ?, currency = ?, low_stock_threshold = ?,
     reorder_quantity = ?, allow_backorder = ?, lead_time_days = ?, weight = ?,
     weight_unit = ?, length = ?, width = ?, height = ?, dimension_unit = ?,
     country_of_origin = ?, hs_code = ?, is_active = ?, track_inventory = ?

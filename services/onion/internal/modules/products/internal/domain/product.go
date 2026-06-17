@@ -125,6 +125,7 @@ type ProductInput struct {
 	CostPrice         float64 `json:"cost_price"`
 	SalePrice         float64 `json:"sale_price"`
 	StockQuantity     float64 `json:"stock_quantity"`
+	StockQuantitySet  bool    `json:"-"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
