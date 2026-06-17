@@ -11,7 +11,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -158,12 +157,12 @@ func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) 
 }
 
 func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ListOrdersResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return ListOrdersResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orders, err := h.Service.ListOrders(ctx, ownerID, req.SessionID, req.Status, req.DateFrom, req.DateTo)
 	if err != nil {
@@ -225,6 +224,14 @@ func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest
 		}
 	}
 
+	if req.Type != "" && !domain.IsOrderType(domain.OrderType(req.Type)) {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Unsupported order type",
+		}
+	}
+
 	for _, item := range req.Items {
 		if item.Name == "" {
 			return &errorModels.ServerError{
@@ -255,13 +262,13 @@ func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest
 }
 
 func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest) (CreateOrderResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return CreateOrderResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return CreateOrderResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
-	staffID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
+	staffID := user.UserID
 
 	items := make([]domain.OrderItemInput, 0, len(req.Items))
 	for _, item := range req.Items {
@@ -277,7 +284,7 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 		})
 	}
 
-	orderID, err := h.Service.CreateOrder(ctx, ownerID, staffID, domain.OrderInput{
+	orderID, err := h.Service.CreateOrder(ctx, user.BusinessID, ownerID, staffID, domain.OrderInput{
 		SessionID:     req.SessionID,
 		TableID:       req.TableID,
 		LocationID:    req.LocationID,
@@ -320,12 +327,12 @@ type GetOrderDetailResponse struct {
 }
 
 func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRequest) (GetOrderDetailResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return GetOrderDetailResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return GetOrderDetailResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
@@ -400,12 +407,12 @@ func (h *UpdateOrderStatusHandler) Validate(ctx context.Context, req *UpdateOrde
 }
 
 func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderStatusRequest) (UpdateOrderStatusResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return UpdateOrderStatusResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return UpdateOrderStatusResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
@@ -468,12 +475,13 @@ func (h *UpdateOrderItemStatusHandler) Validate(_ context.Context, req *UpdateOr
 }
 
 func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrderItemStatusRequest) (UpdateOrderItemStatusResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return UpdateOrderItemStatusResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return UpdateOrderItemStatusResponse{}, authErr
 	}
 
-	if err := h.Service.UpdateOrderItemStatus(ctx, device.User.UserID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
+	ownerID := resolvedOwnerID(ctx, user)
+	if err := h.Service.UpdateOrderItemStatus(ctx, ownerID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
 		return UpdateOrderItemStatusResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -523,12 +531,12 @@ func (h *ProcessPaymentHandler) Validate(ctx context.Context, req *ProcessPaymen
 }
 
 func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRequest) (ProcessPaymentResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ProcessPaymentResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return ProcessPaymentResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
@@ -604,13 +612,13 @@ func (h *ProcessRefundHandler) Validate(ctx context.Context, req *ProcessRefundR
 }
 
 func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ProcessRefundResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return ProcessRefundResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
-	staffID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
+	staffID := user.UserID
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {

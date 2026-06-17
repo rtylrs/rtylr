@@ -7,7 +7,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -46,12 +45,12 @@ func newLocationPayload(loc domain.Location) LocationPayload {
 }
 
 func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ListLocationsResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return ListLocationsResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	locations, err := h.Service.ListLocations(ctx, ownerID)
 	if err != nil {
@@ -98,12 +97,12 @@ func (h *CreateLocationHandler) Validate(_ context.Context, req *CreateLocationR
 }
 
 func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return CreateLocationResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return CreateLocationResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	id, err := h.Service.CreateLocation(ctx, ownerID, domain.LocationInput{
 		Name:    req.Name,
@@ -137,12 +136,12 @@ type DashboardResponse struct {
 }
 
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return DashboardResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	stats, err := h.Service.GetDashboardStats(ctx, ownerID)
 	if err != nil {

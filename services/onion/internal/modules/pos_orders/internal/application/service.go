@@ -10,6 +10,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
+	settingsapp "github.com/voxire/onion/internal/modules/pos_settings/internal/application"
+	settingsdomain "github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -38,13 +40,37 @@ type PaddlePaymentResult struct {
 }
 
 type Service struct {
-	repo *infrastructure.Repository
+	repo     *infrastructure.Repository
+	settings *settingsapp.Service
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
+func NewService(ctx context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(db),
+		repo:     infrastructure.NewRepository(db),
+		settings: settingsapp.NewService(ctx, db),
 	}
+}
+
+func defaultOrderTypeForProfile(profile string) domain.OrderType {
+	if profile == settingsdomain.ProfileRestaurant {
+		return domain.OrderTypeDineIn
+	}
+	return domain.OrderTypeTakeaway
+}
+
+func (s *Service) defaultOrderType(ctx context.Context, businessID int64) domain.OrderType {
+	if s.settings == nil || businessID <= 0 {
+		return domain.OrderTypeTakeaway
+	}
+	settings, err := s.settings.GetSettings(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Warn("failed to load POS settings for order type default",
+			logger.Error(err),
+			logger.Any("business_id", businessID),
+		)
+		return domain.OrderTypeTakeaway
+	}
+	return defaultOrderTypeForProfile(settings.Profile)
 }
 
 // ─── Locations ───────────────────────────────────────────────────────────────
@@ -188,13 +214,13 @@ func (s *Service) GetOrder(ctx context.Context, ownerID, orderID int64) (*domain
 	)
 }
 
-func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input domain.OrderInput) (int64, error) {
+func (s *Service) CreateOrder(ctx context.Context, businessID, ownerID, staffID int64, input domain.OrderInput) (int64, error) {
 	if len(input.Items) == 0 {
 		return 0, errors.New("order must have at least one item")
 	}
 
 	if input.Type == "" {
-		input.Type = domain.OrderTypeDineIn
+		input.Type = s.defaultOrderType(ctx, businessID)
 	}
 
 	if input.PaymentMethod == "" {

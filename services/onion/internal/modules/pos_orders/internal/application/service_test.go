@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
+	settingsdomain "github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
 )
 
 // ProcessRefund's input guards run before any repository call, so we can
@@ -34,10 +35,22 @@ func TestProcessRefund_RejectsNonPositiveAmount(t *testing.T) {
 
 func TestCreateOrder_RejectsEmptyItems(t *testing.T) {
 	s := &Service{}
-	if _, err := s.CreateOrder(context.Background(), 1, 1, domain.OrderInput{}); err == nil {
+	if _, err := s.CreateOrder(context.Background(), 1, 1, 1, domain.OrderInput{}); err == nil {
 		t.Error("expected error for empty items")
 	} else if !strings.Contains(err.Error(), "item") {
 		t.Errorf("expected item-related error, got: %v", err)
+	}
+}
+
+func TestDefaultOrderTypeForProfile(t *testing.T) {
+	if got := defaultOrderTypeForProfile(settingsdomain.ProfileRetail); got != domain.OrderTypeTakeaway {
+		t.Fatalf("retail default = %q, want %q", got, domain.OrderTypeTakeaway)
+	}
+	if got := defaultOrderTypeForProfile(settingsdomain.ProfileQuickService); got != domain.OrderTypeTakeaway {
+		t.Fatalf("quick service default = %q, want %q", got, domain.OrderTypeTakeaway)
+	}
+	if got := defaultOrderTypeForProfile(settingsdomain.ProfileRestaurant); got != domain.OrderTypeDineIn {
+		t.Fatalf("restaurant default = %q, want %q", got, domain.OrderTypeDineIn)
 	}
 }
 

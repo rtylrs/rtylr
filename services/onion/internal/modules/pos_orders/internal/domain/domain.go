@@ -117,6 +117,15 @@ const (
 	OrderTypeOnline   OrderType = "online"
 )
 
+func IsOrderType(orderType OrderType) bool {
+	switch orderType {
+	case OrderTypeDineIn, OrderTypeTakeaway, OrderTypeDelivery, OrderTypeOnline:
+		return true
+	default:
+		return false
+	}
+}
+
 type OrderStatus string
 
 const (

@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -71,13 +70,13 @@ type GetCurrentSessionResponse struct {
 }
 
 func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessionRequest) (GetCurrentSessionResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return GetCurrentSessionResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return GetCurrentSessionResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
-	staffID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
+	staffID := user.UserID
 
 	sess, err := h.Service.GetCurrentOpenSession(ctx, ownerID, staffID)
 	if err != nil {
@@ -126,13 +125,13 @@ func (h *OpenSessionHandler) Validate(_ context.Context, req *OpenSessionRequest
 }
 
 func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest) (OpenSessionResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return OpenSessionResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return OpenSessionResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
-	staffID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
+	staffID := user.UserID
 
 	id, err := h.Service.OpenSession(ctx, ownerID, staffID, domain.OpenSessionInput{
 		LocationID:  req.LocationID,
@@ -186,12 +185,12 @@ func (h *CloseSessionHandler) Validate(_ context.Context, req *CloseSessionReque
 }
 
 func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionRequest) (CloseSessionResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return CloseSessionResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return CloseSessionResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	if err := h.Service.CloseSession(ctx, ownerID, domain.CloseSessionInput{
 		SessionID:   req.SessionID,
@@ -264,12 +263,12 @@ func (h *ListSessionsHandler) Validate(_ context.Context, req *ListSessionsReque
 }
 
 func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ListSessionsResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return ListSessionsResponse{}, authErr
 	}
 
-	ownerID := device.User.UserID
+	ownerID := resolvedOwnerID(ctx, user)
 
 	sessions, err := h.Service.ListSessions(ctx, ownerID, req.LocationID, req.DateFrom, req.DateTo)
 	if err != nil {

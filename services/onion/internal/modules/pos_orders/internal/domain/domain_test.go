@@ -56,6 +56,12 @@ func TestOrderType_KnownValues(t *testing.T) {
 		if string(typ) != want {
 			t.Errorf("OrderType %v != %q", typ, want)
 		}
+		if !IsOrderType(typ) {
+			t.Errorf("OrderType %v should be valid", typ)
+		}
+	}
+	if IsOrderType(OrderType("pickup")) {
+		t.Error("unknown order type should be invalid")
 	}
 }
 

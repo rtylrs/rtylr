@@ -10,7 +10,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -31,10 +30,11 @@ type PayOrderResponse struct {
 }
 
 func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayOrderResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return PayOrderResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return PayOrderResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	orderID, err := strconv.ParseInt(idStr, 10, 64)
@@ -46,7 +46,7 @@ func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayO
 		}
 	}
 
-	result, payErr := h.Service.CreatePaddlePayment(ctx, device.User.UserID, orderID, req.CustomerEmail, req.Currency)
+	result, payErr := h.Service.CreatePaddlePayment(ctx, ownerID, orderID, req.CustomerEmail, req.Currency)
 	if payErr != nil {
 		if errors.Is(payErr, domain.ErrOrderNotFound) {
 			return PayOrderResponse{}, &errorModels.ServerError{

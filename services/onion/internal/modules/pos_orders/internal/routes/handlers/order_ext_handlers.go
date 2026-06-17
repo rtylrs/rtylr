@@ -10,7 +10,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -65,17 +64,18 @@ func (h *SplitOrderHandler) Validate(ctx context.Context, req *SplitOrderRequest
 }
 
 func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (SplitOrderResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return SplitOrderResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return SplitOrderResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return SplitOrderResponse{}, sErr
 	}
 
-	orderIDs, err := h.Service.SplitOrder(ctx, device.User.UserID, orderID, req.Splits)
+	orderIDs, err := h.Service.SplitOrder(ctx, ownerID, orderID, req.Splits)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
@@ -115,17 +115,18 @@ func (h *DiscountOrderHandler) Validate(ctx context.Context, req *DiscountOrderR
 }
 
 func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequest) (DiscountOrderResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return DiscountOrderResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return DiscountOrderResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return DiscountOrderResponse{}, sErr
 	}
 
-	if err := h.Service.ApplyDiscount(ctx, device.User.UserID, domain.DiscountInput{
+	if err := h.Service.ApplyDiscount(ctx, ownerID, domain.DiscountInput{
 		OrderID:       orderID,
 		DiscountType:  req.DiscountType,
 		DiscountValue: req.DiscountValue,
@@ -165,17 +166,18 @@ func (h *VoidOrderHandler) Validate(ctx context.Context, req *VoidOrderRequest) 
 }
 
 func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (VoidOrderResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return VoidOrderResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return VoidOrderResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return VoidOrderResponse{}, sErr
 	}
 
-	if err := h.Service.VoidOrder(ctx, device.User.UserID, orderID, req.Reason); err != nil {
+	if err := h.Service.VoidOrder(ctx, ownerID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -207,17 +209,18 @@ func (h *HoldOrderHandler) Validate(ctx context.Context, req *HoldOrderRequest) 
 }
 
 func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (HoldOrderResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return HoldOrderResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return HoldOrderResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return HoldOrderResponse{}, sErr
 	}
 
-	if err := h.Service.HoldOrder(ctx, device.User.UserID, orderID, req.Reason); err != nil {
+	if err := h.Service.HoldOrder(ctx, ownerID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -250,17 +253,18 @@ func (h *SendToKitchenHandler) Validate(ctx context.Context, req *SendToKitchenR
 }
 
 func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequest) (SendToKitchenResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return SendToKitchenResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return SendToKitchenResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return SendToKitchenResponse{}, sErr
 	}
 
-	if err := h.Service.SendToKitchen(ctx, device.User.UserID, orderID); err != nil {
+	if err := h.Service.SendToKitchen(ctx, ownerID, orderID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -294,10 +298,11 @@ func (h *VoidOrderItemHandler) Validate(ctx context.Context, _ *VoidOrderItemReq
 }
 
 func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemRequest) (VoidOrderItemResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return VoidOrderItemResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return VoidOrderItemResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, 0)
 	if sErr != nil {
@@ -310,7 +315,7 @@ func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemReques
 		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid item id"}
 	}
 
-	if err := h.Service.VoidOrderItem(ctx, device.User.UserID, orderID, itemID); err != nil {
+	if err := h.Service.VoidOrderItem(ctx, ownerID, orderID, itemID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order item not found"}
 		}
@@ -347,17 +352,18 @@ func (h *TransferTableHandler) Validate(ctx context.Context, req *TransferTableR
 }
 
 func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequest) (TransferTableResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return TransferTableResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return TransferTableResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return TransferTableResponse{}, sErr
 	}
 
-	if err := h.Service.TransferTable(ctx, device.User.UserID, orderID, req.NewTableID); err != nil {
+	if err := h.Service.TransferTable(ctx, ownerID, orderID, req.NewTableID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -382,12 +388,13 @@ type ListHeldOrdersResponse struct {
 }
 
 func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequest) (ListHeldOrdersResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ListHeldOrdersResponse{}, errorModels.PermissionDeniedServerError()
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return ListHeldOrdersResponse{}, authErr
 	}
+	ownerID := resolvedOwnerID(ctx, user)
 
-	orders, err := h.Service.ListHeldOrders(ctx, device.User.UserID)
+	orders, err := h.Service.ListHeldOrders(ctx, ownerID)
 	if err != nil {
 		return ListHeldOrdersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list held orders"}
 	}
