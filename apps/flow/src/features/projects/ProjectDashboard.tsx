@@ -6,6 +6,7 @@ import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
+import { useCurrentProject } from './useCurrentProject';
 
 /**
  * ProjectDashboard - one-glance health view. Four tiles across the top:
@@ -21,8 +22,7 @@ const ProjectDashboard: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { projects } = useFlowStore();
-  const project = projects.find((p) => p.id === projectId);
+  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks = [] } = useTasks({ projectId });
 
   const stats = useMemo(() => {
@@ -58,6 +58,14 @@ const ProjectDashboard: React.FC = () => {
 
     return { total, done, inProgress, overdue, statusCounts, byAssignee };
   }, [apiTasks]);
+
+  if (projectLoading && !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Loading project…
+      </div>
+    );
+  }
 
   if (!project) {
     return (

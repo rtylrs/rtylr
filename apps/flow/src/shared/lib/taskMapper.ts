@@ -1,6 +1,10 @@
 import type { Task } from '../stores/flowStore';
 import type { ApiTask } from '../services/flowApi';
 
+function normalizePriority(priority: ApiTask['priority'] | 'none' | null | undefined): Task['priority'] {
+  return priority === 'none' || !priority ? 'no_priority' : priority;
+}
+
 /**
  * Normalises an ApiTask (from the server) into the richer Task shape used
  * by local store consumers and legacy components.
@@ -40,7 +44,7 @@ export function apiTaskToTask(t: ApiTask): Task {
     title: t.title,
     description: t.description,
     status: t.status,
-    priority: t.priority,
+    priority: normalizePriority(t.priority),
     assignee,
     assigneeInitials: t.assigneeInitials ?? '',
     assigneeId: t.assigneeId != null ? String(t.assigneeId) : '',

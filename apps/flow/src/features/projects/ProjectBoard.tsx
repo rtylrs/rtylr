@@ -18,6 +18,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
+import { useCurrentProject } from './useCurrentProject';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
@@ -151,7 +152,8 @@ function saveGroupBy(projectId: string, key: GroupKey): void {
 const ProjectBoard: React.FC = () => {
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
-  const { projects, selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
+  const { selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
+  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const moveTask = useMoveTaskToColumn();
 
   useProjectRealtime(projectId);
@@ -178,8 +180,6 @@ const ProjectBoard: React.FC = () => {
     if (projectId) saveGroupBy(projectId, k);
   };
 
-  const project = projects.find((p) => p.id === projectId);
-
   // Tasks mapped to Task shape for TaskCard. Computed BEFORE any early
   // return so the useMemo below always runs in the same hook slot on
   // every render (React #310 otherwise - conditional hook order).
@@ -189,6 +189,14 @@ const ProjectBoard: React.FC = () => {
   // renders the same rows in the same order - otherwise empty columns
   // would silently skip lanes and the swimlane grid misaligns.
   const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
+
+  if (projectLoading && !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Loading project…
+      </div>
+    );
+  }
 
   if (!project) {
     return (

@@ -6,6 +6,7 @@ import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
+import { useCurrentProject } from './useCurrentProject';
 
 /**
  * ProjectTimeline - a lightweight Gantt-style view. Each task is drawn as
@@ -20,8 +21,7 @@ const ProjectTimeline: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { projects } = useFlowStore();
-  const project = projects.find((p) => p.id === projectId);
+  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks = [] } = useTasks({ projectId });
 
   // Derive a 30-day horizon anchored on the earliest task start (or today)
@@ -42,6 +42,14 @@ const ProjectTimeline: React.FC = () => {
     }
     return { days: list, anchor };
   }, [apiTasks]);
+
+  if (projectLoading && !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Loading project…
+      </div>
+    );
+  }
 
   if (!project) {
     return (

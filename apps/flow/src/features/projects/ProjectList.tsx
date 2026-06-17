@@ -18,6 +18,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import { cn, formatDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import { useCurrentProject } from './useCurrentProject';
 
 const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
   urgent: { color: '#ef4444', label: 'Urgent' },
@@ -205,10 +206,10 @@ const ProjectList: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { projects, tasks, sections } = useFlowStore();
+  const { tasks, sections } = useFlowStore();
+  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks } = useTasks({ projectId });
 
-  const project = projects.find((p) => p.id === projectId);
   const projectTasks: Task[] = apiTasks
     ? apiTasks.map(apiTaskToTask)
     : tasks.filter((t) => t.projectId === projectId);
@@ -230,6 +231,14 @@ const ProjectList: React.FC = () => {
     if (loose.length) blocks.push({ id: '_unsectioned', title: 'Other', tasks: loose });
     return blocks;
   }, [projectSections, projectTasks]);
+
+  if (projectLoading && !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Loading project…
+      </div>
+    );
+  }
 
   if (!project) {
     return (

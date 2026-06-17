@@ -7,6 +7,7 @@ import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
+import { useCurrentProject } from './useCurrentProject';
 
 /**
  * ProjectCalendar - month grid with tasks placed on their due_date.
@@ -19,8 +20,7 @@ const ProjectCalendar: React.FC = () => {
   useProjectRealtime(projectId);
 
   const navigate = useNavigate();
-  const { projects } = useFlowStore();
-  const project = projects.find((p) => p.id === projectId);
+  const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks = [] } = useTasks({ projectId });
 
   const [cursor, setCursor] = useState(() => {
@@ -63,6 +63,14 @@ const ProjectCalendar: React.FC = () => {
     });
     return map;
   }, [apiTasks]);
+
+  if (projectLoading && !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Loading project…
+      </div>
+    );
+  }
 
   if (!project) {
     return (
