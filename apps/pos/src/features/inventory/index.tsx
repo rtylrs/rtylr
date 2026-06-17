@@ -161,9 +161,14 @@ const InventoryScreen: React.FC = () => {
     }
   };
 
-  const filtered = items.filter(
-    (it) => !search || it.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = items.filter((it) => {
+    const term = search.trim().toLowerCase();
+    return (
+      !term ||
+      it.name.toLowerCase().includes(term) ||
+      (it.sku ? it.sku.toLowerCase().includes(term) : false)
+    );
+  });
 
   const lowStockIds = new Set(lowStock.map((l) => l.itemId));
 

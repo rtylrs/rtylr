@@ -102,6 +102,37 @@ describe('mapInventoryItems', () => {
     expect(result[0].lowStockThreshold).toBe(2);
   });
 
+  it('maps shared stock inventory response', () => {
+    const raw = [
+      {
+        id: 99,
+        product_id: 12,
+        name: 'Platinum MultiVitamins Muscletech',
+        sku: 'SUPLAB-PLATINUM-MULTIVITAMINS',
+        quantity: 28,
+        unit: 'units',
+        reorder_point: 5,
+      },
+    ];
+    const result = mapInventoryItems(raw);
+    expect(result[0]).toEqual({
+      itemId: 12,
+      name: 'Platinum MultiVitamins Muscletech',
+      sku: 'SUPLAB-PLATINUM-MULTIVITAMINS',
+      currentQty: 28,
+      unit: 'units',
+      lowStockThreshold: 5,
+    });
+  });
+
+  it('maps inventory envelope response', () => {
+    const result = mapInventoryItems({
+      inventory: [{ product_id: 7, name: 'Iso 100 Dymatize', quantity: 8 }],
+    });
+    expect(result[0].itemId).toBe(7);
+    expect(result[0].currentQty).toBe(8);
+  });
+
   it('filters out entries with invalid item ids', () => {
     const raw = [
       { item_id: 0, name: 'Bad', current_qty: 5, unit: 'kg', low_stock_threshold: 1 },

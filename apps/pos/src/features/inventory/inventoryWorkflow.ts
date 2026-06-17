@@ -64,20 +64,34 @@ export function buildStockAction({
   };
 }
 
+function inventoryRows(raw: unknown): unknown[] {
+  if (Array.isArray(raw)) return raw;
+  if (!raw || typeof raw !== 'object') return [];
+  const record = raw as Record<string, unknown>;
+  if (Array.isArray(record.inventory)) return record.inventory;
+  if (Array.isArray(record.items)) return record.items;
+  return [];
+}
+
 export function mapInventoryItems(raw: unknown): InventoryItem[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
+  return inventoryRows(raw)
     .filter(
       (item): item is Record<string, unknown> =>
         typeof item === 'object' && item !== null,
     )
     .map((item) => ({
-      itemId: Number(item['item_id'] ?? item['itemId'] ?? item['id'] ?? 0),
-      name: String(item['name'] ?? ''),
+      itemId: Number(
+        item['item_id'] ?? item['itemId'] ?? item['product_id'] ?? item['productId'] ?? item['id'] ?? 0,
+      ),
+      name: String(item['name'] ?? item['product_name'] ?? item['productName'] ?? ''),
       sku: item['sku'] ? String(item['sku']) : undefined,
-      currentQty: Number(item['current_qty'] ?? item['currentQty'] ?? item['qty'] ?? 0),
+      currentQty: Number(
+        item['current_qty'] ?? item['currentQty'] ?? item['quantity'] ?? item['qty'] ?? 0,
+      ),
       unit: String(item['unit'] ?? 'units'),
-      lowStockThreshold: Number(item['low_stock_threshold'] ?? item['threshold'] ?? 0),
+      lowStockThreshold: Number(
+        item['low_stock_threshold'] ?? item['reorder_point'] ?? item['threshold'] ?? 0,
+      ),
     }))
     .filter((item) => item.itemId > 0);
 }
