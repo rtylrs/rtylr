@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Active Orders for Kitchen ---
@@ -34,7 +35,8 @@ func (h *ListKDSOrdersHandler) Serve(ctx context.Context, req *ListKDSOrdersRequ
 	if device.User == nil {
 		return ListKDSOrdersResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	orders, err := h.Service.ListActiveOrdersByStation(ctx, device.User.UserID, req.Station)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	orders, err := h.Service.ListActiveOrdersByStation(ctx, ownerID, req.Station)
 	if err != nil {
 		return ListKDSOrdersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list KDS orders"}
 	}
@@ -68,6 +70,7 @@ func (h *UpdateKDSItemByIDHandler) Serve(ctx context.Context, req *UpdateKDSItem
 	if device.User == nil {
 		return UpdateKDSItemByIDResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 
 	itemIDStr := chi.URLParamFromCtx(ctx, "itemId")
 	itemID, err := strconv.ParseInt(itemIDStr, 10, 64)
@@ -75,7 +78,7 @@ func (h *UpdateKDSItemByIDHandler) Serve(ctx context.Context, req *UpdateKDSItem
 		return UpdateKDSItemByIDResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid item ID"}
 	}
 
-	if updateErr := h.Service.UpdateItemStatusByItemID(ctx, device.User.UserID, itemID, req.Status); updateErr != nil {
+	if updateErr := h.Service.UpdateItemStatusByItemID(ctx, ownerID, itemID, req.Status); updateErr != nil {
 		return UpdateKDSItemByIDResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update item status"}
 	}
 	return UpdateKDSItemByIDResponse{Message: "Item status updated"}, nil
@@ -108,6 +111,7 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 	if device.User == nil {
 		return UpdateKDSItemResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 
 	orderIDStr := chi.URLParamFromCtx(ctx, "orderId")
 	orderID, err := strconv.ParseInt(orderIDStr, 10, 64)
@@ -122,7 +126,7 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 	}
 
 	if updateErr := h.Service.UpdateItemStatus(ctx, domain.UpdateItemStatusInput{
-		OwnerID: device.User.UserID,
+		OwnerID: ownerID,
 		OrderID: orderID,
 		ItemID:  itemID,
 		Status:  req.Status,

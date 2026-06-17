@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type LocationPayload struct {
@@ -56,7 +57,8 @@ func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsReques
 	if device.User == nil {
 		return ListLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	locations, err := h.Service.List(ctx, device.User.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	locations, err := h.Service.List(ctx, ownerID)
 	if err != nil {
 		return ListLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list locations"}
 	}
@@ -98,8 +100,9 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 	if device.User == nil {
 		return CreateLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.Create(ctx, domain.LocationInput{
-		OwnerID:  device.User.UserID,
+		OwnerID:  ownerID,
 		Name:     req.Name,
 		Address:  req.Address,
 		Phone:    req.Phone,
@@ -141,6 +144,7 @@ func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRe
 	if device.User == nil {
 		return UpdateLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -148,7 +152,7 @@ func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRe
 	}
 	if updateErr := h.Service.Update(ctx, domain.LocationUpdateInput{
 		ID:       id,
-		OwnerID:  device.User.UserID,
+		OwnerID:  ownerID,
 		Name:     req.Name,
 		Address:  req.Address,
 		Phone:    req.Phone,

@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type ReceiptPayload struct {
@@ -94,12 +95,13 @@ func (h *EmailReceiptHandler) Serve(ctx context.Context, req *EmailReceiptReques
 	if device.User == nil {
 		return EmailReceiptResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
 		return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid receipt ID"}
 	}
-	if sendErr := h.Service.EmailReceipt(ctx, device.User.UserID, id, strings.TrimSpace(req.Email)); sendErr != nil {
+	if sendErr := h.Service.EmailReceipt(ctx, ownerID, id, strings.TrimSpace(req.Email)); sendErr != nil {
 		if errors.Is(sendErr, domain.ErrReceiptNotFound) {
 			return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Receipt not found"}
 		}
@@ -113,8 +115,9 @@ func (h *ListReceiptsHandler) Serve(ctx context.Context, req *ListReceiptsReques
 	if device.User == nil {
 		return ListReceiptsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 
-	receipts, err := h.Service.List(ctx, device.User.UserID, req.From, req.To)
+	receipts, err := h.Service.List(ctx, ownerID, req.From, req.To)
 	if err != nil {
 		return ListReceiptsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list receipts"}
 	}

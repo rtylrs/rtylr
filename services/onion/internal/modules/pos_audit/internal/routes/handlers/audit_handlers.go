@@ -82,8 +82,12 @@ func (h *ListAuditHandler) Serve(ctx context.Context, req *ListAuditRequest) (Li
 	if device.User == nil {
 		return ListAuditResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID := device.User.BusinessID
+	if businessID <= 0 {
+		businessID = device.User.UserID
+	}
 	logs, err := h.Service.List(ctx, domain.AuditLogFilter{
-		BusinessID: device.User.UserID,
+		BusinessID: businessID,
 		Action:     req.Action,
 		EntityType: req.EntityType,
 		EmployeeID: req.EmployeeID,
@@ -145,8 +149,12 @@ func (h *CreateAuditHandler) Serve(ctx context.Context, req *CreateAuditRequest)
 	if device.User == nil {
 		return CreateAuditResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID := device.User.BusinessID
+	if businessID <= 0 {
+		businessID = device.User.UserID
+	}
 	id, err := h.Service.Create(ctx, domain.AuditLogInput{
-		BusinessID: device.User.UserID,
+		BusinessID: businessID,
 		BranchID:   req.BranchID,
 		TerminalID: req.TerminalID,
 		EmployeeID: req.EmployeeID,

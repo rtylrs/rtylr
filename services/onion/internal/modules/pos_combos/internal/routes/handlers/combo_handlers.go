@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type ComboPayload struct {
@@ -58,7 +59,8 @@ func (h *ListCombosHandler) Serve(ctx context.Context, _ *ListCombosRequest) (Li
 	if device.User == nil {
 		return ListCombosResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	items, err := h.Service.List(ctx, ownerID)
 	if err != nil {
 		return ListCombosResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list combos"}
 	}
@@ -104,7 +106,8 @@ func (h *CreateComboHandler) Serve(ctx context.Context, req *CreateComboRequest)
 	if device.User == nil {
 		return CreateComboResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	id, err := h.Service.Create(ctx, device.User.UserID, domain.ComboInput{
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	id, err := h.Service.Create(ctx, ownerID, domain.ComboInput{
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
@@ -151,12 +154,13 @@ func (h *UpdateComboHandler) Serve(ctx context.Context, req *UpdateComboRequest)
 	if device.User == nil {
 		return UpdateComboResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateComboResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid combo ID"}
 	}
-	if updateErr := h.Service.Update(ctx, device.User.UserID, id, domain.ComboInput{
+	if updateErr := h.Service.Update(ctx, ownerID, id, domain.ComboInput{
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
@@ -188,12 +192,13 @@ func (h *DeleteComboHandler) Serve(ctx context.Context, _ *DeleteComboRequest) (
 	if device.User == nil {
 		return DeleteComboResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteComboResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid combo ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, ownerID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrComboNotFound) {
 			return DeleteComboResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Combo not found"}
 		}

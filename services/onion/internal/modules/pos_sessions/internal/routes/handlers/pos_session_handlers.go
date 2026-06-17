@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type SessionPayload struct {
@@ -65,7 +66,8 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest)
 	if device.User == nil {
 		return ListSessionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	sessions, err := h.Service.List(ctx, device.User.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	sessions, err := h.Service.List(ctx, ownerID)
 	if err != nil {
 		return ListSessionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list sessions"}
 	}
@@ -93,12 +95,13 @@ func (h *GetSessionHandler) Serve(ctx context.Context, _ *GetSessionRequest) (Ge
 	if device.User == nil {
 		return GetSessionResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
 		return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid session ID"}
 	}
-	session, getErr := h.Service.Get(ctx, device.User.UserID, id)
+	session, getErr := h.Service.Get(ctx, ownerID, id)
 	if getErr != nil {
 		if errors.Is(getErr, domain.ErrSessionNotFound) {
 			return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Session not found"}
@@ -131,8 +134,9 @@ func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest)
 	if device.User == nil {
 		return OpenSessionResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.Open(ctx, domain.OpenSessionInput{
-		OwnerID:      device.User.UserID,
+		OwnerID:      ownerID,
 		LocationID:   req.LocationID,
 		StaffID:      req.StaffID,
 		OpeningFloat: req.OpeningFloat,
@@ -162,6 +166,7 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 	if device.User == nil {
 		return CloseSessionResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -169,7 +174,7 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 	}
 	if closeErr := h.Service.Close(ctx, domain.CloseSessionInput{
 		ID:           id,
-		OwnerID:      device.User.UserID,
+		OwnerID:      ownerID,
 		ClosingFloat: req.ClosingFloat,
 	}); closeErr != nil {
 		if errors.Is(closeErr, domain.ErrSessionNotFound) {

@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_day_summary/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 var reDate = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
@@ -44,8 +45,9 @@ func (h *DaySummaryHandler) Serve(ctx context.Context, req *DaySummaryRequest) (
 	if device.User == nil {
 		return DaySummaryResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 
-	summary, err := h.Service.GetDaySummary(ctx, device.User.UserID, req.Date)
+	summary, err := h.Service.GetDaySummary(ctx, ownerID, req.Date)
 	if err != nil {
 		return DaySummaryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get day summary"}
 	}

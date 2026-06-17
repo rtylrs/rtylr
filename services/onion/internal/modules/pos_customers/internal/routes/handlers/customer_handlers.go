@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func SearchCustomersRoutes() []string { return []string{"/pos/customers"} }
@@ -28,7 +29,8 @@ func (h *SearchCustomersHandler) Serve(ctx context.Context, req *SearchCustomers
 		return SearchCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	customers, err := h.Service.Search(ctx, device.User.UserID, req.Query)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	customers, err := h.Service.Search(ctx, ownerID, req.Query)
 	if err != nil {
 		return SearchCustomersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to search customers"}
 	}

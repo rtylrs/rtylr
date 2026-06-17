@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func VerifyPINRoutes() []string { return []string{"/pos/manager/verify"} }
@@ -38,7 +39,8 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 		return VerifyPINResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	result, err := h.Service.VerifyPIN(ctx, device.User.UserID, req.PIN)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	result, err := h.Service.VerifyPIN(ctx, ownerID, req.PIN)
 	if err != nil {
 		return VerifyPINResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to verify PIN"}
 	}
