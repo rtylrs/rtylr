@@ -116,7 +116,6 @@ ALTER TABLE flow_views ADD INDEX idx_flow_views_owner_workspace (owner_id, works
 -- ── pos (supplemental — base v2 indexes already exist for some) ───────────
 ALTER TABLE pos_loyalty_transactions ADD INDEX idx_pos_loyalty_tx_business_customer (business_id, customer_id);
 ALTER TABLE pos_store_credit_transactions ADD INDEX idx_pos_credit_tx_business_customer (business_id, customer_id);
-ALTER TABLE pos_branch_inventory ADD INDEX idx_pos_branch_inventory_business_branch (business_id, branch_id);
 ALTER TABLE pos_cash_movements ADD INDEX idx_pos_cash_movements_business_session (business_id, session_id);
 ALTER TABLE pos_floors ADD INDEX idx_pos_floors_business_branch (business_id, branch_id);
 ALTER TABLE pos_terminals ADD INDEX idx_pos_terminals_business_branch (business_id, branch_id);

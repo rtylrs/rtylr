@@ -152,36 +152,6 @@ CREATE TABLE IF NOT EXISTS pos_store_credit_transactions (
     INDEX idx_credit_customer (customer_id)
 );
 
--- ── Stock movements (per branch) ─────────────────────────────────
-CREATE TABLE IF NOT EXISTS pos_stock_movements (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    branch_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
-    type ENUM('sale','return','receive','transfer_in','transfer_out','adjust','waste','count') NOT NULL,
-    quantity DECIMAL(10,3) NOT NULL,
-    reference_id BIGINT DEFAULT NULL,
-    reference_type VARCHAR(50) DEFAULT NULL,
-    note TEXT,
-    employee_id BIGINT DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_stock_product (product_id, branch_id),
-    INDEX idx_stock_branch (branch_id, created_at)
-);
-
--- ── Branch inventory (current stock per branch) ──────────────────
-CREATE TABLE IF NOT EXISTS pos_branch_inventory (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
-    branch_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
-    quantity DECIMAL(10,3) NOT NULL DEFAULT 0,
-    reorder_point DECIMAL(10,3) DEFAULT NULL,
-    reorder_quantity DECIMAL(10,3) DEFAULT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_branch_product (branch_id, product_id)
-);
-
 -- ── Scheduled pricing ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pos_scheduled_prices (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
