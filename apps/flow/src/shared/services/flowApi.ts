@@ -463,12 +463,16 @@ export const flowApi = {
     workspaceId?: string;
     status?: ApiTask['status'];
     assigneeId?: string;
+    activeOnly?: boolean;
+    compact?: boolean;
   }) => {
     const q: Record<string, string> = {};
     if (params.projectId) q.project_id = params.projectId;
     if (params.workspaceId) q.workspace_id = params.workspaceId;
     if (params.status) q.status = params.status;
     if (params.assigneeId) q.assignee_id = params.assigneeId;
+    if (params.activeOnly) q.active_only = 'true';
+    if (params.compact) q.compact = 'true';
     return safe.get<{ tasks: ApiTask[] }>('/flow/tasks', { params: q });
   },
 

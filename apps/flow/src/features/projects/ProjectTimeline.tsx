@@ -22,7 +22,7 @@ const ProjectTimeline: React.FC = () => {
   useProjectRealtime(projectId);
 
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
-  const { data: apiTasks = [] } = useTasks({ projectId });
+  const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
 
   // Derive a 30-day horizon anchored on the earliest task start (or today)
   // so the bars render at reasonable zoom.

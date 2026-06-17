@@ -12,6 +12,8 @@ export function useTasks(params: {
   projectId?: string;
   status?: ApiTask['status'];
   assigneeId?: string;
+  activeOnly?: boolean;
+  compact?: boolean;
 }) {
   const { activeWorkspaceId } = useFlowStore();
   const effectiveParams = {
@@ -25,6 +27,8 @@ export function useTasks(params: {
       return unwrapListResponse<ApiTask>(res, 'tasks');
     },
     enabled: !!(effectiveParams.projectId || effectiveParams.workspaceId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }
 

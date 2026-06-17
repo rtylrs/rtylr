@@ -208,7 +208,7 @@ const ProjectList: React.FC = () => {
 
   const { tasks, sections } = useFlowStore();
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
-  const { data: apiTasks } = useTasks({ projectId });
+  const { data: apiTasks } = useTasks({ projectId, activeOnly: true, compact: true });
 
   const projectTasks: Task[] = apiTasks
     ? apiTasks.map(apiTaskToTask)

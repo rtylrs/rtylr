@@ -21,7 +21,7 @@ const ProjectCalendar: React.FC = () => {
 
   const navigate = useNavigate();
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
-  const { data: apiTasks = [] } = useTasks({ projectId });
+  const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
 
   const [cursor, setCursor] = useState(() => {
     const d = new Date();

@@ -23,7 +23,7 @@ const ProjectDashboard: React.FC = () => {
   useProjectRealtime(projectId);
 
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
-  const { data: apiTasks = [] } = useTasks({ projectId });
+  const { data: apiTasks = [] } = useTasks({ projectId, compact: true });
 
   const stats = useMemo(() => {
     const now = new Date();

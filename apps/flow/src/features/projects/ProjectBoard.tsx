@@ -158,7 +158,7 @@ const ProjectBoard: React.FC = () => {
 
   useProjectRealtime(projectId);
 
-  const { data: apiTasks = [] } = useTasks({ projectId });
+  const { data: apiTasks = [] } = useTasks({ projectId, activeOnly: true, compact: true });
   const { data: columns = [], isLoading: columnsLoading } = useProjectColumns(projectId);
   const createColumn = useCreateColumn(projectId);
   const updateColumn = useUpdateColumn(projectId);
