@@ -96,6 +96,7 @@ import (
 	posorders "github.com/voxire/onion/internal/modules/pos_orders"
 	posreceipts "github.com/voxire/onion/internal/modules/pos_receipts"
 	possessions "github.com/voxire/onion/internal/modules/pos_sessions"
+	possettings "github.com/voxire/onion/internal/modules/pos_settings"
 	posstockmovements "github.com/voxire/onion/internal/modules/pos_stock_movements"
 	postables "github.com/voxire/onion/internal/modules/pos_tables"
 	posterminals "github.com/voxire/onion/internal/modules/pos_terminals"
@@ -394,6 +395,7 @@ type apiModules struct {
 	PosOrders             *posorders.Module
 	PosReceipts           *posreceipts.Module
 	PosSessions           *possessions.Module
+	PosSettings           *possettings.Module
 	PosStockMovements     *posstockmovements.Module
 	PosTables             *postables.Module
 	PosTerminals          *posterminals.Module
@@ -532,6 +534,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosOrders:             posorders.NewModule(ctx, dbclient.Pool()),
 		PosReceipts:           posreceipts.NewModule(ctx, dbclient.Pool()),
 		PosSessions:           possessions.NewModule(ctx, dbclient.Pool()),
+		PosSettings:           possettings.NewModule(ctx, dbclient.Pool()),
 		PosStockMovements:     posstockmovements.NewModule(ctx, dbclient.Pool()),
 		PosTables:             postables.NewModule(ctx, dbclient.Pool()),
 		PosTerminals:          posterminals.NewModule(ctx, dbclient.Pool()),
