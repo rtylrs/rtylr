@@ -25,18 +25,23 @@ type StockMovement struct {
 }
 
 type BranchInventory struct {
-	ID              int64     `json:"id"`
-	BusinessID      int64     `json:"business_id"`
-	BranchID        int64     `json:"branch_id"`
-	ProductID       int64     `json:"product_id"`
-	Quantity        float64   `json:"quantity"`
-	ReorderPoint    *float64  `json:"reorder_point"`
-	ReorderQuantity *float64  `json:"reorder_quantity"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID                int64     `json:"id"`
+	BusinessID        int64     `json:"business_id"`
+	BranchID          int64     `json:"branch_id"`
+	ProductID         int64     `json:"product_id"`
+	Name              string    `json:"name"`
+	SKU               string    `json:"sku"`
+	Unit              string    `json:"unit"`
+	Quantity          float64   `json:"quantity"`
+	LowStockThreshold *float64  `json:"low_stock_threshold"`
+	ReorderPoint      *float64  `json:"reorder_point"`
+	ReorderQuantity   *float64  `json:"reorder_quantity"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 type ReceiveStockInput struct {
 	BusinessID int64
+	OwnerID    int64
 	BranchID   int64
 	ProductID  int64
 	Quantity   float64
@@ -46,6 +51,7 @@ type ReceiveStockInput struct {
 
 type AdjustStockInput struct {
 	BusinessID int64
+	OwnerID    int64
 	BranchID   int64
 	ProductID  int64
 	Quantity   float64
@@ -55,6 +61,7 @@ type AdjustStockInput struct {
 
 type WasteStockInput struct {
 	BusinessID int64
+	OwnerID    int64
 	BranchID   int64
 	ProductID  int64
 	Quantity   float64
@@ -64,6 +71,7 @@ type WasteStockInput struct {
 
 type TransferStockInput struct {
 	BusinessID   int64
+	OwnerID      int64
 	FromBranchID int64
 	ToBranchID   int64
 	ProductID    int64

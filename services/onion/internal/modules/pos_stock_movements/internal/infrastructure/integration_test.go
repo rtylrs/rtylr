@@ -13,6 +13,7 @@ import (
 // Fixture IDs: businesses.id=1 (owner_id=1001), pos_locations.id=3001, erp_products.id=5201.
 const (
 	fixtureBusinessID int64 = 1
+	fixtureOwnerID    int64 = 1001
 	fixtureBranchID   int64 = 3001
 	fixtureProductID  int64 = 5201
 )
@@ -21,7 +22,7 @@ func TestStockMovements_ListMovements_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -32,7 +33,7 @@ func TestStockMovements_ListMovements_ReturnsNonNilSlice(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -45,7 +46,7 @@ func TestStockMovements_ListMovements_WrongBusinessReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mvts, err := repo.ListMovements(context.Background(), 999999, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(context.Background(), 999999, 999999, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements wrong business: %v", err)
 	}
@@ -80,7 +81,7 @@ func TestStockMovements_CreateMovement_ThenListContainsNew(t *testing.T) {
 		t.Fatalf("CreateMovement: %v", err)
 	}
 
-	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -103,7 +104,7 @@ func TestStockMovements_ListMovements_AllHaveNonZeroID(t *testing.T) {
 
 	_, _ = repo.CreateMovement(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID, "receive", 1.0, nil, nil, nil, nil)
 
-	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -121,7 +122,7 @@ func TestStockMovements_ListMovements_AllHaveNonEmptyType(t *testing.T) {
 
 	_, _ = repo.CreateMovement(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID, "receive", 1.0, nil, nil, nil, nil)
 
-	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
+	mvts, err := repo.ListMovements(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("ListMovements: %v", err)
 	}
@@ -162,7 +163,7 @@ func TestStockMovements_GetInventoryItem_AfterSet(t *testing.T) {
 		t.Fatalf("SetInventoryQuantity: %v", err)
 	}
 
-	item, err := repo.GetInventoryItem(ctx, fixtureBusinessID, fixtureBranchID, fixtureProductID)
+	item, err := repo.GetInventoryItem(ctx, fixtureBusinessID, fixtureOwnerID, fixtureBranchID, fixtureProductID)
 	if err != nil {
 		t.Fatalf("GetInventoryItem: %v", err)
 	}
@@ -175,7 +176,7 @@ func TestStockMovements_GetInventoryItem_UnknownReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	_, err := repo.GetInventoryItem(context.Background(), 999999, 999999, 999999)
+	_, err := repo.GetInventoryItem(context.Background(), 999999, 999999, 999999, 999999)
 	if !errors.Is(err, domain.ErrInventoryNotFound) {
 		t.Fatalf("expected ErrInventoryNotFound, got %v", err)
 	}
@@ -185,7 +186,7 @@ func TestStockMovements_ListBranchInventory_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureBranchID)
+	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID)
 	if err != nil {
 		t.Fatalf("ListBranchInventory: %v", err)
 	}
@@ -198,7 +199,7 @@ func TestStockMovements_ListBranchInventory_AllHaveNonNegativeQuantity(t *testin
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureBranchID)
+	items, err := repo.ListBranchInventory(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID)
 	if err != nil {
 		t.Fatalf("ListBranchInventory: %v", err)
 	}
@@ -213,7 +214,7 @@ func TestStockMovements_ListLowStockItems_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.ListLowStockItems(context.Background(), fixtureBusinessID, fixtureBranchID)
+	items, err := repo.ListLowStockItems(context.Background(), fixtureBusinessID, fixtureOwnerID, fixtureBranchID)
 	if err != nil {
 		t.Fatalf("ListLowStockItems: %v", err)
 	}

@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -31,12 +30,12 @@ func invalidateStockMovementsScope(ctx context.Context, businessID int64) {
 	}
 }
 
-func (s *Service) ListMovements(ctx context.Context, businessID, branchID, productID int64) ([]domain.StockMovement, error) {
+func (s *Service) ListMovements(ctx context.Context, businessID, ownerID, branchID, productID int64) ([]domain.StockMovement, error) {
 	key := fmt.Sprintf("%s|stock|b=%d|p=%d",
 		cacheKeys.ProductsList(businessID), branchID, productID)
 	return cacher.Of[[]domain.StockMovement]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.StockMovement, error) {
-			return s.repo.ListMovements(ctx, businessID, branchID, productID)
+			return s.repo.ListMovements(ctx, businessID, ownerID, branchID, productID)
 		},
 		cacher.WithExpiry(ctx, stockMovementsTTL),
 	)
@@ -46,11 +45,8 @@ func (s *Service) ReceiveStock(ctx context.Context, input domain.ReceiveStockInp
 	if err := domain.ValidateReceiveStockInput(input); err != nil {
 		return 0, err
 	}
-	id, err := s.repo.CreateMovement(ctx, input.BusinessID, input.BranchID, input.ProductID, "receive", input.Quantity, nil, nil, input.Note, input.EmployeeID)
+	id, err := s.repo.ReceiveStock(ctx, input)
 	if err != nil {
-		return 0, err
-	}
-	if err := s.repo.UpdateInventory(ctx, input.BusinessID, input.BranchID, input.ProductID, input.Quantity); err != nil {
 		return 0, err
 	}
 	invalidateStockMovementsScope(ctx, input.BusinessID)
@@ -58,11 +54,11 @@ func (s *Service) ReceiveStock(ctx context.Context, input domain.ReceiveStockInp
 }
 
 func (s *Service) AdjustStock(ctx context.Context, input domain.AdjustStockInput) (int64, error) {
-	id, err := s.repo.CreateMovement(ctx, input.BusinessID, input.BranchID, input.ProductID, "adjust", input.Quantity, nil, nil, input.Note, input.EmployeeID)
-	if err != nil {
+	if err := domain.ValidateAdjustStockInput(input); err != nil {
 		return 0, err
 	}
-	if err := s.repo.UpdateInventory(ctx, input.BusinessID, input.BranchID, input.ProductID, input.Quantity); err != nil {
+	id, err := s.repo.AdjustStock(ctx, input)
+	if err != nil {
 		return 0, err
 	}
 	invalidateStockMovementsScope(ctx, input.BusinessID)
@@ -70,11 +66,11 @@ func (s *Service) AdjustStock(ctx context.Context, input domain.AdjustStockInput
 }
 
 func (s *Service) RecordWaste(ctx context.Context, input domain.WasteStockInput) (int64, error) {
-	id, err := s.repo.CreateMovement(ctx, input.BusinessID, input.BranchID, input.ProductID, "waste", -input.Quantity, nil, nil, input.Note, input.EmployeeID)
-	if err != nil {
+	if err := domain.ValidateWasteStockInput(input); err != nil {
 		return 0, err
 	}
-	if err := s.repo.UpdateInventory(ctx, input.BusinessID, input.BranchID, input.ProductID, -input.Quantity); err != nil {
+	id, err := s.repo.RecordWaste(ctx, input)
+	if err != nil {
 		return 0, err
 	}
 	invalidateStockMovementsScope(ctx, input.BusinessID)
@@ -85,48 +81,29 @@ func (s *Service) TransferStock(ctx context.Context, input domain.TransferStockI
 	if err := domain.ValidateTransferStockInput(input); err != nil {
 		return 0, err
 	}
-	// Reject transfers larger than what the source branch holds — otherwise
-	// transfer_out drives the source inventory negative. A missing inventory
-	// row means zero stock, so that fails the check too.
-	src, err := s.repo.GetInventoryItem(ctx, input.BusinessID, input.FromBranchID, input.ProductID)
-	if err != nil && !errors.Is(err, domain.ErrInventoryNotFound) {
-		return 0, err
-	}
-	if src.Quantity < input.Quantity {
-		return 0, domain.ErrInsufficientStock
-	}
-	if _, err := s.repo.CreateMovement(ctx, input.BusinessID, input.FromBranchID, input.ProductID, "transfer_out", -input.Quantity, nil, nil, input.Note, input.EmployeeID); err != nil {
-		return 0, err
-	}
-	if err := s.repo.UpdateInventory(ctx, input.BusinessID, input.FromBranchID, input.ProductID, -input.Quantity); err != nil {
-		return 0, err
-	}
-	id, err := s.repo.CreateMovement(ctx, input.BusinessID, input.ToBranchID, input.ProductID, "transfer_in", input.Quantity, nil, nil, input.Note, input.EmployeeID)
+	id, err := s.repo.TransferStock(ctx, input)
 	if err != nil {
-		return 0, err
-	}
-	if err := s.repo.UpdateInventory(ctx, input.BusinessID, input.ToBranchID, input.ProductID, input.Quantity); err != nil {
 		return 0, err
 	}
 	invalidateStockMovementsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
-func (s *Service) ListBranchInventory(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error) {
+func (s *Service) ListBranchInventory(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
 	key := fmt.Sprintf("%s|branch_inv|b=%d", cacheKeys.ProductsList(businessID), branchID)
 	return cacher.Of[[]domain.BranchInventory]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.BranchInventory, error) {
-			return s.repo.ListBranchInventory(ctx, businessID, branchID)
+			return s.repo.ListBranchInventory(ctx, businessID, ownerID, branchID)
 		},
 		cacher.WithExpiry(ctx, stockMovementsTTL),
 	)
 }
 
-func (s *Service) ListLowStockItems(ctx context.Context, businessID, branchID int64) ([]domain.BranchInventory, error) {
+func (s *Service) ListLowStockItems(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
 	key := fmt.Sprintf("%s|branch_low|b=%d", cacheKeys.ProductsList(businessID), branchID)
 	return cacher.Of[[]domain.BranchInventory]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.BranchInventory, error) {
-			return s.repo.ListLowStockItems(ctx, businessID, branchID)
+			return s.repo.ListLowStockItems(ctx, businessID, ownerID, branchID)
 		},
 		cacher.WithExpiry(ctx, stockMovementsTTL),
 	)

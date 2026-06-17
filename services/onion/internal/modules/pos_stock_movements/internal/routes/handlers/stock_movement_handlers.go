@@ -2,14 +2,26 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posstockv1 "github.com/voxire/voxie/gen/go/pos/stock/v1"
 )
+
+func stockMovementError(fallback string, err error) *errorModels.ServerError {
+	if errors.Is(err, domain.ErrInsufficientStock) {
+		return &errorModels.ServerError{Code: http.StatusConflict, Message: "Insufficient stock for this operation"}
+	}
+	if errors.Is(err, domain.ErrInventoryNotFound) {
+		return &errorModels.ServerError{Code: http.StatusNotFound, Message: "Inventory product was not found"}
+	}
+	return &errorModels.ServerError{Code: http.StatusInternalServerError, Message: fallback}
+}
 
 // ─── List Movements ──────────────────────────────────────────────────────────
 
@@ -35,7 +47,8 @@ func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequ
 	if req.BranchID == 0 || req.ProductID == 0 {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id and product_id are required"}
 	}
-	movements, err := h.Service.ListMovements(ctx, device.User.BusinessID, req.BranchID, req.ProductID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	movements, err := h.Service.ListMovements(ctx, device.User.BusinessID, ownerID, req.BranchID, req.ProductID)
 	if err != nil {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list stock movements"}
 	}
@@ -85,12 +98,13 @@ func (h *ReceiveStockHandler) Serve(ctx context.Context, req *ReceiveStockReques
 	if req.BranchID == 0 || req.ProductID == 0 || req.Quantity <= 0 {
 		return ReceiveStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.ReceiveStock(ctx, domain.ReceiveStockInput{
-		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: device.User.BusinessID, OwnerID: ownerID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
-		return ReceiveStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to receive stock"}
+		return ReceiveStockResponse{}, stockMovementError("Failed to receive stock", err)
 	}
 	return ReceiveStockResponse{MovementID: id, Message: "Stock received successfully"}, nil
 }
@@ -129,12 +143,13 @@ func (h *AdjustStockHandler) Serve(ctx context.Context, req *AdjustStockRequest)
 	if device.User == nil {
 		return AdjustStockResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.AdjustStock(ctx, domain.AdjustStockInput{
-		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: device.User.BusinessID, OwnerID: ownerID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
-		return AdjustStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to adjust stock"}
+		return AdjustStockResponse{}, stockMovementError("Failed to adjust stock", err)
 	}
 	return AdjustStockResponse{MovementID: id, Message: "Stock adjusted successfully"}, nil
 }
@@ -166,12 +181,13 @@ func (h *WasteStockHandler) Serve(ctx context.Context, req *WasteStockRequest) (
 	if req.BranchID == 0 || req.ProductID == 0 || req.Quantity <= 0 {
 		return WasteStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.RecordWaste(ctx, domain.WasteStockInput{
-		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: device.User.BusinessID, OwnerID: ownerID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
-		return WasteStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to record waste"}
+		return WasteStockResponse{}, stockMovementError("Failed to record waste", err)
 	}
 	return WasteStockResponse{MovementID: id, Message: "Waste recorded successfully"}, nil
 }
@@ -204,12 +220,13 @@ func (h *TransferStockHandler) Serve(ctx context.Context, req *TransferStockRequ
 	if req.FromBranchID == 0 || req.ToBranchID == 0 || req.ProductID == 0 || req.Quantity <= 0 {
 		return TransferStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "fromBranchId, toBranchId, productId, and positive quantity are required"}
 	}
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	id, err := h.Service.TransferStock(ctx, domain.TransferStockInput{
-		BusinessID: device.User.BusinessID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
+		BusinessID: device.User.BusinessID, OwnerID: ownerID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
 		ProductID: req.ProductID, Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
-		return TransferStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to transfer stock"}
+		return TransferStockResponse{}, stockMovementError("Failed to transfer stock", err)
 	}
 	return TransferStockResponse{MovementID: id, Message: "Stock transferred successfully"}, nil
 }
@@ -226,17 +243,42 @@ type (
 )
 
 type ListInventoryResponse struct {
-	Inventory []*posstockv1.BranchInventory `json:"inventory"`
+	Inventory []BranchInventoryPayload `json:"inventory"`
 }
 
-func toProtoBranchInventory(item domain.BranchInventory) *posstockv1.BranchInventory {
-	p := &posstockv1.BranchInventory{
-		Id:         item.ID,
-		BusinessId: item.BusinessID,
-		BranchId:   item.BranchID,
-		ProductId:  item.ProductID,
+type BranchInventoryPayload struct {
+	ID                int64   `json:"id"`
+	BusinessID        int64   `json:"business_id"`
+	BranchID          int64   `json:"branch_id"`
+	ProductID         int64   `json:"product_id"`
+	ItemID            int64   `json:"item_id"`
+	Name              string  `json:"name"`
+	SKU               string  `json:"sku,omitempty"`
+	Unit              string  `json:"unit"`
+	Quantity          float64 `json:"quantity"`
+	CurrentQty        float64 `json:"current_qty"`
+	LowStockThreshold float64 `json:"low_stock_threshold,omitempty"`
+	ReorderPoint      float64 `json:"reorder_point,omitempty"`
+	ReorderQuantity   float64 `json:"reorder_quantity,omitempty"`
+	UpdatedAt         string  `json:"updated_at"`
+}
+
+func toBranchInventoryPayload(item domain.BranchInventory) BranchInventoryPayload {
+	p := BranchInventoryPayload{
+		ID:         item.ID,
+		BusinessID: item.BusinessID,
+		BranchID:   item.BranchID,
+		ProductID:  item.ProductID,
+		ItemID:     item.ProductID,
+		Name:       item.Name,
+		SKU:        item.SKU,
+		Unit:       item.Unit,
 		Quantity:   item.Quantity,
+		CurrentQty: item.Quantity,
 		UpdatedAt:  item.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if item.LowStockThreshold != nil {
+		p.LowStockThreshold = *item.LowStockThreshold
 	}
 	if item.ReorderPoint != nil {
 		p.ReorderPoint = *item.ReorderPoint
@@ -255,13 +297,14 @@ func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequ
 	if req.BranchID == 0 {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	items, err := h.Service.ListBranchInventory(ctx, device.User.BusinessID, req.BranchID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	items, err := h.Service.ListBranchInventory(ctx, device.User.BusinessID, ownerID, req.BranchID)
 	if err != nil {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inventory"}
 	}
-	payloads := make([]*posstockv1.BranchInventory, len(items))
+	payloads := make([]BranchInventoryPayload, len(items))
 	for i, item := range items {
-		payloads[i] = toProtoBranchInventory(item)
+		payloads[i] = toBranchInventoryPayload(item)
 	}
 	return ListInventoryResponse{Inventory: payloads}, nil
 }
@@ -278,7 +321,7 @@ type (
 )
 
 type LowStockResponse struct {
-	Items []*posstockv1.BranchInventory `json:"items"`
+	Items []BranchInventoryPayload `json:"items"`
 }
 
 func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowStockResponse, *errorModels.ServerError) {
@@ -289,13 +332,14 @@ func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowS
 	if req.BranchID == 0 {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	items, err := h.Service.ListLowStockItems(ctx, device.User.BusinessID, req.BranchID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	items, err := h.Service.ListLowStockItems(ctx, device.User.BusinessID, ownerID, req.BranchID)
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list low stock items"}
 	}
-	payloads := make([]*posstockv1.BranchInventory, len(items))
+	payloads := make([]BranchInventoryPayload, len(items))
 	for i, item := range items {
-		payloads[i] = toProtoBranchInventory(item)
+		payloads[i] = toBranchInventoryPayload(item)
 	}
 	return LowStockResponse{Items: payloads}, nil
 }
