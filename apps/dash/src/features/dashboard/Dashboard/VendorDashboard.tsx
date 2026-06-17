@@ -30,6 +30,35 @@ const today = new Date().toLocaleDateString('en-US', {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GridLayout = ResponsiveGridLayout as React.ComponentType<any>;
 
+type SavedLayoutItem = Record<string, unknown> & {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  minW?: number;
+  minH?: number;
+  maxW?: number;
+  maxH?: number;
+};
+type SavedLayout = SavedLayoutItem[];
+
+function layoutSignature(layout: Array<Partial<SavedLayoutItem>> | Layout[] | undefined): string {
+  return JSON.stringify(
+    (layout ?? []).map((item) => ({
+      i: String(item.i ?? ''),
+      x: Number(item.x ?? 0),
+      y: Number(item.y ?? 0),
+      w: Number(item.w ?? 0),
+      h: Number(item.h ?? 0),
+      minW: Number(item.minW ?? 0),
+      minH: Number(item.minH ?? 0),
+      maxW: Number(item.maxW ?? 0),
+      maxH: Number(item.maxH ?? 0),
+    }))
+  );
+}
+
 // ─── Admin Dashboard ────────────────────────────────────────────────────────
 
 const AdminDashboard: React.FC = () => {
@@ -43,21 +72,26 @@ const AdminDashboard: React.FC = () => {
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
+        const nextWidth = Math.round(entry.contentRect.width);
+        setContainerWidth((current) => (current === nextWidth ? current : nextWidth));
       }
     });
     ro.observe(el);
-    setContainerWidth(el.clientWidth);
+    setContainerWidth((current) => (current === el.clientWidth ? current : el.clientWidth));
     return () => ro.disconnect();
   }, []);
 
-  const [layouts, setLayouts] = useState(() => ({ lg: loadLayout() }));
+  const [layouts, setLayouts] = useState<{ lg: SavedLayout }>(() => ({ lg: loadLayout() }));
   const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
   const [showCatalog, setShowCatalog] = useState(false);
 
   const handleLayoutChange = useCallback((_: Layout[], allLayouts: ResponsiveLayouts) => {
-    setLayouts(allLayouts as unknown as { lg: Record<string, unknown>[] });
-    if (allLayouts.lg) saveLayout(allLayouts.lg as unknown as Record<string, unknown>[]);
+    const nextLayout = (allLayouts.lg ?? []) as unknown as SavedLayout;
+    setLayouts((current) => {
+      if (layoutSignature(current.lg) === layoutSignature(nextLayout)) return current;
+      saveLayout(nextLayout);
+      return { lg: nextLayout };
+    });
   }, []);
 
   const addWidget = useCallback(

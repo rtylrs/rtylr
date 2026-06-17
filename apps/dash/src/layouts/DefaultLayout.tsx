@@ -337,7 +337,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           {/* Logo */}
           <div
-            className="flex items-center gap-2.5 px-4 py-4"
+            className="flex h-14 items-center gap-2.5 px-4"
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             <img
@@ -354,10 +354,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             />
           </div>
 
-          {/* Business switcher — only visible when user has multiple businesses */}
-          <div className="px-2 py-1.5" style={{ borderBottom: '1px solid var(--dash-border)' }}>
-            <BusinessSwitcher />
-          </div>
+          <BusinessSwitcher />
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
