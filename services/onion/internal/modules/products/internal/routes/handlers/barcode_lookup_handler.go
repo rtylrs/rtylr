@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
@@ -43,14 +44,15 @@ func BarcodeLookupHandlerFunc(svc *application.Service) http.HandlerFunc {
 			return
 		}
 
-		product, err := svc.GetProductByBarcode(ctx, authUser.UserID, code)
+		ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+		product, err := svc.GetProductByBarcode(ctx, ownerID, code)
 		if err != nil {
 			if errors.Is(err, domain.ErrProductNotFound) {
 				writeProductErr(ctx, w, http.StatusNotFound, "no product with that barcode")
 				return
 			}
 			logger.Ctx(ctx).Error("barcode lookup failed",
-				logger.Any("owner_id", authUser.UserID),
+				logger.Any("owner_id", ownerID),
 				logger.String("barcode", code),
 				logger.Error(err),
 			)

@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
 )
 
@@ -52,7 +53,8 @@ func (h *InventoryReportHandler) Serve(ctx context.Context, _ *InventoryReportRe
 		}
 	}
 
-	items, err := h.Service.GetInventoryReport(ctx, authUser.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	items, err := h.Service.GetInventoryReport(ctx, ownerID)
 	if err != nil {
 		return InventoryReportResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

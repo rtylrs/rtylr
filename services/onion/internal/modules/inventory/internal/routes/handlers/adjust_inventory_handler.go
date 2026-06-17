@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func AdjustInventoryRoutes() []string {
@@ -90,7 +91,8 @@ func (h *AdjustInventoryHandler) Serve(ctx context.Context, req *AdjustInventory
 		Notes:     req.Notes,
 	}
 
-	if err := h.Service.AdjustInventory(ctx, authUser.UserID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.AdjustInventory(ctx, ownerID, input); err != nil {
 		return AdjustInventoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

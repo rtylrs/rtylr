@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ListProductAttributesResponse is the JSON body for the attributes endpoint.
@@ -36,7 +37,8 @@ func ListProductAttributesHandlerFunc(svc *application.Service) http.HandlerFunc
 			return
 		}
 
-		attrs, err := svc.ListProductAttributes(ctx, authUser.UserID, id)
+		ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+		attrs, err := svc.ListProductAttributes(ctx, ownerID, id)
 		if err != nil {
 			logger.Ctx(ctx).Error("failed to list product attributes",
 				logger.Any("product_id", id), logger.Error(err))

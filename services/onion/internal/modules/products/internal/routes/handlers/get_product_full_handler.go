@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // FullProductResponse returns the complete product as JSON (every PIM column),
@@ -39,7 +40,8 @@ func GetProductFullHandlerFunc(svc *application.Service) http.HandlerFunc {
 			return
 		}
 
-		product, err := svc.GetProduct(ctx, authUser.UserID, id)
+		ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+		product, err := svc.GetProduct(ctx, ownerID, id)
 		if err != nil {
 			if errors.Is(err, domain.ErrProductNotFound) {
 				writeProductErr(ctx, w, http.StatusNotFound, "product not found")

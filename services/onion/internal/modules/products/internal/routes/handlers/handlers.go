@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
@@ -69,7 +70,8 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		}
 	}
 
-	products, hasMore, err := h.Service.ListProducts(ctx, authUser.UserID, req.Search, int64(req.CategoryID), req.Page, req.PageSize)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	products, hasMore, err := h.Service.ListProducts(ctx, ownerID, req.Search, int64(req.CategoryID), req.Page, req.PageSize)
 	if err != nil {
 		return ListProductsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -212,7 +214,8 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 		TrackInventory:    req.TrackInventory,
 	}
 
-	id, err := h.Service.CreateProduct(ctx, authUser.UserID, input)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	id, err := h.Service.CreateProduct(ctx, ownerID, input)
 	if err != nil {
 		return CreateProductResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -222,7 +225,7 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 	}
 
 	// Best-effort: the product is created; attribute failure shouldn't fail it.
-	_ = h.Service.ReplaceProductAttributes(ctx, authUser.UserID, id, req.Attributes)
+	_ = h.Service.ReplaceProductAttributes(ctx, ownerID, id, req.Attributes)
 
 	return CreateProductResponse{
 		ProductID: id,
@@ -356,7 +359,8 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		TrackInventory:    req.TrackInventory,
 	}
 
-	if err := h.Service.UpdateProduct(ctx, authUser.UserID, req.ID, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateProduct(ctx, ownerID, req.ID, input); err != nil {
 		return UpdateProductResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -365,7 +369,7 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 	}
 
 	// Replace the product's custom attributes with the submitted set.
-	_ = h.Service.ReplaceProductAttributes(ctx, authUser.UserID, req.ID, req.Attributes)
+	_ = h.Service.ReplaceProductAttributes(ctx, ownerID, req.ID, req.Attributes)
 
 	return UpdateProductResponse{Message: "Product updated successfully"}, nil
 }
@@ -410,7 +414,8 @@ func (h *DeleteProductHandler) Serve(ctx context.Context, req *DeleteProductRequ
 		}
 	}
 
-	if err := h.Service.DeleteProduct(ctx, authUser.UserID, req.ID); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.DeleteProduct(ctx, ownerID, req.ID); err != nil {
 		return DeleteProductResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
 )
 
@@ -35,7 +36,8 @@ func (h *LowStockHandler) Serve(ctx context.Context, _ *LowStockRequest) (LowSto
 		}
 	}
 
-	items, err := h.Service.GetLowStockProducts(ctx, authUser.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	items, err := h.Service.GetLowStockProducts(ctx, ownerID)
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

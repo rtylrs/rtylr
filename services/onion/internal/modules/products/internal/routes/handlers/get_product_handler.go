@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
@@ -44,14 +45,15 @@ func GetProductHandlerFunc(svc *application.Service) http.HandlerFunc {
 			return
 		}
 
-		product, err := svc.GetProduct(ctx, authUser.UserID, id)
+		ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+		product, err := svc.GetProduct(ctx, ownerID, id)
 		if err != nil {
 			if errors.Is(err, domain.ErrProductNotFound) {
 				writeProductErr(ctx, w, http.StatusNotFound, "product not found")
 				return
 			}
 			logger.Ctx(ctx).Error("failed to load product",
-				logger.Any("owner_id", authUser.UserID),
+				logger.Any("owner_id", ownerID),
 				logger.Any("product_id", id),
 				logger.Error(err),
 			)

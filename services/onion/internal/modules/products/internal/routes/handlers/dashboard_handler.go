@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── GET /erp/dashboard ───────────────────────────────────────────────────────
@@ -59,7 +60,8 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	stats, err := h.Service.GetDashboard(ctx, device.User.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	stats, err := h.Service.GetDashboard(ctx, ownerID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -148,7 +150,8 @@ func (h *ReorderSuggestionsHandler) Serve(ctx context.Context, _ *ReorderSuggest
 		return ReorderSuggestionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	list, err := h.Service.ListReorderSuggestions(ctx, device.User.UserID)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	list, err := h.Service.ListReorderSuggestions(ctx, ownerID)
 	if err != nil {
 		return ReorderSuggestionsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -204,7 +207,8 @@ func (h *ExpiryHandler) Serve(ctx context.Context, req *ExpiryRequest) (ExpiryRe
 		return ExpiryResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	items, err := h.Service.ListExpiringItems(ctx, device.User.UserID, req.DaysAhead)
+	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	items, err := h.Service.ListExpiringItems(ctx, ownerID, req.DaysAhead)
 	if err != nil {
 		return ExpiryResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

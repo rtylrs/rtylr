@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── Update Product by Path ID ────────────────────────────────────────────────
@@ -111,7 +112,8 @@ func (h *UpdateProductByIDHandler) Serve(ctx context.Context, req *UpdateProduct
 		TrackInventory:    req.TrackInventory,
 	}
 
-	if err := h.Service.UpdateProduct(ctx, authUser.UserID, id, input); err != nil {
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := h.Service.UpdateProduct(ctx, ownerID, id, input); err != nil {
 		return UpdateProductByIDResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
