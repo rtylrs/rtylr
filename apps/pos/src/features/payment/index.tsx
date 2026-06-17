@@ -32,7 +32,17 @@ const fmt = (n: number): string =>
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
-  const { items, total, clearCart, newOrder, customerId, customerName } = useCartStore();
+  const {
+    items,
+    total,
+    clearCart,
+    newOrder,
+    customerId,
+    customerName,
+    orderType,
+    tableId,
+    notes,
+  } = useCartStore();
   const locationId = useTerminalContextStore((s) => s.locationId);
   // Stable local reference for the QR panel - regenerating it per render
   // would change the QR code under the customer's camera.
@@ -41,6 +51,7 @@ const Payment: React.FC = () => {
   const printer = useSettingsStore((s) => s.printer);
   const business = useSettingsStore((s) => s.business);
   const tipsEnabled = useSettingsStore((s) => s.features.tips);
+  const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const cashDrawerEnabled = useSettingsStore((s) => s.features.cashDrawer);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
   const addReceipt = useReceiptsStore((s) => s.add);
@@ -76,8 +87,11 @@ const Payment: React.FC = () => {
         items,
         method,
         locationId,
+        tableId: tablesEnabled ? tableId : null,
+        orderType,
         customerId,
         customerName,
+        notes,
       });
 
       const result = await processCheckout({
@@ -187,7 +201,7 @@ const Payment: React.FC = () => {
                 className="text-xs text-pos-muted hover:text-pos-text border border-pos-border rounded-lg px-3 py-1.5 transition-colors"
                 onClick={() => navigate(serverOrderId ? `/split-bill/${serverOrderId}` : '/split-bill/current')}
               >
-                Split Bill
+                Split Payment
               </button>
               {serverOrderId && (
                 <button

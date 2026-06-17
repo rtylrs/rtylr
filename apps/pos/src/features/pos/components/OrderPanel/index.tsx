@@ -35,6 +35,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   } = useCartStore();
   const hold = useHeldOrdersStore((s) => s.hold);
   const taxRate = useSettingsStore((s) => s.taxRate);
+  const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const locationId = useTerminalContextStore((s) => s.locationId);
   const customerId = useCartStore((s) => s.customerId);
   const customerName = useCartStore((s) => s.customerName);
@@ -42,6 +43,8 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const subtotal = total();
   const tax = subtotal * taxRate;
   const grandTotal = subtotal + tax;
+  const activeTableId = tablesEnabled ? tableId : undefined;
+  const activeTableNumber = tablesEnabled ? tableNumber : undefined;
 
   const [confirmClear, setConfirmClear] = useState(false);
   const [notingItemId, setNotingItemId] = useState<string | null>(null);
@@ -50,7 +53,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const onHold = () => {
     if (items.length === 0) return;
     hold({
-      label: tableNumber ? `Table ${tableNumber}` : `Cart ${new Date().toLocaleTimeString()}`,
+      label: activeTableNumber
+        ? `Table ${activeTableNumber}`
+        : `Cart ${new Date().toLocaleTimeString()}`,
       items: items.map((i) => ({
         id: i.id,
         name: i.name,
@@ -58,7 +63,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
         quantity: i.quantity,
         notes: i.notes,
       })),
-      tableNumber,
+      tableNumber: activeTableNumber,
     });
     clearCart();
     toast.success('Order held');
@@ -76,7 +81,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
             buildOrderSubmitPayload({
               items,
               locationId,
-              tableId,
+              tableId: activeTableId,
               customerId,
               customerName,
               orderType,
@@ -101,7 +106,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
       <div className="flex items-start justify-between px-4 py-3.5 border-b border-pos-border shrink-0 gap-2">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-pos-text">Current Order</h2>
-          {tableNumber && <span className="text-xs text-pos-muted">Table {tableNumber}</span>}
+          {activeTableNumber && (
+            <span className="text-xs text-pos-muted">Table {activeTableNumber}</span>
+          )}
           <div className="mt-1">
             <OfflineBadge />
           </div>
@@ -210,7 +217,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
               className="h-12 rounded-xl bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 transition"
               onClick={() => navigate('/split-bill/current')}
             >
-              Split
+              Split Pay
             </button>
           </div>
           <button

@@ -31,6 +31,7 @@ interface BuildCreateOrderPayloadParams {
   locationId?: number | null;
   tableId?: number | null;
   sessionId?: number | null;
+  orderType?: string;
   customerId?: string | number | null;
   customerName?: string | null;
   notes?: string;
@@ -110,6 +111,7 @@ export function buildCreateOrderPayload({
   locationId,
   tableId,
   sessionId,
+  orderType,
   customerId,
   customerName,
   notes,
@@ -118,6 +120,7 @@ export function buildCreateOrderPayload({
     location_id: positiveInteger(locationId),
     table_id: positiveInteger(tableId),
     session_id: positiveInteger(sessionId),
+    ...(orderType ? { type: orderType } : {}),
     customer_id: positiveInteger(customerId),
     customer_name: customerName ?? undefined,
     payment_method: method,

@@ -14,8 +14,8 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
   const { theme, toggleTheme } = useThemeStore();
   const endSession = useEmployeeSessionStore((s) => s.endSession);
   const businessProfile = useUserStore((s) => s.businessProfile);
-  const fallbackBusinessName = useSettingsStore((s) => s.business.name);
-  const businessName = businessDisplayName(businessProfile) ?? fallbackBusinessName;
+  const configuredBusinessName = useSettingsStore((s) => s.business.name.trim());
+  const businessName = configuredBusinessName || businessDisplayName(businessProfile);
 
   return (
     <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>

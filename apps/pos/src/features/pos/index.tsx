@@ -6,19 +6,24 @@ import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
 import AiAssistant from './AiAssistant';
 import { useCartStore } from '../../shared/stores/cartStore';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { useMenuItems } from '../menu-items/useMenuItems';
 
 const POS: React.FC = () => {
   const { items: products, categories } = useMenuItems();
   const [searchParams] = useSearchParams();
   const setTableNumber = useCartStore((s) => s.setTableNumber);
-  const tableNumber = searchParams.get('table') ?? undefined;
+  const setTable = useCartStore((s) => s.setTable);
+  const tablesEnabled = useSettingsStore((s) => s.features.tables);
+  const tableParam = searchParams.get('table');
+  const tableNumber = tablesEnabled ? (tableParam ?? undefined) : undefined;
 
   useEffect(() => {
-    if (tableNumber) {
-      setTableNumber(tableNumber);
+    setTableNumber(tableNumber ?? null);
+    if (!tablesEnabled) {
+      setTable(null, null);
     }
-  }, [tableNumber, setTableNumber]);
+  }, [tableNumber, setTable, setTableNumber, tablesEnabled]);
 
   return (
     <POSLayout>

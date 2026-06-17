@@ -218,7 +218,7 @@ const initialState: CartState = {
   localOrderId: null,
   serverOrderId: null,
   orderNumber: null,
-  orderType: 'dine_in',
+  orderType: 'takeaway',
   branchId: null,
   terminalId: null,
   employeeId: null,

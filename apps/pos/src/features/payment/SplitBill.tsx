@@ -75,7 +75,7 @@ const SplitBillScreen: React.FC = () => {
   };
 
   return (
-    <ScreenLayout title="Split Bill" subtitle={`Order #${orderId ?? 'current'}`}>
+    <ScreenLayout title="Split Payment" subtitle={`Order #${orderId ?? 'current'}`}>
       <div className="p-5 space-y-5 max-w-5xl">
         <div className="flex flex-wrap gap-2">
           {(['seat', 'amount', 'items'] as SplitMode[]).map((m) => (
