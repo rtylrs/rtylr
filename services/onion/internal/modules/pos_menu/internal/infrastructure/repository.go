@@ -32,7 +32,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			COALESCE(c.name, 'Other') AS category_name,
 			p.name,
 			p.sku,
+			p.barcode,
 			p.sale_price,
+			p.tax_rate,
 			p.description,
 			COALESCE(img.url, '') AS image_url,
 			COALESCE(pst.total_quantity, p.stock_quantity) AS stock_quantity,
@@ -71,7 +73,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			categoryID sql.NullInt64
 			category   sql.NullString
 			sku        sql.NullString
+			barcode    sql.NullString
 			salePrice  string
+			taxRate    string
 			desc       sql.NullString
 			imageURL   sql.NullString
 			stock      string
@@ -87,7 +91,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			&category,
 			&item.Name,
 			&sku,
+			&barcode,
 			&salePrice,
+			&taxRate,
 			&desc,
 			&imageURL,
 			&stock,
@@ -109,7 +115,11 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 		if sku.Valid {
 			item.SKU = sku.String
 		}
+		if barcode.Valid {
+			item.Barcode = barcode.String
+		}
 		item.SalePrice = decimalToFloat(salePrice)
+		item.TaxRate = decimalToFloat(taxRate)
 		if desc.Valid {
 			item.Description = desc.String
 		}
@@ -131,7 +141,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 			Category:    item.Category,
 			Name:        item.Name,
 			SKU:         item.SKU,
+			Barcode:     item.Barcode,
 			SalePrice:   item.SalePrice,
+			TaxRate:     item.TaxRate,
 			Description: item.Description,
 			ImageURL:    item.ImageURL,
 			Stock:       item.Stock,

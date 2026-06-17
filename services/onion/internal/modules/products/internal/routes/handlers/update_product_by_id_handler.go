@@ -40,8 +40,8 @@ type UpdateProductByIDRequest struct {
 	SalePrice         float64 `json:"sale_price"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
-	IsActive          bool    `json:"is_active"`
-	TrackInventory    bool    `json:"track_inventory"`
+	IsActive          *bool   `json:"is_active"`
+	TrackInventory    *bool   `json:"track_inventory"`
 }
 
 type UpdateProductByIDResponse struct {
@@ -96,6 +96,16 @@ func (h *UpdateProductByIDHandler) Serve(ctx context.Context, req *UpdateProduct
 		}
 	}
 
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	isActive, trackInventory, flagErr := productFlagsForUpdate(ctx, h.Service, ownerID, id, req.IsActive, req.TrackInventory)
+	if flagErr != nil {
+		return UpdateProductByIDResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to update product",
+		}
+	}
+
 	input := domain.ProductInput{
 		CategoryID:        req.CategoryID,
 		SupplierID:        req.SupplierID,
@@ -108,11 +118,10 @@ func (h *UpdateProductByIDHandler) Serve(ctx context.Context, req *UpdateProduct
 		SalePrice:         req.SalePrice,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
-		IsActive:          req.IsActive,
-		TrackInventory:    req.TrackInventory,
+		IsActive:          isActive,
+		TrackInventory:    trackInventory,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
 	if err := h.Service.UpdateProduct(ctx, ownerID, id, input); err != nil {
 		return UpdateProductByIDResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

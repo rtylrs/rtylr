@@ -133,8 +133,8 @@ type CreateProductRequest struct {
 	LeadTimeDays      int     `json:"lead_time_days"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
-	IsActive          bool    `json:"is_active"`
-	TrackInventory    bool    `json:"track_inventory"`
+	IsActive          *bool   `json:"is_active"`
+	TrackInventory    *bool   `json:"track_inventory"`
 
 	Attributes []domain.ProductAttributeInput `json:"attributes"`
 }
@@ -210,8 +210,8 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 		LeadTimeDays:      req.LeadTimeDays,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
-		IsActive:          req.IsActive,
-		TrackInventory:    req.TrackInventory,
+		IsActive:          productBoolDefault(req.IsActive, true),
+		TrackInventory:    productBoolDefault(req.TrackInventory, true),
 	}
 
 	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
@@ -271,8 +271,8 @@ type UpdateProductRequest struct {
 	LeadTimeDays      int     `json:"lead_time_days"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
-	IsActive          bool    `json:"is_active"`
-	TrackInventory    bool    `json:"track_inventory"`
+	IsActive          *bool   `json:"is_active"`
+	TrackInventory    *bool   `json:"track_inventory"`
 
 	Attributes []domain.ProductAttributeInput `json:"attributes"`
 }
@@ -328,6 +328,16 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		}
 	}
 
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	isActive, trackInventory, flagErr := productFlagsForUpdate(ctx, h.Service, ownerID, req.ID, req.IsActive, req.TrackInventory)
+	if flagErr != nil {
+		return UpdateProductResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to update product",
+		}
+	}
+
 	input := domain.ProductInput{
 		CategoryID:        req.CategoryID,
 		SupplierID:        req.SupplierID,
@@ -355,11 +365,10 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		LeadTimeDays:      req.LeadTimeDays,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
-		IsActive:          req.IsActive,
-		TrackInventory:    req.TrackInventory,
+		IsActive:          isActive,
+		TrackInventory:    trackInventory,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
 	if err := h.Service.UpdateProduct(ctx, ownerID, req.ID, input); err != nil {
 		return UpdateProductResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

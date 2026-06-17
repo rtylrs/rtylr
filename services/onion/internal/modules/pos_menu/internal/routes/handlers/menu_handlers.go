@@ -20,8 +20,10 @@ type MenuItemPayload struct {
 	CategoryName string  `json:"category_name"`
 	Name         string  `json:"name"`
 	SKU          string  `json:"sku"`
+	Barcode      string  `json:"barcode,omitempty"`
 	Price        float64 `json:"price"`
 	SalePrice    float64 `json:"sale_price"`
+	TaxRate      float64 `json:"tax_rate,omitempty"`
 	Image        string  `json:"image,omitempty"`
 	ImageURL     string  `json:"image_url,omitempty"`
 	Available    bool    `json:"available"`
@@ -50,8 +52,10 @@ func toMenuItemPayload(item domain.MenuItem) MenuItemPayload {
 		CategoryName: item.Category,
 		Name:         item.Name,
 		SKU:          item.SKU,
+		Barcode:      item.Barcode,
 		Price:        item.SalePrice,
 		SalePrice:    item.SalePrice,
+		TaxRate:      item.TaxRate,
 		Image:        item.ImageURL,
 		ImageURL:     item.ImageURL,
 		Available:    item.IsActive,
