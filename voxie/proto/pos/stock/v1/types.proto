@@ -50,4 +50,16 @@ message BranchInventory {
   double reorder_quantity = 7;
   // updated_at is when the record was last updated.
   string updated_at = 8;
+  // item_id is an alias for product_id used by POS catalog UIs.
+  int64 item_id = 9;
+  // name is the ERP product display name.
+  string name = 10;
+  // sku is the ERP product SKU.
+  string sku = 11;
+  // unit is the product stock unit.
+  string unit = 12;
+  // current_qty is an alias for quantity used by POS inventory UIs.
+  double current_qty = 13;
+  // low_stock_threshold is the ERP product low-stock threshold.
+  double low_stock_threshold = 14;
 }
