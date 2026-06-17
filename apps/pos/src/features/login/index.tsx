@@ -31,6 +31,10 @@ const PinLogin: React.FC = () => {
   const [settingPin, setSettingPin] = useState(false);
   const [revealPin, setRevealPin] = useState(false);
   const [shake, setShake] = useState(false);
+  const submittingRef = React.useRef(false);
+  const mountedRef = React.useRef(true);
+
+  const busy = loading || settingPin;
 
   const loadRoster = useCallback(async () => {
     if (!locationId) return;
@@ -49,6 +53,20 @@ const PinLogin: React.FC = () => {
   useEffect(() => {
     void loadRoster();
   }, [loadRoster]);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const flashShake = useCallback(() => {
+    if (!mountedRef.current) return;
+    setShake(true);
+    window.setTimeout(() => {
+      if (mountedRef.current) setShake(false);
+    }, 500);
+  }, []);
 
   const resetToRoster = (): void => {
     setStep('roster');
@@ -69,27 +87,31 @@ const PinLogin: React.FC = () => {
   const submitEnter = useCallback(
     async (value: string) => {
       if (!member || !locationId) return;
+      if (submittingRef.current) return;
+      submittingRef.current = true;
       try {
         await authenticatePin(locationId, member.userId, value);
         // success → AppShell sees isActive and renders the POS
       } catch {
-        setShake(true);
-        setPin('');
-        setTimeout(() => setShake(false), 500);
+        flashShake();
+        if (mountedRef.current) setPin('');
+      } finally {
+        submittingRef.current = false;
       }
     },
-    [authenticatePin, locationId, member]
+    [authenticatePin, flashShake, locationId, member]
   );
 
   const submitSetup = useCallback(async () => {
     if (!member || !locationId) return;
+    if (submittingRef.current) return;
     if (pin !== confirmPin) {
-      setShake(true);
+      flashShake();
       setConfirmPin('');
-      setTimeout(() => setShake(false), 500);
       toast.error('PINs do not match');
       return;
     }
+    submittingRef.current = true;
     setSettingPin(true);
     try {
       await unwrap(
@@ -100,22 +122,27 @@ const PinLogin: React.FC = () => {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not set PIN';
       toast.error(msg);
-      setPin('');
-      setConfirmPin('');
-      setStep('setup');
+      if (mountedRef.current) {
+        setPin('');
+        setConfirmPin('');
+        setStep('setup');
+      }
     } finally {
-      setSettingPin(false);
+      submittingRef.current = false;
+      if (mountedRef.current) setSettingPin(false);
     }
-  }, [authenticatePin, confirmPin, locationId, member, pin]);
+  }, [authenticatePin, confirmPin, flashShake, locationId, member, pin]);
 
   // Auto-submit when a PIN field fills.
   useEffect(() => {
+    if (busy || submittingRef.current) return;
     if (step === 'enter' && isCompletePin(pin)) void submitEnter(pin);
-  }, [pin, step, submitEnter]);
+  }, [busy, pin, step, submitEnter]);
 
   useEffect(() => {
+    if (busy || submittingRef.current) return;
     if (step === 'setup' && isCompletePin(pin) && isCompletePin(confirmPin)) void submitSetup();
-  }, [pin, confirmPin, step, submitSetup]);
+  }, [busy, pin, confirmPin, step, submitSetup]);
 
   // The active field for the keypad: PIN first, then confirm during setup.
   const activeValue = step === 'setup' && isCompletePin(pin) ? confirmPin : pin;
@@ -239,7 +266,6 @@ const PinLogin: React.FC = () => {
       ? 'Re-enter to confirm'
       : `Pick a ${PIN_LENGTH}-digit PIN for this location`
     : 'Enter your PIN';
-  const busy = loading || settingPin;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-pos-bg">
