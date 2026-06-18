@@ -121,6 +121,51 @@ func TestBuildSQL_InFilterRendersIn(t *testing.T) {
 	}
 }
 
+func TestBuildSQL_AllowsSafeColumnComparisonFilters(t *testing.T) {
+	sql, args, err := BuildSQL(QuerySpec{
+		View: "ai_products",
+		Aggregations: []Aggregation{{
+			Func: "count",
+			As:   "low_stock_products",
+		}},
+		Where: []Filter{
+			{Col: "track_inventory", Op: "=", Value: true},
+			{Col: "stock_quantity", Op: "<=", ValueColumn: "low_stock_threshold"},
+		},
+	}, 9)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if !strings.Contains(sql, "stock_quantity <= low_stock_threshold") {
+		t.Fatalf("expected column comparison in SQL, got: %s", sql)
+	}
+	if len(args) != 2 { // owner_id + track_inventory
+		t.Fatalf("expected only bound scalar args, got %v", args)
+	}
+}
+
+func TestBuildSQL_RejectsUnsafeColumnComparisonFilters(t *testing.T) {
+	cases := []QuerySpec{
+		{
+			View:  "ai_products",
+			Where: []Filter{{Col: "stock_quantity", Op: "<=", ValueColumn: "password"}},
+		},
+		{
+			View:  "ai_products",
+			Where: []Filter{{Col: "name", Op: "like", ValueColumn: "sku"}},
+		},
+		{
+			View:  "ai_products",
+			Where: []Filter{{Col: "name", Op: "in", ValueColumn: "sku"}},
+		},
+	}
+	for i, spec := range cases {
+		if _, _, err := BuildSQL(spec, 1); err == nil {
+			t.Fatalf("case %d: expected unsafe column comparison rejection", i)
+		}
+	}
+}
+
 func TestSchema_ExposesViewsWithoutOwnerID(t *testing.T) {
 	s := Schema()
 	if len(s) != 7 {

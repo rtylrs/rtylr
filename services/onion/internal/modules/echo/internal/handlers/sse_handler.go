@@ -638,7 +638,11 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		return nil
 	}
 
-	blockID := fmt.Sprintf("tool-analytics-%d", time.Now().UnixNano())
+	toolName := strings.TrimSpace(grounding.ToolName)
+	if toolName == "" {
+		toolName = "analytics.query"
+	}
+	blockID := fmt.Sprintf("tool-%s-%d", strings.ReplaceAll(toolName, ".", "-"), time.Now().UnixNano())
 	input := map[string]any{
 		"question": grounding.Question,
 		"spec":     json.RawMessage(grounding.SpecJSON),
@@ -653,7 +657,7 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		Type:             EventToolCall,
 		MessageID:        messageID,
 		BlockID:          blockID,
-		Name:             "analytics.query",
+		Name:             toolName,
 		Input:            input,
 		RequiresApproval: false,
 	}); err != nil {

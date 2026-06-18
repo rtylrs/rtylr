@@ -14,6 +14,7 @@ type ToolDef struct {
 // CoreTools is the seed registry — the long-term plan is to source this
 // list from each module's MCP descriptor.
 var CoreTools = []ToolDef{
+	{Name: "business.snapshot", Description: "Build a tenant-scoped owner snapshot across sales, finance, inventory, CRM, HR, and Flow.", Module: "business", Scope: "read"},
 	{Name: "analytics.query", Description: "Run a tenant-scoped, read-only analytics query over allowlisted business views.", Module: "analytics", Scope: "read"},
 	{Name: "crm.list_customers", Description: "List CRM customers.", Module: "crm", Scope: "read"},
 	{Name: "crm.create_customer", Description: "Create a CRM customer.", Module: "crm", Scope: "write", RequiresApproval: true},

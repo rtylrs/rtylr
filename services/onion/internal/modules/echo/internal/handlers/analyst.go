@@ -26,6 +26,7 @@ type AnalystService interface {
 const maxGroundingChars = 12000
 
 type analystGroundingResult struct {
+	ToolName   string
 	Prompt     string
 	Question   string
 	SpecJSON   string
@@ -55,14 +56,14 @@ func buildSpecGenPrompt(schema, question, today string) string {
 	b.WriteString(".\n\nViews and their columns:\n")
 	b.WriteString(schema)
 	b.WriteString("\nSpec shape:\n")
-	b.WriteString(`{"view":"<one view>","columns":["<col>"],"aggregations":[{"func":"sum|count|avg|min|max","col":"<col>","as":"<alias>"}],"where":[{"col":"<col>","op":"=|!=|<|<=|>|>=|like|in","value":<value>}],"group_by":["<col>"],"order_by":[{"col":"<col-or-alias>","dir":"asc|desc"}],"limit":<int>}`)
-	b.WriteString("\n\nRules: exactly one view; only columns listed for that view; never reference owner_id (applied automatically); limit <= 1000. For date filters use 'YYYY-MM-DD'. For today's datetime windows, filter >= today and < tomorrow. For daily revenue/sales, prefer paid ai_pos_orders total using payment_status='paid' and paid_at; use ai_invoices only when the user specifically asks about invoices or billing.\n\n")
+	b.WriteString(`{"view":"<one view>","columns":["<col>"],"aggregations":[{"func":"sum|count|avg|min|max","col":"<col>","as":"<alias>"}],"where":[{"col":"<col>","op":"=|!=|<|<=|>|>=|like|in","value":<value>,"value_col":"<other-col-if-comparing-columns>"}],"group_by":["<col>"],"order_by":[{"col":"<col-or-alias>","dir":"asc|desc"}],"limit":<int>}`)
+	b.WriteString("\n\nRules: exactly one view; only columns listed for that view; never reference owner_id (applied automatically); limit <= 1000. For date filters use 'YYYY-MM-DD'. For today's datetime windows, filter >= today and < tomorrow. For safe column-to-column comparisons, use value_col instead of value. For daily revenue/sales, prefer paid ai_pos_orders total using payment_status='paid' and paid_at; use ai_invoices only when the user specifically asks about invoices or billing.\n\n")
 	b.WriteString("Examples:\n")
 	b.WriteString(`Q: "revenue today" -> {"view":"ai_pos_orders","aggregations":[{"func":"sum","col":"total","as":"revenue"}],"where":[{"col":"payment_status","op":"=","value":"paid"},{"col":"paid_at","op":">=","value":"` + today + `"},{"col":"paid_at","op":"<","value":"` + tomorrow + `"}]}`)
 	b.WriteString("\n")
 	b.WriteString(`Q: "how many employees" -> {"view":"ai_employees","aggregations":[{"func":"count","as":"employees"}]}`)
 	b.WriteString("\n")
-	b.WriteString(`Q: "low stock products" -> {"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":20}`)
+	b.WriteString(`Q: "low stock products" -> {"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"where":[{"col":"track_inventory","op":"=","value":true},{"col":"stock_quantity","op":"<=","value_col":"low_stock_threshold"}],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":20}`)
 	b.WriteString("\n\nIf the question is not answerable from these views (greetings, how-to, general chat), respond with exactly: {}\n\n")
 	b.WriteString("Question: ")
 	b.WriteString(question)
@@ -122,7 +123,15 @@ func repairLLMJSON(s string) string {
 // On success it returns the data-grounded prompt plus event metadata; on any
 // failure it returns (nil, false) so the caller falls back to normal chat.
 func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
-	if h.AnalystService == nil || h.AiService == nil {
+	if h.AnalystService == nil {
+		return nil, false
+	}
+	if shouldUseBusinessSnapshot(question) {
+		if grounding, ok := h.businessSnapshotGrounding(ctx, question, businessID, userID); ok {
+			return grounding, true
+		}
+	}
+	if h.AiService == nil {
 		return nil, false
 	}
 
@@ -150,6 +159,7 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 
 	rowsJSON, truncated := marshalGroundingRows(rows, maxGroundingChars)
 	return &analystGroundingResult{
+		ToolName:   "analytics.query",
 		Prompt:     buildAnalystGroundingPromptFromJSON(rowsJSON, len(rows), truncated, specJSON),
 		Question:   question,
 		SpecJSON:   specJSON,

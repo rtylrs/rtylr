@@ -59,9 +59,10 @@ type Aggregation struct {
 
 // Filter is a single WHERE condition. Value is a scalar, or a slice for "in".
 type Filter struct {
-	Col   string `json:"col"`
-	Op    string `json:"op"`
-	Value any    `json:"value"`
+	Col         string `json:"col"`
+	Op          string `json:"op"`
+	Value       any    `json:"value,omitempty"`
+	ValueColumn string `json:"value_col,omitempty"`
 }
 
 // OrderBy references a selected column or an aggregation alias.
@@ -205,6 +206,16 @@ func filterPredicate(f Filter, cols map[string]struct{}) (sq.Sqlizer, error) {
 	op := strings.ToLower(strings.TrimSpace(f.Op))
 	if !inSet(allowedOperators, op) {
 		return nil, fmt.Errorf("%w: %q", ErrBadOperator, f.Op)
+	}
+	if strings.TrimSpace(f.ValueColumn) != "" {
+		valueCol := strings.TrimSpace(f.ValueColumn)
+		if !allowed(cols, valueCol) {
+			return nil, fmt.Errorf("%w: value column %q", ErrUnknownColumn, valueCol)
+		}
+		if op == "like" || op == "in" {
+			return nil, fmt.Errorf("%w: column comparison with %q", ErrBadOperator, f.Op)
+		}
+		return sq.Expr(fmt.Sprintf("%s %s %s", strings.TrimSpace(f.Col), op, valueCol)), nil
 	}
 
 	switch op {

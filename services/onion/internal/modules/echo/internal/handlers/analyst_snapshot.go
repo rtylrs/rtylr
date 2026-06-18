@@ -1,0 +1,193 @@
+package handlers
+
+import (
+	"context"
+	"encoding/json"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+type businessSnapshotQuery struct {
+	Metric string
+	Label  string
+	Spec   string
+}
+
+type businessSnapshotSpecItem struct {
+	Metric string          `json:"metric"`
+	Label  string          `json:"label"`
+	Spec   json.RawMessage `json:"spec"`
+}
+
+func shouldUseBusinessSnapshot(question string) bool {
+	q := strings.ToLower(strings.TrimSpace(question))
+	if q == "" {
+		return false
+	}
+
+	for _, phrase := range []string{
+		"business snapshot",
+		"business overview",
+		"owner brief",
+		"daily brief",
+		"business health",
+		"how is my business",
+		"how's my business",
+		"how are we doing",
+		"what should i focus on",
+		"what needs attention",
+		"give me a dashboard",
+	} {
+		if strings.Contains(q, phrase) {
+			return true
+		}
+	}
+	return false
+}
+
+func (h *GenerateTextStreamHandler) businessSnapshotGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
+	if h.AnalystService == nil {
+		return nil, false
+	}
+
+	started := time.Now()
+	now := started.UTC()
+	queries := buildBusinessSnapshotQueries(now)
+	sections := make([]map[string]any, 0, len(queries))
+	specItems := make([]businessSnapshotSpecItem, 0, len(queries))
+
+	for _, query := range queries {
+		rows, _, err := h.AnalystService.RunJSON(ctx, businessID, userID, query.Spec)
+		if err != nil {
+			logger.Ctx(ctx).Warn("business snapshot query failed",
+				logger.String("metric", query.Metric),
+				logger.Error(err),
+			)
+			continue
+		}
+
+		sections = append(sections, map[string]any{
+			"metric":    query.Metric,
+			"label":     query.Label,
+			"row_count": len(rows),
+			"rows":      rows,
+		})
+		specItems = append(specItems, businessSnapshotSpecItem{
+			Metric: query.Metric,
+			Label:  query.Label,
+			Spec:   json.RawMessage(query.Spec),
+		})
+	}
+
+	if len(sections) == 0 {
+		return nil, false
+	}
+
+	rowsJSON, truncated := marshalGroundingRows(sections, maxGroundingChars)
+	specJSON := buildBusinessSnapshotSpecJSON(now.Format("2006-01-02"), specItems)
+	return &analystGroundingResult{
+		ToolName:   "business.snapshot",
+		Prompt:     buildBusinessSnapshotGroundingPromptFromJSON(rowsJSON, len(sections), truncated, specJSON),
+		Question:   question,
+		SpecJSON:   specJSON,
+		RowsJSON:   rowsJSON,
+		Rows:       rowsPreviewFromJSON(rowsJSON),
+		RowCount:   len(sections),
+		Truncated:  truncated,
+		DurationMs: time.Since(started).Milliseconds(),
+	}, true
+}
+
+func buildBusinessSnapshotQueries(now time.Time) []businessSnapshotQuery {
+	today := now.Format("2006-01-02")
+	tomorrow := now.AddDate(0, 0, 1).Format("2006-01-02")
+	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC).Format("2006-01-02")
+
+	return []businessSnapshotQuery{
+		{
+			Metric: "today_revenue",
+			Label:  "Paid POS revenue today",
+			Spec:   `{"view":"ai_pos_orders","aggregations":[{"func":"sum","col":"total","as":"revenue"}],"where":[{"col":"payment_status","op":"=","value":"paid"},{"col":"paid_at","op":">=","value":"` + today + `"},{"col":"paid_at","op":"<","value":"` + tomorrow + `"}]}`,
+		},
+		{
+			Metric: "today_orders",
+			Label:  "Paid POS orders today",
+			Spec:   `{"view":"ai_pos_orders","aggregations":[{"func":"count","as":"orders"}],"where":[{"col":"payment_status","op":"=","value":"paid"},{"col":"paid_at","op":">=","value":"` + today + `"},{"col":"paid_at","op":"<","value":"` + tomorrow + `"}]}`,
+		},
+		{
+			Metric: "open_invoice_exposure",
+			Label:  "Unpaid invoice exposure",
+			Spec:   `{"view":"ai_invoices","aggregations":[{"func":"sum","col":"amount_due","as":"amount_due"},{"func":"count","as":"invoice_count"}],"where":[{"col":"amount_due","op":">","value":0}]}`,
+		},
+		{
+			Metric: "month_expenses",
+			Label:  "Month-to-date expenses",
+			Spec:   `{"view":"ai_expenses","aggregations":[{"func":"sum","col":"amount","as":"expenses"}],"where":[{"col":"expense_date","op":">=","value":"` + monthStart + `"},{"col":"expense_date","op":"<","value":"` + tomorrow + `"}]}`,
+		},
+		{
+			Metric: "customer_base",
+			Label:  "Customer base",
+			Spec:   `{"view":"ai_customers","aggregations":[{"func":"count","as":"customers"}]}`,
+		},
+		{
+			Metric: "active_employees",
+			Label:  "Active employees",
+			Spec:   `{"view":"ai_employees","aggregations":[{"func":"count","as":"employees"}],"where":[{"col":"status","op":"=","value":"active"}]}`,
+		},
+		{
+			Metric: "low_stock_products",
+			Label:  "Low-stock inventory",
+			Spec:   `{"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"where":[{"col":"track_inventory","op":"=","value":true},{"col":"stock_quantity","op":"<=","value_col":"low_stock_threshold"}],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":10}`,
+		},
+		{
+			Metric: "task_status",
+			Label:  "Flow tasks by status",
+			Spec:   `{"view":"ai_tasks","columns":["status"],"aggregations":[{"func":"count","as":"tasks"}],"group_by":["status"],"order_by":[{"col":"tasks","dir":"desc"}],"limit":10}`,
+		},
+	}
+}
+
+func buildBusinessSnapshotSpecJSON(date string, items []businessSnapshotSpecItem) string {
+	doc := struct {
+		Kind    string                     `json:"kind"`
+		Date    string                     `json:"date"`
+		Queries []businessSnapshotSpecItem `json:"queries"`
+	}{
+		Kind:    "business_snapshot",
+		Date:    date,
+		Queries: items,
+	}
+	data, err := json.Marshal(doc)
+	if err != nil {
+		return `{"kind":"business_snapshot"}`
+	}
+	return string(data)
+}
+
+func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount int, truncated bool, specJSON string) string {
+	var g strings.Builder
+	g.WriteString("Authoritative business snapshot:\n")
+	g.WriteString("- Scope: the authenticated user's own tenant only.\n")
+	g.WriteString("- Source: server-validated, read-only business.snapshot tool.\n")
+	g.WriteString("- Metric sections returned: ")
+	g.WriteString(strconv.Itoa(sectionCount))
+	g.WriteString("\n")
+	if truncated {
+		g.WriteString("- Note: snapshot rows were truncated to fit the model context; say that visible rows are partial if it affects the answer.\n")
+	}
+	if spec := strings.TrimSpace(specJSON); spec != "" {
+		g.WriteString("- Query spec bundle: ")
+		g.WriteString(spec)
+		g.WriteString("\n")
+	}
+	g.WriteString("\nSnapshot JSON:\n```json\n")
+	g.WriteString(dataStr)
+	g.WriteString("\n```\n")
+	g.WriteString("Answer the user's business-owner question using ONLY this snapshot. ")
+	g.WriteString("Lead with a compact operator summary, then call out risks or opportunities, then suggest concrete next actions. ")
+	g.WriteString("If a metric is empty or missing, say it is unavailable or has no visible rows; do not invent missing values.")
+	return g.String()
+}

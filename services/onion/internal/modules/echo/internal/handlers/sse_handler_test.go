@@ -276,6 +276,34 @@ func TestWriteAnalystToolEventsEmitsReadOnlyToolCallAndResult(t *testing.T) {
 	}
 }
 
+func TestWriteAnalystToolEventsUsesGroundingToolName(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	rec := httptest.NewRecorder()
+	grounding := &analystGroundingResult{
+		ToolName:   "business.snapshot",
+		Question:   "how are we doing?",
+		SpecJSON:   `{"kind":"business_snapshot"}`,
+		Rows:       []map[string]any{{"metric": "today_revenue", "rows": []map[string]any{{"revenue": 10}}}},
+		RowCount:   1,
+		DurationMs: 4,
+	}
+
+	if err := handler.writeAnalystToolEvents(rec, "assistant-1", grounding); err != nil {
+		t.Fatalf("writeAnalystToolEvents: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	if len(events) != 2 {
+		t.Fatalf("expected tool call and result, got %#v", events)
+	}
+	if events[0].Name != "business.snapshot" {
+		t.Fatalf("expected business.snapshot tool, got %#v", events[0])
+	}
+	if events[0].RequiresApproval {
+		t.Fatalf("business snapshot should not require approval")
+	}
+}
+
 func eventTypes(events []StreamEvent) []StreamEventType {
 	out := make([]StreamEventType, len(events))
 	for i := range events {
