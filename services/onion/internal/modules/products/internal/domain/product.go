@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrProductNotFound = errors.New("product not found")
+var (
+	ErrProductNotFound      = errors.New("product not found")
+	ErrProductAlreadyExists = errors.New("product SKU or barcode already exists")
+)
 
 type Product struct {
 	ID                int64     `json:"id"`

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -197,6 +198,13 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
 	id, err := h.Service.CreateProduct(ctx, ownerID, input)
 	if err != nil {
+		if errors.Is(err, domain.ErrProductAlreadyExists) {
+			return CreateProductResponse{}, &errorModels.ServerError{
+				Code:     http.StatusConflict,
+				HTTPCode: http.StatusConflict,
+				Message:  err.Error(),
+			}
+		}
 		return CreateProductResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

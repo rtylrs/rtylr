@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/go-sql-driver/mysql"
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
@@ -180,6 +181,10 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		TrackInventory:    sql.NullBool{Bool: input.TrackInventory, Valid: true},
 	})
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return 0, domain.ErrProductAlreadyExists
+		}
 		logger.Ctx(ctx).Error("Failed to create product", logger.Error(err))
 
 		return 0, err
