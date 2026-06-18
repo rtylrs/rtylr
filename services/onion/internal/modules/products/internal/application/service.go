@@ -13,7 +13,10 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
-const productsCacheTTL = 5 * time.Minute
+const (
+	productsCacheTTL         = 5 * time.Minute
+	productsListCacheVersion = "v2"
+)
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -48,9 +51,10 @@ func paginateProducts(page, pageSize int64) (int, int) {
 }
 
 func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, page, pageSize int64) ([]domain.Product, bool, error) {
+	search = strings.TrimSpace(search)
 	limit, offset := paginateProducts(page, pageSize)
-	key := fmt.Sprintf("%s|s=%s|c=%d|p=%d|ps=%d",
-		cacheKeys.ProductsList(ownerID), search, categoryID, page, pageSize)
+	key := fmt.Sprintf("%s|%s|s=%s|c=%d|p=%d|ps=%d",
+		cacheKeys.ProductsList(ownerID), productsListCacheVersion, search, categoryID, page, pageSize)
 
 	type pageResult struct {
 		items   []domain.Product
