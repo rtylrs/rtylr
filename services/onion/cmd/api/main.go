@@ -456,6 +456,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 	suppliersModule := suppliers.NewModule(ctx, dbclient.Pool())
 	purchaseOrdersModule := purchaseorders.NewModule(ctx, dbclient.Pool())
+	stockTransfersModule := stocktransfers.NewModule(ctx, dbclient.Pool())
 	billsModule := bills.NewModule(ctx, dbclient.Pool())
 	quotesModule := quotes.NewModule(ctx, dbclient.Pool())
 	bookingAppointmentsModule := bookingappointments.NewModule(ctx, dbclient.Pool())
@@ -495,7 +496,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, purchaseOrdersModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -563,7 +564,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Shifts:                shifts.NewModule(ctx, dbclient.Pool()),
 		Staff:                 staff.NewModule(ctx, dbclient.Pool()),
 		StockTakes:            stocktakes.NewModule(ctx, dbclient.Pool()),
-		StockTransfers:        stocktransfers.NewModule(ctx, dbclient.Pool()),
+		StockTransfers:        stockTransfersModule,
 		StoreCategories:       storecategories.NewModule(ctx, dbclient.Pool()),
 		StoreCheckout:         storecheckout.NewModule(ctx, dbclient.Pool()),
 		Storefronts:           storefronts.NewModule(ctx, dbclient.Pool()),
