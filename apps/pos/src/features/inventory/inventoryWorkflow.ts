@@ -16,6 +16,12 @@ export interface InventoryLocation {
   name: string;
 }
 
+export interface LowStockSummary {
+  count: number;
+  names: string[];
+  hiddenCount: number;
+}
+
 export interface StockActionParams {
   itemId: number;
   action: StockAction;
@@ -122,6 +128,23 @@ export function mapInventoryItems(raw: unknown): InventoryItem[] {
       ),
     }))
     .filter((item) => item.itemId > 0);
+}
+
+export function summarizeLowStockItems(
+  items: Pick<InventoryItem, 'name'>[],
+  visibleItemCount = 4,
+): LowStockSummary {
+  const visibleCount = Math.max(0, Math.floor(visibleItemCount));
+  const names = items
+    .slice(0, visibleCount)
+    .map((item) => item.name.trim())
+    .filter(Boolean);
+
+  return {
+    count: items.length,
+    names,
+    hiddenCount: Math.max(0, items.length - visibleCount),
+  };
 }
 
 function locationRows(raw: unknown): unknown[] {

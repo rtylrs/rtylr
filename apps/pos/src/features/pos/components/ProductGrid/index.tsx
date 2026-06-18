@@ -90,7 +90,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
           <div className="grid grid-cols-3 gap-2.5">
             {filtered.map((product) => {
               const unavailable = product.available === false;
-              const showStock = inventoryEnabled && hasFiniteStock(product.stock);
+              const stock = product.stock;
+              const showStock = inventoryEnabled && hasFiniteStock(stock);
               return (
                 <motion.button
                   key={product.id}
@@ -128,7 +129,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
                       </span>
                       {showStock && (
                         <span className="rounded-full bg-white/6 px-2 py-1 text-[10px] font-semibold text-pos-muted">
-                          {formatStock(product.stock)} in stock
+                          {formatStock(stock)} in stock
                         </span>
                       )}
                     </div>

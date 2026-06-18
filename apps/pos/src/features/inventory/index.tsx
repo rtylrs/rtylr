@@ -8,7 +8,12 @@ import Skeleton from '../../shared/components/Skeleton';
 import { posService } from '../../shared/services/api/posService';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
-import { buildStockAction, mapInventoryItems, mapInventoryLocations } from './inventoryWorkflow';
+import {
+  buildStockAction,
+  mapInventoryItems,
+  mapInventoryLocations,
+  summarizeLowStockItems,
+} from './inventoryWorkflow';
 import type { InventoryItem, InventoryLocation, StockAction } from './inventoryWorkflow';
 
 const ACTION_LABELS: Record<StockAction, string> = {
@@ -197,14 +202,18 @@ const InventoryScreen: React.FC = () => {
         toBranchId,
         employeeId: Number(employee?.id) || null,
       });
-      const call =
-        built.action === 'receive'
-          ? posService.receiveStock(built.payload)
-          : built.action === 'adjust'
-            ? posService.adjustStock(built.payload)
-            : built.action === 'waste'
-              ? posService.wasteStock(built.payload)
-              : posService.transferStock(built.payload);
+      const call = (() => {
+        switch (built.action) {
+          case 'receive':
+            return posService.receiveStock(built.payload);
+          case 'adjust':
+            return posService.adjustStock(built.payload);
+          case 'waste':
+            return posService.wasteStock(built.payload);
+          case 'transfer':
+            return posService.transferStock(built.payload);
+        }
+      })();
       await unwrap(call);
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
@@ -224,6 +233,7 @@ const InventoryScreen: React.FC = () => {
   });
 
   const lowStockIds = new Set(lowStock.map((l) => l.itemId));
+  const lowStockSummary = summarizeLowStockItems(lowStock);
   const hasTransferDestinations = locations.some((location) => location.id !== branchId);
 
   return (
@@ -239,13 +249,18 @@ const InventoryScreen: React.FC = () => {
         </button>
       }
     >
-      <div className="p-5 max-w-4xl space-y-4">
+      <div className="w-full min-w-0 p-5 space-y-4">
         {lowStock.length > 0 && (
-          <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-2">
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3">
             <p className="text-xs font-semibold text-amber-300">
-              {lowStock.length} item{lowStock.length !== 1 ? 's' : ''} low on stock:&nbsp;
-              {lowStock.map((i) => i.name).join(', ')}
+              {lowStockSummary.count} item{lowStockSummary.count !== 1 ? 's' : ''} low on stock
             </p>
+            {lowStockSummary.names.length > 0 && (
+              <p className="mt-1 truncate text-xs text-amber-100/80">
+                {lowStockSummary.names.join(', ')}
+                {lowStockSummary.hiddenCount > 0 && `, +${lowStockSummary.hiddenCount} more`}
+              </p>
+            )}
           </div>
         )}
 
@@ -267,7 +282,7 @@ const InventoryScreen: React.FC = () => {
             {filtered.map((item) => (
               <div
                 key={item.itemId}
-                className="rounded-xl bg-pos-card border border-pos-border px-4 py-3 flex items-center justify-between gap-4"
+                className="rounded-xl bg-pos-card border border-pos-border px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -294,7 +309,7 @@ const InventoryScreen: React.FC = () => {
                   </span>
                   <span className="ml-1 text-xs text-pos-muted">{item.unit}</span>
                 </div>
-                <div className="shrink-0 flex gap-1">
+                <div className="shrink-0 flex flex-wrap justify-end gap-1">
                   {(['receive', 'adjust', 'waste', 'transfer'] as StockAction[]).map((action) => {
                     const transferDisabled = action === 'transfer' && !hasTransferDestinations;
                     return (

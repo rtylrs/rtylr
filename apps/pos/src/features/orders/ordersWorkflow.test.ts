@@ -40,8 +40,8 @@ describe('mapRemoteOrders', () => {
     expect(mapRemoteOrders([null, { id: '   ', total: 10 }, { total: 20 }])).toEqual([]);
   });
 
-  it('defaults invalid statuses to open', () => {
-    expect(mapRemoteOrders([{ id: 1, status: 'mystery', total: 10 }])[0].status).toBe('open');
+  it('defaults invalid statuses to pending', () => {
+    expect(mapRemoteOrders([{ id: 1, status: 'mystery', total: 10 }])[0].status).toBe('pending');
   });
 
   it('normalizes common order API response envelopes', () => {

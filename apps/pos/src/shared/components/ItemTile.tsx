@@ -11,12 +11,13 @@ interface ItemTileProps {
 
 const ItemTile: React.FC<ItemTileProps> = ({ item, onClick, size = 'md', disabled }) => {
   const unavailable = disabled || item.available === false;
-  const showStock = typeof item.stock === 'number' && Number.isFinite(item.stock);
+  const stock = item.stock;
+  const showStock = typeof stock === 'number' && Number.isFinite(stock);
   const stockLabel =
     showStock &&
-    (Number.isInteger(item.stock)
-      ? String(item.stock)
-      : item.stock.toFixed(3).replace(/\.?0+$/, ''));
+    (Number.isInteger(stock)
+      ? String(stock)
+      : stock.toFixed(3).replace(/\.?0+$/, ''));
   const padding =
     size === 'lg' ? 'p-4 min-h-[7rem]' : size === 'sm' ? 'p-2 min-h-[4rem]' : 'p-3 min-h-[5.5rem]';
   return (

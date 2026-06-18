@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildStockAction, mapInventoryItems, mapInventoryLocations } from './inventoryWorkflow';
+import {
+  buildStockAction,
+  mapInventoryItems,
+  mapInventoryLocations,
+  summarizeLowStockItems,
+} from './inventoryWorkflow';
 
 describe('buildStockAction', () => {
   it('builds a receive action from valid input', () => {
@@ -209,5 +214,41 @@ describe('mapInventoryLocations', () => {
     expect(mapInventoryLocations([{ id: 0, name: 'Bad' }, { locationId: 3 }])).toEqual([
       { id: 3, name: 'Location 3' },
     ]);
+  });
+});
+
+describe('summarizeLowStockItems', () => {
+  it('keeps the banner compact when many items are low on stock', () => {
+    const result = summarizeLowStockItems(
+      [
+        { name: '100% Beef Aminos' },
+        { name: '100% Mass Gainer' },
+        { name: '100% Whey Protein Challenger' },
+        { name: '100% Whey Protein Hydro Edition' },
+        { name: '2 Whey Hd Bpi' },
+      ],
+      4,
+    );
+
+    expect(result).toEqual({
+      count: 5,
+      names: [
+        '100% Beef Aminos',
+        '100% Mass Gainer',
+        '100% Whey Protein Challenger',
+        '100% Whey Protein Hydro Edition',
+      ],
+      hiddenCount: 1,
+    });
+  });
+
+  it('trims empty names without changing the total count', () => {
+    const result = summarizeLowStockItems([{ name: '  Whey  ' }, { name: '   ' }], 2);
+
+    expect(result).toEqual({
+      count: 2,
+      names: ['Whey'],
+      hiddenCount: 0,
+    });
   });
 });

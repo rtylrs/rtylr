@@ -13,8 +13,8 @@ describe('orderStatusLabel', () => {
     expect(orderStatusLabel('open')).toBe('Open');
   });
 
-  it('returns "Sent to Kitchen" for sent status', () => {
-    expect(orderStatusLabel('sent')).toBe('Sent to Kitchen');
+  it('returns "Submitted" for sent status', () => {
+    expect(orderStatusLabel('sent')).toBe('Submitted');
   });
 
   it('returns "Ready" for ready status', () => {
