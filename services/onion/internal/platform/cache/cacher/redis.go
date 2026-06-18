@@ -643,37 +643,48 @@ func (r *redisCache) DeleteByPattern(ctx context.Context, pattern string) int {
 
 	const batch = 200
 	deleted := 0
-	iter := r.redisCacheCluster.Scan(ctx, 0, pattern, batch).Iterator()
-	keys := make([]string, 0, batch)
 
-	flush := func() {
-		if len(keys) == 0 {
-			return
+	patterns := []string{pattern}
+	if strings.HasPrefix(pattern, "cache:") {
+		patterns = append(patterns, "*"+pattern)
+	}
+
+	for _, currentPattern := range patterns {
+		iter := r.redisCacheCluster.Scan(ctx, 0, currentPattern, batch).Iterator()
+		keys := make([]string, 0, batch)
+
+		flush := func() {
+			if len(keys) == 0 {
+				return
+			}
+			if err := r.redisCacheCluster.Del(ctx, keys...).Err(); err != nil {
+				logger.Ctx(ctx).Warn("redis pattern delete failed",
+					logger.Error(err),
+					logger.String("pattern", currentPattern),
+				)
+			} else {
+				deleted += len(keys)
+			}
+			keys = keys[:0]
 		}
-		if err := r.redisCacheCluster.Del(ctx, keys...).Err(); err != nil {
-			logger.Ctx(ctx).Warn("redis pattern delete failed",
+
+		for iter.Next(ctx) {
+			keys = append(keys, iter.Val())
+			if len(keys) >= batch {
+				flush()
+			}
+		}
+		flush()
+
+		if err := iter.Err(); err != nil {
+			logger.Ctx(ctx).Warn("redis scan failed during pattern delete",
 				logger.Error(err),
-				logger.String("pattern", pattern),
+				logger.String("pattern", currentPattern),
 			)
-		} else {
-			deleted += len(keys)
 		}
-		keys = keys[:0]
-	}
-
-	for iter.Next(ctx) {
-		keys = append(keys, iter.Val())
-		if len(keys) >= batch {
-			flush()
+		if ctx.Err() != nil {
+			break
 		}
-	}
-	flush()
-
-	if err := iter.Err(); err != nil {
-		logger.Ctx(ctx).Warn("redis scan failed during pattern delete",
-			logger.Error(err),
-			logger.String("pattern", pattern),
-		)
 	}
 	return deleted
 }
