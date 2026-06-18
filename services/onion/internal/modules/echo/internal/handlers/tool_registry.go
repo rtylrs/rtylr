@@ -23,6 +23,7 @@ var CoreTools = []ToolDef{
 	{Name: "erp.list_products", Description: "List inventory products.", Module: "erp", Scope: "read"},
 	{Name: "erp.set_stock", Description: "Set product stock quantity.", Module: "erp", Scope: "write", RequiresApproval: true},
 	{Name: "hr.list_employees", Description: "List employees.", Module: "hr", Scope: "read"},
+	{Name: "hr.create_employee", Description: "Create an HR employee record.", Module: "hr", Scope: "write", RequiresApproval: true},
 	{Name: "flow.list_tasks", Description: "List Flow tasks.", Module: "flow", Scope: "read"},
 	{Name: "flow.create_task", Description: "Create a Flow task.", Module: "flow", Scope: "write", RequiresApproval: true},
 	{Name: "finance.list_invoices", Description: "List finance invoices.", Module: "finance", Scope: "read"},
@@ -35,6 +36,7 @@ var promptExecutableWriteTools = map[string]struct{}{
 	"flow.create_task":       {},
 	"finance.record_expense": {},
 	"pos.refund_order":       {},
+	"hr.create_employee":     {},
 }
 
 // ToolByName returns a registered tool definition by stable tool name.
