@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS pos_combos (
 CREATE TABLE IF NOT EXISTS pos_gift_cards (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    customer_id BIGINT,
     code VARCHAR(50) NOT NULL UNIQUE,
     initial_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
     current_balance DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -157,7 +158,8 @@ CREATE TABLE IF NOT EXISTS pos_gift_cards (
     expires_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_pos_gift_cards_owner (owner_id)
+    INDEX idx_pos_gift_cards_owner (owner_id),
+    INDEX idx_pos_gift_cards_customer (owner_id, customer_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_manager_pins (
