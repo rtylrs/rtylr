@@ -10,6 +10,8 @@ import { useCaretSessions } from '../hooks/useCaretSessions';
 import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
+import { authHeaders } from '../lib/auth';
+import type { ToolCallBlock } from '../types/message';
 import HeaderBar from './header/HeaderBar';
 import MessageList from './MessageList';
 import { Composer } from './composer';
@@ -32,6 +34,30 @@ const DEFAULT_SUGGESTIONS = [
   'Show my top 5 customers',
   'How many staff are clocked in?',
 ];
+
+type ToolDecision = 'approve' | 'deny';
+
+interface ToolDecisionResponse {
+  tool_call_id: string;
+  status: string;
+  message: string;
+  executed: boolean;
+  output?: unknown;
+}
+
+function normalizeToolDecisionStatus(status: string): ToolCallBlock['status'] {
+  switch (status) {
+    case 'pending':
+    case 'approved':
+    case 'denied':
+    case 'running':
+    case 'success':
+    case 'error':
+      return status;
+    default:
+      return 'error';
+  }
+}
 
 const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseUrl, variant }) => {
   useShortcuts();
@@ -97,8 +123,76 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
     return () => window.clearTimeout(timer);
   }, [isOpen]);
 
-  const onApprove = (id: string): void => setToolStatus(id, 'approved');
-  const onDeny = (id: string): void => setToolStatus(id, 'denied');
+  const findToolCall = useCallback(
+    (id: string): ToolCallBlock | null => {
+      for (const message of messages) {
+        for (const block of message.blocks) {
+          if (block.type === 'tool_call' && block.id === id) return block;
+        }
+      }
+      return null;
+    },
+    [messages]
+  );
+
+  const sendToolDecision = useCallback(
+    async (id: string, decision: ToolDecision): Promise<void> => {
+      const call = findToolCall(id);
+      if (!call) {
+        setToolStatus(id, 'error', { error: 'Tool call no longer exists.' });
+        return;
+      }
+
+      const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
+      setToolStatus(id, 'running');
+
+      try {
+        const response = await fetch(`${baseUrl}caret/tools/decision`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            tool_call_id: id,
+            name: call.name,
+            input: call.input ?? {},
+            decision,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = (await response.json()) as ToolDecisionResponse;
+        const status = normalizeToolDecisionStatus(result.status);
+        const extras: Partial<ToolCallBlock> =
+          status === 'error'
+            ? { error: result.message || 'Tool decision failed.' }
+            : { output: result.output ?? { message: result.message, executed: result.executed } };
+        setToolStatus(id, status, extras);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Tool decision failed.';
+        setToolStatus(id, 'error', { error: message });
+      }
+    },
+    [apiBaseUrl, findToolCall, setToolStatus]
+  );
+
+  const onApprove = useCallback(
+    (id: string): void => {
+      void sendToolDecision(id, 'approve');
+    },
+    [sendToolDecision]
+  );
+  const onDeny = useCallback(
+    (id: string): void => {
+      void sendToolDecision(id, 'deny');
+    },
+    [sendToolDecision]
+  );
 
   const rootStyle: React.CSSProperties =
     variant === 'inline'
