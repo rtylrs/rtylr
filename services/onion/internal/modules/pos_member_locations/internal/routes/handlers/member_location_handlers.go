@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posaccessv1 "github.com/voxire/voxie/gen/go/pos/access/v1"
 )
 
@@ -40,7 +41,7 @@ func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequ
 		locs []infrastructure.MyLocation
 		err  error
 	)
-	if isOwnerOrAdmin(authUser) {
+	if hasBusinessWidePOSAccess(ctx, authUser) {
 		locs, err = h.Service.GetBusinessLocations(ctx, authUser.BusinessID)
 	} else {
 		locs, err = h.Service.GetMyLocations(ctx, authUser.BusinessID, authUser.UserID)
@@ -76,7 +77,7 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "locationId required"}
 	}
 
-	if !isOwnerOrAdmin(authUser) {
+	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		assigned, accessErr := h.Service.IsAssignedToLocation(ctx, authUser.BusinessID, authUser.UserID, req.LocationID)
 		if accessErr != nil {
 			return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: accessErr.Error()}
@@ -95,6 +96,19 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 
 func isOwnerOrAdmin(u *authPkg.AuthUser) bool {
 	return u.Role == "owner" || u.Role == "admin"
+}
+
+func hasBusinessWidePOSAccess(ctx context.Context, u *authPkg.AuthUser) bool {
+	if u == nil {
+		return false
+	}
+	if isOwnerOrAdmin(u) {
+		return true
+	}
+	if u.BusinessID <= 0 || u.UserID <= 0 {
+		return false
+	}
+	return tenant.ResolveOwnerID(ctx, u.BusinessID, 0) == u.UserID
 }
 
 func MemberLocationsRoutes() []string { return []string{"/pos/access/member-locations"} }
@@ -122,7 +136,7 @@ func (h *GetMemberLocationsHandler) Serve(ctx context.Context, req *GetMemberLoc
 	if !ok {
 		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if !isOwnerOrAdmin(authUser) {
+	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	if req.UserID <= 0 {
@@ -200,7 +214,7 @@ func (h *AssignLocationHandler) Serve(ctx context.Context, req *AssignLocationRe
 	if !ok {
 		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if !isOwnerOrAdmin(authUser) {
+	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	id, err := h.Service.Assign(ctx, authUser.BusinessID, req.UserID, req.LocationID, req.CanManagePOSUsers, req.CanManageTerminals, req.CanViewReports)
@@ -238,7 +252,7 @@ func (h *RemoveLocationHandler) Serve(ctx context.Context, req *RemoveLocationRe
 	if !ok {
 		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if !isOwnerOrAdmin(authUser) {
+	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	err := h.Service.Remove(ctx, authUser.BusinessID, req.ID)

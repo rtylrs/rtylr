@@ -149,6 +149,21 @@ func TestIsOwnerOrAdmin_UsesRoleNotIDCollision(t *testing.T) {
 	}
 }
 
+func TestHasBusinessWidePOSAccess_RoleAndFallbackRules(t *testing.T) {
+	if !hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "owner"}) {
+		t.Fatal("owner role should be privileged")
+	}
+	if !hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "admin"}) {
+		t.Fatal("admin role should be privileged")
+	}
+	if hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "store_manager"}) {
+		t.Fatal("store manager should not be privileged without matching business owner row")
+	}
+	if hasBusinessWidePOSAccess(context.Background(), nil) {
+		t.Fatal("nil auth user should not be privileged")
+	}
+}
+
 // ─── Handler struct creation ──────────────────────────────────────────────────
 
 func TestHandlers_CanBeInstantiated(_ *testing.T) {
