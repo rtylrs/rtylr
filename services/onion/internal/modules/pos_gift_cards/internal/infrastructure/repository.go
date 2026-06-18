@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -37,6 +38,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.GiftCard
 		gc := domain.GiftCard{
 			ID:             row.ID,
 			OwnerID:        row.OwnerID,
+			CustomerID:     nullableInt64(row.CustomerID),
 			Code:           row.Code,
 			InitialAmount:  decimalToFloat(row.InitialAmount),
 			CurrentBalance: decimalToFloat(row.CurrentBalance),
@@ -66,8 +68,25 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 
 	amountStr := floatToDecimal(input.InitialAmount)
 
-	result, err := r.queries.CreateGiftCard(ctx, sqlc.CreateGiftCardParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin gift card transaction", logger.Error(err))
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to sync gift card customer", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.queries.WithTx(tx).CreateGiftCard(ctx, sqlc.CreateGiftCardParams{
 		OwnerID:        ownerID,
+		CustomerID:     nullableInt64Value(customerID),
 		Code:           input.Code,
 		InitialAmount:  amountStr,
 		CurrentBalance: amountStr,
@@ -79,7 +98,15 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 		logger.Ctx(ctx).Error("Failed to create gift card", logger.Error(err))
 		return 0, err
 	}
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit gift card transaction", logger.Error(err))
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) (*domain.GiftCard, error) {
@@ -173,6 +200,7 @@ func giftCardFromRow(row sqlc.PosGiftCard) *domain.GiftCard {
 	gc := &domain.GiftCard{
 		ID:             row.ID,
 		OwnerID:        row.OwnerID,
+		CustomerID:     nullableInt64(row.CustomerID),
 		Code:           row.Code,
 		InitialAmount:  decimalToFloat(row.InitialAmount),
 		CurrentBalance: decimalToFloat(row.CurrentBalance),
@@ -187,6 +215,17 @@ func giftCardFromRow(row sqlc.PosGiftCard) *domain.GiftCard {
 		gc.ExpiresAt = &t
 	}
 	return gc
+}
+
+func nullableInt64(v sql.NullInt64) int64 {
+	if !v.Valid {
+		return 0
+	}
+	return v.Int64
+}
+
+func nullableInt64Value(v int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
 func decimalToFloat(s string) float64 {

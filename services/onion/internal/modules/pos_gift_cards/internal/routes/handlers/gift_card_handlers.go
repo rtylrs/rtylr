@@ -19,6 +19,7 @@ import (
 type GiftCardPayload struct {
 	ID             int64   `json:"id"`
 	OwnerID        int64   `json:"owner_id"`
+	CustomerID     int64   `json:"customer_id"`
 	Code           string  `json:"code"`
 	InitialAmount  float64 `json:"initial_amount"`
 	CurrentBalance float64 `json:"current_balance"`
@@ -38,6 +39,7 @@ func newGiftCardPayload(gc domain.GiftCard) GiftCardPayload {
 	return GiftCardPayload{
 		ID:             gc.ID,
 		OwnerID:        gc.OwnerID,
+		CustomerID:     gc.CustomerID,
 		Code:           gc.Code,
 		InitialAmount:  gc.InitialAmount,
 		CurrentBalance: gc.CurrentBalance,

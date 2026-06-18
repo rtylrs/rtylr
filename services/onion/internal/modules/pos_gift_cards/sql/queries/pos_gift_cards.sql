@@ -1,20 +1,20 @@
 -- name: ListGiftCardsByOwner :many
 SELECT id, owner_id, code, initial_amount, current_balance,
-       customer_name, customer_email, is_active, expires_at, created_at, updated_at
+       customer_id, customer_name, customer_email, is_active, expires_at, created_at, updated_at
 FROM pos_gift_cards WHERE owner_id = ? ORDER BY created_at DESC;
 
 -- name: CreateGiftCard :execresult
-INSERT INTO pos_gift_cards (owner_id, code, initial_amount, current_balance, customer_name, customer_email, expires_at)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO pos_gift_cards (owner_id, customer_id, code, initial_amount, current_balance, customer_name, customer_email, expires_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetGiftCardByCode :one
 SELECT id, owner_id, code, initial_amount, current_balance,
-       customer_name, customer_email, is_active, expires_at, created_at, updated_at
+       customer_id, customer_name, customer_email, is_active, expires_at, created_at, updated_at
 FROM pos_gift_cards WHERE owner_id = ? AND code = ?;
 
 -- name: GetGiftCardByCodeForUpdate :one
 SELECT id, owner_id, code, initial_amount, current_balance,
-       customer_name, customer_email, is_active, expires_at, created_at, updated_at
+       customer_id, customer_name, customer_email, is_active, expires_at, created_at, updated_at
 FROM pos_gift_cards WHERE owner_id = ? AND code = ? FOR UPDATE;
 
 -- name: UpdateGiftCardBalance :exec
