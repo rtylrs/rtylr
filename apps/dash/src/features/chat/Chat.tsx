@@ -3,7 +3,15 @@ import { cn } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useCaretStore, useCaretStream } from '@voxire/caret';
+import {
+  MessageActions,
+  MessageBlocks,
+  StreamingDot,
+  useCaretStore,
+  useCaretStream,
+  type CaretMessageType,
+  type ContentBlock,
+} from '@voxire/caret';
 import { useUserStore } from '../../shared/stores/userStore';
 
 const SUGGESTIONS = [
@@ -12,6 +20,23 @@ const SUGGESTIONS = [
   'Show me our top 5 customers',
   'How many staff are clocked in?',
 ];
+
+function blocksForMessage(message: CaretMessageType): ContentBlock[] {
+  if (message.blocks.length > 0) return message.blocks;
+  if (!message.content) return [];
+  return [{ id: `${message.id}-text`, type: 'text', content: message.content }];
+}
+
+function blocksToText(blocks: ContentBlock[]): string {
+  return blocks
+    .map((block) => {
+      if (block.type === 'text') return block.content;
+      if (block.type === 'thinking') return '';
+      return `[tool:${block.name}]`;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
 
 const Chat: React.FC = () => {
   const { user } = useUserStore();
@@ -105,6 +130,9 @@ const Chat: React.FC = () => {
                 {messages.map((msg, index) => {
                   const isLastStreaming =
                     index === messages.length - 1 && msg.role === 'assistant' && isStreaming;
+                  const blocks = blocksForMessage(msg);
+                  const text = msg.content ?? blocksToText(blocks);
+
                   return (
                     <motion.div
                       key={msg.id}
@@ -121,19 +149,26 @@ const Chat: React.FC = () => {
                         </div>
                       )}
                       <div
-                        className="rounded-2xl px-4 py-3 max-w-[80%]"
+                        className={cn(
+                          'rounded-2xl px-4 py-3',
+                          msg.role === 'user' ? 'max-w-[80%]' : 'min-w-0 flex-1'
+                        )}
                         style={{
                           background: msg.role === 'user' ? '#4583C4' : 'var(--dash-card)',
                           color: msg.role === 'user' ? '#fff' : 'var(--dash-text)',
                           border: msg.role === 'user' ? 'none' : '1px solid var(--dash-border)',
                         }}
                       >
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                        {isLastStreaming && (
-                          <span
-                            className="inline-block h-3 w-0.5 ml-0.5 rounded-sm animate-pulse"
-                            style={{ background: '#8b5cf6' }}
-                          />
+                        {msg.role === 'user' ? (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>
+                        ) : (
+                          <>
+                            <MessageBlocks blocks={blocks} />
+                            {isLastStreaming && <StreamingDot />}
+                            {!isLastStreaming && blocks.some((block) => block.type === 'text') && (
+                              <MessageActions text={text} />
+                            )}
+                          </>
                         )}
                       </div>
                     </motion.div>
