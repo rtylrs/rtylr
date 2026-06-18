@@ -78,6 +78,19 @@ func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) 
 	return out, nil
 }
 
+func (r *Repository) IsAssignedToLocation(ctx context.Context, businessID, userID, locationID int64) (bool, error) {
+	var assigned bool
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT EXISTS (
+			SELECT 1
+			FROM pos_member_locations
+			WHERE business_id = ? AND user_id = ? AND location_id = ?
+		)`,
+		businessID, userID, locationID,
+	).Scan(&assigned)
+	return assigned, err
+}
+
 func (r *Repository) GetMyLocations(ctx context.Context, businessID, userID int64) ([]MyLocation, error) {
 	q := sqlc.New(r.pool)
 	rows, err := q.GetMyLocations(ctx, sqlc.GetMyLocationsParams{BusinessID: businessID, UserID: userID})
