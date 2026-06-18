@@ -455,6 +455,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 	suppliersModule := suppliers.NewModule(ctx, dbclient.Pool())
+	purchaseOrdersModule := purchaseorders.NewModule(ctx, dbclient.Pool())
 	billsModule := bills.NewModule(ctx, dbclient.Pool())
 	quotesModule := quotes.NewModule(ctx, dbclient.Pool())
 	bookingAppointmentsModule := bookingappointments.NewModule(ctx, dbclient.Pool())
@@ -494,7 +495,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, purchaseOrdersModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -552,7 +553,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosUsers:              posusers.NewModule(ctx, dbclient.Pool()),
 		PriceLists:            pricelists.NewModule(ctx, dbclient.Pool()),
 		Products:              productsModule,
-		PurchaseOrders:        purchaseorders.NewModule(ctx, dbclient.Pool()),
+		PurchaseOrders:        purchaseOrdersModule,
 		Quotes:                quotesModule,
 		RecurringInvoices:     recurringinvoices.NewModule(ctx, dbclient.Pool()),
 		Reviews:               reviews.NewModule(ctx, dbclient.Pool()),
