@@ -28,7 +28,8 @@ type ToolExecutor interface {
 }
 
 type ToolDecisionHandler struct {
-	Executor ToolExecutor
+	Executor  ToolExecutor
+	Executors []ToolExecutor
 }
 
 type ListToolsRequest struct {
@@ -117,8 +118,8 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 
-	if h.Executor != nil {
-		output, executed, err := h.Executor.ExecuteCaretTool(ctx, tool.Name, req.Input)
+	for _, executor := range h.executorChain() {
+		output, executed, err := executor.ExecuteCaretTool(ctx, tool.Name, req.Input)
 		if err != nil {
 			h.logDecision(ctx, req, tool, "execution_failed", false)
 			return ToolDecisionResponse{
@@ -153,6 +154,15 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		Executed:   false,
 		Tool:       tool,
 	}, nil
+}
+
+func (h *ToolDecisionHandler) executorChain() []ToolExecutor {
+	out := make([]ToolExecutor, 0, len(h.Executors)+1)
+	if h.Executor != nil {
+		out = append(out, h.Executor)
+	}
+	out = append(out, h.Executors...)
+	return out
 }
 
 func userFacingToolError(err error) string {

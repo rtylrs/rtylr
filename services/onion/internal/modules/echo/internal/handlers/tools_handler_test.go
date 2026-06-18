@@ -100,6 +100,34 @@ func TestToolDecisionApproveExecutableWriteToolReturnsSuccess(t *testing.T) {
 	}
 }
 
+func TestToolDecisionApproveTriesMultipleExecutors(t *testing.T) {
+	handler := &ToolDecisionHandler{
+		Executors: []ToolExecutor{
+			fakeToolExecutor{executed: false},
+			fakeToolExecutor{
+				output: map[string]any{"customer": map[string]any{"id": int64(42), "first_name": "Ada"}},
+			},
+		},
+	}
+
+	got, err := handler.Serve(context.Background(), &ToolDecisionRequest{
+		ToolCallID: "tool-1",
+		Name:       "crm.create_customer",
+		Input:      map[string]any{"first_name": "Ada"},
+		Decision:   "approve",
+	})
+
+	if err != nil {
+		t.Fatalf("Serve returned error: %#v", err)
+	}
+	if got.Status != "success" || !got.Executed {
+		t.Fatalf("expected second executor success, got %#v", got)
+	}
+	if got.Output["customer"] == nil {
+		t.Fatalf("expected customer output, got %#v", got.Output)
+	}
+}
+
 func TestToolDecisionApproveExecutableWriteToolFailureReturnsError(t *testing.T) {
 	handler := &ToolDecisionHandler{
 		Executor: fakeToolExecutor{err: errors.New("title is required")},

@@ -448,6 +448,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	aiQuotaModule := aiquota.NewModule(ctx, dbclient.Pool())
 	aiQueryModule := aiquery.NewModule(ctx)
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
+	customersModule := customers.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
@@ -478,13 +479,13 @@ func initializeModules(ctx context.Context) *apiModules {
 		Config:                config.NewModule(ctx, dbclient.Pool()),
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
 		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()),
-		Customers:             customers.NewModule(ctx, dbclient.Pool()),
+		Customers:             customersModule,
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expenses.NewModule(ctx, dbclient.Pool()),
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),

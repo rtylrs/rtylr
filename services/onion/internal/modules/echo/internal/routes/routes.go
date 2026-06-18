@@ -16,7 +16,7 @@ import (
 // GenerateTextStreamRoutes() share the same bucket state.
 var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)
 
-func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.Service, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutor handlers.ToolExecutor) {
+func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.Service, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutors []handlers.ToolExecutor) {
 	serverHttp.RegisterGET[handlers.GetProviderStatusRequest, handlers.GetProviderStatusResponse](
 		ctx,
 		r,
@@ -35,7 +35,7 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.S
 		ctx,
 		r,
 		handlers.ToolDecisionRoutes(),
-		&handlers.ToolDecisionHandler{Executor: toolExecutor},
+		&handlers.ToolDecisionHandler{Executors: toolExecutors},
 	)
 
 	// SSE endpoints are registered manually — they stream tokens rather than
