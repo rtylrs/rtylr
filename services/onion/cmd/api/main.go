@@ -454,6 +454,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 	suppliersModule := suppliers.NewModule(ctx, dbclient.Pool())
+	billsModule := bills.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
 		Accounts:              accounts.NewModule(ctx, dbclient.Pool()),
@@ -466,7 +467,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Benefits:              benefits.NewModule(ctx, dbclient.Pool()),
 		Billing:               billing.NewModule(ctx, dbclient.Pool()),
 		Subscriptions:         subscriptions.NewModule(ctx, dbclient.Pool()),
-		Bills:                 bills.NewModule(ctx, dbclient.Pool()),
+		Bills:                 billsModule,
 		BookingAppointments:   bookingappointments.NewModule(ctx, dbclient.Pool()),
 		BookingCalendar:       bookingcalendar.NewModule(ctx, dbclient.Pool()),
 		BookingDashboard:      bookingdashboard.NewModule(ctx, dbclient.Pool()),
@@ -489,7 +490,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
