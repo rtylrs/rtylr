@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi } from 'vitest';
 import Dashboard from './Dashboard';
 
@@ -95,11 +96,33 @@ vi.mock('../products/useProducts', () => ({
     },
     isLoading: false,
   }),
+  useCreateProduct: () => ({
+    isPending: false,
+    mutate: vi.fn(),
+  }),
+  useUpdateProduct: () => ({
+    isPending: false,
+    mutate: vi.fn(),
+  }),
 }));
 
 vi.mock('../suppliers/useSuppliers', () => ({
   useSuppliers: () => ({
     data: { suppliers: [{ id: 1, name: 'North Roast' }] },
+    isLoading: false,
+  }),
+}));
+
+vi.mock('../categories/useCategories', () => ({
+  useCategories: () => ({
+    data: [],
+    isLoading: false,
+  }),
+}));
+
+vi.mock('../brands/useBrands', () => ({
+  useBrands: () => ({
+    data: [],
     isLoading: false,
   }),
 }));
@@ -117,9 +140,21 @@ vi.mock('../../shared/hooks/useActivity', () => ({
   }),
 }));
 
+function renderDashboard() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Dashboard />
+    </QueryClientProvider>
+  );
+}
+
 describe('Dashboard layout', () => {
   it('uses the full content width on large screens', () => {
-    const { container } = render(<Dashboard />);
+    const { container } = renderDashboard();
 
     expect(screen.getByRole('heading', { name: 'Inventory Overview' })).toBeInTheDocument();
     expect(screen.getByText('234')).toBeInTheDocument();
