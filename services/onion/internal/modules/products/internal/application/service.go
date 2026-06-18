@@ -14,8 +14,7 @@ import (
 )
 
 const (
-	productsCacheTTL         = 5 * time.Minute
-	productsListCacheVersion = "v3"
+	productsCacheTTL = 5 * time.Minute
 )
 
 type Service struct {
@@ -53,28 +52,15 @@ func paginateProducts(page, pageSize int64) (int, int) {
 func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, page, pageSize int64) ([]domain.Product, bool, error) {
 	search = strings.TrimSpace(search)
 	limit, offset := paginateProducts(page, pageSize)
-	key := fmt.Sprintf("%s|%s|s=%s|c=%d|p=%d|ps=%d",
-		cacheKeys.ProductsList(ownerID), productsListCacheVersion, search, categoryID, page, pageSize)
 
-	type pageResult struct {
-		items   []domain.Product
-		hasMore bool
-	}
-
-	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (pageResult, error) {
-		items, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
-		if items == nil {
-			items = []domain.Product{}
-		}
-		return pageResult{items: items, hasMore: hasMore}, err
-	}, cacher.WithExpiry(ctx, productsCacheTTL))
+	items, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
 	if err != nil {
 		return nil, false, err
 	}
-	if res.items == nil {
-		res.items = []domain.Product{}
+	if items == nil {
+		items = []domain.Product{}
 	}
-	return res.items, res.hasMore, nil
+	return items, hasMore, nil
 }
 
 func (s *Service) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {

@@ -4,16 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
-)
-
-const (
-	supplierCacheTTL          = 5 * time.Minute
-	suppliersListCacheVersion = "v2"
 )
 
 type repository interface {
@@ -46,27 +40,14 @@ func paginateSuppliers(page, pageSize int64) (int, int) {
 
 func (s *Service) ListSuppliers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.Supplier, bool, error) {
 	limit, offset := paginateSuppliers(page, pageSize)
-	cacheKey := fmt.Sprintf("suppliers:%d|%s|p=%d|ps=%d", ownerID, suppliersListCacheVersion, page, pageSize)
-
-	type pageResult struct {
-		items   []domain.Supplier
-		hasMore bool
-	}
-
-	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
-		items, hasMore, err := s.repo.ListSuppliers(ctx, ownerID, limit, offset)
-		if items == nil {
-			items = []domain.Supplier{}
-		}
-		return pageResult{items: items, hasMore: hasMore}, err
-	}, cacher.WithExpiry(ctx, supplierCacheTTL))
+	items, hasMore, err := s.repo.ListSuppliers(ctx, ownerID, limit, offset)
 	if err != nil {
 		return nil, false, err
 	}
-	if res.items == nil {
-		res.items = []domain.Supplier{}
+	if items == nil {
+		items = []domain.Supplier{}
 	}
-	return res.items, res.hasMore, nil
+	return items, hasMore, nil
 }
 
 func (s *Service) CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error) {
