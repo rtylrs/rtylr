@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { renderMarkdown } from '../../markdown';
+import '../../styles/markdown.css';
 
 export interface MarkdownProps {
   source: string;

@@ -125,7 +125,11 @@ function isTableStart(lines: string[], index: number): boolean {
   if (index + 1 >= lines.length) return false;
   const header = splitTableRow(lines[index]);
   const separator = splitTableRow(lines[index + 1]);
-  return header.length > 0 && separator.length > 0 && separator.every(isTableSeparatorCell);
+  return (
+    header.some((cell) => cell.length > 0) &&
+    separator.length > 0 &&
+    separator.every(isTableSeparatorCell)
+  );
 }
 
 function splitTableRow(line: string): string[] {
@@ -136,7 +140,8 @@ function splitTableRow(line: string): string[] {
 }
 
 function isTableSeparatorCell(cell: string): boolean {
-  return /^:?-{3,}:?$/.test(cell.trim());
+  const normalized = cell.trim().replace(/\s+/g, '').replace(/[–—]/g, '-');
+  return /^:?-{2,}:?$/.test(normalized);
 }
 
 /** Render a list block's raw lines into <ul>/<ol> HTML. */
