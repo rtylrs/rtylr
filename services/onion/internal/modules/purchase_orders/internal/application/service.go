@@ -86,15 +86,22 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, ownerID, poID int64)
 	return nil
 }
 
+func (s *Service) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, receivedBy int64) error {
+	if err := s.repo.ReceivePurchaseOrder(ctx, ownerID, poID, receivedBy); err != nil {
+		return err
+	}
+	s.invalidateCache(ctx, ownerID)
+	return nil
+}
+
 func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id int64, status string) error {
 	// Receiving is special: it must verify ownership, increment stock for every
 	// line item, and ledger the movement — all atomically and idempotently.
 	// ReceivePurchaseOrder owns that whole transaction.
 	if status == string(domain.POStatusReceived) {
-		if err := s.repo.ReceivePurchaseOrder(ctx, ownerID, id, ownerID); err != nil {
+		if err := s.ReceivePurchaseOrder(ctx, ownerID, id, ownerID); err != nil {
 			return err
 		}
-		s.invalidateCache(ctx, ownerID)
 		return nil
 	}
 

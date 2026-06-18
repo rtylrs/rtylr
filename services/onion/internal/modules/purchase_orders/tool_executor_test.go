@@ -131,3 +131,10 @@ func TestParseApprovePurchaseOrderToolInputRejectsMissingID(t *testing.T) {
 		t.Fatal("expected missing id error")
 	}
 }
+
+func TestParsePurchaseOrderIDToolInputRejectsFractionalID(t *testing.T) {
+	_, err := parsePurchaseOrderIDToolInput(map[string]any{"purchase_order_id": 4.5})
+	if err == nil {
+		t.Fatal("expected fractional id error")
+	}
+}

@@ -18,6 +18,7 @@ import (
 const (
 	createPurchaseOrderToolName  = "erp.create_purchase_order"
 	approvePurchaseOrderToolName = "erp.approve_purchase_order"
+	receivePurchaseOrderToolName = "erp.receive_purchase_order"
 )
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
@@ -27,6 +28,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		return output, true, err
 	case approvePurchaseOrderToolName:
 		output, err := m.executeApprovePurchaseOrderTool(ctx, input)
+		return output, true, err
+	case receivePurchaseOrderToolName:
+		output, err := m.executeReceivePurchaseOrderTool(ctx, input)
 		return output, true, err
 	default:
 		return nil, false, nil
@@ -93,6 +97,31 @@ func (m *Module) executeApprovePurchaseOrderTool(ctx context.Context, input map[
 	}, nil
 }
 
+func (m *Module) executeReceivePurchaseOrderTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	poID, err := parsePurchaseOrderIDToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	if err := m.service.ReceivePurchaseOrder(ctx, ownerID, poID, authUser.UserID); err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"purchase_order": map[string]any{
+			"id":       poID,
+			"status":   string(domain.POStatusReceived),
+			"received": true,
+		},
+	}, nil
+}
+
 func parseCreatePurchaseOrderToolInput(input map[string]any) (domain.PurchaseOrderInput, error) {
 	supplierID, err := purchaseOrderToolPositiveInt64(firstPurchaseOrderToolValue(input, "supplier_id"))
 	if err != nil {
@@ -134,6 +163,10 @@ func parseCreatePurchaseOrderToolInput(input map[string]any) (domain.PurchaseOrd
 }
 
 func parseApprovePurchaseOrderToolInput(input map[string]any) (int64, error) {
+	return parsePurchaseOrderIDToolInput(input)
+}
+
+func parsePurchaseOrderIDToolInput(input map[string]any) (int64, error) {
 	poID, err := purchaseOrderToolPositiveInt64(firstPurchaseOrderToolValue(input, "purchase_order_id", "po_id", "id"))
 	if err != nil {
 		return 0, fmt.Errorf("invalid purchase_order_id: %w", err)
