@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS crm_contacts (
   id         BIGINT AUTO_INCREMENT PRIMARY KEY,
   owner_id   BIGINT NOT NULL,
   lead_id    BIGINT NOT NULL,
+  customer_id BIGINT NULL,
   name       VARCHAR(255) NOT NULL,
   role       VARCHAR(100) NULL,
   email      VARCHAR(255) NULL,
@@ -33,7 +34,8 @@ CREATE TABLE IF NOT EXISTS crm_contacts (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_crm_contacts_owner (owner_id),
-  INDEX idx_crm_contacts_lead (lead_id)
+  INDEX idx_crm_contacts_lead (lead_id),
+  INDEX idx_crm_contacts_customer (owner_id, customer_id)
 );
 
 CREATE TABLE IF NOT EXISTS crm_touchpoints (
