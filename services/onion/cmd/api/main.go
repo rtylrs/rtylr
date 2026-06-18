@@ -449,6 +449,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	aiQueryModule := aiquery.NewModule(ctx)
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
 	customersModule := customers.NewModule(ctx, dbclient.Pool())
+	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
@@ -485,7 +486,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expenses.NewModule(ctx, dbclient.Pool()),
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -509,7 +510,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HRTime:                hrtime.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		Insights:              insights.NewModule(ctx, dbclient.Pool()),
 		Integrations:          integrations.NewModule(ctx, dbclient.Pool()),
-		Inventory:             inventory.NewModule(ctx, dbclient.Pool()),
+		Inventory:             inventoryModule,
 		Invoices:              invoices.NewModule(ctx, dbclient.Pool()),
 		Journal:               journal.NewModule(ctx, dbclient.Pool()),
 		KPIs:                  kpis.NewModule(ctx, dbclient.Pool()),
