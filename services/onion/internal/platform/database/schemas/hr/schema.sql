@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     user_id BIGINT,
+    employee_id BIGINT DEFAULT NULL,
     department_id BIGINT,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -34,7 +35,8 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     apps JSON DEFAULT (JSON_ARRAY()) COMMENT 'Which rtylr apps this staff member can access',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_hr_staff_employee (owner_id, employee_id)
 );
 
 CREATE TABLE IF NOT EXISTS hr_shifts (
