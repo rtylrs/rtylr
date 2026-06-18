@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -22,7 +23,13 @@ func ToolDecisionRoutes() []string { return []string{"/caret/tools/decision"} }
 // gate tools by the caller's role + active plan.
 type ListToolsHandler struct{}
 
-type ToolDecisionHandler struct{}
+type ToolExecutor interface {
+	ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (output map[string]any, executed bool, err error)
+}
+
+type ToolDecisionHandler struct {
+	Executor ToolExecutor
+}
 
 type ListToolsRequest struct {
 	Mode string `json:"mode"`
@@ -99,8 +106,8 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 
-	h.logDecision(ctx, req, tool, "approved_unexecuted", false)
 	if tool.Scope == "read" {
+		h.logDecision(ctx, req, tool, "approved_read_unexecuted", false)
 		return ToolDecisionResponse{
 			ToolCallID: req.ToolCallID,
 			Status:     "error",
@@ -110,6 +117,35 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 
+	if h.Executor != nil {
+		output, executed, err := h.Executor.ExecuteCaretTool(ctx, tool.Name, req.Input)
+		if err != nil {
+			h.logDecision(ctx, req, tool, "execution_failed", false)
+			return ToolDecisionResponse{
+				ToolCallID: req.ToolCallID,
+				Status:     "error",
+				Message:    "Tool execution failed. No confirmed changes were made.",
+				Executed:   false,
+				Tool:       tool,
+				Output: map[string]any{
+					"error": userFacingToolError(err),
+				},
+			}, nil
+		}
+		if executed {
+			h.logDecision(ctx, req, tool, "executed", true)
+			return ToolDecisionResponse{
+				ToolCallID: req.ToolCallID,
+				Status:     "success",
+				Message:    "Tool executed successfully.",
+				Executed:   true,
+				Tool:       tool,
+				Output:     output,
+			}, nil
+		}
+	}
+
+	h.logDecision(ctx, req, tool, "approved_unexecuted", false)
 	return ToolDecisionResponse{
 		ToolCallID: req.ToolCallID,
 		Status:     "error",
@@ -117,6 +153,20 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		Executed:   false,
 		Tool:       tool,
 	}, nil
+}
+
+func userFacingToolError(err error) string {
+	if err == nil {
+		return ""
+	}
+	message := strings.TrimSpace(err.Error())
+	if message == "" {
+		return "unknown error"
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return "request was interrupted"
+	}
+	return message
 }
 
 func (h *ToolDecisionHandler) logDecision(ctx context.Context, req *ToolDecisionRequest, tool ToolDef, status string, executed bool) {

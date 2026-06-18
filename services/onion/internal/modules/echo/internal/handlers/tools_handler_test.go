@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"testing"
 )
@@ -71,6 +72,56 @@ func TestToolDecisionApproveUnimplementedWriteToolReturnsExplicitError(t *testin
 	}
 }
 
+func TestToolDecisionApproveExecutableWriteToolReturnsSuccess(t *testing.T) {
+	handler := &ToolDecisionHandler{
+		Executor: fakeToolExecutor{
+			output: map[string]any{"task": map[string]any{"id": int64(123), "title": "Follow up"}},
+		},
+	}
+
+	got, err := handler.Serve(context.Background(), &ToolDecisionRequest{
+		ToolCallID: "tool-1",
+		Name:       "flow.create_task",
+		Input:      map[string]any{"title": "Follow up"},
+		Decision:   "approve",
+	})
+
+	if err != nil {
+		t.Fatalf("Serve returned error: %#v", err)
+	}
+	if got.Status != "success" || !got.Executed {
+		t.Fatalf("expected executed success, got %#v", got)
+	}
+	if got.Tool.Name != "flow.create_task" {
+		t.Fatalf("expected registered Flow tool metadata, got %#v", got.Tool)
+	}
+	if got.Output["task"] == nil {
+		t.Fatalf("expected task output, got %#v", got.Output)
+	}
+}
+
+func TestToolDecisionApproveExecutableWriteToolFailureReturnsError(t *testing.T) {
+	handler := &ToolDecisionHandler{
+		Executor: fakeToolExecutor{err: errors.New("title is required")},
+	}
+
+	got, err := handler.Serve(context.Background(), &ToolDecisionRequest{
+		ToolCallID: "tool-1",
+		Name:       "flow.create_task",
+		Decision:   "approve",
+	})
+
+	if err != nil {
+		t.Fatalf("Serve returned error: %#v", err)
+	}
+	if got.Status != "error" || got.Executed {
+		t.Fatalf("expected non-executed error, got %#v", got)
+	}
+	if got.Output["error"] != "title is required" {
+		t.Fatalf("expected user-facing error output, got %#v", got.Output)
+	}
+}
+
 func TestToolDecisionUnknownToolReturnsExplicitError(t *testing.T) {
 	handler := &ToolDecisionHandler{}
 
@@ -89,4 +140,21 @@ func TestToolDecisionUnknownToolReturnsExplicitError(t *testing.T) {
 	if got.Executed {
 		t.Fatalf("unknown tool must not execute: %#v", got)
 	}
+}
+
+type fakeToolExecutor struct {
+	output   map[string]any
+	executed bool
+	err      error
+}
+
+func (f fakeToolExecutor) ExecuteCaretTool(_ context.Context, _ string, _ map[string]any) (map[string]any, bool, error) {
+	if f.err != nil {
+		return nil, false, f.err
+	}
+	executed := f.executed
+	if f.output != nil {
+		executed = true
+	}
+	return f.output, executed, nil
 }

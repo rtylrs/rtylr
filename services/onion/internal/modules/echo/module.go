@@ -15,9 +15,10 @@ type Module struct {
 	memoryService  handlers.MemoryService
 	quotaService   handlers.QuotaService
 	analystService handlers.AnalystService
+	toolExecutor   handlers.ToolExecutor
 }
 
-func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService) *Module {
+func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutor handlers.ToolExecutor) *Module {
 	snipsService, err := application.NewService(ctx)
 	if err != nil {
 		snipsService = nil
@@ -28,6 +29,7 @@ func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaS
 		memoryService:  memoryService,
 		quotaService:   quotaService,
 		analystService: analystService,
+		toolExecutor:   toolExecutor,
 	}
 }
 
@@ -36,5 +38,5 @@ func (m *Module) GetSnipsService() *application.Service {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, r, m.snipsService, m.memoryService, m.quotaService, m.analystService)
+	routes.RegisterRoutes(ctx, r, m.snipsService, m.memoryService, m.quotaService, m.analystService, m.toolExecutor)
 }
