@@ -1,4 +1,4 @@
-import { parseBlocks, renderListItems, renderCodeBlock } from './block';
+import { parseBlocks, renderListItems, renderCodeBlock, renderTable } from './block';
 import { renderInlineMarkdown } from './inline';
 
 /** Render a complete markdown document to safe HTML. */
@@ -25,6 +25,9 @@ export function renderMarkdown(src: string): string {
         break;
       case 'code':
         out.push(renderCodeBlock(b.raw, b.language));
+        break;
+      case 'table':
+        out.push(renderTable(b.raw));
         break;
       case 'hr':
         out.push('<hr class="caret-hr" />');

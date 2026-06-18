@@ -2,7 +2,7 @@ import { renderInlineMarkdown } from './inline';
 import { escapeHtml } from './escape';
 
 export interface MarkdownBlock {
-  type: 'paragraph' | 'heading' | 'list' | 'quote' | 'code' | 'hr';
+  type: 'paragraph' | 'heading' | 'list' | 'quote' | 'code' | 'table' | 'hr';
   /** Heading level 1..6 */
   level?: number;
   /** For lists: 'ordered' or 'unordered'. */
@@ -56,6 +56,22 @@ export function parseBlocks(src: string): MarkdownBlock[] {
       continue;
     }
 
+    if (isTableStart(lines, i)) {
+      const buf: string[] = [line, lines[i + 1]];
+      i += 2;
+      while (
+        i < lines.length &&
+        !/^\s*$/.test(lines[i]) &&
+        hasTablePipe(lines[i]) &&
+        !lines[i].startsWith('```')
+      ) {
+        buf.push(lines[i]);
+        i++;
+      }
+      blocks.push({ type: 'table', raw: buf.join('\n') });
+      continue;
+    }
+
     if (/^\s*>/.test(line)) {
       const buf: string[] = [];
       while (i < lines.length && /^\s*>/.test(lines[i])) {
@@ -88,6 +104,7 @@ export function parseBlocks(src: string): MarkdownBlock[] {
       i < lines.length &&
       !/^\s*$/.test(lines[i]) &&
       !lines[i].startsWith('```') &&
+      !isTableStart(lines, i) &&
       !/^#{1,6}\s+/.test(lines[i]) &&
       !/^\s*>/.test(lines[i]) &&
       !/^\s*([-*+]|\d+\.)\s+/.test(lines[i])
@@ -98,6 +115,28 @@ export function parseBlocks(src: string): MarkdownBlock[] {
     blocks.push({ type: 'paragraph', raw: buf.join('\n') });
   }
   return blocks;
+}
+
+function hasTablePipe(line: string): boolean {
+  return line.includes('|');
+}
+
+function isTableStart(lines: string[], index: number): boolean {
+  if (index + 1 >= lines.length) return false;
+  const header = splitTableRow(lines[index]);
+  const separator = splitTableRow(lines[index + 1]);
+  return header.length > 0 && separator.length > 0 && separator.every(isTableSeparatorCell);
+}
+
+function splitTableRow(line: string): string[] {
+  const trimmed = line.trim();
+  if (!trimmed.includes('|')) return [];
+  const withoutOuterPipes = trimmed.replace(/^\|/, '').replace(/\|$/, '');
+  return withoutOuterPipes.split('|').map((cell) => cell.trim());
+}
+
+function isTableSeparatorCell(cell: string): boolean {
+  return /^:?-{3,}:?$/.test(cell.trim());
 }
 
 /** Render a list block's raw lines into <ul>/<ol> HTML. */
@@ -115,4 +154,38 @@ export function renderCodeBlock(raw: string, language?: string): string {
   const escaped = escapeHtml(raw);
   const langAttr = language ? ` data-lang="${escapeHtml(language)}"` : '';
   return `<pre class="caret-codeblock"${langAttr}><code>${escaped}</code></pre>`;
+}
+
+export function renderTable(raw: string): string {
+  const rows = raw
+    .split('\n')
+    .map(splitTableRow)
+    .filter((row) => row.length > 0);
+  if (rows.length < 2 || !rows[1].every(isTableSeparatorCell)) {
+    return `<p class="caret-p">${renderInlineMarkdown(raw)}</p>`;
+  }
+
+  const headers = rows[0];
+  const bodyRows = rows.slice(2);
+  const columnCount = Math.max(headers.length, ...bodyRows.map((row) => row.length), 0);
+  const normalizedHeaders = normalizeRow(headers, columnCount);
+  const thead = normalizedHeaders
+    .map((cell) => `<th>${renderInlineMarkdown(cell)}</th>`)
+    .join('');
+  const tbody = bodyRows
+    .map((row) => {
+      const cells = normalizeRow(row, columnCount)
+        .map((cell) => `<td>${renderInlineMarkdown(cell)}</td>`)
+        .join('');
+      return `<tr>${cells}</tr>`;
+    })
+    .join('');
+
+  return `<div class="caret-table-wrap"><table class="caret-table"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table></div>`;
+}
+
+function normalizeRow(row: string[], columnCount: number): string[] {
+  const normalized = row.slice(0, columnCount);
+  while (normalized.length < columnCount) normalized.push('');
+  return normalized;
 }
