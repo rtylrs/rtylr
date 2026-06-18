@@ -1,4 +1,4 @@
-package stock_transfers
+package stocktransfers
 
 import (
 	"context"
