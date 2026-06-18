@@ -26,6 +26,14 @@ var CoreTools = []ToolDef{
 	{Name: "flow.list_tasks", Description: "List Flow tasks.", Module: "flow", Scope: "read"},
 	{Name: "flow.create_task", Description: "Create a Flow task.", Module: "flow", Scope: "write", RequiresApproval: true},
 	{Name: "finance.list_invoices", Description: "List finance invoices.", Module: "finance", Scope: "read"},
+	{Name: "finance.record_expense", Description: "Record a business expense.", Module: "finance", Scope: "write", RequiresApproval: true},
+}
+
+var promptExecutableWriteTools = map[string]struct{}{
+	"crm.create_customer":    {},
+	"erp.set_stock":          {},
+	"flow.create_task":       {},
+	"finance.record_expense": {},
 }
 
 // ToolByName returns a registered tool definition by stable tool name.
@@ -56,18 +64,22 @@ func ToolsForMode(m CaretMode) []ToolDef {
 }
 
 // PromptToolsForMode returns only the tools the model may explicitly propose in
-// an answer stream. Read tools are either server-grounded today
-// (analytics.query) or catalog-only placeholders, so advertising them causes
-// broken "execution unavailable" cards.
+// an answer stream. Read tools are server-grounded before the prompt, and write
+// tools stay hidden until an approval executor exists.
 func PromptToolsForMode(m CaretMode) []ToolDef {
 	if m != ModeAgent {
 		return nil
 	}
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
-		if t.Scope == "write" {
+		if t.Scope == "write" && promptToolCanExecute(t.Name) {
 			out = append(out, t)
 		}
 	}
 	return out
+}
+
+func promptToolCanExecute(name string) bool {
+	_, ok := promptExecutableWriteTools[name]
+	return ok
 }
