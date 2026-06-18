@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	"github.com/voxire/onion/internal/modules/quotes/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -51,7 +52,26 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Quo
 		status = "draft"
 	}
 
-	res, err := r.queries.CreateQuote(ctx, sqlc.CreateQuoteParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin quote transaction", logger.Error(err))
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync quote customer", logger.Error(err))
+		return 0, err
+	}
+
+	res, err := r.queries.WithTx(tx).CreateQuote(ctx, sqlc.CreateQuoteParams{
 		OwnerID:       ownerID,
 		CustomerName:  input.CustomerName,
 		CustomerEmail: nullableString(input.CustomerEmail),
@@ -69,11 +89,38 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Quo
 		return 0, err
 	}
 
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit quote transaction", logger.Error(err))
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error {
-	err := r.queries.UpdateQuote(ctx, sqlc.UpdateQuoteParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin quote update transaction", logger.Error(err))
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  input.CustomerName,
+		Email: input.CustomerEmail,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync quote customer", logger.Error(err))
+		return err
+	}
+
+	err = r.queries.WithTx(tx).UpdateQuote(ctx, sqlc.UpdateQuoteParams{
 		CustomerName:  input.CustomerName,
 		CustomerEmail: nullableString(input.CustomerEmail),
 		Status:        sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(input.Status), Valid: input.Status != ""},
@@ -89,6 +136,11 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update quote", logger.Error(err))
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit quote update transaction", logger.Error(err))
 		return err
 	}
 
@@ -186,6 +238,15 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 	notes := ""
 	if quoteRow.Notes.Valid {
 		notes = quoteRow.Notes.String
+	}
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  quoteRow.CustomerName,
+		Email: customerEmail,
+	}); err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to sync quote customer before conversion", logger.Error(err))
+		return 0, err
 	}
 
 	// cross-schema write from quotes to finance_invoices — materialise quote

@@ -3,10 +3,12 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/infrastructure/persistence/sqlc"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -24,7 +26,25 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
-	result, err := r.queries.CreateCheckout(ctx, sqlc.CreateCheckoutParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin checkout transaction", logger.Error(err))
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Email: input.CustomerEmail,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to sync checkout customer", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.queries.WithTx(tx).CreateCheckout(ctx, sqlc.CreateCheckoutParams{
 		OwnerID:       ownerID,
 		SessionID:     sql.NullString{String: input.SessionID, Valid: input.SessionID != ""},
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
@@ -38,13 +58,55 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Che
 		return 0, err
 	}
 	id, _ := result.LastInsertId()
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit checkout transaction", logger.Error(err))
+		return 0, err
+	}
 	return id, nil
 }
 
 func (r *Repository) Complete(ctx context.Context, ownerID, id int64) error {
-	err := r.queries.CompleteCheckout(ctx, sqlc.CompleteCheckoutParams{OwnerID: ownerID, ID: id})
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin checkout completion transaction", logger.Error(err))
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var customerEmail sql.NullString
+	var totalString string
+	err = tx.QueryRowContext(ctx,
+		`SELECT customer_email, total FROM store_checkouts WHERE owner_id = ? AND id = ? LIMIT 1`,
+		ownerID, id,
+	).Scan(&customerEmail, &totalString)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = nil
+	} else if err != nil {
+		logger.Ctx(ctx).Error("Failed to load checkout customer", logger.Error(err))
+		return err
+	} else {
+		total, _ := strconv.ParseFloat(totalString, 64)
+		if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+			Email:      customerEmail.String,
+			TotalSpent: total,
+			CountVisit: true,
+		}); err != nil {
+			logger.Ctx(ctx).Error("Failed to sync completed checkout customer", logger.Error(err))
+			return err
+		}
+	}
+
+	err = r.queries.WithTx(tx).CompleteCheckout(ctx, sqlc.CompleteCheckoutParams{OwnerID: ownerID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to complete checkout", logger.Error(err))
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit checkout completion transaction", logger.Error(err))
 		return err
 	}
 	return nil
