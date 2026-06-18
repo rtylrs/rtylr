@@ -47,6 +47,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"Available business capability catalog:",
 		"crm.list_customers [read]",
 		"erp.list_products [read]",
+		"hr.list_employees [read]",
 		"crm.create_customer [write, approval required]",
 		"Structured stream controls:",
 		`<tool>{"name":"tool.name","input":{}}</tool>`,

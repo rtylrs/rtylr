@@ -1,9 +1,95 @@
 package hr_core
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 )
+
+func TestParseListEmployeesToolInput(t *testing.T) {
+	parsed, err := parseListEmployeesToolInput(map[string]any{
+		"limit": json.Number("10"),
+		"page":  "3",
+	})
+	if err != nil {
+		t.Fatalf("parseListEmployeesToolInput: %v", err)
+	}
+	if parsed.Limit != 10 {
+		t.Fatalf("Limit = %d", parsed.Limit)
+	}
+	if parsed.Offset != 20 {
+		t.Fatalf("Offset = %d", parsed.Offset)
+	}
+	if parsed.Page != 3 {
+		t.Fatalf("Page = %d", parsed.Page)
+	}
+}
+
+func TestParseListEmployeesToolInputOffsetOverridesPage(t *testing.T) {
+	parsed, err := parseListEmployeesToolInput(map[string]any{
+		"limit":  10,
+		"page":   3,
+		"offset": 5,
+	})
+	if err != nil {
+		t.Fatalf("parseListEmployeesToolInput: %v", err)
+	}
+	if parsed.Offset != 5 {
+		t.Fatalf("Offset = %d", parsed.Offset)
+	}
+	if parsed.Page != 1 {
+		t.Fatalf("Page = %d", parsed.Page)
+	}
+}
+
+func TestParseListEmployeesToolInputDefaultsAndCapsLimit(t *testing.T) {
+	parsed, err := parseListEmployeesToolInput(map[string]any{
+		"limit": 500,
+	})
+	if err != nil {
+		t.Fatalf("parseListEmployeesToolInput: %v", err)
+	}
+	if parsed.Limit != int32(maxListEmployeesToolLimit) {
+		t.Fatalf("Limit = %d", parsed.Limit)
+	}
+	if parsed.Offset != 0 {
+		t.Fatalf("Offset = %d", parsed.Offset)
+	}
+}
+
+func TestParseListEmployeesToolInputRejectsInvalidLimit(t *testing.T) {
+	_, err := parseListEmployeesToolInput(map[string]any{
+		"limit": 1.5,
+	})
+	if err == nil {
+		t.Fatal("expected invalid limit error")
+	}
+}
+
+func TestEmployeeToolPayload(t *testing.T) {
+	payload := employeeToolPayload(domain.EmployeeRecord{
+		ID:             7,
+		FirstName:      "Maya",
+		LastName:       "Haddad",
+		Email:          "maya@example.com",
+		EmploymentType: domain.EmploymentTypePartTime,
+		Status:         "active",
+		DepartmentID:   3,
+		StartDate:      time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC),
+	})
+	if payload["full_name"] != "Maya Haddad" {
+		t.Fatalf("full_name = %#v", payload["full_name"])
+	}
+	if payload["start_date"] != "2026-06-18" {
+		t.Fatalf("start_date = %#v", payload["start_date"])
+	}
+	if payload["end_date"] != nil {
+		t.Fatalf("end_date = %#v", payload["end_date"])
+	}
+}
 
 func TestParseCreateEmployeeToolInput(t *testing.T) {
 	parsed, err := parseCreateEmployeeToolInput(map[string]any{

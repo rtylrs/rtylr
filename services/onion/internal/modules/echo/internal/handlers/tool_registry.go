@@ -62,6 +62,7 @@ var promptExecutableTools = map[string]struct{}{
 	"erp.receive_purchase_order": {},
 	"erp.create_stock_transfer":  {},
 	"erp.receive_stock_transfer": {},
+	"hr.list_employees":          {},
 	"flow.create_task":           {},
 	"finance.record_expense":     {},
 	"finance.record_bill":        {},

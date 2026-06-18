@@ -14,6 +14,19 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
+const (
+	listEmployeesToolName         = "hr.list_employees"
+	createEmployeeToolName        = "hr.create_employee"
+	defaultListEmployeesToolLimit = int64(20)
+	maxListEmployeesToolLimit     = int64(50)
+)
+
+type listEmployeesToolInput struct {
+	Limit  int32
+	Offset int32
+	Page   int32
+}
+
 type createEmployeeToolInput struct {
 	DepartmentID          int64
 	LocationID            int64
@@ -34,11 +47,47 @@ type createEmployeeToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "hr.create_employee" {
+	switch name {
+	case listEmployeesToolName:
+		output, err := m.executeListEmployeesTool(ctx, input)
+		return output, true, err
+	case createEmployeeToolName:
+		output, err := m.executeCreateEmployeeTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateEmployeeTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListEmployeesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListEmployeesToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	employees, total, err := m.service.ListEmployees(ctx, authUser.UserID, parsed.Limit, parsed.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(employees))
+	for _, employee := range employees {
+		payloads = append(payloads, employeeToolPayload(employee))
+	}
+
+	return map[string]any{
+		"employees": payloads,
+		"total":     total,
+		"returned":  len(payloads),
+		"limit":     parsed.Limit,
+		"offset":    parsed.Offset,
+		"page":      parsed.Page,
+	}, nil
 }
 
 func (m *Module) executeCreateEmployeeTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -171,6 +220,81 @@ func parseCreateEmployeeToolInput(input map[string]any) (createEmployeeToolInput
 		return createEmployeeToolInput{}, err
 	}
 	return parsed, nil
+}
+
+func parseListEmployeesToolInput(input map[string]any) (listEmployeesToolInput, error) {
+	limit, err := hrToolNonNegativeInt64(firstHRToolValue(input, "limit", "page_size"))
+	if err != nil {
+		return listEmployeesToolInput{}, fmt.Errorf("invalid limit: %w", err)
+	}
+	if limit == 0 {
+		limit = defaultListEmployeesToolLimit
+	}
+	if limit > maxListEmployeesToolLimit {
+		limit = maxListEmployeesToolLimit
+	}
+
+	page, err := hrToolNonNegativeInt64(firstHRToolValue(input, "page"))
+	if err != nil {
+		return listEmployeesToolInput{}, fmt.Errorf("invalid page: %w", err)
+	}
+	if page == 0 {
+		page = 1
+	}
+
+	var offset int64
+	if offsetValue := firstHRToolValue(input, "offset"); offsetValue != nil {
+		offset, err = hrToolNonNegativeInt64(offsetValue)
+		if err != nil {
+			return listEmployeesToolInput{}, fmt.Errorf("invalid offset: %w", err)
+		}
+	} else {
+		offset = (page - 1) * limit
+	}
+	if offset > math.MaxInt32 {
+		return listEmployeesToolInput{}, errors.New("offset is too large")
+	}
+
+	return listEmployeesToolInput{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+		Page:   int32(offset/limit) + 1,
+	}, nil
+}
+
+func firstHRToolValue(input map[string]any, keys ...string) any {
+	for _, key := range keys {
+		value, ok := input[key]
+		if !ok || value == nil {
+			continue
+		}
+		if s, ok := value.(string); ok && strings.TrimSpace(s) == "" {
+			continue
+		}
+		return value
+	}
+	return nil
+}
+
+func employeeToolPayload(e domain.EmployeeRecord) map[string]any {
+	fullName := strings.TrimSpace(strings.TrimSpace(e.FirstName) + " " + strings.TrimSpace(e.LastName))
+	return map[string]any{
+		"id":               e.ID,
+		"full_name":        fullName,
+		"first_name":       e.FirstName,
+		"last_name":        e.LastName,
+		"email":            e.Email,
+		"phone":            e.Phone,
+		"employment_type":  e.EmploymentType,
+		"status":           e.Status,
+		"department_id":    e.DepartmentID,
+		"location_id":      e.LocationID,
+		"work_schedule_id": e.WorkScheduleID,
+		"salary":           e.Salary,
+		"hourly_rate":      e.HourlyRate,
+		"start_date":       formatEmployeeToolDate(e.StartDate),
+		"end_date":         formatEmployeeToolDate(e.EndDate),
+	}
 }
 
 func splitEmployeeName(value string) (string, string) {
