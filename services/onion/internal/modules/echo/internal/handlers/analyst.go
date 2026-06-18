@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"regexp"
 	"strings"
 	"time"
 
@@ -49,15 +50,53 @@ func buildSpecGenPrompt(schema, question, today string) string {
 	return b.String()
 }
 
-// extractJSONObject returns the first complete {...} object in s, tolerating
-// stray prose or ```json fences around it.
+// extractJSONObject returns the first complete {...} object in s using
+// bracket counting, tolerating prose, markdown fences, and trailing text.
 func extractJSONObject(s string) string {
 	start := strings.Index(s, "{")
-	end := strings.LastIndex(s, "}")
-	if start < 0 || end <= start {
+	if start < 0 {
 		return ""
 	}
-	return s[start : end+1]
+	depth := 0
+	inStr := false
+	escaped := false
+	for i := start; i < len(s); i++ {
+		c := s[i]
+		if escaped {
+			escaped = false
+			continue
+		}
+		if c == '\\' && inStr {
+			escaped = true
+			continue
+		}
+		if c == '"' {
+			inStr = !inStr
+			continue
+		}
+		if inStr {
+			continue
+		}
+		switch c {
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				return s[start : i+1]
+			}
+		}
+	}
+	return ""
+}
+
+// unquotedOpRe matches LLM-generated "op": = (unquoted operator value).
+var unquotedOpRe = regexp.MustCompile(`"op"\s*:\s*(>=|<=|!=|>|<|=|like|in)\s*([,}\]])`)
+
+// repairLLMJSON fixes the most common LLM JSON mistake: an unquoted comparison
+// operator used as the value for an "op" field, e.g. "op": = or "op": >=.
+func repairLLMJSON(s string) string {
+	return unquotedOpRe.ReplaceAllString(s, `"op": "$1"$2`)
 }
 
 // analystGrounding runs the analyst pipeline: question -> query spec -> rows.
@@ -75,14 +114,14 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 		return "", false
 	}
 
-	specJSON := extractJSONObject(raw)
+	specJSON := repairLLMJSON(extractJSONObject(raw))
 	if specJSON == "" || specJSON == "{}" {
 		return "", false
 	}
 
 	rows, sql, err := h.AnalystService.RunJSON(ctx, businessID, userID, specJSON)
 	if err != nil {
-		logger.Ctx(ctx).Warn("analyst query failed", logger.Error(err))
+		logger.Ctx(ctx).Warn("analyst query failed", logger.Error(err), logger.String("spec", specJSON))
 		return "", false
 	}
 
