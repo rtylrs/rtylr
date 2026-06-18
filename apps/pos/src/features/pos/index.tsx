@@ -4,7 +4,6 @@ import POSLayout from '../../layouts/POSLayout';
 import QuickAccessSidebar from '../../shared/components/QuickAccessSidebar';
 import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
-import AiAssistant from './AiAssistant';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { useMenuItems } from '../menu-items/useMenuItems';
@@ -32,7 +31,6 @@ const POS: React.FC = () => {
         <ProductGrid products={products} categories={categories} />
         <OrderPanel tableNumber={tableNumber} />
       </div>
-      <AiAssistant />
     </POSLayout>
   );
 };

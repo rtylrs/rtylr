@@ -23,6 +23,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:packages/caret
       '@voxire/components':
         specifier: workspace:*
         version: link:packages/components
