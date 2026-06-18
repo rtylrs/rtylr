@@ -15,7 +15,7 @@ import (
 
 const (
 	productsCacheTTL         = 5 * time.Minute
-	productsListCacheVersion = "v2"
+	productsListCacheVersion = "v3"
 )
 
 type Service struct {
@@ -63,10 +63,16 @@ func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string
 
 	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (pageResult, error) {
 		items, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
+		if items == nil {
+			items = []domain.Product{}
+		}
 		return pageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, productsCacheTTL))
 	if err != nil {
 		return nil, false, err
+	}
+	if res.items == nil {
+		res.items = []domain.Product{}
 	}
 	return res.items, res.hasMore, nil
 }
