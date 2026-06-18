@@ -50,6 +50,7 @@ var promptExecutableTools = map[string]struct{}{
 	"booking.create_appointment": {},
 	"crm.list_customers":         {},
 	"crm.create_customer":        {},
+	"erp.list_products":          {},
 	"erp.set_stock":              {},
 	"erp.create_product":         {},
 	"erp.create_category":        {},
