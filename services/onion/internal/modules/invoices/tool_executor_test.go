@@ -158,3 +158,93 @@ func TestParseCreateInvoiceToolInputRejectsBadItemDiscount(t *testing.T) {
 		t.Fatalf("error = %v, want discount validation", err)
 	}
 }
+
+func TestParseRecordPaymentToolInput(t *testing.T) {
+	parsed, err := parseRecordPaymentToolInput(map[string]any{
+		"invoice_id":     "42",
+		"payment_amount": "125.50",
+		"currency":       "usd",
+		"paid_at":        "2026-07-15T10:30:00Z",
+		"method":         "bank transfer",
+		"transaction_id": "TX-123",
+		"notes":          "First installment",
+	}, time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("parseRecordPaymentToolInput returned error: %v", err)
+	}
+	if parsed.InvoiceID != 42 {
+		t.Fatalf("InvoiceID = %d, want 42", parsed.InvoiceID)
+	}
+	if parsed.Amount != 125.50 {
+		t.Fatalf("Amount = %v, want 125.50", parsed.Amount)
+	}
+	if parsed.Currency != "USD" {
+		t.Fatalf("Currency = %q, want USD", parsed.Currency)
+	}
+	if parsed.PaymentDate != "2026-07-15" {
+		t.Fatalf("PaymentDate = %q, want 2026-07-15", parsed.PaymentDate)
+	}
+	if parsed.Method != domain.PaymentMethodBankTransfer {
+		t.Fatalf("Method = %q, want bank_transfer", parsed.Method)
+	}
+	if parsed.Reference != "TX-123" {
+		t.Fatalf("Reference = %q, want TX-123", parsed.Reference)
+	}
+}
+
+func TestParseRecordPaymentToolInputDefaultsDateAndMethod(t *testing.T) {
+	parsed, err := parseRecordPaymentToolInput(map[string]any{
+		"id":     42,
+		"amount": 125.50,
+	}, time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("parseRecordPaymentToolInput returned error: %v", err)
+	}
+	if parsed.PaymentDate != "2026-06-19" {
+		t.Fatalf("PaymentDate = %q, want 2026-06-19", parsed.PaymentDate)
+	}
+	if parsed.Method != domain.PaymentMethodCash {
+		t.Fatalf("Method = %q, want cash", parsed.Method)
+	}
+}
+
+func TestParseRecordPaymentToolInputRejectsMissingInvoice(t *testing.T) {
+	_, err := parseRecordPaymentToolInput(map[string]any{
+		"amount": 125.50,
+	}, time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC))
+	if err == nil || !strings.Contains(err.Error(), "invoice_id") {
+		t.Fatalf("error = %v, want invoice_id validation", err)
+	}
+}
+
+func TestParseRecordPaymentToolInputRejectsInvalidAmount(t *testing.T) {
+	_, err := parseRecordPaymentToolInput(map[string]any{
+		"invoice_id": 42,
+		"amount":     0,
+	}, time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC))
+	if !errors.Is(err, domain.ErrInvalidPaymentAmount) {
+		t.Fatalf("error = %v, want ErrInvalidPaymentAmount", err)
+	}
+}
+
+func TestParseRecordPaymentToolInputRejectsBadMethod(t *testing.T) {
+	_, err := parseRecordPaymentToolInput(map[string]any{
+		"invoice_id": 42,
+		"amount":     125.50,
+		"method":     "crypto",
+	}, time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC))
+	if err == nil || !strings.Contains(err.Error(), "method") {
+		t.Fatalf("error = %v, want method validation", err)
+	}
+}
+
+func TestParseRecordPaymentToolInputRejectsBadCurrency(t *testing.T) {
+	_, err := parseRecordPaymentToolInput(map[string]any{
+		"invoice_id": 42,
+		"amount":     125.50,
+		"currency":   "USDD",
+	}, time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC))
+	if err == nil || !strings.Contains(err.Error(), "currency") {
+		t.Fatalf("error = %v, want currency validation", err)
+	}
+}

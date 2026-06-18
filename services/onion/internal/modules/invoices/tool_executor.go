@@ -15,11 +15,16 @@ import (
 )
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "finance.create_invoice" {
+	switch name {
+	case "finance.create_invoice":
+		output, err := m.executeCreateInvoiceTool(ctx, input)
+		return output, true, err
+	case "finance.record_payment":
+		output, err := m.executeRecordPaymentTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateInvoiceTool(ctx, input)
-	return output, true, err
 }
 
 func (m *Module) executeCreateInvoiceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -75,6 +80,36 @@ func (m *Module) executeCreateInvoiceTool(ctx context.Context, input map[string]
 			"notes":           invoice.Notes,
 			"terms":           invoice.Terms,
 			"items":           items,
+		},
+	}, nil
+}
+
+func (m *Module) executeRecordPaymentTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseRecordPaymentToolInput(input, time.Now())
+	if err != nil {
+		return nil, err
+	}
+
+	payment, err := m.service.RecordPayment(ctx, authUser.UserID, parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"payment": map[string]any{
+			"id":           payment.ID,
+			"invoice_id":   payment.InvoiceID,
+			"amount":       payment.Amount,
+			"currency":     payment.Currency,
+			"payment_date": payment.PaymentDate.Format("2006-01-02"),
+			"method":       payment.Method,
+			"reference":    payment.Reference,
+			"notes":        payment.Notes,
 		},
 	}, nil
 }
@@ -158,6 +193,52 @@ func parseCreateInvoiceToolInput(input map[string]any, now time.Time) (domain.In
 		Notes:         strings.TrimSpace(invoiceToolString(input["notes"])),
 		Terms:         strings.TrimSpace(invoiceToolString(input["terms"])),
 		Items:         items,
+	}, nil
+}
+
+func parseRecordPaymentToolInput(input map[string]any, now time.Time) (domain.PaymentInput, error) {
+	invoiceID, err := invoiceToolInt64(firstInvoiceToolValue(input, "invoice_id", "invoice", "id"))
+	if err != nil {
+		return domain.PaymentInput{}, fmt.Errorf("invalid invoice_id: %w", err)
+	}
+	if invoiceID <= 0 {
+		return domain.PaymentInput{}, errors.New("invoice_id is required")
+	}
+
+	amount, err := invoiceToolFloat64(firstInvoiceToolValue(input, "amount", "payment_amount", "paid_amount", "total"))
+	if err != nil {
+		return domain.PaymentInput{}, fmt.Errorf("invalid amount: %w", err)
+	}
+	if amount <= 0 {
+		return domain.PaymentInput{}, domain.ErrInvalidPaymentAmount
+	}
+
+	paymentDate, err := invoiceToolDate(firstInvoiceToolValue(input, "payment_date", "paid_at", "date"))
+	if err != nil {
+		return domain.PaymentInput{}, fmt.Errorf("invalid payment_date: %w", err)
+	}
+	if paymentDate == "" {
+		paymentDate = now.Format("2006-01-02")
+	}
+
+	currency := strings.ToUpper(strings.TrimSpace(invoiceToolString(input["currency"])))
+	if currency != "" && !validInvoiceToolCurrency(currency) {
+		return domain.PaymentInput{}, errors.New("currency must be a 3-letter ISO code")
+	}
+
+	method := normalizePaymentToolMethod(input["method"])
+	if method == "" {
+		return domain.PaymentInput{}, errors.New("method must be cash, card, bank_transfer, or other")
+	}
+
+	return domain.PaymentInput{
+		InvoiceID:   invoiceID,
+		Amount:      amount,
+		Currency:    currency,
+		PaymentDate: paymentDate,
+		Method:      method,
+		Reference:   strings.TrimSpace(invoiceToolString(firstInvoiceToolValue(input, "reference", "ref", "payment_reference", "transaction_id"))),
+		Notes:       strings.TrimSpace(invoiceToolString(input["notes"])),
 	}, nil
 }
 
@@ -401,6 +482,27 @@ func normalizeInvoiceToolDiscountType(value any) string {
 		return "fixed"
 	case "percentage", "percent", "pct":
 		return "percentage"
+	default:
+		return ""
+	}
+}
+
+func normalizePaymentToolMethod(value any) string {
+	method := strings.ToLower(strings.TrimSpace(invoiceToolString(value)))
+	if method == "" {
+		return domain.PaymentMethodCash
+	}
+	method = strings.ReplaceAll(method, "-", "_")
+	method = strings.ReplaceAll(method, " ", "_")
+	switch method {
+	case domain.PaymentMethodCash:
+		return domain.PaymentMethodCash
+	case domain.PaymentMethodCard, "credit_card", "debit_card":
+		return domain.PaymentMethodCard
+	case domain.PaymentMethodBankTransfer, "transfer", "bank", "wire", "wire_transfer":
+		return domain.PaymentMethodBankTransfer
+	case domain.PaymentMethodOther:
+		return domain.PaymentMethodOther
 	default:
 		return ""
 	}

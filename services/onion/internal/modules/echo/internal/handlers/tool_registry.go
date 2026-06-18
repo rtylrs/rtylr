@@ -32,6 +32,7 @@ var CoreTools = []ToolDef{
 	{Name: "finance.record_bill", Description: "Record a supplier bill.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.create_quote", Description: "Create a customer quote.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.create_invoice", Description: "Create a customer invoice.", Module: "finance", Scope: "write", RequiresApproval: true},
+	{Name: "finance.record_payment", Description: "Record a customer payment against an invoice.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
 }
 
@@ -45,6 +46,7 @@ var promptExecutableWriteTools = map[string]struct{}{
 	"finance.record_bill":        {},
 	"finance.create_quote":       {},
 	"finance.create_invoice":     {},
+	"finance.record_payment":     {},
 	"pos.refund_order":           {},
 	"hr.create_employee":         {},
 }
