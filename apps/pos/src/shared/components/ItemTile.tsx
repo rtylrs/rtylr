@@ -32,7 +32,7 @@ const ItemTile: React.FC<ItemTileProps> = ({ item, onClick, size = 'md', disable
           src={item.image}
           alt={item.name}
           loading="lazy"
-          className="w-full aspect-square object-cover rounded-lg mb-1.5"
+          className="w-full aspect-square object-contain rounded-lg bg-white p-2 mb-1.5"
         />
       ) : (
         <div className="mb-1.5 flex w-full aspect-square items-center justify-center rounded-lg bg-white/6 text-sm font-semibold text-pos-muted">

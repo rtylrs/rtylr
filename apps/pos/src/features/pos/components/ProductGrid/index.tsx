@@ -105,7 +105,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full aspect-[4/3] object-cover"
+                      className="w-full aspect-[4/3] object-contain bg-white p-2"
                       loading="lazy"
                     />
                   ) : (
