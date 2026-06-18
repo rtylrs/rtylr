@@ -450,6 +450,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
 	customersModule := customers.NewModule(ctx, dbclient.Pool())
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
+	productsModule := products.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
@@ -493,7 +494,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, expensesModule, posOrdersModule, hrCoreModule, suppliersModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -550,7 +551,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosTerminals:          posterminals.NewModule(ctx, dbclient.Pool()),
 		PosUsers:              posusers.NewModule(ctx, dbclient.Pool()),
 		PriceLists:            pricelists.NewModule(ctx, dbclient.Pool()),
-		Products:              products.NewModule(ctx, dbclient.Pool()),
+		Products:              productsModule,
 		PurchaseOrders:        purchaseorders.NewModule(ctx, dbclient.Pool()),
 		Quotes:                quotesModule,
 		RecurringInvoices:     recurringinvoices.NewModule(ctx, dbclient.Pool()),
