@@ -62,18 +62,19 @@ type UpdateLeadRequest struct {
 }
 
 type Contact struct {
-	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"owner_id"`
-	LeadID    int64     `json:"lead_id"`
-	Name      string    `json:"name"`
-	Role      string    `json:"role"`
-	Email     string    `json:"email"`
-	Phone     string    `json:"phone"`
-	LinkedIn  string    `json:"linkedin"`
-	IsPrimary bool      `json:"is_primary"`
-	Notes     string    `json:"notes"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         int64     `json:"id"`
+	OwnerID    int64     `json:"owner_id"`
+	LeadID     int64     `json:"lead_id"`
+	CustomerID int64     `json:"customer_id"`
+	Name       string    `json:"name"`
+	Role       string    `json:"role"`
+	Email      string    `json:"email"`
+	Phone      string    `json:"phone"`
+	LinkedIn   string    `json:"linkedin"`
+	IsPrimary  bool      `json:"is_primary"`
+	Notes      string    `json:"notes"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type CreateContactRequest struct {

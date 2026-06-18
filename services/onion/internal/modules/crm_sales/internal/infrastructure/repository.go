@@ -8,6 +8,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
+	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -209,7 +210,7 @@ func (r *Repository) GetPipeline(ctx context.Context, ownerID int64) ([]domain.P
 
 func (r *Repository) ListContacts(ctx context.Context, ownerID int64, leadID *int64) ([]domain.Contact, error) {
 	builder := sq.
-		Select("id", "owner_id", "lead_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
+		Select("id", "owner_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
 			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_contacts").
@@ -250,7 +251,7 @@ func (r *Repository) ListContacts(ctx context.Context, ownerID int64, leadID *in
 
 func (r *Repository) GetContact(ctx context.Context, id, ownerID int64) (domain.Contact, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "lead_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
+		Select("id", "owner_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
 			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_contacts").
@@ -273,10 +274,25 @@ func (r *Repository) GetContact(ctx context.Context, id, ownerID int64) (domain.
 }
 
 func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domain.CreateContactRequest) (domain.Contact, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.Contact{}, err
+	}
+	defer tx.Rollback()
+
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  req.Name,
+		Email: req.Email,
+		Phone: req.Phone,
+	})
+	if err != nil {
+		return domain.Contact{}, err
+	}
+
 	query, args, err := sq.
 		Insert("crm_contacts").
-		Columns("owner_id", "lead_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
-		Values(ownerID, req.LeadID, req.Name, nullableString(req.Role), nullableString(req.Email),
+		Columns("owner_id", "lead_id", "customer_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
+		Values(ownerID, req.LeadID, nullableInt64Value(customerID), req.Name, nullableString(req.Role), nullableString(req.Email),
 			nullableString(req.Phone), nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes)).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -284,7 +300,7 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 		return domain.Contact{}, err
 	}
 
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := tx.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Contact{}, err
 	}
@@ -292,12 +308,42 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 	if err != nil {
 		return domain.Contact{}, err
 	}
+	if err := tx.Commit(); err != nil {
+		return domain.Contact{}, err
+	}
 	return r.GetContact(ctx, id, ownerID)
 }
 
 func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.Contact{}, err
+	}
+	defer tx.Rollback()
+
+	var existingContactID int64
+	if err := tx.QueryRowContext(ctx,
+		`SELECT id FROM crm_contacts WHERE owner_id = ? AND id = ? LIMIT 1`,
+		ownerID, id,
+	).Scan(&existingContactID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Contact{}, domain.ErrContactNotFound
+		}
+		return domain.Contact{}, err
+	}
+
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		Name:  req.Name,
+		Email: req.Email,
+		Phone: req.Phone,
+	})
+	if err != nil {
+		return domain.Contact{}, err
+	}
+
 	query, args, err := sq.
 		Update("crm_contacts").
+		Set("customer_id", nullableInt64Value(customerID)).
 		Set("name", req.Name).
 		Set("role", nullableString(req.Role)).
 		Set("email", nullableString(req.Email)).
@@ -312,8 +358,11 @@ func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req d
 		return domain.Contact{}, err
 	}
 
-	_, err = r.db.ExecContext(ctx, query, args...)
+	_, err = tx.ExecContext(ctx, query, args...)
 	if err != nil {
+		return domain.Contact{}, err
+	}
+	if err := tx.Commit(); err != nil {
 		return domain.Contact{}, err
 	}
 	return r.GetContact(ctx, id, ownerID)
@@ -645,26 +694,34 @@ type contactScanner interface {
 
 func scanContact(s contactScanner) (domain.Contact, error) {
 	var c domain.Contact
+	var customerID sql.NullInt64
 	err := s.Scan(
-		&c.ID, &c.OwnerID, &c.LeadID, &c.Name, &c.Role, &c.Email,
+		&c.ID, &c.OwnerID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
 		&c.Phone, &c.LinkedIn, &c.IsPrimary, &c.Notes,
 		&c.CreatedAt, &c.UpdatedAt,
 	)
 	if err != nil {
 		return domain.Contact{}, err
 	}
+	if customerID.Valid {
+		c.CustomerID = customerID.Int64
+	}
 	return c, nil
 }
 
 func scanContactRow(row *sql.Row) (domain.Contact, error) {
 	var c domain.Contact
+	var customerID sql.NullInt64
 	err := row.Scan(
-		&c.ID, &c.OwnerID, &c.LeadID, &c.Name, &c.Role, &c.Email,
+		&c.ID, &c.OwnerID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
 		&c.Phone, &c.LinkedIn, &c.IsPrimary, &c.Notes,
 		&c.CreatedAt, &c.UpdatedAt,
 	)
 	if err != nil {
 		return domain.Contact{}, err
+	}
+	if customerID.Valid {
+		c.CustomerID = customerID.Int64
 	}
 	return c, nil
 }
@@ -779,6 +836,10 @@ func nullableInt64(v *int64) sql.NullInt64 {
 		return sql.NullInt64{}
 	}
 	return sql.NullInt64{Int64: *v, Valid: true}
+}
+
+func nullableInt64Value(v int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
 func nullableFloat64(v *float64) sql.NullFloat64 {
