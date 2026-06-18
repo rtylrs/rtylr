@@ -39,6 +39,7 @@ type Product struct {
 	HSCode            string    `json:"hs_code"`
 	AllowBackorder    bool      `json:"allow_backorder"`
 	LeadTimeDays      int       `json:"lead_time_days"`
+	ImageURL          string    `json:"image_url"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
@@ -53,6 +54,7 @@ func (p *Product) FromRow(row *sql.Rows) error {
 		unit              sql.NullString
 		lowStockThreshold sql.NullFloat64
 		reorderQuantity   sql.NullFloat64
+		imageURL          sql.NullString
 	)
 
 	err := row.Scan(
@@ -72,6 +74,7 @@ func (p *Product) FromRow(row *sql.Rows) error {
 		&reorderQuantity,
 		&p.IsActive,
 		&p.TrackInventory,
+		&imageURL,
 		&p.CreatedAt,
 		&p.UpdatedAt,
 	)
@@ -109,6 +112,10 @@ func (p *Product) FromRow(row *sql.Rows) error {
 
 	if reorderQuantity.Valid {
 		p.ReorderQuantity = reorderQuantity.Float64
+	}
+
+	if imageURL.Valid {
+		p.ImageURL = imageURL.String
 	}
 
 	return nil

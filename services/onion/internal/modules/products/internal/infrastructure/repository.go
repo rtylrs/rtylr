@@ -31,27 +31,37 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, bool, error) {
 	qb := squirrel.Select(
-		"id", "owner_id", "category_id", "supplier_id", "name", "sku", "barcode", "description",
-		"unit", "cost_price", "sale_price", "stock_quantity", "low_stock_threshold",
-		"reorder_quantity", "is_active", "track_inventory", "created_at", "updated_at",
+		"p.id", "p.owner_id", "p.category_id", "p.supplier_id", "p.name", "p.sku",
+		"p.barcode", "p.description", "p.unit", "p.cost_price", "p.sale_price",
+		"p.stock_quantity", "p.low_stock_threshold", "p.reorder_quantity", "p.is_active",
+		"p.track_inventory", "COALESCE(img.url, '') AS image_url", "p.created_at", "p.updated_at",
 	).
-		From("erp_products").
-		Where(squirrel.Eq{"owner_id": ownerID})
+		From("erp_products p").
+		LeftJoin(`erp_product_images img ON img.id = (
+			SELECT i.id
+			FROM erp_product_images i
+			WHERE i.owner_id = p.owner_id
+			  AND i.product_id = p.id
+			ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
+			LIMIT 1
+		)`).
+		Where(squirrel.Eq{"p.owner_id": ownerID}).
+		Where("TRIM(COALESCE(p.name, '')) <> ''")
 
 	if search != "" {
 		like := "%" + search + "%"
 		qb = qb.Where(squirrel.Or{
-			squirrel.Like{"name": like},
-			squirrel.Like{"sku": like},
-			squirrel.Like{"barcode": like},
+			squirrel.Like{"p.name": like},
+			squirrel.Like{"p.sku": like},
+			squirrel.Like{"p.barcode": like},
 		})
 	}
 
 	if categoryID > 0 {
-		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
+		qb = qb.Where(squirrel.Eq{"p.category_id": categoryID})
 	}
 
-	qb = qb.OrderBy("name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset))
+	qb = qb.OrderBy("p.name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset))
 
 	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
 	if err != nil {

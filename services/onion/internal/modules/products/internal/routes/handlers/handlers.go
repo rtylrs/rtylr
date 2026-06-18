@@ -10,7 +10,6 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
-	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
 // ─── List Products ────────────────────────────────────────────────────────────
@@ -31,33 +30,10 @@ type ListProductsRequest struct {
 }
 
 type ListProductsResponse struct {
-	Products []*erpproductv1.Product `json:"products"`
-	HasMore  bool                    `json:"has_more"`
-	Page     int64                   `json:"page"`
-	PageSize int64                   `json:"page_size"`
-}
-
-func newProductPayload(p domain.Product) *erpproductv1.Product {
-	return &erpproductv1.Product{
-		Id:                p.ID,
-		OwnerId:           p.OwnerID,
-		CategoryId:        p.CategoryID,
-		SupplierId:        p.SupplierID,
-		Name:              p.Name,
-		Sku:               p.SKU,
-		Barcode:           p.Barcode,
-		Description:       p.Description,
-		Unit:              p.Unit,
-		CostPrice:         p.CostPrice,
-		SalePrice:         p.SalePrice,
-		StockQuantity:     p.StockQuantity,
-		LowStockThreshold: p.LowStockThreshold,
-		ReorderQuantity:   p.ReorderQuantity,
-		IsActive:          p.IsActive,
-		TrackInventory:    p.TrackInventory,
-		CreatedAt:         p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:         p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-	}
+	Products []domain.Product `json:"products"`
+	HasMore  bool             `json:"has_more"`
+	Page     int64            `json:"page"`
+	PageSize int64            `json:"page_size"`
 }
 
 func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsRequest) (ListProductsResponse, *errorModels.ServerError) {
@@ -80,11 +56,6 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		}
 	}
 
-	payloads := make([]*erpproductv1.Product, 0, len(products))
-	for _, p := range products {
-		payloads = append(payloads, newProductPayload(p))
-	}
-
 	page := req.Page
 	if page < 1 {
 		page = 1
@@ -93,7 +64,7 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 	if pageSize < 1 {
 		pageSize = 50
 	}
-	return ListProductsResponse{Products: payloads, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
+	return ListProductsResponse{Products: products, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // ─── Create Product ───────────────────────────────────────────────────────────
