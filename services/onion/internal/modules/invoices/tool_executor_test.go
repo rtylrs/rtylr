@@ -9,6 +9,95 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 )
 
+func TestParseListInvoicesToolInput(t *testing.T) {
+	parsed, err := parseListInvoicesToolInput(map[string]any{
+		"status":        "overdue",
+		"customer_name": "Maya Haddad",
+		"date_from":     "2026-06-01T10:30:00Z",
+		"date_to":       "2026-06-30",
+		"page":          "2",
+		"limit":         100,
+	})
+	if err != nil {
+		t.Fatalf("parseListInvoicesToolInput returned error: %v", err)
+	}
+	if parsed.Status != domain.StatusOverdue {
+		t.Fatalf("Status = %q, want overdue", parsed.Status)
+	}
+	if parsed.Search != "Maya Haddad" {
+		t.Fatalf("Search = %q, want Maya Haddad", parsed.Search)
+	}
+	if parsed.DateFrom != "2026-06-01" {
+		t.Fatalf("DateFrom = %q, want 2026-06-01", parsed.DateFrom)
+	}
+	if parsed.DateTo != "2026-06-30" {
+		t.Fatalf("DateTo = %q, want 2026-06-30", parsed.DateTo)
+	}
+	if parsed.Page != 2 {
+		t.Fatalf("Page = %d, want 2", parsed.Page)
+	}
+	if parsed.PageSize != maxListInvoicesToolPageSize {
+		t.Fatalf("PageSize = %d, want cap %d", parsed.PageSize, maxListInvoicesToolPageSize)
+	}
+}
+
+func TestParseListInvoicesToolInputUsesDefaults(t *testing.T) {
+	parsed, err := parseListInvoicesToolInput(map[string]any{})
+	if err != nil {
+		t.Fatalf("parseListInvoicesToolInput returned error: %v", err)
+	}
+	if parsed.Page != 1 {
+		t.Fatalf("Page = %d, want 1", parsed.Page)
+	}
+	if parsed.PageSize != defaultListInvoicesToolPageSize {
+		t.Fatalf("PageSize = %d, want %d", parsed.PageSize, defaultListInvoicesToolPageSize)
+	}
+}
+
+func TestParseListInvoicesToolInputRejectsInvalidStatus(t *testing.T) {
+	_, err := parseListInvoicesToolInput(map[string]any{"status": "stuck"})
+	if err == nil || !strings.Contains(err.Error(), "status") {
+		t.Fatalf("error = %v, want status validation", err)
+	}
+}
+
+func TestParseListInvoicesToolInputRejectsInvalidDateRange(t *testing.T) {
+	_, err := parseListInvoicesToolInput(map[string]any{
+		"date_from": "2026-06-30",
+		"date_to":   "2026-06-01",
+	})
+	if err == nil || !strings.Contains(err.Error(), "date_to") {
+		t.Fatalf("error = %v, want date range validation", err)
+	}
+}
+
+func TestInvoiceToolPayload(t *testing.T) {
+	paidDate := time.Date(2026, 6, 19, 9, 0, 0, 0, time.UTC)
+	payload := invoiceToolPayload(domain.Invoice{
+		ID:            42,
+		InvoiceNumber: "INV-2026-0042",
+		ClientName:    "Maya Haddad",
+		Status:        domain.StatusPaid,
+		IssueDate:     time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC),
+		DueDate:       time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC),
+		PaidDate:      &paidDate,
+		Currency:      "USD",
+		Total:         150,
+		AmountPaid:    150,
+		AmountDue:     0,
+		CreatedAt:     time.Date(2026, 6, 1, 10, 0, 0, 0, time.UTC),
+	})
+	if payload["invoice_number"] != "INV-2026-0042" {
+		t.Fatalf("invoice_number = %v, want INV-2026-0042", payload["invoice_number"])
+	}
+	if payload["paid_date"] != "2026-06-19" {
+		t.Fatalf("paid_date = %v, want 2026-06-19", payload["paid_date"])
+	}
+	if payload["created_at"] != "2026-06-01T10:00:00Z" {
+		t.Fatalf("created_at = %v, want formatted timestamp", payload["created_at"])
+	}
+}
+
 func TestParseCreateInvoiceToolInput(t *testing.T) {
 	parsed, err := parseCreateInvoiceToolInput(map[string]any{
 		"customer_name":  "Maya Haddad",

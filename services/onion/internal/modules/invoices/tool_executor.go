@@ -14,20 +14,77 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
+const (
+	listInvoicesToolName            = "finance.list_invoices"
+	createInvoiceToolName           = "finance.create_invoice"
+	recordPaymentToolName           = "finance.record_payment"
+	sendInvoiceToolName             = "finance.send_invoice"
+	defaultListInvoicesToolPageSize = int64(20)
+	maxListInvoicesToolPageSize     = int64(50)
+)
+
+type listInvoicesToolInput struct {
+	Status   string
+	Search   string
+	DateFrom string
+	DateTo   string
+	Page     int64
+	PageSize int64
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
-	case "finance.create_invoice":
+	case listInvoicesToolName:
+		output, err := m.executeListInvoicesTool(ctx, input)
+		return output, true, err
+	case createInvoiceToolName:
 		output, err := m.executeCreateInvoiceTool(ctx, input)
 		return output, true, err
-	case "finance.record_payment":
+	case recordPaymentToolName:
 		output, err := m.executeRecordPaymentTool(ctx, input)
 		return output, true, err
-	case "finance.send_invoice":
+	case sendInvoiceToolName:
 		output, err := m.executeSendInvoiceTool(ctx, input)
 		return output, true, err
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeListInvoicesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListInvoicesToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	invoices, hasMore, err := m.service.ListInvoices(ctx, authUser.UserID, parsed.Status, parsed.Search, parsed.DateFrom, parsed.DateTo, parsed.Page, parsed.PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(invoices))
+	for _, invoice := range invoices {
+		payloads = append(payloads, invoiceToolPayload(invoice))
+	}
+
+	return map[string]any{
+		"invoices":  payloads,
+		"returned":  len(payloads),
+		"page":      parsed.Page,
+		"page_size": parsed.PageSize,
+		"has_more":  hasMore,
+		"filters": map[string]any{
+			"status":    parsed.Status,
+			"search":    parsed.Search,
+			"date_from": parsed.DateFrom,
+			"date_to":   parsed.DateTo,
+		},
+	}, nil
 }
 
 func (m *Module) executeCreateInvoiceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -138,6 +195,59 @@ func (m *Module) executeSendInvoiceTool(ctx context.Context, input map[string]an
 			"status": domain.StatusSent,
 		},
 		"message": "Invoice sent successfully",
+	}, nil
+}
+
+func parseListInvoicesToolInput(input map[string]any) (listInvoicesToolInput, error) {
+	status := normalizeListInvoicesToolStatus(input["status"])
+	if strings.TrimSpace(invoiceToolString(input["status"])) != "" && status == "" {
+		return listInvoicesToolInput{}, errors.New("status must be one of draft, sent, viewed, partial, paid, overdue, or void")
+	}
+
+	dateFrom, err := invoiceToolDate(firstInvoiceToolValue(input, "date_from", "from", "start_date", "issue_date_from"))
+	if err != nil {
+		return listInvoicesToolInput{}, fmt.Errorf("invalid date_from: %w", err)
+	}
+	dateTo, err := invoiceToolDate(firstInvoiceToolValue(input, "date_to", "to", "end_date", "issue_date_to"))
+	if err != nil {
+		return listInvoicesToolInput{}, fmt.Errorf("invalid date_to: %w", err)
+	}
+	if err := validateListInvoicesToolDateRange(dateFrom, dateTo); err != nil {
+		return listInvoicesToolInput{}, err
+	}
+
+	page, err := invoiceToolInt64(firstInvoiceToolValue(input, "page"))
+	if err != nil {
+		return listInvoicesToolInput{}, fmt.Errorf("invalid page: %w", err)
+	}
+	if page < 0 {
+		return listInvoicesToolInput{}, errors.New("page must be non-negative")
+	}
+	if page == 0 {
+		page = 1
+	}
+
+	pageSize, err := invoiceToolInt64(firstInvoiceToolValue(input, "page_size", "limit"))
+	if err != nil {
+		return listInvoicesToolInput{}, fmt.Errorf("invalid page_size: %w", err)
+	}
+	if pageSize < 0 {
+		return listInvoicesToolInput{}, errors.New("page_size must be non-negative")
+	}
+	if pageSize == 0 {
+		pageSize = defaultListInvoicesToolPageSize
+	}
+	if pageSize > maxListInvoicesToolPageSize {
+		pageSize = maxListInvoicesToolPageSize
+	}
+
+	return listInvoicesToolInput{
+		Status:   status,
+		Search:   strings.TrimSpace(invoiceToolString(firstInvoiceToolValue(input, "search", "query", "q", "customer", "client_name", "customer_name"))),
+		DateFrom: dateFrom,
+		DateTo:   dateTo,
+		Page:     page,
+		PageSize: pageSize,
 	}, nil
 }
 
@@ -311,6 +421,24 @@ func validateInvoiceToolDateOrder(issueDate, dueDate string) error {
 	}
 	if parsedDueDate.Before(parsedIssueDate) {
 		return domain.ErrInvalidInvoiceDate
+	}
+	return nil
+}
+
+func validateListInvoicesToolDateRange(dateFrom, dateTo string) error {
+	if dateFrom == "" || dateTo == "" {
+		return nil
+	}
+	parsedFrom, err := time.Parse("2006-01-02", dateFrom)
+	if err != nil {
+		return fmt.Errorf("invalid date_from: %w", err)
+	}
+	parsedTo, err := time.Parse("2006-01-02", dateTo)
+	if err != nil {
+		return fmt.Errorf("invalid date_to: %w", err)
+	}
+	if parsedTo.Before(parsedFrom) {
+		return errors.New("date_to must be on or after date_from")
 	}
 	return nil
 }
@@ -510,6 +638,19 @@ func invoiceToolDate(value any) (string, error) {
 	}
 }
 
+func normalizeListInvoicesToolStatus(value any) string {
+	status := strings.ToLower(strings.TrimSpace(invoiceToolString(value)))
+	if status == "" {
+		return ""
+	}
+	status = strings.ReplaceAll(status, "-", "_")
+	status = strings.ReplaceAll(status, " ", "_")
+	if domain.IsValidStatus(status) {
+		return status
+	}
+	return ""
+}
+
 func normalizeInvoiceToolDiscountType(value any) string {
 	discountType := strings.ToLower(strings.TrimSpace(invoiceToolString(value)))
 	if discountType == "" {
@@ -556,6 +697,30 @@ func validInvoiceToolCurrency(currency string) bool {
 		}
 	}
 	return true
+}
+
+func invoiceToolPayload(invoice domain.Invoice) map[string]any {
+	return map[string]any{
+		"id":             invoice.ID,
+		"invoice_number": invoice.InvoiceNumber,
+		"client_name":    invoice.ClientName,
+		"status":         invoice.Status,
+		"issue_date":     invoice.IssueDate.Format("2006-01-02"),
+		"due_date":       invoice.DueDate.Format("2006-01-02"),
+		"paid_date":      formatInvoiceToolOptionalDate(invoice.PaidDate),
+		"currency":       invoice.Currency,
+		"total":          invoice.Total,
+		"amount_paid":    invoice.AmountPaid,
+		"amount_due":     invoice.AmountDue,
+		"created_at":     invoice.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+}
+
+func formatInvoiceToolOptionalDate(value *time.Time) string {
+	if value == nil || value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02")
 }
 
 func firstInvoiceToolValue(input map[string]any, keys ...string) any {
