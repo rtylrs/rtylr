@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
-import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
 import { useProducts, useDeleteProduct, ProductFilters } from './useProducts';
@@ -258,14 +258,31 @@ const Products: React.FC = () => {
                   onChange={() => toggle(p.id)}
                   className="cursor-pointer"
                 />
-                <Link
-                  to="/products/$id"
-                  params={{ id: String(p.id) }}
-                  className="text-sm font-medium hover:underline"
-                  style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
-                >
-                  {p.name}
-                </Link>
+                <div className="flex min-w-0 items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg"
+                    style={{ background: 'var(--hub-hover)' }}
+                  >
+                    {p.imageUrl ? (
+                      <img
+                        src={p.imageUrl}
+                        alt={p.name}
+                        className="h-full w-full bg-white p-1 object-contain"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Package size={16} style={{ color: 'var(--hub-text-dim)' }} />
+                    )}
+                  </div>
+                  <Link
+                    to="/products/$id"
+                    params={{ id: String(p.id) }}
+                    className="min-w-0 truncate text-sm font-medium hover:underline"
+                    style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
+                  >
+                    {p.name}
+                  </Link>
+                </div>
                 <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
                   {p.sku}
                 </span>

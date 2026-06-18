@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="h-12 w-12 rounded-lg object-cover"
+              className="h-12 w-12 rounded-lg bg-white p-1 object-contain"
             />
           ) : (
             <Package size={18} style={{ color: 'var(--hub-text-dim)' }} />

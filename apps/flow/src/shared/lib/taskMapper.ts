@@ -1,7 +1,9 @@
 import type { Task } from '../stores/flowStore';
 import type { ApiTask } from '../services/flowApi';
 
-function normalizePriority(priority: ApiTask['priority'] | 'none' | null | undefined): Task['priority'] {
+function normalizePriority(
+  priority: ApiTask['priority'] | 'none' | null | undefined
+): Task['priority'] {
   return priority === 'none' || !priority ? 'no_priority' : priority;
 }
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
-import { Search, Plus } from 'lucide-react';
+import { Package, Search, Plus } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Product } from '../../shared/services/erpApi';
@@ -29,25 +29,15 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
 };
 
-const columns = [
-  'Name',
-  'SKU',
-  'Category',
-  'Stock',
-  'Low Stock',
-  'Cost Price',
-  'Sale Price',
-  'Status',
-];
+const columns = ['Product', 'SKU', 'Stock', 'Low Stock', 'Cost Price', 'Sale Price', 'Status'];
+
+const tableColumns = 'minmax(260px, 2.2fr) minmax(140px, 1fr) 0.7fr 0.7fr 0.9fr 0.9fr 0.9fr';
 
 // ─── Skeleton row ─────────────────────────────────────────────────────────────
 
 const SkeletonTableRow: React.FC = () => (
-  <div
-    className="grid px-4 py-3 items-center"
-    style={{ gridTemplateColumns: '2fr 1fr 1fr 0.7fr 0.7fr 1fr 1fr 0.9fr' }}
-  >
-    {Array.from({ length: 8 }).map((_, i) => (
+  <div className="grid px-4 py-3 items-center" style={{ gridTemplateColumns: tableColumns }}>
+    {Array.from({ length: columns.length }).map((_, i) => (
       <div
         key={i}
         className="h-3 rounded animate-pulse mr-2"
@@ -72,8 +62,7 @@ const Inventory: React.FC = () => {
     : products.filter(
         (p) =>
           p.name.toLowerCase().includes(search.toLowerCase()) ||
-          p.sku.toLowerCase().includes(search.toLowerCase()) ||
-          p.category.toLowerCase().includes(search.toLowerCase())
+          p.sku.toLowerCase().includes(search.toLowerCase())
       );
 
   return (
@@ -136,100 +125,131 @@ const Inventory: React.FC = () => {
       {/* Table */}
       <motion.div
         variants={itemVariants}
-        className="rounded-xl overflow-hidden"
+        className="overflow-hidden rounded-xl"
         style={{
           background: 'var(--hub-card)',
           border: '1px solid var(--hub-border)',
         }}
       >
-        {/* Column headers */}
-        <div
-          className="grid px-4 py-3"
-          style={{
-            gridTemplateColumns: '2fr 1fr 1fr 0.7fr 0.7fr 1fr 1fr 0.9fr',
-            borderBottom: '1px solid var(--hub-border)',
-          }}
-        >
-          {columns.map((col) => (
-            <span
-              key={col}
-              className="text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--hub-text-dim)' }}
-            >
-              {col}
-            </span>
-          ))}
-        </div>
-
-        {/* Rows */}
-        <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
-          ) : filtered.length === 0 ? (
+        <div className="overflow-x-auto">
+          <div className="min-w-[860px]">
+            {/* Column headers */}
             <div
-              className="px-4 py-8 text-center text-sm"
-              style={{ color: 'var(--hub-text-muted)' }}
+              className="grid px-4 py-3"
+              style={{
+                gridTemplateColumns: tableColumns,
+                borderBottom: '1px solid var(--hub-border)',
+              }}
             >
-              No products found.
-            </div>
-          ) : (
-            filtered.map((product) => {
-              const sc = statusConfig[product.status];
-              return (
-                <div
-                  key={product.id}
-                  className="grid px-4 py-3 items-center transition-colors"
-                  style={{ gridTemplateColumns: '2fr 1fr 1fr 0.7fr 0.7fr 1fr 1fr 0.9fr' }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  }}
+              {columns.map((col) => (
+                <span
+                  key={col}
+                  className="text-[10px] font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--hub-text-dim)' }}
                 >
-                  <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {product.name}
-                  </span>
-                  <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
-                    {product.sku}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {product.category}
-                  </span>
-                  <span
-                    className="text-sm font-semibold"
-                    style={{
-                      color:
-                        product.stock === 0
-                          ? '#f87171'
-                          : product.stock < product.lowStock
-                            ? AMBER
-                            : 'var(--hub-text)',
-                    }}
-                  >
-                    {product.stock}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {product.lowStock}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    ${product.costPrice.toFixed(2)}
-                  </span>
-                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                    ${product.salePrice.toFixed(2)}
-                  </span>
-                  <span>
-                    <span
-                      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                      style={{ background: sc.bg, color: sc.color }}
-                    >
-                      {product.status}
-                    </span>
-                  </span>
+                  {col}
+                </span>
+              ))}
+            </div>
+
+            {/* Rows */}
+            <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
+              ) : filtered.length === 0 ? (
+                <div
+                  className="px-4 py-8 text-center text-sm"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  No products found.
                 </div>
-              );
-            })
-          )}
+              ) : (
+                filtered.map((product) => {
+                  const sc = statusConfig[product.status];
+                  return (
+                    <div
+                      key={product.id}
+                      className="grid items-center px-4 py-3 transition-colors"
+                      style={{ gridTemplateColumns: tableColumns }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      }}
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg"
+                          style={{ background: 'var(--hub-hover)' }}
+                        >
+                          {product.imageUrl ? (
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="h-full w-full bg-white p-1 object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <Package size={16} style={{ color: 'var(--hub-text-dim)' }} />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div
+                            className="truncate text-sm font-semibold"
+                            style={{ color: 'var(--hub-text)' }}
+                          >
+                            {product.name}
+                          </div>
+                          {product.unit && (
+                            <div className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
+                              Unit: {product.unit}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <span
+                        className="truncate text-xs font-mono"
+                        style={{ color: 'var(--hub-text-muted)' }}
+                      >
+                        {product.sku}
+                      </span>
+                      <span
+                        className="text-sm font-semibold"
+                        style={{
+                          color:
+                            product.stock === 0
+                              ? '#f87171'
+                              : product.stock < product.lowStock
+                                ? AMBER
+                                : 'var(--hub-text)',
+                        }}
+                      >
+                        {product.stock}
+                      </span>
+                      <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                        {product.lowStock}
+                      </span>
+                      <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                        ${product.costPrice.toFixed(2)}
+                      </span>
+                      <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                        ${product.salePrice.toFixed(2)}
+                      </span>
+                      <span>
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                          style={{ background: sc.bg, color: sc.color }}
+                        >
+                          {product.status}
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
       </motion.div>
     </motion.div>

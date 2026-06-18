@@ -44,8 +44,8 @@ export interface ProductListResult {
 // display-only value computed from stock vs. threshold — the backend never sends it.
 interface BackendProduct {
   id: number;
-  name: string;
-  sku: string;
+  name?: string | null;
+  sku?: string | null;
   categoryId?: number;
   stockQuantity?: number;
   lowStockThreshold?: number;
@@ -55,6 +55,9 @@ interface BackendProduct {
   barcode?: string;
   description?: string;
   unit?: string;
+  image?: string | null;
+  imageUrl?: string | null;
+  image_url?: string | null;
 }
 
 function computeStatus(stock: number, lowStock: number): Product['status'] {
@@ -66,10 +69,11 @@ function computeStatus(stock: number, lowStock: number): Product['status'] {
 function normalizeProduct(raw: BackendProduct): Record<string, unknown> {
   const stock = raw.stockQuantity ?? 0;
   const lowStock = raw.lowStockThreshold ?? 0;
+  const imageUrl = raw.imageUrl ?? raw.image_url ?? raw.image ?? null;
   return {
     id: raw.id,
-    name: raw.name,
-    sku: raw.sku,
+    name: raw.name?.trim() ?? '',
+    sku: raw.sku?.trim() ?? '',
     // Backend has no category name — only categoryId. Keep the id around for
     // filtering and leave the display string empty so the schema doesn't throw.
     category: '',
@@ -81,6 +85,7 @@ function normalizeProduct(raw: BackendProduct): Record<string, unknown> {
     status: computeStatus(stock, lowStock),
     barcode: raw.barcode ?? null,
     description: raw.description ?? null,
+    imageUrl,
     unit: raw.unit ?? null,
     reorderPoint: raw.lowStockThreshold ?? null,
   };
@@ -90,8 +95,8 @@ function normalizeProduct(raw: BackendProduct): Record<string, unknown> {
 type ProductWithCategoryId = Product & { categoryId?: number };
 
 function applyFilters(list: ProductWithCategoryId[], f?: ProductFilters): Product[] {
-  if (!f) return list;
-  let out = list.slice();
+  let out = list.filter((p) => p.name.trim() !== '');
+  if (!f) return out;
   if (f.search) {
     const q = f.search.toLowerCase();
     out = out.filter(

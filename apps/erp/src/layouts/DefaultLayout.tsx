@@ -61,7 +61,6 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Dashboard', path: '/', icon: LayoutDashboard },
       { label: 'Products', path: '/products', icon: Package },
-      { label: 'Inventory', path: '/inventory', icon: Package },
     ],
   },
   {
@@ -104,7 +103,7 @@ const navGroups: NavGroup[] = [
 const routeLabels: Record<string, string> = {
   '/': 'Dashboard',
   '/products': 'Products',
-  '/inventory': 'Inventory',
+  '/inventory': 'Products',
   '/purchasing': 'Purchase Orders',
   '/suppliers': 'Suppliers',
   '/categories': 'Categories',
@@ -287,7 +286,7 @@ const DefaultLayout: React.FC = () => {
       } else if (e.shiftKey) {
         if (e.key === 'I' || e.key === 'i') {
           e.preventDefault();
-          navigate({ to: '/inventory' });
+          navigate({ to: '/products' });
         } else if (e.key === 'P' || e.key === 'p') {
           e.preventDefault();
           navigate({ to: '/purchasing' });
