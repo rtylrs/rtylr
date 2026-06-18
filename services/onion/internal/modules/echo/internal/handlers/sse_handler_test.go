@@ -155,6 +155,59 @@ func TestStreamRendererExtractsWriteToolProposal(t *testing.T) {
 	}
 }
 
+func TestStreamRendererSilentlyDropsInvalidToolMarker(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+
+	err := renderer.AppendText(`Before <tool>{"input":{"name":"Ada"}}</tool> after.`)
+	if err != nil {
+		t.Fatalf("append tool chunk: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	for _, event := range events {
+		if event.Type == EventError {
+			t.Fatalf("invalid marker should not be surfaced as a UI error: %#v", events)
+		}
+		if event.Type == EventToolCall {
+			t.Fatalf("invalid marker should not emit a tool call: %#v", events)
+		}
+	}
+	if strings.Contains(full.String(), "<tool>") || strings.Contains(full.String(), "input") {
+		t.Fatalf("public response should not include raw invalid tool marker, got %q", full.String())
+	}
+	if full.String() != "Before  after." {
+		t.Fatalf("expected visible text around marker to remain, got %q", full.String())
+	}
+}
+
+func TestStreamRendererSilentlyDropsIncompleteToolMarker(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+
+	if err := renderer.AppendText(`Before <tool>{"name":"crm.create_customer"`); err != nil {
+		t.Fatalf("append tool chunk: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	for _, event := range events {
+		if event.Type == EventError || event.Type == EventToolCall {
+			t.Fatalf("incomplete marker should be silent, got %#v", events)
+		}
+	}
+	if full.String() != "Before " {
+		t.Fatalf("expected text before incomplete marker to remain, got %q", full.String())
+	}
+}
+
 func TestWriteAnalystToolEventsEmitsReadOnlyToolCallAndResult(t *testing.T) {
 	handler := &GenerateTextStreamHandler{}
 	rec := httptest.NewRecorder()

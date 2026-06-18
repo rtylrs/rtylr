@@ -66,7 +66,7 @@ func TestBuildSQL_AggregatesAndGroupBy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected: %v", err)
 	}
-	for _, want := range []string{"SUM(total) AS revenue", "COUNT(*) AS cnt", "GROUP BY status", "ORDER BY revenue DESC", "owner_id = ?"} {
+	for _, want := range []string{"COALESCE(SUM(total), 0) AS revenue", "COUNT(*) AS cnt", "GROUP BY status", "ORDER BY revenue DESC", "owner_id = ?"} {
 		if !strings.Contains(sql, want) {
 			t.Errorf("missing %q in: %s", want, sql)
 		}
@@ -74,6 +74,19 @@ func TestBuildSQL_AggregatesAndGroupBy(t *testing.T) {
 	// owner_id + status both bound.
 	if len(args) != 2 {
 		t.Errorf("expected 2 args (owner_id, status), got %v", args)
+	}
+}
+
+func TestBuildSQL_SumAggregatesDefaultToZero(t *testing.T) {
+	sql, _, err := BuildSQL(QuerySpec{
+		View:         "ai_pos_orders",
+		Aggregations: []Aggregation{{Func: "sum", Col: "total", As: "revenue"}},
+	}, 7)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if !strings.Contains(sql, "COALESCE(SUM(total), 0) AS revenue") {
+		t.Fatalf("expected SUM aggregate to default null to zero, got: %s", sql)
 	}
 }
 

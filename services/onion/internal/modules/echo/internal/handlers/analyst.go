@@ -40,18 +40,25 @@ type analystGroundingResult struct {
 // spec (no prose) against the allowlisted schema. owner_id is never mentioned —
 // it is enforced server-side.
 func buildSpecGenPrompt(schema, question, today string) string {
+	tomorrow := today
+	if parsed, err := time.Parse("2006-01-02", today); err == nil {
+		tomorrow = parsed.AddDate(0, 0, 1).Format("2006-01-02")
+	}
+
 	var b strings.Builder
 	b.WriteString("You convert a business question into a JSON query against a read-only analytics API. ")
 	b.WriteString("Output ONLY a single JSON object, nothing else — no prose, no markdown fences.\n\n")
 	b.WriteString("Today is ")
 	b.WriteString(today)
+	b.WriteString(". Tomorrow is ")
+	b.WriteString(tomorrow)
 	b.WriteString(".\n\nViews and their columns:\n")
 	b.WriteString(schema)
 	b.WriteString("\nSpec shape:\n")
 	b.WriteString(`{"view":"<one view>","columns":["<col>"],"aggregations":[{"func":"sum|count|avg|min|max","col":"<col>","as":"<alias>"}],"where":[{"col":"<col>","op":"=|!=|<|<=|>|>=|like|in","value":<value>}],"group_by":["<col>"],"order_by":[{"col":"<col-or-alias>","dir":"asc|desc"}],"limit":<int>}`)
-	b.WriteString("\n\nRules: exactly one view; only columns listed for that view; never reference owner_id (applied automatically); limit <= 1000. For date filters use 'YYYY-MM-DD'.\n\n")
+	b.WriteString("\n\nRules: exactly one view; only columns listed for that view; never reference owner_id (applied automatically); limit <= 1000. For date filters use 'YYYY-MM-DD'. For today's datetime windows, filter >= today and < tomorrow. For daily revenue/sales, prefer paid ai_pos_orders total using payment_status='paid' and paid_at; use ai_invoices only when the user specifically asks about invoices or billing.\n\n")
 	b.WriteString("Examples:\n")
-	b.WriteString(`Q: "revenue today" -> {"view":"ai_invoices","aggregations":[{"func":"sum","col":"total","as":"revenue"}],"where":[{"col":"issue_date","op":">=","value":"` + today + `"}]}`)
+	b.WriteString(`Q: "revenue today" -> {"view":"ai_pos_orders","aggregations":[{"func":"sum","col":"total","as":"revenue"}],"where":[{"col":"payment_status","op":"=","value":"paid"},{"col":"paid_at","op":">=","value":"` + today + `"},{"col":"paid_at","op":"<","value":"` + tomorrow + `"}]}`)
 	b.WriteString("\n")
 	b.WriteString(`Q: "how many employees" -> {"view":"ai_employees","aggregations":[{"func":"count","as":"employees"}]}`)
 	b.WriteString("\n")

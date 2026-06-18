@@ -173,7 +173,7 @@ func buildSelects(spec QuerySpec, cols map[string]struct{}) ([]string, error) {
 		if !allowed(cols, a.Col) {
 			return nil, fmt.Errorf("%w: aggregate on %q", ErrUnknownColumn, a.Col)
 		}
-		selects = append(selects, fmt.Sprintf("%s(%s) AS %s", strings.ToUpper(fn), a.Col, orDefault(alias, fn+"_"+a.Col)))
+		selects = append(selects, fmt.Sprintf("%s AS %s", aggregateExpr(fn, a.Col), orDefault(alias, fn+"_"+a.Col)))
 	}
 
 	if len(selects) == 0 {
@@ -187,6 +187,15 @@ func buildSelects(spec QuerySpec, cols map[string]struct{}) ([]string, error) {
 	}
 
 	return selects, nil
+}
+
+func aggregateExpr(fn, col string) string {
+	switch fn {
+	case "sum":
+		return fmt.Sprintf("COALESCE(SUM(%s), 0)", col)
+	default:
+		return fmt.Sprintf("%s(%s)", strings.ToUpper(fn), col)
+	}
 }
 
 func filterPredicate(f Filter, cols map[string]struct{}) (sq.Sqlizer, error) {

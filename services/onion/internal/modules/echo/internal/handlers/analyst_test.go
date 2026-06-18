@@ -48,3 +48,25 @@ func TestBuildAnalystGroundingPromptStatesEvidenceRules(t *testing.T) {
 		}
 	}
 }
+
+func TestBuildSpecGenPromptRoutesDailyRevenueToPaidPOSOrders(t *testing.T) {
+	got := buildSpecGenPrompt(
+		"ai_pos_orders(total, payment_status, paid_at)\nai_invoices(total, issue_date, paid_date)\n",
+		"How much revenue today?",
+		"2026-06-18",
+	)
+
+	mustContain := []string{
+		"Tomorrow is 2026-06-19.",
+		"prefer paid ai_pos_orders total",
+		`"view":"ai_pos_orders"`,
+		`"col":"payment_status","op":"=","value":"paid"`,
+		`"col":"paid_at","op":">=","value":"2026-06-18"`,
+		`"col":"paid_at","op":"<","value":"2026-06-19"`,
+	}
+	for _, want := range mustContain {
+		if !strings.Contains(got, want) {
+			t.Fatalf("spec prompt missing %q\nprompt:\n%s", want, got)
+		}
+	}
+}

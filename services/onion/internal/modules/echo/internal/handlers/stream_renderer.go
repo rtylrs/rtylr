@@ -149,9 +149,6 @@ func (r *streamEventRenderer) drainTool(final bool) (bool, error) {
 	end := strings.Index(r.pending, toolCloseTag)
 	if end < 0 {
 		if final {
-			if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventError, Error: "Incomplete tool call marker ignored.", Recoverable: true}); err != nil {
-				return false, err
-			}
 			r.pending = ""
 			return true, nil
 		}
@@ -186,7 +183,7 @@ func (r *streamEventRenderer) emitText(text string) error {
 func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	var call ToolCallMarker
 	if err := json.Unmarshal([]byte(raw), &call); err != nil || strings.TrimSpace(call.Name) == "" {
-		return WriteEvent(r.w, r.flush, StreamEvent{Type: EventError, Error: "Invalid tool call marker ignored.", Recoverable: true})
+		return nil
 	}
 
 	def, ok := ToolByName(call.Name)
