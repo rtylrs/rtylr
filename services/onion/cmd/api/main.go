@@ -452,6 +452,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
+	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
 		Accounts:              accounts.NewModule(ctx, dbclient.Pool()),
@@ -487,7 +488,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, expensesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, expensesModule, posOrdersModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -535,7 +536,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosMemberLocations:    posmemberlocations.NewModule(ctx, dbclient.Pool()),
 		PosMenu:               posmenu.NewModule(ctx, dbclient.Pool()),
 		PosModifiers:          posmodifiers.NewModule(ctx, dbclient.Pool()),
-		PosOrders:             posorders.NewModule(ctx, dbclient.Pool()),
+		PosOrders:             posOrdersModule,
 		PosReceipts:           posreceipts.NewModule(ctx, dbclient.Pool()),
 		PosSessions:           possessions.NewModule(ctx, dbclient.Pool()),
 		PosSettings:           possettings.NewModule(ctx, dbclient.Pool()),

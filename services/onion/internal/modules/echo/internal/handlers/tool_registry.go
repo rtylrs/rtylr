@@ -34,6 +34,7 @@ var promptExecutableWriteTools = map[string]struct{}{
 	"erp.set_stock":          {},
 	"flow.create_task":       {},
 	"finance.record_expense": {},
+	"pos.refund_order":       {},
 }
 
 // ToolByName returns a registered tool definition by stable tool name.
