@@ -16,7 +16,7 @@ func TestQueryInt(t *testing.T) {
 	}
 	for url, want := range cases {
 		req := httptest.NewRequest("GET", url, nil)
-		if got := queryInt(req, "w"); got != want {
+		if got := queryInt(req.URL.Query(), "w"); got != want {
 			t.Errorf("queryInt(%q) = %d, want %d", url, got, want)
 		}
 	}

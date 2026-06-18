@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"golang.org/x/sync/errgroup"
 )
 
 type Repository struct {
@@ -711,43 +712,56 @@ func (r *Repository) UpdateCampaignStatus(ctx context.Context, ownerID, campaign
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
-	var stats domain.DashboardStats
+	var (
+		totalCustomers int64
+		newThisMonth   int64
+		activeMembers  int64
+		topRows        []sqlc.ListTopCustomersRow
+	)
 
-	totalCustomers, err := r.queries.CountActiveCustomers(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get total customers", logger.Error(err))
-
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		var err error
+		totalCustomers, err = r.queries.CountActiveCustomers(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to get total customers", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to get new customers this month", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		activeMembers, err = r.queries.CountActiveLoyaltyMembers(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to get active loyalty members", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		topRows, err = r.queries.ListTopCustomers(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to get top customers", logger.Error(err))
+		}
+		return err
+	})
+	if err := group.Wait(); err != nil {
 		return domain.DashboardStats{}, err
 	}
 
-	stats.TotalCustomers = int(totalCustomers)
-
-	newThisMonth, err := r.queries.CountNewCustomersThisMonth(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get new customers this month", logger.Error(err))
-
-		return domain.DashboardStats{}, err
+	stats := domain.DashboardStats{
+		TotalCustomers:       int(totalCustomers),
+		NewThisMonth:         int(newThisMonth),
+		ActiveLoyaltyMembers: int(activeMembers),
+		TopCustomers:         make([]domain.TopCustomer, 0, len(topRows)),
 	}
-
-	stats.NewThisMonth = int(newThisMonth)
-
-	activeMembers, err := r.queries.CountActiveLoyaltyMembers(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get active loyalty members", logger.Error(err))
-
-		return domain.DashboardStats{}, err
-	}
-
-	stats.ActiveLoyaltyMembers = int(activeMembers)
-
-	topRows, err := r.queries.ListTopCustomers(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get top customers", logger.Error(err))
-
-		return domain.DashboardStats{}, err
-	}
-
-	stats.TopCustomers = make([]domain.TopCustomer, 0, len(topRows))
 	for _, row := range topRows {
 		spent := parseDecimal(row.TotalSpent.String)
 		stats.TopCustomers = append(stats.TopCustomers, domain.TopCustomer{

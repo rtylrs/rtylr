@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -13,6 +14,8 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/utils/sliceutils"
 )
+
+const tokenValidationCacheTTL = 30 * time.Second
 
 type Module struct {
 	UserService         *application.Service
@@ -47,6 +50,12 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 		Platform:       claims.Platform,
 		PlatformUserID: claims.PlatformUserID,
 		PlanID:         claims.PlanID,
+		ExpiresAt: func() time.Time {
+			if claims.ExpiresAt == nil {
+				return time.Time{}
+			}
+			return claims.ExpiresAt.Time
+		}(),
 	}, nil
 }
 
@@ -57,7 +66,10 @@ func NewModule(ctx context.Context, db *sql.DB, googleClientID string) *Module {
 	module := &Module{
 		UserService:    userService,
 		UserRepository: userRepo,
-		tokenValidator: &userTokenValidator{userService: userService},
+		tokenValidator: authPkg.NewCachingTokenValidator(
+			&userTokenValidator{userService: userService},
+			tokenValidationCacheTTL,
+		),
 	}
 
 	userService.Initialize(ctx)

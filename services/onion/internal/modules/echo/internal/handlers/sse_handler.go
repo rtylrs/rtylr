@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
+	"github.com/voxire/onion/internal/platform/aicache"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -37,6 +38,16 @@ type QuotaService interface {
 const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
+
+type cacheWritePlan struct {
+	Enabled     bool
+	Key         string
+	Mode        string
+	Provider    string
+	Policy      aicache.ExactPolicy
+	StartedAt   time.Time
+	PromptChars int
+}
 
 func GenerateTextStreamRoutes() []string {
 	return []string{
@@ -172,7 +183,9 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	enhancedPrompt, contextErr := h.buildEnhancedPromptWithContext(ctx, req)
+	mode := ParseMode(req.Mode)
+
+	enhancedPrompt, contextErr := h.buildEnhancedPromptWithContext(ctx, req, mode)
 	if contextErr != nil {
 		log.Error("Failed to get conversation context", logger.Error(contextErr))
 		http.Error(w, "Failed to get context", http.StatusInternalServerError)
@@ -183,27 +196,79 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	// Analyst mode: turn the question into a validated, tenant-scoped query,
 	// run it on the read replica, and ground the answer in the real rows. Falls
 	// back to a normal chat answer if the data pipeline can't produce a result.
-	if ParseMode(req.Mode) != ModeSupport {
+	var liveGrounding *analystGroundingResult
+	if mode != ModeSupport {
 		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
-			enhancedPrompt = grounding + "\n\n---\n\n" + enhancedPrompt
+			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
+			liveGrounding = grounding
 		}
 	}
 
+	cachePlan := h.buildCacheWritePlan(ctx, mode, enhancedPrompt, businessID, authUserID)
+	if liveGrounding != nil {
+		cachePlan.Enabled = false
+		cachePlan.Key = ""
+		cachePlan.Policy.Enabled = false
+		cachePlan.Policy.Reason = "request includes live analyst grounding"
+	}
+
 	log.Info("Starting AI text generation",
-		logger.String("enhanced_prompt_length", strconv.Itoa(len(enhancedPrompt))))
+		logger.String("enhanced_prompt_length", strconv.Itoa(len(enhancedPrompt))),
+		logger.String("cache_mode", cachePlan.Mode),
+		logger.String("cache_policy", cachePlan.Policy.Reason))
 
 	h.setupSSEHeaders(w)
 	clientGone := h.monitorClientDisconnect(r)
 
+	if cachePlan.Enabled {
+		if cached, ok := aicache.GetExact(ctx, cachePlan.Key); ok {
+			log.Info("AI exact cache hit",
+				logger.String("mode", cachePlan.Mode),
+				logger.String("provider", cached.Provider),
+				logger.String("cache_key", aicache.KeyPreview(cachePlan.Key)))
+			h.streamCachedResponse(ctx, w, clientGone, req, cached, cachePlan, businessID, authUserID)
+			return
+		}
+		aicache.Record(aicache.Event{
+			Outcome:         aicache.OutcomeMiss,
+			Mode:            cachePlan.Mode,
+			Provider:        cachePlan.Provider,
+			CacheKeyPreview: aicache.KeyPreview(cachePlan.Key),
+			BusinessID:      businessID,
+			UserID:          authUserID,
+			PromptChars:     len(enhancedPrompt),
+		})
+	} else {
+		aicache.Record(aicache.Event{
+			Outcome:         aicache.OutcomeSkip,
+			Mode:            cachePlan.Mode,
+			Provider:        cachePlan.Provider,
+			Reason:          cachePlan.Policy.Reason,
+			BusinessID:      businessID,
+			UserID:          authUserID,
+			PromptChars:     len(enhancedPrompt),
+			CacheKeyPreview: "",
+		})
+	}
+
 	tokenChan, err := h.AiService.GenerateTextStream(ctx, enhancedPrompt)
 	if err != nil {
 		log.Error("Failed to generate text stream", logger.Error(err))
+		aicache.Record(aicache.Event{
+			Outcome:     aicache.OutcomeError,
+			Mode:        cachePlan.Mode,
+			Provider:    cachePlan.Provider,
+			Reason:      "provider stream failed to start",
+			BusinessID:  businessID,
+			UserID:      authUserID,
+			PromptChars: len(enhancedPrompt),
+		})
 		h.writeErrorResponse(w, "Failed to generate response")
 
 		return
 	}
 
-	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, len(enhancedPrompt))
+	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding)
 }
 
 // writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
@@ -324,27 +389,18 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 	return nil
 }
 
-func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest) (string, error) {
+func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest, mode CaretMode) (string, error) {
 	logger.Ctx(ctx).Info("Building enhanced prompt with context",
 		logger.String("session_id", req.SessionID),
 		logger.Int("user_id", int(req.UserID)))
 
-	enhancedPrompt := h.MemoryService.BuildEnhancedPrompt(ctx, req.SessionID, int(req.UserID), req.Prompt)
-
-	if req.SystemContext == "" {
-		return enhancedPrompt, nil
-	}
-
-	var sb strings.Builder
-	sb.WriteString(caretSystemPreamble)
-	sb.WriteString(" Today is ")
-	sb.WriteString(time.Now().Format("2006-01-02"))
-	sb.WriteString(".\nCurrent application context:\n")
-	sb.WriteString(req.SystemContext)
-	sb.WriteString("\n\n---\n\n")
-	sb.WriteString(enhancedPrompt)
-
-	return sb.String(), nil
+	conversationPrompt := h.MemoryService.BuildEnhancedPrompt(ctx, req.SessionID, int(req.UserID), req.Prompt)
+	return buildCaretPrompt(caretPromptInput{
+		Mode:               mode,
+		ConversationPrompt: conversationPrompt,
+		SystemContext:      req.SystemContext,
+		Now:                time.Now(),
+	}), nil
 }
 
 func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
@@ -376,32 +432,137 @@ func (h *GenerateTextStreamHandler) monitorClientDisconnect(r *http.Request) cha
 }
 
 func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, errorMsg string) {
-	if _, writeErr := fmt.Fprintf(w, "event: error\ndata: %s\n\n", jsonEscape(errorMsg)); writeErr != nil {
+	if writeErr := WriteEvent(w, flushResponse(w), StreamEvent{
+		Type:        EventError,
+		Error:       errorMsg,
+		Recoverable: false,
+	}); writeErr != nil {
 		logger.Global().Error("Failed to write error to SSE response", logger.Error(writeErr))
-	}
-
-	if flusher, ok := w.(http.Flusher); ok {
-		flusher.Flush()
 	}
 }
 
-func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, promptChars int) {
+func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, enhancedPrompt string, businessID, userID int64) cacheWritePlan {
+	policy := aicache.ExactPolicyForMode(string(mode))
+	provider := h.AiService.GetPrimaryProvider()
+	plan := cacheWritePlan{
+		Enabled:     policy.Enabled,
+		Mode:        string(mode),
+		Provider:    provider,
+		Policy:      policy,
+		StartedAt:   time.Now(),
+		PromptChars: len(enhancedPrompt),
+	}
+	if policy.Enabled {
+		plan.Key = aicache.ExactKey(aicache.ExactKeyParts{
+			BusinessID: businessID,
+			UserID:     userID,
+			Mode:       string(mode),
+			Provider:   provider,
+			Prompt:     enhancedPrompt,
+		})
+	}
+	return plan
+}
+
+func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w http.ResponseWriter, clientGone chan bool, req *GenerateTextStreamRequest, cached aicache.ExactResponse, plan cacheWritePlan, businessID, userID int64) {
+	started := time.Now()
+	messageID := newAssistantMessageID()
+	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
+		return
+	}
+
+	runes := []rune(cached.Response)
 	var fullResponse strings.Builder
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse)
+
+	const chunkRunes = 360
+	for i := 0; i < len(runes); i += chunkRunes {
+		select {
+		case <-clientGone:
+			return
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		end := i + chunkRunes
+		if end > len(runes) {
+			end = len(runes)
+		}
+		if err := renderer.AppendText(string(runes[i:end])); err != nil {
+			return
+		}
+	}
+
+	if err := renderer.Finish(); err != nil {
+		return
+	}
+
+	if cached.Response != "" {
+		go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), cached.Response)
+	}
+
+	aicache.Record(aicache.Event{
+		Outcome:          aicache.OutcomeHit,
+		Mode:             plan.Mode,
+		Provider:         cached.Provider,
+		CacheKeyPreview:  aicache.KeyPreview(plan.Key),
+		BusinessID:       businessID,
+		UserID:           userID,
+		PromptChars:      plan.PromptChars,
+		ResponseChars:    len(cached.Response),
+		EstimatedSavings: cached.TotalTokens(),
+		LatencyMs:        time.Since(started).Milliseconds(),
+	})
+}
+
+func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult) {
+	var fullResponse strings.Builder
+	messageID := newAssistantMessageID()
+	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
+		return
+	}
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse)
+	if grounding != nil {
+		if err := h.writeAnalystToolEvents(w, messageID, grounding); err != nil {
+			return
+		}
+	}
 
 	for {
 		select {
-		case token := <-tokenChan:
+		case token, ok := <-tokenChan:
+			if !ok {
+				return
+			}
+
 			if token.Error != "" {
 				h.writeErrorResponse(w, token.Error)
+				aicache.Record(aicache.Event{
+					Outcome:         aicache.OutcomeError,
+					Mode:            cachePlan.Mode,
+					Provider:        token.Provider,
+					Reason:          token.Error,
+					CacheKeyPreview: aicache.KeyPreview(cachePlan.Key),
+					BusinessID:      businessID,
+					UserID:          userID,
+					PromptChars:     cachePlan.PromptChars,
+					LatencyMs:       time.Since(cachePlan.StartedAt).Milliseconds(),
+				})
 
 				return
 			}
 
-			if err := h.processAndStreamToken(w, token, &fullResponse); err != nil {
-				continue
+			if token.Text != "" {
+				if err := renderer.AppendText(token.Text); err != nil {
+					return
+				}
 			}
 
 			if token.Done {
+				if err := renderer.Finish(); err != nil {
+					return
+				}
 				if fullResponse.Len() > 0 {
 					go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
 				}
@@ -410,9 +571,10 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				// token counts; fall back to a char/4 estimate when absent.
 				tokens := token.PromptTokens + token.CompletionTokens
 				if tokens == 0 {
-					tokens = estimateTokens(promptChars) + estimateTokens(fullResponse.Len())
+					tokens = estimateTokens(cachePlan.PromptChars) + estimateTokens(fullResponse.Len())
 				}
 				h.recordUsage(ctx, businessID, userID, tokens)
+				h.writeExactCacheEntry(ctx, token, fullResponse.String(), tokens, cachePlan, businessID, userID)
 
 				return
 			}
@@ -426,33 +588,93 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	}
 }
 
-func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter, token snips.StreamToken, fullResponse *strings.Builder) error {
-	if token.Error != "" {
+func (h *GenerateTextStreamHandler) writeExactCacheEntry(ctx context.Context, token snips.StreamToken, response string, tokens int, plan cacheWritePlan, businessID, userID int64) {
+	if !plan.Enabled || plan.Key == "" || response == "" {
+		return
+	}
+
+	provider := token.Provider
+	if provider == "" {
+		provider = plan.Provider
+	}
+
+	writeCtx := context.WithoutCancel(ctx)
+	aicache.PutExact(writeCtx, plan.Key, aicache.ExactResponse{
+		Response:         response,
+		Provider:         provider,
+		Mode:             plan.Mode,
+		PromptChars:      plan.PromptChars,
+		ResponseChars:    len(response),
+		PromptTokens:     token.PromptTokens,
+		CompletionTokens: token.CompletionTokens,
+		CreatedAt:        time.Now().UTC(),
+	}, plan.Policy.TTL)
+
+	aicache.Record(aicache.Event{
+		Outcome:         aicache.OutcomeWrite,
+		Mode:            plan.Mode,
+		Provider:        provider,
+		CacheKeyPreview: aicache.KeyPreview(plan.Key),
+		BusinessID:      businessID,
+		UserID:          userID,
+		PromptChars:     plan.PromptChars,
+		ResponseChars:   len(response),
+		ProviderTokens:  tokens,
+		LatencyMs:       time.Since(plan.StartedAt).Milliseconds(),
+	})
+}
+
+func (h *GenerateTextStreamHandler) writeStreamPrelude(w http.ResponseWriter, sessionID, messageID string) error {
+	if sessionID != "" {
+		if err := WriteEvent(w, flushResponse(w), StreamEvent{Type: EventSession, SessionID: sessionID}); err != nil {
+			return err
+		}
+	}
+	return WriteEvent(w, flushResponse(w), StreamEvent{Type: EventMessageStart, MessageID: messageID, Role: "assistant"})
+}
+
+func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter, messageID string, grounding *analystGroundingResult) error {
+	if grounding == nil {
 		return nil
 	}
 
-	data, err := json.Marshal(token)
-	if err != nil {
-		h.writeErrorResponse(w, "Failed to marshal token")
-
+	blockID := fmt.Sprintf("tool-analytics-%d", time.Now().UnixNano())
+	input := map[string]any{
+		"question": grounding.Question,
+		"spec":     json.RawMessage(grounding.SpecJSON),
+	}
+	output := map[string]any{
+		"row_count":   grounding.RowCount,
+		"truncated":   grounding.Truncated,
+		"rows":        grounding.Rows,
+		"duration_ms": grounding.DurationMs,
+	}
+	if err := WriteEvent(w, flushResponse(w), StreamEvent{
+		Type:             EventToolCall,
+		MessageID:        messageID,
+		BlockID:          blockID,
+		Name:             "analytics.query",
+		Input:            input,
+		RequiresApproval: false,
+	}); err != nil {
 		return err
 	}
+	return WriteEvent(w, flushResponse(w), StreamEvent{
+		Type:       EventToolResult,
+		MessageID:  messageID,
+		BlockID:    blockID,
+		Status:     "success",
+		Output:     output,
+		DurationMs: grounding.DurationMs,
+	})
+}
 
-	if _, err := fmt.Fprintf(w, "data: %s\n\n", data); err != nil {
-		logger.Global().Error("Failed to write SSE data to response", logger.Error(err))
-
-		return err
+func flushResponse(w http.ResponseWriter) func() {
+	return func() {
+		if flusher, ok := w.(http.Flusher); ok {
+			flusher.Flush()
+		}
 	}
-
-	if flusher, ok := w.(http.Flusher); ok {
-		flusher.Flush()
-	}
-
-	if token.Text != "" {
-		fullResponse.WriteString(token.Text)
-	}
-
-	return nil
 }
 
 func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {
@@ -498,8 +720,4 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 				logger.Int("user_id", userID))
 		}
 	}()
-}
-
-func jsonEscape(s string) string {
-	return fmt.Sprintf("%q", s)
 }

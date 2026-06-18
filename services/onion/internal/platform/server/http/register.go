@@ -2,11 +2,14 @@ package http
 
 import (
 	"context"
+	"encoding"
 	"encoding/json"
 	stdErrors "errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -145,6 +148,8 @@ func RegisterDELETEWithValidation[Req, Res any](ctx context.Context, router *chi
 }
 
 func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res], validate bool) http.HandlerFunc {
+	validateResponses := responseProtoValidationEnabled()
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req Req
 
@@ -187,15 +192,17 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 			return
 		}
 
-		if err := validateProtoMessages(res); err != nil {
-			logger.Ctx(reqCtx).Error("Response proto validation failed", logger.Error(err))
-			writeServerError(reqCtx, w, &errors.ServerError{
-				HTTPCode: http.StatusInternalServerError,
-				Code:     http.StatusInternalServerError,
-				Message:  "Response validation failed",
-			})
+		if validateResponses {
+			if err := validateProtoMessages(res); err != nil {
+				logger.Ctx(reqCtx).Error("Response proto validation failed", logger.Error(err))
+				writeServerError(reqCtx, w, &errors.ServerError{
+					HTTPCode: http.StatusInternalServerError,
+					Code:     http.StatusInternalServerError,
+					Message:  "Response validation failed",
+				})
 
-			return
+				return
+			}
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -204,6 +211,19 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 		if err := json.NewEncoder(w).Encode(res); err != nil {
 			logger.Ctx(ctx).Error("Failed to encode response", logger.Error(err))
 		}
+	}
+}
+
+func responseProtoValidationEnabled() bool {
+	return envFlag("VALIDATE_RESPONSE_PROTOS") || envFlag("RESPONSE_PROTO_VALIDATION")
+}
+
+func envFlag(key string) bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
 	}
 }
 
@@ -299,7 +319,6 @@ func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req
 
 	return nil
 }
-
 func validateProtoMessages(value any) error {
 	seen := make(map[uintptr]struct{})
 	return walkProtoMessages(reflect.ValueOf(value), seen)
@@ -374,32 +393,191 @@ func walkProtoMessages(value reflect.Value, seen map[uintptr]struct{}) error {
 }
 
 func parseQueryParams[Req any](r *http.Request, req *Req) {
+	if r == nil || r.URL == nil || req == nil {
+		return
+	}
+
 	query := r.URL.Query()
 	if len(query) == 0 {
 		return
 	}
 
-	queryMap := make(map[string]any)
-
-	for key, values := range query {
-		val := values[0]
-		if n, err := strconv.ParseInt(val, 10, 64); err == nil {
-			queryMap[key] = n
-		} else if f, err := strconv.ParseFloat(val, 64); err == nil {
-			queryMap[key] = f
-		} else if val == "true" || val == "false" {
-			queryMap[key] = val == "true"
-		} else {
-			queryMap[key] = val
-		}
+	target := reflect.ValueOf(req)
+	if target.Kind() != reflect.Pointer || target.IsNil() {
+		return
 	}
+	assignQueryParams(target.Elem(), query)
+}
 
-	queryJSON, err := json.Marshal(queryMap)
-	if err != nil {
+func assignQueryParams(value reflect.Value, query url.Values) {
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			if !value.CanSet() {
+				return
+			}
+			value.Set(reflect.New(value.Type().Elem()))
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
 		return
 	}
 
-	_ = json.Unmarshal(queryJSON, req) //nolint:errcheck // best-effort query param parsing
+	valueType := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		structField := valueType.Field(i)
+		fieldValue := value.Field(i)
+		if structField.PkgPath != "" && !structField.Anonymous {
+			continue
+		}
+
+		fieldName, ok := queryParamFieldName(structField)
+		if !ok {
+			continue
+		}
+
+		if structField.Anonymous && fieldName == "" {
+			assignQueryParams(fieldValue, query)
+			continue
+		}
+
+		values, exists := queryValuesForField(query, fieldName)
+		if !exists || len(values) == 0 {
+			continue
+		}
+		setQueryField(fieldValue, values)
+	}
+}
+
+func queryParamFieldName(field reflect.StructField) (string, bool) {
+	tag := field.Tag.Get("json")
+	if tag == "-" {
+		return "", false
+	}
+
+	if tag != "" {
+		name, _, _ := strings.Cut(tag, ",")
+		if name != "" {
+			return name, true
+		}
+	}
+
+	if field.Anonymous {
+		return "", true
+	}
+
+	return field.Name, true
+}
+
+func queryValuesForField(query url.Values, fieldName string) ([]string, bool) {
+	if values, exists := query[fieldName]; exists {
+		return values, true
+	}
+	if fieldName == "" {
+		return nil, false
+	}
+
+	lowerFirst := strings.ToLower(fieldName[:1]) + fieldName[1:]
+	if values, exists := query[lowerFirst]; exists {
+		return values, true
+	}
+
+	lower := strings.ToLower(fieldName)
+	if values, exists := query[lower]; exists {
+		return values, true
+	}
+
+	return nil, false
+}
+
+func setQueryField(field reflect.Value, values []string) bool {
+	if !field.CanSet() || len(values) == 0 {
+		return false
+	}
+
+	if field.Kind() == reflect.Pointer {
+		elem := reflect.New(field.Type().Elem())
+		if !setQueryField(elem.Elem(), values) {
+			return false
+		}
+		field.Set(elem)
+		return true
+	}
+
+	if field.Kind() == reflect.Slice {
+		slice := reflect.MakeSlice(field.Type(), 0, len(values))
+		for _, value := range values {
+			elem := reflect.New(field.Type().Elem()).Elem()
+			if !setQueryField(elem, []string{value}) {
+				return false
+			}
+			slice = reflect.Append(slice, elem)
+		}
+		field.Set(slice)
+		return true
+	}
+
+	return setQueryScalar(field, values[0])
+}
+
+func setQueryScalar(field reflect.Value, value string) bool {
+	if !field.CanSet() {
+		return false
+	}
+
+	if field.CanAddr() && field.Addr().CanInterface() {
+		if unmarshaler, ok := field.Addr().Interface().(encoding.TextUnmarshaler); ok {
+			return unmarshaler.UnmarshalText([]byte(value)) == nil
+		}
+	}
+
+	switch field.Kind() {
+	case reflect.String:
+		field.SetString(value)
+	case reflect.Bool:
+		parsed, err := strconv.ParseBool(value)
+		if err != nil {
+			return false
+		}
+		field.SetBool(parsed)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		parsed, err := strconv.ParseInt(value, 10, field.Type().Bits())
+		if err != nil {
+			return false
+		}
+		field.SetInt(parsed)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		parsed, err := strconv.ParseUint(value, 10, field.Type().Bits())
+		if err != nil {
+			return false
+		}
+		field.SetUint(parsed)
+	case reflect.Float32, reflect.Float64:
+		parsed, err := strconv.ParseFloat(value, field.Type().Bits())
+		if err != nil {
+			return false
+		}
+		field.SetFloat(parsed)
+	case reflect.Interface:
+		field.Set(reflect.ValueOf(parseQueryPrimitive(value)))
+	default:
+		return false
+	}
+
+	return true
+}
+
+func parseQueryPrimitive(value string) any {
+	if parsed, err := strconv.ParseInt(value, 10, 64); err == nil {
+		return parsed
+	}
+	if parsed, err := strconv.ParseFloat(value, 64); err == nil {
+		return parsed
+	}
+	if value == "true" || value == "false" {
+		return value == "true"
+	}
+	return value
 }
 
 func writeServerError(ctx context.Context, w http.ResponseWriter, serverError *errors.ServerError) {

@@ -2,6 +2,8 @@ package cacher
 
 import (
 	"context"
+	"encoding/binary"
+	"errors"
 	"strings"
 	"time"
 
@@ -13,6 +15,7 @@ import (
 
 const (
 	entryNotFoundError = "Entry not found"
+	expiryBytesLen     = 8
 )
 
 type LocalCache struct {
@@ -23,7 +26,7 @@ func (c *LocalCache) GetMulti(ctx context.Context, keys []string) (results map[s
 	results = make(map[string][]byte, len(keys))
 
 	for _, key := range keys {
-		results[key] = GetInMemoryCache(ctx).Get(ctx, key)
+		results[key] = c.Get(ctx, key)
 		if results[key] == nil {
 			notFound = append(notFound, key)
 		}
@@ -45,11 +48,9 @@ func (c *LocalCache) Get(ctx context.Context, key string) []byte {
 		return nil // Gracefully handle uninitialized cache
 	}
 
-	int64BytesLen := 15
-
 	result, err := c.cache.Get(key)
 	if err != nil {
-		if err.Error() != entryNotFoundError {
+		if !errors.Is(err, bigcache.ErrEntryNotFound) && err.Error() != entryNotFoundError {
 			logger.Ctx(ctx).Warn("Error while retrieving data from the memory cache",
 				logger.String("key", key),
 				logger.Error(err),
@@ -59,22 +60,19 @@ func (c *LocalCache) Get(ctx context.Context, key string) []byte {
 		return nil
 	}
 
-	var bestBefore time.Time
-
-	err = bestBefore.UnmarshalBinary(result[:int64BytesLen])
-	if err != nil {
-		logger.Ctx(ctx).Warn("Error while unmarshaling data from the memory cache",
+	if len(result) < expiryBytesLen {
+		logger.Ctx(ctx).Warn("Invalid memory cache entry",
 			logger.String("key", key),
-			logger.Error(err),
 		)
 
 		return nil
 	}
 
-	if time.Now().After(bestBefore) {
+	expiresAt := int64(binary.BigEndian.Uint64(result[:expiryBytesLen]))
+	if time.Now().UnixNano() > expiresAt {
 		err = c.cache.Delete(key)
 
-		if err != nil && err.Error() != entryNotFoundError {
+		if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) && err.Error() != entryNotFoundError {
 			logger.Ctx(ctx).Warn("Error while deleting data from the memory cache",
 				logger.String("key", key),
 				logger.Error(err),
@@ -84,7 +82,7 @@ func (c *LocalCache) Get(ctx context.Context, key string) []byte {
 		return nil
 	}
 
-	return result[int64BytesLen:]
+	return result[expiryBytesLen:]
 }
 
 func (c *LocalCache) Put(ctx context.Context, key string, val []byte, ttl time.Duration) {
@@ -92,9 +90,11 @@ func (c *LocalCache) Put(ctx context.Context, key string, val []byte, ttl time.D
 		return // Gracefully handle uninitialized cache
 	}
 
-	expiryBytes := getExpiryBytes(ttl)
+	entry := make([]byte, expiryBytesLen+len(val))
+	binary.BigEndian.PutUint64(entry[:expiryBytesLen], uint64(time.Now().Add(ttl).UnixNano()))
+	copy(entry[expiryBytesLen:], val)
 
-	err := c.cache.Set(key, append(expiryBytes, val...))
+	err := c.cache.Set(key, entry)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Error while putting data in the memory cache",
 			logger.String("key", key),
@@ -111,7 +111,7 @@ func (c *LocalCache) Delete(ctx context.Context, keys []string) {
 	for _, key := range keys {
 		err := c.cache.Delete(key)
 
-		if err != nil && err.Error() != entryNotFoundError {
+		if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) && err.Error() != entryNotFoundError {
 			logger.Ctx(ctx).Warn("Error while deleting from memory cache",
 				logger.Error(err),
 				logger.String("keys", strings.Join(keys, ",")),
@@ -206,28 +206,4 @@ func GetLocalCache(ctx context.Context) *LocalCache {
 	}
 
 	return localCacheInstance
-}
-
-func getExpiryBytes(ttl time.Duration) []byte {
-	timestamp := time.Now().Add(ttl)
-
-	binaryTime, err := timestamp.MarshalBinary()
-	if err != nil {
-		// In case of errors default to an expiry on 01-01-2100 at midnight
-		// Create a proper time.Time and marshal it to binary format
-		fallbackTime := time.Unix(4102444800, 0)
-
-		binaryTime, err = fallbackTime.MarshalBinary()
-		if err != nil {
-			// If even the fallback fails, use a far future time
-			farFutureTime := time.Date(2100, 1, 1, 0, 0, 0, 0, time.UTC)
-			binaryTime, err = farFutureTime.MarshalBinary()
-			// If this also fails, we'll use the zero value of []byte
-			if err != nil {
-				binaryTime = []byte{}
-			}
-		}
-	}
-
-	return binaryTime
 }

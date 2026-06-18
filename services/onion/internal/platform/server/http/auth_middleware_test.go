@@ -22,3 +22,21 @@ func TestExtractToken(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthSuccessLogsDisabledByDefault(t *testing.T) {
+	t.Setenv("AUTH_SUCCESS_LOGS", "")
+	t.Setenv("AUTH_REQUEST_LOGS", "")
+
+	if authSuccessLogsEnabled() {
+		t.Fatal("expected auth success logs to be disabled")
+	}
+}
+
+func TestAuthSuccessLogsCanBeEnabled(t *testing.T) {
+	t.Setenv("AUTH_SUCCESS_LOGS", "true")
+	t.Setenv("AUTH_REQUEST_LOGS", "")
+
+	if !authSuccessLogsEnabled() {
+		t.Fatal("expected auth success logs to be enabled")
+	}
+}

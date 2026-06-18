@@ -110,6 +110,103 @@ func TestRegisterGETWithValidationParsesQuery(t *testing.T) {
 	}
 }
 
+type typedQueryRequest struct {
+	Limit    int64   `json:"limit"`
+	Active   bool    `json:"active"`
+	Search   string  `json:"search"`
+	Score    float64 `json:"score"`
+	IDs      []int64 `json:"ids"`
+	Optional *int64  `json:"optional"`
+	Ignored  int64   `json:"-"`
+	Any      any     `json:"any"`
+}
+
+func TestParseQueryParamsAssignsTypedFieldsWithoutJSONRoundTrip(t *testing.T) {
+	req := httptest.NewRequest(
+		http.MethodGet,
+		"/typed?limit=25&active=true&search=register&score=1.5&ids=1&ids=2&optional=9&ignored=3&any=17",
+		http.NoBody,
+	)
+	var got typedQueryRequest
+
+	parseQueryParams(req, &got)
+
+	if got.Limit != 25 {
+		t.Fatalf("limit = %d, want 25", got.Limit)
+	}
+	if !got.Active {
+		t.Fatal("active = false, want true")
+	}
+	if got.Search != "register" {
+		t.Fatalf("search = %q, want register", got.Search)
+	}
+	if got.Score != 1.5 {
+		t.Fatalf("score = %f, want 1.5", got.Score)
+	}
+	if len(got.IDs) != 2 || got.IDs[0] != 1 || got.IDs[1] != 2 {
+		t.Fatalf("ids = %#v, want [1 2]", got.IDs)
+	}
+	if got.Optional == nil || *got.Optional != 9 {
+		t.Fatalf("optional = %#v, want pointer to 9", got.Optional)
+	}
+	if got.Ignored != 0 {
+		t.Fatalf("ignored = %d, want 0", got.Ignored)
+	}
+	if got.Any != int64(17) {
+		t.Fatalf("any = %#v, want int64(17)", got.Any)
+	}
+}
+
+type emptyRequest struct{}
+
+type invalidProtoResponseHandler struct{}
+
+func (h invalidProtoResponseHandler) Serve(_ context.Context, _ *emptyRequest) (*commonauthv1.LoginRequest, *platformErrors.ServerError) {
+	return &commonauthv1.LoginRequest{}, nil
+}
+
+func TestRegisterGETSkipsResponseProtoValidationByDefault(t *testing.T) {
+	t.Setenv("VALIDATE_RESPONSE_PROTOS", "")
+	t.Setenv("RESPONSE_PROTO_VALIDATION", "")
+
+	router := chi.NewRouter()
+	RegisterGET[emptyRequest, *commonauthv1.LoginRequest](
+		context.Background(),
+		router,
+		[]string{"/proto"},
+		invalidProtoResponseHandler{},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/proto", http.NoBody)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestRegisterGETCanValidateResponseProtosWhenEnabled(t *testing.T) {
+	t.Setenv("VALIDATE_RESPONSE_PROTOS", "true")
+	t.Setenv("RESPONSE_PROTO_VALIDATION", "")
+
+	router := chi.NewRouter()
+	RegisterGET[emptyRequest, *commonauthv1.LoginRequest](
+		context.Background(),
+		router,
+		[]string{"/proto"},
+		invalidProtoResponseHandler{},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/proto", http.NoBody)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
 type jsonBodyRequest struct {
 	Name string `json:"name"`
 }

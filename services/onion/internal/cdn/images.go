@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -46,11 +47,45 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 		return nil, 0, "", fmt.Errorf("checking transformation cache: %w", err)
 	}
 
+	resultCh := c.transformGroup.DoChan(key, func() (any, error) {
+		cached, err := c.transformationByCacheKey(ctx, key)
+		if err == nil {
+			return cached.StorageKey, nil
+		}
+		if !errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("checking transformation cache: %w", err)
+		}
+		return c.generateTransformation(ctx, fileID, fileUUID, originalStorageKey, key, mimeType, p)
+	})
+
+	var transformedKey string
+	select {
+	case result := <-resultCh:
+		if result.Err != nil {
+			return nil, 0, "", result.Err
+		}
+		var ok bool
+		transformedKey, ok = result.Val.(string)
+		if !ok || transformedKey == "" {
+			return nil, 0, "", fmt.Errorf("media-engine returned an empty transformation key")
+		}
+	case <-ctx.Done():
+		return nil, 0, "", ctx.Err()
+	}
+
+	reader, size, err := c.storage.Download(ctx, transformedKey)
+	if err != nil {
+		return nil, 0, "", fmt.Errorf("streaming transformation: %w", err)
+	}
+	return reader, size, mimeType, nil
+}
+
+func (c *CDN) generateTransformation(ctx context.Context, fileID int64, fileUUID, originalStorageKey, key, mimeType string, p Params) (string, error) {
 	// Cache miss — pull the original to a temp file, run the media-engine,
-	// upload the result, record it, then stream it back.
+	// upload the result, and record it.
 	tmpIn, tmpOut, cleanup, err := c.stageOriginal(ctx, originalStorageKey)
 	if err != nil {
-		return nil, 0, "", err
+		return "", err
 	}
 	defer cleanup()
 
@@ -60,7 +95,7 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	case c.engineSem <- struct{}{}:
 		defer func() { <-c.engineSem }()
 	case <-ctx.Done():
-		return nil, 0, "", ctx.Err()
+		return "", ctx.Err()
 	}
 
 	execCtx, cancel := context.WithTimeout(ctx, engineTimeout)
@@ -68,21 +103,21 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	// #nosec G204 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
 	cmd := exec.CommandContext(execCtx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
-		return nil, 0, "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)
+		return "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)
 	}
 
 	resultFile, err := os.Open(tmpOut)
 	if err != nil {
-		return nil, 0, "", fmt.Errorf("opening media-engine result: %w", err)
+		return "", fmt.Errorf("opening media-engine result: %w", err)
 	}
 	defer func() { _ = resultFile.Close() }()
 
 	transformedKey := p.StorageKey(fileUUID, key)
 	if err := c.storage.Upload(ctx, transformedKey, mimeType, resultFile); err != nil {
-		return nil, 0, "", fmt.Errorf("uploading transformation: %w", err)
+		return "", fmt.Errorf("uploading transformation: %w", err)
 	}
 	if err := c.insertTransformation(ctx, fileID, key, transformedKey, p); err != nil {
-		return nil, 0, "", err
+		return "", err
 	}
 
 	logger.Ctx(ctx).Info("cdn: generated transformation",
@@ -92,12 +127,7 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 		logger.Any("height", p.Height),
 	)
 
-	// Re-download so the streamed size/headers match exactly what S3 stored.
-	reader, size, err := c.storage.Download(ctx, transformedKey)
-	if err != nil {
-		return nil, 0, "", fmt.Errorf("streaming transformation: %w", err)
-	}
-	return reader, size, mimeType, nil
+	return transformedKey, nil
 }
 
 // stageOriginal downloads the original object to a temp input file and creates
@@ -146,7 +176,8 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 
 	// An explicit ?format= wins; otherwise negotiate from the Accept header so
 	// modern clients get AVIF/WebP. The response varies on Accept accordingly.
-	format := r.URL.Query().Get("format")
+	query := r.URL.Query()
+	format := query.Get("format")
 	if format == "" {
 		if negotiated := negotiateFormat(r.Header.Get("Accept")); negotiated != "" {
 			format = negotiated
@@ -155,17 +186,17 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p := Params{
-		Width:   queryInt(r, "w"),
-		Height:  queryInt(r, "h"),
-		Fit:     r.URL.Query().Get("fit"),
+		Width:   queryInt(query, "w"),
+		Height:  queryInt(query, "h"),
+		Fit:     query.Get("fit"),
 		Format:  format,
-		Quality: queryInt(r, "q"),
+		Quality: queryInt(query, "q"),
 	}
 
 	// ?t= carries a Cloudinary-style transformation chain (e.g.
 	// "w_400,c_fill,g_auto/e_blur:300"). When present it drives the transform,
 	// and any f_/q_ inside it sets the output format/quality the CDN serves.
-	if chain := r.URL.Query().Get("t"); chain != "" {
+	if chain := query.Get("t"); chain != "" {
 		p.Chain = chain
 		chainFmt, chainQ := parseChainParams(chain)
 		if chainFmt != "" && chainFmt != "auto" {
@@ -202,8 +233,13 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	// Short-circuit conditional requests before doing any transform/S3 work.
 	etag := quoteETag(p.CacheKey(meta.FileUUID))
 	w.Header().Set("ETag", etag)
+	w.Header().Set("Content-Type", mimeForFormat(p.Format))
+	w.Header().Set("Cache-Control", immutableCacheControl)
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	if r.Method == http.MethodHead {
 		return
 	}
 
@@ -217,7 +253,6 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	defer func() { _ = reader.Close() }()
 
 	w.Header().Set("Content-Type", mimeType)
-	w.Header().Set("Cache-Control", immutableCacheControl)
 	if size > 0 {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 	}
@@ -226,8 +261,8 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func queryInt(r *http.Request, key string) int {
-	v := r.URL.Query().Get(key)
+func queryInt(query url.Values, key string) int {
+	v := query.Get(key)
 	if v == "" {
 		return 0
 	}

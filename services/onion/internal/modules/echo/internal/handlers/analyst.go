@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,6 +24,17 @@ type AnalystService interface {
 
 // maxGroundingChars caps the retrieved data folded into the prompt.
 const maxGroundingChars = 12000
+
+type analystGroundingResult struct {
+	Prompt     string
+	Question   string
+	SpecJSON   string
+	RowsJSON   string
+	Rows       []map[string]any
+	RowCount   int
+	Truncated  bool
+	DurationMs int64
+}
 
 // buildSpecGenPrompt asks the model to turn a question into a strict JSON query
 // spec (no prose) against the allowlisted schema. owner_id is never mentioned —
@@ -100,47 +112,102 @@ func repairLLMJSON(s string) string {
 }
 
 // analystGrounding runs the analyst pipeline: question -> query spec -> rows.
-// On success it returns a data-grounded prompt prefix and true; on any failure
-// it returns ("", false) so the caller falls back to a normal chat answer.
-func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, question string, businessID, userID int64) (string, bool) {
+// On success it returns the data-grounded prompt plus event metadata; on any
+// failure it returns (nil, false) so the caller falls back to normal chat.
+func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
 	if h.AnalystService == nil || h.AiService == nil {
-		return "", false
+		return nil, false
 	}
 
+	started := time.Now()
 	today := time.Now().UTC().Format("2006-01-02")
 	raw, err := h.AiService.CompleteText(ctx, buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today))
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst spec generation failed", logger.Error(err))
-		return "", false
+		return nil, false
 	}
 
 	specJSON := repairLLMJSON(extractJSONObject(raw))
 	if specJSON == "" || specJSON == "{}" {
-		return "", false
+		return nil, false
 	}
 
 	rows, sql, err := h.AnalystService.RunJSON(ctx, businessID, userID, specJSON)
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst query failed", logger.Error(err), logger.String("spec", specJSON))
-		return "", false
-	}
-
-	data, err := json.Marshal(rows)
-	if err != nil {
-		return "", false
-	}
-	dataStr := string(data)
-	if len(dataStr) > maxGroundingChars {
-		dataStr = dataStr[:maxGroundingChars]
+		return nil, false
 	}
 
 	logger.Ctx(ctx).Info("analyst query executed",
 		logger.String("sql", sql), logger.Int("rows", len(rows)))
 
+	rowsJSON, truncated := marshalGroundingRows(rows, maxGroundingChars)
+	return &analystGroundingResult{
+		Prompt:     buildAnalystGroundingPromptFromJSON(rowsJSON, len(rows), truncated, specJSON),
+		Question:   question,
+		SpecJSON:   specJSON,
+		RowsJSON:   rowsJSON,
+		Rows:       rowsPreviewFromJSON(rowsJSON),
+		RowCount:   len(rows),
+		Truncated:  truncated,
+		DurationMs: time.Since(started).Milliseconds(),
+	}, true
+}
+
+func buildAnalystGroundingPrompt(rows []map[string]any, specJSON string) string {
+	dataStr, truncated := marshalGroundingRows(rows, maxGroundingChars)
+	return buildAnalystGroundingPromptFromJSON(dataStr, len(rows), truncated, specJSON)
+}
+
+func buildAnalystGroundingPromptFromJSON(dataStr string, rowCount int, truncated bool, specJSON string) string {
 	var g strings.Builder
-	g.WriteString("You are answering an analytics question about the user's own business. ")
-	g.WriteString("The following rows were retrieved from their database for this question:\n```json\n")
+	g.WriteString("Authoritative analyst grounding:\n")
+	g.WriteString("- Scope: the authenticated user's own tenant only.\n")
+	g.WriteString("- Source: server-validated, read-only analytics query.\n")
+	g.WriteString("- Row count returned: ")
+	g.WriteString(strconv.Itoa(rowCount))
+	g.WriteString("\n")
+	if truncated {
+		g.WriteString("- Note: rows were truncated to fit the model context; say that the visible rows are partial if it affects the answer.\n")
+	}
+	if spec := strings.TrimSpace(specJSON); spec != "" {
+		g.WriteString("- Query spec: ")
+		g.WriteString(spec)
+		g.WriteString("\n")
+	}
+	g.WriteString("\nRows JSON:\n```json\n")
 	g.WriteString(dataStr)
-	g.WriteString("\n```\nAnswer the question using ONLY this data. Be concise; use a small table or bullets when it helps. If the data is empty, say so plainly.")
-	return g.String(), true
+	g.WriteString("\n```\n")
+	g.WriteString("Answer the user's analytics question using ONLY this grounding. ")
+	g.WriteString("If the rows are empty or insufficient, say so plainly and do not invent missing values. ")
+	g.WriteString("Use a compact table for row-level comparisons and bullets for conclusions.")
+	return g.String()
+}
+
+func rowsPreviewFromJSON(dataStr string) []map[string]any {
+	var rows []map[string]any
+	if err := json.Unmarshal([]byte(dataStr), &rows); err != nil {
+		return nil
+	}
+	return rows
+}
+
+func marshalGroundingRows(rows []map[string]any, maxChars int) (string, bool) {
+	if maxChars <= 2 {
+		return "[]", len(rows) > 0
+	}
+
+	limit := len(rows)
+	for limit > 0 {
+		data, err := json.Marshal(rows[:limit])
+		if err != nil {
+			return "[]", true
+		}
+		if len(data) <= maxChars {
+			return string(data), limit < len(rows)
+		}
+		limit--
+	}
+
+	return "[]", len(rows) > 0
 }

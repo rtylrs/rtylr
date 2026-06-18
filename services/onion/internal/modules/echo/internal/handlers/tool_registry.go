@@ -1,9 +1,8 @@
 package handlers
 
-// ToolDef describes a callable tool exposed to the LLM. The Caret echo
-// handler renders these to JSON schema in the system prompt so the model
-// knows what's available. Actual execution is dispatched per call site
-// (HTTP, MCP, etc) — this module is metadata-only.
+// ToolDef describes a callable tool exposed to Caret. The registry is used in
+// prompts and stream events; execution starts with server-owned read-only tools
+// and can grow toward approval-backed write tools.
 type ToolDef struct {
 	Name             string `json:"name"`
 	Description      string `json:"description"`
@@ -15,6 +14,7 @@ type ToolDef struct {
 // CoreTools is the seed registry — the long-term plan is to source this
 // list from each module's MCP descriptor.
 var CoreTools = []ToolDef{
+	{Name: "analytics.query", Description: "Run a tenant-scoped, read-only analytics query over allowlisted business views.", Module: "analytics", Scope: "read"},
 	{Name: "crm.list_customers", Description: "List CRM customers.", Module: "crm", Scope: "read"},
 	{Name: "crm.create_customer", Description: "Create a CRM customer.", Module: "crm", Scope: "write", RequiresApproval: true},
 	{Name: "pos.list_orders", Description: "List recent POS orders.", Module: "pos", Scope: "read"},
@@ -25,6 +25,16 @@ var CoreTools = []ToolDef{
 	{Name: "flow.list_tasks", Description: "List Flow tasks.", Module: "flow", Scope: "read"},
 	{Name: "flow.create_task", Description: "Create a Flow task.", Module: "flow", Scope: "write", RequiresApproval: true},
 	{Name: "finance.list_invoices", Description: "List finance invoices.", Module: "finance", Scope: "read"},
+}
+
+// ToolByName returns a registered tool definition by stable tool name.
+func ToolByName(name string) (ToolDef, bool) {
+	for _, tool := range CoreTools {
+		if tool.Name == name {
+			return tool, true
+		}
+	}
+	return ToolDef{}, false
 }
 
 // ToolsForMode filters CoreTools by mode capability.

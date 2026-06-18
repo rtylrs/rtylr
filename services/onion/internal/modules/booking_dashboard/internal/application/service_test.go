@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -21,9 +22,15 @@ type mockDashboardRepo struct {
 	errUpcoming error
 	errMonth    error
 	errRevenue  error
+	delay       time.Duration
+	activeCalls atomic.Int64
+	maxActive   atomic.Int64
 }
 
 func (m *mockDashboardRepo) GetTodayCount(_ context.Context, _ int64, _, _ time.Time) (int, error) {
+	done := m.trackCall()
+	defer done()
+
 	if m.errToday != nil {
 		return 0, m.errToday
 	}
@@ -31,6 +38,9 @@ func (m *mockDashboardRepo) GetTodayCount(_ context.Context, _ int64, _, _ time.
 }
 
 func (m *mockDashboardRepo) GetUpcomingCount(_ context.Context, _ int64, _ time.Time) (int, error) {
+	done := m.trackCall()
+	defer done()
+
 	if m.errUpcoming != nil {
 		return 0, m.errUpcoming
 	}
@@ -38,6 +48,9 @@ func (m *mockDashboardRepo) GetUpcomingCount(_ context.Context, _ int64, _ time.
 }
 
 func (m *mockDashboardRepo) GetMonthCounts(_ context.Context, _ int64, _ time.Time) (int, int, error) {
+	done := m.trackCall()
+	defer done()
+
 	if m.errMonth != nil {
 		return 0, 0, m.errMonth
 	}
@@ -45,10 +58,33 @@ func (m *mockDashboardRepo) GetMonthCounts(_ context.Context, _ int64, _ time.Ti
 }
 
 func (m *mockDashboardRepo) GetMonthRevenue(_ context.Context, _ int64, _ time.Time) (float64, error) {
+	done := m.trackCall()
+	defer done()
+
 	if m.errRevenue != nil {
 		return 0, m.errRevenue
 	}
 	return m.revenue, m.err
+}
+
+func (m *mockDashboardRepo) trackCall() func() {
+	if m.delay <= 0 {
+		return func() {}
+	}
+
+	active := m.activeCalls.Add(1)
+	for {
+		maxActive := m.maxActive.Load()
+		if active <= maxActive || m.maxActive.CompareAndSwap(maxActive, active) {
+			break
+		}
+	}
+
+	time.Sleep(m.delay)
+
+	return func() {
+		m.activeCalls.Add(-1)
+	}
 }
 
 func newDashboardService(r domain.Repository) *Service {
@@ -67,6 +103,26 @@ func TestFetchDashboard_HappyPath(t *testing.T) {
 	}
 	if data.UpcomingCount != 10 {
 		t.Errorf("expected UpcomingCount=10, got %d", data.UpcomingCount)
+	}
+}
+
+func TestFetchDashboardRunsIndependentQueriesConcurrently(t *testing.T) {
+	repo := &mockDashboardRepo{
+		todayCount:     5,
+		upcomingCount:  10,
+		totalMonth:     20,
+		cancelledMonth: 4,
+		revenue:        1500.0,
+		delay:          20 * time.Millisecond,
+	}
+	svc := newDashboardService(repo)
+
+	if _, err := svc.fetchDashboard(context.Background(), 1); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if maxActive := repo.maxActive.Load(); maxActive < 2 {
+		t.Fatalf("expected concurrent repo calls, max active calls = %d", maxActive)
 	}
 }
 

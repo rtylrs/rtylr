@@ -46,13 +46,7 @@ func (rl *SecurityRateLimiter) isAllowed(key string) bool {
 	windowStart := now.Add(-rl.window)
 
 	if times, exists := rl.requests[key]; exists {
-		var validRequests []time.Time
-
-		for _, t := range times {
-			if t.After(windowStart) {
-				validRequests = append(validRequests, t)
-			}
-		}
+		validRequests := retainTimesAfter(times, windowStart)
 
 		rl.requests[key] = validRequests
 
@@ -83,13 +77,7 @@ func (rl *SecurityRateLimiter) cleanup() {
 				windowStart := now.Add(-rl.window)
 
 				for key, times := range rl.requests {
-					var validRequests []time.Time
-
-					for _, t := range times {
-						if t.After(windowStart) {
-							validRequests = append(validRequests, t)
-						}
-					}
+					validRequests := retainTimesAfter(times, windowStart)
 
 					if len(validRequests) == 0 {
 						delete(rl.requests, key)
@@ -102,6 +90,16 @@ func (rl *SecurityRateLimiter) cleanup() {
 			}
 		}
 	}()
+}
+
+func retainTimesAfter(times []time.Time, cutoff time.Time) []time.Time {
+	valid := times[:0]
+	for _, requestTime := range times {
+		if requestTime.After(cutoff) {
+			valid = append(valid, requestTime)
+		}
+	}
+	return valid
 }
 
 func (rl *SecurityRateLimiter) Stop() {

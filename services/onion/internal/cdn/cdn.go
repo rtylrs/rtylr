@@ -17,6 +17,7 @@ import (
 	"runtime"
 
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/voxire/onion/internal/platform/storage"
 )
@@ -35,6 +36,11 @@ type CDN struct {
 	// invocation is CPU- and memory-heavy (libvips decode + encode), so a flood
 	// of cache-miss requests must not fork an unbounded number of them.
 	engineSem chan struct{}
+
+	// transformGroup collapses concurrent cache misses for the same derivative
+	// inside one process. Only the first request runs media-engine; waiters
+	// stream the stored object once it exists.
+	transformGroup singleflight.Group
 }
 
 // immutableCacheControl is sent on every served asset. Originals are keyed by

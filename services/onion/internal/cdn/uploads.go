@@ -148,8 +148,17 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 	if !meta.CreatedAt.IsZero() {
 		w.Header().Set("Last-Modified", meta.CreatedAt.UTC().Format(http.TimeFormat))
 	}
+	w.Header().Set("Content-Type", meta.MIMEType)
+	w.Header().Set("Cache-Control", immutableCacheControl)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", sanitizeFilename(meta.OriginalFilename)))
+	if meta.Size > 0 {
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", meta.Size))
+	}
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	if r.Method == http.MethodHead {
 		return
 	}
 
@@ -162,9 +171,6 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() { _ = reader.Close() }()
 
-	w.Header().Set("Content-Type", meta.MIMEType)
-	w.Header().Set("Cache-Control", immutableCacheControl)
-	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", sanitizeFilename(meta.OriginalFilename)))
 	if size > 0 {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 	}

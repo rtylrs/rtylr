@@ -3,10 +3,12 @@ package application
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
 // ---- mock ----
@@ -24,6 +26,10 @@ type mockRepo struct {
 	sumVal      float64
 	seqCount    int64
 	err         error
+	sumCalls    atomic.Int64
+	delay       time.Duration
+	activeCalls atomic.Int64
+	maxActive   atomic.Int64
 }
 
 func (m *mockRepo) ListInvoices(_ context.Context, _ int64, _, _, _, _ string, _, _ int) ([]domain.Invoice, error) {
@@ -96,27 +102,66 @@ func (m *mockRepo) CreateTaxConfig(_ context.Context, _ int64, _ domain.TaxConfi
 }
 
 func (m *mockRepo) SumPaidInvoices(_ context.Context, _ int64, _, _ string) (float64, error) {
+	done := m.trackSumCall()
+	defer done()
+
 	return m.sumVal, m.err
 }
 
 func (m *mockRepo) SumExpenses(_ context.Context, _ int64, _, _ string) (float64, error) {
+	done := m.trackSumCall()
+	defer done()
+
 	return m.sumVal, m.err
 }
 
 func (m *mockRepo) SumTotalReceivable(_ context.Context, _ int64) (float64, error) {
+	done := m.trackSumCall()
+	defer done()
+
 	return m.sumVal, m.err
 }
 
 func (m *mockRepo) SumOverdueAmount(_ context.Context, _ int64) (float64, error) {
+	done := m.trackSumCall()
+	defer done()
+
 	return m.sumVal, m.err
 }
 
 func (m *mockRepo) SumTaxCollected(_ context.Context, _ int64, _, _ string) (float64, error) {
+	done := m.trackSumCall()
+	defer done()
+
 	return m.sumVal, m.err
 }
 
 func (m *mockRepo) SumTaxOwed(_ context.Context, _ int64, _, _ string) (float64, error) {
+	done := m.trackSumCall()
+	defer done()
+
 	return m.sumVal, m.err
+}
+
+func (m *mockRepo) trackSumCall() func() {
+	m.sumCalls.Add(1)
+	if m.delay <= 0 {
+		return func() {}
+	}
+
+	active := m.activeCalls.Add(1)
+	for {
+		maxActive := m.maxActive.Load()
+		if active <= maxActive || m.maxActive.CompareAndSwap(maxActive, active) {
+			break
+		}
+	}
+
+	time.Sleep(m.delay)
+
+	return func() {
+		m.activeCalls.Add(-1)
+	}
 }
 
 // ---- paginateInvoices ----
@@ -397,7 +442,7 @@ func TestGetPLReport_MarginPctZeroWhenNoRevenue(t *testing.T) {
 func TestGetDashboard_PropagatesReceivableError(t *testing.T) {
 	want := errors.New("receivable err")
 	s := &Service{repo: &mockRepo{err: want}}
-	_, err := s.GetDashboard(context.Background(), 1)
+	_, err := s.GetDashboard(context.Background(), 901)
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
@@ -405,12 +450,49 @@ func TestGetDashboard_PropagatesReceivableError(t *testing.T) {
 
 func TestGetDashboard_ReturnsZeroValuesForEmptyRepo(t *testing.T) {
 	s := &Service{repo: &mockRepo{sumVal: 0}}
-	dash, err := s.GetDashboard(context.Background(), 1)
+	dash, err := s.GetDashboard(context.Background(), 902)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if dash.TotalReceivable != 0 || dash.OverdueAmount != 0 {
 		t.Errorf("expected zero dashboard, got %+v", dash)
+	}
+}
+
+func TestGetDashboard_CachesSummary(t *testing.T) {
+	ctx := context.Background()
+	if err := cacher.InitializeLocalCache(ctx); err != nil {
+		t.Fatalf("InitializeLocalCache: %v", err)
+	}
+
+	repo := &mockRepo{sumVal: 12}
+	s := &Service{repo: repo}
+
+	for i := 0; i < 2; i++ {
+		dash, err := s.GetDashboard(ctx, 991)
+		if err != nil {
+			t.Fatalf("call %d unexpected error: %v", i+1, err)
+		}
+		if dash.TotalReceivable != 12 || dash.OverdueAmount != 12 || dash.TotalExpensesMTD != 12 {
+			t.Fatalf("call %d unexpected dashboard: %+v", i+1, dash)
+		}
+	}
+
+	if calls := repo.sumCalls.Load(); calls != 4 {
+		t.Fatalf("sum calls = %d, want 4", calls)
+	}
+}
+
+func TestFetchDashboardRunsAggregatesConcurrently(t *testing.T) {
+	repo := &mockRepo{sumVal: 12, delay: 20 * time.Millisecond}
+	s := &Service{repo: repo}
+
+	if _, err := s.fetchDashboard(context.Background(), 992); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if maxActive := repo.maxActive.Load(); maxActive < 2 {
+		t.Fatalf("expected concurrent aggregate calls, max active calls = %d", maxActive)
 	}
 }
 

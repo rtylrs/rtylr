@@ -1,6 +1,9 @@
 package auth
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type ContextKey string
 
@@ -27,6 +30,7 @@ type TokenClaims struct {
 	Platform       string
 	PlatformUserID int64
 	PlanID         int64
+	ExpiresAt      time.Time
 }
 
 type TokenValidator interface {

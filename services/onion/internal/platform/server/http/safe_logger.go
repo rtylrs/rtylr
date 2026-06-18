@@ -34,6 +34,10 @@ func safeRequestLogger() func(stdhttp.Handler) stdhttp.Handler {
 	})
 }
 
+func accessLogsEnabled() bool {
+	return envFlag("HTTP_ACCESS_LOGS") || envFlag("ACCESS_LOGS")
+}
+
 func (f *sanitizedLogFormatter) NewLogEntry(r *stdhttp.Request) middleware.LogEntry {
 	return f.base.NewLogEntry(sanitizeRequestForLogging(r))
 }

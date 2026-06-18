@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/console/internal/application"
+	"github.com/voxire/onion/internal/platform/aicache"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
@@ -41,6 +42,22 @@ func (h *StatsHandler) Serve(ctx context.Context, _ *StatsRequest) (StatsRespons
 		return StatsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to fetch stats"}
 	}
 	return *stats, nil
+}
+
+// ── AI cache analytics ───────────────────────────────────────────────────────
+
+type (
+	AICacheAnalyticsRequest  struct{}
+	AICacheAnalyticsResponse = aicache.AnalyticsSnapshot
+)
+
+type AICacheAnalyticsHandler struct{}
+
+func (h *AICacheAnalyticsHandler) Serve(ctx context.Context, _ *AICacheAnalyticsRequest) (AICacheAnalyticsResponse, *errorModels.ServerError) {
+	if sErr := requireConsoleAdmin(ctx); sErr != nil {
+		return AICacheAnalyticsResponse{}, sErr
+	}
+	return aicache.Snapshot(), nil
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────

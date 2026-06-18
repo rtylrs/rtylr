@@ -25,6 +25,8 @@ const (
 	LocalCacheInvalidationChannel = "invalidate-local-cache"
 )
 
+const defaultLocalCacheTTL = 10 * time.Minute
+
 // Cache is a generic cache implementation with support for in-memory and Redis storage.
 type Cache[M any] struct {
 	namespace string
@@ -72,19 +74,8 @@ func (c Cache[M]) GetOrCompute(ctx context.Context, ids []string, fetch func(ctx
 
 // GetOrComputeKeys is a more flexible version that takes specific cache keys and returns values for those keys.
 func (c Cache[M]) GetOrComputeKeys(ctx context.Context, keys []string, fetch func(ctx context.Context, missingKeys []string) (map[string]M, error), options ...ClientOption) (map[string]M, error) {
-	forceOriginFetch := false
 	configuration := getConfiguration(options...)
-
-	if configuration.evictionProbability > 0 {
-		// TODO consider a more elaborate formula to account for the magnitude of keys[] and the probability
-		var buf [4]byte
-
-		_, err := rand.Read(buf[:])
-		if err == nil {
-			randomFloat := float32(binary.BigEndian.Uint32(buf[:])) / float32(^uint32(0))
-			forceOriginFetch = randomFloat <= configuration.evictionProbability
-		}
-	}
+	forceOriginFetch := shouldForceOriginFetch(configuration.evictionProbability)
 
 	var (
 		remaining    map[string]M
@@ -124,19 +115,8 @@ func (c Cache[M]) GetOrComputeKeys(ctx context.Context, keys []string, fetch fun
 }
 
 func (c Cache[M]) GetOrComputeWithError(ctx context.Context, ids []string, fetch func(ctx context.Context, ids []string) (map[string]M, error), options ...ClientOption) (map[string]M, error) {
-	forceOriginFetch := false
 	configuration := getConfiguration(options...)
-
-	if configuration.evictionProbability > 0 {
-		// TODO consider a more elaborate formula to account for the magnitude of ids[] and the probability
-		var buf [4]byte
-
-		_, err := rand.Read(buf[:])
-		if err == nil {
-			randomFloat := float32(binary.BigEndian.Uint32(buf[:])) / float32(^uint32(0))
-			forceOriginFetch = randomFloat <= configuration.evictionProbability
-		}
-	}
+	forceOriginFetch := shouldForceOriginFetch(configuration.evictionProbability)
 
 	var (
 		remaining    map[string]M
@@ -173,27 +153,21 @@ func (c Cache[M]) GetOrComputeWithError(ctx context.Context, ids []string, fetch
 
 // GetOrComputeSingle is a convenience method for single key operations with error handling.
 func (c Cache[M]) GetOrComputeSingle(ctx context.Context, key string, fetch func(ctx context.Context) (M, error), options ...ClientOption) (M, error) {
-	result, err := c.GetOrComputeKeys(ctx, []string{key}, func(ctx context.Context, missingKeys []string) (map[string]M, error) {
-		if len(missingKeys) == 0 {
-			return map[string]M{}, nil
+	configuration := getConfiguration(options...)
+	if !shouldForceOriginFetch(configuration.evictionProbability) {
+		if value, found := c.Get(ctx, key, options...); found {
+			return value, nil
 		}
+	}
 
-		value, fetchErr := fetch(ctx)
-		if fetchErr != nil {
-			return nil, fetchErr
-		}
-
-		return map[string]M{key: value}, nil
-	}, options...)
+	ctxWithoutCancel := context.WithoutCancel(ctx)
+	value, err := fetch(ctxWithoutCancel)
 	if err != nil {
 		return *new(M), err
 	}
 
-	if value, found := result[key]; found {
-		return value, nil
-	}
-
-	return *new(M), nil
+	c.Put(ctxWithoutCancel, key, value, options...)
+	return value, nil
 }
 
 // MonoGetOrCompute is a convenience method for calling GetOrComputeLegacy on a single key.
@@ -258,22 +232,62 @@ func (c Cache[M]) PutMulti(ctx context.Context, keyVals map[string]M, options ..
 
 // Get retrieves a key-value pair from cache.
 func (c Cache[M]) Get(ctx context.Context, key string, options ...ClientOption) (M, bool) {
-	res, notFound := c.GetMulti(ctx, []string{key}, options...)
+	configuration := getConfiguration(options...)
+	cacheKey := c.appendIdentifierPrefix(key)
 
-	return res[key], !sliceutils.Contains(notFound, key)
+	var bytes []byte
+	if !configuration.remoteOnly {
+		bytes = GetInMemoryCache(ctx).Get(ctx, cacheKey)
+	}
+
+	if bytes == nil && !configuration.memoryOnly {
+		bytes = getRedisCache().Get(ctx, cacheKey)
+		if bytes != nil && !configuration.remoteOnly {
+			GetInMemoryCache(ctx).Put(ctx, cacheKey, bytes, defaultLocalCacheTTL)
+		}
+	}
+
+	if bytes == nil {
+		return *new(M), false
+	}
+
+	model := new(M)
+	if err := c.unmarshal(bytes, model); err != nil {
+		logger.Ctx(ctx).Warn("Error while unmarshalling data from cache store",
+			logger.String("key", cacheKey),
+			logger.Error(err),
+		)
+
+		return *new(M), false
+	}
+
+	return *model, true
 }
 
 // GetMulti retrieves multiple key-value pairs from cache.
 func (c Cache[M]) getMultiByTransformedKeys(ctx context.Context, transformedKeys []string, options ...ClientOption) (results map[string]M, notFound []string) {
 	configuration := getConfiguration(options...)
 
-	results = make(map[string]M)
+	results = make(map[string]M, len(transformedKeys))
+	if len(transformedKeys) == 0 {
+		return results, nil
+	}
 
-	fromMemory, remainingKeysFromMemory := GetInMemoryCache(ctx).GetMulti(ctx, transformedKeys)
-	fromRedis, remainingKeysFromRedis := getRedisCache().GetMulti(ctx, remainingKeysFromMemory)
+	fromMemory := make(map[string][]byte)
+	fromRedis := make(map[string][]byte)
+	remainingKeys := transformedKeys
 
 	if !configuration.remoteOnly {
-		const defaultLocalCacheTTL = 10 * time.Minute
+		fromMemory, remainingKeys = GetInMemoryCache(ctx).GetMulti(ctx, transformedKeys)
+	}
+
+	if !configuration.memoryOnly {
+		var remainingKeysFromRedis []string
+		fromRedis, remainingKeysFromRedis = getRedisCache().GetMulti(ctx, remainingKeys)
+		remainingKeys = remainingKeysFromRedis
+	}
+
+	if !configuration.remoteOnly && !configuration.memoryOnly {
 		GetInMemoryCache(ctx).PutMulti(ctx, fromRedis, defaultLocalCacheTTL)
 	}
 
@@ -300,7 +314,7 @@ func (c Cache[M]) getMultiByTransformedKeys(ctx context.Context, transformedKeys
 		results[key] = *model
 	}
 
-	return results, remainingKeysFromRedis
+	return results, remainingKeys
 }
 
 func (c Cache[M]) GetMulti(ctx context.Context, keys []string, options ...ClientOption) (results map[string]M, notFound []string) {
@@ -308,13 +322,26 @@ func (c Cache[M]) GetMulti(ctx context.Context, keys []string, options ...Client
 
 	cacheKeys := c.transformListKeys(keys)
 
-	results = make(map[string]M)
+	results = make(map[string]M, len(cacheKeys))
+	if len(cacheKeys) == 0 {
+		return results, nil
+	}
 
-	fromMemory, remainingKeysFromMemory := GetInMemoryCache(ctx).GetMulti(ctx, cacheKeys)
-	fromRedis, remainingKeysFromRedis := getRedisCache().GetMulti(ctx, remainingKeysFromMemory)
+	fromMemory := make(map[string][]byte)
+	fromRedis := make(map[string][]byte)
+	remainingKeys := cacheKeys
 
 	if !configuration.remoteOnly {
-		const defaultLocalCacheTTL = 10 * time.Minute
+		fromMemory, remainingKeys = GetInMemoryCache(ctx).GetMulti(ctx, cacheKeys)
+	}
+
+	if !configuration.memoryOnly {
+		var remainingKeysFromRedis []string
+		fromRedis, remainingKeysFromRedis = getRedisCache().GetMulti(ctx, remainingKeys)
+		remainingKeys = remainingKeysFromRedis
+	}
+
+	if !configuration.remoteOnly && !configuration.memoryOnly {
 		GetInMemoryCache(ctx).PutMulti(ctx, fromRedis, defaultLocalCacheTTL)
 	}
 
@@ -342,7 +369,7 @@ func (c Cache[M]) GetMulti(ctx context.Context, keys []string, options ...Client
 	}
 
 	results = c.recoverMapKeys(results)
-	notFound = c.recoverListKeys(remainingKeysFromRedis)
+	notFound = c.recoverListKeys(remainingKeys)
 
 	return results, notFound
 }
@@ -706,6 +733,20 @@ func (c Cache[M]) recoverMapKeys(keyVals map[string]M) map[string]M {
 
 func (c Cache[M]) deleteIdentifierPrefix(s string) string {
 	return strings.ReplaceAll(s, c.getModelIdentifier()+"-", "")
+}
+
+func shouldForceOriginFetch(probability float32) bool {
+	if probability <= 0 {
+		return false
+	}
+
+	var buf [4]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return false
+	}
+
+	randomFloat := float32(binary.BigEndian.Uint32(buf[:])) / float32(^uint32(0))
+	return randomFloat <= probability
 }
 
 // CounterIncrement increments a key in redis and returns its new value.

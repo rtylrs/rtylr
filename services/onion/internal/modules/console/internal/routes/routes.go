@@ -34,6 +34,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, []string{"/console/stats"},
 		&handlers.StatsHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.AICacheAnalyticsRequest, handlers.AICacheAnalyticsResponse](
+		ctx, router, []string{"/console/ai-cache/analytics"},
+		&handlers.AICacheAnalyticsHandler{},
+	)
 
 	// Users
 	serverHttp.RegisterGET[handlers.ListUsersRequest, handlers.ListUsersResponse](

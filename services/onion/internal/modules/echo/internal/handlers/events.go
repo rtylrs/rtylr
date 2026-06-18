@@ -28,6 +28,7 @@ type StreamEvent struct {
 	Type             StreamEventType `json:"type"`
 	SessionID        string          `json:"sessionId,omitempty"`
 	MessageID        string          `json:"messageId,omitempty"`
+	Role             string          `json:"role,omitempty"`
 	BlockID          string          `json:"blockId,omitempty"`
 	Delta            string          `json:"delta,omitempty"`
 	Name             string          `json:"name,omitempty"`

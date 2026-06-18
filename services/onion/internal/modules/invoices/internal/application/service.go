@@ -12,6 +12,7 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -687,27 +688,50 @@ func (s *Service) GetPLReport(ctx context.Context, ownerID int64, period, date s
 }
 
 func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.Dashboard, error) {
-	totalReceivable, err := s.repo.SumTotalReceivable(ctx, ownerID)
-	if err != nil {
-		return domain.Dashboard{}, err
-	}
+	key := cacheKeys.Scoped(invoicesScope, ownerID, "dashboard")
 
-	overdueAmount, err := s.repo.SumOverdueAmount(ctx, ownerID)
-	if err != nil {
-		return domain.Dashboard{}, err
-	}
+	return cacher.Of[domain.Dashboard]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.Dashboard, error) {
+			return s.fetchDashboard(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, time.Minute),
+	)
+}
 
+func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Dashboard, error) {
 	now := time.Now()
 	mtdFrom := fmt.Sprintf("%d-%02d-01", now.Year(), now.Month())
 	mtdTo := now.Format("2006-01-02")
 
-	totalExpensesMTD, err := s.repo.SumExpenses(ctx, ownerID, mtdFrom, mtdTo)
-	if err != nil {
-		return domain.Dashboard{}, err
-	}
+	var (
+		totalReceivable  float64
+		overdueAmount    float64
+		totalExpensesMTD float64
+		revenueMTD       float64
+	)
 
-	revenueMTD, err := s.repo.SumPaidInvoices(ctx, ownerID, mtdFrom, mtdTo)
-	if err != nil {
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		var err error
+		totalReceivable, err = s.repo.SumTotalReceivable(groupCtx, ownerID)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		overdueAmount, err = s.repo.SumOverdueAmount(groupCtx, ownerID)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		totalExpensesMTD, err = s.repo.SumExpenses(groupCtx, ownerID, mtdFrom, mtdTo)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		revenueMTD, err = s.repo.SumPaidInvoices(groupCtx, ownerID, mtdFrom, mtdTo)
+		return err
+	})
+	if err := group.Wait(); err != nil {
 		return domain.Dashboard{}, err
 	}
 

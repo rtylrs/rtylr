@@ -8,75 +8,91 @@ import (
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
+	"golang.org/x/sync/errgroup"
 )
 
 // GetDashboard aggregates the counts + recent records used by the ERP
 // dashboard. Counts run as three small queries rather than one UNION
 // because MySQL optimises simple COUNT(*) scans extremely well.
 func (r *Repository) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
-	var stats domain.DashboardStats
+	var (
+		totalProducts  int64
+		lowStock       int64
+		pendingOrders  int64
+		totalSuppliers int64
+		invValue       float64
+		items          []domain.LowStockItem
+		recent         []domain.RecentPO
+		cats           []domain.TopCategory
+	)
 
-	// Total active products.
-	totalProducts, err := r.queries.CountActiveProducts(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to count products", logger.Error(err))
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.Go(func() error {
+		var err error
+		totalProducts, err = r.queries.CountActiveProducts(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to count products", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		lowStock, err = r.queries.CountLowStockProducts(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to count low stock", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		pendingOrders, err = r.queries.CountPendingPurchaseOrders(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to count pending POs", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		totalSuppliers, err = r.queries.CountActiveSuppliers(groupCtx, ownerID)
+		if err != nil {
+			logger.Ctx(groupCtx).Error("Failed to count suppliers", logger.Error(err))
+		}
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		invValue, err = r.inventoryValue(groupCtx, ownerID)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		items, err = r.topLowStockItems(groupCtx, ownerID, 5)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		recent, err = r.recentPurchaseOrders(groupCtx, ownerID, 5)
+		return err
+	})
+	group.Go(func() error {
+		var err error
+		cats, err = r.topCategories(groupCtx, ownerID, 5)
+		return err
+	})
+	if err := group.Wait(); err != nil {
 		return domain.DashboardStats{}, err
 	}
-	stats.TotalProducts = int(totalProducts)
 
-	// Low stock: products at or below their low_stock_threshold.
-	lowStock, err := r.queries.CountLowStockProducts(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to count low stock", logger.Error(err))
-		return domain.DashboardStats{}, err
-	}
-	stats.LowStockCount = int(lowStock)
-
-	// Pending purchase orders (draft or sent, not yet received).
-	pendingOrders, err := r.queries.CountPendingPurchaseOrders(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to count pending POs", logger.Error(err))
-		return domain.DashboardStats{}, err
-	}
-	stats.PendingOrders = int(pendingOrders)
-
-	// Active suppliers.
-	totalSuppliers, err := r.queries.CountActiveSuppliers(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to count suppliers", logger.Error(err))
-		return domain.DashboardStats{}, err
-	}
-	stats.TotalSuppliers = int(totalSuppliers)
-
-	// Inventory value = sum(stock_quantity * cost_price) for tracked products.
-	invValue, err := r.inventoryValue(ctx, ownerID)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-	stats.InventoryValue = invValue
-
-	// Low stock items (top 5) for the dashboard sidebar card.
-	items, err := r.topLowStockItems(ctx, ownerID, 5)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-	stats.LowStockItems = items
-
-	// Recent purchase orders (top 5) with supplier name.
-	recent, err := r.recentPurchaseOrders(ctx, ownerID, 5)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-	stats.RecentOrders = recent
-
-	// Top 5 categories by product count.
-	cats, err := r.topCategories(ctx, ownerID, 5)
-	if err != nil {
-		return domain.DashboardStats{}, err
-	}
-	stats.TopCategories = cats
-
-	return stats, nil
+	return domain.DashboardStats{
+		TotalProducts:  int(totalProducts),
+		LowStockCount:  int(lowStock),
+		PendingOrders:  int(pendingOrders),
+		TotalSuppliers: int(totalSuppliers),
+		InventoryValue: invValue,
+		LowStockItems:  items,
+		RecentOrders:   recent,
+		TopCategories:  cats,
+	}, nil
 }
 
 // inventoryValue sums stock_quantity * cost_price for tracked, active

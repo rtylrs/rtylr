@@ -2,6 +2,7 @@ package cdn
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -114,7 +115,8 @@ func cacheKey(parts ...string) string {
 		h.Write([]byte(p))
 		h.Write([]byte{0})
 	}
-	return fmt.Sprintf("%x", h.Sum(nil))[:32]
+	sum := h.Sum(nil)
+	return hex.EncodeToString(sum[:16])
 }
 
 // Params holds the parameters for a single image transformation request.
@@ -175,6 +177,15 @@ func allowedOutputFormat(format string) bool {
 	}
 }
 
+func allowedFitMode(fit string) bool {
+	switch strings.ToLower(fit) {
+	case "cover", "contain", "fill", "inside", "outside":
+		return true
+	default:
+		return false
+	}
+}
+
 // Validate returns an error if parameters are out of acceptable range.
 func (p *Params) Validate() error {
 	// Chain mode: geometry/effects live in the chain string; only the output
@@ -206,12 +217,10 @@ func (p *Params) Validate() error {
 	if p.Quality < 1 || p.Quality > 100 {
 		return fmt.Errorf("quality must be between 1 and 100")
 	}
-	allowed := map[string]bool{"webp": true, "jpeg": true, "jpg": true, "png": true, "avif": true}
-	if !allowed[strings.ToLower(p.Format)] {
+	if !allowedOutputFormat(p.Format) {
 		return fmt.Errorf("unsupported format: %s", p.Format)
 	}
-	allowedFit := map[string]bool{"cover": true, "contain": true, "fill": true, "inside": true, "outside": true}
-	if !allowedFit[strings.ToLower(p.Fit)] {
+	if !allowedFitMode(p.Fit) {
 		return fmt.Errorf("unsupported fit mode: %s", p.Fit)
 	}
 	return nil

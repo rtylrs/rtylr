@@ -13,6 +13,7 @@ type mockRepo struct {
 	createID  int64
 	createErr error
 	updErr    error
+	statusErr error
 	delErr    error
 }
 
@@ -26,6 +27,10 @@ func (m *mockRepo) Create(_ context.Context, _ domain.TableInput) (int64, error)
 
 func (m *mockRepo) Update(_ context.Context, _ domain.TableUpdateInput) error {
 	return m.updErr
+}
+
+func (m *mockRepo) UpdateStatus(_ context.Context, _ domain.TableStatusInput) error {
+	return m.statusErr
 }
 
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {

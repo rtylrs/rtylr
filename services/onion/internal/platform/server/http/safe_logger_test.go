@@ -26,3 +26,21 @@ func TestSanitizeRequestForLoggingRedactsSensitiveQueryValues(t *testing.T) {
 		t.Fatalf("expected original request to remain untouched, got %q", req.URL.Query().Get("token"))
 	}
 }
+
+func TestAccessLogsDisabledByDefault(t *testing.T) {
+	t.Setenv("HTTP_ACCESS_LOGS", "")
+	t.Setenv("ACCESS_LOGS", "")
+
+	if accessLogsEnabled() {
+		t.Fatal("expected access logs to be disabled")
+	}
+}
+
+func TestAccessLogsCanBeEnabled(t *testing.T) {
+	t.Setenv("HTTP_ACCESS_LOGS", "on")
+	t.Setenv("ACCESS_LOGS", "")
+
+	if !accessLogsEnabled() {
+		t.Fatal("expected access logs to be enabled")
+	}
+}

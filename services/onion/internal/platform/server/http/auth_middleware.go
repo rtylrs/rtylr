@@ -92,13 +92,19 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 		IP:             remoteAddr,
 	}
 
-	logger.Ctx(ctx).Info("Authenticated request",
-		logger.Any("user_id", authUser.UserID),
-		logger.String("ip", remoteAddr),
-		logger.String("path", path),
-	)
+	if authSuccessLogsEnabled() {
+		logger.Ctx(ctx).Info("Authenticated request",
+			logger.Any("user_id", authUser.UserID),
+			logger.String("ip", remoteAddr),
+			logger.String("path", path),
+		)
+	}
 
 	return authUser, nil
+}
+
+func authSuccessLogsEnabled() bool {
+	return envFlag("AUTH_SUCCESS_LOGS") || envFlag("AUTH_REQUEST_LOGS")
 }
 
 func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolver authPkg.TokenValidatorResolver) MiddlewareFunc {
