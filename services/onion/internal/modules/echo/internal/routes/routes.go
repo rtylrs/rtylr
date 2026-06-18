@@ -47,6 +47,7 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.S
 			MemoryService:  memoryService,
 			QuotaService:   quotaService,
 			AnalystService: analystService,
+			ToolExecutors:  toolExecutors,
 		}
 		r.With(aiStreamRateLimit).Post(path, streamHandler.ServeHTTP)
 	}

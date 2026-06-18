@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,12 +14,76 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
+const (
+	listCustomersToolName         = "crm.list_customers"
+	createCustomerToolName        = "crm.create_customer"
+	defaultListCustomersToolLimit = 20
+	maxListCustomersToolPageSize  = 50
+	customerToolTimestampDate     = "2006-01-02T15:04:05Z"
+	customerToolCalendarDate      = "2006-01-02"
+)
+
+type listCustomersToolInput struct {
+	Search   string
+	Tier     string
+	Tag      string
+	Page     int
+	PageSize int
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "crm.create_customer" {
+	switch name {
+	case listCustomersToolName:
+		output, err := m.executeListCustomersTool(ctx, input)
+		return output, true, err
+	case createCustomerToolName:
+		output, err := m.executeCreateCustomerTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateCustomerTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListCustomersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListCustomersToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := m.service.ListCustomers(ctx, domain.CustomerListFilter{
+		OwnerID:  authUser.UserID,
+		Search:   parsed.Search,
+		Tier:     parsed.Tier,
+		Tag:      parsed.Tag,
+		Page:     parsed.Page,
+		PageSize: parsed.PageSize,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	customers := make([]map[string]any, 0, len(result.Customers))
+	for _, customer := range result.Customers {
+		customers = append(customers, customerToolPayload(customer))
+	}
+
+	return map[string]any{
+		"customers": customers,
+		"total":     result.Total,
+		"page":      result.Page,
+		"page_size": result.PageSize,
+		"returned":  len(customers),
+		"filters": map[string]any{
+			"search": parsed.Search,
+			"tier":   parsed.Tier,
+			"tag":    parsed.Tag,
+		},
+	}, nil
 }
 
 func (m *Module) executeCreateCustomerTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -96,6 +162,128 @@ func splitCustomerName(value string) (string, string) {
 	return parts[0], strings.Join(parts[1:], " ")
 }
 
+func parseListCustomersToolInput(input map[string]any) (listCustomersToolInput, error) {
+	page, err := customerToolNonNegativeInt(firstCustomerToolValue(input, "page"))
+	if err != nil {
+		return listCustomersToolInput{}, fmt.Errorf("invalid page: %w", err)
+	}
+	if page == 0 {
+		page = 1
+	}
+
+	pageSize, err := customerToolNonNegativeInt(firstCustomerToolValue(input, "page_size", "limit"))
+	if err != nil {
+		return listCustomersToolInput{}, fmt.Errorf("invalid page_size: %w", err)
+	}
+	if pageSize == 0 {
+		pageSize = defaultListCustomersToolLimit
+	}
+	if pageSize > maxListCustomersToolPageSize {
+		pageSize = maxListCustomersToolPageSize
+	}
+
+	return listCustomersToolInput{
+		Search:   strings.TrimSpace(toolStringValue(firstCustomerToolValue(input, "search", "query", "q"))),
+		Tier:     strings.TrimSpace(toolStringValue(firstCustomerToolValue(input, "tier", "loyalty_tier"))),
+		Tag:      strings.TrimSpace(toolStringValue(firstCustomerToolValue(input, "tag"))),
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
+}
+
+func firstCustomerToolValue(input map[string]any, keys ...string) any {
+	for _, key := range keys {
+		value, ok := input[key]
+		if !ok || value == nil {
+			continue
+		}
+		if s, ok := value.(string); ok && strings.TrimSpace(s) == "" {
+			continue
+		}
+		return value
+	}
+	return nil
+}
+
+func customerToolNonNegativeInt(value any) (int, error) {
+	out, err := customerToolInt(value)
+	if err != nil {
+		return 0, err
+	}
+	if out < 0 {
+		return 0, errors.New("must be non-negative")
+	}
+	return out, nil
+}
+
+func customerToolInt(value any) (int, error) {
+	switch v := value.(type) {
+	case nil:
+		return 0, nil
+	case int:
+		return v, nil
+	case int64:
+		if v > math.MaxInt || v < math.MinInt {
+			return 0, errors.New("out of range")
+		}
+		return int(v), nil
+	case int32:
+		return int(v), nil
+	case float64:
+		if math.IsNaN(v) || math.IsInf(v, 0) {
+			return 0, errors.New("must be finite")
+		}
+		if math.Trunc(v) != v {
+			return 0, errors.New("must be an integer")
+		}
+		if v > float64(math.MaxInt) || v < float64(math.MinInt) {
+			return 0, errors.New("out of range")
+		}
+		return int(v), nil
+	case json.Number:
+		n, err := v.Int64()
+		if err != nil {
+			return 0, err
+		}
+		if n > math.MaxInt || n < math.MinInt {
+			return 0, errors.New("out of range")
+		}
+		return int(n), nil
+	case string:
+		raw := strings.TrimSpace(v)
+		if raw == "" {
+			return 0, nil
+		}
+		n, err := strconv.ParseInt(raw, 10, 0)
+		if err != nil {
+			return 0, err
+		}
+		return int(n), nil
+	default:
+		return 0, fmt.Errorf("unsupported value %T", value)
+	}
+}
+
+func customerToolPayload(c domain.Customer) map[string]any {
+	fullName := strings.TrimSpace(strings.TrimSpace(c.FirstName) + " " + strings.TrimSpace(c.LastName))
+	return map[string]any{
+		"id":             c.ID,
+		"first_name":     c.FirstName,
+		"last_name":      c.LastName,
+		"full_name":      fullName,
+		"email":          c.Email,
+		"phone":          c.Phone,
+		"loyalty_points": c.LoyaltyPoints,
+		"loyalty_tier":   c.LoyaltyTier,
+		"total_spent":    c.TotalSpent,
+		"visit_count":    c.VisitCount,
+		"last_visit_at":  formatCustomerTimestamp(c.LastVisitAt),
+		"tags":           c.Tags,
+		"is_active":      c.IsActive,
+		"created_at":     c.CreatedAt.Format(customerToolTimestampDate),
+	}
+}
+
 func toolStringValue(value any) string {
 	switch v := value.(type) {
 	case nil:
@@ -160,7 +348,7 @@ func optionalCustomerDate(value any) (*time.Time, error) {
 		if raw == "" {
 			return nil, nil
 		}
-		for _, layout := range []string{"2006-01-02", time.RFC3339, time.RFC3339Nano} {
+		for _, layout := range []string{customerToolCalendarDate, time.RFC3339, time.RFC3339Nano} {
 			parsed, err := time.Parse(layout, raw)
 			if err == nil {
 				return &parsed, nil
@@ -176,5 +364,12 @@ func formatCustomerDate(value *time.Time) any {
 	if value == nil {
 		return nil
 	}
-	return value.Format("2006-01-02")
+	return value.Format(customerToolCalendarDate)
+}
+
+func formatCustomerTimestamp(value *time.Time) any {
+	if value == nil {
+		return nil
+	}
+	return value.Format(customerToolTimestampDate)
 }

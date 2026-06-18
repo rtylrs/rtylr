@@ -60,6 +60,7 @@ type GenerateTextStreamHandler struct {
 	MemoryService  MemoryService
 	QuotaService   QuotaService
 	AnalystService AnalystService
+	ToolExecutors  []ToolExecutor
 }
 
 type GenerateTextStreamRequest struct {
@@ -522,7 +523,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
 		return
 	}
-	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse)
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamToolExecution(ctx, h.ToolExecutors))
 	if grounding != nil {
 		if err := h.writeAnalystToolEvents(w, messageID, grounding); err != nil {
 			return

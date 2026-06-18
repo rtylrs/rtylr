@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,15 +31,30 @@ type streamEventRenderer struct {
 	messageID    string
 	fullResponse *strings.Builder
 	pending      string
+	ctx          context.Context
+	executors    []ToolExecutor
 }
 
-func newStreamEventRenderer(w io.Writer, flush func(), messageID string, fullResponse *strings.Builder) *streamEventRenderer {
-	return &streamEventRenderer{
+type streamRendererOption func(*streamEventRenderer)
+
+func withStreamToolExecution(ctx context.Context, executors []ToolExecutor) streamRendererOption {
+	return func(r *streamEventRenderer) {
+		r.ctx = ctx
+		r.executors = executors
+	}
+}
+
+func newStreamEventRenderer(w io.Writer, flush func(), messageID string, fullResponse *strings.Builder, opts ...streamRendererOption) *streamEventRenderer {
+	r := &streamEventRenderer{
 		w:            w,
 		flush:        flush,
 		messageID:    messageID,
 		fullResponse: fullResponse,
 	}
+	for _, opt := range opts {
+		opt(r)
+	}
+	return r
 }
 
 func (r *streamEventRenderer) AppendText(text string) error {
@@ -187,11 +203,15 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	}
 
 	def, ok := ToolByName(call.Name)
-	if !ok || def.Scope == "read" {
+	if !ok {
 		return nil
 	}
 
 	requiresApproval := def.RequiresApproval || def.Scope == "write"
+	if !requiresApproval && len(r.executors) == 0 {
+		return nil
+	}
+
 	blockID := fmt.Sprintf("tool-%d", time.Now().UnixNano())
 	if err := WriteEvent(r.w, r.flush, StreamEvent{
 		Type:             EventToolCall,
@@ -206,6 +226,35 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 
 	if requiresApproval {
 		return nil
+	}
+
+	ctx := r.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	for _, executor := range r.executors {
+		if executor == nil {
+			continue
+		}
+		output, executed, err := executor.ExecuteCaretTool(ctx, call.Name, call.Input)
+		if err != nil {
+			return WriteEvent(r.w, r.flush, StreamEvent{
+				Type:      EventToolResult,
+				MessageID: r.messageID,
+				BlockID:   blockID,
+				Status:    "error",
+				Error:     userFacingToolError(err),
+			})
+		}
+		if executed {
+			return WriteEvent(r.w, r.flush, StreamEvent{
+				Type:      EventToolResult,
+				MessageID: r.messageID,
+				BlockID:   blockID,
+				Status:    "success",
+				Output:    output,
+			})
+		}
 	}
 
 	return WriteEvent(r.w, r.flush, StreamEvent{

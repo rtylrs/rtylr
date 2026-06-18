@@ -46,8 +46,9 @@ var CoreTools = []ToolDef{
 	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
 }
 
-var promptExecutableWriteTools = map[string]struct{}{
+var promptExecutableTools = map[string]struct{}{
 	"booking.create_appointment": {},
+	"crm.list_customers":         {},
 	"crm.create_customer":        {},
 	"erp.set_stock":              {},
 	"erp.create_product":         {},
@@ -98,16 +99,16 @@ func ToolsForMode(m CaretMode) []ToolDef {
 	return CoreTools
 }
 
-// PromptToolsForMode returns only the tools the model may explicitly propose in
-// an answer stream. Read tools are server-grounded before the prompt, and write
-// tools stay hidden until an approval executor exists.
+// PromptToolsForMode returns only the tools the model may explicitly emit in an
+// answer stream. A tool stays hidden until the stream or approval path has a
+// server executor for it.
 func PromptToolsForMode(m CaretMode) []ToolDef {
 	if m != ModeAgent {
 		return nil
 	}
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
-		if t.Scope == "write" && promptToolCanExecute(t.Name) {
+		if promptToolCanExecute(t.Name) {
 			out = append(out, t)
 		}
 	}
@@ -115,6 +116,6 @@ func PromptToolsForMode(m CaretMode) []ToolDef {
 }
 
 func promptToolCanExecute(name string) bool {
-	_, ok := promptExecutableWriteTools[name]
+	_, ok := promptExecutableTools[name]
 	return ok
 }

@@ -36,7 +36,7 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 	}
 }
 
-func TestBuildCaretPromptAgentModeIncludesWriteToolProposalsOnly(t *testing.T) {
+func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing.T) {
 	got := buildCaretPrompt(caretPromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: create a customer",
@@ -45,9 +45,11 @@ func TestBuildCaretPromptAgentModeIncludesWriteToolProposalsOnly(t *testing.T) {
 
 	mustContain := []string{
 		"Available business capability catalog:",
+		"crm.list_customers [read]",
 		"crm.create_customer [write, approval required]",
 		"Structured stream controls:",
 		`<tool>{"name":"tool.name","input":{}}</tool>`,
+		"Read tools run immediately",
 		"never reveal private chain-of-thought",
 	}
 	for _, want := range mustContain {
@@ -55,7 +57,7 @@ func TestBuildCaretPromptAgentModeIncludesWriteToolProposalsOnly(t *testing.T) {
 			t.Fatalf("agent prompt missing %q\nprompt:\n%s", want, got)
 		}
 	}
-	for _, forbidden := range []string{"business.snapshot [read]", "crm.list_customers [read]", "pos.list_orders [read]", "analytics.query [read]"} {
+	for _, forbidden := range []string{"business.snapshot [read]", "pos.list_orders [read]", "analytics.query [read]"} {
 		if strings.Contains(got, forbidden) {
 			t.Fatalf("agent prompt should not advertise non-executable read tool %q\nprompt:\n%s", forbidden, got)
 		}

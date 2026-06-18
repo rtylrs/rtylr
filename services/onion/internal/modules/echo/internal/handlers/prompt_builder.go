@@ -70,6 +70,7 @@ func buildCaretPrompt(in caretPromptInput) string {
 		b.WriteString("Use this catalog to reason about what the product can help with. Do not claim a tool ran unless the platform gives you a result.\n\n")
 		b.WriteString("Structured stream controls:\n")
 		b.WriteString("- If you need to propose a tool call, emit exactly one compact marker like <tool>{\"name\":\"tool.name\",\"input\":{}}</tool>.\n")
+		b.WriteString("- Read tools run immediately when the platform can execute them; use their returned result instead of guessing.\n")
 		b.WriteString("- Write tools are approval proposals only; after a write-tool marker, wait for approval and do not say the action succeeded.\n")
 		b.WriteString("- Do not emit analytics.query yourself; the server runs tenant-scoped analytics grounding automatically when it is safe.\n")
 		b.WriteString("- You may use <thinking>short user-facing progress note</thinking> for brief status notes, but never reveal private chain-of-thought.\n\n")

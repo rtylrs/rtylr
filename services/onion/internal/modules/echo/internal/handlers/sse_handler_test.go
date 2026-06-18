@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -206,6 +207,58 @@ func TestStreamRendererSilentlyDropsReadToolMarker(t *testing.T) {
 	}
 	if full.String() != "Done. " {
 		t.Fatalf("expected text before read marker to remain, got %q", full.String())
+	}
+}
+
+func TestStreamRendererExecutesReadToolMarkerWithExecutor(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(
+		rec,
+		nil,
+		"assistant-1",
+		full,
+		withStreamToolExecution(context.Background(), []ToolExecutor{
+			fakeToolExecutor{output: map[string]any{
+				"customers": []any{},
+				"total":     0,
+			}},
+		}),
+	)
+
+	err := renderer.AppendText(`Done. <tool>{"name":"crm.list_customers","input":{"limit":2}}</tool>`)
+	if err != nil {
+		t.Fatalf("append tool chunk: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	var toolCall, toolResult *StreamEvent
+	for i := range events {
+		switch events[i].Type {
+		case EventToolCall:
+			toolCall = &events[i]
+		case EventToolResult:
+			toolResult = &events[i]
+		}
+	}
+	if toolCall == nil {
+		t.Fatalf("expected read tool_call event, got %#v", events)
+	}
+	if toolCall.Name != "crm.list_customers" || toolCall.RequiresApproval {
+		t.Fatalf("expected executable read tool call, got %#v", *toolCall)
+	}
+	if toolResult == nil || toolResult.Status != "success" {
+		t.Fatalf("expected successful tool result, got %#v", events)
+	}
+	output, ok := toolResult.Output.(map[string]any)
+	if !ok || output["total"] != float64(0) {
+		t.Fatalf("expected output total, got %#v", toolResult.Output)
+	}
+	if full.String() != "Done. " {
+		t.Fatalf("expected visible text before marker to remain, got %q", full.String())
 	}
 }
 
