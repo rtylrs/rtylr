@@ -13,15 +13,12 @@ import {
   PackagePlus,
 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import { LowStockItem, PurchaseOrder } from '../../shared/services/erpApi';
-import { useLowStock } from '../inventory/useInventory';
-import { usePurchaseOrders } from '../purchasing/usePurchaseOrders';
 import { useProducts } from '../products/useProducts';
-import { useSuppliers } from '../suppliers/useSuppliers';
 import { useActivity } from '../../shared/hooks/useActivity';
 import { timeAgo, formatCurrency } from '../../shared/lib/format';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
+import { useDashboardStats } from '../../shared/hooks/queries/useDashboardStats';
 
 const AMBER = 'var(--erp-accent, #f59e0b)';
 
@@ -32,16 +29,17 @@ const today = new Date().toLocaleDateString('en-US', {
   day: 'numeric',
 });
 
-function getStatusColor(status: PurchaseOrder['status']): string {
+function getStatusColor(status: string): string {
   if (status === 'Received') return 'var(--erp-success, #10b981)';
-  if (status === 'Sent' || status === 'Approved') return AMBER;
+  if (status === 'Sent' || status === 'Approved' || status === 'Partial') return AMBER;
   if (status === 'Pending Approval') return 'var(--erp-purple, #a78bfa)';
   return 'var(--hub-text-dim)';
 }
 
-function getStatusBg(status: PurchaseOrder['status']): string {
+function getStatusBg(status: string): string {
   if (status === 'Received') return 'rgba(16,185,129,0.09)';
-  if (status === 'Sent' || status === 'Approved') return 'rgba(245,158,11,0.09)';
+  if (status === 'Sent' || status === 'Approved' || status === 'Partial')
+    return 'rgba(245,158,11,0.09)';
   if (status === 'Pending Approval') return 'rgba(167,139,250,0.09)';
   return 'rgba(0,0,0,0.06)';
 }
@@ -66,32 +64,20 @@ const itemVariants = {
 
 const Dashboard: React.FC = () => {
   const [quickAddOpen, setQuickAddOpen] = React.useState(false);
-  const { data: lowStockData, isLoading: lowStockLoading } = useLowStock();
-  const { data: ordersResult, isLoading: ordersLoading } = usePurchaseOrders();
-  const { data: productsResult, isLoading: productsLoading } = useProducts();
-  const { data: suppliersResult, isLoading: suppliersLoading } = useSuppliers();
+  const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats();
+  const { data: productsResult, isLoading: productsLoading } = useProducts({ pageSize: 5 });
   const productsData = productsResult?.products ?? [];
-  const suppliersData = suppliersResult?.suppliers ?? [];
   const { data: activityData = [] } = useActivity(8);
 
-  const isLoading = lowStockLoading || ordersLoading || productsLoading || suppliersLoading;
-
-  // useLowStock returns the backend inventory-report shape; map it to the
-  // LowStockItem display shape this widget renders.
-  const lowStockItems: LowStockItem[] = (lowStockData ?? []).map((i) => ({
-    name: i.productName,
-    sku: i.sku,
-    stock: i.stockQuantity,
-    minStock: i.lowStockThreshold,
-    unit: i.unit,
-  }));
-  const ordersForList: PurchaseOrder[] = ordersResult?.orders ?? [];
-  const recentOrders = ordersForList.slice(0, 3);
+  const isLoading = statsLoading || productsLoading;
+  const lowStockItems = dashboardStats?.lowStockItems ?? [];
+  const recentOrders = (dashboardStats?.recentOrders ?? []).slice(0, 3);
+  const criticalLowStockCount = lowStockItems.filter((i) => i.stock <= 5).length;
 
   const stats = [
     {
       label: 'Total Products',
-      value: productsData?.length ?? 0,
+      value: dashboardStats?.totalProducts ?? 0,
       icon: Package,
       change: '',
       changePositive: true,
@@ -99,23 +85,23 @@ const Dashboard: React.FC = () => {
     },
     {
       label: 'Low Stock Items',
-      value: lowStockItems.length,
+      value: dashboardStats?.lowStockCount ?? 0,
       icon: AlertTriangle,
-      change: `${lowStockItems.filter((i) => i.stock <= 5).length} critical`,
+      change: `${criticalLowStockCount} critical`,
       changePositive: false,
       to: '/alerts',
     },
     {
       label: 'Pending Orders',
-      value: ordersForList.filter((o) => o.status === 'Sent' || o.status === 'Draft').length,
+      value: dashboardStats?.pendingOrders ?? 0,
       icon: ShoppingCart,
-      change: `${ordersForList.filter((o) => o.status === 'Pending Approval').length} awaiting approval`,
+      change: 'needs review',
       changePositive: true,
       to: '/purchasing',
     },
     {
       label: 'Total Suppliers',
-      value: suppliersData?.length ?? 0,
+      value: dashboardStats?.totalSuppliers ?? 0,
       icon: Users,
       change: '',
       changePositive: true,
@@ -123,9 +109,9 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  const weeklyValue = (productsData || [])
-    .slice(0, 5)
-    .reduce((s, p) => s + p.salePrice * (p.stock || 0), 0);
+  const inventoryValue =
+    dashboardStats?.inventoryValue ??
+    (productsData || []).slice(0, 5).reduce((s, p) => s + p.salePrice * (p.stock || 0), 0);
 
   return (
     <motion.div
@@ -227,14 +213,14 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={14} style={{ color: 'var(--erp-success, #10b981)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Catalog Value (Top 5)
+              Inventory Value
             </h3>
           </div>
           <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-            {formatCurrency(weeklyValue)}
+            {isLoading ? '…' : formatCurrency(inventoryValue)}
           </p>
           <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-            top 5 products by price
+            active tracked stock at cost
           </p>
         </motion.div>
 
@@ -321,7 +307,7 @@ const Dashboard: React.FC = () => {
               className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
               style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--erp-danger, #f87171)' }}
             >
-              {isLoading ? '…' : `${lowStockItems.length} items`}
+              {isLoading ? '…' : `${dashboardStats?.lowStockCount ?? 0} items`}
             </span>
           </div>
           <div className="space-y-1">
@@ -380,7 +366,7 @@ const Dashboard: React.FC = () => {
                     >
                       <div>
                         <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                          PO-{order.id}
+                          {order.poNumber}
                         </p>
                         <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
                           {order.date}
@@ -396,7 +382,7 @@ const Dashboard: React.FC = () => {
                         className="text-xs font-semibold text-right"
                         style={{ color: 'var(--hub-text)' }}
                       >
-                        {order.total}
+                        {formatCurrency(order.total)}
                       </p>
                       <div className="flex justify-end">
                         <span

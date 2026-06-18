@@ -36,6 +36,41 @@ vi.mock('../inventory/useInventory', () => ({
   }),
 }));
 
+vi.mock('../../shared/hooks/queries/useDashboardStats', () => ({
+  useDashboardStats: () => ({
+    data: {
+      totalProducts: 234,
+      lowStockCount: 1,
+      pendingOrders: 1,
+      totalSuppliers: 1,
+      inventoryValue: 245561.2,
+      lowStockItems: [
+        {
+          productId: 1,
+          name: 'Espresso Beans',
+          sku: 'ESP-01',
+          stock: 4,
+          minStock: 8,
+          unit: 'kg',
+          warehouseName: '',
+        },
+      ],
+      recentOrders: [
+        {
+          id: 17,
+          poNumber: 'PO-17',
+          status: 'Pending Approval',
+          supplier: 'North Roast',
+          total: 120,
+          date: '2026-06-05',
+        },
+      ],
+      topCategories: [],
+    },
+    isLoading: false,
+  }),
+}));
+
 vi.mock('../purchasing/usePurchaseOrders', () => ({
   usePurchaseOrders: () => ({
     data: {
@@ -87,6 +122,7 @@ describe('Dashboard layout', () => {
     const { container } = render(<Dashboard />);
 
     expect(screen.getByRole('heading', { name: 'Inventory Overview' })).toBeInTheDocument();
+    expect(screen.getByText('234')).toBeInTheDocument();
     expect(container.firstElementChild).toHaveClass('w-full');
     expect(container.firstElementChild).toHaveClass('min-w-0');
   });
