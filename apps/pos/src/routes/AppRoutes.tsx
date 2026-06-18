@@ -1,4 +1,5 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import type { POSFeatureKey } from '../shared/stores/settingsStore';
 
 const POS = React.lazy(() => import('../features/pos'));
@@ -18,7 +19,6 @@ const Receipts = React.lazy(() => import('../features/receipts/ReceiptList'));
 const DaySummary = React.lazy(() => import('../features/day-summary'));
 const Override = React.lazy(() => import('../features/override'));
 const ProductQuickEdit = React.lazy(() => import('../features/product-quick-edit'));
-const OfflineQueue = React.lazy(() => import('../features/offline-queue'));
 const Orders = React.lazy(() => import('../features/orders'));
 const Tables = React.lazy(() => import('../features/tables'));
 const CloseSession = React.lazy(() => import('../features/close-session'));
@@ -52,7 +52,7 @@ const AppRoutes: AppRoute[] = [
   { path: '/day-summary', element: <DaySummary /> },
   { path: '/override', element: <Override /> },
   { path: '/products/quick', element: <ProductQuickEdit />, feature: 'inventory' },
-  { path: '/offline', element: <OfflineQueue /> },
+  { path: '/offline', element: <Navigate to="/" replace /> },
   { path: '/orders', element: <Orders /> },
   { path: '/tables', element: <Tables />, feature: 'tables' },
   { path: '/close-session', element: <CloseSession /> },

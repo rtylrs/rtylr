@@ -109,6 +109,48 @@ export interface OfflinePayment {
   giftCardCode?: string;
 }
 
+export type ApiRequestMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
+export type ApiMutationMethod = Exclude<ApiRequestMethod, 'get'>;
+export type ApiMutationStatus = 'pending' | 'syncing' | 'failed';
+export type ApiRequestStatus = 'ok' | 'cached' | 'queued' | 'failed';
+
+export interface ApiSnapshot {
+  key: string;
+  method: ApiRequestMethod;
+  url: string;
+  params?: unknown;
+  requestBody?: unknown;
+  responseBody: unknown;
+  updatedAt: number;
+}
+
+export interface ApiMutation {
+  id: string;
+  method: ApiMutationMethod;
+  url: string;
+  params?: unknown;
+  requestBody?: unknown;
+  optimisticResponse?: unknown;
+  status: ApiMutationStatus;
+  retries: number;
+  lastError?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ApiRequestLog {
+  id: string;
+  method: ApiRequestMethod;
+  url: string;
+  params?: unknown;
+  requestBody?: unknown;
+  responseBody?: unknown;
+  status: ApiRequestStatus;
+  error?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 // ── Dexie database ─────────────────────────────────────────────────
 
 const db = new Dexie('rtylr-pos') as Dexie & {
@@ -117,6 +159,9 @@ const db = new Dexie('rtylr-pos') as Dexie & {
   combos: EntityTable<CachedCombo, 'id'>;
   customers: EntityTable<CachedCustomer, 'id'>;
   offlineOrders: EntityTable<OfflineOrder, 'localId'>;
+  apiSnapshots: EntityTable<ApiSnapshot, 'key'>;
+  apiMutations: EntityTable<ApiMutation, 'id'>;
+  apiRequestLog: EntityTable<ApiRequestLog, 'id'>;
 };
 
 db.version(1).stores({
@@ -125,6 +170,17 @@ db.version(1).stores({
   combos: 'id',
   customers: 'id, phone, email',
   offlineOrders: 'localId, synced, createdAt',
+});
+
+db.version(2).stores({
+  products: 'id, sku, barcode, categoryId, [categoryId+available]',
+  modifiers: 'id, groupName',
+  combos: 'id',
+  customers: 'id, phone, email',
+  offlineOrders: 'localId, synced, createdAt',
+  apiSnapshots: 'key, method, url, updatedAt',
+  apiMutations: 'id, status, createdAt, url',
+  apiRequestLog: 'id, method, url, status, createdAt',
 });
 
 export { db };

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../services/db';
 import { useOfflineQueueStore } from '../stores/offlineQueueStore';
 import { useSessionCloseQueueStore } from '../stores/sessionCloseQueueStore';
 import { useCashMovementQueueStore } from '../stores/cashMovementQueueStore';
@@ -8,7 +10,14 @@ const OfflineBadge: React.FC = () => {
   const orderQueueSize = useOfflineQueueStore((s) => s.queue.length);
   const sessionCloseQueueSize = useSessionCloseQueueStore((s) => s.queue.length);
   const cashMovementQueueSize = useCashMovementQueueStore((s) => s.queue.length);
-  const queueSize = orderQueueSize + sessionCloseQueueSize + cashMovementQueueSize;
+  const apiMutationQueueSize =
+    useLiveQuery(
+      () => db.apiMutations.where('status').anyOf('pending', 'syncing', 'failed').count(),
+      [],
+      0
+    ) ?? 0;
+  const queueSize =
+    orderQueueSize + sessionCloseQueueSize + cashMovementQueueSize + apiMutationQueueSize;
   if (online && queueSize === 0) return null;
   return (
     <div

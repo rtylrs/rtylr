@@ -97,12 +97,6 @@ const CommandPalette: React.FC = () => {
         action: () => navigate('/settings'),
       },
       {
-        id: 'nav-offline',
-        label: 'Offline Queue',
-        category: 'Navigate',
-        action: () => navigate('/offline'),
-      },
-      {
         id: 'nav-held',
         label: 'Held Orders',
         category: 'Navigate',

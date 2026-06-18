@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -238,8 +239,10 @@ const initialState: CartState = {
   tableNumber: null,
 };
 
-export const useCartStore = create<CartState & CartActions>()((set, get) => ({
-  ...initialState,
+export const useCartStore = create<CartState & CartActions>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
 
   // ── Items ──────────────────────────────────────────────────────
 
@@ -477,5 +480,34 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
   amountDue: () => Math.max(0, get().total() - get().amountPaid()),
 
-  itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
-}));
+      itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+    }),
+    {
+      name: 'pos-active-cart',
+      version: 1,
+      partialize: (state): CartState => ({
+        localOrderId: state.localOrderId,
+        serverOrderId: state.serverOrderId,
+        orderNumber: state.orderNumber,
+        orderType: state.orderType,
+        branchId: state.branchId,
+        terminalId: state.terminalId,
+        employeeId: state.employeeId,
+        tableId: state.tableId,
+        floorId: state.floorId,
+        customerId: state.customerId,
+        customerName: state.customerName,
+        items: state.items,
+        orderDiscount: state.orderDiscount,
+        tipAmount: state.tipAmount,
+        payments: state.payments,
+        notes: state.notes,
+        kitchenNotes: state.kitchenNotes,
+        isHeld: state.isHeld,
+        holdLabel: state.holdLabel,
+        orderId: state.orderId,
+        tableNumber: state.tableNumber,
+      }),
+    }
+  )
+);
