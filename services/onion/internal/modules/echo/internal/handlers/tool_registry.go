@@ -31,18 +31,20 @@ var CoreTools = []ToolDef{
 	{Name: "finance.record_expense", Description: "Record a business expense.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.record_bill", Description: "Record a supplier bill.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.create_quote", Description: "Create a customer quote.", Module: "finance", Scope: "write", RequiresApproval: true},
+	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
 }
 
 var promptExecutableWriteTools = map[string]struct{}{
-	"crm.create_customer":    {},
-	"erp.set_stock":          {},
-	"erp.create_supplier":    {},
-	"flow.create_task":       {},
-	"finance.record_expense": {},
-	"finance.record_bill":    {},
-	"finance.create_quote":   {},
-	"pos.refund_order":       {},
-	"hr.create_employee":     {},
+	"booking.create_appointment": {},
+	"crm.create_customer":        {},
+	"erp.set_stock":              {},
+	"erp.create_supplier":        {},
+	"flow.create_task":           {},
+	"finance.record_expense":     {},
+	"finance.record_bill":        {},
+	"finance.create_quote":       {},
+	"pos.refund_order":           {},
+	"hr.create_employee":         {},
 }
 
 // ToolByName returns a registered tool definition by stable tool name.
