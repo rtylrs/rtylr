@@ -71,6 +71,7 @@ var promptExecutableTools = map[string]struct{}{
 	"finance.create_invoice":     {},
 	"finance.record_payment":     {},
 	"finance.send_invoice":       {},
+	"pos.list_orders":            {},
 	"pos.refund_order":           {},
 	"hr.create_employee":         {},
 }

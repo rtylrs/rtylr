@@ -8,13 +8,31 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
-const refundAmountTolerance = 0.000001
+const (
+	listOrdersToolName     = "pos.list_orders"
+	refundOrderToolName    = "pos.refund_order"
+	refundAmountTolerance  = 0.000001
+	defaultListOrdersLimit = int64(20)
+	maxListOrdersToolLimit = int64(50)
+	posToolCalendarDate    = "2006-01-02"
+	posToolTimestampDate   = "2006-01-02T15:04:05Z"
+)
+
+type listOrdersToolInput struct {
+	SessionID int64
+	Status    string
+	DateFrom  string
+	DateTo    string
+	Page      int64
+	Limit     int64
+}
 
 type refundOrderToolInput struct {
 	OrderID int64
@@ -23,11 +41,63 @@ type refundOrderToolInput struct {
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "pos.refund_order" {
+	switch name {
+	case listOrdersToolName:
+		output, err := m.executeListOrdersTool(ctx, input)
+		return output, true, err
+	case refundOrderToolName:
+		output, err := m.executeRefundOrderTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeRefundOrderTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListOrdersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListOrdersToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	orders, err := m.service.ListOrders(ctx, ownerID, parsed.SessionID, parsed.Status, parsed.DateFrom, parsed.DateTo)
+	if err != nil {
+		return nil, err
+	}
+
+	start := int((parsed.Page - 1) * parsed.Limit)
+	if start > len(orders) {
+		start = len(orders)
+	}
+	end := start + int(parsed.Limit)
+	if end > len(orders) {
+		end = len(orders)
+	}
+
+	payloads := make([]map[string]any, 0, end-start)
+	for _, order := range orders[start:end] {
+		payloads = append(payloads, orderToolPayload(order))
+	}
+
+	return map[string]any{
+		"orders":    payloads,
+		"total":     len(orders),
+		"returned":  len(payloads),
+		"page":      parsed.Page,
+		"page_size": parsed.Limit,
+		"has_more":  end < len(orders),
+		"filters": map[string]any{
+			"session_id": parsed.SessionID,
+			"status":     parsed.Status,
+			"date_from":  parsed.DateFrom,
+			"date_to":    parsed.DateTo,
+		},
+	}, nil
 }
 
 func (m *Module) executeRefundOrderTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -69,6 +139,67 @@ func (m *Module) executeRefundOrderTool(ctx context.Context, input map[string]an
 			"previous_status":         string(order.Status),
 			"previous_payment_status": string(order.PaymentStatus),
 		},
+	}, nil
+}
+
+func parseListOrdersToolInput(input map[string]any) (listOrdersToolInput, error) {
+	sessionID, err := posToolInt64(firstPosToolValue(input, "session_id", "session"))
+	if err != nil {
+		return listOrdersToolInput{}, fmt.Errorf("invalid session_id: %w", err)
+	}
+	if sessionID < 0 {
+		return listOrdersToolInput{}, errors.New("session_id must be non-negative")
+	}
+
+	status := normalizeOrderToolStatus(input["status"])
+	if strings.TrimSpace(posToolString(input["status"])) != "" && status == "" {
+		return listOrdersToolInput{}, errors.New("status must be one of pending, confirmed, preparing, ready, served, paid, cancelled, refunded, voided, or held")
+	}
+
+	dateFrom, err := posToolDate(firstPosToolValue(input, "date_from", "from", "start_date", "created_from"))
+	if err != nil {
+		return listOrdersToolInput{}, fmt.Errorf("invalid date_from: %w", err)
+	}
+	dateTo, err := posToolDate(firstPosToolValue(input, "date_to", "to", "end_date", "created_to"))
+	if err != nil {
+		return listOrdersToolInput{}, fmt.Errorf("invalid date_to: %w", err)
+	}
+	if err := validateOrderToolDateRange(dateFrom, dateTo); err != nil {
+		return listOrdersToolInput{}, err
+	}
+
+	page, err := posToolInt64(firstPosToolValue(input, "page"))
+	if err != nil {
+		return listOrdersToolInput{}, fmt.Errorf("invalid page: %w", err)
+	}
+	if page < 0 {
+		return listOrdersToolInput{}, errors.New("page must be non-negative")
+	}
+	if page == 0 {
+		page = 1
+	}
+
+	limit, err := posToolInt64(firstPosToolValue(input, "limit", "page_size"))
+	if err != nil {
+		return listOrdersToolInput{}, fmt.Errorf("invalid limit: %w", err)
+	}
+	if limit < 0 {
+		return listOrdersToolInput{}, errors.New("limit must be non-negative")
+	}
+	if limit == 0 {
+		limit = defaultListOrdersLimit
+	}
+	if limit > maxListOrdersToolLimit {
+		limit = maxListOrdersToolLimit
+	}
+
+	return listOrdersToolInput{
+		SessionID: sessionID,
+		Status:    status,
+		DateFrom:  dateFrom,
+		DateTo:    dateTo,
+		Page:      page,
+		Limit:     limit,
 	}, nil
 }
 
@@ -135,6 +266,131 @@ func validateRefundableOrder(order *domain.Order, amount float64) error {
 	}
 	if amount-maxRefund > refundAmountTolerance {
 		return fmt.Errorf("refund amount cannot exceed %.2f", maxRefund)
+	}
+	return nil
+}
+
+func normalizeOrderToolStatus(value any) string {
+	status := strings.ToLower(strings.TrimSpace(posToolString(value)))
+	if status == "" {
+		return ""
+	}
+	status = strings.ReplaceAll(status, "-", "_")
+	status = strings.ReplaceAll(status, " ", "_")
+	switch domain.OrderStatus(status) {
+	case domain.OrderStatusPending,
+		domain.OrderStatusConfirmed,
+		domain.OrderStatusPreparing,
+		domain.OrderStatusReady,
+		domain.OrderStatusServed,
+		domain.OrderStatusPaid,
+		domain.OrderStatusCancelled,
+		domain.OrderStatusRefunded,
+		domain.OrderStatusVoided,
+		domain.OrderStatusHeld:
+		return status
+	default:
+		return ""
+	}
+}
+
+func validateOrderToolDateRange(dateFrom, dateTo string) error {
+	if dateFrom == "" || dateTo == "" {
+		return nil
+	}
+	parsedFrom, err := time.Parse(posToolCalendarDate, dateFrom)
+	if err != nil {
+		return fmt.Errorf("invalid date_from: %w", err)
+	}
+	parsedTo, err := time.Parse(posToolCalendarDate, dateTo)
+	if err != nil {
+		return fmt.Errorf("invalid date_to: %w", err)
+	}
+	if parsedTo.Before(parsedFrom) {
+		return errors.New("date_to must be on or after date_from")
+	}
+	return nil
+}
+
+func orderToolPayload(order domain.Order) map[string]any {
+	return map[string]any{
+		"id":              order.ID,
+		"session_id":      order.SessionID,
+		"table_id":        order.TableID,
+		"location_id":     order.LocationID,
+		"order_number":    order.OrderNumber,
+		"type":            string(order.Type),
+		"status":          string(order.Status),
+		"customer_id":     order.CustomerID,
+		"customer_name":   order.CustomerName,
+		"staff_id":        order.StaffID,
+		"subtotal":        order.Subtotal,
+		"discount_amount": order.DiscountAmount,
+		"tax_amount":      order.TaxAmount,
+		"total":           order.Total,
+		"payment_method":  string(order.PaymentMethod),
+		"payment_status":  string(order.PaymentStatus),
+		"amount_paid":     order.AmountPaid,
+		"change_due":      order.ChangeDue,
+		"item_count":      len(order.Items),
+		"created_at":      formatOrderToolTime(order.CreatedAt),
+		"paid_at":         formatOrderToolOptionalTime(order.PaidAt),
+	}
+}
+
+func formatOrderToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.Format(posToolTimestampDate)
+}
+
+func formatOrderToolOptionalTime(value *time.Time) string {
+	if value == nil {
+		return ""
+	}
+	return formatOrderToolTime(*value)
+}
+
+func posToolDate(value any) (string, error) {
+	switch v := value.(type) {
+	case nil:
+		return "", nil
+	case time.Time:
+		if v.IsZero() {
+			return "", nil
+		}
+		return v.Format(posToolCalendarDate), nil
+	case string:
+		raw := strings.TrimSpace(v)
+		if raw == "" {
+			return "", nil
+		}
+		for _, layout := range []string{posToolCalendarDate, time.RFC3339, time.RFC3339Nano} {
+			parsed, err := time.Parse(layout, raw)
+			if err == nil {
+				return parsed.Format(posToolCalendarDate), nil
+			}
+		}
+		return "", errors.New("must be YYYY-MM-DD or RFC3339")
+	default:
+		return "", fmt.Errorf("unsupported value %T", value)
+	}
+}
+
+func firstPosToolValue(input map[string]any, keys ...string) any {
+	for _, key := range keys {
+		value, ok := input[key]
+		if !ok {
+			continue
+		}
+		if raw, ok := value.(string); ok && strings.TrimSpace(raw) == "" {
+			continue
+		}
+		if number, ok := value.(float64); ok && math.IsNaN(number) {
+			continue
+		}
+		return value
 	}
 	return nil
 }
