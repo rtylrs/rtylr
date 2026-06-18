@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { Package, Search, Plus } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Product } from '../../shared/services/erpApi';
 import { useProducts } from '../products/useProducts';
+import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 
 const AMBER = '#f59e0b';
 
@@ -51,8 +51,8 @@ const SkeletonTableRow: React.FC = () => (
 
 const Inventory: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const { data: productResult, isLoading } = useProducts();
   const products = productResult?.products ?? [];
 
@@ -80,7 +80,7 @@ const Inventory: React.FC = () => {
         </h2>
         <button
           data-testid="inventory-add-product-button"
-          onClick={() => navigate({ to: '/products' })}
+          onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{ background: AMBER, color: '#000' }}
           onMouseEnter={(e) => {
@@ -252,6 +252,7 @@ const Inventory: React.FC = () => {
           </div>
         </div>
       </motion.div>
+      <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
     </motion.div>
   );
 };

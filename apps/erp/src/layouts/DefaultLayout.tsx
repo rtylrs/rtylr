@@ -60,7 +60,7 @@ const navGroups: NavGroup[] = [
     label: 'Workspace',
     items: [
       { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-      { label: 'Products', path: '/products', icon: Package },
+      { label: 'Inventory', path: '/inventory', icon: Package },
     ],
   },
   {
@@ -103,7 +103,7 @@ const navGroups: NavGroup[] = [
 const routeLabels: Record<string, string> = {
   '/': 'Dashboard',
   '/products': 'Products',
-  '/inventory': 'Products',
+  '/inventory': 'Inventory',
   '/purchasing': 'Purchase Orders',
   '/suppliers': 'Suppliers',
   '/categories': 'Categories',
@@ -194,7 +194,6 @@ const DefaultLayout: React.FC = () => {
 
   useForesightLinks(sidebarRef, {
     '/': () => import('../features/dashboard/Dashboard'),
-    '/products': () => import('../features/products/Products'),
     '/inventory': () => import('../features/inventory/Inventory'),
     '/categories': () => import('../features/categories/Categories'),
     '/brands': () => import('../features/brands/Brands'),
@@ -286,7 +285,7 @@ const DefaultLayout: React.FC = () => {
       } else if (e.shiftKey) {
         if (e.key === 'I' || e.key === 'i') {
           e.preventDefault();
-          navigate({ to: '/products' });
+          navigate({ to: '/inventory' });
         } else if (e.key === 'P' || e.key === 'p') {
           e.preventDefault();
           navigate({ to: '/purchasing' });

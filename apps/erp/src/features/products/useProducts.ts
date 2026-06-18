@@ -125,17 +125,19 @@ function applyFilters(list: ProductWithCategoryId[], f?: ProductFilters): Produc
 export function useProducts(filters?: ProductFilters) {
   const page = filters?.page ?? 1;
   const pageSize = filters?.pageSize ?? 50;
+  const search = filters?.search?.trim();
+  const categoryId = filters?.categoryId;
   return useQuery<ProductListResult>({
-    queryKey: ['products', { ...filters, page, pageSize }],
+    queryKey: ['products', { ...filters, search, categoryId, page, pageSize }],
     queryFn: async () => {
-      const res = await unwrap(
-        erpApi.listProducts({
-          search: filters?.search,
-          category_id: filters?.categoryId,
-          page,
-          page_size: pageSize,
-        })
-      );
+      const params: NonNullable<Parameters<typeof erpApi.listProducts>[0]> = {
+        page,
+        page_size: pageSize,
+      };
+      if (search) params.search = search;
+      if (categoryId !== undefined) params.category_id = categoryId;
+
+      const res = await unwrap(erpApi.listProducts(params));
       const raw = unwrapList<BackendProduct>(res, 'products');
       const parsed: ProductWithCategoryId[] = raw.map((r) => {
         const normalized = normalizeProduct(r);

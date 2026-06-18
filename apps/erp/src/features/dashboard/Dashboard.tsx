@@ -21,6 +21,7 @@ import { useSuppliers } from '../suppliers/useSuppliers';
 import { useActivity } from '../../shared/hooks/useActivity';
 import { timeAgo, formatCurrency } from '../../shared/lib/format';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 
 const AMBER = 'var(--erp-accent, #f59e0b)';
 
@@ -64,6 +65,7 @@ const itemVariants = {
 };
 
 const Dashboard: React.FC = () => {
+  const [quickAddOpen, setQuickAddOpen] = React.useState(false);
   const { data: lowStockData, isLoading: lowStockLoading } = useLowStock();
   const { data: ordersResult, isLoading: ordersLoading } = usePurchaseOrders();
   const { data: productsResult, isLoading: productsLoading } = useProducts();
@@ -93,7 +95,7 @@ const Dashboard: React.FC = () => {
       icon: Package,
       change: '',
       changePositive: true,
-      to: '/products',
+      to: '/inventory',
     },
     {
       label: 'Low Stock Items',
@@ -145,14 +147,15 @@ const Dashboard: React.FC = () => {
             {today}
           </p>
         </div>
-        <Link
-          to="/products"
+        <button
+          type="button"
+          onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
           style={{ background: AMBER, color: '#000', textDecoration: 'none' }}
         >
           <PackagePlus size={14} />
           New Product
-        </Link>
+        </button>
       </motion.div>
 
       {/* Stat cards */}
@@ -409,6 +412,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
     </motion.div>
   );
 };
