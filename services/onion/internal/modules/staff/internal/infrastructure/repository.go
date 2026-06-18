@@ -230,10 +230,40 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 }
 
 func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
-	row, err := r.queries.GetStaffByID(ctx, sqlc.GetStaffByIDParams{
-		ID:      staffID,
-		OwnerID: ownerID,
-	})
+	var s domain.Staff
+	var (
+		userID                sql.NullInt64
+		departmentID          sql.NullInt64
+		phone                 sql.NullString
+		employmentType        sql.NullString
+		statusVal             sql.NullString
+		salary                sql.NullString
+		hourlyRate            sql.NullString
+		overtimeRate          sql.NullString
+		endDate               sql.NullTime
+		address               sql.NullString
+		emergencyContactName  sql.NullString
+		emergencyContactPhone sql.NullString
+		apps                  []byte
+		notes                 sql.NullString
+		createdAt             sql.NullTime
+		updatedAt             sql.NullTime
+	)
+
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT id, owner_id, user_id, department_id, first_name, last_name, email, phone,
+		       role, employment_type, status, salary, hourly_rate, overtime_rate,
+		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
+		       apps, notes, created_at, updated_at
+		FROM hr_staff
+		WHERE id = ? AND owner_id = ?
+	`, staffID, ownerID).Scan(
+		&s.ID, &s.OwnerID, &userID, &departmentID,
+		&s.FirstName, &s.LastName, &s.Email, &phone,
+		&s.Role, &employmentType, &statusVal, &salary, &hourlyRate, &overtimeRate,
+		&s.StartDate, &endDate, &address, &emergencyContactName, &emergencyContactPhone,
+		&apps, &notes, &createdAt, &updatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrStaffNotFound
@@ -241,7 +271,55 @@ func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (
 		return nil, err
 	}
 
-	s := staffFromRow(row)
+	if userID.Valid {
+		s.UserID = userID.Int64
+	}
+	if departmentID.Valid {
+		s.DepartmentID = departmentID.Int64
+	}
+	if phone.Valid {
+		s.Phone = phone.String
+	}
+	if employmentType.Valid {
+		s.EmploymentType = employmentType.String
+	}
+	if statusVal.Valid {
+		s.Status = statusVal.String
+	}
+	if salary.Valid {
+		s.Salary = parseDecimal(salary.String)
+	}
+	if hourlyRate.Valid {
+		s.HourlyRate = parseDecimal(hourlyRate.String)
+	}
+	if overtimeRate.Valid {
+		s.OvertimeRate = parseDecimal(overtimeRate.String)
+	}
+	if endDate.Valid {
+		s.EndDate = endDate.Time
+	}
+	if address.Valid {
+		s.Address = address.String
+	}
+	if emergencyContactName.Valid {
+		s.EmergencyContactName = emergencyContactName.String
+	}
+	if emergencyContactPhone.Valid {
+		s.EmergencyContactPhone = emergencyContactPhone.String
+	}
+	if apps != nil {
+		s.Apps = string(apps)
+	}
+	if notes.Valid {
+		s.Notes = notes.String
+	}
+	if createdAt.Valid {
+		s.CreatedAt = createdAt.Time
+	}
+	if updatedAt.Valid {
+		s.UpdatedAt = updatedAt.Time
+	}
+
 	return &s, nil
 }
 
