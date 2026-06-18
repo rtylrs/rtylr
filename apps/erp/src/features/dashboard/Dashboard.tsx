@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Activity,
   PackagePlus,
+  Tags,
 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { useProducts } from '../products/useProducts';
@@ -21,6 +22,12 @@ import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import { useDashboardStats } from '../../shared/hooks/queries/useDashboardStats';
 
 const AMBER = 'var(--erp-accent, #f59e0b)';
+const CARD_STYLE: React.CSSProperties = {
+  background: 'var(--hub-card)',
+  border: '1px solid var(--hub-border)',
+};
+const CARD_CLASS = 'flex h-full min-h-0 flex-col rounded-lg p-4';
+const SCROLL_AREA_CLASS = 'min-h-0 flex-1 overflow-y-auto pr-1';
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -72,6 +79,7 @@ const Dashboard: React.FC = () => {
   const isLoading = statsLoading || productsLoading;
   const lowStockItems = dashboardStats?.lowStockItems ?? [];
   const recentOrders = (dashboardStats?.recentOrders ?? []).slice(0, 3);
+  const topCategories = dashboardStats?.topCategories ?? [];
   const criticalLowStockCount = lowStockItems.filter((i) => i.stock <= 5).length;
 
   const stats = [
@@ -144,23 +152,18 @@ const Dashboard: React.FC = () => {
         </button>
       </motion.div>
 
-      {/* Stat cards */}
       <motion.div
         variants={containerVariants as any}
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid auto-rows-[168px] grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div key={stat.label} variants={itemVariants as any}>
+            <motion.div key={stat.label} variants={itemVariants as any} className="h-full">
               <Link
                 to={stat.to}
-                className="block rounded-xl p-4 transition-all"
-                style={{
-                  background: 'var(--hub-card)',
-                  border: '1px solid var(--hub-border)',
-                  textDecoration: 'none',
-                }}
+                className={`${CARD_CLASS} justify-between transition-all`}
+                style={{ ...CARD_STYLE, textDecoration: 'none' }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)';
                 }}
@@ -179,64 +182,54 @@ const Dashboard: React.FC = () => {
                     <Icon size={14} style={{ color: AMBER }} />
                   </span>
                 </div>
-                <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-                  {isLoading ? '…' : stat.value}
-                </p>
-                {stat.change && (
-                  <p
-                    className="text-xs mt-1"
-                    style={{
-                      color: stat.changePositive
-                        ? 'var(--erp-success, #10b981)'
-                        : 'var(--erp-danger, #f87171)',
-                    }}
-                  >
-                    {stat.change}
+                <div>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
+                    {isLoading ? '…' : stat.value}
                   </p>
-                )}
+                  {stat.change && (
+                    <p
+                      className="text-xs mt-1"
+                      style={{
+                        color: stat.changePositive
+                          ? 'var(--erp-success, #10b981)'
+                          : 'var(--erp-danger, #f87171)',
+                      }}
+                    >
+                      {stat.change}
+                    </p>
+                  )}
+                </div>
               </Link>
             </motion.div>
           );
         })}
-      </motion.div>
 
-      {/* Extra widgets row */}
-      <motion.div
-        variants={containerVariants as any}
-        className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(320px,0.9fr)]"
-      >
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
-          <div className="flex items-center gap-2 mb-3">
+        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+          <div className="flex items-center gap-2">
             <TrendingUp size={14} style={{ color: 'var(--erp-success, #10b981)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Inventory Value
             </h3>
           </div>
-          <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-            {isLoading ? '…' : formatCurrency(inventoryValue)}
-          </p>
-          <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-            active tracked stock at cost
-          </p>
+          <div className="mt-auto">
+            <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
+              {isLoading ? '…' : formatCurrency(inventoryValue)}
+            </p>
+            <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
+              active tracked stock at cost
+            </p>
+          </div>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
+        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <Package size={14} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Top 5 Items
             </h3>
           </div>
-          <div className="space-y-1.5">
-            {(productsData || []).slice(0, 5).map((p, i) => (
+          <div className={`${SCROLL_AREA_CLASS} space-y-1.5`}>
+            {productsData.slice(0, 5).map((p, i) => (
               <div key={p.id} className="flex items-center gap-2">
                 <span className="text-[10px] w-4" style={{ color: 'var(--hub-text-dim)' }}>
                   {i + 1}
@@ -249,21 +242,54 @@ const Dashboard: React.FC = () => {
                 </span>
               </div>
             ))}
+            {!productsData.length && (
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                No products yet
+              </p>
+            )}
           </div>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
+        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+          <div className="flex items-center gap-2 mb-3">
+            <Tags size={14} style={{ color: AMBER }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Top Categories
+            </h3>
+          </div>
+          <div className={`${SCROLL_AREA_CLASS} space-y-1.5`}>
+            {topCategories.slice(0, 5).map((category, i) => (
+              <div key={category.name || i} className="flex items-center gap-2">
+                <span className="text-[10px] w-4" style={{ color: 'var(--hub-text-dim)' }}>
+                  {i + 1}
+                </span>
+                <span
+                  className="text-xs flex-1 truncate"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  {category.name}
+                </span>
+                <span className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
+                  {category.productCount}
+                </span>
+              </div>
+            ))}
+            {!topCategories.length && (
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                No categories yet
+              </p>
+            )}
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
             <Activity size={14} style={{ color: 'var(--erp-info, #60a5fa)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Recent Activity
             </h3>
           </div>
-          <div className="space-y-2">
+          <div className={`${SCROLL_AREA_CLASS} space-y-2`}>
             {activityData.slice(0, 5).map((a) => {
               const Icon = activityIconFor(a.type);
               return (
@@ -287,18 +313,16 @@ const Dashboard: React.FC = () => {
                 </div>
               );
             })}
+            {!activityData.length && (
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                No recent activity
+              </p>
+            )}
           </div>
         </motion.div>
-      </motion.div>
 
-      {/* Two column grid */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
-          <div className="flex items-center gap-2 mb-4">
+        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+          <div className="flex items-center gap-2 mb-3">
             <TrendingDown size={15} style={{ color: 'var(--erp-danger, #f87171)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Low Stock Alert
@@ -310,7 +334,7 @@ const Dashboard: React.FC = () => {
               {isLoading ? '…' : `${dashboardStats?.lowStockCount ?? 0} items`}
             </span>
           </div>
-          <div className="space-y-1">
+          <div className={`${SCROLL_AREA_CLASS} space-y-1`}>
             {isLoading
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={3} />)
               : lowStockItems.slice(0, 5).map((item) => (
@@ -338,21 +362,22 @@ const Dashboard: React.FC = () => {
                     </p>
                   </div>
                 ))}
+            {!isLoading && !lowStockItems.length && (
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                No low stock items
+              </p>
+            )}
           </div>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
-          <div className="flex items-center gap-2 mb-4">
+        <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
+          <div className="flex items-center gap-2 mb-3">
             <Clock size={15} style={{ color: AMBER }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Recent Purchase Orders
             </h3>
           </div>
-          <div className="space-y-1">
+          <div className={`${SCROLL_AREA_CLASS} space-y-1`}>
             {isLoading
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
               : recentOrders.map((order) => {
@@ -395,9 +420,14 @@ const Dashboard: React.FC = () => {
                     </div>
                   );
                 })}
+            {!isLoading && !recentOrders.length && (
+              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                No purchase orders yet
+              </p>
+            )}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
       <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
     </motion.div>
   );
