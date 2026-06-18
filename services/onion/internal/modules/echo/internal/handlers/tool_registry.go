@@ -22,6 +22,7 @@ var CoreTools = []ToolDef{
 	{Name: "pos.refund_order", Description: "Refund a POS order.", Module: "pos", Scope: "write", RequiresApproval: true},
 	{Name: "erp.list_products", Description: "List inventory products.", Module: "erp", Scope: "read"},
 	{Name: "erp.set_stock", Description: "Set product stock quantity.", Module: "erp", Scope: "write", RequiresApproval: true},
+	{Name: "erp.create_supplier", Description: "Create an ERP supplier.", Module: "erp", Scope: "write", RequiresApproval: true},
 	{Name: "hr.list_employees", Description: "List employees.", Module: "hr", Scope: "read"},
 	{Name: "hr.create_employee", Description: "Create an HR employee record.", Module: "hr", Scope: "write", RequiresApproval: true},
 	{Name: "flow.list_tasks", Description: "List Flow tasks.", Module: "flow", Scope: "read"},
@@ -33,6 +34,7 @@ var CoreTools = []ToolDef{
 var promptExecutableWriteTools = map[string]struct{}{
 	"crm.create_customer":    {},
 	"erp.set_stock":          {},
+	"erp.create_supplier":    {},
 	"flow.create_task":       {},
 	"finance.record_expense": {},
 	"pos.refund_order":       {},
