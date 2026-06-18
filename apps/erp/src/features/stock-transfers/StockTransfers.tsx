@@ -9,6 +9,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
+import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
@@ -33,8 +34,11 @@ function statusConfig(status: StockTransferStatus): { color: string; bg: string 
 }
 
 const StockTransfers: React.FC = () => {
-  const { data: transferResult, isLoading } = useStockTransfers();
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
+  const { data: transferResult, isLoading } = useStockTransfers({ page, pageSize });
   const transfers = transferResult?.transfers ?? [];
+  const hasMore = transferResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
   const createMut = useCreateStockTransfer();
   const [showCreate, setShowCreate] = useState(false);
@@ -162,6 +166,12 @@ const StockTransfers: React.FC = () => {
           )}
         </div>
       </div>
+      <PaginationControls
+        page={page}
+        hasMore={hasMore}
+        itemCount={transfers.length}
+        onPageChange={setPage}
+      />
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"

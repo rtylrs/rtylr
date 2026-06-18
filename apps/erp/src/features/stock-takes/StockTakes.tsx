@@ -14,6 +14,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { formatDate } from '../../shared/lib/format';
+import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
@@ -31,8 +32,11 @@ const inputStyle: React.CSSProperties = {
 };
 
 const StockTakes: React.FC = () => {
-  const { data: stockTakeResult, isLoading } = useStockTakes();
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
+  const { data: stockTakeResult, isLoading } = useStockTakes({ page, pageSize });
   const stockTakes = stockTakeResult?.stockTakes ?? [];
+  const hasMore = stockTakeResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
@@ -206,6 +210,13 @@ const StockTakes: React.FC = () => {
           })
         )}
       </div>
+
+      <PaginationControls
+        page={page}
+        hasMore={hasMore}
+        itemCount={stockTakes.length}
+        onPageChange={setPage}
+      />
 
       {showCreate && (
         <div

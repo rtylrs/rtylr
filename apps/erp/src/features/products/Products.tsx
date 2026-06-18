@@ -15,6 +15,7 @@ import BulkActionBar from '../../shared/components/BulkActionBar';
 import ExportButton from '../../shared/components/ExportButton';
 import ImportCSV from '../../shared/components/ImportCSV';
 import EmptyState from '../../shared/components/EmptyState';
+import PaginationControls from '../../shared/components/PaginationControls';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PageHeader from '../../shared/components/PageHeader';
@@ -33,13 +34,27 @@ const Products: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [showAdd, setShowAdd] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
 
-  const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch };
+  const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch, page, pageSize };
   const { data: productResult, isLoading } = useProducts(mergedFilters);
   const products = productResult?.products ?? [];
+  const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();
   const deleteMut = useDeleteProduct();
+
+  const changePage = (nextPage: number): void => {
+    setSelected(new Set());
+    setPage(nextPage);
+  };
+
+  const updateFilters = (next: ProductFilters): void => {
+    setSelected(new Set());
+    setPage(1);
+    setFilters(next);
+  };
 
   const toggle = (id: number) => {
     const next = new Set(selected);
@@ -84,7 +99,7 @@ const Products: React.FC = () => {
       <HelmetContainer title="Products · rtylr" />
       <PageHeader
         title={t('erp.products.title')}
-        description={t('erp.products.catalogCount', { count: products.length })}
+        description={`Page ${page} · ${products.length} product${products.length === 1 ? '' : 's'} shown`}
         actions={
           <>
             <ImportCSV
@@ -117,7 +132,11 @@ const Products: React.FC = () => {
           />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setSelected(new Set());
+              setSearch(e.target.value);
+            }}
             placeholder="Search products…"
             className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none"
             style={{
@@ -144,7 +163,7 @@ const Products: React.FC = () => {
         </button>
         <button
           onClick={() =>
-            setFilters({
+            updateFilters({
               ...filters,
               sort: 'name',
               sortDir: filters.sortDir === 'asc' ? 'desc' : 'asc',
@@ -311,10 +330,17 @@ const Products: React.FC = () => {
         </div>
       )}
 
+      <PaginationControls
+        page={page}
+        hasMore={hasMore}
+        itemCount={products.length}
+        onPageChange={changePage}
+      />
+
       <FilterDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        onReset={() => setFilters({})}
+        onReset={() => updateFilters({})}
       >
         <div>
           <label
@@ -326,7 +352,7 @@ const Products: React.FC = () => {
           <select
             value={filters.categoryId !== undefined ? String(filters.categoryId) : ''}
             onChange={(e) =>
-              setFilters({
+              updateFilters({
                 ...filters,
                 categoryId: e.target.value ? Number(e.target.value) : undefined,
               })
@@ -355,7 +381,7 @@ const Products: React.FC = () => {
           </label>
           <select
             value={filters.brand || ''}
-            onChange={(e) => setFilters({ ...filters, brand: e.target.value || undefined })}
+            onChange={(e) => updateFilters({ ...filters, brand: e.target.value || undefined })}
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -381,7 +407,10 @@ const Products: React.FC = () => {
           <select
             value={filters.status || ''}
             onChange={(e) =>
-              setFilters({ ...filters, status: (e.target.value as Product['status']) || undefined })
+              updateFilters({
+                ...filters,
+                status: (e.target.value as Product['status']) || undefined,
+              })
             }
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
             style={{

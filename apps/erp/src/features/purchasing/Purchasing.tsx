@@ -21,6 +21,7 @@ import { useSuppliers } from '../suppliers/useSuppliers';
 import { useProducts } from '../products/useProducts';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
+import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
@@ -494,31 +495,12 @@ const Purchasing: React.FC = () => {
         </div>
       )}
 
-      {(page > 1 || hasMore) && (
-        <div className="flex items-center justify-between px-1 py-3">
-          <span className="text-xs" style={{ color: 'var(--erp-text-dim)' }}>
-            Page {page}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-30"
-              style={{ background: 'var(--erp-hover)', color: 'var(--erp-text-muted)' }}
-            >
-              Prev
-            </button>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={!hasMore}
-              className="px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-30"
-              style={{ background: 'var(--erp-hover)', color: 'var(--erp-text-muted)' }}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+      <PaginationControls
+        page={page}
+        hasMore={hasMore}
+        itemCount={orders.length}
+        onPageChange={setPage}
+      />
     </motion.div>
   );
 };

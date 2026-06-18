@@ -3,9 +3,11 @@ import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { Package, Search, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useDebounce } from '@voxire/utils';
 import { Product } from '../../shared/services/erpApi';
 import { useProducts } from '../products/useProducts';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
+import PaginationControls from '../../shared/components/PaginationControls';
 
 const AMBER = '#f59e0b';
 
@@ -53,17 +55,20 @@ const Inventory: React.FC = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const { data: productResult, isLoading } = useProducts();
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
+  const debouncedSearch = useDebounce(search, 300);
+  const { data: productResult, isLoading } = useProducts({
+    search: debouncedSearch,
+    page,
+    pageSize,
+  });
   const products = productResult?.products ?? [];
+  const hasMore = productResult?.hasMore ?? false;
 
-  // Client-side search filters mock data; real API uses search param on mount
-  const filtered = isLoading
-    ? []
-    : products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(search.toLowerCase()) ||
-          p.sku.toLowerCase().includes(search.toLowerCase())
-      );
+  const changePage = (nextPage: number): void => {
+    setPage(nextPage);
+  };
 
   return (
     <motion.div
@@ -106,7 +111,10 @@ const Inventory: React.FC = () => {
           type="text"
           placeholder="Search products…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
           className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none transition-colors"
           style={{
             background: 'var(--hub-input-bg)',
@@ -156,7 +164,7 @@ const Inventory: React.FC = () => {
             <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
-              ) : filtered.length === 0 ? (
+              ) : products.length === 0 ? (
                 <div
                   className="px-4 py-8 text-center text-sm"
                   style={{ color: 'var(--hub-text-muted)' }}
@@ -164,7 +172,7 @@ const Inventory: React.FC = () => {
                   No products found.
                 </div>
               ) : (
-                filtered.map((product) => {
+                products.map((product) => {
                   const sc = statusConfig[product.status];
                   return (
                     <div
@@ -252,6 +260,12 @@ const Inventory: React.FC = () => {
           </div>
         </div>
       </motion.div>
+      <PaginationControls
+        page={page}
+        hasMore={hasMore}
+        itemCount={products.length}
+        onPageChange={changePage}
+      />
       <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
     </motion.div>
   );

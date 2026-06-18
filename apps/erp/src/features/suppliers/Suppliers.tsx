@@ -8,6 +8,7 @@ import { Supplier } from '../../shared/services/erpApi';
 import { useSuppliers, useCreateSupplier } from './useSuppliers';
 import SupplierScorecard from '../../shared/components/SupplierScorecard';
 import ExportButton from '../../shared/components/ExportButton';
+import PaginationControls from '../../shared/components/PaginationControls';
 
 const AMBER = '#f59e0b';
 
@@ -80,8 +81,11 @@ const SkeletonCard: React.FC = () => (
 
 const Suppliers: React.FC = () => {
   const { t } = useTranslation();
-  const { data: supplierResult, isLoading } = useSuppliers();
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
+  const { data: supplierResult, isLoading } = useSuppliers({ page, pageSize });
   const suppliers = supplierResult?.suppliers ?? [];
+  const hasMore = supplierResult?.hasMore ?? false;
   const createMut = useCreateSupplier();
   const [showScorecards, setShowScorecards] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -287,6 +291,13 @@ const Suppliers: React.FC = () => {
               );
             })}
       </motion.div>
+
+      <PaginationControls
+        page={page}
+        hasMore={hasMore}
+        itemCount={suppliers.length}
+        onPageChange={setPage}
+      />
 
       {showCreate && (
         <div
