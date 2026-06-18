@@ -248,3 +248,31 @@ func TestParseRecordPaymentToolInputRejectsBadCurrency(t *testing.T) {
 		t.Fatalf("error = %v, want currency validation", err)
 	}
 }
+
+func TestParseSendInvoiceToolInput(t *testing.T) {
+	invoiceID, err := parseSendInvoiceToolInput(map[string]any{
+		"invoice": "42",
+	})
+	if err != nil {
+		t.Fatalf("parseSendInvoiceToolInput returned error: %v", err)
+	}
+	if invoiceID != 42 {
+		t.Fatalf("invoiceID = %d, want 42", invoiceID)
+	}
+}
+
+func TestParseSendInvoiceToolInputRejectsMissingInvoice(t *testing.T) {
+	_, err := parseSendInvoiceToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "invoice_id") {
+		t.Fatalf("error = %v, want invoice_id validation", err)
+	}
+}
+
+func TestParseSendInvoiceToolInputRejectsBadInvoice(t *testing.T) {
+	_, err := parseSendInvoiceToolInput(map[string]any{
+		"invoice_id": "abc",
+	})
+	if err == nil || !strings.Contains(err.Error(), "invoice_id") {
+		t.Fatalf("error = %v, want invoice_id validation", err)
+	}
+}

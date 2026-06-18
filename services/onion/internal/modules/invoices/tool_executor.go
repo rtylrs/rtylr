@@ -22,6 +22,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case "finance.record_payment":
 		output, err := m.executeRecordPaymentTool(ctx, input)
 		return output, true, err
+	case "finance.send_invoice":
+		output, err := m.executeSendInvoiceTool(ctx, input)
+		return output, true, err
 	default:
 		return nil, false, nil
 	}
@@ -111,6 +114,30 @@ func (m *Module) executeRecordPaymentTool(ctx context.Context, input map[string]
 			"reference":    payment.Reference,
 			"notes":        payment.Notes,
 		},
+	}, nil
+}
+
+func (m *Module) executeSendInvoiceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	invoiceID, err := parseSendInvoiceToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := m.service.SendInvoice(ctx, authUser.UserID, invoiceID); err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"invoice": map[string]any{
+			"id":     invoiceID,
+			"status": domain.StatusSent,
+		},
+		"message": "Invoice sent successfully",
 	}, nil
 }
 
@@ -240,6 +267,17 @@ func parseRecordPaymentToolInput(input map[string]any, now time.Time) (domain.Pa
 		Reference:   strings.TrimSpace(invoiceToolString(firstInvoiceToolValue(input, "reference", "ref", "payment_reference", "transaction_id"))),
 		Notes:       strings.TrimSpace(invoiceToolString(input["notes"])),
 	}, nil
+}
+
+func parseSendInvoiceToolInput(input map[string]any) (int64, error) {
+	invoiceID, err := invoiceToolInt64(firstInvoiceToolValue(input, "invoice_id", "invoice", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid invoice_id: %w", err)
+	}
+	if invoiceID <= 0 {
+		return 0, errors.New("invoice_id is required")
+	}
+	return invoiceID, nil
 }
 
 func invoiceToolDueDate(input map[string]any, issueDate string) (string, error) {
