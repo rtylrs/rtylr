@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestBuildCaretPromptIncludesBusinessContractModeToolsAndContext(t *testing.T) {
+func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 	got := buildCaretPrompt(caretPromptInput{
 		Mode:               ModeAnalyst,
 		ConversationPrompt: "Current request: revenue today",
@@ -20,14 +20,7 @@ func TestBuildCaretPromptIncludesBusinessContractModeToolsAndContext(t *testing.
 		"Today: 2026-06-18",
 		"Act like a capable business operator",
 		"Mode:\nanalyst",
-		"Use read-only tools to gather data before answering.",
-		"Available business capability catalog:",
-		"analytics.query [read]",
-		"crm.list_customers [read]",
-		"crm.create_customer [write, approval required]",
-		"Structured stream controls:",
-		`<tool>{"name":"tool.name","input":{}}</tool>`,
-		"never reveal private chain-of-thought",
+		"server-provided analytics grounding",
 		"Current application context:",
 		"Route: /finance/dashboard",
 		"Conversation, memory, and current request:",
@@ -36,6 +29,35 @@ func TestBuildCaretPromptIncludesBusinessContractModeToolsAndContext(t *testing.
 	for _, want := range mustContain {
 		if !strings.Contains(got, want) {
 			t.Fatalf("prompt missing %q\nprompt:\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "Available business capability catalog:") {
+		t.Fatalf("analyst prompt should not invite model-emitted tool calls:\n%s", got)
+	}
+}
+
+func TestBuildCaretPromptAgentModeIncludesWriteToolProposalsOnly(t *testing.T) {
+	got := buildCaretPrompt(caretPromptInput{
+		Mode:               ModeAgent,
+		ConversationPrompt: "Current request: create a customer",
+		Now:                time.Date(2026, 6, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	mustContain := []string{
+		"Available business capability catalog:",
+		"crm.create_customer [write, approval required]",
+		"Structured stream controls:",
+		`<tool>{"name":"tool.name","input":{}}</tool>`,
+		"never reveal private chain-of-thought",
+	}
+	for _, want := range mustContain {
+		if !strings.Contains(got, want) {
+			t.Fatalf("agent prompt missing %q\nprompt:\n%s", want, got)
+		}
+	}
+	for _, forbidden := range []string{"crm.list_customers [read]", "pos.list_orders [read]", "analytics.query [read]"} {
+		if strings.Contains(got, forbidden) {
+			t.Fatalf("agent prompt should not advertise non-executable read tool %q\nprompt:\n%s", forbidden, got)
 		}
 	}
 }

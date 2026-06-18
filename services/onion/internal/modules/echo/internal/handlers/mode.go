@@ -19,8 +19,8 @@ func (m CaretMode) SystemPromptAddendum() string {
 		return "You are in Agent mode. You may call tools to perform actions. Summarize " +
 			"your plan before mutating tools and request approval for irreversible actions."
 	case ModeAnalyst:
-		return "You are in Analyst mode. Prefer concise tables and bullets. Use read-only " +
-			"tools to gather data before answering."
+		return "You are in Analyst mode. Prefer concise tables and bullets. Use the " +
+			"server-provided analytics grounding when it is present; do not propose unrelated tools."
 	case ModeSupport:
 		return "You are in Support mode. Help the user navigate the product and explain " +
 			"features. Never mutate data without explicit approval."

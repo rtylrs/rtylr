@@ -185,6 +185,30 @@ func TestStreamRendererSilentlyDropsInvalidToolMarker(t *testing.T) {
 	}
 }
 
+func TestStreamRendererSilentlyDropsReadToolMarker(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+
+	err := renderer.AppendText(`Done. <tool>{"name":"crm.list_customers","input":{}}</tool>`)
+	if err != nil {
+		t.Fatalf("append tool chunk: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	for _, event := range events {
+		if event.Type == EventToolCall || event.Type == EventToolResult || event.Type == EventError {
+			t.Fatalf("read tool marker should be silent, got %#v", events)
+		}
+	}
+	if full.String() != "Done. " {
+		t.Fatalf("expected text before read marker to remain, got %q", full.String())
+	}
+}
+
 func TestStreamRendererSilentlyDropsIncompleteToolMarker(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}

@@ -53,3 +53,20 @@ func ToolsForMode(m CaretMode) []ToolDef {
 	}
 	return CoreTools
 }
+
+// PromptToolsForMode returns only the tools the model may explicitly propose in
+// an answer stream. Read tools are either server-grounded today
+// (analytics.query) or catalog-only placeholders, so advertising them causes
+// broken "execution unavailable" cards.
+func PromptToolsForMode(m CaretMode) []ToolDef {
+	if m != ModeAgent {
+		return nil
+	}
+	out := make([]ToolDef, 0, len(CoreTools))
+	for _, t := range CoreTools {
+		if t.Scope == "write" {
+			out = append(out, t)
+		}
+	}
+	return out
+}

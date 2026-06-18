@@ -187,7 +187,11 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	}
 
 	def, ok := ToolByName(call.Name)
-	requiresApproval := !ok || def.RequiresApproval || def.Scope == "write"
+	if !ok || def.Scope == "read" {
+		return nil
+	}
+
+	requiresApproval := def.RequiresApproval || def.Scope == "write"
 	blockID := fmt.Sprintf("tool-%d", time.Now().UnixNano())
 	if err := WriteEvent(r.w, r.flush, StreamEvent{
 		Type:             EventToolCall,

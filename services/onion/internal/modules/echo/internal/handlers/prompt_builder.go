@@ -52,7 +52,7 @@ func buildCaretPrompt(in caretPromptInput) string {
 	b.WriteString(mode.SystemPromptAddendum())
 	b.WriteString("\n\n")
 
-	tools := ToolsForMode(mode)
+	tools := PromptToolsForMode(mode)
 	if len(tools) > 0 {
 		b.WriteString("Available business capability catalog:\n")
 		for _, tool := range tools {
