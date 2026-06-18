@@ -169,9 +169,7 @@ export function renderTable(raw: string): string {
   const bodyRows = rows.slice(2);
   const columnCount = Math.max(headers.length, ...bodyRows.map((row) => row.length), 0);
   const normalizedHeaders = normalizeRow(headers, columnCount);
-  const thead = normalizedHeaders
-    .map((cell) => `<th>${renderInlineMarkdown(cell)}</th>`)
-    .join('');
+  const thead = normalizedHeaders.map((cell) => `<th>${renderInlineMarkdown(cell)}</th>`).join('');
   const tbody = bodyRows
     .map((row) => {
       const cells = normalizeRow(row, columnCount)

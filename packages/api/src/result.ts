@@ -64,10 +64,7 @@ function messageFrom(value: unknown): string | null {
 
   const record = value as Record<string, unknown>;
   return (
-    messageFrom(record.message) ??
-    messageFrom(record.error) ??
-    messageFrom(record.detail) ??
-    null
+    messageFrom(record.message) ?? messageFrom(record.error) ?? messageFrom(record.detail) ?? null
   );
 }
 
