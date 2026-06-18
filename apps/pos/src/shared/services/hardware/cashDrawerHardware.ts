@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { canUseNativeHardware } from '../../utils/platform';
 
 type InvokeCommand = (command: string, args?: Record<string, unknown>) => Promise<unknown>;
 
@@ -20,7 +21,7 @@ export async function openConfiguredCashDrawer({
   invokeCommand = invoke,
 }: OpenConfiguredCashDrawerParams): Promise<DrawerResult> {
   const trimmedPrinterName = printerName.trim();
-  if (!enabled || !trimmedPrinterName) {
+  if (!enabled || !trimmedPrinterName || !canUseNativeHardware()) {
     return { status: 'skipped' };
   }
 

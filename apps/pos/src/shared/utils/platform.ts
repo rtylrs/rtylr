@@ -23,6 +23,10 @@ export const isWeb = (): boolean => {
   return !isTauri();
 };
 
+export const canUseNativeHardware = (): boolean => {
+  return isTauri() || import.meta.env.MODE === 'test';
+};
+
 // Get current platform
 export const getPlatform = (): PlatformType => {
   return isTauri() ? 'tauri' : 'web';

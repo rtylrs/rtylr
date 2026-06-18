@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { canUseNativeHardware } from '../../utils/platform';
 
 export type DrawerPin = 2 | 5;
 
@@ -13,7 +14,7 @@ export async function openDrawerSerial(
   baudRate: number = 9600,
   pin: DrawerPin = 2,
 ): Promise<DrawerResult> {
-  if (!portName.trim()) return { status: 'skipped' };
+  if (!portName.trim() || !canUseNativeHardware()) return { status: 'skipped' };
   try {
     const msg = await invoke<string>('open_cash_drawer_serial', {
       portName: portName.trim(),
@@ -32,7 +33,7 @@ export async function openDrawerNetwork(
   port: number = 9100,
   pin: DrawerPin = 2,
 ): Promise<DrawerResult> {
-  if (!host.trim()) return { status: 'skipped' };
+  if (!host.trim() || !canUseNativeHardware()) return { status: 'skipped' };
   try {
     const msg = await invoke<string>('open_cash_drawer_network', {
       host: host.trim(),

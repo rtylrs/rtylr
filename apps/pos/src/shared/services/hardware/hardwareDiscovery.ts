@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { canUseNativeHardware } from '../../utils/platform';
 
 export interface PrinterInfo {
   name: string;
@@ -16,6 +17,7 @@ export interface SerialPortInfo {
 
 /** List all printers available to the OS (Windows: WinAPI, macOS/Linux: CUPS). */
 export async function listPrinters(): Promise<PrinterInfo[]> {
+  if (!canUseNativeHardware()) return [];
   const raw = await invoke<Array<{
     name: string;
     is_default: boolean;
@@ -30,6 +32,7 @@ export async function listPrinters(): Promise<PrinterInfo[]> {
 
 /** List all serial ports, including USB-to-serial adapters. */
 export async function listSerialPorts(): Promise<SerialPortInfo[]> {
+  if (!canUseNativeHardware()) return [];
   const raw = await invoke<Array<{
     port_name: string;
     manufacturer: string | null;
@@ -62,6 +65,7 @@ export async function discoverNetworkHardware(
   subnetPrefix: string,
   timeoutMs = 150,
 ): Promise<DiscoveredDevice[]> {
+  if (!canUseNativeHardware()) return [];
   const raw = await invoke<Array<{
     host: string;
     port: number;

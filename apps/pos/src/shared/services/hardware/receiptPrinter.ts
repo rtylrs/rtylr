@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { canUseNativeHardware } from '../../utils/platform';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,9 @@ export async function printReceipt(
   transport: PrinterTransport,
   receipt: ReceiptData,
 ): Promise<PrintResult> {
+  if (!canUseNativeHardware()) {
+    return { status: 'printed', message: 'Receipt print skipped in browser POS.' };
+  }
   const config = buildConfig(transport);
   const receiptPayload = toSnakeCase(receipt);
 

@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { PrinterSettings, KdsHardwareSettings } from '../../stores/settingsStore';
+import { canUseNativeHardware } from '../../utils/platform';
 
 export interface DeviceStatus {
   name: string;
@@ -61,6 +62,25 @@ export async function checkHardwareHealth(
   printer: PrinterSettings,
   kds: KdsHardwareSettings,
 ): Promise<HardwareHealthReport> {
+  if (!canUseNativeHardware()) {
+    return {
+      printer: {
+        name: 'Browser POS',
+        status: 'not_configured',
+        message: 'Native hardware checks run only in the desktop app.',
+      },
+      drawer: {
+        name: 'Browser POS',
+        status: 'not_configured',
+        message: 'Native cash drawer checks run only in the desktop app.',
+      },
+      kds: {
+        name: 'Browser POS',
+        status: 'not_configured',
+        message: 'Native KDS checks run only in the desktop app.',
+      },
+    };
+  }
   const config = buildConfig(printer, kds);
   const raw = await invoke<{
     printer: { name: string; status: string; message: string };

@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { KdsHardwareSettings } from '../../stores/settingsStore';
+import { canUseNativeHardware } from '../../utils/platform';
 
 export interface KdsTicketItem {
   name: string;
@@ -31,6 +32,8 @@ export async function sendKdsTicket(
   config: KdsHardwareSettings,
   ticket: KdsTicket,
 ): Promise<KdsHardwareResult> {
+  if (!canUseNativeHardware()) return { status: 'skipped' };
+
   const payload = {
     order_number: ticket.orderNumber,
     station: ticket.station ?? null,

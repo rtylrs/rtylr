@@ -18,6 +18,7 @@ import {
 } from '../../shared/services/api/posService';
 import { listPrinters, listSerialPorts } from '../../shared/services/hardware/hardwareDiscovery';
 import type { PrinterInfo, SerialPortInfo } from '../../shared/services/hardware/hardwareDiscovery';
+import { isTauri } from '../../shared/utils/platform';
 import appConfig from '../../app.json';
 import { HardwareHealthCheck } from './HardwareHealthCheck';
 
@@ -55,8 +56,10 @@ const SettingsScreen: React.FC = () => {
   const [serialPorts, setSerialPorts] = useState<SerialPortInfo[]>([]);
   const [discovering, setDiscovering] = useState(false);
   const [savingPOSSettings, setSavingPOSSettings] = useState(false);
+  const nativeHardwareAvailable = isTauri();
 
   const discover = async () => {
+    if (!nativeHardwareAvailable) return;
     setDiscovering(true);
     try {
       const [p, sp] = await Promise.all([listPrinters(), listSerialPorts()]);
@@ -75,9 +78,11 @@ const SettingsScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    discover();
+    if (nativeHardwareAvailable) {
+      discover();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [nativeHardwareAvailable]);
 
   const updateTip = (index: number, value: number) => {
     const next = [...s.tipPresets];
@@ -240,21 +245,27 @@ const SettingsScreen: React.FC = () => {
         </Section>
 
         <Section title="Printer & Cash Drawer">
-          <div className="flex items-center justify-between">
+          {nativeHardwareAvailable ? (
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-pos-muted">
+                {discovering
+                  ? 'Scanning hardware...'
+                  : `${printers.length} printer(s) · ${serialPorts.length} serial port(s) detected`}
+              </p>
+              <button
+                type="button"
+                onClick={discover}
+                disabled={discovering}
+                className="h-8 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
+              >
+                Refresh
+              </button>
+            </div>
+          ) : (
             <p className="text-xs text-pos-muted">
-              {discovering
-                ? 'Scanning hardware...'
-                : `${printers.length} printer(s) · ${serialPorts.length} serial port(s) detected`}
+              Native printer and cash drawer discovery is available in the desktop app only.
             </p>
-            <button
-              type="button"
-              onClick={discover}
-              disabled={discovering}
-              className="h-8 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
-            >
-              Refresh
-            </button>
-          </div>
+          )}
 
           {/* Transport */}
           <div>
@@ -410,7 +421,7 @@ const SettingsScreen: React.FC = () => {
           )}
         </Section>
 
-        {s.features.kitchenDisplay && (
+        {nativeHardwareAvailable && s.features.kitchenDisplay && (
           <Section title="KDS Hardware Display">
             <p className="text-xs text-pos-muted">
               Connect a dedicated hardware KDS display (VFD, kitchen screen) via serial or network.
@@ -500,14 +511,16 @@ const SettingsScreen: React.FC = () => {
           </Section>
         )}
 
-        <Section title="Hardware Status">
-          <HardwareHealthCheck
-            printer={s.printer}
-            kds={s.kdsHardware}
-            showCashDrawer={s.features.cashDrawer}
-            showKds={s.features.kitchenDisplay}
-          />
-        </Section>
+        {nativeHardwareAvailable && (
+          <Section title="Hardware Status">
+            <HardwareHealthCheck
+              printer={s.printer}
+              kds={s.kdsHardware}
+              showCashDrawer={s.features.cashDrawer}
+              showKds={s.features.kitchenDisplay}
+            />
+          </Section>
+        )}
 
         <Section title="Workstation">
           <div className="space-y-3">
