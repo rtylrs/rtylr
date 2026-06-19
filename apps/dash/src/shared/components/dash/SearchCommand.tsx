@@ -25,6 +25,7 @@ import {
   UtensilsCrossed,
   CommandIcon,
   ArrowRight,
+  ScrollText,
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { useCommandPalette } from '../../stores/commandPaletteStore';
