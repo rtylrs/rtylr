@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	CacheVersion = "exact-v1"
+	CacheVersion = "exact-v2"
 
 	OutcomeHit   = "hit"
 	OutcomeMiss  = "miss"
@@ -52,12 +52,14 @@ type PolicyStatus struct {
 }
 
 type ExactKeyParts struct {
-	BusinessID int64
-	UserID     int64
-	Mode       string
-	Provider   string
-	Model      string
-	Prompt     string
+	BusinessID    int64
+	UserID        int64
+	Mode          string
+	Provider      string
+	Model         string
+	RequestDate   string
+	SystemContext string
+	Prompt        string
 }
 
 type ExactResponse struct {
@@ -203,26 +205,34 @@ func ExactTTL() time.Duration {
 
 func ExactKey(parts ExactKeyParts) string {
 	payload := struct {
-		Version    string `json:"version"`
-		BusinessID int64  `json:"business_id"`
-		UserID     int64  `json:"user_id"`
-		Mode       string `json:"mode"`
-		Provider   string `json:"provider"`
-		Model      string `json:"model"`
-		Prompt     string `json:"prompt"`
+		Version       string `json:"version"`
+		BusinessID    int64  `json:"business_id"`
+		UserID        int64  `json:"user_id"`
+		Mode          string `json:"mode"`
+		Provider      string `json:"provider"`
+		Model         string `json:"model"`
+		RequestDate   string `json:"request_date"`
+		SystemContext string `json:"system_context"`
+		Prompt        string `json:"prompt"`
 	}{
-		Version:    CacheVersion,
-		BusinessID: parts.BusinessID,
-		UserID:     parts.UserID,
-		Mode:       normalizeMode(parts.Mode),
-		Provider:   strings.TrimSpace(parts.Provider),
-		Model:      strings.TrimSpace(parts.Model),
-		Prompt:     strings.TrimSpace(parts.Prompt),
+		Version:       CacheVersion,
+		BusinessID:    parts.BusinessID,
+		UserID:        parts.UserID,
+		Mode:          normalizeMode(parts.Mode),
+		Provider:      normalizeText(parts.Provider),
+		Model:         normalizeText(parts.Model),
+		RequestDate:   normalizeText(parts.RequestDate),
+		SystemContext: normalizeText(parts.SystemContext),
+		Prompt:        normalizeText(parts.Prompt),
 	}
 
 	bytes, _ := json.Marshal(payload)
 	sum := sha256.Sum256(bytes)
 	return hex.EncodeToString(sum[:])
+}
+
+func normalizeText(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
 
 func KeyPreview(key string) string {

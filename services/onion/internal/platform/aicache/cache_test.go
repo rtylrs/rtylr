@@ -45,6 +45,49 @@ func TestExactKeyIncludesTenantScope(t *testing.T) {
 	}
 }
 
+func TestExactKeyIncludesStableRequestContext(t *testing.T) {
+	base := ExactKeyParts{
+		BusinessID:    1,
+		UserID:        2,
+		Mode:          "ask",
+		Provider:      "deepseek",
+		RequestDate:   "2026-06-19",
+		SystemContext: "User is in the Dash app.",
+		Prompt:        "show my top customers",
+	}
+
+	otherContext := base
+	otherContext.SystemContext = "User is in the POS app."
+	if ExactKey(base) == ExactKey(otherContext) {
+		t.Fatal("expected app context change to produce a different exact key")
+	}
+
+	otherDate := base
+	otherDate.RequestDate = "2026-06-20"
+	if ExactKey(base) == ExactKey(otherDate) {
+		t.Fatal("expected request date change to produce a different exact key")
+	}
+}
+
+func TestExactKeyNormalizesWhitespace(t *testing.T) {
+	base := ExactKeyParts{
+		BusinessID:    1,
+		UserID:        2,
+		Mode:          "ask",
+		Provider:      "deepseek",
+		RequestDate:   "2026-06-19",
+		SystemContext: "User is in the\nDash app.",
+		Prompt:        " show   my\n top customers ",
+	}
+	same := base
+	same.SystemContext = "User is in the Dash app."
+	same.Prompt = "show my top customers"
+
+	if ExactKey(base) != ExactKey(same) {
+		t.Fatal("expected whitespace-only changes to preserve the exact key")
+	}
+}
+
 func TestExactPolicySkipsUnsafeModes(t *testing.T) {
 	t.Setenv("AI_RESPONSE_CACHE_ENABLED", "")
 

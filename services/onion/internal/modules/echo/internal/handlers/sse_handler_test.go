@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGenerateTextStreamParseRejectsTrailingJSON(t *testing.T) {
@@ -121,6 +122,60 @@ func TestStreamRendererExtractsSplitThinkingMarker(t *testing.T) {
 	}
 	if !strings.Contains(full.String(), "Here is the answer.") || !strings.Contains(full.String(), "Final.") {
 		t.Fatalf("public response missing visible text, got %q", full.String())
+	}
+}
+
+func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	now := time.Date(2026, 6, 19, 11, 0, 0, 0, time.UTC)
+	req := &GenerateTextStreamRequest{
+		Prompt:        "Show my top customers",
+		SystemContext: "User is in the Dash app.",
+		Mode:          string(ModeAsk),
+	}
+
+	first := handler.buildCacheWritePlan(
+		context.Background(),
+		ModeAsk,
+		req,
+		"Recent messages (oldest first):\nuser: Show my top customers\n\nCurrent request: Show my top customers",
+		11,
+		22,
+		now,
+	)
+	second := handler.buildCacheWritePlan(
+		context.Background(),
+		ModeAsk,
+		req,
+		"Recent messages (oldest first):\nuser: Show my top customers\nassistant: cached answer\nuser: Show my top customers\n\nCurrent request: Show my top customers",
+		11,
+		22,
+		now,
+	)
+
+	if first.Key == "" || second.Key == "" {
+		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
+	}
+	if first.Key != second.Key {
+		t.Fatalf("same request identity should reuse cache key despite rolling memory: %q != %q", first.Key, second.Key)
+	}
+	if first.PromptChars == len(req.Prompt) {
+		t.Fatal("prompt chars should still track the full provider prompt for quota estimates")
+	}
+
+	otherReq := *req
+	otherReq.SystemContext = "User is in the POS app."
+	other := handler.buildCacheWritePlan(
+		context.Background(),
+		ModeAsk,
+		&otherReq,
+		"Current request: Show my top customers",
+		11,
+		22,
+		now,
+	)
+	if first.Key == other.Key {
+		t.Fatal("different app context should not share an exact cache key")
 	}
 }
 

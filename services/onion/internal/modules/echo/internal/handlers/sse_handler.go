@@ -186,8 +186,9 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	}
 
 	mode := ParseMode(req.Mode)
+	requestNow := time.Now()
 
-	enhancedPrompt, contextErr := h.buildEnhancedPromptWithContext(ctx, req, mode)
+	enhancedPrompt, contextErr := h.buildEnhancedPromptWithContext(ctx, req, mode, requestNow)
 	if contextErr != nil {
 		log.Error("Failed to get conversation context", logger.Error(contextErr))
 		http.Error(w, "Failed to get context", http.StatusInternalServerError)
@@ -206,7 +207,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		}
 	}
 
-	cachePlan := h.buildCacheWritePlan(ctx, mode, enhancedPrompt, businessID, authUserID)
+	cachePlan := h.buildCacheWritePlan(ctx, mode, req, enhancedPrompt, businessID, authUserID, requestNow)
 	if liveGrounding != nil {
 		cachePlan.Enabled = false
 		cachePlan.Key = ""
@@ -404,7 +405,7 @@ func sessionTitleFromPrompt(prompt string) string {
 	return string(runes[:maxSessionTitleRunes]) + "..."
 }
 
-func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest, mode CaretMode) (string, error) {
+func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest, mode CaretMode, now time.Time) (string, error) {
 	logger.Ctx(ctx).Info("Building enhanced prompt with context",
 		logger.String("session_id", req.SessionID),
 		logger.Int("user_id", int(req.UserID)))
@@ -414,7 +415,7 @@ func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.C
 		Mode:               mode,
 		ConversationPrompt: conversationPrompt,
 		SystemContext:      req.SystemContext,
-		Now:                time.Now(),
+		Now:                now,
 	}), nil
 }
 
@@ -456,9 +457,12 @@ func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, er
 	}
 }
 
-func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, enhancedPrompt string, businessID, userID int64) cacheWritePlan {
+func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, req *GenerateTextStreamRequest, enhancedPrompt string, businessID, userID int64, now time.Time) cacheWritePlan {
 	policy := aicache.ExactPolicyForMode(string(mode))
-	provider := h.AiService.GetPrimaryProvider()
+	provider := ""
+	if h.AiService != nil {
+		provider = h.AiService.GetPrimaryProvider()
+	}
 	plan := cacheWritePlan{
 		Enabled:     policy.Enabled,
 		Mode:        string(mode),
@@ -469,11 +473,13 @@ func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode 
 	}
 	if policy.Enabled {
 		plan.Key = aicache.ExactKey(aicache.ExactKeyParts{
-			BusinessID: businessID,
-			UserID:     userID,
-			Mode:       string(mode),
-			Provider:   provider,
-			Prompt:     enhancedPrompt,
+			BusinessID:    businessID,
+			UserID:        userID,
+			Mode:          string(mode),
+			Provider:      provider,
+			RequestDate:   now.UTC().Format("2006-01-02"),
+			SystemContext: req.SystemContext,
+			Prompt:        req.Prompt,
 		})
 	}
 	return plan
