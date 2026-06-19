@@ -120,7 +120,7 @@ UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
 -- name: GetOrderItems :many
 SELECT id, order_id, menu_item_id, name, sku,
        quantity, unit_price, discount_pct, discount_amount, tax_rate, total,
-       notes, status, created_at, modifiers, combo_id, variant_name
+       notes, status, created_at, COALESCE(modifiers, JSON_ARRAY()) AS modifiers, combo_id, variant_name
 FROM pos_order_items
 WHERE order_id = ?;
 
