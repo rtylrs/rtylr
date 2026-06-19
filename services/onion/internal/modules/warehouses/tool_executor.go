@@ -17,11 +17,19 @@ import (
 
 const (
 	createWarehouseToolName = "erp.create_warehouse"
+	getWarehouseToolName    = "erp.get_warehouse"
 	listWarehousesToolName  = "erp.list_warehouses"
 )
 
+type getWarehouseToolInput struct {
+	WarehouseID int64
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
+	case getWarehouseToolName:
+		output, err := m.executeGetWarehouseTool(ctx, input)
+		return output, true, err
 	case listWarehousesToolName:
 		output, err := m.executeListWarehousesTool(ctx)
 		return output, true, err
@@ -31,6 +39,32 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetWarehouseTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseGetWarehouseToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	warehouse, err := m.service.GetWarehouseByID(ctx, businessID, parsed.WarehouseID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"warehouse": warehouseToolPayload(warehouse),
+	}, nil
 }
 
 func (m *Module) executeListWarehousesTool(ctx context.Context) (map[string]any, error) {
@@ -96,6 +130,17 @@ func (m *Module) executeCreateWarehouseTool(ctx context.Context, input map[strin
 	}, nil
 }
 
+func parseGetWarehouseToolInput(input map[string]any) (getWarehouseToolInput, error) {
+	warehouseID, err := warehouseIDToolValue(firstWarehouseToolValue(input, "warehouse_id", "warehouse", "id"))
+	if err != nil {
+		return getWarehouseToolInput{}, fmt.Errorf("invalid warehouse_id: %w", err)
+	}
+	if warehouseID <= 0 {
+		return getWarehouseToolInput{}, errors.New("warehouse_id is required")
+	}
+	return getWarehouseToolInput{WarehouseID: warehouseID}, nil
+}
+
 func parseCreateWarehouseToolInput(input map[string]any) (domain.WarehouseInput, error) {
 	capacity, err := warehouseToolNonNegativeInt64(firstWarehouseToolValue(input, "capacity"))
 	if err != nil {
@@ -140,6 +185,21 @@ func firstWarehouseToolValue(input map[string]any, keys ...string) any {
 		return value
 	}
 	return nil
+}
+
+func warehouseIDToolValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"warehouse-", "warehouse_", "wh-", "wh_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return warehouseToolInt64(raw)
+	default:
+		return warehouseToolInt64(value)
+	}
 }
 
 func warehouseToolPayload(warehouse domain.Warehouse) map[string]any {

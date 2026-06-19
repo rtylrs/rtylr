@@ -15,6 +15,7 @@ const warehousesCacheTTL = 5 * time.Minute
 
 type repository interface {
 	ListWarehouses(ctx context.Context, businessID int64) ([]domain.Warehouse, error)
+	GetWarehouseByID(ctx context.Context, businessID, id int64) (domain.Warehouse, error)
 	CreateWarehouse(ctx context.Context, businessID int64, input domain.WarehouseInput) (int64, error)
 	UpdateWarehouse(ctx context.Context, businessID, id int64, input domain.WarehouseInput) error
 	DeleteWarehouse(ctx context.Context, businessID, id int64) error
@@ -38,6 +39,10 @@ func (s *Service) ListWarehouses(ctx context.Context, businessID int64) ([]domai
 	return cacher.Of[[]domain.Warehouse]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Warehouse, error) {
 		return s.repo.ListWarehouses(ctx, businessID)
 	}, cacher.WithExpiry(ctx, warehousesCacheTTL))
+}
+
+func (s *Service) GetWarehouseByID(ctx context.Context, businessID, id int64) (domain.Warehouse, error) {
+	return s.repo.GetWarehouseByID(ctx, businessID, id)
 }
 
 func (s *Service) CreateWarehouse(ctx context.Context, businessID int64, input domain.WarehouseInput) (int64, error) {

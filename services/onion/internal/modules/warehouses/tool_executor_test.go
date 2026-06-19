@@ -2,6 +2,7 @@ package warehouses
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -97,6 +98,32 @@ func TestParseCreateWarehouseToolInputRejectsInvalidBool(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected invalid bool error")
+	}
+}
+
+func TestParseGetWarehouseToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"warehouse_id": int64(3)},
+		{"warehouse": "#3"},
+		{"id": "warehouse-3"},
+		{"id": "wh_3"},
+	}
+
+	for _, input := range cases {
+		parsed, err := parseGetWarehouseToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetWarehouseToolInput(%v) returned error: %v", input, err)
+		}
+		if parsed.WarehouseID != 3 {
+			t.Fatalf("WarehouseID = %d, want 3 for %v", parsed.WarehouseID, input)
+		}
+	}
+}
+
+func TestParseGetWarehouseToolInputRejectsMissingWarehouse(t *testing.T) {
+	_, err := parseGetWarehouseToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "warehouse_id") {
+		t.Fatalf("error = %v, want warehouse_id validation", err)
 	}
 }
 

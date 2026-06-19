@@ -21,6 +21,10 @@ func (m *mockRepo) ListWarehouses(_ context.Context, _ int64) ([]domain.Warehous
 	return m.listResult, m.listErr
 }
 
+func (m *mockRepo) GetWarehouseByID(_ context.Context, _, _ int64) (domain.Warehouse, error) {
+	return domain.Warehouse{}, nil
+}
+
 func (m *mockRepo) CreateWarehouse(_ context.Context, _ int64, _ domain.WarehouseInput) (int64, error) {
 	return m.createID, m.createErr
 }
