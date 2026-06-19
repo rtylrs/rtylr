@@ -2,21 +2,14 @@ syntax = "proto3";
 
 package insights.product.v1;
 
-import "common/pagination/v1/pagination.proto";
 import "insights/product/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/product/v1";
 
 message GetProductMarginsRequest {
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1;
-  // period is the period value for this contract.
-  string period = 2;
 }
 
 message GetProductMarginsResponse {
-  // products is the products value for this contract.
-  repeated ProductMargin products = 1;
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationResponse pagination = 2;
+  // buckets is the buckets value for this contract.
+  repeated MarginBucket buckets = 1;
 }

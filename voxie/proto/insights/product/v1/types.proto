@@ -12,11 +12,9 @@ message BestSeller {
   // name is the name value for this contract.
   string name = 2;
   // units_sold is the units sold value for this contract.
-  int32 units_sold = 3;
-  // revenue is the revenue value for this contract.
-  double revenue = 4;
-  // category is the category value for this contract.
-  string category = 5;
+  double units_sold = 3;
+  // revenue_minor_units is the revenue minor units value for this contract.
+  int64 revenue_minor_units = 4;
 }
 
 message SlowMover {
@@ -24,38 +22,28 @@ message SlowMover {
   int64 product_id = 1;
   // name is the name value for this contract.
   string name = 2;
-  // units_sold is the units sold value for this contract.
-  int32 units_sold = 3;
-  // days_in_stock is the days in stock value for this contract.
-  int32 days_in_stock = 4;
-  // stock_value is the stock value value for this contract.
-  double stock_value = 5;
+  // stock_quantity is the stock quantity value for this contract.
+  double stock_quantity = 3;
 }
 
-message ProductMargin {
-  // product_id is the product id value for this contract.
-  int64 product_id = 1;
-  // name is the name value for this contract.
-  string name = 2;
-  // revenue is the revenue value for this contract.
-  double revenue = 3;
-  // cost is the cost value for this contract.
-  double cost = 4;
-  // margin is the margin value for this contract.
-  double margin = 5;
-  // margin_percentage is the margin percentage value for this contract.
-  double margin_percentage = 6;
-}
-
-message CategoryPerformance {
-  // category is the category value for this contract.
-  string category = 1;
-  // revenue is the revenue value for this contract.
-  double revenue = 2;
-  // units_sold is the units sold value for this contract.
-  int32 units_sold = 3;
-  // avg_margin is the avg margin value for this contract.
-  double avg_margin = 4;
+message MarginBucket {
+  // label is the label value for this contract.
+  string label = 1;
+  // lower_pct is the lower pct value for this contract.
+  double lower_pct = 2;
+  // upper_pct is the upper pct value for this contract.
+  double upper_pct = 3;
   // product_count is the product count value for this contract.
-  int32 product_count = 5;
+  int64 product_count = 4;
+}
+
+message CategorySales {
+  // category_id is the category id value for this contract.
+  int64 category_id = 1;
+  // category_name is the category name value for this contract.
+  string category_name = 2;
+  // units_sold is the units sold value for this contract.
+  double units_sold = 3;
+  // revenue_minor_units is the revenue minor units value for this contract.
+  int64 revenue_minor_units = 4;
 }

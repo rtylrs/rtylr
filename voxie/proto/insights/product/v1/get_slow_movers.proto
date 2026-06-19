@@ -2,19 +2,16 @@ syntax = "proto3";
 
 package insights.product.v1;
 
-import "common/pagination/v1/pagination.proto";
 import "insights/product/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/product/v1";
 
 message GetSlowMoversRequest {
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1;
+  // days is the trailing sales window used to detect slow movers.
+  int32 days = 1;
 }
 
 message GetSlowMoversResponse {
   // products is the products value for this contract.
   repeated SlowMover products = 1;
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationResponse pagination = 2;
 }

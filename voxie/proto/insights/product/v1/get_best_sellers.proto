@@ -2,21 +2,16 @@ syntax = "proto3";
 
 package insights.product.v1;
 
-import "common/pagination/v1/pagination.proto";
 import "insights/product/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/product/v1";
 
 message GetBestSellersRequest {
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1;
-  // period is the period value for this contract.
-  string period = 2;
+  // limit is the maximum number of products to return.
+  int32 limit = 1;
 }
 
 message GetBestSellersResponse {
   // products is the products value for this contract.
   repeated BestSeller products = 1;
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationResponse pagination = 2;
 }
