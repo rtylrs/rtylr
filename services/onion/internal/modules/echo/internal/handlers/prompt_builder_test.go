@@ -53,6 +53,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"erp.list_suppliers [read]",
 		"erp.list_warehouses [read]",
 		"erp.list_purchase_orders [read]",
+		"erp.list_stock_transfers [read]",
 		"hr.list_employees [read]",
 		"flow.list_tasks [read]",
 		"finance.list_invoices [read]",

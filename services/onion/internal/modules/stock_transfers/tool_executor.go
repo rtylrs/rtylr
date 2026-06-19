@@ -8,6 +8,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -15,12 +16,24 @@ import (
 )
 
 const (
-	createStockTransferToolName  = "erp.create_stock_transfer"
-	receiveStockTransferToolName = "erp.receive_stock_transfer"
+	listStockTransfersToolName            = "erp.list_stock_transfers"
+	createStockTransferToolName           = "erp.create_stock_transfer"
+	receiveStockTransferToolName          = "erp.receive_stock_transfer"
+	defaultListStockTransfersToolPageSize = int64(20)
+	maxListStockTransfersToolPageSize     = int64(50)
 )
+
+type listStockTransfersToolInput struct {
+	Status   domain.StockTransferStatus
+	Page     int64
+	PageSize int64
+}
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
+	case listStockTransfersToolName:
+		output, err := m.executeListStockTransfersTool(ctx, input)
+		return output, true, err
 	case createStockTransferToolName:
 		output, err := m.executeCreateStockTransferTool(ctx, input)
 		return output, true, err
@@ -30,6 +43,43 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeListStockTransfersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListStockTransfersToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	transfers, hasMore, err := m.service.ListStockTransfers(ctx, ownerID, parsed.Page, parsed.PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(transfers))
+	for _, transfer := range transfers {
+		if parsed.Status != "" && transfer.Status != parsed.Status {
+			continue
+		}
+		payloads = append(payloads, stockTransferToolPayload(transfer))
+	}
+
+	return map[string]any{
+		"stock_transfers": payloads,
+		"returned":        len(payloads),
+		"page":            parsed.Page,
+		"page_size":       parsed.PageSize,
+		"has_more":        hasMore,
+		"filters": map[string]any{
+			"status": string(parsed.Status),
+		},
+	}, nil
 }
 
 func (m *Module) executeCreateStockTransferTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -118,6 +168,62 @@ func parseCreateStockTransferToolInput(input map[string]any) (domain.StockTransf
 		Notes:           strings.TrimSpace(stockTransferToolString(firstStockTransferToolValue(input, "notes"))),
 		Items:           items,
 	}, nil
+}
+
+func parseListStockTransfersToolInput(input map[string]any) (listStockTransfersToolInput, error) {
+	status := normalizeStockTransferStatus(firstStockTransferToolValue(input, "status"))
+	if strings.TrimSpace(stockTransferToolString(firstStockTransferToolValue(input, "status"))) != "" && status == "" {
+		return listStockTransfersToolInput{}, errors.New("status must be one of draft, in_transit, received, or cancelled")
+	}
+
+	page, err := stockTransferToolInt64(firstStockTransferToolValue(input, "page"))
+	if err != nil {
+		return listStockTransfersToolInput{}, fmt.Errorf("invalid page: %w", err)
+	}
+	if page < 0 {
+		return listStockTransfersToolInput{}, errors.New("page must be non-negative")
+	}
+	if page == 0 {
+		page = 1
+	}
+
+	pageSize, err := stockTransferToolInt64(firstStockTransferToolValue(input, "page_size", "limit"))
+	if err != nil {
+		return listStockTransfersToolInput{}, fmt.Errorf("invalid page_size: %w", err)
+	}
+	if pageSize < 0 {
+		return listStockTransfersToolInput{}, errors.New("page_size must be non-negative")
+	}
+	if pageSize == 0 {
+		pageSize = defaultListStockTransfersToolPageSize
+	}
+	if pageSize > maxListStockTransfersToolPageSize {
+		pageSize = maxListStockTransfersToolPageSize
+	}
+
+	return listStockTransfersToolInput{
+		Status:   status,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
+}
+
+func normalizeStockTransferStatus(value any) domain.StockTransferStatus {
+	status := strings.ToLower(strings.TrimSpace(stockTransferToolString(value)))
+	if status == "" {
+		return ""
+	}
+	status = strings.ReplaceAll(status, "-", "_")
+	status = strings.ReplaceAll(status, " ", "_")
+	switch domain.StockTransferStatus(status) {
+	case domain.StockTransferStatusDraft,
+		domain.StockTransferStatusInTransit,
+		domain.StockTransferStatusReceived,
+		domain.StockTransferStatusCancelled:
+		return domain.StockTransferStatus(status)
+	default:
+		return ""
+	}
 }
 
 func validateStockTransferToolItems(items []domain.StockTransferItemInput) error {
@@ -314,6 +420,34 @@ func stockTransferToolString(value any) string {
 	}
 }
 
+func stockTransferToolPayload(transfer domain.StockTransfer) map[string]any {
+	return map[string]any{
+		"id":                transfer.ID,
+		"from_warehouse_id": transfer.FromWarehouseID,
+		"to_warehouse_id":   transfer.ToWarehouseID,
+		"status":            string(transfer.Status),
+		"notes":             transfer.Notes,
+		"items":             stockTransferDomainItemsOutput(transfer.Items),
+		"item_count":        len(transfer.Items),
+		"created_at":        stockTransferToolTime(transfer.CreatedAt),
+		"updated_at":        stockTransferToolTime(transfer.UpdatedAt),
+	}
+}
+
+func stockTransferDomainItemsOutput(items []domain.StockTransferItem) []map[string]any {
+	out := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		out = append(out, map[string]any{
+			"id":          item.ID,
+			"transfer_id": item.TransferID,
+			"product_id":  item.ProductID,
+			"quantity":    item.Quantity,
+			"created_at":  stockTransferToolTime(item.CreatedAt),
+		})
+	}
+	return out
+}
+
 func stockTransferToolItemsOutput(items []domain.StockTransferItemInput) []map[string]any {
 	out := make([]map[string]any, 0, len(items))
 	for _, item := range items {
@@ -323,4 +457,11 @@ func stockTransferToolItemsOutput(items []domain.StockTransferItemInput) []map[s
 		})
 	}
 	return out
+}
+
+func stockTransferToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }

@@ -1,7 +1,9 @@
 package stocktransfers
 
 import (
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 )
@@ -93,5 +95,60 @@ func TestParseStockTransferIDToolInputRejectsMissingID(t *testing.T) {
 	_, err := parseStockTransferIDToolInput(map[string]any{})
 	if err == nil {
 		t.Fatal("expected missing id error")
+	}
+}
+
+func TestParseListStockTransfersToolInput(t *testing.T) {
+	parsed, err := parseListStockTransfersToolInput(map[string]any{
+		"status":    "in transit",
+		"page":      "2",
+		"page_size": "500",
+	})
+	if err != nil {
+		t.Fatalf("parseListStockTransfersToolInput: %v", err)
+	}
+	if parsed.Status != domain.StockTransferStatusInTransit {
+		t.Fatalf("Status = %q, want in_transit", parsed.Status)
+	}
+	if parsed.Page != 2 {
+		t.Fatalf("Page = %d, want 2", parsed.Page)
+	}
+	if parsed.PageSize != maxListStockTransfersToolPageSize {
+		t.Fatalf("PageSize = %d, want %d", parsed.PageSize, maxListStockTransfersToolPageSize)
+	}
+}
+
+func TestParseListStockTransfersToolInputRejectsBadStatus(t *testing.T) {
+	_, err := parseListStockTransfersToolInput(map[string]any{"status": "pending"})
+	if err == nil || !strings.Contains(err.Error(), "status") {
+		t.Fatalf("error = %v, want status validation", err)
+	}
+}
+
+func TestStockTransferToolPayloadFormatsFields(t *testing.T) {
+	createdAt := time.Date(2026, 6, 18, 11, 30, 0, 0, time.FixedZone("EEST", 3*60*60))
+	payload := stockTransferToolPayload(domain.StockTransfer{
+		ID:              44,
+		FromWarehouseID: 3,
+		ToWarehouseID:   4,
+		Status:          domain.StockTransferStatusDraft,
+		Notes:           "Move summer stock",
+		CreatedAt:       createdAt,
+		Items: []domain.StockTransferItem{
+			{ID: 1, TransferID: 44, ProductID: 10, Quantity: 5.5, CreatedAt: createdAt},
+		},
+	})
+
+	if payload["id"] != int64(44) {
+		t.Fatalf("id = %v", payload["id"])
+	}
+	if payload["status"] != "draft" {
+		t.Fatalf("status = %v", payload["status"])
+	}
+	if payload["item_count"] != 1 {
+		t.Fatalf("item_count = %v", payload["item_count"])
+	}
+	if payload["created_at"] != "2026-06-18T08:30:00Z" {
+		t.Fatalf("created_at = %v", payload["created_at"])
 	}
 }
