@@ -295,7 +295,8 @@ func Snapshot() AnalyticsSnapshot {
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
 
-	recent := append([]Event(nil), collector.recent...)
+	recent := make([]Event, len(collector.recent))
+	copy(recent, collector.recent)
 	totals := collector.totals
 	outcomes := breakdowns(collector.outcomes)
 	modes := breakdowns(collector.modes)
