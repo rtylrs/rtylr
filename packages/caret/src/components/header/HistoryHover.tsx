@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { History, MessageSquare } from 'lucide-react';
+import { History, MessageSquare, Trash2 } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import IconButton from '../../ui/IconButton';
 import Tooltip from '../../ui/Tooltip';
@@ -8,10 +8,11 @@ import { useCaretUIStore } from '../../stores/uiStore';
 
 export interface HistoryHoverProps {
   onSelectChat?: (id: string) => void;
+  onDeleteChat?: (id: string) => void | Promise<void>;
 }
 
 /** History icon button that reveals a hover dropdown of recent chats. */
-export const HistoryHover: React.FC<HistoryHoverProps> = ({ onSelectChat }) => {
+export const HistoryHover: React.FC<HistoryHoverProps> = ({ onSelectChat, onDeleteChat }) => {
   const recent = useChatsStore((s) => s.recent);
   const setActive = useChatsStore((s) => s.setActiveChat);
   const setView = useCaretUIStore((s) => s.setView);
@@ -78,48 +79,73 @@ export const HistoryHover: React.FC<HistoryHoverProps> = ({ onSelectChat }) => {
             Recent chats
           </div>
           {recent.map((c) => (
-            <button
+            <div
               key={c.id}
-              type="button"
-              onClick={() => {
-                setActive(c.id);
-                if (onSelectChat) onSelectChat(c.id);
-                else setView('chat');
-                setOpen(false);
-              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: 2,
                 width: '100%',
-                padding: '6px 8px',
+                padding: 0,
                 background: 'transparent',
-                border: 'none',
                 borderRadius: caretRadius.sm,
-                color: caretTokens.text,
-                fontSize: 12.5,
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = caretTokens.surfaceHigh;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
               }}
             >
-              <MessageSquare size={11} style={{ color: caretTokens.textDim, flexShrink: 0 }} />
-              <span
+              <button
+                type="button"
+                onClick={() => {
+                  setActive(c.id);
+                  if (onSelectChat) onSelectChat(c.id);
+                  else setView('chat');
+                  setOpen(false);
+                }}
                 style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
                   flex: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  minWidth: 0,
+                  padding: '6px 8px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: caretRadius.sm,
+                  color: caretTokens.text,
+                  fontSize: 12.5,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background =
+                    caretTokens.surfaceHigh;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                 }}
               >
-                {c.title || 'New chat'}
-              </span>
-            </button>
+                <MessageSquare size={11} style={{ color: caretTokens.textDim, flexShrink: 0 }} />
+                <span
+                  style={{
+                    flex: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {c.title || 'New chat'}
+                </span>
+              </button>
+              {onDeleteChat && (
+                <IconButton
+                  size="sm"
+                  label="Delete chat"
+                  onClick={() => {
+                    void onDeleteChat(c.id);
+                  }}
+                >
+                  <Trash2 size={11} />
+                </IconButton>
+              )}
+            </div>
           ))}
         </div>
       )}

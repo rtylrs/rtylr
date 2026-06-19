@@ -9,7 +9,7 @@ export interface ChatListItemProps {
   active?: boolean;
   onSelect: (id: string) => void;
   onTogglePin?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string) => void | Promise<void>;
 }
 
 export const ChatListItem: React.FC<ChatListItemProps> = ({
@@ -62,7 +62,13 @@ export const ChatListItem: React.FC<ChatListItemProps> = ({
           </IconButton>
         )}
         {onDelete && (
-          <IconButton size="sm" label="Delete chat" onClick={() => onDelete(chat.id)}>
+          <IconButton
+            size="sm"
+            label="Delete chat"
+            onClick={() => {
+              void onDelete(chat.id);
+            }}
+          >
             <Trash2 size={11} />
           </IconButton>
         )}

@@ -1,16 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import type { CaretChatSummary } from '../types/chat';
 import { authHeaders } from '../lib/auth';
+import { normalizeChatTitle } from '../lib/chatTitles';
 
 interface RawSession {
-  session_id: string;
+  id?: string;
+  session_id?: string;
   title?: string;
   summary?: string;
-  updated_at: string;
+  updatedAt?: string;
+  updated_at?: string;
 }
 
 interface SessionsResponse {
-  sessions: RawSession[];
+  sessions?: RawSession[];
+  chats?: RawSession[];
 }
 
 interface UseCaretSessionsParams {
@@ -48,13 +52,14 @@ export function useCaretSessions({
       }
 
       const json = (await response.json()) as SessionsResponse;
-      return (json.sessions ?? [])
-        .filter((s) => s.session_id)
+      const rows = json.chats?.length ? json.chats : (json.sessions ?? []);
+      return rows
+        .filter((s) => s.id || s.session_id)
         .map((s) => ({
-          id: s.session_id,
-          title: s.title || 'Untitled chat',
+          id: s.id ?? s.session_id ?? '',
+          title: normalizeChatTitle(s.title),
           summary: s.summary,
-          updatedAt: s.updated_at,
+          updatedAt: s.updatedAt ?? s.updated_at ?? new Date().toISOString(),
         }));
     },
     enabled: userId > 0,

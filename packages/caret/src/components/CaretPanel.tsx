@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import '../styles/index.css';
 import { caretTokens } from '../ui/tokens';
 import { useCaretStore } from '../stores/caretStore';
@@ -11,6 +12,7 @@ import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
+import type { CaretChatSummary } from '../types/chat';
 import type { ToolCallBlock } from '../types/message';
 import HeaderBar from './header/HeaderBar';
 import MessageList from './MessageList';
@@ -75,6 +77,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
   const panelWidth = useCaretSettingsStore((s) => s.panelWidth);
   const view = useCaretUIStore((s) => s.view);
   const setView = useCaretUIStore((s) => s.setView);
+  const queryClient = useQueryClient();
 
   const { sendMessage, stopStreaming } = useCaretStream({
     userId,
@@ -84,6 +87,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
   const { sessions } = useCaretSessions({ userId, apiBaseUrl });
   const loadChat = useLoadCaretChat({ userId, apiBaseUrl });
   const setRecent = useChatsStore((s) => s.setRecent);
+  const removeRecent = useChatsStore((s) => s.removeRecent);
   const { onMouseDown } = usePanelResize();
 
   useEffect(() => {
@@ -107,6 +111,41 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
       }
     },
     [loadChat, setSessionId, setMessages, setView]
+  );
+
+  const deleteChat = useCallback(
+    async (id: string): Promise<void> => {
+      const queryKey = ['caret', 'sessions', userId] as const;
+      const previous = queryClient.getQueryData<CaretChatSummary[]>(queryKey);
+
+      removeRecent(id);
+      queryClient.setQueryData<CaretChatSummary[]>(queryKey, (old) =>
+        old ? old.filter((chat) => chat.id !== id) : []
+      );
+
+      const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
+      const response = await fetch(`${baseUrl}memory/chats/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: authHeaders(),
+      }).catch(() => null);
+
+      if (!response || (!response.ok && response.status !== 404)) {
+        if (previous) {
+          queryClient.setQueryData<CaretChatSummary[]>(queryKey, previous);
+          setRecent(previous);
+        }
+        return;
+      }
+
+      if (sessionId === id) {
+        reset();
+        setView('chat');
+      }
+
+      void queryClient.invalidateQueries({ queryKey });
+    },
+    [apiBaseUrl, queryClient, removeRecent, reset, sessionId, setRecent, setView, userId]
   );
 
   const [introPlaying, setIntroPlaying] = useState(false);
@@ -245,7 +284,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
         }}
       />
 
-      <HeaderBar onNewChat={newChat} onSelectChat={selectChat} />
+      <HeaderBar onNewChat={newChat} onSelectChat={selectChat} onDeleteChat={deleteChat} />
 
       {view === 'chat' && (
         <>
@@ -269,7 +308,13 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
       )}
 
       {view === 'history' && (
-        <ChatList chats={sessions} activeId={sessionId} onSelect={selectChat} onNew={newChat} />
+        <ChatList
+          chats={sessions}
+          activeId={sessionId}
+          onSelect={selectChat}
+          onNew={newChat}
+          onDelete={deleteChat}
+        />
       )}
 
       {view === 'settings' && <SettingsPanel />}

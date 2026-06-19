@@ -2,7 +2,7 @@
 @import './markdown.css';
 
 .caret-chat-row .caret-chat-actions {
-  opacity: 0;
+  opacity: 0.55;
   transition: opacity 0.12s;
 }
 .caret-chat-row:hover .caret-chat-actions,

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CaretChatSummary } from '../types/chat';
+import { normalizeChatTitle } from '../lib/chatTitles';
 
 interface ChatsState {
   /** Active chat session id. */
@@ -21,6 +22,10 @@ export type ChatsStore = ChatsState & ChatsActions;
 
 const MAX_RECENT = 20;
 
+function normalizeRecentChat(chat: CaretChatSummary): CaretChatSummary {
+  return { ...chat, title: normalizeChatTitle(chat.title) };
+}
+
 export const useChatsStore = create<ChatsStore>()(
   persist(
     (set) => ({
@@ -29,10 +34,11 @@ export const useChatsStore = create<ChatsStore>()(
       setActiveChat: (id) => set({ activeChatId: id }),
       upsertRecent: (chat) =>
         set((s) => {
-          const filtered = s.recent.filter((c) => c.id !== chat.id);
-          return { recent: [chat, ...filtered].slice(0, MAX_RECENT) };
+          const normalized = normalizeRecentChat(chat);
+          const filtered = s.recent.filter((c) => c.id !== normalized.id);
+          return { recent: [normalized, ...filtered].slice(0, MAX_RECENT) };
         }),
-      setRecent: (chats) => set({ recent: chats.slice(0, MAX_RECENT) }),
+      setRecent: (chats) => set({ recent: chats.map(normalizeRecentChat).slice(0, MAX_RECENT) }),
       removeRecent: (id) => set((s) => ({ recent: s.recent.filter((c) => c.id !== id) })),
       clear: () => set({ activeChatId: null, recent: [] }),
     }),

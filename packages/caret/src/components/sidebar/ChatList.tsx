@@ -11,7 +11,7 @@ export interface ChatListProps {
   activeId?: string | null;
   onSelect: (id: string) => void;
   onNew: () => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string) => void | Promise<void>;
   onTogglePin?: (id: string) => void;
 }
 
