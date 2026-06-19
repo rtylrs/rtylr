@@ -14,12 +14,59 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
+const (
+	listBillsToolName  = "finance.list_bills"
+	recordBillToolName = "finance.record_bill"
+)
+
+type listBillsToolInput struct {
+	Status string
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "finance.record_bill" {
+	switch name {
+	case listBillsToolName:
+		output, err := m.executeListBillsTool(ctx, input)
+		return output, true, err
+	case recordBillToolName:
+		output, err := m.executeRecordBillTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeRecordBillTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListBillsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListBillsToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	bills, err := m.service.List(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(bills))
+	for _, bill := range bills {
+		if parsed.Status != "" && bill.Status != parsed.Status {
+			continue
+		}
+		payloads = append(payloads, billToolPayload(bill))
+	}
+
+	return map[string]any{
+		"bills":    payloads,
+		"returned": len(payloads),
+		"filters": map[string]any{
+			"status": parsed.Status,
+		},
+	}, nil
 }
 
 func (m *Module) executeRecordBillTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -94,6 +141,14 @@ func parseRecordBillToolInput(input map[string]any) (domain.BillInput, error) {
 	return parsed, nil
 }
 
+func parseListBillsToolInput(input map[string]any) (listBillsToolInput, error) {
+	status := normalizeBillStatus(input["status"])
+	if strings.TrimSpace(billToolString(input["status"])) != "" && status == "" {
+		return listBillsToolInput{}, errors.New("status must be one of pending, paid, or overdue")
+	}
+	return listBillsToolInput{Status: status}, nil
+}
+
 func normalizeBillStatus(value any) string {
 	status := strings.ToLower(strings.TrimSpace(billToolString(value)))
 	if status == "" {
@@ -104,6 +159,20 @@ func normalizeBillStatus(value any) string {
 		return status
 	}
 	return ""
+}
+
+func billToolPayload(bill domain.Bill) map[string]any {
+	return map[string]any{
+		"id":          bill.ID,
+		"supplier_id": bill.SupplierID,
+		"amount":      bill.Amount,
+		"currency":    bill.Currency,
+		"due_date":    billToolDateOnly(bill.DueDate),
+		"status":      bill.Status,
+		"description": bill.Description,
+		"created_at":  billToolTime(bill.CreatedAt),
+		"updated_at":  billToolTime(bill.UpdatedAt),
+	}
 }
 
 func billToolDate(value any) (string, error) {
@@ -200,4 +269,18 @@ func billToolString(value any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func billToolDateOnly(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02")
+}
+
+func billToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }

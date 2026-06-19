@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 )
 
 func TestParseRecordExpenseToolInput(t *testing.T) {
@@ -47,5 +49,73 @@ func TestParseRecordExpenseToolInputRejectsFutureDate(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "must not be in the future") {
 		t.Fatalf("error = %v, want future date validation", err)
+	}
+}
+
+func TestParseListExpensesToolInput(t *testing.T) {
+	parsed, err := parseListExpensesToolInput(map[string]any{"status": "approved"})
+	if err != nil {
+		t.Fatalf("parseListExpensesToolInput returned error: %v", err)
+	}
+	if parsed.Status != "approved" {
+		t.Fatalf("Status = %q, want approved", parsed.Status)
+	}
+}
+
+func TestParseListExpensesToolInputRejectsBadStatus(t *testing.T) {
+	_, err := parseListExpensesToolInput(map[string]any{"status": "paid"})
+	if err == nil || !strings.Contains(err.Error(), "status") {
+		t.Fatalf("error = %v, want status validation", err)
+	}
+}
+
+func TestExpenseToolPayloadFormatsFields(t *testing.T) {
+	categoryID := int64(42)
+	expenseDate := time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC)
+	createdAt := time.Date(2026, 6, 18, 10, 30, 0, 0, time.FixedZone("EEST", 3*60*60))
+	payload := expenseToolPayload(domain.Expense{
+		ID:          8,
+		CategoryID:  &categoryID,
+		Amount:      19.99,
+		Currency:    "USD",
+		Description: "Office snacks",
+		Vendor:      "Corner Shop",
+		ExpenseDate: expenseDate,
+		Status:      "pending",
+		CreatedAt:   createdAt,
+	})
+
+	if payload["id"] != int64(8) {
+		t.Fatalf("id = %v", payload["id"])
+	}
+	gotCategoryID, ok := payload["category_id"].(*int64)
+	if !ok || gotCategoryID == nil || *gotCategoryID != categoryID {
+		t.Fatalf("category_id = %v", payload["category_id"])
+	}
+	if payload["expense_date"] != "2026-06-18" {
+		t.Fatalf("expense_date = %v", payload["expense_date"])
+	}
+	if payload["created_at"] != "2026-06-18T07:30:00Z" {
+		t.Fatalf("created_at = %v", payload["created_at"])
+	}
+}
+
+func TestExpenseCategoryToolPayloadFormatsFields(t *testing.T) {
+	createdAt := time.Date(2026, 6, 18, 9, 0, 0, 0, time.FixedZone("EEST", 3*60*60))
+	payload := expenseCategoryToolPayload(domain.ExpenseCategory{
+		ID:        3,
+		Name:      "Supplies",
+		Color:     "#ffcc00",
+		CreatedAt: createdAt,
+	})
+
+	if payload["id"] != int64(3) {
+		t.Fatalf("id = %v", payload["id"])
+	}
+	if payload["name"] != "Supplies" {
+		t.Fatalf("name = %v", payload["name"])
+	}
+	if payload["created_at"] != "2026-06-18T06:00:00Z" {
+		t.Fatalf("created_at = %v", payload["created_at"])
 	}
 }

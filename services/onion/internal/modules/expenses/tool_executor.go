@@ -24,12 +24,85 @@ type recordExpenseToolInput struct {
 	ExpenseDate time.Time
 }
 
+const (
+	listExpensesToolName          = "finance.list_expenses"
+	listExpenseCategoriesToolName = "finance.list_expense_categories"
+	recordExpenseToolName         = "finance.record_expense"
+)
+
+type listExpensesToolInput struct {
+	Status string
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "finance.record_expense" {
+	switch name {
+	case listExpensesToolName:
+		output, err := m.executeListExpensesTool(ctx, input)
+		return output, true, err
+	case listExpenseCategoriesToolName:
+		output, err := m.executeListExpenseCategoriesTool(ctx)
+		return output, true, err
+	case recordExpenseToolName:
+		output, err := m.executeRecordExpenseTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeRecordExpenseTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListExpensesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListExpensesToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	expenses, err := m.service.List(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(expenses))
+	for _, expense := range expenses {
+		if parsed.Status != "" && expense.Status != parsed.Status {
+			continue
+		}
+		payloads = append(payloads, expenseToolPayload(expense))
+	}
+
+	return map[string]any{
+		"expenses": payloads,
+		"returned": len(payloads),
+		"filters": map[string]any{
+			"status": parsed.Status,
+		},
+	}, nil
+}
+
+func (m *Module) executeListExpenseCategoriesTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	categories, err := m.service.ListCategories(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(categories))
+	for _, category := range categories {
+		payloads = append(payloads, expenseCategoryToolPayload(category))
+	}
+
+	return map[string]any{
+		"categories": payloads,
+		"returned":   len(payloads),
+	}, nil
 }
 
 func (m *Module) executeRecordExpenseTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -101,6 +174,51 @@ func parseRecordExpenseToolInput(input map[string]any) (recordExpenseToolInput, 
 		return recordExpenseToolInput{}, err
 	}
 	return parsed, nil
+}
+
+func parseListExpensesToolInput(input map[string]any) (listExpensesToolInput, error) {
+	status := normalizeExpenseStatus(input["status"])
+	if strings.TrimSpace(expenseToolString(input["status"])) != "" && status == "" {
+		return listExpensesToolInput{}, errors.New("status must be one of pending, approved, or rejected")
+	}
+	return listExpensesToolInput{Status: status}, nil
+}
+
+func normalizeExpenseStatus(value any) string {
+	status := strings.ToLower(strings.TrimSpace(expenseToolString(value)))
+	if status == "" {
+		return ""
+	}
+	status = strings.ReplaceAll(status, " ", "_")
+	if _, ok := domain.ValidExpenseStatuses[status]; ok {
+		return status
+	}
+	return ""
+}
+
+func expenseToolPayload(expense domain.Expense) map[string]any {
+	return map[string]any{
+		"id":           expense.ID,
+		"category_id":  expense.CategoryID,
+		"amount":       expense.Amount,
+		"currency":     expense.Currency,
+		"description":  expense.Description,
+		"vendor":       expense.Vendor,
+		"receipt_url":  expense.ReceiptURL,
+		"expense_date": expenseToolDateOnly(expense.ExpenseDate),
+		"status":       expense.Status,
+		"created_at":   expenseToolTime(expense.CreatedAt),
+		"updated_at":   expenseToolTime(expense.UpdatedAt),
+	}
+}
+
+func expenseCategoryToolPayload(category domain.ExpenseCategory) map[string]any {
+	return map[string]any{
+		"id":         category.ID,
+		"name":       category.Name,
+		"color":      category.Color,
+		"created_at": expenseToolTime(category.CreatedAt),
+	}
 }
 
 func expenseToolOptionalInt64(value any) (*int64, error) {
@@ -211,4 +329,18 @@ func expenseToolString(value any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func expenseToolDateOnly(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02")
+}
+
+func expenseToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }
