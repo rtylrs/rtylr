@@ -458,6 +458,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 	posSessionsModule := possessions.NewModule(ctx, dbclient.Pool())
 	posCashMovementsModule := poscashmovements.NewModule(ctx, dbclient.Pool())
+	posStockMovementsModule := posstockmovements.NewModule(ctx, dbclient.Pool())
 	suppliersModule := suppliers.NewModule(ctx, dbclient.Pool())
 	warehousesModule := warehouses.NewModule(ctx, dbclient.Pool())
 	purchaseOrdersModule := purchaseorders.NewModule(ctx, dbclient.Pool())
@@ -501,7 +502,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posSessionsModule, posCashMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -553,7 +554,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosReceipts:           posreceipts.NewModule(ctx, dbclient.Pool()),
 		PosSessions:           posSessionsModule,
 		PosSettings:           possettings.NewModule(ctx, dbclient.Pool()),
-		PosStockMovements:     posstockmovements.NewModule(ctx, dbclient.Pool()),
+		PosStockMovements:     posStockMovementsModule,
 		PosTables:             postables.NewModule(ctx, dbclient.Pool()),
 		PosTerminals:          posterminals.NewModule(ctx, dbclient.Pool()),
 		PosUsers:              posusers.NewModule(ctx, dbclient.Pool()),
