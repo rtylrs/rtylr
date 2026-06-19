@@ -973,6 +973,17 @@ func (r *Repository) GetAdminsAndOwnerUserIDs(ctx context.Context, businessID in
 
 // BulkCreateHubNotification writes an in-app notification to hub_notifications for
 // each recipient in userIDs. Best-effort: errors are logged, not propagated.
+func (r *Repository) ResolveAccessRequest(ctx context.Context, id, businessID int64, status string) error {
+	return r.queries.ResolveAccessRequest(ctx, sqlc.ResolveAccessRequestParams{
+		ID:         id,
+		BusinessID: businessID,
+		Status: sqlc.NullAccessRequestsStatus{
+			AccessRequestsStatus: sqlc.AccessRequestsStatus(status),
+			Valid:                true,
+		},
+	})
+}
+
 func (r *Repository) BulkCreateHubNotification(ctx context.Context, ownerID int64, userIDs []int64, title, body, notifType, link string) error {
 	for _, uid := range userIDs {
 		// cross-schema write to hub_notifications — approved for cross-module access request alerts

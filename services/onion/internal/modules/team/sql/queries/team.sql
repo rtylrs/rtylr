@@ -91,6 +91,9 @@ UPDATE users SET onboarded = TRUE WHERE id = ?;
 -- name: CountActiveMembers :one
 SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1;
 
+-- name: ResolveAccessRequest :exec
+UPDATE access_requests SET status = ? WHERE id = ? AND business_id = ?;
+
 -- name: ListAccessRequestsByBusiness :many
 SELECT ar.id, ar.user_id, ar.app, ar.status, ar.created_at,
        COALESCE(u.full_name,'') AS requester_name, COALESCE(u.email,'') AS requester_email

@@ -620,3 +620,49 @@ func (h *ListAccessRequestsHandler) Serve(ctx context.Context, _ *ListAccessRequ
 
 	return ListAccessRequestsResponse{Requests: payloads}, nil
 }
+
+func ApproveAccessRequestRoutes() []string { return []string{"/team/access-requests/{id}/approve"} }
+
+type ApproveAccessRequestRequest struct {
+	UserID int64  `json:"user_id"`
+	App    string `json:"app"`
+}
+
+type ApproveAccessRequestResponse struct {
+	Message string `json:"message"`
+}
+
+type ApproveAccessRequestHandler struct{ Service *application.Service }
+
+func (h *ApproveAccessRequestHandler) Validate(_ context.Context, req *ApproveAccessRequestRequest) *errorModels.ServerError {
+	if req.UserID == 0 || req.App == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "user_id and app are required"}
+	}
+	return nil
+}
+
+func (h *ApproveAccessRequestHandler) Serve(ctx context.Context, req *ApproveAccessRequestRequest) (ApproveAccessRequestResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ApproveAccessRequestResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	requestID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || requestID == 0 {
+		return ApproveAccessRequestResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "invalid request id"}
+	}
+
+	if err := h.Service.ApproveAccessRequest(ctx, device.User.UserID, device.User.BusinessID, requestID, req.UserID, req.App); err != nil {
+		if errors.Is(err, domain.ErrForbidden) {
+			return ApproveAccessRequestResponse{}, errorModels.PermissionDeniedServerError()
+		}
+		return ApproveAccessRequestResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to approve access request",
+		}
+	}
+
+	return ApproveAccessRequestResponse{Message: "Access granted"}, nil
+}

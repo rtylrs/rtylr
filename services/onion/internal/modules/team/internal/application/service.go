@@ -428,6 +428,32 @@ func (s *Service) ListAccessRequests(ctx context.Context, actorID, businessID in
 	return s.repo.ListAccessRequests(ctx, businessID)
 }
 
+// ApproveAccessRequest grants the requested app to the user and marks the request resolved.
+func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID, requestID, targetUserID int64, app string) error {
+	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
+	if err != nil {
+		return domain.ErrForbidden
+	}
+
+	existing, err := s.repo.GetStaffUserByID(ctx, ownerID, businessID, targetUserID)
+	if err != nil {
+		return err
+	}
+	apps := existing.Apps
+	for _, a := range apps {
+		if a == app {
+			// already has access — just resolve the request
+			return s.repo.ResolveAccessRequest(ctx, requestID, businessID, "approved")
+		}
+	}
+	apps = append(apps, app)
+
+	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, domain.Role(existing.Role)); err != nil {
+		return err
+	}
+	return s.repo.ResolveAccessRequest(ctx, requestID, businessID, "approved")
+}
+
 // GetBusinessOwnerEmail returns the email of the business owner.
 func (s *Service) GetBusinessOwnerEmail(ctx context.Context, businessID int64) string {
 	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)

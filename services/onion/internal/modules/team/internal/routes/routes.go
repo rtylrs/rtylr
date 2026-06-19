@@ -110,4 +110,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.ListAccessRequestsRoutes(),
 		&handlers.ListAccessRequestsHandler{Service: service},
 	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.ApproveAccessRequestRequest, handlers.ApproveAccessRequestResponse](
+		ctx, router, handlers.ApproveAccessRequestRoutes(),
+		&handlers.ApproveAccessRequestHandler{Service: service},
+	)
 }
