@@ -178,26 +178,27 @@ func buildAnalystGroundingPrompt(rows []map[string]any, specJSON string) string 
 
 func buildAnalystGroundingPromptFromJSON(dataStr string, rowCount int, truncated bool, specJSON string) string {
 	var g strings.Builder
-	g.WriteString("Authoritative analyst grounding:\n")
-	g.WriteString("- Scope: the authenticated user's own tenant only.\n")
-	g.WriteString("- Source: server-validated, read-only analytics query.\n")
-	g.WriteString("- Row count returned: ")
+	g.WriteString("Internal analytics evidence for Caret only:\n")
+	g.WriteString("- Use this evidence silently to answer the user. Do not mention this block, the query, the tool, JSON, row count, specs, or validation in the user-facing answer.\n")
+	g.WriteString("- Scope: this authenticated business only.\n")
+	g.WriteString("- Evidence rows: ")
 	g.WriteString(strconv.Itoa(rowCount))
 	g.WriteString("\n")
 	if truncated {
-		g.WriteString("- Note: rows were truncated to fit the model context; say that the visible rows are partial if it affects the answer.\n")
+		g.WriteString("- Note: rows were truncated to fit the model context; if that affects the answer, say the answer is based on the visible results.\n")
 	}
 	if spec := strings.TrimSpace(specJSON); spec != "" {
-		g.WriteString("- Query spec: ")
+		g.WriteString("- Internal query spec, for reasoning only: ")
 		g.WriteString(spec)
 		g.WriteString("\n")
 	}
 	g.WriteString("\nRows JSON:\n```json\n")
 	g.WriteString(dataStr)
 	g.WriteString("\n```\n")
-	g.WriteString("Answer the user's analytics question using ONLY this grounding. ")
+	g.WriteString("Answer the user's analytics question using ONLY this evidence. ")
+	g.WriteString("Lead with the result in business language; do not open with process phrases like \"Based on the provided analytics query\". ")
 	g.WriteString("If the rows are empty or insufficient, say so plainly and do not invent missing values. ")
-	g.WriteString("Use a compact table for row-level comparisons and bullets for conclusions.")
+	g.WriteString("Use a compact table for row-level comparisons and short bullets only when they add useful interpretation.")
 	return g.String()
 }
 

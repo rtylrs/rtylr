@@ -38,12 +38,14 @@ func TestBuildAnalystGroundingPromptStatesEvidenceRules(t *testing.T) {
 	)
 
 	mustContain := []string{
-		"Authoritative analyst grounding:",
-		"Scope: the authenticated user's own tenant only.",
-		"Row count returned: 1",
+		"Internal analytics evidence for Caret only:",
+		"Use this evidence silently to answer the user.",
+		"Scope: this authenticated business only.",
+		"Evidence rows: 1",
 		"Rows JSON:",
 		`"revenue":123.45`,
-		"using ONLY this grounding",
+		"using ONLY this evidence",
+		`do not open with process phrases like "Based on the provided analytics query"`,
 		"do not invent missing values",
 	}
 	for _, want := range mustContain {
@@ -88,11 +90,11 @@ func TestAnalystGroundingUsesBusinessSnapshotForOwnerOverview(t *testing.T) {
 		t.Fatalf("expected business.snapshot tool, got %#v", got)
 	}
 	for _, want := range []string{
-		"Authoritative business snapshot:",
-		"business.snapshot tool",
+		"Internal business snapshot evidence for Caret only:",
+		"snapshot tool",
 		"today_revenue",
 		"low_stock_products",
-		"using ONLY this snapshot",
+		"using ONLY this evidence",
 	} {
 		if !strings.Contains(got.Prompt, want) {
 			t.Fatalf("snapshot prompt missing %q\nprompt:\n%s", want, got.Prompt)

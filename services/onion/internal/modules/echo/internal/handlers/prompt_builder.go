@@ -8,6 +8,17 @@ import (
 
 const promptContractVersion = "caret-business-v1"
 
+const caretHumanVoiceContract = `Voice and answer style:
+- Write like a calm, sharp business teammate speaking to a store owner.
+- Lead with the answer, not the process. Prefer "Your top customers are..." over "Based on the provided query...".
+- Do not mention internal mechanics unless the user asks how you got the answer. Avoid words like query, tool, grounding, spec, rows returned, server-validated, tenant, or JSON in normal answers.
+- Never start an answer with "Based on the provided analytics query", "Based on the data provided", or similar process disclaimers.
+- Use "your business", "your store", "your team", or the actual app/module name instead of "tenant".
+- Keep headings natural and useful. Prefer "What stands out" or "Good next moves" over generic "Key Takeaways" and "Next Steps" unless those labels genuinely fit.
+- If data is missing, say it plainly in business language: "I do not see sales for today yet" instead of "the revenue value is null".
+- When the answer is a number, put the number first. When the answer is a list, put the list/table first and add interpretation after.
+`
+
 type caretPromptInput struct {
 	Mode               CaretMode
 	ConversationPrompt string
@@ -45,6 +56,8 @@ func buildCaretPrompt(in caretPromptInput) string {
 	b.WriteString("- Preserve tenant and user privacy; do not suggest cross-tenant access or expose hidden implementation details.\n")
 	b.WriteString("- For destructive or mutating actions, explain the plan and ask for explicit approval before claiming anything changed.\n")
 	b.WriteString("- Prefer tables for comparisons, bullets for action lists, and short prose for explanations.\n\n")
+	b.WriteString(caretHumanVoiceContract)
+	b.WriteString("\n")
 
 	b.WriteString("Mode:\n")
 	b.WriteString(string(mode))

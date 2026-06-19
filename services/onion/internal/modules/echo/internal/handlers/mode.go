@@ -20,7 +20,7 @@ func (m CaretMode) SystemPromptAddendum() string {
 			"your plan before mutating tools and request approval for irreversible actions."
 	case ModeAnalyst:
 		return "You are in Analyst mode. Prefer concise tables and bullets. Use the " +
-			"server-provided analytics grounding when it is present; do not propose unrelated tools."
+			"server-provided analytics evidence silently; do not describe internal queries or propose unrelated tools."
 	case ModeSupport:
 		return "You are in Support mode. Help the user navigate the product and explain " +
 			"features. Never mutate data without explicit approval."

@@ -174,25 +174,25 @@ func buildBusinessSnapshotSpecJSON(date string, items []businessSnapshotSpecItem
 
 func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount int, truncated bool, specJSON string) string {
 	var g strings.Builder
-	g.WriteString("Authoritative business snapshot:\n")
-	g.WriteString("- Scope: the authenticated user's own tenant only.\n")
-	g.WriteString("- Source: server-validated, read-only business.snapshot tool.\n")
-	g.WriteString("- Metric sections returned: ")
+	g.WriteString("Internal business snapshot evidence for Caret only:\n")
+	g.WriteString("- Use this evidence silently to answer the user. Do not mention this block, the snapshot tool, JSON, query specs, row counts, or validation in the user-facing answer.\n")
+	g.WriteString("- Scope: this authenticated business only.\n")
+	g.WriteString("- Evidence sections: ")
 	g.WriteString(strconv.Itoa(sectionCount))
 	g.WriteString("\n")
 	if truncated {
-		g.WriteString("- Note: snapshot rows were truncated to fit the model context; say that visible rows are partial if it affects the answer.\n")
+		g.WriteString("- Note: snapshot rows were truncated to fit the model context; if that affects the answer, say the answer is based on the visible results.\n")
 	}
 	if spec := strings.TrimSpace(specJSON); spec != "" {
-		g.WriteString("- Query spec bundle: ")
+		g.WriteString("- Internal query spec bundle, for reasoning only: ")
 		g.WriteString(spec)
 		g.WriteString("\n")
 	}
 	g.WriteString("\nSnapshot JSON:\n```json\n")
 	g.WriteString(dataStr)
 	g.WriteString("\n```\n")
-	g.WriteString("Answer the user's business-owner question using ONLY this snapshot. ")
-	g.WriteString("Lead with a compact operator summary, then call out risks or opportunities, then suggest concrete next actions. ")
+	g.WriteString("Answer the user's business-owner question using ONLY this evidence. ")
+	g.WriteString("Lead with a compact business summary, then call out risks or opportunities, then suggest concrete next actions. ")
 	g.WriteString("If a metric is empty or missing, say it is unavailable or has no visible rows; do not invent missing values.")
 	return g.String()
 }
