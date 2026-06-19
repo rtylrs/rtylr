@@ -7,7 +7,7 @@
  *   auth     → auth.rtylr.com
  *   dash     → dash.rtylr.com
  *   menu     → menu.rtylr.com
- *   pos      → pos.rtylr.com  (vbitez)
+ *   pos      → pos.rtylr.com
  *   api      → api.rtylr.com
  */
 

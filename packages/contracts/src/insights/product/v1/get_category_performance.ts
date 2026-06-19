@@ -5,14 +5,11 @@
 // source: insights/product/v1/get_category_performance.proto
 
 /* eslint-disable */
-import type { CategoryPerformance } from './types';
+import type { CategorySales } from './types';
 
-export interface GetCategoryPerformanceRequest {
-  /** period is the period value for this contract. */
-  period: string;
-}
+export interface GetCategoryPerformanceRequest {}
 
 export interface GetCategoryPerformanceResponse {
   /** categories is the categories value for this contract. */
-  categories: CategoryPerformance[];
+  categories: CategorySales[];
 }

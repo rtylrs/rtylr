@@ -7842,65 +7842,27 @@
       }
     },
     "insights.product.v1.GetBestSellersRequest": {
-      "pagination": {
-        "name": "pagination",
+      "limit": {
+        "name": "limit",
         "optional": false,
-        "protoName": "pagination",
-        "repeated": false,
-        "required": false,
-        "scalar": false,
-        "type": "common.pagination.v1.PaginationRequest"
-      },
-      "period": {
-        "name": "period",
-        "optional": false,
-        "protoName": "period",
+        "protoName": "limit",
         "repeated": false,
         "required": false,
         "scalar": true,
-        "type": "string"
+        "type": "int32"
       }
     },
-    "insights.product.v1.GetCategoryPerformanceRequest": {
-      "period": {
-        "name": "period",
-        "optional": false,
-        "protoName": "period",
-        "repeated": false,
-        "required": false,
-        "scalar": true,
-        "type": "string"
-      }
-    },
-    "insights.product.v1.GetProductMarginsRequest": {
-      "pagination": {
-        "name": "pagination",
-        "optional": false,
-        "protoName": "pagination",
-        "repeated": false,
-        "required": false,
-        "scalar": false,
-        "type": "common.pagination.v1.PaginationRequest"
-      },
-      "period": {
-        "name": "period",
-        "optional": false,
-        "protoName": "period",
-        "repeated": false,
-        "required": false,
-        "scalar": true,
-        "type": "string"
-      }
-    },
+    "insights.product.v1.GetCategoryPerformanceRequest": {},
+    "insights.product.v1.GetProductMarginsRequest": {},
     "insights.product.v1.GetSlowMoversRequest": {
-      "pagination": {
-        "name": "pagination",
+      "days": {
+        "name": "days",
         "optional": false,
-        "protoName": "pagination",
+        "protoName": "days",
         "repeated": false,
         "required": false,
-        "scalar": false,
-        "type": "common.pagination.v1.PaginationRequest"
+        "scalar": true,
+        "type": "int32"
       }
     },
     "insights.report.v1.CreateReportTemplateRequest": {

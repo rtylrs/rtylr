@@ -1,13 +1,35 @@
 import React from 'react';
+import MessageBlocks from './MessageBlocks';
+import StreamingDot from './blocks/StreamingDot';
 import type { CaretMessage as CaretMessageType } from '../stores/caretStore';
+import type { ContentBlock } from '../types/message';
 
 interface CaretMessageProps {
   message: CaretMessageType;
   isStreaming?: boolean;
 }
 
+function messageBlocks(message: CaretMessageType): ContentBlock[] {
+  if (message.blocks.length > 0) return message.blocks;
+  if (!message.content) return [];
+  return [{ id: `${message.id}-text`, type: 'text', content: message.content }];
+}
+
+function blocksToText(blocks: ContentBlock[]): string {
+  return blocks
+    .map((block) => {
+      if (block.type === 'text') return block.content;
+      if (block.type === 'thinking') return '';
+      return `[tool:${block.name}]`;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
 const CaretMessage = ({ message, isStreaming = false }: CaretMessageProps): React.JSX.Element => {
   const isUser = message.role === 'user';
+  const blocks = messageBlocks(message);
+  const text = message.content ?? blocksToText(blocks);
 
   return (
     <div
@@ -31,28 +53,9 @@ const CaretMessage = ({ message, isStreaming = false }: CaretMessageProps): Reac
           wordBreak: 'break-word',
         }}
       >
-        {message.content}
-        {isStreaming && (
-          <span
-            style={{
-              display: 'inline-block',
-              width: '2px',
-              height: '14px',
-              background: 'var(--caret-accent, #8b5cf6)',
-              marginLeft: '2px',
-              verticalAlign: 'text-bottom',
-              animation: 'caret-blink 1s step-end infinite',
-            }}
-            aria-hidden="true"
-          />
-        )}
+        {isUser ? text : <MessageBlocks blocks={blocks} />}
+        {isStreaming && <StreamingDot />}
       </div>
-      <style>{`
-        @keyframes caret-blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 };

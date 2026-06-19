@@ -45,6 +45,29 @@ function resolveCode(status: number): ApiErrorCode {
   return 'UNKNOWN';
 }
 
+function fallbackMessage(status: number): string {
+  if (status === 401) return 'Session expired. Please sign in again.';
+  if (status === 403) return 'You do not have permission to perform this action.';
+  if (status === 404) return 'The requested resource was not found.';
+  if (status === 422) return 'Please check your input and try again.';
+  if (status === 429) return 'Too many requests. Please wait a moment.';
+  if (status >= 500) return 'Something went wrong on our end. Please try again.';
+  return 'An unexpected error occurred.';
+}
+
+function messageFrom(value: unknown): string | null {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+  if (!value || typeof value !== 'object') return null;
+
+  const record = value as Record<string, unknown>;
+  return (
+    messageFrom(record.message) ?? messageFrom(record.error) ?? messageFrom(record.detail) ?? null
+  );
+}
+
 function parseAxiosError(error: AxiosError<any>): ApiError {
   if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
     return {
@@ -66,22 +89,7 @@ function parseAxiosError(error: AxiosError<any>): ApiError {
 
   const status = error.response.status;
   const data = error.response.data;
-  const message =
-    data?.message ??
-    data?.error ??
-    (status === 401
-      ? 'Session expired. Please sign in again.'
-      : status === 403
-        ? 'You do not have permission to perform this action.'
-        : status === 404
-          ? 'The requested resource was not found.'
-          : status === 422
-            ? 'Please check your input and try again.'
-            : status === 429
-              ? 'Too many requests. Please wait a moment.'
-              : status >= 500
-                ? 'Something went wrong on our end. Please try again.'
-                : 'An unexpected error occurred.');
+  const message = messageFrom(data) ?? fallbackMessage(status);
 
   return { status, code: resolveCode(status), message, cause: error };
 }
@@ -93,7 +101,7 @@ function toApiError(error: unknown): ApiError {
   return {
     status: 0,
     code: 'UNKNOWN',
-    message: error instanceof Error ? error.message : 'An unexpected error occurred.',
+    message: messageFrom(error) ?? 'An unexpected error occurred.',
     cause: error,
   };
 }
@@ -182,7 +190,7 @@ export function safeFetch(client: AxiosInstance): SafeApi {
  * ```ts
  * useQuery({
  *   queryKey: ['products'],
- *   queryFn: () => unwrap(safe.get<Product[]>('/store/products')),
+ *   queryFn: () => unwrap(safe.get<Product[]>('/erp/products')),
  * });
  * ```
  */

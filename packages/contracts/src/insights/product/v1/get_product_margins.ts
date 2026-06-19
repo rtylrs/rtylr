@@ -5,22 +5,11 @@
 // source: insights/product/v1/get_product_margins.proto
 
 /* eslint-disable */
-import type {
-  PaginationRequest,
-  PaginationResponse,
-} from '../../../common/pagination/v1/pagination';
-import type { ProductMargin } from './types';
+import type { MarginBucket } from './types';
 
-export interface GetProductMarginsRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationRequest | undefined;
-  /** period is the period value for this contract. */
-  period: string;
-}
+export interface GetProductMarginsRequest {}
 
 export interface GetProductMarginsResponse {
-  /** products is the products value for this contract. */
-  products: ProductMargin[];
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationResponse | undefined;
+  /** buckets is the buckets value for this contract. */
+  buckets: MarginBucket[];
 }

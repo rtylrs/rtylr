@@ -52,6 +52,11 @@
   padding: 1px 4px;
   border-radius: 4px;
 }
+.caret-md pre .caret-inline-code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
 .caret-md pre.caret-codeblock {
   font-family: SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
@@ -61,6 +66,35 @@
   border-radius: 6px;
   overflow-x: auto;
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.caret-md .caret-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.caret-md table.caret-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 220px;
+  font-size: 13px;
+}
+.caret-md table.caret-table th,
+.caret-md table.caret-table td {
+  padding: 7px 9px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.caret-md table.caret-table th {
+  color: var(--caret-text, #fff);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+}
+.caret-md table.caret-table tr:last-child td {
+  border-bottom: 0;
 }
 .caret-md a.caret-link {
   color: var(--caret-accent, #8b5cf6);

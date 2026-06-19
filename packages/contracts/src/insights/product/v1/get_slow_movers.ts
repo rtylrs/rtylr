@@ -5,20 +5,14 @@
 // source: insights/product/v1/get_slow_movers.proto
 
 /* eslint-disable */
-import type {
-  PaginationRequest,
-  PaginationResponse,
-} from '../../../common/pagination/v1/pagination';
 import type { SlowMover } from './types';
 
 export interface GetSlowMoversRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationRequest | undefined;
+  /** days is the trailing sales window used to detect slow movers. */
+  days: number;
 }
 
 export interface GetSlowMoversResponse {
   /** products is the products value for this contract. */
   products: SlowMover[];
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationResponse | undefined;
 }

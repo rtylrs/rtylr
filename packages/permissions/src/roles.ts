@@ -6,13 +6,22 @@ export type PlatformRole =
   | 'operator'
   | 'billing'
   | 'menu_manager'
+  | 'store_manager'
   | 'staff'
   | 'viewer';
 
-/** Role hierarchy - higher index = more power */
+/**
+ * Role hierarchy - higher index = more power.
+ *
+ * store_manager sits just above staff in the GLOBAL hierarchy on purpose: its
+ * elevated powers (managing POS users, voids/refunds) are location-scoped and
+ * enforced per-location via pos_member_locations flags, not granted globally.
+ * Keeping it low here prevents a global hasRoleLevel check from over-granting.
+ */
 export const ROLE_HIERARCHY: PlatformRole[] = [
   'viewer',
   'staff',
+  'store_manager',
   'menu_manager',
   'billing',
   'operator',

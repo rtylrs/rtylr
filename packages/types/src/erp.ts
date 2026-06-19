@@ -1,14 +1,25 @@
 export interface Product {
-  id: string;
+  id: number;
+  ownerId?: number;
   name: string;
   sku?: string;
+  categoryId?: number;
+  categoryName?: string;
   category?: string;
+  brandId?: number;
+  supplierId?: number;
   costPrice: number;
   salePrice: number;
-  stock: number;
+  stockQuantity: number;
   lowStockThreshold?: number;
+  reorderQuantity?: number;
   unit?: string;
-  supplierId?: string;
+  isActive?: boolean;
+  trackInventory?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  /** @deprecated Use stockQuantity from erp_products-backed contracts. */
+  stock?: number;
 }
 
 export interface Supplier {
@@ -24,8 +35,8 @@ export type PurchaseOrderStatus = 'draft' | 'sent' | 'received' | 'cancelled';
 
 export interface PurchaseOrder {
   id: string;
-  supplierId: string;
-  items: { productId: string; quantity: number; unitCost: number }[];
+  supplierId: number | string;
+  items: { productId: number; quantity: number; unitCost: number }[];
   total: number;
   status: PurchaseOrderStatus;
   expectedDelivery?: string;

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Wrench, ChevronDown, ChevronRight, Check, X, AlertCircle } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Check, X, AlertCircle } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
-import Badge from '../../ui/Badge';
 import Spinner from '../../ui/Spinner';
 import type { ToolCallBlock } from '../../types/message';
 
@@ -11,111 +10,148 @@ export interface ToolCallCardProps {
   onDeny?: (id: string) => void;
 }
 
-const STATUS_TONE: Record<ToolCallBlock['status'], React.ComponentProps<typeof Badge>['tone']> = {
-  pending: 'warn',
-  approved: 'accent',
-  denied: 'danger',
-  running: 'accent',
-  success: 'success',
-  error: 'danger',
+const TOOL_TARGETS: Array<[RegExp, string]> = [
+  [/^analytics\./, 'analytics'],
+  [/^crm\./, 'customer data'],
+  [/^customers?\./, 'customer data'],
+  [/^inventory\./, 'inventory'],
+  [/^orders?\./, 'orders'],
+  [/^finance\./, 'finance'],
+  [/^booking\./, 'bookings'],
+  [/^(hr|workforce|employees?)\./, 'team data'],
+  [/^loyalty\./, 'loyalty data'],
+  [/^(menu|catalog)\./, 'menu data'],
+  [/^(marketing|growth|insights)\./, 'business insights'],
+  [/^(operator|operations)\./, 'operations'],
+  [/^settings\./, 'settings'],
+  [/^locations?\./, 'locations'],
+  [/^payments?\./, 'payments'],
+];
+
+const detailLabelStyle: React.CSSProperties = {
+  color: caretTokens.textDim,
+  fontSize: 11,
+  marginBottom: 4,
 };
 
-const STATUS_LABEL: Record<ToolCallBlock['status'], string> = {
-  pending: 'Awaiting approval',
-  approved: 'Approved',
-  denied: 'Denied',
-  running: 'Running',
-  success: 'Success',
-  error: 'Error',
+const detailPreStyle: React.CSSProperties = {
+  margin: 0,
+  padding: '8px 9px',
+  background: 'rgba(255,255,255,0.03)',
+  border: `1px solid ${caretTokens.border}`,
+  borderRadius: caretRadius.sm,
+  overflowX: 'auto',
+  whiteSpace: 'pre-wrap',
+  wordBreak: 'break-word',
+  color: caretTokens.textMuted,
 };
+
+function targetForTool(name: string): string {
+  const normalized = name.trim().toLowerCase();
+  const match = TOOL_TARGETS.find(([pattern]) => pattern.test(normalized));
+
+  if (match) return match[1];
+
+  const [moduleName] = normalized.split('.');
+  const readableModule = moduleName?.replace(/[_-]/g, ' ').trim();
+  return readableModule ? `${readableModule} data` : 'business data';
+}
+
+function statusText(status: ToolCallBlock['status'], target: string): string {
+  switch (status) {
+    case 'pending':
+      return `Needs permission to check ${target}`;
+    case 'approved':
+    case 'running':
+      return `Checking ${target}`;
+    case 'success':
+      return `Checked ${target}`;
+    case 'denied':
+      return `Skipped checking ${target}`;
+    case 'error':
+      return `Could not check ${target}`;
+  }
+}
+
+function formatValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+
+  try {
+    return JSON.stringify(value ?? {}, null, 2);
+  } catch {
+    return String(value);
+  }
+}
 
 export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onDeny }) => {
-  const [open, setOpen] = useState(call.status === 'error' || call.status === 'pending');
+  const [open, setOpen] = useState(call.status === 'pending');
+  const target = targetForTool(call.name);
+  const label = statusText(call.status, target);
+  const isPending = call.status === 'pending';
+  const isRunning = call.status === 'running' || call.status === 'approved';
+  const ActivityIcon = call.status === 'error' ? AlertCircle : Search;
 
   return (
     <div
       style={{
-        background: caretTokens.surface,
-        border: `1px solid ${caretTokens.border}`,
-        borderRadius: caretRadius.md,
-        margin: '4px 0',
-        overflow: 'hidden',
+        margin: isPending ? '8px 0 10px' : '8px 0',
+        color: caretTokens.textDim,
       }}
     >
       <button
         type="button"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         style={{
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
-          gap: 8,
-          width: '100%',
-          padding: '8px 10px',
+          gap: 9,
+          maxWidth: '100%',
+          padding: '2px 0',
           background: 'transparent',
           border: 'none',
-          color: caretTokens.text,
-          fontSize: 12,
+          color: isPending ? caretTokens.textMuted : caretTokens.textDim,
+          fontSize: 13,
+          lineHeight: 1.4,
           cursor: 'pointer',
+          opacity: isPending ? 0.95 : 0.76,
         }}
       >
-        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        <Wrench size={12} style={{ color: caretTokens.accent }} />
-        <span style={{ flex: 1, textAlign: 'left' }}>
-          <span style={{ fontWeight: 600 }}>{call.name}</span>
-        </span>
-        <Badge tone={STATUS_TONE[call.status]}>
-          {call.status === 'running' && <Spinner size={9} />}
-          {STATUS_LABEL[call.status]}
-        </Badge>
+        {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+        {isRunning ? (
+          <Spinner size={12} />
+        ) : (
+          <ActivityIcon size={14} style={{ flex: '0 0 auto' }} />
+        )}
+        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
       </button>
 
       {open && (
         <div
           style={{
-            padding: '8px 10px',
-            borderTop: `1px solid ${caretTokens.border}`,
+            marginTop: 6,
+            marginLeft: 21,
+            padding: '4px 0 2px 12px',
+            borderLeft: `1px solid ${caretTokens.border}`,
             fontFamily: 'SFMono-Regular, Menlo, Consolas, monospace',
             fontSize: 11,
             color: caretTokens.textMuted,
           }}
         >
-          <div style={{ marginBottom: 6 }}>
-            <div style={{ color: caretTokens.textDim, marginBottom: 2 }}>input</div>
-            <pre
-              style={{
-                margin: 0,
-                padding: 6,
-                background: caretTokens.bg,
-                borderRadius: caretRadius.sm,
-                overflowX: 'auto',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                color: caretTokens.text,
-              }}
-            >
-              {JSON.stringify(call.input ?? {}, null, 2)}
-            </pre>
+          <div style={{ marginBottom: 8 }}>
+            <div style={detailLabelStyle}>source</div>
+            <pre style={detailPreStyle}>{call.name}</pre>
+          </div>
+
+          <div style={{ marginBottom: 8 }}>
+            <div style={detailLabelStyle}>details</div>
+            <pre style={detailPreStyle}>{formatValue(call.input ?? {})}</pre>
           </div>
 
           {call.output !== undefined && (
-            <div style={{ marginBottom: 6 }}>
-              <div style={{ color: caretTokens.textDim, marginBottom: 2 }}>output</div>
-              <pre
-                style={{
-                  margin: 0,
-                  padding: 6,
-                  background: caretTokens.bg,
-                  borderRadius: caretRadius.sm,
-                  overflowX: 'auto',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  color: caretTokens.text,
-                }}
-              >
-                {typeof call.output === 'string'
-                  ? call.output
-                  : JSON.stringify(call.output, null, 2)}
-              </pre>
+            <div style={{ marginBottom: 8 }}>
+              <div style={detailLabelStyle}>result</div>
+              <pre style={detailPreStyle}>{formatValue(call.output)}</pre>
             </div>
           )}
 
@@ -125,20 +161,21 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: 6,
-                padding: 6,
-                background: 'rgba(239,68,68,0.08)',
-                color: caretTokens.danger,
+                padding: '8px 9px',
+                background: 'rgba(255,255,255,0.03)',
+                border: `1px solid ${caretTokens.border}`,
+                color: caretTokens.textMuted,
                 borderRadius: caretRadius.sm,
                 fontFamily: 'inherit',
               }}
             >
-              <AlertCircle size={12} style={{ marginTop: 1 }} />
+              <AlertCircle size={12} style={{ marginTop: 1, color: caretTokens.textDim }} />
               <span>{call.error}</span>
             </div>
           )}
 
           {call.status === 'pending' && (onApprove || onDeny) && (
-            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+            <div style={{ display: 'flex', gap: 6, marginTop: 9, fontFamily: 'inherit' }}>
               {onApprove && (
                 <button
                   type="button"
@@ -149,14 +186,14 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                     gap: 4,
                     padding: '4px 10px',
                     borderRadius: caretRadius.sm,
-                    background: caretTokens.accent,
-                    color: '#fff',
-                    border: 'none',
+                    background: caretTokens.accentSoft,
+                    color: caretTokens.text,
+                    border: `1px solid ${caretTokens.accentBorder}`,
                     fontSize: 12,
                     cursor: 'pointer',
                   }}
                 >
-                  <Check size={12} /> Approve
+                  <Check size={12} /> Allow
                 </button>
               )}
               {onDeny && (
@@ -176,7 +213,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                     cursor: 'pointer',
                   }}
                 >
-                  <X size={12} /> Deny
+                  <X size={12} /> Skip
                 </button>
               )}
             </div>
