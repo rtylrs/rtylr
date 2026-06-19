@@ -46,6 +46,10 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 	mustContain := []string{
 		"Available business capability catalog:",
 		"business.snapshot [read]",
+		"insights.get_dashboard [read]",
+		"insights.get_revenue_series [read]",
+		"insights.get_invoice_aging [read]",
+		"insights.get_operations_kpis [read]",
 		"crm.list_customers [read]",
 		"crm.list_campaigns [read]",
 		"crm.get_campaign [read]",

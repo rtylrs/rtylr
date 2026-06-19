@@ -457,6 +457,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	loyaltyModule := loyalty.NewModule(ctx, dbclient.Pool())
 	reviewsModule := reviews.NewModule(ctx, dbclient.Pool())
 	segmentsModule := segments.NewModule(ctx, dbclient.Pool())
+	insightsModule := insights.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
@@ -521,7 +522,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -543,7 +544,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HRSetup:               hrsetup.NewModule(ctx, dbclient.Pool()),
 		HRShifts:              hrshifts.NewModule(ctx, dbclient.Pool()),
 		HRTime:                hrtime.NewModule(ctx, dbclient.Pool(), hrCoreModule),
-		Insights:              insights.NewModule(ctx, dbclient.Pool()),
+		Insights:              insightsModule,
 		Integrations:          integrations.NewModule(ctx, dbclient.Pool()),
 		Inventory:             inventoryModule,
 		Invoices:              invoicesModule,
