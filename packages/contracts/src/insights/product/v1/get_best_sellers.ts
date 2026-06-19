@@ -5,22 +5,14 @@
 // source: insights/product/v1/get_best_sellers.proto
 
 /* eslint-disable */
-import type {
-  PaginationRequest,
-  PaginationResponse,
-} from '../../../common/pagination/v1/pagination';
 import type { BestSeller } from './types';
 
 export interface GetBestSellersRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationRequest | undefined;
-  /** period is the period value for this contract. */
-  period: string;
+  /** limit is the maximum number of products to return. */
+  limit: number;
 }
 
 export interface GetBestSellersResponse {
   /** products is the products value for this contract. */
   products: BestSeller[];
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationResponse | undefined;
 }

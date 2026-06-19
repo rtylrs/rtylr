@@ -13,10 +13,8 @@ export interface BestSeller {
   name: string;
   /** units_sold is the units sold value for this contract. */
   unitsSold: number;
-  /** revenue is the revenue value for this contract. */
-  revenue: number;
-  /** category is the category value for this contract. */
-  category: string;
+  /** revenue_minor_units is the revenue minor units value for this contract. */
+  revenueMinorUnits: number;
 }
 
 export interface SlowMover {
@@ -24,38 +22,28 @@ export interface SlowMover {
   productId: number;
   /** name is the name value for this contract. */
   name: string;
-  /** units_sold is the units sold value for this contract. */
-  unitsSold: number;
-  /** days_in_stock is the days in stock value for this contract. */
-  daysInStock: number;
-  /** stock_value is the stock value value for this contract. */
-  stockValue: number;
+  /** stock_quantity is the stock quantity value for this contract. */
+  stockQuantity: number;
 }
 
-export interface ProductMargin {
-  /** product_id is the product id value for this contract. */
-  productId: number;
-  /** name is the name value for this contract. */
-  name: string;
-  /** revenue is the revenue value for this contract. */
-  revenue: number;
-  /** cost is the cost value for this contract. */
-  cost: number;
-  /** margin is the margin value for this contract. */
-  margin: number;
-  /** margin_percentage is the margin percentage value for this contract. */
-  marginPercentage: number;
-}
-
-export interface CategoryPerformance {
-  /** category is the category value for this contract. */
-  category: string;
-  /** revenue is the revenue value for this contract. */
-  revenue: number;
-  /** units_sold is the units sold value for this contract. */
-  unitsSold: number;
-  /** avg_margin is the avg margin value for this contract. */
-  avgMargin: number;
+export interface MarginBucket {
+  /** label is the label value for this contract. */
+  label: string;
+  /** lower_pct is the lower pct value for this contract. */
+  lowerPct: number;
+  /** upper_pct is the upper pct value for this contract. */
+  upperPct: number;
   /** product_count is the product count value for this contract. */
   productCount: number;
+}
+
+export interface CategorySales {
+  /** category_id is the category id value for this contract. */
+  categoryId: number;
+  /** category_name is the category name value for this contract. */
+  categoryName: string;
+  /** units_sold is the units sold value for this contract. */
+  unitsSold: number;
+  /** revenue_minor_units is the revenue minor units value for this contract. */
+  revenueMinorUnits: number;
 }
