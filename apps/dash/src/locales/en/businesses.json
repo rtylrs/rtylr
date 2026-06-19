@@ -7,6 +7,7 @@
   "creating": "Creating...",
   "switchSuccess": "Switched to {{name}}",
   "switchError": "Failed to switch business",
+  "createSuccess": "Business created",
   "createError": "Failed to create business",
   "parentRequired": "Parent business is required"
 }

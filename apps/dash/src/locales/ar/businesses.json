@@ -7,6 +7,7 @@
   "creating": "جارٍ الإنشاء...",
   "switchSuccess": "تم التبديل إلى {{name}}",
   "switchError": "فشل تبديل النشاط التجاري",
+  "createSuccess": "تم إنشاء النشاط التجاري",
   "createError": "فشل إنشاء النشاط التجاري",
   "parentRequired": "النشاط التجاري الأصلي مطلوب"
 }
