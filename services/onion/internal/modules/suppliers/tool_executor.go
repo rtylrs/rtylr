@@ -18,10 +18,15 @@ import (
 
 const (
 	createSupplierToolName           = "erp.create_supplier"
+	getSupplierToolName              = "erp.get_supplier"
 	listSuppliersToolName            = "erp.list_suppliers"
 	defaultListSuppliersToolPageSize = int64(20)
 	maxListSuppliersToolPageSize     = int64(50)
 )
+
+type getSupplierToolInput struct {
+	SupplierID int64
+}
 
 type listSuppliersToolInput struct {
 	Page     int64
@@ -30,6 +35,9 @@ type listSuppliersToolInput struct {
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
+	case getSupplierToolName:
+		output, err := m.executeGetSupplierTool(ctx, input)
+		return output, true, err
 	case listSuppliersToolName:
 		output, err := m.executeListSuppliersTool(ctx, input)
 		return output, true, err
@@ -39,6 +47,31 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetSupplierTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseGetSupplierToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+	supplier, err := m.service.GetSupplierByID(ctx, businessID, parsed.SupplierID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"supplier": supplierToolPayload(supplier),
+	}, nil
 }
 
 func (m *Module) executeListSuppliersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -112,6 +145,17 @@ func (m *Module) executeCreateSupplierTool(ctx context.Context, input map[string
 	}, nil
 }
 
+func parseGetSupplierToolInput(input map[string]any) (getSupplierToolInput, error) {
+	supplierID, err := supplierIDToolValue(firstSupplierToolValue(input, "supplier_id", "supplier", "id"))
+	if err != nil {
+		return getSupplierToolInput{}, fmt.Errorf("invalid supplier_id: %w", err)
+	}
+	if supplierID <= 0 {
+		return getSupplierToolInput{}, errors.New("supplier_id is required")
+	}
+	return getSupplierToolInput{SupplierID: supplierID}, nil
+}
+
 func parseCreateSupplierToolInput(input map[string]any) (domain.SupplierInput, error) {
 	isActive, err := supplierToolBool(firstSupplierToolValue(input, "is_active", "active"), true)
 	if err != nil {
@@ -180,6 +224,21 @@ func firstSupplierToolValue(input map[string]any, keys ...string) any {
 		return value
 	}
 	return nil
+}
+
+func supplierIDToolValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"supplier-", "supplier_", "sup-", "sup_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return supplierToolInt64(raw)
+	default:
+		return supplierToolInt64(value)
+	}
 }
 
 func supplierToolPayload(supplier domain.Supplier) map[string]any {

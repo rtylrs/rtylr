@@ -19,6 +19,10 @@ func (m *mockRepo) ListSuppliers(_ context.Context, _ int64, _, _ int) ([]domain
 	return nil, false, nil
 }
 
+func (m *mockRepo) GetSupplierByID(_ context.Context, _, _ int64) (domain.Supplier, error) {
+	return domain.Supplier{}, nil
+}
+
 func (m *mockRepo) CreateSupplier(_ context.Context, _ int64, _ domain.SupplierInput) (int64, error) {
 	return m.createID, m.createErr
 }

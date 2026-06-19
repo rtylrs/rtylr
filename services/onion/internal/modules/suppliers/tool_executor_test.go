@@ -99,6 +99,32 @@ func TestParseListSuppliersToolInputRejectsNegativePage(t *testing.T) {
 	}
 }
 
+func TestParseGetSupplierToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"supplier_id": int64(42)},
+		{"supplier": "#42"},
+		{"id": "supplier-42"},
+		{"id": "sup_42"},
+	}
+
+	for _, input := range cases {
+		parsed, err := parseGetSupplierToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetSupplierToolInput(%v) returned error: %v", input, err)
+		}
+		if parsed.SupplierID != 42 {
+			t.Fatalf("SupplierID = %d, want 42 for %v", parsed.SupplierID, input)
+		}
+	}
+}
+
+func TestParseGetSupplierToolInputRejectsMissingSupplier(t *testing.T) {
+	_, err := parseGetSupplierToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "supplier_id") {
+		t.Fatalf("error = %v, want supplier_id validation", err)
+	}
+}
+
 func TestSupplierToolPayloadFormatsFields(t *testing.T) {
 	createdAt := time.Date(2026, 6, 18, 10, 30, 0, 0, time.FixedZone("EEST", 3*60*60))
 	payload := supplierToolPayload(domain.Supplier{

@@ -12,6 +12,7 @@ import (
 
 type repository interface {
 	ListSuppliers(ctx context.Context, businessID int64, limit, offset int) ([]domain.Supplier, bool, error)
+	GetSupplierByID(ctx context.Context, businessID, id int64) (domain.Supplier, error)
 	CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error)
 	UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error
 	DeleteSupplier(ctx context.Context, businessID, id int64) error
@@ -48,6 +49,10 @@ func (s *Service) ListSuppliers(ctx context.Context, businessID, page, pageSize 
 		items = []domain.Supplier{}
 	}
 	return items, hasMore, nil
+}
+
+func (s *Service) GetSupplierByID(ctx context.Context, businessID, id int64) (domain.Supplier, error) {
+	return s.repo.GetSupplierByID(ctx, businessID, id)
 }
 
 func (s *Service) CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error) {
