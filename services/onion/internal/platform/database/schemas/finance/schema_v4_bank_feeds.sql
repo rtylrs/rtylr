@@ -19,6 +19,7 @@
 CREATE TABLE IF NOT EXISTS finance_bank_feeds (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     bank_account_id BIGINT NOT NULL,
     amount_minor_units BIGINT NOT NULL,
     currency VARCHAR(10) NOT NULL DEFAULT 'USD',

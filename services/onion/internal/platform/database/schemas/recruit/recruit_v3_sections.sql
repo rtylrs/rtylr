@@ -15,6 +15,7 @@
 CREATE TABLE IF NOT EXISTS careers_sections (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     kind VARCHAR(32) NOT NULL,
     title VARCHAR(240) NULL,
     body TEXT NULL,

@@ -17,6 +17,7 @@
 CREATE TABLE IF NOT EXISTS finance_reconciliation_matches (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     bank_feed_id BIGINT NOT NULL,
     target_type VARCHAR(16) NOT NULL,
     target_id BIGINT NOT NULL,

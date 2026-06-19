@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS themes (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id INT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     primary_color TEXT NULL,
     secondary_color TEXT NULL,
     accent_color TEXT NULL,

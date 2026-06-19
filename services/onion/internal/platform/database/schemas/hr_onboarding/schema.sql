@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_onboarding_checklist_templates (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     trigger_type VARCHAR(50) NOT NULL DEFAULT 'onboarding',
     role_id BIGINT,
@@ -13,6 +14,7 @@ CREATE TABLE IF NOT EXISTS hr_onboarding_checklist_templates (
 CREATE TABLE IF NOT EXISTS hr_onboarding_checklist_items (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     template_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
@@ -28,6 +30,7 @@ CREATE TABLE IF NOT EXISTS hr_onboarding_checklist_items (
 CREATE TABLE IF NOT EXISTS hr_onboarding_employee_checklists (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     template_id BIGINT NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'in_progress',
@@ -41,6 +44,7 @@ CREATE TABLE IF NOT EXISTS hr_onboarding_employee_checklists (
 CREATE TABLE IF NOT EXISTS hr_onboarding_employee_checklist_items (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_checklist_id BIGINT NOT NULL,
     checklist_item_id BIGINT NOT NULL,
     assigned_to_employee_id BIGINT NOT NULL DEFAULT 0,

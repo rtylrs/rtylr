@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hub_api_keys (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     key_hash VARCHAR(255) NOT NULL,
     key_prefix VARCHAR(10) NOT NULL,

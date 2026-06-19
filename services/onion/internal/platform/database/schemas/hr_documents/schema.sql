@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_employee_documents (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     document_type VARCHAR(100) NOT NULL,
     title VARCHAR(255) NOT NULL,

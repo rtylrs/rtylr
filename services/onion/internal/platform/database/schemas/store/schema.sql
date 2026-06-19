@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS store_sites (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     domain VARCHAR(255),
     logo_url TEXT,
@@ -13,6 +14,7 @@ CREATE TABLE IF NOT EXISTS store_sites (
 CREATE TABLE IF NOT EXISTS store_products (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     product_id BIGINT,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255),
@@ -29,6 +31,7 @@ CREATE TABLE IF NOT EXISTS store_products (
 CREATE TABLE IF NOT EXISTS store_categories (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255),
     description TEXT,
@@ -41,6 +44,7 @@ CREATE TABLE IF NOT EXISTS store_categories (
 CREATE TABLE IF NOT EXISTS store_orders (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     customer_email VARCHAR(255),
     customer_name VARCHAR(255),
     customer_phone VARCHAR(50),
@@ -69,6 +73,7 @@ CREATE TABLE IF NOT EXISTS store_order_items (
 CREATE TABLE IF NOT EXISTS store_checkouts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     session_id VARCHAR(255),
     customer_email VARCHAR(255),
     items JSON,
@@ -83,6 +88,7 @@ CREATE TABLE IF NOT EXISTS store_checkouts (
 CREATE TABLE IF NOT EXISTS store_shipping_methods (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10,2) NOT NULL DEFAULT 0,
     estimated_days INT DEFAULT 0,
@@ -93,6 +99,7 @@ CREATE TABLE IF NOT EXISTS store_shipping_methods (
 CREATE TABLE IF NOT EXISTS store_payment_methods (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     provider VARCHAR(100) NOT NULL,
     config JSON DEFAULT (JSON_OBJECT()),
     is_active BOOLEAN DEFAULT TRUE,
@@ -102,6 +109,7 @@ CREATE TABLE IF NOT EXISTS store_payment_methods (
 CREATE TABLE IF NOT EXISTS store_themes (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     primary_color VARCHAR(20),
     font VARCHAR(100),

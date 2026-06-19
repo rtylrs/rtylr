@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS flow_workspaces (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     icon VARCHAR(50) DEFAULT '🚀',
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS flow_projects (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     workspace_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     icon VARCHAR(50) DEFAULT '📋',
@@ -59,6 +61,7 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     project_id BIGINT NOT NULL,
     workspace_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     parent_task_id BIGINT DEFAULT NULL,
     title VARCHAR(500) NOT NULL,
     description TEXT,
@@ -102,6 +105,7 @@ CREATE TABLE IF NOT EXISTS flow_task_attachments (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     task_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     url TEXT NOT NULL,
     size BIGINT DEFAULT 0,
@@ -112,6 +116,7 @@ CREATE TABLE IF NOT EXISTS flow_task_attachments (
 CREATE TABLE IF NOT EXISTS flow_time_logs (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     task_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     duration_minutes INT NOT NULL DEFAULT 0,
@@ -123,6 +128,7 @@ CREATE TABLE IF NOT EXISTS flow_time_logs (
 CREATE TABLE IF NOT EXISTS flow_milestones (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL DEFAULT 0,
+    business_id BIGINT NOT NULL DEFAULT 0,
     project_id BIGINT NOT NULL,
     workspace_id BIGINT NULL,
     name VARCHAR(255) NOT NULL,
@@ -139,6 +145,7 @@ CREATE TABLE IF NOT EXISTS flow_milestones (
 CREATE TABLE IF NOT EXISTS flow_cycles (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL DEFAULT 0,
+    business_id BIGINT NOT NULL DEFAULT 0,
     workspace_id BIGINT NOT NULL,
     project_id BIGINT NULL,
     name VARCHAR(255) NOT NULL,
@@ -154,6 +161,7 @@ CREATE TABLE IF NOT EXISTS flow_cycles (
 CREATE TABLE IF NOT EXISTS flow_views (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL DEFAULT 0,
+    business_id BIGINT NOT NULL DEFAULT 0,
     workspace_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     icon VARCHAR(50) DEFAULT 'eye',
@@ -186,6 +194,7 @@ CREATE TABLE IF NOT EXISTS flow_project_columns (
 CREATE TABLE IF NOT EXISTS flow_businesses (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     color VARCHAR(20) DEFAULT '#64C5B9',
     icon VARCHAR(50) DEFAULT NULL,

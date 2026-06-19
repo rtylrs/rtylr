@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_attendance_records (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     location_id BIGINT NOT NULL DEFAULT 0,
     date DATE NOT NULL,
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS hr_attendance_records (
 CREATE TABLE IF NOT EXISTS hr_attendance_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     app_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     qr_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     gps_enabled BOOLEAN NOT NULL DEFAULT FALSE,

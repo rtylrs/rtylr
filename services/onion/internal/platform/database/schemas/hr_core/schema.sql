@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_company_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     company_name VARCHAR(255) NOT NULL DEFAULT '',
     fiscal_year_start_month INT NOT NULL DEFAULT 1,
     default_currency VARCHAR(10) NOT NULL DEFAULT 'USD',
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS hr_company_config (
 CREATE TABLE IF NOT EXISTS hr_setup_steps (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     step_key VARCHAR(100) NOT NULL,
     step_label VARCHAR(255) NOT NULL DEFAULT '',
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
@@ -28,6 +30,7 @@ CREATE TABLE IF NOT EXISTS hr_setup_steps (
 CREATE TABLE IF NOT EXISTS hr_locations (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(80) NULL,
     address TEXT,
@@ -47,6 +50,7 @@ CREATE TABLE IF NOT EXISTS hr_locations (
 CREATE TABLE IF NOT EXISTS hr_work_schedules (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     schedule_data JSON,
     is_default BOOLEAN NOT NULL DEFAULT FALSE,
@@ -58,6 +62,7 @@ CREATE TABLE IF NOT EXISTS hr_work_schedules (
 CREATE TABLE IF NOT EXISTS hr_departments (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     location_id BIGINT NOT NULL,
     parent_department_id BIGINT NULL,
     name VARCHAR(255) NOT NULL,
@@ -70,6 +75,7 @@ CREATE TABLE IF NOT EXISTS hr_departments (
 CREATE TABLE IF NOT EXISTS hr_employees (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     user_id BIGINT,
     department_id BIGINT,
     location_id BIGINT,
@@ -102,6 +108,7 @@ CREATE TABLE IF NOT EXISTS hr_employees (
 CREATE TABLE IF NOT EXISTS hr_roles (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     permissions JSON,
@@ -115,6 +122,7 @@ CREATE TABLE IF NOT EXISTS hr_roles (
 CREATE TABLE IF NOT EXISTS hr_employee_roles (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -126,6 +134,7 @@ CREATE TABLE IF NOT EXISTS hr_employee_roles (
 CREATE TABLE IF NOT EXISTS hr_approval_chains (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     request_type VARCHAR(100) NOT NULL,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -137,6 +146,7 @@ CREATE TABLE IF NOT EXISTS hr_approval_chains (
 CREATE TABLE IF NOT EXISTS hr_approval_chain_levels (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     approval_chain_id BIGINT NOT NULL,
     level_order INT NOT NULL,
     approver_type VARCHAR(50) NOT NULL,
@@ -150,6 +160,7 @@ CREATE TABLE IF NOT EXISTS hr_approval_chain_levels (
 CREATE TABLE IF NOT EXISTS hr_employee_invites (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     token VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
@@ -164,6 +175,7 @@ CREATE TABLE IF NOT EXISTS hr_employee_invites (
 CREATE TABLE IF NOT EXISTS hr_leave_balances (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     leave_type_id BIGINT NOT NULL,
     year INT NOT NULL,

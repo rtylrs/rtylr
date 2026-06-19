@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS crm_leads (
   id            BIGINT AUTO_INCREMENT PRIMARY KEY,
   owner_id      BIGINT NOT NULL,
+  business_id   BIGINT NOT NULL DEFAULT 0,
   company_name  VARCHAR(255) NOT NULL,
   industry      VARCHAR(100) NULL,
   size          VARCHAR(50) NULL,
@@ -16,12 +17,14 @@ CREATE TABLE IF NOT EXISTS crm_leads (
   updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_crm_leads_owner (owner_id),
   INDEX idx_crm_leads_stage (owner_id, stage),
-  INDEX idx_crm_leads_assigned (owner_id, assigned_to)
+  INDEX idx_crm_leads_assigned (owner_id, assigned_to),
+  INDEX idx_crm_leads_business (business_id)
 );
 
 CREATE TABLE IF NOT EXISTS crm_contacts (
   id         BIGINT AUTO_INCREMENT PRIMARY KEY,
   owner_id   BIGINT NOT NULL,
+  business_id BIGINT NOT NULL DEFAULT 0,
   lead_id    BIGINT NOT NULL,
   customer_id BIGINT NULL,
   name       VARCHAR(255) NOT NULL,
@@ -35,12 +38,14 @@ CREATE TABLE IF NOT EXISTS crm_contacts (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_crm_contacts_owner (owner_id),
   INDEX idx_crm_contacts_lead (lead_id),
-  INDEX idx_crm_contacts_customer (owner_id, customer_id)
+  INDEX idx_crm_contacts_customer (owner_id, customer_id),
+  INDEX idx_crm_contacts_business (business_id)
 );
 
 CREATE TABLE IF NOT EXISTS crm_touchpoints (
   id             BIGINT AUTO_INCREMENT PRIMARY KEY,
   owner_id       BIGINT NOT NULL,
+  business_id    BIGINT NOT NULL DEFAULT 0,
   lead_id        BIGINT NOT NULL,
   contact_id     BIGINT NULL,
   type           VARCHAR(50) NOT NULL DEFAULT 'call',
@@ -50,12 +55,14 @@ CREATE TABLE IF NOT EXISTS crm_touchpoints (
   created_by     BIGINT NOT NULL,
   created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_crm_touchpoints_owner (owner_id),
-  INDEX idx_crm_touchpoints_lead (lead_id)
+  INDEX idx_crm_touchpoints_lead (lead_id),
+  INDEX idx_crm_touchpoints_business (business_id)
 );
 
 CREATE TABLE IF NOT EXISTS crm_contracts (
   id             BIGINT AUTO_INCREMENT PRIMARY KEY,
   owner_id       BIGINT NOT NULL,
+  business_id    BIGINT NOT NULL DEFAULT 0,
   lead_id        BIGINT NOT NULL,
   plan           VARCHAR(50) NOT NULL DEFAULT 'pro',
   mrr            DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -67,5 +74,6 @@ CREATE TABLE IF NOT EXISTS crm_contracts (
   created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_crm_contracts_owner (owner_id),
-  INDEX idx_crm_contracts_lead (lead_id)
+  INDEX idx_crm_contracts_lead (lead_id),
+  INDEX idx_crm_contracts_business (business_id)
 );

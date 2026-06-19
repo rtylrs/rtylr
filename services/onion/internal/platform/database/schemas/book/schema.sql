@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS booking_services (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     duration_minutes INT NOT NULL DEFAULT 30,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS booking_services (
 CREATE TABLE IF NOT EXISTS booking_appointments (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     service_id BIGINT,
     resource_id BIGINT,
     staff_id BIGINT,
@@ -31,6 +33,7 @@ CREATE TABLE IF NOT EXISTS booking_appointments (
 CREATE TABLE IF NOT EXISTS booking_resources (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     type ENUM('room','station','equipment','vehicle') DEFAULT 'room',
     capacity INT DEFAULT 1,
@@ -41,6 +44,7 @@ CREATE TABLE IF NOT EXISTS booking_resources (
 CREATE TABLE IF NOT EXISTS booking_waitlist (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     service_id BIGINT,
     customer_name VARCHAR(255),
     customer_email VARCHAR(255),
@@ -54,6 +58,7 @@ CREATE TABLE IF NOT EXISTS booking_waitlist (
 CREATE TABLE IF NOT EXISTS booking_reminders (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     appointment_id BIGINT,
     type ENUM('email','sms') DEFAULT 'email',
     scheduled_at DATETIME,

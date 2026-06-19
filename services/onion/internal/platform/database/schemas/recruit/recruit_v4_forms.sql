@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS careers_form_fields (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     career_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     kind VARCHAR(32) NOT NULL,
     label VARCHAR(240) NOT NULL,
     placeholder VARCHAR(240) NULL,

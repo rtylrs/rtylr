@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS insights_settings (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     default_currency VARCHAR(10) NOT NULL DEFAULT 'USD',
     fiscal_year_start VARCHAR(5) NOT NULL DEFAULT '01-01',
     timezone VARCHAR(50) NOT NULL DEFAULT 'UTC',
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS insights_settings (
 CREATE TABLE IF NOT EXISTS insights_scheduled_reports (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     template_id VARCHAR(100) NOT NULL,
     cadence VARCHAR(50) NOT NULL,
     channel VARCHAR(50) NOT NULL,

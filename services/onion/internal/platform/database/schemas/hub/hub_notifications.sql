@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hub_notifications (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     user_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     body TEXT NULL,

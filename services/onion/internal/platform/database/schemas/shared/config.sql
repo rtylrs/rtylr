@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id INT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     site_name TEXT NULL,
     logo_url TEXT NULL,
     favicon_url TEXT NULL,

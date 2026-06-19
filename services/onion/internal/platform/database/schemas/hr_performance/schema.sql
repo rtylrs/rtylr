@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_performance_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     rating_scale_type VARCHAR(50) NOT NULL DEFAULT 'numeric',
     rating_min INT NOT NULL DEFAULT 1,
     rating_max INT NOT NULL DEFAULT 5,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS hr_performance_config (
 CREATE TABLE IF NOT EXISTS hr_performance_review_cycles (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     cycle_type VARCHAR(50) NOT NULL DEFAULT 'annual',
     period_start DATE NOT NULL,
@@ -28,6 +30,7 @@ CREATE TABLE IF NOT EXISTS hr_performance_review_cycles (
 CREATE TABLE IF NOT EXISTS hr_performance_reviews (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     review_cycle_id BIGINT NOT NULL,
     reviewer_employee_id BIGINT NOT NULL,
@@ -47,6 +50,7 @@ CREATE TABLE IF NOT EXISTS hr_performance_reviews (
 CREATE TABLE IF NOT EXISTS hr_performance_review_goals (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     review_cycle_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,

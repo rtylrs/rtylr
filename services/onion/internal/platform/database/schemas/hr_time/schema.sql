@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_time_entries (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     timesheet_id BIGINT,
     project_id BIGINT,
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS hr_time_entries (
 CREATE TABLE IF NOT EXISTS hr_timesheets (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     period_start DATE NOT NULL,
     period_end DATE NOT NULL,
@@ -47,6 +49,7 @@ CREATE TABLE IF NOT EXISTS hr_timesheets (
 CREATE TABLE IF NOT EXISTS hr_timesheet_approval_actions (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     timesheet_id BIGINT NOT NULL,
     approver_id BIGINT NOT NULL,
     action VARCHAR(50) NOT NULL,

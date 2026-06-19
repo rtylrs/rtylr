@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_shifts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     location_id BIGINT NOT NULL,
     name VARCHAR(100) NOT NULL,
     start_time VARCHAR(10) NOT NULL,
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS hr_shifts (
 CREATE TABLE IF NOT EXISTS hr_shift_assignments (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     shift_id BIGINT NOT NULL,
     date DATE NOT NULL,

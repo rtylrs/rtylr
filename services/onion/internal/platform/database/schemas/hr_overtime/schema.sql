@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_overtime_requests (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     date DATE NOT NULL,
     planned_extra_minutes INT NOT NULL,
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS hr_overtime_requests (
 CREATE TABLE IF NOT EXISTS hr_overtime_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     daily_threshold_minutes INT NOT NULL DEFAULT 480,
     default_multiplier DECIMAL(5,2) NOT NULL DEFAULT 1.50,
     auto_detect_enabled BOOLEAN NOT NULL DEFAULT FALSE,

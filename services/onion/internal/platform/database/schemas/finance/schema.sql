@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS finance_accounts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     code VARCHAR(32) NULL,
     parent_id BIGINT NULL,
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS finance_accounts (
 CREATE TABLE IF NOT EXISTS finance_invoices (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     invoice_number VARCHAR(100) NOT NULL,
     client_name VARCHAR(255) NOT NULL,
     client_email VARCHAR(255),
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS finance_invoice_items (
 CREATE TABLE IF NOT EXISTS finance_payments (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     invoice_id BIGINT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     currency VARCHAR(10) DEFAULT 'USD',
@@ -70,6 +73,7 @@ CREATE TABLE IF NOT EXISTS finance_payments (
 CREATE TABLE IF NOT EXISTS finance_expense_categories (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     color VARCHAR(20),
     icon VARCHAR(50),
@@ -79,6 +83,7 @@ CREATE TABLE IF NOT EXISTS finance_expense_categories (
 CREATE TABLE IF NOT EXISTS finance_expenses (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     category_id BIGINT,
     description VARCHAR(500) NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
@@ -98,6 +103,7 @@ CREATE TABLE IF NOT EXISTS finance_expenses (
 CREATE TABLE IF NOT EXISTS finance_tax_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL UNIQUE,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(100) NOT NULL DEFAULT '',
     rate DECIMAL(5,2) NOT NULL DEFAULT 0,
     type ENUM('vat','sales_tax','gst','other') DEFAULT 'vat',
@@ -113,6 +119,7 @@ CREATE TABLE IF NOT EXISTS finance_tax_config (
 CREATE TABLE IF NOT EXISTS finance_recurring_invoices (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     template_invoice_id BIGINT NOT NULL,
     frequency ENUM('weekly','monthly','quarterly','yearly') NOT NULL,
     next_invoice_date DATE NOT NULL,
@@ -124,6 +131,7 @@ CREATE TABLE IF NOT EXISTS finance_recurring_invoices (
 CREATE TABLE IF NOT EXISTS finance_quotes (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     customer_name VARCHAR(255) NOT NULL,
     customer_email VARCHAR(255),
     status ENUM('draft','sent','accepted','rejected','expired','converted') DEFAULT 'draft',
@@ -141,6 +149,7 @@ CREATE TABLE IF NOT EXISTS finance_quotes (
 CREATE TABLE IF NOT EXISTS finance_bills (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     supplier_id BIGINT,
     amount DECIMAL(10,2) NOT NULL,
     currency VARCHAR(10) DEFAULT 'USD',
@@ -154,6 +163,7 @@ CREATE TABLE IF NOT EXISTS finance_bills (
 CREATE TABLE IF NOT EXISTS finance_bank_accounts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     institution VARCHAR(255),
     account_type VARCHAR(50),
@@ -167,6 +177,7 @@ CREATE TABLE IF NOT EXISTS finance_bank_accounts (
 CREATE TABLE IF NOT EXISTS finance_journal_entries (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     date DATE NOT NULL,
     description TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'draft',

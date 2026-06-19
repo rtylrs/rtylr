@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hub_integrations (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     provider VARCHAR(50) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'connected',
     config JSON NOT NULL DEFAULT (JSON_OBJECT()),

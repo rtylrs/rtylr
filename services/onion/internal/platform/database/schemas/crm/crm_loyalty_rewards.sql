@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS crm_loyalty_rewards (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(150) NOT NULL,
     description TEXT,
     category VARCHAR(50) DEFAULT 'general' COMMENT 'e.g. food, drink, merch, discount, experience',
@@ -13,5 +14,6 @@ CREATE TABLE IF NOT EXISTS crm_loyalty_rewards (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_lr_owner (owner_id),
-    INDEX idx_lr_active (owner_id, active)
+    INDEX idx_lr_active (owner_id, active),
+    INDEX idx_lr_business (business_id)
 );

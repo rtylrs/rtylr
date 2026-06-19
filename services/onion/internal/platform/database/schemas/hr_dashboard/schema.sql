@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_dashboard_widgets (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     role_id BIGINT NOT NULL DEFAULT 0,
     widget_type VARCHAR(64) NOT NULL,
     position_x INT NOT NULL DEFAULT 0,

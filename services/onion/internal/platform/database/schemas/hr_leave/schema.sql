@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_leave_types (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(100) NOT NULL,
     is_paid BOOLEAN NOT NULL DEFAULT TRUE,
     requires_approval BOOLEAN NOT NULL DEFAULT TRUE,
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS hr_leave_types (
 CREATE TABLE IF NOT EXISTS hr_leave_requests (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     leave_type_id BIGINT NOT NULL,
     start_date DATE NOT NULL,
@@ -39,6 +41,7 @@ CREATE TABLE IF NOT EXISTS hr_leave_requests (
 CREATE TABLE IF NOT EXISTS hr_leave_balances (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     leave_type_id BIGINT NOT NULL,
     year INT NOT NULL,

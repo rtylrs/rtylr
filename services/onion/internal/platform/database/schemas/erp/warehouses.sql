@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS erp_warehouses (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     address TEXT,
     city VARCHAR(100),

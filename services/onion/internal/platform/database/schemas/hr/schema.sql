@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_departments (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     manager_staff_id BIGINT,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS hr_departments (
 CREATE TABLE IF NOT EXISTS hr_staff (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     user_id BIGINT,
     employee_id BIGINT DEFAULT NULL,
     department_id BIGINT,
@@ -42,6 +44,7 @@ CREATE TABLE IF NOT EXISTS hr_staff (
 CREATE TABLE IF NOT EXISTS hr_shifts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT DEFAULT NULL,
     department_id BIGINT DEFAULT NULL,
     date DATE DEFAULT NULL,
@@ -65,6 +68,7 @@ CREATE TABLE IF NOT EXISTS hr_shifts (
 CREATE TABLE IF NOT EXISTS hr_time_off_requests (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT NOT NULL,
     type ENUM('vacation','sick','personal','unpaid','other') NOT NULL,
     start_date DATE NOT NULL,
@@ -82,6 +86,7 @@ CREATE TABLE IF NOT EXISTS hr_time_off_requests (
 CREATE TABLE IF NOT EXISTS hr_payroll_records (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT NOT NULL,
     period_start DATE NOT NULL,
     period_end DATE NOT NULL,
@@ -103,6 +108,7 @@ CREATE TABLE IF NOT EXISTS hr_payroll_records (
 CREATE TABLE IF NOT EXISTS hr_reviews (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT NOT NULL,
     reviewer_id BIGINT,
     period VARCHAR(100),
@@ -119,6 +125,7 @@ CREATE TABLE IF NOT EXISTS hr_reviews (
 CREATE TABLE IF NOT EXISTS hr_one_on_ones (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     manager_id BIGINT NOT NULL,
     staff_id BIGINT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
@@ -131,6 +138,7 @@ CREATE TABLE IF NOT EXISTS hr_one_on_ones (
 CREATE TABLE IF NOT EXISTS hr_documents (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT,
     name VARCHAR(255) NOT NULL,
     type VARCHAR(100),
@@ -142,6 +150,7 @@ CREATE TABLE IF NOT EXISTS hr_documents (
 CREATE TABLE IF NOT EXISTS hr_benefit_plans (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     type ENUM('health','dental','vision','401k','life','other') DEFAULT 'other',
     provider VARCHAR(255),
@@ -154,6 +163,7 @@ CREATE TABLE IF NOT EXISTS hr_benefit_plans (
 CREATE TABLE IF NOT EXISTS hr_training_courses (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     duration_hours DECIMAL(6,1) DEFAULT 0,
@@ -172,6 +182,7 @@ CREATE TABLE IF NOT EXISTS hr_training_progress (
 CREATE TABLE IF NOT EXISTS hr_dashboard_widgets (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     role_id BIGINT NOT NULL DEFAULT 0,
     widget_type VARCHAR(100) NOT NULL,
     position_x INT NOT NULL DEFAULT 0,
@@ -188,6 +199,7 @@ CREATE TABLE IF NOT EXISTS hr_dashboard_widgets (
 CREATE TABLE IF NOT EXISTS hr_employee_documents (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     document_type VARCHAR(100) NOT NULL,
     title VARCHAR(255) NOT NULL,

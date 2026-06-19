@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_equipment_requests (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     employee_id BIGINT NOT NULL,
     item_name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS hr_equipment_requests (
 CREATE TABLE IF NOT EXISTS hr_assets (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100) NOT NULL,
     serial_number VARCHAR(255),

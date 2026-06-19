@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS erp_categories (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -10,6 +11,7 @@ CREATE TABLE IF NOT EXISTS erp_categories (
 CREATE TABLE IF NOT EXISTS erp_suppliers (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(50),
@@ -27,6 +29,7 @@ CREATE TABLE IF NOT EXISTS erp_suppliers (
 CREATE TABLE IF NOT EXISTS erp_products (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     category_id BIGINT,
     supplier_id BIGINT,
     brand_id BIGINT DEFAULT NULL,
@@ -63,6 +66,7 @@ CREATE TABLE IF NOT EXISTS erp_products (
 CREATE TABLE IF NOT EXISTS erp_inventory_transactions (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     product_id BIGINT NOT NULL,
     type ENUM('purchase','sale','adjustment','return','waste') NOT NULL,
     quantity_change DECIMAL(10,3) NOT NULL,
@@ -78,6 +82,7 @@ CREATE TABLE IF NOT EXISTS erp_inventory_transactions (
 CREATE TABLE IF NOT EXISTS erp_purchase_orders (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     supplier_id BIGINT NOT NULL,
     po_number VARCHAR(100) NOT NULL,
     status ENUM('draft','sent','approved','partial','received','cancelled') DEFAULT 'draft',

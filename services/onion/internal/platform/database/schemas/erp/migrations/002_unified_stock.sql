@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS stock_locations (
 CREATE TABLE IF NOT EXISTS stock_levels (
     id               BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id         BIGINT NOT NULL,
+    business_id      BIGINT NOT NULL DEFAULT 0,
     location_id      BIGINT NOT NULL,             -- -> stock_locations.id
     product_id       BIGINT NOT NULL,             -- -> erp_products.id (the only product identity)
     on_hand          DECIMAL(14,3) NOT NULL DEFAULT 0,
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS stock_levels (
 CREATE TABLE IF NOT EXISTS stock_ledger (
     id              BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id        BIGINT NOT NULL,
+    business_id     BIGINT NOT NULL DEFAULT 0,
     location_id     BIGINT NOT NULL,             -- -> stock_locations.id
     product_id      BIGINT NOT NULL,             -- -> erp_products.id
     entry_type      ENUM('purchase','sale','return','adjustment','waste','count','transfer_in','transfer_out','reserve','release','opening') NOT NULL,

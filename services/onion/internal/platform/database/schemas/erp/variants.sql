@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS erp_product_variants (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     product_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     sku VARCHAR(100),

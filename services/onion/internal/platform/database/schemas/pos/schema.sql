@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS pos_locations (
 CREATE TABLE IF NOT EXISTS pos_tables (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     location_id BIGINT,
     name VARCHAR(50) NOT NULL,
     capacity INT DEFAULT 4,
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS pos_sessions (
 CREATE TABLE IF NOT EXISTS pos_orders (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     session_id BIGINT,
     table_id BIGINT,
     location_id BIGINT,
@@ -111,6 +113,7 @@ CREATE TABLE IF NOT EXISTS pos_order_items (
 CREATE TABLE IF NOT EXISTS pos_refunds (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     order_id BIGINT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     reason TEXT,
@@ -123,6 +126,7 @@ CREATE TABLE IF NOT EXISTS pos_refunds (
 CREATE TABLE IF NOT EXISTS pos_modifiers (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     price_delta DECIMAL(10,2) NOT NULL DEFAULT 0,
     group_name VARCHAR(255),
@@ -135,6 +139,7 @@ CREATE TABLE IF NOT EXISTS pos_modifiers (
 CREATE TABLE IF NOT EXISTS pos_combos (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -148,6 +153,7 @@ CREATE TABLE IF NOT EXISTS pos_combos (
 CREATE TABLE IF NOT EXISTS pos_gift_cards (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     customer_id BIGINT,
     code VARCHAR(50) NOT NULL UNIQUE,
     initial_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -165,6 +171,7 @@ CREATE TABLE IF NOT EXISTS pos_gift_cards (
 CREATE TABLE IF NOT EXISTS pos_manager_pins (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     staff_id BIGINT NOT NULL,
     pin VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -178,6 +185,7 @@ CREATE TABLE IF NOT EXISTS pos_manager_pins (
 CREATE TABLE IF NOT EXISTS pos_users (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     user_id BIGINT NOT NULL,
     location_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,

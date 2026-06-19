@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS user_groups (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     name VARCHAR(100) NOT NULL,
     description TEXT,
     color VARCHAR(7) DEFAULT '#6366f1',
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS user_group_members (
     group_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     added_by BIGINT NULL,
     PRIMARY KEY (group_id, user_id),

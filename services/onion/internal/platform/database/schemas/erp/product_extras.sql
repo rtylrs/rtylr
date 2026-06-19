@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS erp_product_images (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     product_id BIGINT NOT NULL,
     url VARCHAR(1024) NOT NULL,
     alt VARCHAR(255) DEFAULT NULL,
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS erp_product_images (
 CREATE TABLE IF NOT EXISTS erp_product_attributes (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     product_id BIGINT NOT NULL,
     name VARCHAR(120) NOT NULL,
     value VARCHAR(1024) NOT NULL,

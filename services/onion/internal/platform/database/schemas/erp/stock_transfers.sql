@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS erp_stock_transfers (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     from_warehouse_id BIGINT NOT NULL,
     to_warehouse_id BIGINT NOT NULL,
     status ENUM('draft','in_transit','received','cancelled') DEFAULT 'draft',

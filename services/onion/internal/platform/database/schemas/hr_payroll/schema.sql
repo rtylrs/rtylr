@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS hr_payroll_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     period_type VARCHAR(50) NOT NULL DEFAULT 'monthly',
     pay_day_of_month INT NOT NULL DEFAULT 28,
     overtime_enabled BOOLEAN NOT NULL DEFAULT FALSE,
@@ -12,6 +13,7 @@ CREATE TABLE IF NOT EXISTS hr_payroll_config (
 CREATE TABLE IF NOT EXISTS hr_payroll_runs (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     period_start DATE NOT NULL,
     period_end DATE NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'draft',
@@ -30,6 +32,7 @@ CREATE TABLE IF NOT EXISTS hr_payroll_runs (
 CREATE TABLE IF NOT EXISTS hr_payroll_entries (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     payroll_run_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
     hours_worked DECIMAL(8,2) NOT NULL DEFAULT 0,

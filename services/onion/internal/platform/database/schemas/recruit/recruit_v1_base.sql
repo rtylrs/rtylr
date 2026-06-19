@@ -46,6 +46,7 @@ CREATE UNIQUE INDEX uk_careers_owner_slug ON careers (owner_id, slug);
 CREATE TABLE IF NOT EXISTS careers_customizations (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     slug VARCHAR(80) NOT NULL,
     brand_name VARCHAR(120) NOT NULL,
     tagline VARCHAR(240) NULL,
@@ -80,6 +81,7 @@ CREATE TABLE IF NOT EXISTS careers_submissions (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     career_id BIGINT NOT NULL,
     owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
     candidate_name VARCHAR(160) NOT NULL,
     email VARCHAR(160) NOT NULL,
     phone VARCHAR(40) NULL,
