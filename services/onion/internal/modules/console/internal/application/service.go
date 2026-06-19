@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,7 +19,11 @@ import (
 const consoleTTL = 1 * time.Minute
 const freeIncludedSeatLimit = 10
 
-var ErrNotOrganizationOwner = errors.New("access can only be granted to organization owners")
+var (
+	ErrNotOrganizationOwner   = errors.New("access can only be granted to organization owners")
+	ErrBusinessNotOwnedByUser = errors.New("business does not belong to the requested owner")
+	ErrAddonNotFound          = errors.New("addon not found")
+)
 
 // Console is a global admin surface — caches are keyed on the admin namespace
 // rather than per-owner because they aggregate across all tenants.
@@ -36,6 +41,13 @@ func invalidateOwnerSubscriptionScope(ctx context.Context, ownerID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, cacheKeys.SubscriptionPrefix(ownerID))
 		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(ownerID))
+	}
+}
+
+func invalidateBusinessAddonScope(ctx context.Context, businessID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix("addons", businessID))
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
 	}
 }
 
@@ -702,15 +714,260 @@ func (s *Service) DeleteGrant(ctx context.Context, id int64) error {
 	return s.repo.DeleteGrant(ctx, id)
 }
 
+// ── Addon Grants ──────────────────────────────────────────────────────────────
+
+type AddonDTO struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Icon        string  `json:"icon"`
+	Price       float64 `json:"price"`
+	IsFree      bool    `json:"is_free"`
+	SortOrder   int64   `json:"sort_order"`
+}
+
+type AddonGrantDTO struct {
+	ID             int64   `json:"id"`
+	UserID         int64   `json:"user_id"`
+	UserName       string  `json:"user_name"`
+	UserEmail      string  `json:"user_email"`
+	BusinessID     int64   `json:"business_id"`
+	BusinessName   string  `json:"business_name"`
+	AddonID        string  `json:"addon_id"`
+	AddonName      string  `json:"addon_name"`
+	AddonPrice     float64 `json:"addon_price"`
+	GrantedBy      int64   `json:"granted_by"`
+	GranterName    string  `json:"granter_name"`
+	Note           string  `json:"note"`
+	ExpiresAt      *string `json:"expires_at,omitempty"`
+	RevokedAt      *string `json:"revoked_at,omitempty"`
+	EnabledByGrant bool    `json:"enabled_by_grant"`
+	CreatedAt      string  `json:"created_at"`
+}
+
+type ListAddonsResult struct {
+	Addons []AddonDTO `json:"addons"`
+}
+
+type ListAddonGrantsResult struct {
+	Grants []AddonGrantDTO `json:"grants"`
+	Total  int64           `json:"total"`
+}
+
+func decimalStringToFloat(value string) float64 {
+	if value == "" {
+		return 0
+	}
+	parsed, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0
+	}
+	return parsed
+}
+
+func toAddonDTO(a infrastructure.AddonCatalogRow) AddonDTO {
+	dto := AddonDTO{
+		ID:    a.ID,
+		Name:  a.Name,
+		Price: decimalStringToFloat(a.Price.String),
+	}
+	if a.Description.Valid {
+		dto.Description = a.Description.String
+	}
+	if a.Icon.Valid {
+		dto.Icon = a.Icon.String
+	}
+	if a.IsFree.Valid {
+		dto.IsFree = a.IsFree.Bool
+	}
+	if a.SortOrder.Valid {
+		dto.SortOrder = a.SortOrder.Int64
+	}
+	return dto
+}
+
+func toAddonGrantDTO(g infrastructure.AddonGrantRow) AddonGrantDTO {
+	dto := AddonGrantDTO{
+		ID:             g.ID,
+		UserID:         g.UserID,
+		BusinessID:     g.BusinessID,
+		AddonID:        g.AddonID,
+		AddonName:      g.AddonName,
+		AddonPrice:     decimalStringToFloat(g.AddonPrice.String),
+		GrantedBy:      g.GrantedBy,
+		EnabledByGrant: g.EnabledByGrant,
+	}
+	if g.UserName.Valid {
+		dto.UserName = g.UserName.String
+	}
+	if g.UserEmail.Valid {
+		dto.UserEmail = g.UserEmail.String
+	}
+	if g.BusinessName.Valid {
+		dto.BusinessName = g.BusinessName.String
+	}
+	if g.GranterName.Valid {
+		dto.GranterName = g.GranterName.String
+	}
+	if g.Note.Valid {
+		dto.Note = g.Note.String
+	}
+	if g.ExpiresAt.Valid {
+		t := g.ExpiresAt.Time.Format(time.RFC3339)
+		dto.ExpiresAt = &t
+	}
+	if g.RevokedAt.Valid {
+		t := g.RevokedAt.Time.Format(time.RFC3339)
+		dto.RevokedAt = &t
+	}
+	if g.CreatedAt.Valid {
+		dto.CreatedAt = g.CreatedAt.Time.Format(time.RFC3339)
+	}
+	return dto
+}
+
+func (s *Service) ListAddons(ctx context.Context) (*ListAddonsResult, error) {
+	rows, err := s.repo.ListAddons(ctx)
+	if err != nil {
+		return nil, err
+	}
+	dtos := make([]AddonDTO, 0, len(rows))
+	for _, a := range rows {
+		dtos = append(dtos, toAddonDTO(a))
+	}
+	return &ListAddonsResult{Addons: dtos}, nil
+}
+
+func (s *Service) ListAddonGrants(ctx context.Context, limit, offset int) (*ListAddonGrantsResult, error) {
+	rows, total, err := s.repo.ListAddonGrants(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	dtos := make([]AddonGrantDTO, 0, len(rows))
+	for _, g := range rows {
+		dtos = append(dtos, toAddonGrantDTO(g))
+	}
+	return &ListAddonGrantsResult{Grants: dtos, Total: total}, nil
+}
+
+func (s *Service) resolveAddonGrantBusiness(ctx context.Context, userID, businessID int64) (*infrastructure.BusinessRow, error) {
+	if businessID > 0 {
+		business, err := s.repo.GetBusinessByID(ctx, businessID)
+		if err != nil {
+			return nil, err
+		}
+		if business.OwnerID != userID {
+			return nil, ErrBusinessNotOwnedByUser
+		}
+		return business, nil
+	}
+	business, err := s.repo.GetActiveBusinessByOwner(ctx, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotOrganizationOwner
+		}
+		return nil, err
+	}
+	return business, nil
+}
+
+func (s *Service) CreateAddonGrant(ctx context.Context, userID, businessID int64, addonID string, grantedBy int64, note string, expiresAt *time.Time) (*AddonGrantDTO, error) {
+	defer invalidateConsoleScope(ctx)
+	defer invalidateOwnerSubscriptionScope(ctx, userID)
+	exists, err := s.repo.AddonExists(ctx, addonID)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, ErrAddonNotFound
+	}
+
+	business, err := s.resolveAddonGrantBusiness(ctx, userID, businessID)
+	if err != nil {
+		return nil, err
+	}
+	defer invalidateBusinessAddonScope(ctx, business.ID)
+
+	wasEnabled, err := s.repo.IsBusinessAddonEnabled(ctx, business.ID, addonID)
+	if err != nil {
+		return nil, err
+	}
+	enabledByGrant := !wasEnabled
+
+	id, err := s.repo.CreateAddonGrant(ctx, userID, business.ID, addonID, grantedBy, note, expiresAt, enabledByGrant)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.repo.EnableBusinessAddon(ctx, business.ID, addonID); err != nil {
+		return nil, err
+	}
+
+	result, _, err := s.repo.ListAddonGrants(ctx, 1000, 0)
+	if err != nil {
+		return &AddonGrantDTO{ID: id}, nil
+	}
+	for _, g := range result {
+		if g.ID == id {
+			dto := toAddonGrantDTO(g)
+			return &dto, nil
+		}
+	}
+	return &AddonGrantDTO{ID: id}, nil
+}
+
+func (s *Service) cleanupAddonGrantEnablement(ctx context.Context, scope *infrastructure.AddonGrantScopeRow) error {
+	if scope == nil || !scope.EnabledByGrant {
+		return nil
+	}
+	hasActiveGrant, err := s.repo.HasActiveAddonGrant(ctx, scope.BusinessID, scope.AddonID)
+	if err != nil {
+		return err
+	}
+	if hasActiveGrant {
+		return nil
+	}
+	return s.repo.DisableBusinessAddon(ctx, scope.BusinessID, scope.AddonID)
+}
+
+func (s *Service) RevokeAddonGrant(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
+	scope, err := s.repo.GetAddonGrantScope(ctx, id)
+	if err == nil {
+		defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
+		defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
+	}
+	if err := s.repo.RevokeAddonGrant(ctx, id); err != nil {
+		return err
+	}
+	return s.cleanupAddonGrantEnablement(ctx, scope)
+}
+
+func (s *Service) DeleteAddonGrant(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
+	scope, err := s.repo.GetAddonGrantScope(ctx, id)
+	if err == nil {
+		defer invalidateOwnerSubscriptionScope(ctx, scope.UserID)
+		defer invalidateBusinessAddonScope(ctx, scope.BusinessID)
+	}
+	if err := s.repo.DeleteAddonGrant(ctx, id); err != nil {
+		return err
+	}
+	return s.cleanupAddonGrantEnablement(ctx, scope)
+}
+
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
 type StatsDTO struct {
-	TotalUsers      int64 `json:"total_users"`
-	BannedUsers     int64 `json:"banned_users"`
-	TotalBusinesses int64 `json:"total_businesses"`
-	ActiveSubs      int64 `json:"active_subs"`
-	TrialSubs       int64 `json:"trial_subs"`
-	ManualGrants    int64 `json:"manual_grants"`
+	TotalUsers          int64 `json:"total_users"`
+	BannedUsers         int64 `json:"banned_users"`
+	TotalBusinesses     int64 `json:"total_businesses"`
+	ActiveSubs          int64 `json:"active_subs"`
+	ActiveSubscriptions int64 `json:"active_subscriptions"`
+	TrialSubs           int64 `json:"trial_subs"`
+	ManualGrants        int64 `json:"manual_grants"`
+	ManualAddonGrants   int64 `json:"manual_addon_grants"`
+	TotalGrants         int64 `json:"total_grants"`
+	ConsoleAdmins       int64 `json:"console_admins"`
 }
 
 func (s *Service) GetStats(ctx context.Context) (*StatsDTO, error) {
@@ -719,11 +976,15 @@ func (s *Service) GetStats(ctx context.Context) (*StatsDTO, error) {
 		return nil, err
 	}
 	return &StatsDTO{
-		TotalUsers:      row.TotalUsers,
-		BannedUsers:     row.BannedUsers,
-		TotalBusinesses: row.TotalBusinesses,
-		ActiveSubs:      row.ActiveSubs,
-		TrialSubs:       row.TrialSubs,
-		ManualGrants:    row.ManualGrants,
+		TotalUsers:          row.TotalUsers,
+		BannedUsers:         row.BannedUsers,
+		TotalBusinesses:     row.TotalBusinesses,
+		ActiveSubs:          row.ActiveSubs,
+		ActiveSubscriptions: row.ActiveSubs,
+		TrialSubs:           row.TrialSubs,
+		ManualGrants:        row.ManualGrants,
+		ManualAddonGrants:   row.ManualAddonGrants,
+		TotalGrants:         row.ManualGrants,
+		ConsoleAdmins:       row.ConsoleAdmins,
 	}, nil
 }

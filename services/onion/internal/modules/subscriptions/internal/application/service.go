@@ -131,7 +131,7 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 		totalCents += item.AmountCents
 		seatDiscountCents += item.IncludedCents
 	}
-	addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, currentMonth)
+	addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, ownerID, businessID, currentMonth)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (s *Service) GetBillingHistory(ctx context.Context, ownerID, businessID int
 		return nil, err
 	}
 	for i := range months {
-		addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, months[i].Month)
+		addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, ownerID, businessID, months[i].Month)
 		if err != nil {
 			return nil, err
 		}
@@ -352,6 +352,12 @@ func computeAddonLineItem(period domain.AddonBillingPeriod) domain.BillingLineIt
 	item.UnitPriceCents = period.PriceCents
 	item.SeatCount = 0
 	item.PricePerSeatCents = 0
+	item.IsGranted = period.IsGranted
+	item.GrantExpiresAt = period.GrantExpiresAt
+	if period.IsGranted {
+		item.IncludedCents += item.AmountCents
+		item.AmountCents = 0
+	}
 	return item
 }
 

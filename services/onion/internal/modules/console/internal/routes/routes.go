@@ -99,6 +99,22 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 	router.Post("/console/grants/{id}/revoke", rawRevokeGrant(ctx, service))
 	router.Delete("/console/grants/{id}", rawDeleteGrant(ctx, service))
+
+	// Addon Grants
+	serverHttp.RegisterGET[handlers.ListAddonsRequest, handlers.ListAddonsResponse](
+		ctx, router, []string{"/console/addons"},
+		&handlers.ListAddonsHandler{Service: service},
+	)
+	serverHttp.RegisterGET[handlers.ListAddonGrantsRequest, handlers.ListAddonGrantsResponse](
+		ctx, router, []string{"/console/addon-grants"},
+		&handlers.ListAddonGrantsHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateAddonGrantRequest, handlers.CreateAddonGrantResponse](
+		ctx, router, []string{"/console/addon-grants"},
+		&handlers.CreateAddonGrantHandler{Service: service},
+	)
+	router.Post("/console/addon-grants/{id}/revoke", rawRevokeAddonGrant(ctx, service))
+	router.Delete("/console/addon-grants/{id}", rawDeleteAddonGrant(ctx, service))
 }
 
 // ── helper ────────────────────────────────────────────────────────────────────
@@ -652,5 +668,43 @@ func rawDeleteGrant(_ context.Context, svc *application.Service) http.HandlerFun
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Grant deleted"})
+	}
+}
+
+func rawRevokeAddonGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		id, ok := getIDParam(r, "id")
+		if !ok {
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
+		}
+		if err := svc.RevokeAddonGrant(r.Context(), id); err != nil {
+			writeError(w, http.StatusInternalServerError, "Failed to revoke addon grant")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"message": "Addon grant revoked"})
+	}
+}
+
+func rawDeleteAddonGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		id, ok := getIDParam(r, "id")
+		if !ok {
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
+		}
+		if err := svc.DeleteAddonGrant(r.Context(), id); err != nil {
+			writeError(w, http.StatusInternalServerError, "Failed to delete addon grant")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"message": "Addon grant deleted"})
 	}
 }

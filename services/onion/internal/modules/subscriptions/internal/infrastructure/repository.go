@@ -450,16 +450,25 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 	return periods, rows.Err()
 }
 
-func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
+func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
 	if businessID <= 0 {
 		return []domain.AddonBillingPeriod{}, nil
 	}
 
 	billingMonth := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
 	firstOfNextMonth := time.Date(billingMonth.Year(), billingMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
+	activeGrantPredicate := `
+mag.user_id = ?
+AND mag.business_id = ba.business_id
+AND mag.addon_id = ba.addon_id
+AND mag.revoked_at IS NULL
+AND mag.created_at < ?
+AND (mag.expires_at IS NULL OR mag.expires_at >= ?)`
 
 	query, args, err := sq.
 		Select("ba.addon_id", "a.name", "a.price", "ba.enabled_at", "ba.disabled_at").
+		Column(sq.Expr("EXISTS (SELECT 1 FROM manual_addon_grants mag WHERE "+activeGrantPredicate+") AS is_granted", ownerID, firstOfNextMonth, billingMonth)).
+		Column(sq.Expr("(SELECT mag.expires_at FROM manual_addon_grants mag WHERE "+activeGrantPredicate+" ORDER BY mag.created_at DESC LIMIT 1) AS grant_expires_at", ownerID, firstOfNextMonth, billingMonth)).
 		From("business_addons ba").
 		Join("addons a ON a.id = ba.addon_id").
 		Where(sq.Eq{"ba.business_id": businessID, "a.is_free": false}).
@@ -487,7 +496,9 @@ func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, businessID int
 		var addonID, name, price string
 		var enabledAt time.Time
 		var disabledAt sql.NullTime
-		if err := rows.Scan(&addonID, &name, &price, &enabledAt, &disabledAt); err != nil {
+		var isGranted bool
+		var grantExpiresAt sql.NullTime
+		if err := rows.Scan(&addonID, &name, &price, &enabledAt, &disabledAt, &isGranted, &grantExpiresAt); err != nil {
 			return nil, err
 		}
 
@@ -503,14 +514,21 @@ func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, businessID int
 				end = &disabled
 			}
 		}
+		var grantExpires *time.Time
+		if grantExpiresAt.Valid {
+			t := grantExpiresAt.Time.UTC()
+			grantExpires = &t
+		}
 
 		periods = append(periods, domain.AddonBillingPeriod{
-			AddonID:      addonID,
-			Name:         name,
-			PriceCents:   decimalStringToCents(price),
-			PeriodStart:  start,
-			PeriodEnd:    end,
-			BillingMonth: billingMonth,
+			AddonID:        addonID,
+			Name:           name,
+			PriceCents:     decimalStringToCents(price),
+			PeriodStart:    start,
+			PeriodEnd:      end,
+			BillingMonth:   billingMonth,
+			IsGranted:      isGranted,
+			GrantExpiresAt: grantExpires,
 		})
 	}
 

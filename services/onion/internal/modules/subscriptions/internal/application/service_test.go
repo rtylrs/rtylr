@@ -98,7 +98,7 @@ func (m *mockRepo) GetPeriodsForMonth(_ context.Context, _ int64, _ time.Time) (
 	return nil, m.getPeriodsErr
 }
 
-func (m *mockRepo) GetAddonPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
+func (m *mockRepo) GetAddonPeriodsForMonth(_ context.Context, _, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
 	return m.addonPeriods, m.getAddonPeriodsErr
 }
 

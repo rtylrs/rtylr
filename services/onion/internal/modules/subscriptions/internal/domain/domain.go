@@ -85,6 +85,8 @@ type BillingLineItem struct {
 	AmountCents       int        `json:"amount_cents"`
 	Type              string     `json:"type"`
 	Description       string     `json:"description"`
+	IsGranted         bool       `json:"is_granted,omitempty"`
+	GrantExpiresAt    *time.Time `json:"grant_expires_at,omitempty"`
 	AddonID           string     `json:"addon_id,omitempty"`
 	Quantity          int        `json:"quantity"`
 	UnitPriceCents    int        `json:"unit_price_cents"`
@@ -92,12 +94,14 @@ type BillingLineItem struct {
 
 // AddonBillingPeriod is a paid addon span that overlaps a billing month.
 type AddonBillingPeriod struct {
-	AddonID      string     `json:"addon_id"`
-	Name         string     `json:"name"`
-	PriceCents   int        `json:"price_cents"`
-	PeriodStart  time.Time  `json:"period_start"`
-	PeriodEnd    *time.Time `json:"period_end"`
-	BillingMonth time.Time  `json:"billing_month"`
+	AddonID        string     `json:"addon_id"`
+	Name           string     `json:"name"`
+	PriceCents     int        `json:"price_cents"`
+	PeriodStart    time.Time  `json:"period_start"`
+	PeriodEnd      *time.Time `json:"period_end"`
+	BillingMonth   time.Time  `json:"billing_month"`
+	IsGranted      bool       `json:"is_granted"`
+	GrantExpiresAt *time.Time `json:"grant_expires_at,omitempty"`
 }
 
 // BillingDetail is the full view of the current billing month.
@@ -138,7 +142,7 @@ type Repository interface {
 	CountActiveSeats(ctx context.Context, ownerID int64) (int, error)
 	// Seat period management
 	GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]SeatPeriod, error)
-	GetAddonPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]AddonBillingPeriod, error)
+	GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]AddonBillingPeriod, error)
 	GetActivePeriod(ctx context.Context, subscriptionID int64) (*SeatPeriod, error)
 	CloseActivePeriod(ctx context.Context, subscriptionID int64, periodEnd time.Time) error
 	OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error

@@ -447,3 +447,99 @@ func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest)
 	}
 	return CreateGrantResponse{Grant: *grant, Message: "Access grant created"}, nil
 }
+
+// ── Addon Grants ──────────────────────────────────────────────────────────────
+
+type ListAddonsRequest struct{}
+
+type ListAddonsResponse = application.ListAddonsResult
+
+type ListAddonsHandler struct{ Service *application.Service }
+
+func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (ListAddonsResponse, *errorModels.ServerError) {
+	if sErr := requireConsoleAdmin(ctx); sErr != nil {
+		return ListAddonsResponse{}, sErr
+	}
+	result, err := h.Service.ListAddons(ctx)
+	if err != nil {
+		return ListAddonsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list addons"}
+	}
+	return *result, nil
+}
+
+type ListAddonGrantsRequest struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+}
+
+type ListAddonGrantsResponse = application.ListAddonGrantsResult
+
+type ListAddonGrantsHandler struct{ Service *application.Service }
+
+func (h *ListAddonGrantsHandler) Serve(ctx context.Context, req *ListAddonGrantsRequest) (ListAddonGrantsResponse, *errorModels.ServerError) {
+	if sErr := requireConsoleAdmin(ctx); sErr != nil {
+		return ListAddonGrantsResponse{}, sErr
+	}
+	limit := req.Limit
+	if limit <= 0 || limit > 200 {
+		limit = 50
+	}
+	result, err := h.Service.ListAddonGrants(ctx, limit, req.Offset)
+	if err != nil {
+		return ListAddonGrantsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list addon grants"}
+	}
+	return *result, nil
+}
+
+type CreateAddonGrantRequest struct {
+	UserID     int64  `json:"user_id"`
+	BusinessID int64  `json:"business_id,omitempty"`
+	AddonID    string `json:"addon_id"`
+	Note       string `json:"note"`
+	ExpiresAt  string `json:"expires_at,omitempty"`
+}
+
+type CreateAddonGrantResponse struct {
+	Grant   application.AddonGrantDTO `json:"grant"`
+	Message string                    `json:"message"`
+}
+
+type CreateAddonGrantHandler struct{ Service *application.Service }
+
+func (h *CreateAddonGrantHandler) Validate(_ context.Context, req *CreateAddonGrantRequest) *errorModels.ServerError {
+	if req.UserID == 0 || req.AddonID == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id and addon_id are required"}
+	}
+	return nil
+}
+
+func (h *CreateAddonGrantHandler) Serve(ctx context.Context, req *CreateAddonGrantRequest) (CreateAddonGrantResponse, *errorModels.ServerError) {
+	if sErr := requireConsoleAdmin(ctx); sErr != nil {
+		return CreateAddonGrantResponse{}, sErr
+	}
+	admin, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "Unauthorized"}
+	}
+	var expiresAt *time.Time
+	if req.ExpiresAt != "" {
+		t, err := time.Parse(time.RFC3339, req.ExpiresAt)
+		if err == nil {
+			expiresAt = &t
+		}
+	}
+	grant, err := h.Service.CreateAddonGrant(ctx, req.UserID, req.BusinessID, req.AddonID, admin.UserID, req.Note, expiresAt)
+	if err != nil {
+		switch {
+		case errors.Is(err, application.ErrNotOrganizationOwner):
+			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Addon grants can only be created for organization owners"}
+		case errors.Is(err, application.ErrBusinessNotOwnedByUser):
+			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Business does not belong to this owner"}
+		case errors.Is(err, application.ErrAddonNotFound):
+			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Addon not found"}
+		default:
+			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create addon grant"}
+		}
+	}
+	return CreateAddonGrantResponse{Grant: *grant, Message: "Addon grant created"}, nil
+}

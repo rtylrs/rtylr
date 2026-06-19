@@ -178,6 +178,8 @@ type BillingLineItemPayload struct {
 	AmountCents       int        `json:"amount_cents"`
 	Type              string     `json:"type"`
 	Description       string     `json:"description"`
+	IsGranted         bool       `json:"is_granted,omitempty"`
+	GrantExpiresAt    *time.Time `json:"grant_expires_at,omitempty"`
 	AddonID           string     `json:"addon_id,omitempty"`
 	Quantity          int        `json:"quantity"`
 	UnitPriceCents    int        `json:"unit_price_cents"`
@@ -238,6 +240,8 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 			AmountCents:       li.AmountCents,
 			Type:              li.Type,
 			Description:       li.Description,
+			IsGranted:         li.IsGranted,
+			GrantExpiresAt:    li.GrantExpiresAt,
 			AddonID:           li.AddonID,
 			Quantity:          li.Quantity,
 			UnitPriceCents:    li.UnitPriceCents,
@@ -317,6 +321,8 @@ func (h *BillingHistoryHandler) Serve(ctx context.Context, _ *BillingHistoryRequ
 				AmountCents:       li.AmountCents,
 				Type:              li.Type,
 				Description:       li.Description,
+				IsGranted:         li.IsGranted,
+				GrantExpiresAt:    li.GrantExpiresAt,
 				AddonID:           li.AddonID,
 				Quantity:          li.Quantity,
 				UnitPriceCents:    li.UnitPriceCents,
