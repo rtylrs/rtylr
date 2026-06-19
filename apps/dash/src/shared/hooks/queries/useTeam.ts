@@ -186,3 +186,16 @@ export const useAccessRequests = () =>
     },
     staleTime: 30_000,
   });
+
+export const useApproveAccessRequest = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, userId, app }: { id: number; userId: number; app: string }) =>
+      unwrap(safe.post(`/team/access-requests/${id}/approve`, { userId, app })),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['team', 'access-requests'] });
+      void qc.invalidateQueries({ queryKey: ['team'] });
+    },
+    onError: () => toast.error('Failed to grant access'),
+  });
+};

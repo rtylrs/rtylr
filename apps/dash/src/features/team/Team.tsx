@@ -29,6 +29,7 @@ import {
   useTeam,
   useDeactivateMember,
   useAccessRequests,
+  useApproveAccessRequest,
   type TeamMember,
   type AccessRequest,
 } from '../../shared/hooks/queries/useTeam';
@@ -89,6 +90,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
   const { data: groups = [] } = useGroups();
   const { data: accessRequests = [] } = useAccessRequests();
+  const approveAccessRequest = useApproveAccessRequest();
 
   const addGroupMembers = useAddGroupMembers(selectedGroupId || undefined);
 
@@ -228,11 +230,14 @@ const Team: React.FC = (): React.JSX.Element => {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate({ to: `/team/${String(req.userId)}` })}
-                  className="text-[11px] px-2.5 py-1 rounded-md transition-colors"
+                  disabled={approveAccessRequest.isPending}
+                  onClick={() =>
+                    approveAccessRequest.mutate({ id: req.id, userId: req.userId, app: req.app })
+                  }
+                  className="text-[11px] px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
                   style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
                 >
-                  Grant
+                  {approveAccessRequest.isPending ? '...' : 'Grant'}
                 </button>
               </div>
             ))}

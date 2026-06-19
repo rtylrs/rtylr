@@ -92,7 +92,7 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
             <ChevronRight size={11} style={{ color: 'var(--dash-text-dim)' }} />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" side="right" sideOffset={8} className="w-52">
+        <DropdownMenuContent align="start" side="bottom" className="w-52">
           <div
             className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
             style={{ color: 'var(--dash-text-dim)' }}
