@@ -128,7 +128,7 @@ func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]d
 		item.CostPrice = parseDecimal(row.CostPrice)
 		item.SalePrice = parseDecimal(row.SalePrice)
 		item.StockValue = parseDecimal(row.StockValue)
-		item.IsLowStock = row.IsLowStock
+		item.IsLowStock = row.IsLowStock != 0
 
 		if row.LowStockThreshold.Valid {
 			item.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)

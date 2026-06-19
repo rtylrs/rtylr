@@ -7,7 +7,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 SELECT id, name, sku, unit, stock_quantity, low_stock_threshold,
        reorder_quantity, cost_price, sale_price,
        CAST(stock_quantity * cost_price AS DECIMAL(18,4)) AS stock_value,
-       (low_stock_threshold IS NOT NULL AND stock_quantity <= low_stock_threshold) AS is_low_stock
+       CASE WHEN low_stock_threshold IS NOT NULL AND stock_quantity <= low_stock_threshold THEN 1 ELSE 0 END AS is_low_stock
 FROM erp_products
 WHERE owner_id = ? AND track_inventory = TRUE AND is_active = TRUE
 ORDER BY name ASC;
