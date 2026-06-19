@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
@@ -143,15 +144,22 @@ func (h *GetConfigByOwnerHandler) Validate(_ context.Context, _ *GetConfigByOwne
 	return nil
 }
 
-func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, _ *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil {
 		return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
+		if !strings.EqualFold(authUser.Role, "console_admin") || req == nil || req.Owner == "" {
+			return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
+		}
+		ownerBusinessID, parseErr := strconv.ParseInt(req.Owner, 10, 64)
+		if parseErr != nil || ownerBusinessID <= 0 {
+			return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
+		}
+		businessID = ownerBusinessID
 	}
 
 	businessIDStr := strconv.FormatInt(businessID, 10)
