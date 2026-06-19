@@ -42,28 +42,7 @@ func (r *Repository) ListStockTransfers(ctx context.Context, businessID int64, l
 
 	transfers := make([]domain.StockTransfer, 0, limit+1)
 	for _, row := range rows {
-		t := domain.StockTransfer{
-			ID:              row.ID,
-			OwnerID:         row.OwnerID,
-			BusinessID:      row.BusinessID,
-			FromWarehouseID: row.FromWarehouseID,
-			ToWarehouseID:   row.ToWarehouseID,
-		}
-
-		if row.Status.Valid {
-			t.Status = domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
-		}
-		if row.Notes.Valid {
-			t.Notes = row.Notes.String
-		}
-		if row.CreatedAt.Valid {
-			t.CreatedAt = row.CreatedAt.Time
-		}
-		if row.UpdatedAt.Valid {
-			t.UpdatedAt = row.UpdatedAt.Time
-		}
-
-		transfers = append(transfers, t)
+		transfers = append(transfers, stockTransferFromRow(row))
 	}
 
 	hasMore := len(transfers) > limit
@@ -80,6 +59,66 @@ func (r *Repository) ListStockTransfers(ctx context.Context, businessID int64, l
 	}
 
 	return transfers, hasMore, nil
+}
+
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.StockTransfer, error) {
+	var row sqlc.ErpStockTransfer
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id,
+		       status, notes, created_at, updated_at
+		FROM erp_stock_transfers
+		WHERE business_id = ? AND id = ?
+	`, businessID, id).Scan(
+		&row.ID,
+		&row.OwnerID,
+		&row.BusinessID,
+		&row.FromWarehouseID,
+		&row.ToWarehouseID,
+		&row.Status,
+		&row.Notes,
+		&row.CreatedAt,
+		&row.UpdatedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.StockTransfer{}, domain.ErrStockTransferNotFound
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get stock transfer by ID", logger.Error(err))
+		return domain.StockTransfer{}, err
+	}
+
+	transfer := stockTransferFromRow(row)
+	itemsByTransfer, err := r.getTransferItemsBatch(ctx, []domain.StockTransfer{transfer})
+	if err != nil {
+		return domain.StockTransfer{}, err
+	}
+	transfer.Items = itemsByTransfer[transfer.ID]
+	return transfer, nil
+}
+
+func stockTransferFromRow(row sqlc.ErpStockTransfer) domain.StockTransfer {
+	t := domain.StockTransfer{
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
+		FromWarehouseID: row.FromWarehouseID,
+		ToWarehouseID:   row.ToWarehouseID,
+	}
+
+	if row.Status.Valid {
+		t.Status = domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
+	}
+	if row.Notes.Valid {
+		t.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		t.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		t.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return t
 }
 
 // getTransferItemsBatch loads all items for the given transfers in a single

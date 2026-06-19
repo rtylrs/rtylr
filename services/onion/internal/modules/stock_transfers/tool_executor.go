@@ -17,6 +17,7 @@ import (
 
 const (
 	listStockTransfersToolName            = "erp.list_stock_transfers"
+	getStockTransferToolName              = "erp.get_stock_transfer"
 	createStockTransferToolName           = "erp.create_stock_transfer"
 	receiveStockTransferToolName          = "erp.receive_stock_transfer"
 	defaultListStockTransfersToolPageSize = int64(20)
@@ -34,6 +35,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case listStockTransfersToolName:
 		output, err := m.executeListStockTransfersTool(ctx, input)
 		return output, true, err
+	case getStockTransferToolName:
+		output, err := m.executeGetStockTransferTool(ctx, input)
+		return output, true, err
 	case createStockTransferToolName:
 		output, err := m.executeCreateStockTransferTool(ctx, input)
 		return output, true, err
@@ -43,6 +47,32 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetStockTransferTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	transferID, err := parseStockTransferIDToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	transfer, err := m.service.GetByID(ctx, businessID, transferID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"stock_transfer": stockTransferToolPayload(transfer),
+	}, nil
 }
 
 func (m *Module) executeListStockTransfersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -251,9 +281,12 @@ func validateStockTransferToolItems(items []domain.StockTransferItemInput) error
 }
 
 func parseStockTransferIDToolInput(input map[string]any) (int64, error) {
-	transferID, err := stockTransferToolPositiveInt64(firstStockTransferToolValue(input, "stock_transfer_id", "transfer_id", "id"))
+	transferID, err := stockTransferIDToolValue(firstStockTransferToolValue(input, "stock_transfer_id", "transfer_id", "stock_transfer", "transfer", "id"))
 	if err != nil {
 		return 0, fmt.Errorf("invalid stock_transfer_id: %w", err)
+	}
+	if transferID <= 0 {
+		return 0, errors.New("stock_transfer_id is required")
 	}
 	return transferID, nil
 }
@@ -322,6 +355,21 @@ func stockTransferToolItem(input map[string]any) (domain.StockTransferItemInput,
 		ProductID: productID,
 		Quantity:  quantity,
 	}, nil
+}
+
+func stockTransferIDToolValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"stock-transfer-", "stock_transfer_", "stocktransfer-", "stocktransfer_", "transfer-", "transfer_", "st-", "st_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return stockTransferToolInt64(raw)
+	default:
+		return stockTransferToolInt64(value)
+	}
 }
 
 func stockTransferToolPositiveInt64(value any) (int64, error) {

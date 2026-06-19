@@ -18,6 +18,10 @@ func (m *mockRepo) ListStockTransfers(_ context.Context, _ int64, _, _ int) ([]d
 	return nil, false, nil
 }
 
+func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.StockTransfer, error) {
+	return domain.StockTransfer{}, nil
+}
+
 func (m *mockRepo) CreateStockTransfer(_ context.Context, _ int64, _ domain.StockTransferInput) (int64, error) {
 	return m.createID, m.createErr
 }

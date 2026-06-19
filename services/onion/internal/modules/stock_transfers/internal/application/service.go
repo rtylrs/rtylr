@@ -15,6 +15,7 @@ const stockTransfersCacheTTL = 5 * time.Minute
 
 type repository interface {
 	ListStockTransfers(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTransfer, bool, error)
+	GetByID(ctx context.Context, businessID, id int64) (domain.StockTransfer, error)
 	CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error)
 	UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error
 }
@@ -61,6 +62,10 @@ func (s *Service) ListStockTransfers(ctx context.Context, businessID, page, page
 		return nil, false, err
 	}
 	return res.items, res.hasMore, nil
+}
+
+func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.StockTransfer, error) {
+	return s.repo.GetByID(ctx, businessID, id)
 }
 
 func (s *Service) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error) {

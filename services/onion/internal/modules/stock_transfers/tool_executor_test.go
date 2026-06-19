@@ -91,6 +91,27 @@ func TestParseStockTransferIDToolInput(t *testing.T) {
 	}
 }
 
+func TestParseStockTransferIDToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"stock_transfer_id": int64(55)},
+		{"stock_transfer": "#55"},
+		{"transfer": "transfer-55"},
+		{"id": "stock-transfer-55"},
+		{"id": "stock_transfer_55"},
+		{"id": "st_55"},
+	}
+
+	for _, input := range cases {
+		transferID, err := parseStockTransferIDToolInput(input)
+		if err != nil {
+			t.Fatalf("parseStockTransferIDToolInput(%v) returned error: %v", input, err)
+		}
+		if transferID != 55 {
+			t.Fatalf("transferID = %d, want 55 for %v", transferID, input)
+		}
+	}
+}
+
 func TestParseStockTransferIDToolInputRejectsMissingID(t *testing.T) {
 	_, err := parseStockTransferIDToolInput(map[string]any{})
 	if err == nil {
