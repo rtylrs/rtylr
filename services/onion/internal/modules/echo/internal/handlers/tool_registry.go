@@ -32,6 +32,10 @@ var CoreTools = []ToolDef{
 	{Name: "pos.list_branch_inventory", Description: "List POS branch inventory.", Module: "pos", Scope: "read"},
 	{Name: "pos.list_low_stock_items", Description: "List low-stock POS branch inventory items.", Module: "pos", Scope: "read"},
 	{Name: "pos.refund_order", Description: "Refund a POS order.", Module: "pos", Scope: "write", RequiresApproval: true},
+	{Name: "store.list_orders", Description: "List ecommerce store orders.", Module: "store", Scope: "read"},
+	{Name: "store.get_order", Description: "Get an ecommerce store order with line items.", Module: "store", Scope: "read"},
+	{Name: "store.list_products", Description: "List ecommerce store products.", Module: "store", Scope: "read"},
+	{Name: "store.list_categories", Description: "List ecommerce store categories.", Module: "store", Scope: "read"},
 	{Name: "erp.list_products", Description: "List inventory products.", Module: "erp", Scope: "read"},
 	{Name: "erp.set_stock", Description: "Set product stock quantity.", Module: "erp", Scope: "write", RequiresApproval: true},
 	{Name: "erp.list_categories", Description: "List ERP product categories.", Module: "erp", Scope: "read"},
@@ -130,6 +134,10 @@ var promptExecutableTools = map[string]struct{}{
 	"pos.list_branch_inventory":       {},
 	"pos.list_low_stock_items":        {},
 	"pos.refund_order":                {},
+	"store.list_orders":               {},
+	"store.get_order":                 {},
+	"store.list_products":             {},
+	"store.list_categories":           {},
 	"hr.create_employee":              {},
 }
 
