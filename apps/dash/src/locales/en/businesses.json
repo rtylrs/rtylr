@@ -1,14 +1,12 @@
 {
-  "businesses": {
-    "switchBusiness": "Switch Business",
-    "addBusiness": "Add Business",
-    "myBusinesses": "My Businesses",
-    "createSubBusiness": "Create Business",
-    "businessName": "Business name",
-    "creating": "Creating...",
-    "switchSuccess": "Switched to {{name}}",
-    "switchError": "Failed to switch business",
-    "createError": "Failed to create business",
-    "parentRequired": "Parent business is required"
-  }
+  "switchBusiness": "Switch Business",
+  "addBusiness": "Add Business",
+  "myBusinesses": "My Businesses",
+  "createSubBusiness": "Create Business",
+  "businessName": "Business name",
+  "creating": "Creating...",
+  "switchSuccess": "Switched to {{name}}",
+  "switchError": "Failed to switch business",
+  "createError": "Failed to create business",
+  "parentRequired": "Parent business is required"
 }

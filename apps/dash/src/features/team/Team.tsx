@@ -232,7 +232,7 @@ const Team: React.FC = (): React.JSX.Element => {
                   className="text-[11px] px-2.5 py-1 rounded-md transition-colors"
                   style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
                 >
-                  Review
+                  Grant
                 </button>
               </div>
             ))}
