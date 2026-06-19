@@ -477,6 +477,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	storeCategoriesModule := storecategories.NewModule(ctx, dbclient.Pool())
 	storeOrdersModule := storeorders.NewModule(ctx, dbclient.Pool())
 	storeProductsModule := storeproducts.NewModule(ctx, dbclient.Pool())
+	supportCustomersModule := supportcustomers.NewModule(ctx, dbclient.Pool())
+	supportInboxModule := supportinbox.NewModule(ctx, dbclient.Pool())
+	supportTicketsModule := supporttickets.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
 		Accounts:              accounts.NewModule(ctx, dbclient.Pool()),
@@ -512,7 +515,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -590,11 +593,11 @@ func initializeModules(ctx context.Context) *apiModules {
 		StoreShipping:         storeshipping.NewModule(ctx, dbclient.Pool()),
 		StoreThemes:           storethemes.NewModule(ctx, dbclient.Pool()),
 		SupportCanned:         supportcanned.NewModule(ctx, dbclient.Pool()),
-		SupportCustomers:      supportcustomers.NewModule(ctx, dbclient.Pool()),
-		SupportInbox:          supportinbox.NewModule(ctx, dbclient.Pool()),
+		SupportCustomers:      supportCustomersModule,
+		SupportInbox:          supportInboxModule,
 		SupportKnowledge:      supportknowledge.NewModule(ctx, dbclient.Pool()),
 		SupportSettings:       supportsettings.NewModule(ctx, dbclient.Pool()),
-		SupportTickets:        supporttickets.NewModule(ctx, dbclient.Pool()),
+		SupportTickets:        supportTicketsModule,
 		Suppliers:             suppliersModule,
 		Tax:                   tax.NewModule(ctx, dbclient.Pool()),
 		Team:                  team.NewModule(ctx, dbclient.Pool()),
