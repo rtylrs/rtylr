@@ -124,6 +124,9 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 	seatDiscountCents := 0
 	for _, p := range periods {
 		item := computeLineItem(p.SeatCount, p.PricePerSeatCents, p.PeriodStart, p.PeriodEnd, currentMonth)
+		if sub.IsGranted {
+			item = applyGrantToSeatLineItem(item)
+		}
 		lineItems = append(lineItems, item)
 		totalCents += item.AmountCents
 		seatDiscountCents += item.IncludedCents
@@ -151,6 +154,8 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 		BillableSeatCount:    sub.BillableSeatCount,
 		SeatDiscountCents:    seatDiscountCents,
 		Status:               sub.Status,
+		IsGranted:            sub.IsGranted,
+		GrantExpiresAt:       sub.GrantExpiresAt,
 		TrialEndsAt:          sub.TrialEndsAt,
 		PaddleSubscriptionID: sub.PaddleSubscriptionID,
 	}
@@ -268,11 +273,31 @@ func (s *Service) syncSubscriptionBillingState(ctx context.Context, sub *domain.
 }
 
 func (s *Service) withSeatAllowance(sub *domain.Subscription) *domain.Subscription {
-	includedSeats, billableSeats := splitSeats(sub.SeatCount, domain.FreeIncludedSeatLimit)
-	sub.IncludedSeatLimit = domain.FreeIncludedSeatLimit
+	includedLimit := domain.FreeIncludedSeatLimit
+	includedSeats, billableSeats := splitSeats(sub.SeatCount, includedLimit)
+	if sub.IsGranted {
+		includedSeats = sub.SeatCount
+		billableSeats = 0
+		if includedLimit < sub.SeatCount {
+			includedLimit = sub.SeatCount
+		}
+	}
+	sub.IncludedSeatLimit = includedLimit
 	sub.IncludedSeatCount = includedSeats
 	sub.BillableSeatCount = billableSeats
 	return sub
+}
+
+func applyGrantToSeatLineItem(item domain.BillingLineItem) domain.BillingLineItem {
+	item.IncludedCents += item.AmountCents
+	item.AmountCents = 0
+	item.BillableSeatCount = 0
+	item.IncludedSeatCount = item.SeatCount
+	if item.IncludedSeatLimit < item.SeatCount {
+		item.IncludedSeatLimit = item.SeatCount
+	}
+	item.Description = "Granted plan access"
+	return item
 }
 
 // computeLineItem mirrors the infrastructure helper for use in the service layer.

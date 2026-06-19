@@ -43,10 +43,12 @@ type Subscription struct {
 	Apps                 []string   `json:"apps"`
 	PricePerSeatCents    int        `json:"price_per_seat_cents"`
 	Status               string     `json:"status"`
+	IsGranted            bool       `json:"is_granted"`
 	SeatCount            int        `json:"seat_count"`
 	IncludedSeatLimit    int        `json:"included_seat_limit"`
 	IncludedSeatCount    int        `json:"included_seat_count"`
 	BillableSeatCount    int        `json:"billable_seat_count"`
+	GrantExpiresAt       *time.Time `json:"grant_expires_at,omitempty"`
 	TrialEndsAt          *time.Time `json:"trial_ends_at,omitempty"`
 	NextBillingDate      *time.Time `json:"next_billing_date,omitempty"`
 	CurrentPeriodEndsAt  *time.Time `json:"current_period_ends_at,omitempty"`
@@ -112,6 +114,8 @@ type BillingDetail struct {
 	BillableSeatCount    int               `json:"billable_seat_count"`
 	SeatDiscountCents    int               `json:"seat_discount_cents"`
 	Status               string            `json:"status"`
+	IsGranted            bool              `json:"is_granted"`
+	GrantExpiresAt       *time.Time        `json:"grant_expires_at"`
 	TrialEndsAt          *time.Time        `json:"trial_ends_at"`
 	PaddleSubscriptionID string            `json:"paddle_subscription_id"`
 }

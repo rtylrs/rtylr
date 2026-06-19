@@ -10,6 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
@@ -28,6 +29,13 @@ func consoleKey(detail string) string {
 func invalidateConsoleScope(ctx context.Context) {
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, "cache:console:*")
+	}
+}
+
+func invalidateOwnerSubscriptionScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.SubscriptionPrefix(ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(ownerID))
 	}
 }
 
@@ -472,6 +480,7 @@ func (s *Service) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*S
 
 func (s *Service) UpsertSubscription(ctx context.Context, ownerID, planID int64, status string, seatCount int, expiresAt *time.Time) error {
 	defer invalidateConsoleScope(ctx)
+	defer invalidateOwnerSubscriptionScope(ctx, ownerID)
 	seatCount, err := s.activeSeatCountForOwner(ctx, ownerID)
 	if err != nil {
 		return err
@@ -485,6 +494,7 @@ func (s *Service) UpdateSubscription(ctx context.Context, id, planID int64, stat
 	if err != nil {
 		return err
 	}
+	defer invalidateOwnerSubscriptionScope(ctx, sub.OwnerID)
 	seatCount, err = s.activeSeatCountForOwner(ctx, sub.OwnerID)
 	if err != nil {
 		return err
@@ -642,6 +652,7 @@ func (s *Service) ListGrants(ctx context.Context, limit, offset int) (*ListGrant
 
 func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time) (*GrantDTO, error) {
 	defer invalidateConsoleScope(ctx)
+	defer invalidateOwnerSubscriptionScope(ctx, userID)
 	seatCount, err := s.activeSeatCountForOwner(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -677,11 +688,17 @@ func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int
 
 func (s *Service) RevokeGrant(ctx context.Context, id int64) error {
 	defer invalidateConsoleScope(ctx)
+	if ownerID, err := s.repo.GetGrantUserID(ctx, id); err == nil {
+		defer invalidateOwnerSubscriptionScope(ctx, ownerID)
+	}
 	return s.repo.RevokeGrant(ctx, id)
 }
 
 func (s *Service) DeleteGrant(ctx context.Context, id int64) error {
 	defer invalidateConsoleScope(ctx)
+	if ownerID, err := s.repo.GetGrantUserID(ctx, id); err == nil {
+		defer invalidateOwnerSubscriptionScope(ctx, ownerID)
+	}
 	return s.repo.DeleteGrant(ctx, id)
 }
 

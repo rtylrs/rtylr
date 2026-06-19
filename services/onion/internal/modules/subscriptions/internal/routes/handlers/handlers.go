@@ -103,10 +103,12 @@ type SubscriptionPayload struct {
 	Apps                 []string   `json:"apps"`
 	PricePerSeatCents    int        `json:"price_per_seat_cents"`
 	Status               string     `json:"status"`
+	IsGranted            bool       `json:"is_granted"`
 	SeatCount            int        `json:"seat_count"`
 	IncludedSeatLimit    int        `json:"included_seat_limit"`
 	IncludedSeatCount    int        `json:"included_seat_count"`
 	BillableSeatCount    int        `json:"billable_seat_count"`
+	GrantExpiresAt       *time.Time `json:"grant_expires_at,omitempty"`
 	TrialEndsAt          *time.Time `json:"trial_ends_at,omitempty"`
 	NextBillingDate      *time.Time `json:"next_billing_date,omitempty"`
 	PaddleSubscriptionID string     `json:"paddle_subscription_id,omitempty"`
@@ -142,10 +144,12 @@ func (h *MySubscriptionHandler) Serve(ctx context.Context, _ *MySubscriptionRequ
 			Apps:                 sub.Apps,
 			PricePerSeatCents:    sub.PricePerSeatCents,
 			Status:               sub.Status,
+			IsGranted:            sub.IsGranted,
 			SeatCount:            sub.SeatCount,
 			IncludedSeatLimit:    sub.IncludedSeatLimit,
 			IncludedSeatCount:    sub.IncludedSeatCount,
 			BillableSeatCount:    sub.BillableSeatCount,
+			GrantExpiresAt:       sub.GrantExpiresAt,
 			TrialEndsAt:          sub.TrialEndsAt,
 			NextBillingDate:      sub.NextBillingDate,
 			PaddleSubscriptionID: sub.PaddleSubscriptionID,
@@ -192,6 +196,8 @@ type BillingDetailPayload struct {
 	BillableSeatCount    int                      `json:"billable_seat_count"`
 	SeatDiscountCents    int                      `json:"seat_discount_cents"`
 	Status               string                   `json:"status"`
+	IsGranted            bool                     `json:"is_granted"`
+	GrantExpiresAt       *time.Time               `json:"grant_expires_at,omitempty"`
 	TrialEndsAt          *time.Time               `json:"trial_ends_at"`
 	PaddleSubscriptionID string                   `json:"paddle_subscription_id,omitempty"`
 }
@@ -252,6 +258,8 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 			BillableSeatCount:    detail.BillableSeatCount,
 			SeatDiscountCents:    detail.SeatDiscountCents,
 			Status:               detail.Status,
+			IsGranted:            detail.IsGranted,
+			GrantExpiresAt:       detail.GrantExpiresAt,
 			TrialEndsAt:          detail.TrialEndsAt,
 			PaddleSubscriptionID: detail.PaddleSubscriptionID,
 		},

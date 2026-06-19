@@ -204,7 +204,41 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 		sub.PaddleCustomerID = paddleCustID.String
 	}
 
+	if err := r.hydrateActiveGrant(ctx, &sub); err != nil {
+		return nil, err
+	}
+
 	return &sub, nil
+}
+
+func (r *Repository) hydrateActiveGrant(ctx context.Context, sub *domain.Subscription) error {
+	query, args, err := sq.
+		Select("expires_at").
+		From("manual_access_grants").
+		Where(sq.Eq{"user_id": sub.OwnerID, "plan_id": sub.PlanID, "revoked_at": nil}).
+		Where("(expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)").
+		OrderBy("created_at DESC").
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	var expiresAt sql.NullTime
+	if err := r.db.QueryRowContext(ctx, query, args...).Scan(&expiresAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+		return err
+	}
+
+	sub.IsGranted = true
+	if expiresAt.Valid {
+		t := expiresAt.Time
+		sub.GrantExpiresAt = &t
+	}
+	return nil
 }
 
 func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error {

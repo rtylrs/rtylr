@@ -1156,6 +1156,25 @@ func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy 
 	return res.LastInsertId()
 }
 
+func (r *Repository) GetGrantUserID(ctx context.Context, id int64) (int64, error) {
+	query, args, err := sq.
+		Select("user_id").
+		From("manual_access_grants").
+		Where(sq.Eq{"id": id}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	var userID int64
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&userID); err != nil {
+		return 0, err
+	}
+	return userID, nil
+}
+
 func (r *Repository) RevokeGrant(ctx context.Context, id int64) error {
 	query, args, err := sq.
 		Update("manual_access_grants").
