@@ -10,6 +10,8 @@ interface RawSession {
   summary?: string;
   updatedAt?: string;
   updated_at?: string;
+  pinned?: boolean;
+  archived?: boolean;
 }
 
 interface SessionsResponse {
@@ -60,6 +62,8 @@ export function useCaretSessions({
           title: normalizeChatTitle(s.title),
           summary: s.summary,
           updatedAt: s.updatedAt ?? s.updated_at ?? new Date().toISOString(),
+          pinned: s.pinned,
+          archived: s.archived,
         }));
     },
     enabled: userId > 0,
