@@ -177,7 +177,7 @@ const Addons: React.FC = () => {
     .filter((addon) => addon.isEnabled && !addon.isFree)
     .reduce((sum, addon) => sum + addonPriceCents(addon), 0);
   const recurringBaseCents =
-    (billing?.currentSeatCount ?? 0) * (billing?.pricePerSeatCents ?? 0) + enabledPaidMonthlyCents;
+    (billing?.billableSeatCount ?? 0) * (billing?.pricePerSeatCents ?? 0) + enabledPaidMonthlyCents;
   const purchasePriceCents = purchaseTarget ? addonPriceCents(purchaseTarget) : 0;
   const purchaseProration = proratedAddonCents(purchasePriceCents);
 

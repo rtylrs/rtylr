@@ -13,6 +13,9 @@ export interface SubscriptionPayload {
   pricePerSeatCents: number;
   status: 'active' | 'trial' | 'cancelled' | 'expired';
   seatCount: number;
+  includedSeatLimit: number;
+  includedSeatCount: number;
+  billableSeatCount: number;
   trialEndsAt: string | null;
   nextBillingDate: string | null;
   paddleSubscriptionId: string | null;
@@ -41,6 +44,10 @@ export interface BillingLineItem {
   periodStart: string;
   periodEnd: string | null; // null = still active
   seatCount: number;
+  includedSeatLimit?: number;
+  includedSeatCount?: number;
+  billableSeatCount?: number;
+  includedCents?: number;
   pricePerSeatCents: number;
   amountCents: number;
   type?: 'seat' | 'addon';
@@ -58,6 +65,10 @@ export interface BillingDetailPayload {
   planName: string;
   pricePerSeatCents: number;
   currentSeatCount: number;
+  includedSeatLimit: number;
+  includedSeatCount: number;
+  billableSeatCount: number;
+  seatDiscountCents: number;
   status: 'active' | 'trial' | 'cancelled' | 'expired';
   trialEndsAt: string | null;
   paddleSubscriptionId: string | null;

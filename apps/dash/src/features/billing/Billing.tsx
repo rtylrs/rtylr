@@ -99,6 +99,16 @@ function discountLabel(plan: PlanPayload): string | null {
   return discount > 0 ? `Save ${discount}%` : null;
 }
 
+function splitIncludedSeats(
+  seats: number,
+  includedLimit: number
+): { included: number; billable: number } {
+  const safeSeats = Math.max(0, seats);
+  const safeLimit = Math.max(0, includedLimit);
+  const included = Math.min(safeSeats, safeLimit);
+  return { included, billable: Math.max(0, safeSeats - included) };
+}
+
 const SectionHeader: React.FC<{
   title: string;
   description?: string;
@@ -229,7 +239,16 @@ const BillingSummary: React.FC<{
   sub: SubscriptionPayload | null | undefined;
   billing: BillingDetailPayload | null | undefined;
 }> = ({ sub, billing }) => {
-  const seats = sub?.seatCount ?? billing?.currentSeatCount ?? 0;
+  const seats = billing?.currentSeatCount ?? sub?.seatCount ?? 0;
+  const includedSeatLimit = billing?.includedSeatLimit ?? sub?.includedSeatLimit ?? 10;
+  const includedSeatCount =
+    billing?.includedSeatCount ??
+    sub?.includedSeatCount ??
+    splitIncludedSeats(seats, includedSeatLimit).included;
+  const billableSeatCount =
+    billing?.billableSeatCount ??
+    sub?.billableSeatCount ??
+    splitIncludedSeats(seats, includedSeatLimit).billable;
   const planName = sub?.planName ?? billing?.planName ?? 'No plan';
   const trialDays = trialDaysLeft(sub?.trialEndsAt ?? null);
   const nextDate = billing?.nextBillingDate ?? sub?.nextBillingDate;
@@ -255,7 +274,7 @@ const BillingSummary: React.FC<{
         <SummaryTile
           label="Seats"
           value={seats.toLocaleString()}
-          detail={seats === 1 ? 'Active billable seat' : 'Active billable seats'}
+          detail={`${includedSeatCount} of ${includedSeatLimit} included · ${billableSeatCount} billable`}
           icon={Users}
         />
         <SummaryTile
@@ -326,10 +345,12 @@ const SuitePlanCard: React.FC<{
   isCurrent: boolean;
   currentTier?: number;
   seats: number;
+  includedSeatLimit: number;
   ownerEmail: string;
-}> = ({ plan, cycle, isCurrent, currentTier, seats, ownerEmail }) => {
+}> = ({ plan, cycle, isCurrent, currentTier, seats, includedSeatLimit, ownerEmail }) => {
   const price = planPrice(plan, cycle);
-  const monthlyTotal = price * Math.max(1, seats);
+  const seatSplit = splitIncludedSeats(seats, includedSeatLimit);
+  const monthlyTotal = price * seatSplit.billable;
   const discount = cycle === 'yearly' ? discountLabel(plan) : null;
 
   return (
@@ -383,7 +404,7 @@ const SuitePlanCard: React.FC<{
           <p className="text-xs mt-1" style={{ color: 'var(--dash-text-dim)' }}>
             {price === 0
               ? 'No monthly subscription cost'
-              : `${centsToDisplay(monthlyTotal)}/mo at ${seats} seat${seats !== 1 ? 's' : ''}`}
+              : `${centsToDisplay(monthlyTotal)}/mo after ${seatSplit.included} included seat${seatSplit.included !== 1 ? 's' : ''}`}
             {cycle === 'yearly' && price > 0 ? ' · billed yearly' : ''}
           </p>
         </div>
@@ -474,9 +495,10 @@ const SoloPlanCard: React.FC<{
 
 const PlansSection: React.FC<{
   sub: SubscriptionPayload | null | undefined;
+  billing: BillingDetailPayload | null | undefined;
   plans: PlanPayload[];
   loading: boolean;
-}> = ({ sub, plans, loading }) => {
+}> = ({ sub, billing, plans, loading }) => {
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
   const ownerEmail = useUserStore((s) => s.user?.email ?? '');
   const suitePlans = useMemo(
@@ -488,7 +510,8 @@ const PlansSection: React.FC<{
     [plans]
   );
   const currentTier = suitePlans.find((plan) => plan.slug === sub?.planSlug)?.tierOrder;
-  const seats = sub?.seatCount ?? 1;
+  const seats = billing?.currentSeatCount ?? sub?.seatCount ?? 1;
+  const includedSeatLimit = billing?.includedSeatLimit ?? sub?.includedSeatLimit ?? 10;
 
   return (
     <>
@@ -518,6 +541,7 @@ const PlansSection: React.FC<{
                 isCurrent={plan.slug === sub?.planSlug}
                 currentTier={currentTier}
                 seats={seats}
+                includedSeatLimit={includedSeatLimit}
                 ownerEmail={ownerEmail}
               />
             ))}
@@ -638,6 +662,13 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
   );
 };
 
+function seatLineDetail(item: BillingLineItem): string {
+  const split = splitIncludedSeats(item.seatCount, item.includedSeatLimit ?? 0);
+  const included = item.includedSeatCount ?? split.included;
+  const billable = item.billableSeatCount ?? split.billable;
+  return `${included} included · ${billable} billable at ${centsToDisplay(item.pricePerSeatCents)}/seat/mo`;
+}
+
 const CurrentChargesSection: React.FC<{
   billing: BillingDetailPayload | null | undefined;
   loading: boolean;
@@ -664,32 +695,59 @@ const CurrentChargesSection: React.FC<{
         </div>
       ) : (
         <div>
-          {billing.lineItems.map((item, index) => (
+          {billing.includedSeatLimit > 0 ? (
             <div
-              key={`${item.type ?? 'seat'}-${item.addonId ?? index}-${item.periodStart}`}
               className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-4 px-5 py-4 items-center"
               style={{ borderBottom: '1px solid var(--dash-border)' }}
             >
               <div>
                 <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                  {item.type === 'addon'
-                    ? (item.description ?? 'Paid addon')
-                    : `${item.seatCount} seat${item.seatCount !== 1 ? 's' : ''}`}
+                  Free tier allowance
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                  {item.type === 'addon'
-                    ? `${centsToDisplay(item.unitPriceCents ?? 0)}/mo addon`
-                    : `${centsToDisplay(item.pricePerSeatCents)}/seat/mo`}
+                  {billing.includedSeatCount} of {billing.includedSeatLimit} seats included this
+                  month
                 </p>
               </div>
               <p
                 className="text-sm font-semibold sm:text-right"
-                style={{ color: 'var(--dash-text)' }}
+                style={{ color: 'var(--status-active)' }}
               >
-                {centsToDisplay(item.amountCents)}
+                {billing.seatDiscountCents > 0
+                  ? `Saves ${centsToDisplay(billing.seatDiscountCents)}`
+                  : 'Included'}
               </p>
             </div>
-          ))}
+          ) : null}
+          {billing.lineItems.map((item, index) => {
+            const isAddon = item.type === 'addon';
+            return (
+              <div
+                key={`${item.type ?? 'seat'}-${item.addonId ?? index}-${item.periodStart}`}
+                className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-4 px-5 py-4 items-center"
+                style={{ borderBottom: '1px solid var(--dash-border)' }}
+              >
+                <div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                    {isAddon
+                      ? (item.description ?? 'Paid addon')
+                      : `${item.seatCount} active seat${item.seatCount !== 1 ? 's' : ''}`}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                    {isAddon
+                      ? `${centsToDisplay(item.unitPriceCents ?? 0)}/mo addon`
+                      : seatLineDetail(item)}
+                  </p>
+                </div>
+                <p
+                  className="text-sm font-semibold sm:text-right"
+                  style={{ color: 'var(--dash-text)' }}
+                >
+                  {centsToDisplay(item.amountCents)}
+                </p>
+              </div>
+            );
+          })}
           <div className="px-5 py-4 flex items-center justify-between gap-4">
             <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
               Estimated total
@@ -835,7 +893,7 @@ const Billing: React.FC = (): React.JSX.Element => {
         )}
 
         <CurrentChargesSection billing={billing} loading={billingLoading} />
-        <PlansSection sub={sub} plans={plans} loading={plansLoading} />
+        <PlansSection sub={sub} billing={billing} plans={plans} loading={plansLoading} />
         <PaymentMethodsSection sub={sub} />
         <InvoiceHistorySection history={history} loading={historyLoading} />
       </div>

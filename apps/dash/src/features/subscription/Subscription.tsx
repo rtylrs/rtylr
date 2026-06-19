@@ -65,6 +65,16 @@ const STATUS_MAP: Record<SubStatus, StatusConfig> = {
   },
 };
 
+function splitIncludedSeats(
+  seats: number,
+  includedLimit: number
+): { included: number; billable: number } {
+  const safeSeats = Math.max(0, seats);
+  const safeLimit = Math.max(0, includedLimit);
+  const included = Math.min(safeSeats, safeLimit);
+  return { included, billable: Math.max(0, safeSeats - included) };
+}
+
 const StatusBadge: React.FC<{ status: SubStatus }> = ({ status }) => {
   const cfg = STATUS_MAP[status] ?? STATUS_MAP.expired;
   const { Icon } = cfg;
@@ -116,7 +126,12 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
   const { data: billing } = useBillingDetail();
   const daysLeft = trialDaysLeft(sub.trialEndsAt);
   const isTrial = sub.status === 'trial';
-  const estimatedMonthly = sub.seatCount * sub.pricePerSeatCents;
+  const activeSeats = billing?.currentSeatCount ?? sub.seatCount;
+  const includedLimit = billing?.includedSeatLimit ?? sub.includedSeatLimit ?? 10;
+  const seatSplit = splitIncludedSeats(activeSeats, includedLimit);
+  const billableSeats = billing?.billableSeatCount ?? sub.billableSeatCount ?? seatSplit.billable;
+  const includedSeats = billing?.includedSeatCount ?? sub.includedSeatCount ?? seatSplit.included;
+  const estimatedMonthly = billableSeats * sub.pricePerSeatCents;
 
   return (
     <SettingSection title="Current plan" description="Your active subscription and seat usage.">
@@ -151,8 +166,8 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
                 {centsToDisplay(billing?.totalCents ?? estimatedMonthly)}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
-                {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
+                {activeSeats} active seat{activeSeats !== 1 ? 's' : ''} · {includedSeats} of{' '}
+                {includedLimit} included · {billableSeats} billable
               </p>
             </div>
             {isTrial && (
@@ -188,10 +203,12 @@ const PlanCard: React.FC<{
   plan: PlanPayload;
   isCurrent: boolean;
   currentSeats: number;
+  includedSeatLimit: number;
   ownerEmail: string;
   compact?: boolean;
-}> = ({ plan, isCurrent, currentSeats, ownerEmail, compact }) => {
-  const estimatedMonthly = currentSeats * plan.pricePerSeatCents;
+}> = ({ plan, isCurrent, currentSeats, includedSeatLimit, ownerEmail, compact }) => {
+  const seatSplit = splitIncludedSeats(currentSeats, includedSeatLimit);
+  const estimatedMonthly = seatSplit.billable * plan.pricePerSeatCents;
   const checkout = useCheckout();
 
   const handleCheckout = (): void => {
@@ -287,7 +304,7 @@ const PlanCard: React.FC<{
           <p className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
             {plan.pricePerSeatCents === 0
               ? 'Free forever'
-              : `~${centsToDisplay(estimatedMonthly)}/mo at ${currentSeats} seat${currentSeats !== 1 ? 's' : ''}`}
+              : `~${centsToDisplay(estimatedMonthly)}/mo after ${seatSplit.included} included seat${seatSplit.included !== 1 ? 's' : ''}`}
           </p>
           <button
             onClick={handleCheckout}
@@ -317,6 +334,8 @@ const Subscription: React.FC = (): React.JSX.Element => {
 
   const tierPlans = [...plans].filter((p) => !p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
   const soloPlans = [...plans].filter((p) => p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
+  const currentSeats = sub?.seatCount ?? 1;
+  const includedSeatLimit = sub?.includedSeatLimit ?? 10;
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -364,7 +383,8 @@ const Subscription: React.FC = (): React.JSX.Element => {
                 key={plan.id}
                 plan={plan}
                 isCurrent={plan.slug === sub?.planSlug}
-                currentSeats={sub?.seatCount ?? 1}
+                currentSeats={currentSeats}
+                includedSeatLimit={includedSeatLimit}
                 ownerEmail={ownerEmail}
               />
             ))}
@@ -384,7 +404,8 @@ const Subscription: React.FC = (): React.JSX.Element => {
                 key={plan.id}
                 plan={plan}
                 isCurrent={plan.slug === sub?.planSlug}
-                currentSeats={sub?.seatCount ?? 1}
+                currentSeats={currentSeats}
+                includedSeatLimit={includedSeatLimit}
                 ownerEmail={ownerEmail}
                 compact
               />
