@@ -17,6 +17,7 @@ import (
 
 const (
 	listEmployeesToolName         = "hr.list_employees"
+	getEmployeeToolName           = "hr.get_employee"
 	listHRLocationsToolName       = "hr.list_locations"
 	listHRDepartmentsToolName     = "hr.list_departments"
 	listHRWorkSchedulesToolName   = "hr.list_work_schedules"
@@ -61,6 +62,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	switch name {
 	case listEmployeesToolName:
 		output, err := m.executeListEmployeesTool(ctx, input)
+		return output, true, err
+	case getEmployeeToolName:
+		output, err := m.executeGetEmployeeTool(ctx, input)
 		return output, true, err
 	case listHRLocationsToolName:
 		output, err := m.executeListHRLocationsTool(ctx)
@@ -116,6 +120,27 @@ func (m *Module) executeListEmployeesTool(ctx context.Context, input map[string]
 		"limit":     parsed.Limit,
 		"offset":    parsed.Offset,
 		"page":      parsed.Page,
+	}, nil
+}
+
+func (m *Module) executeGetEmployeeTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	employeeID, err := parseGetEmployeeToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	employee, err := m.service.GetEmployee(ctx, authUser.UserID, employeeID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"employee": employeeDetailToolPayload(*employee),
 	}, nil
 }
 
@@ -398,6 +423,17 @@ func parseCreateEmployeeToolInput(input map[string]any) (createEmployeeToolInput
 	return parsed, nil
 }
 
+func parseGetEmployeeToolInput(input map[string]any) (int64, error) {
+	employeeID, err := hrToolNonNegativeInt64(firstHRToolValue(input, "employee_id", "employee", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid employee_id: %w", err)
+	}
+	if employeeID <= 0 {
+		return 0, errors.New("employee_id is required")
+	}
+	return employeeID, nil
+}
+
 func parseListHRDepartmentsToolInput(input map[string]any) (listHRDepartmentsToolInput, error) {
 	locationID, err := hrToolNonNegativeInt64(firstHRToolValue(input, "location_id", "location"))
 	if err != nil {
@@ -479,6 +515,18 @@ func employeeToolPayload(e domain.EmployeeRecord) map[string]any {
 		"start_date":       formatEmployeeToolDate(e.StartDate),
 		"end_date":         formatEmployeeToolDate(e.EndDate),
 	}
+}
+
+func employeeDetailToolPayload(e domain.EmployeeRecord) map[string]any {
+	payload := employeeToolPayload(e)
+	payload["overtime_rate"] = e.OvertimeRate
+	payload["address"] = e.Address
+	payload["emergency_contact_name"] = e.EmergencyContactName
+	payload["emergency_contact_phone"] = e.EmergencyContactPhone
+	payload["notes"] = e.Notes
+	payload["created_at"] = formatHRToolTimestamp(e.CreatedAt)
+	payload["updated_at"] = formatHRToolTimestamp(e.UpdatedAt)
+	return payload
 }
 
 func locationToolPayload(location domain.LocationRecord) map[string]any {
