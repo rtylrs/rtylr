@@ -42,6 +42,8 @@ var CoreTools = []ToolDef{
 	{Name: "support.get_unread_count", Description: "Get the count of open support tickets.", Module: "support", Scope: "read"},
 	{Name: "support.list_customers", Description: "List support customers.", Module: "support", Scope: "read"},
 	{Name: "support.get_customer", Description: "Get a support customer summary.", Module: "support", Scope: "read"},
+	{Name: "support.list_canned_responses", Description: "List reusable support canned responses.", Module: "support", Scope: "read"},
+	{Name: "support.list_articles", Description: "List support knowledge-base articles.", Module: "support", Scope: "read"},
 	{Name: "erp.list_products", Description: "List inventory products.", Module: "erp", Scope: "read"},
 	{Name: "erp.set_stock", Description: "Set product stock quantity.", Module: "erp", Scope: "write", RequiresApproval: true},
 	{Name: "erp.list_categories", Description: "List ERP product categories.", Module: "erp", Scope: "read"},
@@ -150,6 +152,8 @@ var promptExecutableTools = map[string]struct{}{
 	"support.get_unread_count":        {},
 	"support.list_customers":          {},
 	"support.get_customer":            {},
+	"support.list_canned_responses":   {},
+	"support.list_articles":           {},
 	"hr.create_employee":              {},
 }
 

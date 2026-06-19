@@ -69,6 +69,8 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"support.get_unread_count [read]",
 		"support.list_customers [read]",
 		"support.get_customer [read]",
+		"support.list_canned_responses [read]",
+		"support.list_articles [read]",
 		"erp.list_products [read]",
 		"erp.list_categories [read]",
 		"erp.list_brands [read]",
