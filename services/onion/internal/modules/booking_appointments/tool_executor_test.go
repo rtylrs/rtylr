@@ -143,6 +143,31 @@ func TestParseListAppointmentsToolInputRejectsBadStatus(t *testing.T) {
 	}
 }
 
+func TestParseGetAppointmentToolInputAcceptsAliases(t *testing.T) {
+	for _, input := range []map[string]any{
+		{"appointment_id": "17"},
+		{"appointment": "#17"},
+		{"id": "appointment-17"},
+		{"appointment_id": "appt-17"},
+		{"appointment_id": 17},
+	} {
+		got, err := parseGetAppointmentToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetAppointmentToolInput(%v) returned error: %v", input, err)
+		}
+		if got != 17 {
+			t.Fatalf("parseGetAppointmentToolInput(%v) = %d, want 17", input, got)
+		}
+	}
+}
+
+func TestParseGetAppointmentToolInputRejectsMissingAppointment(t *testing.T) {
+	_, err := parseGetAppointmentToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "appointment_id is required") {
+		t.Fatalf("error = %v, want missing appointment_id validation", err)
+	}
+}
+
 func TestAppointmentToolPayloadFormatsFields(t *testing.T) {
 	startTime := time.Date(2026, 7, 15, 10, 0, 0, 0, time.UTC)
 	endTime := time.Date(2026, 7, 15, 10, 45, 0, 0, time.UTC)

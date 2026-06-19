@@ -20,6 +20,7 @@ import (
 const (
 	appointmentCacheScope     = "booking_appointments"
 	createAppointmentToolName = "booking.create_appointment"
+	getAppointmentToolName    = "booking.get_appointment"
 	listAppointmentsToolName  = "booking.list_appointments"
 )
 
@@ -41,6 +42,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	switch name {
 	case listAppointmentsToolName:
 		output, err := m.executeListAppointmentsTool(ctx, input)
+		return output, true, err
+	case getAppointmentToolName:
+		output, err := m.executeGetAppointmentTool(ctx, input)
 		return output, true, err
 	case createAppointmentToolName:
 		output, err := m.executeCreateAppointmentTool(ctx, input)
@@ -93,6 +97,31 @@ func (m *Module) executeListAppointmentsTool(ctx context.Context, input map[stri
 	}, nil
 }
 
+func (m *Module) executeGetAppointmentTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("authentication is required")
+	}
+
+	appointmentID, err := parseGetAppointmentToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	appointment, err := m.service.GetByID(ctx, businessID, appointmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"appointment": appointmentToolPayload(appointment),
+	}, nil
+}
+
 func (m *Module) executeCreateAppointmentTool(ctx context.Context, input map[string]any) (map[string]any, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
@@ -129,6 +158,17 @@ func (m *Module) executeCreateAppointmentTool(ctx context.Context, input map[str
 			"notes":          parsed.Notes,
 		},
 	}, nil
+}
+
+func parseGetAppointmentToolInput(input map[string]any) (int64, error) {
+	appointmentID, err := appointmentIDToolValue(firstAppointmentToolValue(input, "appointment_id", "appointment", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid appointment_id: %w", err)
+	}
+	if appointmentID <= 0 {
+		return 0, errors.New("appointment_id is required")
+	}
+	return appointmentID, nil
 }
 
 func parseCreateAppointmentToolInput(input map[string]any) (domain.AppointmentInput, error) {
@@ -297,6 +337,24 @@ func firstAppointmentToolValue(input map[string]any, keys ...string) any {
 		return value
 	}
 	return nil
+}
+
+func appointmentIDToolValue(value any) (int64, error) {
+	if raw, ok := value.(string); ok {
+		text := strings.TrimSpace(raw)
+		if text == "" {
+			return 0, nil
+		}
+		normalized := strings.ToLower(text)
+		normalized = strings.TrimPrefix(normalized, "#")
+		normalized = strings.TrimPrefix(normalized, "appointment-")
+		normalized = strings.TrimPrefix(normalized, "appt-")
+		if normalized == "" {
+			return 0, nil
+		}
+		return strconv.ParseInt(normalized, 10, 64)
+	}
+	return appointmentToolInt64(value)
 }
 
 func appointmentToolTime(value any) (time.Time, error) {

@@ -30,6 +30,10 @@ func (s *Service) ListToday(ctx context.Context, businessID int64) ([]domain.App
 	return s.repo.ListToday(ctx, businessID)
 }
 
+func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.Appointment, error) {
+	return s.repo.GetByID(ctx, businessID, id)
+}
+
 func (s *Service) Create(ctx context.Context, businessID int64, input domain.AppointmentInput) (int64, error) {
 	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {

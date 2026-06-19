@@ -54,6 +54,38 @@ func (r *Repository) ListToday(ctx context.Context, businessID int64) ([]domain.
 	return items, nil
 }
 
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Appointment, error) {
+	var row sqlc.BookingAppointment
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT id, owner_id, business_id, service_id, resource_id, staff_id,
+		       customer_name, customer_email, customer_phone, start_time, end_time,
+		       status, notes, created_at, updated_at
+		FROM booking_appointments
+		WHERE business_id = ? AND id = ?
+	`, businessID, id).Scan(
+		&row.ID,
+		&row.OwnerID,
+		&row.BusinessID,
+		&row.ServiceID,
+		&row.ResourceID,
+		&row.StaffID,
+		&row.CustomerName,
+		&row.CustomerEmail,
+		&row.CustomerPhone,
+		&row.StartTime,
+		&row.EndTime,
+		&row.Status,
+		&row.Notes,
+		&row.CreatedAt,
+		&row.UpdatedAt,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get appointment", logger.Error(err))
+		return domain.Appointment{}, err
+	}
+	return fromRow(row), nil
+}
+
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.AppointmentInput) (int64, error) {
 	startTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
 	if err != nil {
@@ -153,7 +185,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerPhone: sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
 		StartTime:     startTime, EndTime: endTime,
-		Status:  sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(input.Status), Valid: input.Status != ""},
+		Status:     sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(input.Status), Valid: input.Status != ""},
 		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		BusinessID: businessID, ID: id,
 	})
