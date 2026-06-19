@@ -13,11 +13,7 @@ export interface HeaderBarProps {
   onDeleteChat?: (id: string) => void | Promise<void>;
 }
 
-export const HeaderBar: React.FC<HeaderBarProps> = ({
-  onNewChat,
-  onSelectChat,
-  onDeleteChat,
-}) => {
+export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, onDeleteChat }) => {
   const close = useCaretStore((s) => s.close);
   const view = useCaretUIStore((s) => s.view);
   const setView = useCaretUIStore((s) => s.setView);

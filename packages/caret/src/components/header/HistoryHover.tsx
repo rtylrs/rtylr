@@ -115,8 +115,7 @@ export const HistoryHover: React.FC<HistoryHoverProps> = ({ onSelectChat, onDele
                   textAlign: 'left',
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    caretTokens.surfaceHigh;
+                  (e.currentTarget as HTMLButtonElement).style.background = caretTokens.surfaceHigh;
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
