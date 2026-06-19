@@ -69,6 +69,32 @@ func TestParseListExpensesToolInputRejectsBadStatus(t *testing.T) {
 	}
 }
 
+func TestParseGetExpenseToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"expense_id": int64(8)},
+		{"expense": "#8"},
+		{"id": "expense-8"},
+		{"id": "exp_8"},
+	}
+
+	for _, input := range cases {
+		parsed, err := parseGetExpenseToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetExpenseToolInput(%v) returned error: %v", input, err)
+		}
+		if parsed.ExpenseID != 8 {
+			t.Fatalf("ExpenseID = %d, want 8 for %v", parsed.ExpenseID, input)
+		}
+	}
+}
+
+func TestParseGetExpenseToolInputRejectsMissingExpense(t *testing.T) {
+	_, err := parseGetExpenseToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "expense_id") {
+		t.Fatalf("error = %v, want expense_id validation", err)
+	}
+}
+
 func TestExpenseToolPayloadFormatsFields(t *testing.T) {
 	categoryID := int64(42)
 	expenseDate := time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC)

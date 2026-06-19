@@ -27,9 +27,14 @@ type recordExpenseToolInput struct {
 
 const (
 	listExpensesToolName          = "finance.list_expenses"
+	getExpenseToolName            = "finance.get_expense"
 	listExpenseCategoriesToolName = "finance.list_expense_categories"
 	recordExpenseToolName         = "finance.record_expense"
 )
+
+type getExpenseToolInput struct {
+	ExpenseID int64
+}
 
 type listExpensesToolInput struct {
 	Status string
@@ -40,6 +45,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case listExpensesToolName:
 		output, err := m.executeListExpensesTool(ctx, input)
 		return output, true, err
+	case getExpenseToolName:
+		output, err := m.executeGetExpenseTool(ctx, input)
+		return output, true, err
 	case listExpenseCategoriesToolName:
 		output, err := m.executeListExpenseCategoriesTool(ctx)
 		return output, true, err
@@ -49,6 +57,32 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetExpenseTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseGetExpenseToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	expense, err := m.service.GetByID(ctx, businessID, parsed.ExpenseID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"expense": expenseToolPayload(expense),
+	}, nil
 }
 
 func (m *Module) executeListExpensesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -162,6 +196,17 @@ func (m *Module) executeRecordExpenseTool(ctx context.Context, input map[string]
 	}, nil
 }
 
+func parseGetExpenseToolInput(input map[string]any) (getExpenseToolInput, error) {
+	expenseID, err := expenseIDToolValue(firstExpenseToolValue(input, "expense_id", "expense", "id"))
+	if err != nil {
+		return getExpenseToolInput{}, fmt.Errorf("invalid expense_id: %w", err)
+	}
+	if expenseID <= 0 {
+		return getExpenseToolInput{}, errors.New("expense_id is required")
+	}
+	return getExpenseToolInput{ExpenseID: expenseID}, nil
+}
+
 func parseRecordExpenseToolInput(input map[string]any) (recordExpenseToolInput, error) {
 	amount, err := expenseToolFloat64(input["amount"])
 	if err != nil {
@@ -199,6 +244,20 @@ func parseListExpensesToolInput(input map[string]any) (listExpensesToolInput, er
 		return listExpensesToolInput{}, errors.New("status must be one of pending, approved, or rejected")
 	}
 	return listExpensesToolInput{Status: status}, nil
+}
+
+func firstExpenseToolValue(input map[string]any, keys ...string) any {
+	for _, key := range keys {
+		value, ok := input[key]
+		if !ok || value == nil {
+			continue
+		}
+		if s, ok := value.(string); ok && strings.TrimSpace(s) == "" {
+			continue
+		}
+		return value
+	}
+	return nil
 }
 
 func normalizeExpenseStatus(value any) string {
@@ -250,6 +309,21 @@ func expenseToolOptionalInt64(value any) (*int64, error) {
 		return nil, nil
 	}
 	return &id, nil
+}
+
+func expenseIDToolValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"expense-", "expense_", "exp-", "exp_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return expenseToolInt64(raw)
+	default:
+		return expenseToolInt64(value)
+	}
 }
 
 func expenseToolInt64(value any) (int64, error) {
