@@ -17,13 +17,13 @@ type LTVBucketPayload struct {
 }
 
 // GetLTVDistribution returns the bucketed LTV histogram for the owner.
-func (s *Service) GetLTVDistribution(ctx context.Context, ownerID int64) ([]LTVBucketPayload, error) {
-	key := fmt.Sprintf("insights:%d:customers:ltv", ownerID)
+func (s *Service) GetLTVDistribution(ctx context.Context, businessID int64) ([]LTVBucketPayload, error) {
+	key := fmt.Sprintf("insights:%d:customers:ltv", businessID)
 	type result struct {
 		Buckets []LTVBucketPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetLTVDistribution(ctx, ownerID)
+		rows, rerr := s.repo.GetLTVDistribution(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr
 		}

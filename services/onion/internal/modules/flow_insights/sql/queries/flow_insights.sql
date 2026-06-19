@@ -3,34 +3,34 @@ SELECT
     COUNT(*) AS total_tasks,
     COUNT(CASE WHEN status = 'done' THEN 1 END) AS completed_tasks,
     COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < CURDATE() THEN 1 END) AS overdue_count
-FROM flow_tasks WHERE owner_id = ?;
+FROM flow_tasks WHERE business_id = ?;
 
 -- name: GetAvgCompletionDays :one
 SELECT COALESCE(AVG(DATEDIFF(completed_at, created_at)), 0) AS avg_days
-FROM flow_tasks WHERE owner_id = ? AND status = 'done' AND completed_at IS NOT NULL;
+FROM flow_tasks WHERE business_id = ? AND status = 'done' AND completed_at IS NOT NULL;
 
 -- name: GetVelocityThisWeek :one
 SELECT COUNT(*) AS cnt
 FROM flow_tasks
-WHERE owner_id = ? AND status = 'done'
+WHERE business_id = ? AND status = 'done'
   AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
   AND completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY);
 
 -- name: GetVelocityLastWeek :one
 SELECT COUNT(*) AS cnt
 FROM flow_tasks
-WHERE owner_id = ? AND status = 'done'
+WHERE business_id = ? AND status = 'done'
   AND completed_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
   AND completed_at < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY);
 
 -- name: GetTasksByStatus :many
 SELECT status, COUNT(*) AS cnt
-FROM flow_tasks WHERE owner_id = ?
+FROM flow_tasks WHERE business_id = ?
 GROUP BY status;
 
 -- name: GetTasksByPriority :many
 SELECT priority, COUNT(*) AS cnt
-FROM flow_tasks WHERE owner_id = ?
+FROM flow_tasks WHERE business_id = ?
 GROUP BY priority;
 
 -- name: GetTeamWorkload :many
@@ -43,7 +43,7 @@ SELECT
     COUNT(CASE WHEN ft.status NOT IN ('done','cancelled') AND ft.due_date < CURDATE() THEN 1 END) AS overdue_tasks
 FROM flow_tasks ft
 LEFT JOIN users u ON ft.assignee_id = u.id
-WHERE ft.owner_id = ? AND ft.assignee_id IS NOT NULL
+WHERE ft.business_id = ? AND ft.assignee_id IS NOT NULL
 GROUP BY ft.assignee_id, u.name;
 
 -- name: GetRoadmapProjects :many
@@ -56,7 +56,7 @@ SELECT
     COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_tasks
 FROM flow_projects fp
 LEFT JOIN flow_tasks ft ON ft.project_id = fp.id AND ft.parent_task_id IS NULL
-WHERE fp.owner_id = ? AND fp.status != 'archived'
+WHERE fp.business_id = ? AND fp.status != 'archived'
 GROUP BY fp.id, fp.name, fp.start_date, fp.due_date
 ORDER BY fp.created_at ASC;
 

@@ -24,17 +24,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardData, error) {
+func (s *Service) GetDashboard(ctx context.Context, businessID int64) (domain.DashboardData, error) {
 	return cacher.Of[domain.DashboardData]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped("booking_dashboard", ownerID, "data"),
+		cacheKeys.Scoped("booking_dashboard", businessID, "data"),
 		func(ctx context.Context) (domain.DashboardData, error) {
-			return s.fetchDashboard(ctx, ownerID)
+			return s.fetchDashboard(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, bookingDashboardTTL),
 	)
 }
 
-func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.DashboardData, error) {
+func (s *Service) fetchDashboard(ctx context.Context, businessID int64) (domain.DashboardData, error) {
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
@@ -51,22 +51,22 @@ func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Das
 	group, groupCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		var err error
-		todayCount, err = s.repo.GetTodayCount(groupCtx, ownerID, startOfDay, endOfDay)
+		todayCount, err = s.repo.GetTodayCount(groupCtx, businessID, startOfDay, endOfDay)
 		return err
 	})
 	group.Go(func() error {
 		var err error
-		upcomingCount, err = s.repo.GetUpcomingCount(groupCtx, ownerID, endOfDay)
+		upcomingCount, err = s.repo.GetUpcomingCount(groupCtx, businessID, endOfDay)
 		return err
 	})
 	group.Go(func() error {
 		var err error
-		totalMonth, cancelledMonth, err = s.repo.GetMonthCounts(groupCtx, ownerID, startOfMonth)
+		totalMonth, cancelledMonth, err = s.repo.GetMonthCounts(groupCtx, businessID, startOfMonth)
 		return err
 	})
 	group.Go(func() error {
 		var err error
-		revenue, err = s.repo.GetMonthRevenue(groupCtx, ownerID, startOfMonth)
+		revenue, err = s.repo.GetMonthRevenue(groupCtx, businessID, startOfMonth)
 		return err
 	})
 	if err := group.Wait(); err != nil {

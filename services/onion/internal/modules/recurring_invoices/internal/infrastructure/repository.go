@@ -22,8 +22,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.RecurringInvoice, error) {
-	rows, err := r.queries.ListRecurringInvoices(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.RecurringInvoice, error) {
+	rows, err := r.queries.ListRecurringInvoices(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list recurring invoices", logger.Error(err))
 		return nil, err
@@ -34,6 +34,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Recurrin
 		ri := domain.RecurringInvoice{
 			ID:                row.ID,
 			OwnerID:           row.OwnerID,
+			BusinessID:        row.BusinessID,
 			TemplateInvoiceID: row.TemplateInvoiceID,
 			Frequency:         string(row.Frequency),
 			NextInvoiceDate:   row.NextInvoiceDate,
@@ -49,7 +50,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Recurrin
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.RecurringInvoiceInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.RecurringInvoiceInput) (int64, error) {
 	nextDate, err := time.Parse("2006-01-02", input.NextInvoiceDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse next_invoice_date", logger.Error(err))
@@ -57,7 +58,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rec
 	}
 
 	res, err := r.queries.CreateRecurringInvoice(ctx, sqlc.CreateRecurringInvoiceParams{
-		OwnerID:           ownerID,
+		OwnerID:           businessID,
+		BusinessID:        businessID,
 		TemplateInvoiceID: input.TemplateInvoiceID,
 		Frequency:         sqlc.FinanceRecurringInvoicesFrequency(input.Frequency),
 		NextInvoiceDate:   nextDate,
@@ -72,7 +74,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rec
 	return res.LastInsertId()
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.RecurringInvoiceInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.RecurringInvoiceInput) error {
 	nextDate, err := time.Parse("2006-01-02", input.NextInvoiceDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse next_invoice_date", logger.Error(err))
@@ -86,7 +88,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		EndDate:           nullTimeStr(input.EndDate),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:                id,
-		OwnerID:           ownerID,
+		BusinessID:        businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update recurring invoice", logger.Error(err))
@@ -96,11 +98,11 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) SetActive(ctx context.Context, ownerID, id int64, active bool) error {
+func (r *Repository) SetActive(ctx context.Context, businessID, id int64, active bool) error {
 	res, err := r.queries.SetRecurringInvoiceActive(ctx, sqlc.SetRecurringInvoiceActiveParams{
-		IsActive: sql.NullBool{Bool: active, Valid: true},
-		ID:       id,
-		OwnerID:  ownerID,
+		IsActive:   sql.NullBool{Bool: active, Valid: true},
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update recurring invoice active flag", logger.Error(err))

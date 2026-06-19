@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
@@ -50,7 +51,12 @@ func (h *UploadDocumentHandler) Serve(ctx context.Context, req *UploadDocumentRe
 		return UploadDocumentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	doc, err := h.Service.UploadDocument(ctx, device.User.UserID, domain.CreateDocumentParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UploadDocumentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	doc, err := h.Service.UploadDocument(ctx, businessID, domain.CreateDocumentParams{
 		EmployeeID:   req.EmployeeID,
 		DocumentType: req.DocumentType,
 		Title:        req.Title,

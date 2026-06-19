@@ -18,13 +18,13 @@ type AppRevenueShare struct {
 
 // GetRevenueByApp splits MTD revenue across app surfaces (POS, Finance,
 // ERP, CRM) and computes each surface's share of the total.
-func (s *Service) GetRevenueByApp(ctx context.Context, ownerID int64) ([]AppRevenueShare, error) {
-	key := fmt.Sprintf("insights:%d:revenue:by-app", ownerID)
+func (s *Service) GetRevenueByApp(ctx context.Context, businessID int64) ([]AppRevenueShare, error) {
+	key := fmt.Sprintf("insights:%d:revenue:by-app", businessID)
 	type result struct {
 		Shares []AppRevenueShare
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetRevenueByApp(ctx, ownerID)
+		rows, rerr := s.repo.GetRevenueByApp(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr
 		}

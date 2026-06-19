@@ -14,11 +14,13 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type GiftCardPayload struct {
 	ID             int64   `json:"id"`
 	OwnerID        int64   `json:"owner_id"`
+	BusinessID     int64   `json:"business_id"`
 	CustomerID     int64   `json:"customer_id"`
 	Code           string  `json:"code"`
 	InitialAmount  float64 `json:"initial_amount"`
@@ -39,6 +41,7 @@ func newGiftCardPayload(gc domain.GiftCard) GiftCardPayload {
 	return GiftCardPayload{
 		ID:             gc.ID,
 		OwnerID:        gc.OwnerID,
+		BusinessID:     gc.BusinessID,
 		CustomerID:     gc.CustomerID,
 		Code:           gc.Code,
 		InitialAmount:  gc.InitialAmount,
@@ -69,9 +72,13 @@ func (h *ListGiftCardsHandler) Serve(ctx context.Context, _ *ListGiftCardsReques
 	if device.User == nil {
 		return ListGiftCardsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	items, err := h.Service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListGiftCardsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
+		logger.Ctx(ctx).Error("failed to list gift cards", logger.Int("business_id", int(businessID)), logger.Error(err))
 		return ListGiftCardsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list gift cards"}
 	}
 	payloads := make([]GiftCardPayload, len(items))
@@ -121,8 +128,11 @@ func (h *CreateGiftCardHandler) Serve(ctx context.Context, req *CreateGiftCardRe
 	if device.User == nil {
 		return CreateGiftCardResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	id, err := h.Service.Create(ctx, ownerID, domain.GiftCardInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateGiftCardResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, businessID, domain.GiftCardInput{
 		Code:          req.Code,
 		InitialAmount: req.InitialAmount,
 		CustomerName:  req.CustomerName,
@@ -130,6 +140,7 @@ func (h *CreateGiftCardHandler) Serve(ctx context.Context, req *CreateGiftCardRe
 		ExpiresAt:     req.ExpiresAt,
 	})
 	if err != nil {
+		logger.Ctx(ctx).Error("failed to create gift card", logger.Int("business_id", int(businessID)), logger.Error(err))
 		return CreateGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create gift card"}
 	}
 	return CreateGiftCardResponse{GiftCardID: id, Message: "Gift card created successfully"}, nil
@@ -152,16 +163,20 @@ func (h *GetGiftCardByCodeHandler) Serve(ctx context.Context, _ *GetGiftCardByCo
 	if device.User == nil {
 		return GetGiftCardByCodeResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetGiftCardByCodeResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	code := chi.URLParamFromCtx(ctx, "code")
 	if code == "" {
 		return GetGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Code is required"}
 	}
-	gc, err := h.Service.GetByCode(ctx, ownerID, code)
+	gc, err := h.Service.GetByCode(ctx, businessID, code)
 	if err != nil {
 		if errors.Is(err, domain.ErrGiftCardNotFound) {
 			return GetGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Gift card not found"}
 		}
+		logger.Ctx(ctx).Error("failed to fetch gift card", logger.Int("business_id", int(businessID)), logger.String("code", code), logger.Error(err))
 		return GetGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to fetch gift card"}
 	}
 	return GetGiftCardByCodeResponse{GiftCard: newGiftCardPayload(*gc)}, nil
@@ -195,12 +210,15 @@ func (h *RedeemGiftCardByCodeHandler) Serve(ctx context.Context, req *RedeemGift
 	if device.User == nil {
 		return RedeemGiftCardByCodeResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RedeemGiftCardByCodeResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	code := chi.URLParamFromCtx(ctx, "code")
 	if code == "" {
 		return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Code is required"}
 	}
-	gc, err := h.Service.Redeem(ctx, ownerID, domain.RedeemInput{
+	gc, err := h.Service.Redeem(ctx, businessID, domain.RedeemInput{
 		Code:   code,
 		Amount: req.Amount,
 	})
@@ -217,6 +235,7 @@ func (h *RedeemGiftCardByCodeHandler) Serve(ctx context.Context, req *RedeemGift
 		if errors.Is(err, domain.ErrInsufficientBalance) {
 			return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Insufficient gift card balance"}
 		}
+		logger.Ctx(ctx).Error("failed to redeem gift card", logger.Int("business_id", int(businessID)), logger.String("code", code), logger.Error(err))
 		return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to redeem gift card"}
 	}
 	return RedeemGiftCardByCodeResponse{GiftCard: newGiftCardPayload(*gc), Message: "Gift card redeemed successfully"}, nil
@@ -251,21 +270,25 @@ func (h *RedeemGiftCardHandler) Serve(ctx context.Context, req *RedeemGiftCardRe
 	if device.User == nil {
 		return RedeemGiftCardResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RedeemGiftCardResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	// If amount is 0, just check balance
 	if req.Amount == 0 {
-		gc, err := h.Service.GetByCode(ctx, ownerID, req.Code)
+		gc, err := h.Service.GetByCode(ctx, businessID, req.Code)
 		if err != nil {
 			if errors.Is(err, domain.ErrGiftCardNotFound) {
 				return RedeemGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Gift card not found"}
 			}
+			logger.Ctx(ctx).Error("failed to check gift card", logger.Int("business_id", int(businessID)), logger.String("code", req.Code), logger.Error(err))
 			return RedeemGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to check gift card"}
 		}
 		return RedeemGiftCardResponse{GiftCard: newGiftCardPayload(*gc), Message: "Balance retrieved"}, nil
 	}
 
-	gc, err := h.Service.Redeem(ctx, ownerID, domain.RedeemInput{
+	gc, err := h.Service.Redeem(ctx, businessID, domain.RedeemInput{
 		Code:   req.Code,
 		Amount: req.Amount,
 	})
@@ -282,6 +305,7 @@ func (h *RedeemGiftCardHandler) Serve(ctx context.Context, req *RedeemGiftCardRe
 		if errors.Is(err, domain.ErrInsufficientBalance) {
 			return RedeemGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Insufficient gift card balance"}
 		}
+		logger.Ctx(ctx).Error("failed to redeem gift card", logger.Int("business_id", int(businessID)), logger.String("code", req.Code), logger.Error(err))
 		return RedeemGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to redeem gift card"}
 	}
 	return RedeemGiftCardResponse{GiftCard: newGiftCardPayload(*gc), Message: "Gift card redeemed successfully"}, nil

@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func SendInvoiceRoutes() []string {
@@ -39,7 +40,16 @@ func (h *SendInvoiceHandler) Validate(_ context.Context, req *SendInvoiceRequest
 func (h *SendInvoiceHandler) Serve(ctx context.Context, req *SendInvoiceRequest) (SendInvoiceResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	if err := h.FinanceService.SendInvoice(ctx, device.User.UserID, req.ID); err != nil {
+	if device.User == nil {
+		return SendInvoiceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SendInvoiceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FinanceService.SendInvoice(ctx, businessID, req.ID); err != nil {
 		return SendInvoiceResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to send invoice",

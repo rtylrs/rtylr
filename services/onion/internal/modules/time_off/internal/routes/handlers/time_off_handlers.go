@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/time_off/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
 )
 
@@ -50,7 +51,11 @@ func (h *ListTimeOffHandler) Serve(ctx context.Context, _ *ListTimeOffRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return ListTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	requests, err := h.Service.ListTimeOffRequests(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTimeOffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	requests, err := h.Service.ListTimeOffRequests(ctx, businessID)
 	if err != nil {
 		return ListTimeOffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list time off requests"}
 	}
@@ -109,8 +114,12 @@ func (h *SubmitTimeOffHandler) Serve(ctx context.Context, req *SubmitTimeOffRequ
 	if device.IsAnonymous || device.User == nil {
 		return SubmitTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SubmitTimeOffResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.TimeOffInput{
-		OwnerID: device.User.UserID, StaffID: req.StaffID, Type: req.Type,
+		OwnerID: device.User.UserID, BusinessID: businessID, StaffID: req.StaffID, Type: req.Type,
 		StartDate: req.StartDate, EndDate: req.EndDate, DaysCount: req.DaysCount,
 		Reason: req.Reason, Notes: req.Notes,
 	}
@@ -150,10 +159,14 @@ func (h *ApproveTimeOffHandler) Serve(ctx context.Context, req *ApproveTimeOffRe
 	if device.IsAnonymous || device.User == nil {
 		return ApproveTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ApproveTimeOffResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.TimeOffApprovalInput{
 		ID: req.ID, Status: req.Status, ApprovedBy: device.User.UserID, Notes: req.Notes,
 	}
-	if err := h.Service.ApproveTimeOffRequest(ctx, device.User.UserID, input); err != nil {
+	if err := h.Service.ApproveTimeOffRequest(ctx, businessID, input); err != nil {
 		return ApproveTimeOffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update time off request"}
 	}
 	return ApproveTimeOffResponse{Success: true}, nil

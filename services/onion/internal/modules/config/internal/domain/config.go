@@ -11,6 +11,7 @@ var ErrConfigNotFound = errors.New("config not found")
 
 type Config struct {
 	OwnerId                string
+	BusinessID             int64  `json:"business_id"`
 	SiteName               string
 	LogoUrl                string
 	FaviconUrl             string
@@ -31,6 +32,7 @@ type Config struct {
 
 func (c *Config) FromRows(row sqlc.GetConfigRow) {
 	c.OwnerId = convert.Int32ToString(row.OwnerID)
+	c.BusinessID = row.BusinessID
 	c.SiteName = convert.ToString(row.SiteName)
 	c.LogoUrl = convert.ToString(row.LogoUrl)
 	c.FaviconUrl = convert.ToString(row.FaviconUrl)
@@ -54,6 +56,7 @@ func (c *Config) FromRows(row sqlc.GetConfigRow) {
 
 type ConfigInput struct {
 	OwnerId                string
+	BusinessID             int64  `json:"business_id"`
 	SiteName               string
 	LogoUrl                string
 	FaviconUrl             string

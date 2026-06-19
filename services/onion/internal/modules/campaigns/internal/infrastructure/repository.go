@@ -21,8 +21,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Campaign, error) {
-	rows, err := r.queries.ListCampaigns(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Campaign, error) {
+	rows, err := r.queries.ListCampaigns(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list campaigns", logger.Error(err))
 
@@ -38,10 +38,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Campaign
 	return campaigns, nil
 }
 
-func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.Campaign, error) {
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Campaign, error) {
 	row, err := r.queries.GetCampaignByID(ctx, sqlc.GetCampaignByIDParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -62,6 +62,7 @@ func (r *Repository) Create(ctx context.Context, input domain.CampaignInput) (in
 
 	result, err := r.queries.CreateCampaign(ctx, sqlc.CreateCampaignParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{},
 		Channel:     sqlc.CrmCampaignsChannel(input.Type),
@@ -94,7 +95,7 @@ func (r *Repository) Update(ctx context.Context, input domain.CampaignUpdateInpu
 		Content:     input.Body,
 		ScheduledAt: nullableTime(input.ScheduledAt),
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update campaign", logger.Error(err))
@@ -114,11 +115,11 @@ func (r *Repository) Update(ctx context.Context, input domain.CampaignUpdateInpu
 	return nil
 }
 
-func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
 	result, err := r.queries.UpdateCampaignStatus(ctx, sqlc.UpdateCampaignStatusParams{
-		Status:  sqlc.NullCrmCampaignsStatus{CrmCampaignsStatus: sqlc.CrmCampaignsStatus(status), Valid: true},
-		ID:      id,
-		OwnerID: ownerID,
+		Status:     sqlc.NullCrmCampaignsStatus{CrmCampaignsStatus: sqlc.CrmCampaignsStatus(status), Valid: true},
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update campaign status", logger.Error(err))
@@ -142,6 +143,7 @@ func campaignFromRow(row sqlc.CrmCampaign) domain.Campaign {
 	c := domain.Campaign{
 		ID:        row.ID,
 		OwnerID:   row.OwnerID,
+		BusinessID: row.BusinessID,
 		Name:      row.Name,
 		Type:      string(row.Channel),
 		Status:    string(row.Status.CrmCampaignsStatus),
@@ -179,9 +181,9 @@ func nullableTime(t *time.Time) sql.NullTime {
 	return sql.NullTime{Time: *t, Valid: true}
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	return r.queries.DeleteCampaign(ctx, sqlc.DeleteCampaignParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 }

@@ -26,7 +26,7 @@ type CustomerKPIs struct {
 // "Churned" = has orders historically but none in the last 90+ days. This
 // is a loose heuristic; a strict churn model would need a signup date
 // filter, which sits in the dedicated /customers/churn endpoint.
-func (r *Repository) GetCustomerKPIs(ctx context.Context, ownerID int64) (CustomerKPIs, error) {
+func (r *Repository) GetCustomerKPIs(ctx context.Context, businessID int64) (CustomerKPIs, error) {
 	now := nowFn()
 	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	cutoffActive := now.AddDate(0, 0, -30)
@@ -38,7 +38,7 @@ func (r *Repository) GetCustomerKPIs(ctx context.Context, ownerID int64) (Custom
 	totalSQL, totalArgs, err := sq.
 		Select("COUNT(*)").
 		From("crm_customers").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -54,7 +54,7 @@ func (r *Repository) GetCustomerKPIs(ctx context.Context, ownerID int64) (Custom
 	newSQL, newArgs, err := sq.
 		Select("COUNT(*)").
 		From("crm_customers").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"created_at": monthStart}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -71,8 +71,8 @@ func (r *Repository) GetCustomerKPIs(ctx context.Context, ownerID int64) (Custom
 	activeSQL, activeArgs, err := sq.
 		Select("COUNT(DISTINCT c.id)").
 		From("crm_customers c").
-		Join("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id").
-		Where(sq.Eq{"c.owner_id": ownerID}).
+		Join("pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id").
+		Where(sq.Eq{"c.business_id": businessID}).
 		Where(sq.GtOrEq{"o.created_at": cutoffActive}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -89,9 +89,9 @@ func (r *Repository) GetCustomerKPIs(ctx context.Context, ownerID int64) (Custom
 	churnSQL, churnArgs, err := sq.
 		Select("COUNT(*)").
 		From("crm_customers c").
-		Where(sq.Eq{"c.owner_id": ownerID}).
-		Where(sq.Expr("EXISTS (SELECT 1 FROM pos_orders o WHERE o.owner_id = c.owner_id AND o.customer_id = c.id)")).
-		Where(sq.Expr("NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.owner_id = c.owner_id AND o2.customer_id = c.id AND o2.created_at >= ?)", cutoffChurn)).
+		Where(sq.Eq{"c.business_id": businessID}).
+		Where(sq.Expr("EXISTS (SELECT 1 FROM pos_orders o WHERE o.business_id = c.business_id AND o.customer_id = c.id)")).
+		Where(sq.Expr("NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.business_id = c.business_id AND o2.customer_id = c.id AND o2.created_at >= ?)", cutoffChurn)).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

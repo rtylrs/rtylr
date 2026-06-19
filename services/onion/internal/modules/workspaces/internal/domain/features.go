@@ -22,6 +22,7 @@ type Cycle struct {
 }
 
 type CycleInput struct {
+	BusinessID  int64
 	WorkspaceID int64
 	ProjectID   *int64
 	Name        string
@@ -68,6 +69,7 @@ type MilestoneProject struct {
 type MilestoneInput struct {
 	ProjectID   int64
 	WorkspaceID int64
+	BusinessID  int64
 	Name        string
 	Description string
 	DueDate     time.Time

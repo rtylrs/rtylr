@@ -29,22 +29,22 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, status string, limit, offset int32) ([]domain.PurchaseOrder, error) {
+func (r *Repository) ListPurchaseOrders(ctx context.Context, businessID int64, status string, limit, offset int32) ([]domain.PurchaseOrder, error) {
 	var rows []sqlc.ErpPurchaseOrder
 	var err error
 
 	if status != "" {
 		rows, err = r.queries.ListPurchaseOrdersByStatus(ctx, sqlc.ListPurchaseOrdersByStatusParams{
-			OwnerID: ownerID,
-			Status:  sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true},
-			Limit:   limit,
-			Offset:  offset,
+			BusinessID: businessID,
+			Status:     sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true},
+			Limit:      limit,
+			Offset:     offset,
 		})
 	} else {
 		rows, err = r.queries.ListPurchaseOrders(ctx, sqlc.ListPurchaseOrdersParams{
-			OwnerID: ownerID,
-			Limit:   limit,
-			Offset:  offset,
+			BusinessID: businessID,
+			Limit:      limit,
+			Offset:     offset,
 		})
 	}
 
@@ -61,10 +61,10 @@ func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, stat
 	return orders, nil
 }
 
-func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.PurchaseOrder, error) {
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.PurchaseOrder, error) {
 	row, err := r.queries.GetPurchaseOrderByID(ctx, sqlc.GetPurchaseOrderByIDParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.PurchaseOrder{}, domain.ErrPurchaseOrderNotFound
@@ -110,7 +110,7 @@ func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID 
 	return items, nil
 }
 
-func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, input domain.PurchaseOrderInput, createdBy int64) (int64, error) {
+func (r *Repository) CreatePurchaseOrder(ctx context.Context, businessID int64, input domain.PurchaseOrderInput, createdBy int64) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
@@ -141,7 +141,8 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 	}
 
 	res, err := qtx.InsertPurchaseOrder(ctx, sqlc.InsertPurchaseOrderParams{
-		OwnerID:          ownerID,
+		OwnerID:          createdBy,
+		BusinessID:       businessID,
 		SupplierID:       input.SupplierID,
 		PoNumber:         input.PONumber,
 		Subtotal:         sql.NullString{String: strconv.FormatFloat(subtotal, 'f', 2, 64), Valid: true},
@@ -185,10 +186,10 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 	return poID, nil
 }
 
-func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, ownerID, id int64) (string, error) {
+func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, businessID, id int64) (string, error) {
 	status, err := r.queries.GetPurchaseOrderStatus(ctx, sqlc.GetPurchaseOrderStatusParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -196,7 +197,7 @@ func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, ownerID, id int
 		}
 
 		logger.Ctx(ctx).Error("Failed to get purchase order status",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("purchase_order_id", id),
 			logger.Error(err),
 		)
@@ -211,14 +212,14 @@ func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, ownerID, id int
 	return string(status.ErpPurchaseOrdersStatus), nil
 }
 
-func (r *Repository) ApprovePurchaseOrder(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) ApprovePurchaseOrder(ctx context.Context, businessID, id int64) error {
 	err := r.queries.ApprovePurchaseOrder(ctx, sqlc.ApprovePurchaseOrderParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to approve purchase order",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("purchase_order_id", id),
 			logger.Error(err),
 		)
@@ -229,7 +230,7 @@ func (r *Repository) ApprovePurchaseOrder(ctx context.Context, ownerID, id int64
 	return nil
 }
 
-func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id int64, status string) error {
+func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id int64, status string) error {
 	var err error
 
 	statusVal := sqlc.NullErpPurchaseOrdersStatus{
@@ -239,15 +240,15 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id 
 
 	if status == string(domain.POStatusReceived) {
 		err = r.queries.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
-			Status:  statusVal,
-			OwnerID: ownerID,
-			ID:      id,
+			Status:     statusVal,
+			BusinessID: businessID,
+			ID:         id,
 		})
 	} else {
 		err = r.queries.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{
-			Status:  statusVal,
-			OwnerID: ownerID,
-			ID:      id,
+			Status:     statusVal,
+			BusinessID: businessID,
+			ID:         id,
 		})
 	}
 
@@ -266,7 +267,7 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id 
 // and flips the PO to 'received'. The whole thing is one transaction, so a
 // failure on any item rolls back every stock change — and the
 // already-received guard makes a repeated call a safe no-op (no double-add).
-func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, createdBy int64) error {
+func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID, createdBy int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin receive transaction", logger.Error(err))
@@ -283,8 +284,8 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 
 	// Lock the PO row and confirm ownership + current status.
 	status, err := qtx.GetPurchaseOrderForUpdate(ctx, sqlc.GetPurchaseOrderForUpdateParams{
-		OwnerID: ownerID,
-		ID:      poID,
+		BusinessID: businessID,
+		ID:         poID,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		err = domain.ErrPurchaseOrderNotFound
@@ -309,7 +310,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 
 	// PO receiving lands stock in the tenant's default warehouse location
 	// (per-warehouse routing via destination_location_id is a later slice).
-	locID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+	locID, err := stock_core.DefaultLocationID(ctx, tx, businessID)
 	if err != nil {
 		return err
 	}
@@ -322,7 +323,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 		}
 
 		before, after, merr := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
-			OwnerID:       ownerID,
+			OwnerID:       businessID,
 			LocationID:    locID,
 			ProductID:     it.ProductID,
 			EntryType:     stock_core.EntryPurchase,
@@ -340,7 +341,8 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 
 		// Legacy ledger row (read-compat).
 		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
-			OwnerID:        ownerID,
+			OwnerID:        createdBy,
+			BusinessID:     businessID,
 			ProductID:      it.ProductID,
 			Type:           sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
 			QuantityChange: strconv.FormatFloat(qty, 'f', -1, 64),
@@ -360,9 +362,9 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 	}
 
 	if err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
-		Status:  sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(domain.POStatusReceived), Valid: true},
-		OwnerID: ownerID,
-		ID:      poID,
+		Status:     sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(domain.POStatusReceived), Valid: true},
+		BusinessID: businessID,
+		ID:         poID,
 	}); err != nil {
 		return err
 	}
@@ -374,6 +376,7 @@ func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
 	var po domain.PurchaseOrder
 	po.ID = row.ID
 	po.OwnerID = row.OwnerID
+	po.BusinessID = row.BusinessID
 	po.SupplierID = row.SupplierID
 	po.PONumber = row.PoNumber
 

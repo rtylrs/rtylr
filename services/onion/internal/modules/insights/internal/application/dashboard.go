@@ -17,10 +17,10 @@ import (
 const dashboardCacheTTL = 5 * time.Minute
 
 // GetDashboard returns the four headline cards for the given owner.
-// Result is cached per-owner under `insights:{ownerID}:dashboard`.
-func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardSnapshot, error) {
-	key := fmt.Sprintf("insights:%d:dashboard", ownerID)
+// Result is cached per-owner under `insights:{businessID}:dashboard`.
+func (s *Service) GetDashboard(ctx context.Context, businessID int64) (domain.DashboardSnapshot, error) {
+	key := fmt.Sprintf("insights:%d:dashboard", businessID)
 	return cacher.Of[domain.DashboardSnapshot]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (domain.DashboardSnapshot, error) {
-		return s.repo.GetDashboard(ctx, ownerID, infrastructure.DashboardInput{Now: time.Now()})
+		return s.repo.GetDashboard(ctx, businessID, infrastructure.DashboardInput{Now: time.Now()})
 	}, cacher.WithExpiry(ctx, dashboardCacheTTL))
 }

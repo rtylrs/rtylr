@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -46,7 +47,12 @@ func (h *GetInsightsHandler) Serve(ctx context.Context, _ *GetInsightsRequest) (
 		return GetInsightsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	stats, err := h.Service.GetInsights(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetInsightsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	stats, err := h.Service.GetInsights(ctx, businessID)
 	if err != nil {
 		return GetInsightsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -100,7 +106,12 @@ func (h *GetTeamWorkloadHandler) Serve(ctx context.Context, _ *GetTeamWorkloadRe
 		return GetTeamWorkloadResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	result, err := h.Service.GetTeamWorkload(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetTeamWorkloadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	result, err := h.Service.GetTeamWorkload(ctx, businessID)
 	if err != nil {
 		return GetTeamWorkloadResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -160,7 +171,12 @@ func (h *GetRoadmapHandler) Serve(ctx context.Context, _ *GetRoadmapRequest) (Ge
 		return GetRoadmapResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	result, err := h.Service.GetRoadmap(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetRoadmapResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	result, err := h.Service.GetRoadmap(ctx, businessID)
 	if err != nil {
 		return GetRoadmapResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

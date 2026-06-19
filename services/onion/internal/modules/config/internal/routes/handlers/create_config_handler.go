@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CreateConfigRoutes() []string {
@@ -54,17 +55,21 @@ func (h *CreateConfigHandler) Validate(_ context.Context, req *CreateConfigReque
 }
 
 func (h *CreateConfigHandler) Serve(ctx context.Context, req *CreateConfigRequest) (CreateConfigResponse, *errorModels.ServerError) {
-	// Derive the owner from the authenticated user — never trust an owner id
-	// supplied in the request body (that was an IDOR: any user could create a
-	// config for another business).
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := strconv.FormatInt(device.User.BusinessID, 10)
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessIDStr := strconv.FormatInt(businessID, 10)
 
 	configInput := domain.ConfigInput{
-		OwnerId:      ownerID,
+		OwnerId:      businessIDStr,
+		BusinessID:   businessID,
 		SiteName:     req.Key,
 		ContactEmail: req.Value,
 	}

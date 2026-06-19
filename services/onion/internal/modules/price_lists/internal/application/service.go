@@ -20,8 +20,8 @@ const (
 )
 
 type repository interface {
-	ListPriceLists(ctx context.Context, ownerID int64) ([]domain.PriceList, error)
-	CreatePriceList(ctx context.Context, ownerID int64, input domain.PriceListInput) (int64, error)
+	ListPriceLists(ctx context.Context, businessID int64) ([]domain.PriceList, error)
+	CreatePriceList(ctx context.Context, businessID int64, input domain.PriceListInput) (int64, error)
 }
 
 type Service struct {
@@ -32,32 +32,32 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidatePriceListsScope(ctx context.Context, ownerID int64) {
+func invalidatePriceListsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(priceListsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(priceListsScope, businessID))
 	}
 }
 
-func (s *Service) ListPriceLists(ctx context.Context, ownerID int64) ([]domain.PriceList, error) {
+func (s *Service) ListPriceLists(ctx context.Context, businessID int64) ([]domain.PriceList, error) {
 	return cacher.Of[[]domain.PriceList]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(priceListsScope, ownerID, "list"),
+		cacheKeys.Scoped(priceListsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.PriceList, error) {
-			return s.repo.ListPriceLists(ctx, ownerID)
+			return s.repo.ListPriceLists(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, priceListsTTL),
 	)
 }
 
-func (s *Service) CreatePriceList(ctx context.Context, ownerID int64, input domain.PriceListInput) (int64, error) {
+func (s *Service) CreatePriceList(ctx context.Context, businessID int64, input domain.PriceListInput) (int64, error) {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Currency = strings.TrimSpace(strings.ToUpper(input.Currency))
 	if input.Currency == "" {
 		input.Currency = defaultCurrency
 	}
-	id, err := s.repo.CreatePriceList(ctx, ownerID, input)
+	id, err := s.repo.CreatePriceList(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidatePriceListsScope(ctx, ownerID)
+	invalidatePriceListsScope(ctx, businessID)
 	return id, nil
 }

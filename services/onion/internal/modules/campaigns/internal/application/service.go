@@ -18,12 +18,12 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Campaign, error)
-	GetByID(ctx context.Context, ownerID, id int64) (domain.Campaign, error)
+	List(ctx context.Context, businessID int64) ([]domain.Campaign, error)
+	GetByID(ctx context.Context, businessID, id int64) (domain.Campaign, error)
 	Create(ctx context.Context, input domain.CampaignInput) (int64, error)
 	Update(ctx context.Context, input domain.CampaignUpdateInput) error
-	UpdateStatus(ctx context.Context, ownerID, id int64, status string) error
-	Delete(ctx context.Context, ownerID, id int64) error
+	UpdateStatus(ctx context.Context, businessID, id int64, status string) error
+	Delete(ctx context.Context, businessID, id int64) error
 }
 
 type Service struct {
@@ -34,27 +34,27 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateCampaignsScope(ctx context.Context, ownerID int64) {
+func invalidateCampaignsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(campaignsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(campaignsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Campaign, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Campaign, error) {
 	return cacher.Of[[]domain.Campaign]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(campaignsScope, ownerID, "list"),
+		cacheKeys.Scoped(campaignsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Campaign, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, campaignsTTL),
 	)
 }
 
-func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.Campaign, error) {
-	key := cacheKeys.Scoped(campaignsScope, ownerID, "id="+strconv.FormatInt(id, 10))
+func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.Campaign, error) {
+	key := cacheKeys.Scoped(campaignsScope, businessID, "id="+strconv.FormatInt(id, 10))
 	return cacher.Of[domain.Campaign]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.Campaign, error) {
-			return s.repo.GetByID(ctx, ownerID, id)
+			return s.repo.GetByID(ctx, businessID, id)
 		},
 		cacher.WithExpiry(ctx, campaignsTTL),
 	)
@@ -68,7 +68,7 @@ func (s *Service) Create(ctx context.Context, input domain.CampaignInput) (int64
 	if err != nil {
 		return 0, err
 	}
-	invalidateCampaignsScope(ctx, input.OwnerID)
+	invalidateCampaignsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
@@ -79,22 +79,22 @@ func (s *Service) Update(ctx context.Context, input domain.CampaignUpdateInput) 
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
-	invalidateCampaignsScope(ctx, input.OwnerID)
+	invalidateCampaignsScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
-	if err := s.repo.UpdateStatus(ctx, ownerID, id, status); err != nil {
+func (s *Service) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
+	if err := s.repo.UpdateStatus(ctx, businessID, id, status); err != nil {
 		return err
 	}
-	invalidateCampaignsScope(ctx, ownerID)
+	invalidateCampaignsScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateCampaignsScope(ctx, ownerID)
+	invalidateCampaignsScope(ctx, businessID)
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
@@ -64,7 +65,12 @@ func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiers
 		return ListLoyaltyTiersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	tiers, err := h.CRMService.ListLoyaltyTiers(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListLoyaltyTiersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	tiers, err := h.CRMService.ListLoyaltyTiers(ctx, businessID)
 	if err != nil {
 		return ListLoyaltyTiersResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -130,6 +136,11 @@ func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyalty
 		return CreateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	perks := []byte(req.Perks)
 	if perks == nil {
 		perks = []byte("[]")
@@ -137,6 +148,7 @@ func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyalty
 
 	id, err := h.CRMService.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		MinPoints:   req.MinPoints,
 		DiscountPct: req.DiscountPct,
@@ -210,6 +222,11 @@ func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyalty
 		return UpdateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	perks := []byte(req.Perks)
 	if perks == nil {
 		perks = []byte("[]")
@@ -218,6 +235,7 @@ func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyalty
 	if err := h.CRMService.UpdateLoyaltyTier(ctx, domain.LoyaltyTierUpdateInput{
 		ID:          req.ID,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		MinPoints:   req.MinPoints,
 		DiscountPct: req.DiscountPct,
@@ -258,6 +276,11 @@ func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTi
 		return DeleteLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
@@ -267,7 +290,7 @@ func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTi
 		}
 	}
 
-	if err := h.CRMService.DeleteLoyaltyTier(ctx, device.User.UserID, id); err != nil {
+	if err := h.CRMService.DeleteLoyaltyTier(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrTierNotFound) {
 			return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
 				HTTPCode: http.StatusNotFound,

@@ -20,9 +20,9 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Webhook, error)
-	Create(ctx context.Context, ownerID int64, url, secret string, events []string) (int64, error)
-	Delete(ctx context.Context, ownerID, webhookID int64) error
+	List(ctx context.Context, businessID int64) ([]domain.Webhook, error)
+	Create(ctx context.Context, ownerID, businessID int64, url, secret string, events []string) (int64, error)
+	Delete(ctx context.Context, businessID, webhookID int64) error
 }
 
 type Service struct {
@@ -35,23 +35,23 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateWebhooksScope(ctx context.Context, ownerID int64) {
+func invalidateWebhooksScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(webhooksScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(webhooksScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Webhook, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
 	return cacher.Of[[]domain.Webhook]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(webhooksScope, ownerID, "list"),
+		cacheKeys.Scoped(webhooksScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Webhook, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, webhooksTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, url string, events []string) (int64, error) {
+func (s *Service) Create(ctx context.Context, ownerID, businessID int64, url string, events []string) (int64, error) {
 	if url == "" {
 		return 0, errors.New("url is required")
 	}
@@ -62,22 +62,22 @@ func (s *Service) Create(ctx context.Context, ownerID int64, url string, events 
 	if events == nil {
 		events = []string{}
 	}
-	id, err := s.repo.Create(ctx, ownerID, url, secret, events)
+	id, err := s.repo.Create(ctx, ownerID, businessID, url, secret, events)
 	if err != nil {
 		return 0, err
 	}
-	invalidateWebhooksScope(ctx, ownerID)
+	invalidateWebhooksScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, webhookID int64) error {
+func (s *Service) Delete(ctx context.Context, businessID, webhookID int64) error {
 	if webhookID == 0 {
 		return errors.New("webhook id is required")
 	}
-	if err := s.repo.Delete(ctx, ownerID, webhookID); err != nil {
+	if err := s.repo.Delete(ctx, businessID, webhookID); err != nil {
 		return err
 	}
-	invalidateWebhooksScope(ctx, ownerID)
+	invalidateWebhooksScope(ctx, businessID)
 	return nil
 }
 

@@ -3,10 +3,13 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ConfigByOwnerRoutes() []string {
@@ -136,19 +139,24 @@ func newConfigPayload(config domain.Config) *ConfigPayload {
 	}
 }
 
-func (h *GetConfigByOwnerHandler) Validate(_ context.Context, req *GetConfigByOwnerRequest) *errorModels.ServerError {
-	if req.Owner == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Owner is required",
-		}
-	}
-
+func (h *GetConfigByOwnerHandler) Validate(_ context.Context, _ *GetConfigByOwnerRequest) *errorModels.ServerError {
 	return nil
 }
 
-func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
-	config, err := h.ConfigService.GetConfig(ctx, req.Owner)
+func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, _ *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessIDStr := strconv.FormatInt(businessID, 10)
+
+	config, err := h.ConfigService.GetConfig(ctx, businessIDStr)
 	if err != nil {
 		return GetConfigByOwnerResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -156,7 +164,7 @@ func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwn
 		}
 	}
 
-	theme, err := h.ConfigService.GetThemeByOwnerID(ctx, req.Owner)
+	theme, err := h.ConfigService.GetThemeByOwnerID(ctx, businessIDStr)
 	if err != nil {
 		return GetConfigByOwnerResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

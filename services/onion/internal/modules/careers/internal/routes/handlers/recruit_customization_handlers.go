@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -106,8 +107,12 @@ func (h *GetCustomizationHandler) Serve(ctx context.Context, _ *GetCustomization
 	if !ok {
 		return GetCustomizationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetCustomizationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	c, err := h.CareersService.GetMyCustomization(ctx, authUser.UserID)
+	c, err := h.CareersService.GetMyCustomization(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			// First-time callers get an empty stub rather than a 404 —
@@ -177,9 +182,14 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 	if !ok {
 		return PutCustomizationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return PutCustomizationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.CustomizationInput{
 		OwnerID:            authUser.UserID,
+		BusinessID:         businessID,
 		Slug:               req.Slug,
 		BrandName:          req.BrandName,
 		Tagline:            req.Tagline,
@@ -212,6 +222,6 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 			Message: "Failed to save customization",
 		}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return PutCustomizationResponse{Message: "Customization saved"}, nil
 }

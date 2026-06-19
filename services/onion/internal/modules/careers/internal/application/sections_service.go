@@ -14,8 +14,8 @@ import (
 
 // ListSections returns all of a tenant's sections. `enabledOnly=true`
 // is used by the public page load so draft sections stay hidden.
-func (s *Service) ListSections(ctx context.Context, ownerID int64, enabledOnly bool) ([]domain.Section, error) {
-	return s.repo.ListSections(ctx, ownerID, enabledOnly)
+func (s *Service) ListSections(ctx context.Context, businessID int64, enabledOnly bool) ([]domain.Section, error) {
+	return s.repo.ListSections(ctx, businessID, enabledOnly)
 }
 
 func (s *Service) CreateSection(ctx context.Context, in domain.SectionInput) (int64, error) {
@@ -23,7 +23,7 @@ func (s *Service) CreateSection(ctx context.Context, in domain.SectionInput) (in
 	// sections and use that as the new row's position. Callers that
 	// want a specific slot pass their own position.
 	if in.Position == 0 {
-		existing, err := s.repo.ListSections(ctx, in.OwnerID, false)
+		existing, err := s.repo.ListSections(ctx, in.BusinessID, false)
 		if err == nil {
 			in.Position = int32(len(existing))
 		}
@@ -32,7 +32,7 @@ func (s *Service) CreateSection(ctx context.Context, in domain.SectionInput) (in
 }
 
 func (s *Service) UpdateSection(ctx context.Context, in domain.SectionInput) error {
-	if _, err := s.repo.GetSection(ctx, in.OwnerID, in.ID); err != nil {
+	if _, err := s.repo.GetSection(ctx, in.BusinessID, in.ID); err != nil {
 		if errors.Is(err, infrastructure.ErrSectionNotFound) {
 			return ErrNotFound
 		}
@@ -41,12 +41,12 @@ func (s *Service) UpdateSection(ctx context.Context, in domain.SectionInput) err
 	return s.repo.UpdateSection(ctx, in)
 }
 
-func (s *Service) ReorderSections(ctx context.Context, ownerID int64, orderedIDs []int64) error {
-	return s.repo.ReorderSections(ctx, ownerID, orderedIDs)
+func (s *Service) ReorderSections(ctx context.Context, businessID int64, orderedIDs []int64) error {
+	return s.repo.ReorderSections(ctx, businessID, orderedIDs)
 }
 
-func (s *Service) DeleteSection(ctx context.Context, ownerID, sectionID int64) error {
-	err := s.repo.DeleteSection(ctx, ownerID, sectionID)
+func (s *Service) DeleteSection(ctx context.Context, businessID, sectionID int64) error {
+	err := s.repo.DeleteSection(ctx, businessID, sectionID)
 	if errors.Is(err, infrastructure.ErrSectionNotFound) {
 		return ErrNotFound
 	}

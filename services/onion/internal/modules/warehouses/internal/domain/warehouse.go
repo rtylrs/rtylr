@@ -11,6 +11,7 @@ var ErrWarehouseNotFound = errors.New("warehouse not found")
 type Warehouse struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	Address     string    `json:"address"`
 	City        string    `json:"city"`
@@ -35,6 +36,7 @@ func (w *Warehouse) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&w.ID,
 		&w.OwnerID,
+		&w.BusinessID,
 		&w.Name,
 		&address,
 		&city,

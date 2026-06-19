@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerUpdateRoutes() []string {
@@ -65,9 +66,15 @@ func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRe
 		return UpdateCustomerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.CustomerUpdateInput{
 		ID:          req.ID,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		FirstName:   req.FirstName,
 		LastName:    req.LastName,
 		Email:       req.Email,

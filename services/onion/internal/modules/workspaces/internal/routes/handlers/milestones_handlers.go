@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── List Milestones ──────────────────────────────────────────────────────────
@@ -55,7 +56,12 @@ func (h *ListMilestonesHandler) Serve(ctx context.Context, r *ListMilestonesRequ
 		return ListMilestonesResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	wsID := authUser.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListMilestonesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	wsID := businessID
 	if r.WorkspaceID != "" {
 		if id, err := strconv.ParseInt(r.WorkspaceID, 10, 64); err == nil {
 			wsID = id
@@ -127,8 +133,13 @@ func (h *CreateMilestoneHandler) Serve(ctx context.Context, r *CreateMilestoneRe
 		return CreateMilestoneResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateMilestoneResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	projID, _ := strconv.ParseInt(r.ProjectID, 10, 64)
-	wsID := authUser.BusinessID
+	wsID := businessID
 	if r.WorkspaceID != "" {
 		if id, err := strconv.ParseInt(r.WorkspaceID, 10, 64); err == nil {
 			wsID = id
@@ -143,6 +154,7 @@ func (h *CreateMilestoneHandler) Serve(ctx context.Context, r *CreateMilestoneRe
 	milestone, err := h.FlowService.CreateMilestone(ctx, domain.MilestoneInput{
 		ProjectID:   projID,
 		WorkspaceID: wsID,
+		BusinessID:  businessID,
 		Name:        r.Name,
 		Description: r.Description,
 		DueDate:     dueDate,

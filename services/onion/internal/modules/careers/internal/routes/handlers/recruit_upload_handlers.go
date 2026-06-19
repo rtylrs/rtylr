@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/storage"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -83,7 +84,7 @@ func (h *ResumeUploadURLHandler) Serve(ctx context.Context, req *ResumeUploadURL
 			Message: "Careers page not found",
 		}
 	}
-	career, err := h.CareersService.GetCareerBySlug(ctx, custom.OwnerID, req.CareerSlug)
+	career, err := h.CareersService.GetCareerBySlug(ctx, custom.BusinessID, req.CareerSlug)
 	if err != nil || !career.IsPublished {
 		return ResumeUploadURLResponse{}, &errorModels.ServerError{
 			Code:    http.StatusNotFound,
@@ -154,11 +155,15 @@ func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloa
 	if !ok {
 		return ResumeDownloadURLResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ResumeDownloadURLResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	// Look up the submission, scoped to the caller's tenant. The list
-	// method filters by owner_id already; finding it here means the
+	// method filters by business_id already; finding it here means the
 	// caller owns it.
-	submissions, err := h.CareersService.ListSubmissions(ctx, authUser.UserID, "")
+	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, "")
 	if err != nil {
 		return ResumeDownloadURLResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

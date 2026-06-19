@@ -5,6 +5,7 @@ import "time"
 type Checkout struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	SessionID     string    `json:"session_id"`
 	CustomerEmail string    `json:"customer_email"`
 	Items         string    `json:"items"`

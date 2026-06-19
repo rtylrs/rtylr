@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/documents/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 var expiryDateLayouts = []string{
@@ -59,7 +60,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list documents"}
 	}
@@ -103,11 +108,15 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.DocumentInput{
 		StaffID: req.StaffID, Name: req.Name, Type: req.Type,
 		FileURL: req.FileURL, ExpiryDate: req.ExpiryDate,
 	}
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, businessID, input)
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create document"}
 	}
@@ -139,7 +148,11 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 	if device.IsAnonymous || device.User == nil {
 		return DeleteResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.Service.Delete(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
 		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete document"}
 	}
 	return DeleteResponse{Message: "Document deleted successfully"}, nil

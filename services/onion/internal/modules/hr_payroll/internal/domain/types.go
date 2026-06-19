@@ -5,6 +5,7 @@ import "time"
 type PayrollConfigRecord struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`
+	BusinessID      int64     `json:"business_id"`
 	PeriodType      string    `json:"period_type"`
 	PayDayOfMonth   int32     `json:"pay_day_of_month"`
 	OvertimeEnabled bool      `json:"overtime_enabled"`
@@ -15,6 +16,7 @@ type PayrollConfigRecord struct {
 type PayrollRunRecord struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	PeriodStart string    `json:"period_start"`
 	PeriodEnd   string    `json:"period_end"`
 	Status      string    `json:"status"`
@@ -30,6 +32,7 @@ type PayrollRunRecord struct {
 type PayrollEntryRecord struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	PayrollRunID  int64     `json:"payroll_run_id"`
 	EmployeeID    int64     `json:"employee_id"`
 	HoursWorked   float64   `json:"hours_worked"`

@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BenefitPlan, error) {
-	rows, err := r.queries.ListBenefitPlans(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.BenefitPlan, error) {
+	rows, err := r.queries.ListBenefitPlans(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list benefit plans", logger.Error(err))
 		return nil, err
@@ -36,6 +36,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BenefitP
 		var item domain.BenefitPlan
 		item.ID = row.ID
 		item.OwnerID = row.OwnerID
+		item.BusinessID = row.BusinessID
 		item.Name = row.Name
 		if row.Type.Valid {
 			item.Type = string(row.Type.HrBenefitPlansType)
@@ -60,14 +61,15 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BenefitP
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.BenefitPlanInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.BenefitPlanInput) (int64, error) {
 	benefitType := input.Type
 	if benefitType == "" {
 		benefitType = "other"
 	}
 
 	res, err := r.queries.CreateBenefitPlan(ctx, sqlc.CreateBenefitPlanParams{
-		OwnerID:      ownerID,
+		OwnerID:      businessID,
+		BusinessID:   businessID,
 		Name:         input.Name,
 		Type:         sqlc.NullHrBenefitPlansType{HrBenefitPlansType: sqlc.HrBenefitPlansType(benefitType), Valid: true},
 		Provider:     sql.NullString{String: input.Provider, Valid: input.Provider != ""},

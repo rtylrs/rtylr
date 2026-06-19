@@ -5,6 +5,7 @@ import "time"
 type Role struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	Permissions []string  `json:"permissions"`
 	IsSystem    bool      `json:"is_system"`

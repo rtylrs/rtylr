@@ -10,6 +10,7 @@ var ErrTaxConfigNotFound = errors.New("tax config not found")
 type TaxConfig struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	TaxName     string    `json:"tax_name"`
 	TaxRate     float64   `json:"tax_rate"`
 	IsInclusive bool      `json:"is_inclusive"`
@@ -20,6 +21,7 @@ type TaxConfig struct {
 
 type TaxConfigInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	TaxName     string
 	TaxRate     float64
 	IsInclusive bool

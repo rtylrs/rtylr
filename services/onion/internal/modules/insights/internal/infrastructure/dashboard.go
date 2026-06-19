@@ -20,32 +20,32 @@ type DashboardInput struct {
 // for the given owner. Every underlying query is a cross-schema read; a
 // fresh tenant with no invoices/orders/customers gets back all zeros,
 // not an error, per onion/CLAUDE.md §8 fallback rules.
-func (r *Repository) GetDashboard(ctx context.Context, ownerID int64, in DashboardInput) (domain.DashboardSnapshot, error) {
+func (r *Repository) GetDashboard(ctx context.Context, businessID int64, in DashboardInput) (domain.DashboardSnapshot, error) {
 	thisFrom, thisTo, priorFrom, priorTo := mtdRanges(in.Now)
 
-	revThis, err := r.sumPaidInvoicesMinorUnits(ctx, ownerID, thisFrom, thisTo)
+	revThis, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	revPrior, err := r.sumPaidInvoicesMinorUnits(ctx, ownerID, priorFrom, priorTo)
-	if err != nil {
-		return domain.DashboardSnapshot{}, err
-	}
-
-	ordersThis, err := r.countPosOrders(ctx, ownerID, thisFrom, thisTo)
-	if err != nil {
-		return domain.DashboardSnapshot{}, err
-	}
-	ordersPrior, err := r.countPosOrders(ctx, ownerID, priorFrom, priorTo)
+	revPrior, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, priorFrom, priorTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
 
-	custThis, err := r.countCrmCustomersCreated(ctx, ownerID, thisFrom, thisTo)
+	ordersThis, err := r.countPosOrders(ctx, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	custPrior, err := r.countCrmCustomersCreated(ctx, ownerID, priorFrom, priorTo)
+	ordersPrior, err := r.countPosOrders(ctx, businessID, priorFrom, priorTo)
+	if err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
+
+	custThis, err := r.countCrmCustomersCreated(ctx, businessID, thisFrom, thisTo)
+	if err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
+	custPrior, err := r.countCrmCustomersCreated(ctx, businessID, priorFrom, priorTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
@@ -53,11 +53,11 @@ func (r *Repository) GetDashboard(ctx context.Context, ownerID int64, in Dashboa
 	// Margin % = (revenue - COGS) / revenue * 100, where COGS here is the
 	// summed expenses over the same window. This is a proxy, not a GAAP
 	// margin; the finance module owns the strict calculation.
-	expThis, err := r.sumExpensesMinorUnits(ctx, ownerID, thisFrom, thisTo)
+	expThis, err := r.sumExpensesMinorUnits(ctx, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	expPrior, err := r.sumExpensesMinorUnits(ctx, ownerID, priorFrom, priorTo)
+	expPrior, err := r.sumExpensesMinorUnits(ctx, businessID, priorFrom, priorTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
@@ -91,12 +91,12 @@ func marginPct(revenueMinor, expenseMinor int64) float64 {
 	return (float64(revenueMinor-expenseMinor) / float64(revenueMinor)) * 100
 }
 
-func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
+func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_invoices — paid invoice revenue powers the dashboard revenue card
 	q, args, err := sq.
 		Select("COALESCE(SUM(total), 0)").
 		From("finance_invoices").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Eq{"status": "paid"}).
 		Where(sq.GtOrEq{"COALESCE(paid_date, issue_date)": from.Format("2006-01-02")}).
 		Where(sq.LtOrEq{"COALESCE(paid_date, issue_date)": to.Format("2006-01-02")}).
@@ -114,12 +114,12 @@ func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, ownerID int6
 	return decimalToMinorUnits(total), nil
 }
 
-func (r *Repository) countPosOrders(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
+func (r *Repository) countPosOrders(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from pos_orders — order volume powers the dashboard orders card
 	q, args, err := sq.
 		Select("COUNT(*)").
 		From("pos_orders").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"created_at": from}).
 		Where(sq.LtOrEq{"created_at": to}).
 		PlaceholderFormat(sq.Question).
@@ -136,12 +136,12 @@ func (r *Repository) countPosOrders(ctx context.Context, ownerID int64, from, to
 	return n, nil
 }
 
-func (r *Repository) countCrmCustomersCreated(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
+func (r *Repository) countCrmCustomersCreated(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from crm_customers — new customer signups for the dashboard customers card
 	q, args, err := sq.
 		Select("COUNT(*)").
 		From("crm_customers").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"created_at": from}).
 		Where(sq.LtOrEq{"created_at": to}).
 		PlaceholderFormat(sq.Question).
@@ -158,12 +158,12 @@ func (r *Repository) countCrmCustomersCreated(ctx context.Context, ownerID int64
 	return n, nil
 }
 
-func (r *Repository) sumExpensesMinorUnits(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
+func (r *Repository) sumExpensesMinorUnits(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_expenses — expense totals feed the margin card
 	q, args, err := sq.
 		Select("COALESCE(SUM(amount), 0)").
 		From("finance_expenses").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"expense_date": from.Format("2006-01-02")}).
 		Where(sq.LtOrEq{"expense_date": to.Format("2006-01-02")}).
 		PlaceholderFormat(sq.Question).

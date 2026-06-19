@@ -20,8 +20,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.ShippingMethod, error) {
-	rows, err := r.queries.ListShippingMethods(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.ShippingMethod, error) {
+	rows, err := r.queries.ListShippingMethods(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list shipping methods", logger.Error(err))
 		return nil, err
@@ -33,9 +33,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Shipping
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ShippingMethodInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.ShippingMethodInput) (int64, error) {
 	result, err := r.queries.CreateShippingMethod(ctx, sqlc.CreateShippingMethodParams{
-		OwnerID: ownerID, Name: input.Name,
+		OwnerID: ownerID, BusinessID: businessID, Name: input.Name,
 		Price:         strconv.FormatFloat(input.Price, 'f', 2, 64),
 		EstimatedDays: sql.NullInt32{Int32: int32(input.EstimatedDays), Valid: true},
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -48,12 +48,12 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Shi
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.ShippingMethodInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ShippingMethodInput) error {
 	err := r.queries.UpdateShippingMethod(ctx, sqlc.UpdateShippingMethodParams{
 		Name: input.Name, Price: strconv.FormatFloat(input.Price, 'f', 2, 64),
 		EstimatedDays: sql.NullInt32{Int32: int32(input.EstimatedDays), Valid: true},
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
-		OwnerID:       ownerID, ID: id,
+		BusinessID:    businessID, ID: id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update shipping method", logger.Error(err))
@@ -62,8 +62,8 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	err := r.queries.DeleteShippingMethod(ctx, sqlc.DeleteShippingMethodParams{OwnerID: ownerID, ID: id})
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	err := r.queries.DeleteShippingMethod(ctx, sqlc.DeleteShippingMethodParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete shipping method", logger.Error(err))
 		return err
@@ -81,7 +81,7 @@ func parseMonetary(ctx context.Context, s string) float64 {
 }
 
 func fromRow(ctx context.Context, row sqlc.StoreShippingMethod) domain.ShippingMethod {
-	s := domain.ShippingMethod{ID: row.ID, OwnerID: row.OwnerID, Name: row.Name}
+	s := domain.ShippingMethod{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Name: row.Name}
 	s.Price = parseMonetary(ctx, row.Price)
 	if row.EstimatedDays.Valid {
 		s.EstimatedDays = int(row.EstimatedDays.Int32)

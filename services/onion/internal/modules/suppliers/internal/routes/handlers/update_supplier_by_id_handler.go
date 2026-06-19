@@ -89,8 +89,11 @@ func (h *UpdateSupplierByIDHandler) Serve(ctx context.Context, req *UpdateSuppli
 		IsActive:     req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.UpdateSupplier(ctx, ownerID, id, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateSupplierByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.UpdateSupplier(ctx, businessID, id, input); err != nil {
 		if errors.Is(err, domain.ErrSupplierNotFound) {
 			return UpdateSupplierByIDResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,
@@ -146,8 +149,11 @@ func (h *DeleteSupplierByIDHandler) Serve(ctx context.Context, _ *DeleteSupplier
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.DeleteSupplier(ctx, ownerID, id); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteSupplierByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.DeleteSupplier(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrSupplierNotFound) {
 			return DeleteSupplierByIDResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,

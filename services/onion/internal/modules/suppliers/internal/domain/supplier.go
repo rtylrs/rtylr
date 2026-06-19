@@ -11,6 +11,7 @@ var ErrSupplierNotFound = errors.New("supplier not found")
 type Supplier struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	Phone        string    `json:"phone"`

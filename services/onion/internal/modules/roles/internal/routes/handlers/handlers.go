@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/roles/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func RoleRoutes() []string       { return []string{"/roles"} }
@@ -40,7 +41,12 @@ func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (List
 		return ListRolesResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	roles, err := h.Service.ListRoles(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListRolesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	roles, err := h.Service.ListRoles(ctx, businessID)
 	if err != nil {
 		return ListRolesResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -99,7 +105,12 @@ func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (
 		return CreateRoleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, err := h.Service.CreateRole(ctx, device.User.UserID, domain.CreateRoleInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateRoleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateRole(ctx, businessID, domain.CreateRoleInput{
 		Name:        req.Name,
 		Permissions: req.Permissions,
 	})
@@ -152,7 +163,12 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 		return UpdateRoleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.UpdateRole(ctx, device.User.UserID, domain.UpdateRoleInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateRoleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateRole(ctx, businessID, domain.UpdateRoleInput{
 		ID:          req.ID,
 		Name:        req.Name,
 		Permissions: req.Permissions,
@@ -196,7 +212,12 @@ func (h *DeleteRoleHandler) Serve(ctx context.Context, req *DeleteRoleRequest) (
 		return DeleteRoleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.DeleteRole(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteRoleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteRole(ctx, businessID, req.ID); err != nil {
 		return DeleteRoleResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,

@@ -2,6 +2,7 @@
 SELECT
     id,
     owner_id,
+    business_id,
     primary_color,
     secondary_color,
     accent_color,
@@ -30,4 +31,4 @@ SELECT
     font_size_base,
     font_size_heading,
     mobile_breakpoint
-FROM themes WHERE owner_id = ?;
+FROM themes WHERE business_id = ?;

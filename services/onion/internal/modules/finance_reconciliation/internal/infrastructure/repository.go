@@ -22,12 +22,12 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) ListUnmatchedBankFeeds(ctx context.Context, ownerID int64) ([]domain.UnmatchedBankTransaction, error) {
-	rows, err := r.queries.ListUnmatchedBankFeeds(ctx, ownerID)
+func (r *Repository) ListUnmatchedBankFeeds(ctx context.Context, businessID int64) ([]domain.UnmatchedBankTransaction, error) {
+	rows, err := r.queries.ListUnmatchedBankFeeds(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list unmatched bank feeds",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 		return nil, err
 	}
@@ -51,13 +51,13 @@ func (r *Repository) ListUnmatchedBankFeeds(ctx context.Context, ownerID int64) 
 // that table; we read directly because reconciliation needs both sides of the
 // match and routing this through an in-process RPC would add latency and
 // failure modes without meaningful isolation.
-func (r *Repository) ListUnmatchedInvoices(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error) {
+func (r *Repository) ListUnmatchedInvoices(ctx context.Context, businessID int64) ([]domain.UnmatchedInvoice, error) {
 	// cross-schema read from finance_invoices — reconciliation needs the outstanding invoice side of the match (owned by the invoices module).
-	rows, err := r.queries.ListUnmatchedInvoices(ctx, ownerID)
+	rows, err := r.queries.ListUnmatchedInvoices(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list unmatched invoices",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 		return nil, err
 	}
@@ -81,13 +81,13 @@ func (r *Repository) ListUnmatchedInvoices(ctx context.Context, ownerID int64) (
 // rationale as ListUnmatchedInvoices. The expenses module owns the table but
 // reconciliation legitimately needs to see the payable side for match
 // suggestions.
-func (r *Repository) ListUnmatchedExpenses(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error) {
+func (r *Repository) ListUnmatchedExpenses(ctx context.Context, businessID int64) ([]domain.UnmatchedInvoice, error) {
 	// cross-schema read from finance_expenses — reconciliation needs the outstanding expense side of the match (owned by the expenses module).
-	rows, err := r.queries.ListUnmatchedExpenses(ctx, ownerID)
+	rows, err := r.queries.ListUnmatchedExpenses(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list unmatched expenses",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 		return nil, err
 	}
@@ -107,8 +107,8 @@ func (r *Repository) ListUnmatchedExpenses(ctx context.Context, ownerID int64) (
 	return items, nil
 }
 
-func (r *Repository) BankFeedExists(ctx context.Context, ownerID, id int64) (bool, error) {
-	_, err := r.queries.GetBankFeedForOwner(ctx, sqlc.GetBankFeedForOwnerParams{ID: id, OwnerID: ownerID})
+func (r *Repository) BankFeedExists(ctx context.Context, businessID, id int64) (bool, error) {
+	_, err := r.queries.GetBankFeedForOwner(ctx, sqlc.GetBankFeedForOwnerParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
@@ -118,13 +118,14 @@ func (r *Repository) BankFeedExists(ctx context.Context, ownerID, id int64) (boo
 	return true, nil
 }
 
-func (r *Repository) CreateMatch(ctx context.Context, ownerID int64, input domain.MatchInput) (int64, error) {
+func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error) {
 	matchedBy := sql.NullInt64{}
 	if input.MatchedBy > 0 {
 		matchedBy = sql.NullInt64{Int64: input.MatchedBy, Valid: true}
 	}
 	res, err := r.queries.CreateReconciliationMatch(ctx, sqlc.CreateReconciliationMatchParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		BankFeedID: input.BankFeedID,
 		TargetType: input.TargetType,
 		TargetID:   input.TargetID,
@@ -133,7 +134,7 @@ func (r *Repository) CreateMatch(ctx context.Context, ownerID int64, input domai
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create reconciliation match",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("bank_feed_id", input.BankFeedID),
 			logger.Any("target_type", input.TargetType),
 			logger.Any("target_id", input.TargetID),
@@ -145,8 +146,8 @@ func (r *Repository) CreateMatch(ctx context.Context, ownerID int64, input domai
 
 // CountMatches returns the total number of reconciliation matches created for
 // the owner, regardless of target type.
-func (r *Repository) CountMatches(ctx context.Context, ownerID int64) (int64, error) {
-	cnt, err := r.queries.CountMatches(ctx, ownerID)
+func (r *Repository) CountMatches(ctx context.Context, businessID int64) (int64, error) {
+	cnt, err := r.queries.CountMatches(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count reconciliation matches", logger.Error(err))
 		return 0, err
@@ -157,8 +158,8 @@ func (r *Repository) CountMatches(ctx context.Context, ownerID int64) (int64, er
 
 // CountMatchesByTargetType returns the number of matches for each target
 // type ("invoice", "expense") for the given owner.
-func (r *Repository) CountMatchesByTargetType(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	rows, err := r.queries.CountMatchesByTargetType(ctx, ownerID)
+func (r *Repository) CountMatchesByTargetType(ctx context.Context, businessID int64) (map[string]int64, error) {
+	rows, err := r.queries.CountMatchesByTargetType(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count matches by target type", logger.Error(err))
 		return nil, err

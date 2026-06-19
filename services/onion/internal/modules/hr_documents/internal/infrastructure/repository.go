@@ -23,9 +23,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) CreateDocument(ctx context.Context, ownerID int64, params domain.CreateDocumentParams) (*domain.EmployeeDocumentRecord, error) {
+func (r *Repository) CreateDocument(ctx context.Context, businessID int64, params domain.CreateDocumentParams) (*domain.EmployeeDocumentRecord, error) {
 	result, err := r.queries.CreateDocument(ctx, sqlc.CreateDocumentParams{
-		OwnerID:      ownerID,
+		OwnerID:      businessID,
+		BusinessID:   businessID,
 		EmployeeID:   params.EmployeeID,
 		DocumentType: params.DocumentType,
 		Title:        params.Title,
@@ -43,13 +44,13 @@ func (r *Repository) CreateDocument(ctx context.Context, ownerID int64, params d
 		return nil, err
 	}
 
-	return r.GetDocument(ctx, ownerID, id)
+	return r.GetDocument(ctx, businessID, id)
 }
 
-func (r *Repository) GetDocument(ctx context.Context, ownerID, id int64) (*domain.EmployeeDocumentRecord, error) {
+func (r *Repository) GetDocument(ctx context.Context, businessID, id int64) (*domain.EmployeeDocumentRecord, error) {
 	row, err := r.queries.GetDocument(ctx, sqlc.GetDocumentParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -62,9 +63,9 @@ func (r *Repository) GetDocument(ctx context.Context, ownerID, id int64) (*domai
 	return &record, nil
 }
 
-func (r *Repository) ListDocuments(ctx context.Context, ownerID, employeeID int64, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
+func (r *Repository) ListDocuments(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
 	total, err := r.queries.CountDocuments(ctx, sqlc.CountDocumentsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 	})
 	if err != nil {
@@ -72,7 +73,7 @@ func (r *Repository) ListDocuments(ctx context.Context, ownerID, employeeID int6
 	}
 
 	rows, err := r.queries.ListDocuments(ctx, sqlc.ListDocumentsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Limit:      limit,
 		Offset:     offset,
@@ -89,10 +90,10 @@ func (r *Repository) ListDocuments(ctx context.Context, ownerID, employeeID int6
 	return records, total, nil
 }
 
-func (r *Repository) DeleteDocument(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) DeleteDocument(ctx context.Context, businessID, id int64) error {
 	return r.queries.DeleteDocument(ctx, sqlc.DeleteDocumentParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 }
 
@@ -105,6 +106,7 @@ func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord 
 	return domain.EmployeeDocumentRecord{
 		ID:           row.ID,
 		OwnerID:      row.OwnerID,
+		BusinessID:   row.BusinessID,
 		EmployeeID:   row.EmployeeID,
 		DocumentType: row.DocumentType,
 		Title:        row.Title,
@@ -118,11 +120,11 @@ func documentFromRow(row sqlc.HrEmployeeDocument) domain.EmployeeDocumentRecord 
 	}
 }
 
-func (r *Repository) ListExpiringDocuments(ctx context.Context, ownerID int64, days, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
+func (r *Repository) ListExpiringDocuments(ctx context.Context, businessID int64, days, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
 	cutoff := time.Now().AddDate(0, 0, int(days))
 
 	total, err := r.queries.CountExpiringDocuments(ctx, sqlc.CountExpiringDocumentsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		ExpiryDate: sql.NullTime{Time: cutoff, Valid: true},
 	})
 	if err != nil {
@@ -130,7 +132,7 @@ func (r *Repository) ListExpiringDocuments(ctx context.Context, ownerID int64, d
 	}
 
 	rows, err := r.queries.ListExpiringDocuments(ctx, sqlc.ListExpiringDocumentsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		ExpiryDate: sql.NullTime{Time: cutoff, Valid: true},
 		Limit:      limit,
 		Offset:     offset,

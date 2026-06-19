@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type CampaignPayload struct {
@@ -75,7 +76,11 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, _ *ListCampaignsReques
 	if device.User == nil {
 		return ListCampaignsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	campaigns, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListCampaignsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	campaigns, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListCampaignsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list campaigns"}
 	}
@@ -108,7 +113,11 @@ func (h *GetCampaignHandler) Serve(ctx context.Context, _ *GetCampaignRequest) (
 	if err != nil || id <= 0 {
 		return GetCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid campaign ID"}
 	}
-	campaign, getErr := h.Service.GetByID(ctx, device.User.UserID, id)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	campaign, getErr := h.Service.GetByID(ctx, businessID, id)
 	if getErr != nil {
 		if errors.Is(getErr, domain.ErrCampaignNotFound) {
 			return GetCampaignResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Campaign not found"}
@@ -153,8 +162,13 @@ func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRe
 	if device.User == nil {
 		return CreateCampaignResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.CampaignInput{
 		OwnerID:           device.User.UserID,
+		BusinessID:        businessID,
 		Name:              req.Name,
 		Type:              req.Type,
 		AudienceSegmentID: req.AudienceSegmentID,
@@ -214,9 +228,14 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 	if err != nil {
 		return UpdateCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid campaign ID"}
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.CampaignUpdateInput{
 		ID:                id,
 		OwnerID:           device.User.UserID,
+		BusinessID:        businessID,
 		Name:              req.Name,
 		Type:              req.Type,
 		AudienceSegmentID: req.AudienceSegmentID,
@@ -267,7 +286,11 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 	if err != nil {
 		return UpdateCampaignStatusResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid campaign ID"}
 	}
-	if updateErr := h.Service.UpdateStatus(ctx, device.User.UserID, id, req.Status); updateErr != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateCampaignStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, req.Status); updateErr != nil {
 		return UpdateCampaignStatusResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update campaign status"}
 	}
 	return UpdateCampaignStatusResponse{Message: "Campaign status updated successfully"}, nil

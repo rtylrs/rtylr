@@ -16,6 +16,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // automationsCacheScope namespaces the per-owner automations list cache.
@@ -23,9 +24,9 @@ import (
 // invalidation on every create/update/delete keeps reads consistent.
 const automationsCacheScope = "automations"
 
-func invalidateAutomationsCache(ctx context.Context, ownerID int64) {
+func invalidateAutomationsCache(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsCacheScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsCacheScope, businessID))
 	}
 }
 
@@ -99,11 +100,15 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 		return ListAutomationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListAutomationsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	res, cacheErr := cacher.Of[ListAutomationsResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(automationsCacheScope, device.User.UserID, "list"),
+		cacheKeys.Scoped(automationsCacheScope, businessID, "list"),
 		func(ctx context.Context) (ListAutomationsResponse, error) {
-			return h.computeList(ctx, device.User.UserID)
+			return h.computeList(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, 3*time.Minute),
 	)
@@ -111,7 +116,7 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 		return res, nil
 	}
 
-	res, computeErr := h.computeList(ctx, device.User.UserID)
+	res, computeErr := h.computeList(ctx, businessID)
 	if computeErr != nil {
 		return ListAutomationsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -121,8 +126,8 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 	return res, nil
 }
 
-func (h *ListAutomationsHandler) computeList(ctx context.Context, ownerID int64) (ListAutomationsResponse, error) {
-	items, err := h.Service.List(ctx, ownerID)
+func (h *ListAutomationsHandler) computeList(ctx context.Context, businessID int64) (ListAutomationsResponse, error) {
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListAutomationsResponse{}, err
 	}
@@ -188,8 +193,13 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 		actions = []byte("[]")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateAutomationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.Create(ctx, domain.AutomationInput{
 		OwnerID:       device.User.UserID,
+		BusinessID:    businessID,
 		Name:          req.Name,
 		TriggerType:   req.TriggerType,
 		TriggerConfig: triggerConfig,
@@ -203,7 +213,7 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 		}
 	}
 
-	invalidateAutomationsCache(ctx, device.User.UserID)
+	invalidateAutomationsCache(ctx, businessID)
 
 	return CreateAutomationResponse{AutomationID: id, Message: "Automation created successfully"}, nil
 }
@@ -262,9 +272,14 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		actions = []byte("[]")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateAutomationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if err := h.Service.Update(ctx, domain.AutomationUpdateInput{
 		ID:            id,
 		OwnerID:       device.User.UserID,
+		BusinessID:    businessID,
 		Name:          req.Name,
 		TriggerType:   req.TriggerType,
 		TriggerConfig: triggerConfig,
@@ -284,7 +299,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		}
 	}
 
-	invalidateAutomationsCache(ctx, device.User.UserID)
+	invalidateAutomationsCache(ctx, businessID)
 
 	return UpdateAutomationResponse{Message: "Automation updated successfully"}, nil
 }
@@ -316,7 +331,11 @@ func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomation
 		}
 	}
 
-	if err := h.Service.Delete(ctx, device.User.UserID, id); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteAutomationResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Delete(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrAutomationNotFound) {
 			return DeleteAutomationResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
@@ -330,7 +349,7 @@ func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomation
 		}
 	}
 
-	invalidateAutomationsCache(ctx, device.User.UserID)
+	invalidateAutomationsCache(ctx, businessID)
 
 	return DeleteAutomationResponse{Message: "Automation deleted successfully"}, nil
 }

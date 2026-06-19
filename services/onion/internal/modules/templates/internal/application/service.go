@@ -26,17 +26,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateTemplatesScope(ctx context.Context, ownerID int64) {
+func invalidateTemplatesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(templatesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(templatesScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Template, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Template, error) {
 	return cacher.Of[[]domain.Template]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(templatesScope, ownerID, "list"),
+		cacheKeys.Scoped(templatesScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Template, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, templatesTTL),
 	)
@@ -47,7 +47,7 @@ func (s *Service) Create(ctx context.Context, input domain.TemplateInput) (int64
 	if err != nil {
 		return 0, err
 	}
-	invalidateTemplatesScope(ctx, input.OwnerID)
+	invalidateTemplatesScope(ctx, input.BusinessID)
 	return id, nil
 }
 
@@ -55,14 +55,14 @@ func (s *Service) Update(ctx context.Context, input domain.TemplateUpdateInput) 
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
-	invalidateTemplatesScope(ctx, input.OwnerID)
+	invalidateTemplatesScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, templateID int64) error {
-	if err := s.repo.Delete(ctx, ownerID, templateID); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, templateID int64) error {
+	if err := s.repo.Delete(ctx, businessID, templateID); err != nil {
 		return err
 	}
-	invalidateTemplatesScope(ctx, ownerID)
+	invalidateTemplatesScope(ctx, businessID)
 	return nil
 }

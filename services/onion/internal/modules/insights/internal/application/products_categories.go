@@ -17,13 +17,13 @@ type CategorySalesPayload struct {
 }
 
 // GetSalesByCategory returns MTD sales grouped by product category.
-func (s *Service) GetSalesByCategory(ctx context.Context, ownerID int64) ([]CategorySalesPayload, error) {
-	key := fmt.Sprintf("insights:%d:products:categories", ownerID)
+func (s *Service) GetSalesByCategory(ctx context.Context, businessID int64) ([]CategorySalesPayload, error) {
+	key := fmt.Sprintf("insights:%d:products:categories", businessID)
 	type result struct {
 		Rows []CategorySalesPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetSalesByCategory(ctx, ownerID)
+		rows, rerr := s.repo.GetSalesByCategory(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr
 		}

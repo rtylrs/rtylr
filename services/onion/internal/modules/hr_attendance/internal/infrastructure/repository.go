@@ -27,7 +27,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) CreateAttendanceRecord(ctx context.Context, ownerID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
+func (r *Repository) CreateAttendanceRecord(ctx context.Context, businessID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
 	date, err := time.Parse("2006-01-02", record.Date)
 	if err != nil {
 		return nil, err
@@ -38,8 +38,14 @@ func (r *Repository) CreateAttendanceRecord(ctx context.Context, ownerID int64, 
 		clockInAt = time.Now()
 	}
 
+	ownerID := record.OwnerID
+	if ownerID == 0 {
+		ownerID = businessID
+	}
+
 	result, err := r.queries.CreateAttendanceRecord(ctx, sqlc.CreateAttendanceRecordParams{
 		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		EmployeeID:    record.EmployeeID,
 		LocationID:    record.LocationID,
 		Date:          date,
@@ -52,7 +58,7 @@ func (r *Repository) CreateAttendanceRecord(ctx context.Context, ownerID int64, 
 		Status:        record.Status,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create attendance record", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create attendance record", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	id, err := result.LastInsertId()
@@ -61,28 +67,29 @@ func (r *Repository) CreateAttendanceRecord(ctx context.Context, ownerID int64, 
 	}
 	record.ID = id
 	record.OwnerID = ownerID
+	record.BusinessID = businessID
 	return &record, nil
 }
 
-func (r *Repository) UpdateAttendanceRecord(ctx context.Context, ownerID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
+func (r *Repository) UpdateAttendanceRecord(ctx context.Context, businessID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
 	err := r.queries.UpdateAttendanceRecord(ctx, sqlc.UpdateAttendanceRecordParams{
 		ClockOutAt:      sql.NullTime{Time: record.ClockOutAt, Valid: !record.ClockOutAt.IsZero()},
 		DurationMinutes: sql.NullInt32{Int32: record.DurationMinutes, Valid: record.DurationMinutes > 0},
 		Status:          record.Status,
 		ID:              record.ID,
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to update attendance record", logger.Any("owner_id", ownerID), logger.Any("record_id", record.ID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update attendance record", logger.Any("business_id", businessID), logger.Any("record_id", record.ID), logger.Error(err))
 		return nil, err
 	}
-	record.OwnerID = ownerID
+	record.BusinessID = businessID
 	return &record, nil
 }
 
-func (r *Repository) GetActiveClockIn(ctx context.Context, ownerID, employeeID int64) (*domain.AttendanceRecordRecord, error) {
+func (r *Repository) GetActiveClockIn(ctx context.Context, businessID, employeeID int64) (*domain.AttendanceRecordRecord, error) {
 	row, err := r.queries.GetActiveClockIn(ctx, sqlc.GetActiveClockInParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 	})
 	if err != nil {
@@ -95,7 +102,7 @@ func (r *Repository) GetActiveClockIn(ctx context.Context, ownerID, employeeID i
 	return &rec, nil
 }
 
-func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params domain.ListAttendanceParams) ([]domain.AttendanceRecordRecord, int64, error) {
+func (r *Repository) ListAttendance(ctx context.Context, businessID int64, params domain.ListAttendanceParams) ([]domain.AttendanceRecordRecord, int64, error) {
 	dateFrom, err := time.Parse("2006-01-02", params.DateFrom)
 	if err != nil {
 		return nil, 0, err
@@ -105,24 +112,24 @@ func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params d
 		return nil, 0, err
 	}
 
-	// When EmployeeID is 0, query all employees for the owner.
+	// When EmployeeID is 0, query all employees for the business.
 	if params.EmployeeID == 0 {
-		return r.listAllAttendance(ctx, ownerID, dateFrom, dateTo, params.Limit, params.Offset)
+		return r.listAllAttendance(ctx, businessID, dateFrom, dateTo, params.Limit, params.Offset)
 	}
 
 	total, err := r.queries.CountAttendance(ctx, sqlc.CountAttendanceParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: params.EmployeeID,
 		Date:       dateFrom,
 		Date_2:     dateTo,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to count attendance", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to count attendance", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListAttendance(ctx, sqlc.ListAttendanceParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: params.EmployeeID,
 		Date:       dateFrom,
 		Date_2:     dateTo,
@@ -130,7 +137,7 @@ func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params d
 		Offset:     params.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list attendance", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list attendance", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
@@ -141,22 +148,22 @@ func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params d
 	return records, total, nil
 }
 
-func (r *Repository) listAllAttendance(ctx context.Context, ownerID int64, dateFrom, dateTo time.Time, limit, offset int32) ([]domain.AttendanceRecordRecord, int64, error) {
+func (r *Repository) listAllAttendance(ctx context.Context, businessID int64, dateFrom, dateTo time.Time, limit, offset int32) ([]domain.AttendanceRecordRecord, int64, error) {
 	total, err := r.queries.CountAllAttendance(ctx, sqlc.CountAllAttendanceParams{
-		OwnerID: ownerID,
-		Date:    dateFrom,
-		Date_2:  dateTo,
+		BusinessID: businessID,
+		Date:       dateFrom,
+		Date_2:     dateTo,
 	})
 	if err != nil {
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListAllAttendance(ctx, sqlc.ListAllAttendanceParams{
-		OwnerID: ownerID,
-		Date:    dateFrom,
-		Date_2:  dateTo,
-		Limit:   limit,
-		Offset:  offset,
+		BusinessID: businessID,
+		Date:       dateFrom,
+		Date_2:     dateTo,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		return nil, 0, err
@@ -169,19 +176,19 @@ func (r *Repository) listAllAttendance(ctx context.Context, ownerID int64, dateF
 	return records, total, nil
 }
 
-func (r *Repository) GetDailyAttendance(ctx context.Context, ownerID, locationID int64, date string) ([]domain.AttendanceRecordRecord, error) {
+func (r *Repository) GetDailyAttendance(ctx context.Context, businessID, locationID int64, date string) ([]domain.AttendanceRecordRecord, error) {
 	d, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return nil, err
 	}
 
 	rows, err := r.queries.GetDailyAttendance(ctx, sqlc.GetDailyAttendanceParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		LocationID: locationID,
 		Date:       d,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to get daily attendance", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get daily attendance", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 
@@ -192,18 +199,19 @@ func (r *Repository) GetDailyAttendance(ctx context.Context, ownerID, locationID
 	return records, nil
 }
 
-func (r *Repository) GetAttendanceConfig(ctx context.Context, ownerID int64) (*domain.AttendanceConfigRecord, error) {
-	row, err := r.queries.GetAttendanceConfig(ctx, ownerID)
+func (r *Repository) GetAttendanceConfig(ctx context.Context, businessID int64) (*domain.AttendanceConfigRecord, error) {
+	row, err := r.queries.GetAttendanceConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		logger.Ctx(ctx).Error("failed to get attendance config", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get attendance config", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	return &domain.AttendanceConfigRecord{
 		ID:                 row.ID,
 		OwnerID:            row.OwnerID,
+		BusinessID:         row.BusinessID,
 		AppEnabled:         row.AppEnabled,
 		QREnabled:          row.QrEnabled,
 		GPSEnabled:         row.GpsEnabled,
@@ -217,15 +225,15 @@ func (r *Repository) GetAttendanceConfig(ctx context.Context, ownerID int64) (*d
 
 // --- Employee PIN ---
 
-func (r *Repository) GetEmployeePINHash(ctx context.Context, ownerID, employeeID int64) (string, error) {
+func (r *Repository) GetEmployeePINHash(ctx context.Context, businessID, employeeID int64) (string, error) {
 	// cross-schema read from hr_core — employee PIN hash for attendance clock-in verification
 	queryStr, args, err := sq.Select("clock_in_pin_hash").
 		From("hr_employees").
-		Where(sq.Eq{"id": employeeID, "owner_id": ownerID}).
+		Where(sq.Eq{"id": employeeID, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to build employee PIN hash query", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to build employee PIN hash query", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return "", err
 	}
 
@@ -235,7 +243,7 @@ func (r *Repository) GetEmployeePINHash(ctx context.Context, ownerID, employeeID
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrAttendanceNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get employee PIN hash", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get employee PIN hash", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return "", err
 	}
 	if !hash.Valid || hash.String == "" {
@@ -244,22 +252,22 @@ func (r *Repository) GetEmployeePINHash(ctx context.Context, ownerID, employeeID
 	return hash.String, nil
 }
 
-func (r *Repository) SetEmployeePINHash(ctx context.Context, ownerID, employeeID int64, hash string) error {
+func (r *Repository) SetEmployeePINHash(ctx context.Context, businessID, employeeID int64, hash string) error {
 	// cross-schema write to hr_core — set employee PIN hash for attendance clock-in
 	queryStr, args, err := sq.Update("hr_employees").
 		Set("clock_in_pin_hash", hash).
 		Set("updated_at", sq.Expr("NOW()")).
-		Where(sq.Eq{"id": employeeID, "owner_id": ownerID}).
+		Where(sq.Eq{"id": employeeID, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to build set employee PIN hash query", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to build set employee PIN hash query", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return err
 	}
 
 	result, err := r.pool.ExecContext(ctx, queryStr, args...)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to set employee PIN hash", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to set employee PIN hash", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return err
 	}
 	rows, err := result.RowsAffected()
@@ -274,15 +282,15 @@ func (r *Repository) SetEmployeePINHash(ctx context.Context, ownerID, employeeID
 
 // --- Location Coordinates ---
 
-func (r *Repository) GetLocationCoordinates(ctx context.Context, ownerID, locationID int64) (*domain.LocationCoordinates, error) {
+func (r *Repository) GetLocationCoordinates(ctx context.Context, businessID, locationID int64) (*domain.LocationCoordinates, error) {
 	// cross-schema read from hr_core — location coordinates for geofence attendance validation
 	queryStr, args, err := sq.Select("latitude", "longitude").
 		From("hr_locations").
-		Where(sq.Eq{"id": locationID, "owner_id": ownerID}).
+		Where(sq.Eq{"id": locationID, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to build location coordinates query", logger.Any("owner_id", ownerID), logger.Any("location_id", locationID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to build location coordinates query", logger.Any("business_id", businessID), logger.Any("location_id", locationID), logger.Error(err))
 		return nil, err
 	}
 
@@ -292,7 +300,7 @@ func (r *Repository) GetLocationCoordinates(ctx context.Context, ownerID, locati
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		logger.Ctx(ctx).Error("failed to get location coordinates", logger.Any("owner_id", ownerID), logger.Any("location_id", locationID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get location coordinates", logger.Any("business_id", businessID), logger.Any("location_id", locationID), logger.Error(err))
 		return nil, err
 	}
 	return &domain.LocationCoordinates{
@@ -308,6 +316,7 @@ func attendanceFromRow(row sqlc.HrAttendanceRecord) domain.AttendanceRecordRecor
 	return domain.AttendanceRecordRecord{
 		ID:              row.ID,
 		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
 		EmployeeID:      row.EmployeeID,
 		LocationID:      row.LocationID,
 		Date:            row.Date.Format("2006-01-02"),

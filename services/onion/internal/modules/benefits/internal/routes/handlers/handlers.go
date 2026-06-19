@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // benefitsCacheScope namespaces the per-owner benefit plans list cache.
@@ -19,9 +20,9 @@ import (
 // TTL plus invalidation on create keeps reads consistent.
 const benefitsCacheScope = "benefits"
 
-func invalidateBenefitsCache(ctx context.Context, ownerID int64) {
+func invalidateBenefitsCache(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(benefitsCacheScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(benefitsCacheScope, businessID))
 	}
 }
 
@@ -60,11 +61,15 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	res, cacheErr := cacher.Of[ListResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(benefitsCacheScope, device.User.UserID, "list"),
+		cacheKeys.Scoped(benefitsCacheScope, businessID, "list"),
 		func(ctx context.Context) (ListResponse, error) {
-			return h.computeList(ctx, device.User.UserID)
+			return h.computeList(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, 3*time.Minute),
 	)
@@ -72,15 +77,15 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		return res, nil
 	}
 
-	res, computeErr := h.computeList(ctx, device.User.UserID)
+	res, computeErr := h.computeList(ctx, businessID)
 	if computeErr != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list benefit plans"}
 	}
 	return res, nil
 }
 
-func (h *ListHandler) computeList(ctx context.Context, ownerID int64) (ListResponse, error) {
-	items, err := h.Service.List(ctx, ownerID)
+func (h *ListHandler) computeList(ctx context.Context, businessID int64) (ListResponse, error) {
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, err
 	}
@@ -123,14 +128,18 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.BenefitPlanInput{
 		Name: req.Name, Type: req.Type, Provider: req.Provider,
 		CostEmployer: req.CostEmployer, CostEmployee: req.CostEmployee, IsActive: req.IsActive,
 	}
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, businessID, input)
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create benefit plan"}
 	}
-	invalidateBenefitsCache(ctx, device.User.UserID)
+	invalidateBenefitsCache(ctx, businessID)
 	return CreateResponse{ID: id, Message: "Benefit plan created successfully"}, nil
 }

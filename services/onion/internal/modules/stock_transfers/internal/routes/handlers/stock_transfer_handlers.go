@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Stock Transfers ----------------------------------------------------
@@ -87,7 +88,12 @@ func (h *ListStockTransfersHandler) Serve(ctx context.Context, req *ListStockTra
 		}
 	}
 
-	transfers, hasMore, err := h.Service.ListStockTransfers(ctx, authUser.UserID, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListStockTransfersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	transfers, hasMore, err := h.Service.ListStockTransfers(ctx, businessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListStockTransfersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -184,7 +190,12 @@ func (h *CreateStockTransferHandler) Serve(ctx context.Context, req *CreateStock
 		Items:           items,
 	}
 
-	id, err := h.Service.CreateStockTransfer(ctx, authUser.UserID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateStockTransferResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateStockTransfer(ctx, businessID, input)
 	if err != nil {
 		return CreateStockTransferResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -259,7 +270,12 @@ func (h *UpdateStockTransferStatusHandler) Serve(ctx context.Context, req *Updat
 		}
 	}
 
-	if err := h.Service.UpdateStockTransferStatus(ctx, authUser.UserID, req.ID, domain.StockTransferStatus(req.Status)); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateStockTransferStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateStockTransferStatus(ctx, businessID, req.ID, domain.StockTransferStatus(req.Status)); err != nil {
 		return UpdateStockTransferStatusResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

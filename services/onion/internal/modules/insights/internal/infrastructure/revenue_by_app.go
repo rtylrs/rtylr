@@ -22,20 +22,20 @@ type RevenueByAppRow struct {
 // those are outflows; instead it is left at zero until a sellable ERP
 // channel exists. CRM row is always zero because CRM itself does not
 // capture payments — it surfaces crm_customers as a dimension only.
-func (r *Repository) GetRevenueByApp(ctx context.Context, ownerID int64) ([]RevenueByAppRow, error) {
+func (r *Repository) GetRevenueByApp(ctx context.Context, businessID int64) ([]RevenueByAppRow, error) {
 	thisFrom, thisTo, _, _ := mtdRanges(nowFn())
 
 	// cross-schema read from pos_orders — POS-tracked paid order revenue for the split donut
 	const posQ = `
 		SELECT COALESCE(SUM(total), 0)
 		FROM pos_orders
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND payment_status = 'paid'
 		  AND created_at >= ?
 		  AND created_at <= ?
 	`
 	var posTotal interface{}
-	if err := r.pool.QueryRowContext(ctx, posQ, ownerID, thisFrom, thisTo).Scan(&posTotal); err != nil {
+	if err := r.pool.QueryRowContext(ctx, posQ, businessID, thisFrom, thisTo).Scan(&posTotal); err != nil {
 		logger.Ctx(ctx).Error("insights: revenue by app (pos) failed", logger.Error(err))
 		return nil, err
 	}
@@ -44,13 +44,13 @@ func (r *Repository) GetRevenueByApp(ctx context.Context, ownerID int64) ([]Reve
 	const finQ = `
 		SELECT COALESCE(SUM(total), 0)
 		FROM finance_invoices
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND status = 'paid'
 		  AND COALESCE(paid_date, issue_date) >= ?
 		  AND COALESCE(paid_date, issue_date) <= ?
 	`
 	var finTotal interface{}
-	if err := r.pool.QueryRowContext(ctx, finQ, ownerID, thisFrom.Format("2006-01-02"), thisTo.Format("2006-01-02")).Scan(&finTotal); err != nil {
+	if err := r.pool.QueryRowContext(ctx, finQ, businessID, thisFrom.Format("2006-01-02"), thisTo.Format("2006-01-02")).Scan(&finTotal); err != nil {
 		logger.Ctx(ctx).Error("insights: revenue by app (finance) failed", logger.Error(err))
 		return nil, err
 	}

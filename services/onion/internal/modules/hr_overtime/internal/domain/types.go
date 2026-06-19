@@ -5,6 +5,7 @@ import "time"
 type OvertimeRequestRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	EmployeeID           int64     `json:"employee_id"`
 	Date                 string    `json:"date"`
 	PlannedExtraMinutes  int32     `json:"planned_extra_minutes"`
@@ -20,6 +21,7 @@ type OvertimeRequestRecord struct {
 type OvertimeConfigRecord struct {
 	ID                    int64     `json:"id"`
 	OwnerID               int64     `json:"owner_id"`
+	BusinessID            int64     `json:"business_id"`
 	DailyThresholdMinutes int32     `json:"daily_threshold_minutes"`
 	DefaultMultiplier     float64   `json:"default_multiplier"`
 	AutoDetectEnabled     bool      `json:"auto_detect_enabled"`

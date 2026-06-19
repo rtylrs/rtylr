@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
 )
 
@@ -92,7 +93,12 @@ func (h *ListPurchaseOrdersHandler) Serve(ctx context.Context, req *ListPurchase
 		}
 	}
 
-	orders, hasMore, err := h.Service.ListPurchaseOrders(ctx, authUser.UserID, req.Status, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListPurchaseOrdersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orders, hasMore, err := h.Service.ListPurchaseOrders(ctx, businessID, req.Status, req.Page, req.PageSize)
 	if err != nil {
 		return ListPurchaseOrdersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -228,7 +234,12 @@ func (h *CreatePurchaseOrderHandler) Serve(ctx context.Context, req *CreatePurch
 		Items:            items,
 	}
 
-	id, err := h.Service.CreatePurchaseOrder(ctx, authUser.UserID, input, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreatePurchaseOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreatePurchaseOrder(ctx, businessID, input, authUser.UserID)
 	if err != nil {
 		return CreatePurchaseOrderResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -303,7 +314,12 @@ func (h *UpdatePurchaseOrderStatusHandler) Serve(ctx context.Context, req *Updat
 		}
 	}
 
-	if err := h.Service.UpdatePurchaseOrderStatus(ctx, authUser.UserID, req.ID, req.Status); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdatePurchaseOrderStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdatePurchaseOrderStatus(ctx, businessID, req.ID, req.Status); err != nil {
 		return UpdatePurchaseOrderStatusResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -348,7 +364,12 @@ func (h *GetPurchaseOrderHandler) Serve(ctx context.Context, _ *GetPurchaseOrder
 			Message:  "Invalid purchase order ID",
 		}
 	}
-	po, getErr := h.Service.GetByID(ctx, authUser.UserID, id)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetPurchaseOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	po, getErr := h.Service.GetByID(ctx, businessID, id)
 	if getErr != nil {
 		if errors.Is(getErr, domain.ErrPurchaseOrderNotFound) {
 			return GetPurchaseOrderResponse{}, &errorModels.ServerError{

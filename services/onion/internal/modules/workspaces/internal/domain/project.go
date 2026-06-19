@@ -6,6 +6,7 @@ type Project struct {
 	ID          int64
 	WorkspaceID int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Icon        string
@@ -38,6 +39,7 @@ type ProjectMember struct {
 type ProjectInput struct {
 	WorkspaceID int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Icon        string
@@ -50,6 +52,7 @@ type ProjectInput struct {
 type UpdateProjectInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Icon        string

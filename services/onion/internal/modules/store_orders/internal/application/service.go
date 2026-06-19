@@ -19,37 +19,37 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.StoreOrder, error) {
-	cacheKey := "store_orders:" + strconv.FormatInt(ownerID, 10)
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.StoreOrder, error) {
+	cacheKey := "store_orders:" + strconv.FormatInt(businessID, 10)
 	return cacher.Of[[]domain.StoreOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.StoreOrder, error) {
-		return s.repo.List(ctx, ownerID)
+		return s.repo.List(ctx, businessID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
 }
 
-func (s *Service) GetDetail(ctx context.Context, ownerID, orderID int64) (domain.StoreOrderDetail, error) {
-	return s.repo.GetDetail(ctx, ownerID, orderID)
+func (s *Service) GetDetail(ctx context.Context, businessID, orderID int64) (domain.StoreOrderDetail, error) {
+	return s.repo.GetDetail(ctx, businessID, orderID)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreOrderInput) (int64, error) {
+func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input domain.StoreOrderInput) (int64, error) {
 	if err := validateOrder(input); err != nil {
 		return 0, err
 	}
-	id, err := s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, ownerID, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.StoreOrderInput) error {
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.StoreOrderInput) error {
 	if err := validateOrder(input); err != nil {
 		return err
 	}
-	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return nil
 }
 
@@ -65,7 +65,7 @@ func validateOrder(input domain.StoreOrderInput) error {
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	prefix := "store_orders:" + strconv.FormatInt(ownerID, 10)
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
+	prefix := "store_orders:" + strconv.FormatInt(businessID, 10)
 	cacher.Of[[]domain.StoreOrder]().Invalidate(ctx, []string{prefix})
 }

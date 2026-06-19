@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -75,7 +76,11 @@ func (h *ListSectionsHandler) Serve(ctx context.Context, _ *ListSectionsRequest)
 	if !ok {
 		return ListSectionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	sections, err := h.CareersService.ListSections(ctx, authUser.UserID, false)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListSectionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	sections, err := h.CareersService.ListSections(ctx, businessID, false)
 	if err != nil {
 		return ListSectionsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -123,10 +128,15 @@ func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequ
 	if !ok {
 		return CreateSectionResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateSectionResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	in := domain.SectionInput{
-		OwnerID:   authUser.UserID,
-		Kind:      req.Kind,
+		OwnerID:    authUser.UserID,
+		BusinessID: businessID,
+		Kind:       req.Kind,
 		Title:     req.Title,
 		Body:      req.Body,
 		MediaURL:  req.MediaURL,
@@ -146,9 +156,9 @@ func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequ
 	// Refetch list and return the newly-added row (tail of ordered
 	// list when position wasn't supplied). Keeps the client in sync
 	// without the client having to refetch.
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 
-	sections, _ := h.CareersService.ListSections(ctx, authUser.UserID, false)
+	sections, _ := h.CareersService.ListSections(ctx, businessID, false)
 	if len(sections) == 0 {
 		return CreateSectionResponse{Section: nil}, nil
 	}
@@ -193,11 +203,16 @@ func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequ
 	if !ok {
 		return UpdateSectionResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateSectionResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	in := domain.SectionInput{
-		ID:        req.ID,
-		OwnerID:   authUser.UserID,
-		Kind:      req.Kind,
+		ID:         req.ID,
+		OwnerID:    authUser.UserID,
+		BusinessID: businessID,
+		Kind:       req.Kind,
 		Title:     req.Title,
 		Body:      req.Body,
 		MediaURL:  req.MediaURL,
@@ -218,7 +233,7 @@ func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequ
 			Message: "Failed to update section",
 		}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return UpdateSectionResponse{Message: "Section saved"}, nil
 }
 
@@ -250,8 +265,12 @@ func (h *DeleteSectionHandler) Serve(ctx context.Context, req *DeleteSectionRequ
 	if !ok {
 		return DeleteSectionResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteSectionResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	if err := h.CareersService.DeleteSection(ctx, authUser.UserID, req.ID); err != nil {
+	if err := h.CareersService.DeleteSection(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return DeleteSectionResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
@@ -263,7 +282,7 @@ func (h *DeleteSectionHandler) Serve(ctx context.Context, req *DeleteSectionRequ
 			Message: "Failed to delete section",
 		}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return DeleteSectionResponse{Message: "Section deleted"}, nil
 }
 
@@ -295,12 +314,16 @@ func (h *ReorderSectionsHandler) Serve(ctx context.Context, req *ReorderSections
 	if !ok {
 		return ReorderSectionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.CareersService.ReorderSections(ctx, authUser.UserID, req.OrderedIDs); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ReorderSectionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.CareersService.ReorderSections(ctx, businessID, req.OrderedIDs); err != nil {
 		return ReorderSectionsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to reorder sections",
 		}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return ReorderSectionsResponse{Message: "Order saved"}, nil
 }

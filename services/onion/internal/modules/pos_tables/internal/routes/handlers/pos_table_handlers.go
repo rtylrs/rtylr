@@ -48,8 +48,11 @@ func (h *ListTablesHandler) Serve(ctx context.Context, _ *ListTablesRequest) (Li
 	if device.User == nil {
 		return ListTablesResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	tables, err := h.Service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTablesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	tables, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListTablesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list tables"}
 	}
@@ -89,9 +92,13 @@ func (h *CreateTableHandler) Serve(ctx context.Context, req *CreateTableRequest)
 	if device.User == nil {
 		return CreateTableResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateTableResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.Create(ctx, domain.TableInput{
-		OwnerID:    ownerID,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
 		LocationID: req.LocationID,
 		Label:      req.Label,
 		Seats:      req.Seats,
@@ -131,7 +138,10 @@ func (h *UpdateTableHandler) Serve(ctx context.Context, req *UpdateTableRequest)
 	if device.User == nil {
 		return UpdateTableResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateTableResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -143,7 +153,8 @@ func (h *UpdateTableHandler) Serve(ctx context.Context, req *UpdateTableRequest)
 	}
 	if updateErr := h.Service.Update(ctx, domain.TableUpdateInput{
 		ID:         id,
-		OwnerID:    ownerID,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
 		LocationID: req.LocationID,
 		Label:      req.Label,
 		Seats:      req.Seats,
@@ -187,16 +198,20 @@ func (h *UpdateTableStatusHandler) Serve(ctx context.Context, req *UpdateTableSt
 	if device.User == nil {
 		return UpdateTableStatusResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateTableStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateTableStatusResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid table ID"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
 	if updateErr := h.Service.UpdateStatus(ctx, domain.TableStatusInput{
-		ID:      id,
-		OwnerID: ownerID,
-		Status:  strings.TrimSpace(req.Status),
+		ID:         id,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
+		Status:     strings.TrimSpace(req.Status),
 	}); updateErr != nil {
 		if errors.Is(updateErr, domain.ErrTableNotFound) {
 			return UpdateTableStatusResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Table not found"}
@@ -232,13 +247,16 @@ func (h *DeleteTableHandler) Serve(ctx context.Context, _ *DeleteTableRequest) (
 	if device.User == nil {
 		return DeleteTableResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteTableResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteTableResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid table ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, ownerID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, businessID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrTableNotFound) {
 			return DeleteTableResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Table not found"}
 		}

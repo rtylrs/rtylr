@@ -19,10 +19,10 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-// ThemeBelongsToOwner reports whether the given theme exists and is owned by ownerID.
-func (r *Repository) ThemeBelongsToOwner(ctx context.Context, ownerID, themeID int64) (bool, error) {
+// ThemeBelongsToOwner reports whether the given theme exists and belongs to businessID.
+func (r *Repository) ThemeBelongsToOwner(ctx context.Context, businessID, themeID int64) (bool, error) {
 	// cross-schema read from store_themes — verify theme ownership before linking a storefront
-	count, err := r.queries.CountThemeForOwner(ctx, sqlc.CountThemeForOwnerParams{ID: themeID, OwnerID: ownerID})
+	count, err := r.queries.CountThemeForOwner(ctx, sqlc.CountThemeForOwnerParams{ID: themeID, BusinessID: businessID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to verify theme ownership", logger.Error(err))
 		return false, err
@@ -30,8 +30,8 @@ func (r *Repository) ThemeBelongsToOwner(ctx context.Context, ownerID, themeID i
 	return count > 0, nil
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Storefront, error) {
-	rows, err := r.queries.ListStorefronts(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Storefront, error) {
+	rows, err := r.queries.ListStorefronts(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list storefronts", logger.Error(err))
 		return nil, err
@@ -43,9 +43,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Storefro
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.StorefrontInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, creatorID, businessID int64, input domain.StorefrontInput) (int64, error) {
 	result, err := r.queries.CreateStorefront(ctx, sqlc.CreateStorefrontParams{
-		OwnerID:     ownerID,
+		OwnerID:     creatorID,
+		BusinessID:  businessID,
 		Name:        input.Name,
 		Domain:      sql.NullString{String: input.Domain, Valid: input.Domain != ""},
 		LogoUrl:     sql.NullString{String: input.LogoURL, Valid: input.LogoURL != ""},
@@ -60,14 +61,14 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Sto
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.StorefrontInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.StorefrontInput) error {
 	err := r.queries.UpdateStorefront(ctx, sqlc.UpdateStorefrontParams{
 		Name:        input.Name,
 		Domain:      sql.NullString{String: input.Domain, Valid: input.Domain != ""},
 		LogoUrl:     sql.NullString{String: input.LogoURL, Valid: input.LogoURL != ""},
 		ThemeID:     sql.NullInt64{Int64: input.ThemeID, Valid: input.ThemeID != 0},
 		IsPublished: sql.NullBool{Bool: input.IsPublished, Valid: true},
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		ID:          id,
 	})
 	if err != nil {
@@ -79,9 +80,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 
 func fromRow(row sqlc.StoreSite) domain.Storefront {
 	s := domain.Storefront{
-		ID:      row.ID,
-		OwnerID: row.OwnerID,
-		Name:    row.Name,
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID,
+		Name:       row.Name,
 	}
 	if row.Domain.Valid {
 		s.Domain = row.Domain.String

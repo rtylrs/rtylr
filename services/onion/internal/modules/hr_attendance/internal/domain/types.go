@@ -5,6 +5,7 @@ import "time"
 type AttendanceRecordRecord struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`
+	BusinessID      int64     `json:"business_id"`
 	EmployeeID      int64     `json:"employee_id"`
 	LocationID      int64     `json:"location_id"`
 	Date            string    `json:"date"`
@@ -24,6 +25,7 @@ type AttendanceRecordRecord struct {
 type AttendanceConfigRecord struct {
 	ID                 int64   `json:"id"`
 	OwnerID            int64   `json:"owner_id"`
+	BusinessID         int64   `json:"business_id"`
 	AppEnabled         bool    `json:"app_enabled"`
 	QREnabled          bool    `json:"qr_enabled"`
 	GPSEnabled         bool    `json:"gps_enabled"`

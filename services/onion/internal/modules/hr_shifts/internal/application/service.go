@@ -19,22 +19,22 @@ const (
 	hrShiftsTTL   = 2 * time.Minute
 )
 
-func invalidateHRShiftsScope(ctx context.Context, ownerID int64) {
+func invalidateHRShiftsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrShiftsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrShiftsScope, businessID))
 	}
 }
 
 type repository interface {
-	ListShifts(ctx context.Context, ownerID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error)
-	GetShift(ctx context.Context, ownerID, shiftID int64) (*domain.ShiftRecord, error)
-	CreateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error)
-	UpdateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) error
-	ListShiftsByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.ShiftRecord, error)
-	ListRosterAssignments(ctx context.Context, ownerID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error)
-	CreateShiftAssignment(ctx context.Context, ownerID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error)
-	PublishRosterAssignments(ctx context.Context, ownerID int64, weekStart, weekEnd string) error
-	ListEmployeeAssignmentsForDate(ctx context.Context, ownerID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error)
+	ListShifts(ctx context.Context, businessID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error)
+	GetShift(ctx context.Context, businessID, shiftID int64) (*domain.ShiftRecord, error)
+	CreateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error)
+	UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) error
+	ListShiftsByLocation(ctx context.Context, businessID, locationID int64) ([]domain.ShiftRecord, error)
+	ListRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error)
+	CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error)
+	PublishRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) error
+	ListEmployeeAssignmentsForDate(ctx context.Context, businessID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error)
 }
 
 type Service struct {
@@ -49,7 +49,7 @@ func NewService(_ context.Context, db *sql.DB, leaveChecker domain.LeaveConflict
 	}
 }
 
-func (s *Service) ListShifts(ctx context.Context, ownerID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
+func (s *Service) ListShifts(ctx context.Context, businessID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
@@ -60,10 +60,10 @@ func (s *Service) ListShifts(ctx context.Context, ownerID int64, params domain.L
 		Items []domain.ShiftRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrShiftsScope, ownerID, fmt.Sprintf("list|l=%d|o=%d", params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrShiftsScope, businessID, fmt.Sprintf("list|l=%d|o=%d", params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			items, total, err := s.repo.ListShifts(ctx, ownerID, params)
+			items, total, err := s.repo.ListShifts(ctx, businessID, params)
 			return lr{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrShiftsTTL),
@@ -71,33 +71,33 @@ func (s *Service) ListShifts(ctx context.Context, ownerID int64, params domain.L
 	return res.Items, res.Total, err
 }
 
-func (s *Service) CreateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
+func (s *Service) CreateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	if shift.Color == "" {
 		shift.Color = "#4CAF50"
 	}
-	rec, err := s.repo.CreateShift(ctx, ownerID, shift)
+	rec, err := s.repo.CreateShift(ctx, businessID, shift)
 	if err == nil {
-		invalidateHRShiftsScope(ctx, ownerID)
+		invalidateHRShiftsScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) UpdateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) error {
-	if err := s.repo.UpdateShift(ctx, ownerID, shift); err != nil {
+func (s *Service) UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) error {
+	if err := s.repo.UpdateShift(ctx, businessID, shift); err != nil {
 		return err
 	}
-	invalidateHRShiftsScope(ctx, ownerID)
+	invalidateHRShiftsScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) GetRoster(ctx context.Context, ownerID int64, params domain.RosterParams) ([]domain.ShiftAssignmentRecord, []domain.ConflictInfo, error) {
+func (s *Service) GetRoster(ctx context.Context, businessID int64, params domain.RosterParams) ([]domain.ShiftAssignmentRecord, []domain.ConflictInfo, error) {
 	weekStart, err := time.Parse("2006-01-02", params.WeekStart)
 	if err != nil {
 		return nil, nil, err
 	}
 	weekEnd := weekStart.AddDate(0, 0, 7).Format("2006-01-02")
 
-	assignments, err := s.repo.ListRosterAssignments(ctx, ownerID, params.WeekStart, weekEnd)
+	assignments, err := s.repo.ListRosterAssignments(ctx, businessID, params.WeekStart, weekEnd)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -108,10 +108,10 @@ func (s *Service) GetRoster(ctx context.Context, ownerID int64, params domain.Ro
 		key := a.Date + "-" + strconv.FormatInt(a.EmployeeID, 10)
 
 		if s.leaveConflictChecker != nil {
-			hasLeave, leaveErr := s.leaveConflictChecker.HasApprovedLeave(ctx, ownerID, a.EmployeeID, a.Date)
+			hasLeave, leaveErr := s.leaveConflictChecker.HasApprovedLeave(ctx, businessID, a.EmployeeID, a.Date)
 			if leaveErr != nil {
 				logger.Ctx(ctx).Error("failed to check leave conflict",
-					logger.Any("owner_id", ownerID), logger.Any("employee_id", a.EmployeeID), logger.Error(leaveErr))
+					logger.Any("business_id", businessID), logger.Any("employee_id", a.EmployeeID), logger.Error(leaveErr))
 			}
 			if hasLeave {
 				conflicts = append(conflicts, domain.ConflictInfo{
@@ -137,54 +137,54 @@ func (s *Service) GetRoster(ctx context.Context, ownerID int64, params domain.Ro
 	return assignments, conflicts, nil
 }
 
-func (s *Service) CreateShiftAssignment(ctx context.Context, ownerID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
-	_, err := s.repo.GetShift(ctx, ownerID, assignment.ShiftID)
+func (s *Service) CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
+	_, err := s.repo.GetShift(ctx, businessID, assignment.ShiftID)
 	if err != nil {
 		return nil, err
 	}
 
-	conflicts := s.DetectConflicts(ctx, ownerID, assignment.EmployeeID, assignment.Date)
+	conflicts := s.DetectConflicts(ctx, businessID, assignment.EmployeeID, assignment.Date)
 	for _, c := range conflicts {
 		if c.ConflictType == "leave" {
 			return nil, domain.ErrRosterConflict
 		}
 	}
 
-	rec, err := s.repo.CreateShiftAssignment(ctx, ownerID, assignment)
+	rec, err := s.repo.CreateShiftAssignment(ctx, businessID, assignment)
 	if err == nil {
-		invalidateHRShiftsScope(ctx, ownerID)
+		invalidateHRShiftsScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) PublishRoster(ctx context.Context, ownerID, locationID int64, weekStart string) error {
+func (s *Service) PublishRoster(ctx context.Context, businessID, locationID int64, weekStart string) error {
 	ws, err := time.Parse("2006-01-02", weekStart)
 	if err != nil {
 		return err
 	}
 	weekEnd := ws.AddDate(0, 0, 7).Format("2006-01-02")
 
-	if err := s.repo.PublishRosterAssignments(ctx, ownerID, weekStart, weekEnd); err != nil {
+	if err := s.repo.PublishRosterAssignments(ctx, businessID, weekStart, weekEnd); err != nil {
 		return err
 	}
 
-	invalidateHRShiftsScope(ctx, ownerID)
+	invalidateHRShiftsScope(ctx, businessID)
 	logger.Ctx(ctx).Info("roster published",
-		logger.Any("owner_id", ownerID),
+		logger.Any("business_id", businessID),
 		logger.Any("location_id", locationID),
 		logger.Any("week_start", weekStart))
 
 	return nil
 }
 
-func (s *Service) DetectConflicts(ctx context.Context, ownerID, employeeID int64, date string) []domain.ConflictInfo {
+func (s *Service) DetectConflicts(ctx context.Context, businessID, employeeID int64, date string) []domain.ConflictInfo {
 	var conflicts []domain.ConflictInfo
 
 	if s.leaveConflictChecker != nil {
-		hasLeave, err := s.leaveConflictChecker.HasApprovedLeave(ctx, ownerID, employeeID, date)
+		hasLeave, err := s.leaveConflictChecker.HasApprovedLeave(ctx, businessID, employeeID, date)
 		if err != nil {
 			logger.Ctx(ctx).Error("failed to check leave for conflict detection",
-				logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+				logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		}
 		if hasLeave {
 			conflicts = append(conflicts, domain.ConflictInfo{
@@ -196,10 +196,10 @@ func (s *Service) DetectConflicts(ctx context.Context, ownerID, employeeID int64
 		}
 	}
 
-	existing, err := s.repo.ListEmployeeAssignmentsForDate(ctx, ownerID, employeeID, date)
+	existing, err := s.repo.ListEmployeeAssignmentsForDate(ctx, businessID, employeeID, date)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list existing assignments for conflict detection",
-			logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 	}
 	if len(existing) > 0 {
 		conflicts = append(conflicts, domain.ConflictInfo{

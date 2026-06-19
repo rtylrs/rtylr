@@ -19,9 +19,9 @@ const (
 	hrTimeTTL   = 2 * time.Minute
 )
 
-func invalidateHRTimeScope(ctx context.Context, ownerID int64) {
+func invalidateHRTimeScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrTimeScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrTimeScope, businessID))
 	}
 }
 
@@ -41,12 +41,12 @@ func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalC
 
 // --- Time Entries ---
 
-func (s *Service) CreateTimeEntry(ctx context.Context, ownerID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
+func (s *Service) CreateTimeEntry(ctx context.Context, businessID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
 	if entry.DurationMinutes <= 0 {
 		return nil, domain.ErrInvalidDuration
 	}
 
-	ts, err := s.repo.GetTimesheetForPeriod(ctx, ownerID, entry.EmployeeID, entry.Date[:7]+"-01")
+	ts, err := s.repo.GetTimesheetForPeriod(ctx, businessID, entry.EmployeeID, entry.Date[:7]+"-01")
 	if err != nil {
 		return nil, err
 	}
@@ -61,33 +61,33 @@ func (s *Service) CreateTimeEntry(ctx context.Context, ownerID int64, entry doma
 		entry.Source = "manual"
 	}
 
-	rec, err := s.repo.CreateTimeEntry(ctx, ownerID, entry)
+	rec, err := s.repo.CreateTimeEntry(ctx, businessID, entry)
 	if err == nil {
-		invalidateHRTimeScope(ctx, ownerID)
+		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) UpdateTimeEntry(ctx context.Context, ownerID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
+func (s *Service) UpdateTimeEntry(ctx context.Context, businessID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
 	if entry.DurationMinutes <= 0 {
 		return nil, domain.ErrInvalidDuration
 	}
-	rec, err := s.repo.UpdateTimeEntry(ctx, ownerID, entry)
+	rec, err := s.repo.UpdateTimeEntry(ctx, businessID, entry)
 	if err == nil {
-		invalidateHRTimeScope(ctx, ownerID)
+		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) DeleteTimeEntry(ctx context.Context, ownerID, entryID int64) error {
-	if err := s.repo.DeleteTimeEntry(ctx, ownerID, entryID); err != nil {
+func (s *Service) DeleteTimeEntry(ctx context.Context, businessID, entryID int64) error {
+	if err := s.repo.DeleteTimeEntry(ctx, businessID, entryID); err != nil {
 		return err
 	}
-	invalidateHRTimeScope(ctx, ownerID)
+	invalidateHRTimeScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) ListTimeEntries(ctx context.Context, ownerID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
+func (s *Service) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
@@ -98,10 +98,10 @@ func (s *Service) ListTimeEntries(ctx context.Context, ownerID int64, params dom
 		Items []domain.TimeEntryRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrTimeScope, ownerID, fmt.Sprintf("entries|l=%d|o=%d|e=%d", params.Limit, params.Offset, params.EmployeeID))
+	key := cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf("entries|l=%d|o=%d|e=%d", params.Limit, params.Offset, params.EmployeeID))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			items, total, err := s.repo.ListTimeEntries(ctx, ownerID, params)
+			items, total, err := s.repo.ListTimeEntries(ctx, businessID, params)
 			return lr{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrTimeTTL),
@@ -111,8 +111,8 @@ func (s *Service) ListTimeEntries(ctx context.Context, ownerID int64, params dom
 
 // --- Timesheets ---
 
-func (s *Service) GetOrCreateTimesheet(ctx context.Context, ownerID, employeeID int64, periodStart, periodEnd string) (*domain.TimesheetRecord, error) {
-	ts, err := s.repo.GetTimesheetForPeriod(ctx, ownerID, employeeID, periodStart)
+func (s *Service) GetOrCreateTimesheet(ctx context.Context, businessID, employeeID int64, periodStart, periodEnd string) (*domain.TimesheetRecord, error) {
+	ts, err := s.repo.GetTimesheetForPeriod(ctx, businessID, employeeID, periodStart)
 	if err != nil {
 		return nil, err
 	}
@@ -120,20 +120,20 @@ func (s *Service) GetOrCreateTimesheet(ctx context.Context, ownerID, employeeID 
 		return ts, nil
 	}
 
-	rec, err := s.repo.UpsertTimesheet(ctx, ownerID, domain.TimesheetRecord{
+	rec, err := s.repo.UpsertTimesheet(ctx, businessID, domain.TimesheetRecord{
 		EmployeeID:  employeeID,
 		PeriodStart: periodStart,
 		PeriodEnd:   periodEnd,
 		Status:      "draft",
 	})
 	if err == nil {
-		invalidateHRTimeScope(ctx, ownerID)
+		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) GetTimesheetForPeriod(ctx context.Context, ownerID, employeeID int64, periodStart string) (*domain.TimesheetRecord, error) {
-	ts, err := s.repo.GetTimesheetForPeriod(ctx, ownerID, employeeID, periodStart)
+func (s *Service) GetTimesheetForPeriod(ctx context.Context, businessID, employeeID int64, periodStart string) (*domain.TimesheetRecord, error) {
+	ts, err := s.repo.GetTimesheetForPeriod(ctx, businessID, employeeID, periodStart)
 	if err != nil {
 		return nil, err
 	}
@@ -143,17 +143,17 @@ func (s *Service) GetTimesheetForPeriod(ctx context.Context, ownerID, employeeID
 	return ts, nil
 }
 
-func (s *Service) GetTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
-	key := cacheKeys.Scoped(hrTimeScope, ownerID, fmt.Sprintf("ts=%d", timesheetID))
+func (s *Service) GetTimesheet(ctx context.Context, businessID, timesheetID int64) (*domain.TimesheetRecord, error) {
+	key := cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf("ts=%d", timesheetID))
 	return cacher.Of[*domain.TimesheetRecord]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*domain.TimesheetRecord, error) {
-			return s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+			return s.repo.GetTimesheet(ctx, businessID, timesheetID)
 		},
 		cacher.WithExpiry(ctx, hrTimeTTL),
 	)
 }
 
-func (s *Service) ListTimesheets(ctx context.Context, ownerID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
+func (s *Service) ListTimesheets(ctx context.Context, businessID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
@@ -164,10 +164,10 @@ func (s *Service) ListTimesheets(ctx context.Context, ownerID int64, params doma
 		Items []domain.TimesheetRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrTimeScope, ownerID, fmt.Sprintf("ts_list|e=%d|l=%d|o=%d", params.EmployeeID, params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrTimeScope, businessID, fmt.Sprintf("ts_list|e=%d|l=%d|o=%d", params.EmployeeID, params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
-			items, total, err := s.repo.ListTimesheets(ctx, ownerID, params)
+			items, total, err := s.repo.ListTimesheets(ctx, businessID, params)
 			return lr{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrTimeTTL),
@@ -175,8 +175,8 @@ func (s *Service) ListTimesheets(ctx context.Context, ownerID int64, params doma
 	return res.Items, res.Total, err
 }
 
-func (s *Service) SubmitTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
-	ts, err := s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+func (s *Service) SubmitTimesheet(ctx context.Context, businessID, timesheetID int64) (*domain.TimesheetRecord, error) {
+	ts, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
 	if err != nil {
 		return nil, err
 	}
@@ -184,20 +184,20 @@ func (s *Service) SubmitTimesheet(ctx context.Context, ownerID, timesheetID int6
 		return nil, domain.ErrTimesheetAlreadySubmitted
 	}
 
-	rec, err := s.repo.SubmitTimesheet(ctx, ownerID, timesheetID)
+	rec, err := s.repo.SubmitTimesheet(ctx, businessID, timesheetID)
 	if err == nil {
-		invalidateHRTimeScope(ctx, ownerID)
+		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) ApproveTimesheet(ctx context.Context, ownerID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
-	ts, err := s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+func (s *Service) ApproveTimesheet(ctx context.Context, businessID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
+	ts, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
 	if err != nil {
 		return nil, err
 	}
 
-	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, ownerID, "timesheet")
+	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, businessID, "timesheet")
 	if chainErr != nil {
 		return nil, chainErr
 	}
@@ -206,44 +206,44 @@ func (s *Service) ApproveTimesheet(ctx context.Context, ownerID, timesheetID, ap
 	}
 
 	if ts.CurrentApprovalLevel >= chain.TotalLevels {
-		if err := s.repo.LockTimesheet(ctx, ownerID, timesheetID); err != nil {
+		if err := s.repo.LockTimesheet(ctx, businessID, timesheetID); err != nil {
 			return nil, err
 		}
 
-		lockErr := s.repo.CreateApprovalAction(ctx, ownerID, domain.ApprovalActionRecord{
+		lockErr := s.repo.CreateApprovalAction(ctx, businessID, domain.ApprovalActionRecord{
 			TimesheetID: timesheetID,
 			ApproverID:  approverID,
 			Action:      "final_approved",
 			Level:       ts.CurrentApprovalLevel,
 		})
 		if lockErr != nil {
-			logger.Ctx(ctx).Error("failed to record final approval action", logger.Any("owner_id", ownerID), logger.Error(lockErr))
+			logger.Ctx(ctx).Error("failed to record final approval action", logger.Any("business_id", businessID), logger.Error(lockErr))
 		}
 
-		rec, err := s.repo.GetTimesheet(ctx, ownerID, timesheetID)
-		invalidateHRTimeScope(ctx, ownerID)
+		rec, err := s.repo.GetTimesheet(ctx, businessID, timesheetID)
+		invalidateHRTimeScope(ctx, businessID)
 		return rec, err
 	}
 
-	rec, err := s.repo.AdvanceApprovalLevel(ctx, ownerID, timesheetID, approverID)
+	rec, err := s.repo.AdvanceApprovalLevel(ctx, businessID, timesheetID, approverID)
 	if err == nil {
-		invalidateHRTimeScope(ctx, ownerID)
+		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) RejectTimesheet(ctx context.Context, ownerID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
-	rec, err := s.repo.RejectTimesheet(ctx, ownerID, timesheetID, reason)
+func (s *Service) RejectTimesheet(ctx context.Context, businessID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
+	rec, err := s.repo.RejectTimesheet(ctx, businessID, timesheetID, reason)
 	if err == nil {
-		invalidateHRTimeScope(ctx, ownerID)
+		invalidateHRTimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
 // --- Flow Import ---
 
-func (s *Service) ImportFlowTasks(ctx context.Context, ownerID, employeeID int64, periodStart, periodEnd string) ([]domain.TimeEntryRecord, error) {
-	tasks, err := s.flowReader.GetCompletedTasksForEmployee(ctx, ownerID, employeeID, periodStart, periodEnd)
+func (s *Service) ImportFlowTasks(ctx context.Context, businessID, employeeID int64, periodStart, periodEnd string) ([]domain.TimeEntryRecord, error) {
+	tasks, err := s.flowReader.GetCompletedTasksForEmployee(ctx, businessID, employeeID, periodStart, periodEnd)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +254,7 @@ func (s *Service) ImportFlowTasks(ctx context.Context, ownerID, employeeID int64
 	for _, task := range tasks {
 		taskIDs = append(taskIDs, task.TaskID)
 	}
-	existingTaskIDs, err := s.repo.GetExistingTaskIDsBySource(ctx, ownerID, employeeID, "flow_import", taskIDs)
+	existingTaskIDs, err := s.repo.GetExistingTaskIDsBySource(ctx, businessID, employeeID, "flow_import", taskIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -274,10 +274,10 @@ func (s *Service) ImportFlowTasks(ctx context.Context, ownerID, employeeID int64
 			Status:          "draft",
 			Source:          "flow_import",
 		}
-		created, createErr := s.repo.CreateTimeEntry(ctx, ownerID, entry)
+		created, createErr := s.repo.CreateTimeEntry(ctx, businessID, entry)
 		if createErr != nil {
 			logger.Ctx(ctx).Error("failed to import flow task as time entry",
-				logger.Any("owner_id", ownerID), logger.Any("task_id", task.TaskID), logger.Error(createErr))
+				logger.Any("business_id", businessID), logger.Any("task_id", task.TaskID), logger.Error(createErr))
 			continue
 		}
 		imported = append(imported, *created)
@@ -288,8 +288,8 @@ func (s *Service) ImportFlowTasks(ctx context.Context, ownerID, employeeID int64
 
 // --- Billable Export ---
 
-func (s *Service) ExportBillableEntries(ctx context.Context, ownerID int64) ([]domain.BillableExportItem, int64, error) {
-	entries, err := s.repo.ListApprovedBillableEntries(ctx, ownerID)
+func (s *Service) ExportBillableEntries(ctx context.Context, businessID int64) ([]domain.BillableExportItem, int64, error) {
+	entries, err := s.repo.ListApprovedBillableEntries(ctx, businessID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -303,9 +303,9 @@ func (s *Service) ExportBillableEntries(ctx context.Context, ownerID int64) ([]d
 	items := make([]domain.BillableExportItem, 0, len(entries))
 	var totalMinutes int32
 	for _, e := range entries {
-		if markErr := s.repo.MarkEntryExported(ctx, ownerID, e.ID, batchID); markErr != nil {
+		if markErr := s.repo.MarkEntryExported(ctx, businessID, e.ID, batchID); markErr != nil {
 			logger.Ctx(ctx).Error("failed to mark entry as exported",
-				logger.Any("owner_id", ownerID), logger.Any("entry_id", e.ID), logger.Error(markErr))
+				logger.Any("business_id", businessID), logger.Any("entry_id", e.ID), logger.Error(markErr))
 			continue
 		}
 		items = append(items, domain.BillableExportItem{

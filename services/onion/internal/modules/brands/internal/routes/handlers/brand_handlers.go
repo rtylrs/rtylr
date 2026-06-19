@@ -62,8 +62,12 @@ func (h *ListBrandsHandler) Serve(ctx context.Context, _ *ListBrandsRequest) (Li
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	brands, err := h.Service.ListBrands(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListBrandsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	brands, err := h.Service.ListBrands(ctx, businessID)
 	if err != nil {
 		return ListBrandsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -129,8 +133,12 @@ func (h *CreateBrandHandler) Serve(ctx context.Context, req *CreateBrandRequest)
 		Description: req.Description,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := h.Service.CreateBrand(ctx, ownerID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateBrandResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateBrand(ctx, businessID, input)
 	if err != nil {
 		return CreateBrandResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -199,8 +207,12 @@ func (h *UpdateBrandHandler) Serve(ctx context.Context, req *UpdateBrandRequest)
 		Description: req.Description,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.UpdateBrand(ctx, ownerID, req.ID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateBrandResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateBrand(ctx, businessID, req.ID, input); err != nil {
 		return UpdateBrandResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -251,8 +263,12 @@ func (h *DeleteBrandHandler) Serve(ctx context.Context, req *DeleteBrandRequest)
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.DeleteBrand(ctx, ownerID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteBrandResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteBrand(ctx, businessID, req.ID); err != nil {
 		return DeleteBrandResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

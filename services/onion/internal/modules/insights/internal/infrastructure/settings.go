@@ -14,6 +14,7 @@ import (
 // other module owning it.
 type SettingsRow struct {
 	OwnerID         int64
+	BusinessID      int64
 	DefaultCurrency string
 	FiscalYearStart string // "MM-DD"
 	Timezone        string
@@ -25,15 +26,15 @@ var ErrSettingsNotFound = errors.New("insights settings not found")
 // GetSettings reads the one-row-per-owner settings. Returns
 // ErrSettingsNotFound when no row exists; the service layer is expected
 // to fall back to a default envelope in that case (see CLAUDE.md §8).
-func (r *Repository) GetSettings(ctx context.Context, ownerID int64) (SettingsRow, error) {
+func (r *Repository) GetSettings(ctx context.Context, businessID int64) (SettingsRow, error) {
 	const q = `
-		SELECT owner_id, default_currency, fiscal_year_start, timezone
+		SELECT owner_id, business_id, default_currency, fiscal_year_start, timezone
 		FROM insights_settings
-		WHERE owner_id = ?
+		WHERE business_id = ?
 	`
-	row := r.pool.QueryRowContext(ctx, q, ownerID)
+	row := r.pool.QueryRowContext(ctx, q, businessID)
 	var out SettingsRow
-	if err := row.Scan(&out.OwnerID, &out.DefaultCurrency, &out.FiscalYearStart, &out.Timezone); err != nil {
+	if err := row.Scan(&out.OwnerID, &out.BusinessID, &out.DefaultCurrency, &out.FiscalYearStart, &out.Timezone); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return SettingsRow{}, ErrSettingsNotFound
 		}
@@ -49,8 +50,8 @@ func (r *Repository) GetSettings(ctx context.Context, ownerID int64) (SettingsRo
 // endpoint in the codebase.
 func (r *Repository) UpsertSettings(ctx context.Context, row SettingsRow) error {
 	const q = `
-		INSERT INTO insights_settings (owner_id, default_currency, fiscal_year_start, timezone)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO insights_settings (owner_id, business_id, default_currency, fiscal_year_start, timezone)
+		VALUES (?, ?, ?, ?, ?)
 		ON DUPLICATE KEY UPDATE
 		  default_currency = VALUES(default_currency),
 		  fiscal_year_start = VALUES(fiscal_year_start),
@@ -58,10 +59,10 @@ func (r *Repository) UpsertSettings(ctx context.Context, row SettingsRow) error 
 		  updated_at = CURRENT_TIMESTAMP
 	`
 	if _, err := r.pool.ExecContext(ctx, q,
-		row.OwnerID, row.DefaultCurrency, row.FiscalYearStart, row.Timezone,
+		row.OwnerID, row.BusinessID, row.DefaultCurrency, row.FiscalYearStart, row.Timezone,
 	); err != nil {
 		logger.Ctx(ctx).Error("insights: upsert settings failed",
-			logger.Any("owner_id", row.OwnerID),
+			logger.Any("business_id", row.BusinessID),
 			logger.Error(err),
 		)
 		return err

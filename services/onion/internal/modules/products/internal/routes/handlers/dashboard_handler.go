@@ -60,7 +60,10 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	stats, err := h.Service.GetDashboard(ctx, ownerID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{
@@ -150,7 +153,10 @@ func (h *ReorderSuggestionsHandler) Serve(ctx context.Context, _ *ReorderSuggest
 		return ReorderSuggestionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ReorderSuggestionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	list, err := h.Service.ListReorderSuggestions(ctx, ownerID)
 	if err != nil {
 		return ReorderSuggestionsResponse{}, &errorModels.ServerError{
@@ -207,7 +213,10 @@ func (h *ExpiryHandler) Serve(ctx context.Context, req *ExpiryRequest) (ExpiryRe
 		return ExpiryResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ExpiryResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	items, err := h.Service.ListExpiringItems(ctx, ownerID, req.DaysAhead)
 	if err != nil {
 		return ExpiryResponse{}, &errorModels.ServerError{

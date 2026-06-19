@@ -14,8 +14,8 @@ import (
 const menuCacheTTL = 5 * time.Minute
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error)
-	QuickCreate(ctx context.Context, ownerID int64, input domain.MenuItemInput) (int64, error)
+	List(ctx context.Context, businessID int64) ([]domain.MenuItem, error)
+	QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error)
 	BusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
 }
 
@@ -27,28 +27,28 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateMenuScope(ctx context.Context, ownerID int64) {
+func invalidateMenuScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.MenuPrefix(ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.MenuPrefix(businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.MenuItem, error) {
 	return cacher.Of[[]domain.MenuItem]().GetOrComputeSingle(ctx,
-		cacheKeys.MenusList(ownerID),
+		cacheKeys.MenusList(businessID),
 		func(ctx context.Context) ([]domain.MenuItem, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, menuCacheTTL),
 	)
 }
 
-func (s *Service) QuickCreate(ctx context.Context, ownerID int64, input domain.MenuItemInput) (int64, error) {
-	id, err := s.repo.QuickCreate(ctx, ownerID, input)
+func (s *Service) QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error) {
+	id, err := s.repo.QuickCreate(ctx, ownerID, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateMenuScope(ctx, ownerID)
+	invalidateMenuScope(ctx, businessID)
 	return id, nil
 }
 

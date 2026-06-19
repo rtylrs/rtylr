@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 
 // List returns feedback entries for an owner, applying optional filters by
 // type, source, and score range. Always filters by owner_id.
-func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
+func (r *Repository) List(ctx context.Context, businessID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -36,7 +36,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 
 	offset := (page - 1) * pageSize
 
-	whereConds := squirrel.And{squirrel.Eq{"owner_id": ownerID}}
+	whereConds := squirrel.And{squirrel.Eq{"business_id": businessID}}
 
 	if filters.Type != "" {
 		whereConds = append(whereConds, squirrel.Eq{"type": filters.Type})
@@ -62,7 +62,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to build count feedback query",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 
 		return nil, 0, err
@@ -73,14 +73,14 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 	if err := r.pool.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("Failed to count feedback",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 
 		return nil, 0, err
 	}
 
 	listQuery, listArgs, err := squirrel.Select(
-		"id", "owner_id", "customer_id", "type", "score", "comment", "source", "created_at",
+		"id", "owner_id", "business_id", "customer_id", "type", "score", "comment", "source", "created_at",
 	).
 		From("crm_feedback").
 		Where(whereConds).
@@ -92,7 +92,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to build list feedback query",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 
 		return nil, 0, err
@@ -102,7 +102,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list feedback",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 
 		return nil, 0, err
@@ -117,17 +117,18 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 
 	for rows.Next() {
 		var (
-			id         int64
-			ownerRowID int64
-			customerID int64
-			typeStr    string
-			score      sql.NullInt32
-			comment    sql.NullString
-			source     sql.NullString
-			createdAt  sql.NullTime
+			id            int64
+			ownerRowID    int64
+			businessRowID int64
+			customerID    int64
+			typeStr       string
+			score         sql.NullInt32
+			comment       sql.NullString
+			source        sql.NullString
+			createdAt     sql.NullTime
 		)
 
-		if scanErr := rows.Scan(&id, &ownerRowID, &customerID, &typeStr, &score, &comment, &source, &createdAt); scanErr != nil {
+		if scanErr := rows.Scan(&id, &ownerRowID, &businessRowID, &customerID, &typeStr, &score, &comment, &source, &createdAt); scanErr != nil {
 			logger.Ctx(ctx).Error("Failed to scan feedback row", logger.Error(scanErr))
 
 			return nil, 0, scanErr
@@ -136,6 +137,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 		f := domain.Feedback{
 			ID:         id,
 			OwnerID:    ownerRowID,
+			BusinessID: businessRowID,
 			CustomerID: customerID,
 			Type:       typeStr,
 			Score:      int(score.Int32),
@@ -160,6 +162,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 func (r *Repository) Create(ctx context.Context, input domain.FeedbackInput) (int64, error) {
 	result, err := r.queries.CreateFeedback(ctx, sqlc.CreateFeedbackParams{
 		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
 		CustomerID: input.CustomerID,
 		Type:       sqlc.CrmFeedbackType(input.Type),
 		Score:      sql.NullInt32{Int32: int32(input.Score), Valid: true},

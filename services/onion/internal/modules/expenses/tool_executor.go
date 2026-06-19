@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type recordExpenseToolInput struct {
@@ -61,7 +62,12 @@ func (m *Module) executeListExpensesTool(ctx context.Context, input map[string]a
 		return nil, err
 	}
 
-	expenses, err := m.service.List(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	expenses, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +95,12 @@ func (m *Module) executeListExpenseCategoriesTool(ctx context.Context) (map[stri
 		return nil, errors.New("authentication is required")
 	}
 
-	categories, err := m.service.ListCategories(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	categories, err := m.service.ListCategories(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +127,14 @@ func (m *Module) executeRecordExpenseTool(ctx context.Context, input map[string]
 		return nil, err
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
 	id, err := m.service.Create(ctx, domain.ExpenseInput{
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		CategoryID:  parsed.CategoryID,
 		Amount:      parsed.Amount,
 		Currency:    parsed.Currency,

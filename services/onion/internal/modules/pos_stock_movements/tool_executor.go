@@ -373,7 +373,11 @@ func posStockToolAuth(ctx context.Context) (*authPkg.AuthUser, int64, error) {
 	if authUser.BusinessID <= 0 {
 		return nil, 0, errors.New("business context is required")
 	}
-	return authUser, tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID), nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, 0, errors.New("business context is required")
+	}
+	return authUser, businessID, nil
 }
 
 func posStockToolNonNegativeInt64(value any) (int64, error) {

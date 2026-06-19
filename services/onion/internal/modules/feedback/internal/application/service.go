@@ -18,7 +18,7 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error)
+	List(ctx context.Context, businessID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error)
 	Create(ctx context.Context, input domain.FeedbackInput) (int64, error)
 }
 
@@ -32,9 +32,9 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateFeedbackScope(ctx context.Context, ownerID int64) {
+func invalidateFeedbackScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(feedbackScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(feedbackScope, businessID))
 	}
 }
 
@@ -43,11 +43,11 @@ type feedbackListResult struct {
 	Total int
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
-	key := cacheKeys.Scoped(feedbackScope, ownerID, fmt.Sprintf("list|f=%+v|p=%d|ps=%d", filters, page, pageSize))
+func (s *Service) List(ctx context.Context, businessID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
+	key := cacheKeys.Scoped(feedbackScope, businessID, fmt.Sprintf("list|f=%+v|p=%d|ps=%d", filters, page, pageSize))
 	res, err := cacher.Of[feedbackListResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (feedbackListResult, error) {
-			items, total, err := s.repo.List(ctx, ownerID, filters, page, pageSize)
+			items, total, err := s.repo.List(ctx, businessID, filters, page, pageSize)
 			return feedbackListResult{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, feedbackTTL),
@@ -60,6 +60,6 @@ func (s *Service) Create(ctx context.Context, input domain.FeedbackInput) (int64
 	if err != nil {
 		return 0, err
 	}
-	invalidateFeedbackScope(ctx, input.OwnerID)
+	invalidateFeedbackScope(ctx, input.BusinessID)
 	return id, nil
 }

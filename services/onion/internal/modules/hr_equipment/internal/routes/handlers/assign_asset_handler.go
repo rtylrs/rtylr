@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func AssignAssetRoutes() []string { return []string{"/hr/equipment/assets/{id}/assign"} }
@@ -40,13 +41,18 @@ func (h *AssignAssetHandler) Serve(ctx context.Context, req *AssignAssetRequest)
 		return AssignAssetResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return AssignAssetResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	assetID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return AssignAssetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid asset id"}
 	}
 
-	err := h.Service.AssignAsset(ctx, device.User.UserID, assetID, req.EmployeeID)
+	err := h.Service.AssignAsset(ctx, businessID, assetID, req.EmployeeID)
 	if err != nil {
 		if errors.Is(err, domain.ErrAssetNotFound) {
 			return AssignAssetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Asset not found"}

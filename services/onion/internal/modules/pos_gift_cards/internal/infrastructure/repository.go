@@ -26,8 +26,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.GiftCard, error) {
-	rows, err := r.queries.ListGiftCardsByOwner(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.GiftCard, error) {
+	rows, err := r.queries.ListGiftCardsByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list gift cards", logger.Error(err))
 		return nil, err
@@ -38,6 +38,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.GiftCard
 		gc := domain.GiftCard{
 			ID:             row.ID,
 			OwnerID:        row.OwnerID,
+			BusinessID:     row.BusinessID,
 			CustomerID:     nullableInt64(row.CustomerID),
 			Code:           row.Code,
 			InitialAmount:  decimalToFloat(row.InitialAmount),
@@ -57,7 +58,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.GiftCard
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.GiftCardInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error) {
 	var expiresAt sql.NullTime
 	if input.ExpiresAt != "" {
 		t, err := time.Parse("2006-01-02", input.ExpiresAt)
@@ -75,7 +76,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 	}
 	defer tx.Rollback()
 
-	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 	})
@@ -85,7 +86,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 	}
 
 	result, err := r.queries.WithTx(tx).CreateGiftCard(ctx, sqlc.CreateGiftCardParams{
-		OwnerID:        ownerID,
+		OwnerID:        0,
+		BusinessID:     businessID,
 		CustomerID:     nullableInt64Value(customerID),
 		Code:           input.Code,
 		InitialAmount:  amountStr,
@@ -109,10 +111,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Gif
 	return id, nil
 }
 
-func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) (*domain.GiftCard, error) {
+func (r *Repository) GetByCode(ctx context.Context, businessID int64, code string) (*domain.GiftCard, error) {
 	row, err := r.queries.GetGiftCardByCode(ctx, sqlc.GetGiftCardByCodeParams{
-		OwnerID: ownerID,
-		Code:    code,
+		BusinessID: businessID,
+		Code:       code,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -125,11 +127,11 @@ func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) 
 	return giftCardFromRow(row), nil
 }
 
-func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
+func (r *Repository) Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
 	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin redeem transaction",
-			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
 		return nil, err
 	}
 	defer func() {
@@ -144,8 +146,8 @@ func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.Red
 	// Lock the row for the duration of the transaction so concurrent redemptions
 	// serialise on this gift card and cannot double-spend the balance.
 	row, err := qtx.GetGiftCardByCodeForUpdate(ctx, sqlc.GetGiftCardByCodeForUpdateParams{
-		OwnerID: ownerID,
-		Code:    input.Code,
+		BusinessID: businessID,
+		Code:       input.Code,
 	})
 	if err != nil {
 		_ = tx.Rollback()
@@ -153,7 +155,7 @@ func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.Red
 			return nil, domain.ErrGiftCardNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to lock gift card for redeem",
-			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
 		return nil, err
 	}
 
@@ -177,17 +179,17 @@ func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.Red
 	if err := qtx.UpdateGiftCardBalance(ctx, sqlc.UpdateGiftCardBalanceParams{
 		CurrentBalance: floatToDecimal(newBalance),
 		ID:             gc.ID,
-		OwnerID:        ownerID,
+		BusinessID:     businessID,
 	}); err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to redeem gift card",
-			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
 		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit redeem transaction",
-			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
 		return nil, err
 	}
 
@@ -200,6 +202,7 @@ func giftCardFromRow(row sqlc.PosGiftCard) *domain.GiftCard {
 	gc := &domain.GiftCard{
 		ID:             row.ID,
 		OwnerID:        row.OwnerID,
+		BusinessID:     row.BusinessID,
 		CustomerID:     nullableInt64(row.CustomerID),
 		Code:           row.Code,
 		InitialAmount:  decimalToFloat(row.InitialAmount),

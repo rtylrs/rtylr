@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/timesheets/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type TimesheetEntryPayload struct {
@@ -47,7 +48,12 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	entries, err := h.Service.GetTimesheets(ctx, device.User.UserID, req.WeekStart)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	entries, err := h.Service.GetTimesheets(ctx, businessID, req.WeekStart)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get timesheets"}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/activity/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubactivityv1 "github.com/voxire/voxie/gen/go/hub/activity/v1"
 )
 
@@ -43,6 +44,11 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		}
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListActivityResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	limit := req.Limit
 	if limit <= 0 {
 		limit = 50
@@ -55,7 +61,7 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		offset = 0
 	}
 
-	page, err := h.Service.ListActivity(ctx, authUser.UserID, req.App, limit, offset)
+	page, err := h.Service.ListActivity(ctx, businessID, req.App, limit, offset)
 	if err != nil {
 		return ListActivityResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

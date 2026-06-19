@@ -17,9 +17,9 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Document, error)
-	Create(ctx context.Context, ownerID int64, input domain.DocumentInput) (int64, error)
-	Delete(ctx context.Context, ownerID, id int64) error
+	List(ctx context.Context, businessID int64) ([]domain.Document, error)
+	Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error)
+	Delete(ctx context.Context, businessID, id int64) error
 }
 
 type Service struct {
@@ -30,35 +30,35 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateDocumentsScope(ctx context.Context, ownerID int64) {
+func invalidateDocumentsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(documentsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(documentsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Document, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Document, error) {
 	return cacher.Of[[]domain.Document]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(documentsScope, ownerID, "list"),
+		cacheKeys.Scoped(documentsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Document, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, documentsTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.DocumentInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateDocumentsScope(ctx, ownerID)
+	invalidateDocumentsScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateDocumentsScope(ctx, ownerID)
+	invalidateDocumentsScope(ctx, businessID)
 	return nil
 }

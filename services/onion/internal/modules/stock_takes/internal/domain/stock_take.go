@@ -19,6 +19,7 @@ const (
 type StockTake struct {
 	ID          int64           `json:"id"`
 	OwnerID     int64           `json:"owner_id"`
+	BusinessID  int64           `json:"business_id"`
 	WarehouseID int64           `json:"warehouse_id"`
 	Status      StockTakeStatus `json:"status"`
 	Notes       string          `json:"notes"`
@@ -39,6 +40,7 @@ func (s *StockTake) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&s.ID,
 		&s.OwnerID,
+		&s.BusinessID,
 		&warehouseID,
 		&s.Status,
 		&notes,

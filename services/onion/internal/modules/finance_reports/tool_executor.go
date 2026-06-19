@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -18,17 +19,17 @@ const (
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
 	case getFinanceBalanceSheetToolName:
-		ownerID, err := financeReportsToolOwnerID(ctx)
+		businessID, err := financeReportsToolBusinessID(ctx)
 		if err != nil {
 			return nil, true, err
 		}
-		balanceSheet, err := m.service.GetBalanceSheet(ctx, ownerID)
+		balanceSheet, err := m.service.GetBalanceSheet(ctx, businessID)
 		if err != nil {
 			return nil, true, err
 		}
 		return map[string]any{"balance_sheet": balanceSheet}, true, nil
 	case getFinanceCashFlowReportToolName:
-		ownerID, err := financeReportsToolOwnerID(ctx)
+		businessID, err := financeReportsToolBusinessID(ctx)
 		if err != nil {
 			return nil, true, err
 		}
@@ -36,7 +37,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		if period == "" {
 			period = "month"
 		}
-		cashFlow, err := m.service.GetCashFlow(ctx, ownerID, period)
+		cashFlow, err := m.service.GetCashFlow(ctx, businessID, period)
 		if err != nil {
 			return nil, true, err
 		}
@@ -46,12 +47,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	}
 }
 
-func financeReportsToolOwnerID(ctx context.Context) (int64, error) {
+func financeReportsToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, errors.New("authentication is required")
+	}
+	return businessID, nil
 }
 
 func firstFinanceReportsToolValue(input map[string]any, keys ...string) any {

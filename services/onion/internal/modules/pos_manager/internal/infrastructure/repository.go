@@ -23,10 +23,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) VerifyPIN(ctx context.Context, ownerID int64, pin string) (*domain.VerifyResult, error) {
-	staffID, err := r.queries.VerifyManagerPIN(ctx, sqlc.VerifyManagerPINParams{
-		OwnerID: ownerID,
-		Pin:     pin,
+func (r *Repository) VerifyPIN(ctx context.Context, businessID int64, pin string) (*domain.VerifyResult, error) {
+	row, err := r.queries.VerifyManagerPIN(ctx, sqlc.VerifyManagerPINParams{
+		BusinessID: businessID,
+		Pin:        pin,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -37,7 +37,9 @@ func (r *Repository) VerifyPIN(ctx context.Context, ownerID int64, pin string) (
 	}
 
 	return &domain.VerifyResult{
-		Valid:   true,
-		StaffID: staffID,
+		Valid:      true,
+		StaffID:    row.StaffID,
+		OwnerID:    row.OwnerID,
+		BusinessID: businessID,
 	}, nil
 }

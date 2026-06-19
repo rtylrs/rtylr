@@ -17,13 +17,13 @@ type ChurnWindowPayload struct {
 }
 
 // GetChurnRates returns all four standard windows (30/60/90/180d).
-func (s *Service) GetChurnRates(ctx context.Context, ownerID int64) ([]ChurnWindowPayload, error) {
-	key := fmt.Sprintf("insights:%d:customers:churn", ownerID)
+func (s *Service) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnWindowPayload, error) {
+	key := fmt.Sprintf("insights:%d:customers:churn", businessID)
 	type result struct {
 		Windows []ChurnWindowPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetChurnRates(ctx, ownerID)
+		rows, rerr := s.repo.GetChurnRates(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr
 		}

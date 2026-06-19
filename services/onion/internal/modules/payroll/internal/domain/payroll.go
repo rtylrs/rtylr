@@ -11,6 +11,7 @@ var ErrPayrollNotFound = errors.New("payroll record not found")
 type PayrollRecord struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	StaffID       int64     `json:"staff_id"`
 	PeriodStart   time.Time `json:"period_start"`
 	PeriodEnd     time.Time `json:"period_end"`
@@ -45,6 +46,7 @@ func (p *PayrollRecord) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&p.ID,
 		&p.OwnerID,
+		&p.BusinessID,
 		&p.StaffID,
 		&p.PeriodStart,
 		&p.PeriodEnd,
@@ -107,6 +109,7 @@ func (p *PayrollRecord) FromRow(row *sql.Rows) error {
 
 type PayrollRunInput struct {
 	OwnerID     int64  `json:"owner_id"`
+	BusinessID  int64  `json:"business_id"`
 	PeriodStart string `json:"period_start"`
 	PeriodEnd   string `json:"period_end"`
 	PeriodLabel string `json:"period_label"`

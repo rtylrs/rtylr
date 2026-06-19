@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── List Cycles ──────────────────────────────────────────────────────────────
@@ -46,7 +47,12 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, r *ListCyclesRequest) (Li
 		return ListCyclesResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	wsID := authUser.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListCyclesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	wsID := businessID
 	if r.WorkspaceID != "" {
 		resolved, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, r.WorkspaceID)
 		if err != nil {
@@ -108,7 +114,12 @@ func (h *CreateCycleHandler) Serve(ctx context.Context, r *CreateCycleRequest) (
 		return CreateCycleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	wsID := authUser.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateCycleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	wsID := businessID
 	if r.WorkspaceID != "" {
 		resolved, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, r.WorkspaceID)
 		if err != nil {
@@ -126,6 +137,7 @@ func (h *CreateCycleHandler) Serve(ctx context.Context, r *CreateCycleRequest) (
 	}
 
 	cycle, err := h.FlowService.CreateCycle(ctx, domain.CycleInput{
+		BusinessID:  businessID,
 		WorkspaceID: wsID,
 		Name:        r.Name,
 		StartDate:   start,
@@ -166,6 +178,11 @@ type UpdateCycleHandler struct{ FlowService *application.Service }
 func (h *UpdateCycleHandler) Serve(ctx context.Context, r *UpdateCycleRequest) (UpdateCycleResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return UpdateCycleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	_, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
 		return UpdateCycleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 

@@ -15,10 +15,10 @@ type TimeOffPayload struct {
 }
 
 // GetTimeOffSummary returns pending + approved leave request counts.
-func (s *Service) GetTimeOffSummary(ctx context.Context, ownerID int64) (TimeOffPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:time-off", ownerID)
+func (s *Service) GetTimeOffSummary(ctx context.Context, businessID int64) (TimeOffPayload, error) {
+	key := fmt.Sprintf("insights:%d:operations:time-off", businessID)
 	out, err := cacher.Of[TimeOffPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (TimeOffPayload, error) {
-		row, rerr := s.repo.GetTimeOffSummary(ctx, ownerID)
+		row, rerr := s.repo.GetTimeOffSummary(ctx, businessID)
 		if rerr != nil {
 			return TimeOffPayload{}, rerr
 		}

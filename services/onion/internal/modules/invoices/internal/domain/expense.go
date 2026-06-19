@@ -11,6 +11,7 @@ var ErrExpenseNotFound = errors.New("expense not found")
 type Expense struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`
+	BusinessID      int64     `json:"business_id"`
 	CategoryID      int64     `json:"category_id"`
 	Description     string    `json:"description"`
 	Amount          float64   `json:"amount"`
@@ -39,6 +40,7 @@ func (e *Expense) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&e.ID,
 		&e.OwnerID,
+		&e.BusinessID,
 		&categoryID,
 		&e.Description,
 		&e.Amount,

@@ -31,8 +31,8 @@ func NewRepository(db *sql.DB) *Repository {
 
 // ===== Config =====
 
-func (r *Repository) GetPerformanceConfig(ctx context.Context, ownerID int64) (*domain.PerformanceConfigRecord, error) {
-	row, err := r.queries.GetPerformanceConfig(ctx, ownerID)
+func (r *Repository) GetPerformanceConfig(ctx context.Context, businessID int64) (*domain.PerformanceConfigRecord, error) {
+	row, err := r.queries.GetPerformanceConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPerformanceConfigNotFound
@@ -43,14 +43,15 @@ func (r *Repository) GetPerformanceConfig(ctx context.Context, ownerID int64) (*
 	return &record, nil
 }
 
-func (r *Repository) UpsertPerformanceConfig(ctx context.Context, ownerID int64, params domain.UpsertConfigParams) (*domain.PerformanceConfigRecord, error) {
+func (r *Repository) UpsertPerformanceConfig(ctx context.Context, businessID int64, params domain.UpsertConfigParams) (*domain.PerformanceConfigRecord, error) {
 	var labels json.RawMessage
 	if params.RatingLabels != "" {
 		labels = json.RawMessage(params.RatingLabels)
 	}
 
 	_, err := r.queries.UpsertPerformanceConfig(ctx, sqlc.UpsertPerformanceConfigParams{
-		OwnerID:             ownerID,
+		OwnerID:             businessID,
+		BusinessID:          businessID,
 		RatingScaleType:     params.RatingScaleType,
 		RatingMin:           params.RatingMin,
 		RatingMax:           params.RatingMax,
@@ -61,12 +62,12 @@ func (r *Repository) UpsertPerformanceConfig(ctx context.Context, ownerID int64,
 		return nil, err
 	}
 
-	return r.GetPerformanceConfig(ctx, ownerID)
+	return r.GetPerformanceConfig(ctx, businessID)
 }
 
 // ===== Review Cycles =====
 
-func (r *Repository) CreateReviewCycle(ctx context.Context, ownerID int64, params domain.CreateReviewCycleParams) (*domain.ReviewCycleRecord, error) {
+func (r *Repository) CreateReviewCycle(ctx context.Context, businessID int64, params domain.CreateReviewCycleParams) (*domain.ReviewCycleRecord, error) {
 	periodStart, err := time.Parse("2006-01-02", params.PeriodStart)
 	if err != nil {
 		return nil, fmt.Errorf("invalid period_start: %w", err)
@@ -77,7 +78,8 @@ func (r *Repository) CreateReviewCycle(ctx context.Context, ownerID int64, param
 	}
 
 	result, err := r.queries.CreateReviewCycle(ctx, sqlc.CreateReviewCycleParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		Name:        params.Name,
 		CycleType:   params.CycleType,
 		PeriodStart: periodStart,
@@ -92,13 +94,13 @@ func (r *Repository) CreateReviewCycle(ctx context.Context, ownerID int64, param
 		return nil, err
 	}
 
-	return r.GetReviewCycle(ctx, ownerID, id)
+	return r.GetReviewCycle(ctx, businessID, id)
 }
 
-func (r *Repository) GetReviewCycle(ctx context.Context, ownerID, id int64) (*domain.ReviewCycleRecord, error) {
+func (r *Repository) GetReviewCycle(ctx context.Context, businessID, id int64) (*domain.ReviewCycleRecord, error) {
 	row, err := r.queries.GetReviewCycle(ctx, sqlc.GetReviewCycleParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -110,17 +112,17 @@ func (r *Repository) GetReviewCycle(ctx context.Context, ownerID, id int64) (*do
 	return &record, nil
 }
 
-func (r *Repository) ListReviewCycles(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.ReviewCycleRecord, int64, error) {
+func (r *Repository) ListReviewCycles(ctx context.Context, businessID int64, limit, offset int32) ([]domain.ReviewCycleRecord, int64, error) {
 	rows, err := r.queries.ListReviewCycles(ctx, sqlc.ListReviewCyclesParams{
-		OwnerID: ownerID,
-		Limit:   limit,
-		Offset:  offset,
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		return nil, 0, err
 	}
 
-	total, err := r.queries.CountReviewCycles(ctx, ownerID)
+	total, err := r.queries.CountReviewCycles(ctx, businessID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -133,15 +135,15 @@ func (r *Repository) ListReviewCycles(ctx context.Context, ownerID int64, limit,
 	return records, total, nil
 }
 
-func (r *Repository) UpdateReviewCycleStatus(ctx context.Context, ownerID, id int64, status string) error {
+func (r *Repository) UpdateReviewCycleStatus(ctx context.Context, businessID, id int64, status string) error {
 	return r.queries.UpdateReviewCycleStatus(ctx, sqlc.UpdateReviewCycleStatusParams{
-		Status:  status,
-		OwnerID: ownerID,
-		ID:      id,
+		Status:     status,
+		BusinessID: businessID,
+		ID:         id,
 	})
 }
 
-func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) OpenReviewCycle(ctx context.Context, businessID, id int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -156,9 +158,9 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 	qtx := r.queries.WithTx(tx)
 
 	err = qtx.UpdateReviewCycleStatus(ctx, sqlc.UpdateReviewCycleStatusParams{
-		Status:  "open",
-		OwnerID: ownerID,
-		ID:      id,
+		Status:     "open",
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		_ = tx.Rollback()
@@ -168,7 +170,7 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 	// cross-schema read from hr_core — active employee list for review cycle initialisation
 	selectStr, selectArgs, err := sq.Select("id").
 		From("hr_employees").
-		Where(sq.Eq{"owner_id": ownerID, "status": "active"}).
+		Where(sq.Eq{"business_id": businessID, "status": "active"}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -206,9 +208,9 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 	// Built with squirrel since the value count is dynamic (one row per employee).
 	if len(employeeIDs) > 0 {
 		ib := sq.Insert("hr_performance_reviews").
-			Columns("owner_id", "employee_id", "review_cycle_id", "reviewer_employee_id", "review_type", "status")
+			Columns("owner_id", "business_id", "employee_id", "review_cycle_id", "reviewer_employee_id", "review_type", "status")
 		for _, eid := range employeeIDs {
-			ib = ib.Values(ownerID, eid, id, eid, "self", "draft")
+			ib = ib.Values(businessID, businessID, eid, id, eid, "self", "draft")
 		}
 
 		insertStr, insertArgs, buildErr := ib.PlaceholderFormat(sq.Question).ToSql()
@@ -228,9 +230,10 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 
 // ===== Reviews =====
 
-func (r *Repository) CreatePerformanceReview(ctx context.Context, ownerID, employeeID, cycleID, reviewerID int64, reviewType string) error {
+func (r *Repository) CreatePerformanceReview(ctx context.Context, businessID, employeeID, cycleID, reviewerID int64, reviewType string) error {
 	return r.queries.CreatePerformanceReview(ctx, sqlc.CreatePerformanceReviewParams{
-		OwnerID:            ownerID,
+		OwnerID:            businessID,
+		BusinessID:         businessID,
 		EmployeeID:         employeeID,
 		ReviewCycleID:      cycleID,
 		ReviewerEmployeeID: reviewerID,
@@ -238,10 +241,10 @@ func (r *Repository) CreatePerformanceReview(ctx context.Context, ownerID, emplo
 	})
 }
 
-func (r *Repository) GetPerformanceReview(ctx context.Context, ownerID, id int64) (*domain.PerformanceReviewRecord, error) {
+func (r *Repository) GetPerformanceReview(ctx context.Context, businessID, id int64) (*domain.PerformanceReviewRecord, error) {
 	row, err := r.queries.GetPerformanceReview(ctx, sqlc.GetPerformanceReviewParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -253,9 +256,9 @@ func (r *Repository) GetPerformanceReview(ctx context.Context, ownerID, id int64
 	return &record, nil
 }
 
-func (r *Repository) ListPerformanceReviews(ctx context.Context, ownerID, cycleID int64, limit, offset int32) ([]domain.PerformanceReviewRecord, int64, error) {
+func (r *Repository) ListPerformanceReviews(ctx context.Context, businessID, cycleID int64, limit, offset int32) ([]domain.PerformanceReviewRecord, int64, error) {
 	rows, err := r.queries.ListPerformanceReviewsByCycle(ctx, sqlc.ListPerformanceReviewsByCycleParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ReviewCycleID: cycleID,
 		Limit:         limit,
 		Offset:        offset,
@@ -265,7 +268,7 @@ func (r *Repository) ListPerformanceReviews(ctx context.Context, ownerID, cycleI
 	}
 
 	total, err := r.queries.CountPerformanceReviewsByCycle(ctx, sqlc.CountPerformanceReviewsByCycleParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ReviewCycleID: cycleID,
 	})
 	if err != nil {
@@ -280,9 +283,9 @@ func (r *Repository) ListPerformanceReviews(ctx context.Context, ownerID, cycleI
 	return records, total, nil
 }
 
-func (r *Repository) ListPerformanceReviewsByEmployee(ctx context.Context, ownerID, cycleID, employeeID int64, limit, offset int32) ([]domain.PerformanceReviewRecord, int64, error) {
+func (r *Repository) ListPerformanceReviewsByEmployee(ctx context.Context, businessID, cycleID, employeeID int64, limit, offset int32) ([]domain.PerformanceReviewRecord, int64, error) {
 	rows, err := r.queries.ListPerformanceReviewsByCycleAndEmployee(ctx, sqlc.ListPerformanceReviewsByCycleAndEmployeeParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ReviewCycleID: cycleID,
 		EmployeeID:    employeeID,
 		Limit:         limit,
@@ -293,7 +296,7 @@ func (r *Repository) ListPerformanceReviewsByEmployee(ctx context.Context, owner
 	}
 
 	total, err := r.queries.CountPerformanceReviewsByCycleAndEmployee(ctx, sqlc.CountPerformanceReviewsByCycleAndEmployeeParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ReviewCycleID: cycleID,
 		EmployeeID:    employeeID,
 	})
@@ -309,35 +312,36 @@ func (r *Repository) ListPerformanceReviewsByEmployee(ctx context.Context, owner
 	return records, total, nil
 }
 
-func (r *Repository) UpdateReviewSubmission(ctx context.Context, ownerID, id int64, rating, narrative string) error {
+func (r *Repository) UpdateReviewSubmission(ctx context.Context, businessID, id int64, rating, narrative string) error {
 	return r.queries.UpdateReviewSubmission(ctx, sqlc.UpdateReviewSubmissionParams{
 		OverallRating: nullString(rating),
 		Narrative:     nullString(narrative),
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ID:            id,
 	})
 }
 
-func (r *Repository) UpdateReviewStatus(ctx context.Context, ownerID, id int64, status string) error {
+func (r *Repository) UpdateReviewStatus(ctx context.Context, businessID, id int64, status string) error {
 	return r.queries.UpdateReviewStatus(ctx, sqlc.UpdateReviewStatusParams{
-		Status:  status,
-		OwnerID: ownerID,
-		ID:      id,
+		Status:     status,
+		BusinessID: businessID,
+		ID:         id,
 	})
 }
 
-func (r *Repository) ShareReview(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) ShareReview(ctx context.Context, businessID, id int64) error {
 	return r.queries.ShareReview(ctx, sqlc.ShareReviewParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 }
 
 // ===== Goals =====
 
-func (r *Repository) CreateGoal(ctx context.Context, ownerID int64, params domain.CreateGoalParams) (*domain.ReviewGoalRecord, error) {
+func (r *Repository) CreateGoal(ctx context.Context, businessID int64, params domain.CreateGoalParams) (*domain.ReviewGoalRecord, error) {
 	result, err := r.queries.CreateReviewGoal(ctx, sqlc.CreateReviewGoalParams{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
+		BusinessID:      businessID,
 		EmployeeID:      params.EmployeeID,
 		ReviewCycleID:   params.ReviewCycleID,
 		Title:           params.Title,
@@ -354,13 +358,13 @@ func (r *Repository) CreateGoal(ctx context.Context, ownerID int64, params domai
 		return nil, err
 	}
 
-	return r.GetGoal(ctx, ownerID, id)
+	return r.GetGoal(ctx, businessID, id)
 }
 
-func (r *Repository) GetGoal(ctx context.Context, ownerID, id int64) (*domain.ReviewGoalRecord, error) {
+func (r *Repository) GetGoal(ctx context.Context, businessID, id int64) (*domain.ReviewGoalRecord, error) {
 	row, err := r.queries.GetReviewGoal(ctx, sqlc.GetReviewGoalParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -372,21 +376,21 @@ func (r *Repository) GetGoal(ctx context.Context, ownerID, id int64) (*domain.Re
 	return &record, nil
 }
 
-func (r *Repository) UpdateGoal(ctx context.Context, ownerID, id int64, params domain.UpdateGoalParams) error {
+func (r *Repository) UpdateGoal(ctx context.Context, businessID, id int64, params domain.UpdateGoalParams) error {
 	return r.queries.UpdateReviewGoal(ctx, sqlc.UpdateReviewGoalParams{
 		Title:           params.Title,
 		Description:     nullString(params.Description),
 		Weight:          nullFloat64String(params.Weight),
 		SuccessCriteria: nullString(params.SuccessCriteria),
 		Status:          params.Status,
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		ID:              id,
 	})
 }
 
-func (r *Repository) ListGoals(ctx context.Context, ownerID, employeeID, cycleID int64, limit, offset int32) ([]domain.ReviewGoalRecord, int64, error) {
+func (r *Repository) ListGoals(ctx context.Context, businessID, employeeID, cycleID int64, limit, offset int32) ([]domain.ReviewGoalRecord, int64, error) {
 	rows, err := r.queries.ListReviewGoals(ctx, sqlc.ListReviewGoalsParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		EmployeeID:    employeeID,
 		ReviewCycleID: cycleID,
 		Limit:         limit,
@@ -397,7 +401,7 @@ func (r *Repository) ListGoals(ctx context.Context, ownerID, employeeID, cycleID
 	}
 
 	total, err := r.queries.CountReviewGoals(ctx, sqlc.CountReviewGoalsParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		EmployeeID:    employeeID,
 		ReviewCycleID: cycleID,
 	})
@@ -415,11 +419,11 @@ func (r *Repository) ListGoals(ctx context.Context, ownerID, employeeID, cycleID
 
 // ===== Employees (cross-schema read) =====
 
-func (r *Repository) ListActiveEmployeeIDs(ctx context.Context, ownerID int64) ([]int64, error) {
+func (r *Repository) ListActiveEmployeeIDs(ctx context.Context, businessID int64) ([]int64, error) {
 	// cross-schema read from hr_core — active employee IDs for performance review initialisation
 	queryStr, args, err := sq.Select("id").
 		From("hr_employees").
-		Where(sq.Eq{"owner_id": ownerID, "status": "active"}).
+		Where(sq.Eq{"business_id": businessID, "status": "active"}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -457,6 +461,7 @@ func configFromRow(row sqlc.HrPerformanceConfig) domain.PerformanceConfigRecord 
 	return domain.PerformanceConfigRecord{
 		ID:                  row.ID,
 		OwnerID:             row.OwnerID,
+		BusinessID:          row.BusinessID,
 		RatingScaleType:     row.RatingScaleType,
 		RatingMin:           row.RatingMin,
 		RatingMax:           row.RatingMax,
@@ -471,6 +476,7 @@ func cycleFromRow(row sqlc.HrPerformanceReviewCycle) domain.ReviewCycleRecord {
 	return domain.ReviewCycleRecord{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Name:        row.Name,
 		CycleType:   row.CycleType,
 		PeriodStart: row.PeriodStart.Format("2006-01-02"),
@@ -485,6 +491,7 @@ func reviewFromRow(row sqlc.HrPerformanceReview) domain.PerformanceReviewRecord 
 	return domain.PerformanceReviewRecord{
 		ID:                   row.ID,
 		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
 		EmployeeID:           row.EmployeeID,
 		ReviewCycleID:        row.ReviewCycleID,
 		ReviewerEmployeeID:   row.ReviewerEmployeeID,

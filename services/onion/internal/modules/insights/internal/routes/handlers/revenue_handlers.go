@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/revenue?from=&to=
@@ -40,6 +41,10 @@ func (h *GetRevenueSeriesHandler) Serve(ctx context.Context, req *GetRevenueSeri
 	if device.User == nil {
 		return GetRevenueSeriesResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetRevenueSeriesResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	from, to, err := application.ResolveDateRange(req.From, req.To)
 	if err != nil {
@@ -50,7 +55,7 @@ func (h *GetRevenueSeriesHandler) Serve(ctx context.Context, req *GetRevenueSeri
 		}
 	}
 
-	series, err := h.Service.GetRevenueSeries(ctx, device.User.UserID, from, to)
+	series, err := h.Service.GetRevenueSeries(ctx, businessID, from, to)
 	if err != nil {
 		return GetRevenueSeriesResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

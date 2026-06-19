@@ -25,17 +25,17 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListVariants(ctx context.Context, ownerID, productID int64) ([]domain.Variant, error) {
+func (r *Repository) ListVariants(ctx context.Context, businessID, productID int64) ([]domain.Variant, error) {
 	var rows []sqlc.ErpProductVariant
 	var err error
 
 	if productID > 0 {
 		rows, err = r.queries.ListVariantsByProduct(ctx, sqlc.ListVariantsByProductParams{
-			OwnerID:   ownerID,
-			ProductID: productID,
+			BusinessID: businessID,
+			ProductID:  productID,
 		})
 	} else {
-		rows, err = r.queries.ListVariantsByOwner(ctx, ownerID)
+		rows, err = r.queries.ListVariantsByOwner(ctx, businessID)
 	}
 
 	if err != nil {
@@ -53,9 +53,10 @@ func (r *Repository) ListVariants(ctx context.Context, ownerID, productID int64)
 	return variants, nil
 }
 
-func (r *Repository) CreateVariant(ctx context.Context, ownerID int64, input domain.VariantInput) (int64, error) {
+func (r *Repository) CreateVariant(ctx context.Context, businessID int64, input domain.VariantInput) (int64, error) {
 	result, err := r.queries.CreateVariant(ctx, sqlc.CreateVariantParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		ProductID:     input.ProductID,
 		Name:          input.Name,
 		Sku:           nullString(input.SKU),
@@ -80,7 +81,7 @@ func (r *Repository) CreateVariant(ctx context.Context, ownerID int64, input dom
 	return id, nil
 }
 
-func (r *Repository) UpdateVariant(ctx context.Context, ownerID, id int64, input domain.VariantInput) error {
+func (r *Repository) UpdateVariant(ctx context.Context, businessID, id int64, input domain.VariantInput) error {
 	err := r.queries.UpdateVariant(ctx, sqlc.UpdateVariantParams{
 		ProductID:     input.ProductID,
 		Name:          input.Name,
@@ -91,7 +92,7 @@ func (r *Repository) UpdateVariant(ctx context.Context, ownerID, id int64, input
 		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
 		Attributes:    nullJSON(input.Attributes),
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ID:            id,
 	})
 	if err != nil {
@@ -103,10 +104,10 @@ func (r *Repository) UpdateVariant(ctx context.Context, ownerID, id int64, input
 	return nil
 }
 
-func (r *Repository) DeleteVariant(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) DeleteVariant(ctx context.Context, businessID, id int64) error {
 	err := r.queries.DeleteVariant(ctx, sqlc.DeleteVariantParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete variant", logger.Error(err))
@@ -120,7 +121,7 @@ func (r *Repository) DeleteVariant(ctx context.Context, ownerID, id int64) error
 // CountVariants returns the number of variants for a given owner.
 // Pass productID=0 to count across all products, or a positive productID to
 // limit the count to that product.
-func (r *Repository) CountVariants(ctx context.Context, ownerID, productID int64) (int64, error) {
+func (r *Repository) CountVariants(ctx context.Context, businessID, productID int64) (int64, error) {
 	var (
 		count int64
 		err   error
@@ -128,11 +129,11 @@ func (r *Repository) CountVariants(ctx context.Context, ownerID, productID int64
 
 	if productID > 0 {
 		count, err = r.queries.CountVariantsByProduct(ctx, sqlc.CountVariantsByProductParams{
-			OwnerID:   ownerID,
-			ProductID: productID,
+			BusinessID: businessID,
+			ProductID:  productID,
 		})
 	} else {
-		count, err = r.queries.CountVariantsByOwner(ctx, ownerID)
+		count, err = r.queries.CountVariantsByOwner(ctx, businessID)
 	}
 
 	if err != nil {
@@ -147,6 +148,7 @@ func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 	var v domain.Variant
 	v.ID = row.ID
 	v.OwnerID = row.OwnerID
+	v.BusinessID = row.BusinessID
 	v.ProductID = row.ProductID
 	v.Name = row.Name
 

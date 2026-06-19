@@ -12,6 +12,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/reviews/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -40,7 +42,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListReviewsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := reviewToolOwnerID(ctx)
+	businessID, err := reviewToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +52,7 @@ func (m *Module) executeListReviewsTool(ctx context.Context, input map[string]an
 		return nil, err
 	}
 
-	reviews, err := m.service.List(ctx, ownerID)
+	reviews, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,14 +118,22 @@ func parseListReviewsToolInput(input map[string]any) (listReviewsToolInput, erro
 	return listReviewsToolInput{Status: status, Period: period, StaffID: staffID, Page: page, Limit: limit}, nil
 }
 
-func reviewToolOwnerID(ctx context.Context) (int64, error) {
+func reviewToolBusinessID(ctx context.Context) (int64, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User != nil && device.User.UserID > 0 {
-		return device.User.UserID, nil
+		businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+		if bizErr != nil {
+			return 0, errorModels.PermissionDeniedServerError()
+		}
+		return businessID, nil
 	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if ok && authUser != nil && authUser.UserID > 0 {
-		return authUser.UserID, nil
+		businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if bizErr != nil {
+			return 0, errorModels.PermissionDeniedServerError()
+		}
+		return businessID, nil
 	}
 	return 0, errors.New("authentication is required")
 }

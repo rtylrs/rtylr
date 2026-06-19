@@ -68,14 +68,17 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 	if authErr != nil {
 		return SplitOrderResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return SplitOrderResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return SplitOrderResponse{}, sErr
 	}
 
-	orderIDs, err := h.Service.SplitOrder(ctx, ownerID, orderID, req.Splits)
+	orderIDs, err := h.Service.SplitOrder(ctx, businessID, orderID, req.Splits)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
@@ -119,14 +122,17 @@ func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequ
 	if authErr != nil {
 		return DiscountOrderResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return DiscountOrderResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return DiscountOrderResponse{}, sErr
 	}
 
-	if err := h.Service.ApplyDiscount(ctx, ownerID, domain.DiscountInput{
+	if err := h.Service.ApplyDiscount(ctx, businessID, domain.DiscountInput{
 		OrderID:       orderID,
 		DiscountType:  req.DiscountType,
 		DiscountValue: req.DiscountValue,
@@ -170,14 +176,17 @@ func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (Vo
 	if authErr != nil {
 		return VoidOrderResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return VoidOrderResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return VoidOrderResponse{}, sErr
 	}
 
-	if err := h.Service.VoidOrder(ctx, ownerID, orderID, req.Reason); err != nil {
+	if err := h.Service.VoidOrder(ctx, businessID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -213,14 +222,17 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 	if authErr != nil {
 		return HoldOrderResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return HoldOrderResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return HoldOrderResponse{}, sErr
 	}
 
-	if err := h.Service.HoldOrder(ctx, ownerID, orderID, req.Reason); err != nil {
+	if err := h.Service.HoldOrder(ctx, businessID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -257,14 +269,17 @@ func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequ
 	if authErr != nil {
 		return SendToKitchenResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return SendToKitchenResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return SendToKitchenResponse{}, sErr
 	}
 
-	if err := h.Service.SendToKitchen(ctx, ownerID, orderID); err != nil {
+	if err := h.Service.SendToKitchen(ctx, businessID, orderID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -302,7 +317,10 @@ func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemReques
 	if authErr != nil {
 		return VoidOrderItemResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return VoidOrderItemResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, 0)
 	if sErr != nil {
@@ -315,7 +333,7 @@ func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemReques
 		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid item id"}
 	}
 
-	if err := h.Service.VoidOrderItem(ctx, ownerID, orderID, itemID); err != nil {
+	if err := h.Service.VoidOrderItem(ctx, businessID, orderID, itemID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order item not found"}
 		}
@@ -356,14 +374,17 @@ func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequ
 	if authErr != nil {
 		return TransferTableResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return TransferTableResponse{}, bizErr
+	}
 
 	orderID, sErr := resolveOrderID(ctx, req.OrderID)
 	if sErr != nil {
 		return TransferTableResponse{}, sErr
 	}
 
-	if err := h.Service.TransferTable(ctx, ownerID, orderID, req.NewTableID); err != nil {
+	if err := h.Service.TransferTable(ctx, businessID, orderID, req.NewTableID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
@@ -392,9 +413,12 @@ func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequ
 	if authErr != nil {
 		return ListHeldOrdersResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ListHeldOrdersResponse{}, bizErr
+	}
 
-	orders, err := h.Service.ListHeldOrders(ctx, ownerID)
+	orders, err := h.Service.ListHeldOrders(ctx, businessID)
 	if err != nil {
 		return ListHeldOrdersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list held orders"}
 	}

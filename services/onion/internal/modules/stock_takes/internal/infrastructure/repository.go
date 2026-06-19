@@ -29,11 +29,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTake, bool, error) {
+func (r *Repository) ListStockTakes(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTake, bool, error) {
 	rows, err := r.queries.ListStockTakesPaged(ctx, sqlc.ListStockTakesPagedParams{
-		OwnerID: ownerID,
-		Limit:   int32(limit + 1),
-		Offset:  int32(offset),
+		BusinessID: businessID,
+		Limit:      int32(limit + 1),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock takes", logger.Error(err))
@@ -43,8 +43,9 @@ func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, o
 	stockTakes := make([]domain.StockTake, 0, limit+1)
 	for _, row := range rows {
 		s := domain.StockTake{
-			ID:      row.ID,
-			OwnerID: row.OwnerID,
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
 		}
 
 		if row.WarehouseID.Valid {
@@ -144,7 +145,7 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 	return result, nil
 }
 
-func (r *Repository) CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error) {
+func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
@@ -161,7 +162,8 @@ func (r *Repository) CreateStockTake(ctx context.Context, ownerID int64, input d
 	qtx := r.queries.WithTx(tx)
 
 	res, err := qtx.InsertStockTake(ctx, sqlc.InsertStockTakeParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		WarehouseID: nullInt64(input.WarehouseID),
 		Notes:       nullString(input.Notes),
 	})
@@ -201,7 +203,7 @@ func (r *Repository) CreateStockTake(ctx context.Context, ownerID int64, input d
 	return stockTakeID, nil
 }
 
-func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeUpdateInput) error {
+func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
@@ -225,8 +227,8 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 	if input.Status == domain.StockTakeStatusCompleted {
 		var prior sqlc.NullErpStockTakesStatus
 		prior, err = qtx.GetStockTakeStatusForUpdate(ctx, sqlc.GetStockTakeStatusForUpdateParams{
-			OwnerID: ownerID,
-			ID:      input.ID,
+			BusinessID: businessID,
+			ID:         input.ID,
 		})
 		if errors.Is(err, sql.ErrNoRows) {
 			err = domain.ErrStockTakeNotFound
@@ -247,24 +249,24 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 	switch input.Status {
 	case domain.StockTakeStatusInProgress:
 		err = qtx.UpdateStockTakeStatusInProgress(ctx, sqlc.UpdateStockTakeStatusInProgressParams{
-			Status:  statusVal,
-			Notes:   nullString(input.Notes),
-			OwnerID: ownerID,
-			ID:      input.ID,
+			Status:     statusVal,
+			Notes:      nullString(input.Notes),
+			BusinessID: businessID,
+			ID:         input.ID,
 		})
 	case domain.StockTakeStatusCompleted:
 		err = qtx.UpdateStockTakeStatusCompleted(ctx, sqlc.UpdateStockTakeStatusCompletedParams{
-			Status:  statusVal,
-			Notes:   nullString(input.Notes),
-			OwnerID: ownerID,
-			ID:      input.ID,
+			Status:     statusVal,
+			Notes:      nullString(input.Notes),
+			BusinessID: businessID,
+			ID:         input.ID,
 		})
 	default:
 		err = qtx.UpdateStockTakeStatus(ctx, sqlc.UpdateStockTakeStatusParams{
-			Status:  statusVal,
-			Notes:   nullString(input.Notes),
-			OwnerID: ownerID,
-			ID:      input.ID,
+			Status:     statusVal,
+			Notes:      nullString(input.Notes),
+			BusinessID: businessID,
+			ID:         input.ID,
 		})
 	}
 
@@ -302,7 +304,7 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 	// On the draft/in_progress -> completed transition, reconcile on-hand stock
 	// to the counted quantities and ledger the variance.
 	if input.Status == domain.StockTakeStatusCompleted && !alreadyCompleted {
-		if err = r.reconcileStockTake(ctx, tx, qtx, ownerID, input.ID); err != nil {
+		if err = r.reconcileStockTake(ctx, tx, qtx, businessID, input.ID); err != nil {
 			logger.Ctx(ctx).Error("Failed to reconcile stock take", logger.Error(err))
 			return err
 		}
@@ -320,7 +322,7 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 // reconcileStockTake sets each counted product's on-hand stock to the physical
 // count recorded on the stock take and writes an 'adjustment' inventory
 // transaction for the variance. Runs inside the caller's transaction.
-func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, stockTakeID int64) error {
+func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, businessID, stockTakeID int64) error {
 	items, err := qtx.GetStockTakeItems(ctx, stockTakeID)
 	if err != nil {
 		return err
@@ -328,7 +330,7 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 
 	// Stock takes reconcile the tenant's default warehouse location (per-warehouse
 	// takes via erp_stock_takes.warehouse_id are a later slice).
-	locID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+	locID, err := stock_core.DefaultLocationID(ctx, tx, businessID)
 	if err != nil {
 		return err
 	}
@@ -345,14 +347,14 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 		// Set the location's on-hand to the physical count; stock_core ledgers
 		// the 'count' entry and syncs the scalar cache.
 		before, delta, serr := stock_core.SetLevelTx(ctx, tx, stock_core.Movement{
-			OwnerID:       ownerID,
+			OwnerID:       businessID,
 			LocationID:    locID,
 			ProductID:     it.ProductID,
 			EntryType:     stock_core.EntryCount,
 			ReferenceID:   &stockTakeID,
 			ReferenceType: "stock_take",
 			Channel:       "erp",
-			CreatedBy:     &ownerID,
+			CreatedBy:     &businessID,
 			Note:          fmt.Sprintf("stock take %d reconciliation", stockTakeID),
 		}, counted)
 		if serr != nil {
@@ -364,7 +366,8 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 
 		// Legacy ledger row (read-compat).
 		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
-			OwnerID:        ownerID,
+			OwnerID:        businessID,
+			BusinessID:     businessID,
 			ProductID:      it.ProductID,
 			Type:           sqlc.ErpInventoryTransactionsType("adjustment"),
 			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
@@ -372,7 +375,7 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 			QuantityAfter:  strconv.FormatFloat(counted, 'f', -1, 64),
 			ReferenceID:    sql.NullInt64{Int64: stockTakeID, Valid: true},
 			ReferenceType:  sql.NullString{String: "stock_take", Valid: true},
-			CreatedBy:      sql.NullInt64{Int64: ownerID, Valid: true},
+			CreatedBy:      sql.NullInt64{Int64: businessID, Valid: true},
 			Notes:          sql.NullString{String: fmt.Sprintf("stock take %d reconciliation", stockTakeID), Valid: true},
 		}); err != nil {
 			return err

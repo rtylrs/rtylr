@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 )
 
@@ -177,6 +178,11 @@ func (h *CreateSubtaskHandler) Serve(ctx context.Context, req *CreateSubtaskRequ
 	if device.User == nil {
 		return CreateSubtaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	authUser := device.User
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateSubtaskResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	parentID, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -185,13 +191,14 @@ func (h *CreateSubtaskHandler) Serve(ctx context.Context, req *CreateSubtaskRequ
 	input := domain.TaskInput{
 		ProjectID:      req.ProjectID,
 		WorkspaceID:    req.WorkspaceID,
-		OwnerID:        device.User.UserID,
+		OwnerID:        authUser.UserID,
+		BusinessID:     businessID,
 		ParentTaskID:   &parentID,
 		Title:          req.Title,
 		Description:    req.Description,
 		Priority:       req.Priority,
 		AssigneeID:     req.AssigneeID,
-		ReporterID:     device.User.UserID,
+		ReporterID:     authUser.UserID,
 		EstimatedHours: req.EstimatedHours,
 	}
 	if req.DueDate != nil {
@@ -293,6 +300,11 @@ func (h *CreateAttachmentHandler) Serve(ctx context.Context, req *CreateAttachme
 	if device.User == nil {
 		return CreateAttachmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	authUser := device.User
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateAttachmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	taskID, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -300,11 +312,12 @@ func (h *CreateAttachmentHandler) Serve(ctx context.Context, req *CreateAttachme
 	}
 	input := domain.TaskAttachmentInput{
 		TaskID:     taskID,
-		OwnerID:    device.User.UserID,
+		OwnerID:    authUser.UserID,
+		BusinessID: businessID,
 		Name:       req.Name,
 		URL:        req.URL,
 		Size:       req.Size,
-		UploadedBy: device.User.UserID,
+		UploadedBy: authUser.UserID,
 	}
 	id, createErr := h.FlowService.CreateAttachment(ctx, input)
 	if createErr != nil {
@@ -328,12 +341,17 @@ func (h *DeleteAttachmentHandler) Serve(ctx context.Context, _ *DeleteAttachment
 	if device.User == nil {
 		return DeleteAttachmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	authUser := device.User
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteAttachmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteAttachmentResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid attachment ID"}
 	}
-	if deleteErr := h.FlowService.DeleteAttachment(ctx, id, device.User.UserID); deleteErr != nil {
+	if deleteErr := h.FlowService.DeleteAttachment(ctx, id, businessID); deleteErr != nil {
 		return DeleteAttachmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete attachment"}
 	}
 	return DeleteAttachmentResponse{Message: "Attachment deleted successfully"}, nil
@@ -417,15 +435,21 @@ func (h *CreateTimeLogHandler) Serve(ctx context.Context, req *CreateTimeLogRequ
 	if device.User == nil {
 		return CreateTimeLogResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	authUser := device.User
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateTimeLogResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	taskID, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return CreateTimeLogResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid task ID"}
 	}
 	input := domain.TimeLogInput{
-		OwnerID:         device.User.UserID,
+		OwnerID:         authUser.UserID,
+		BusinessID:      businessID,
 		TaskID:          taskID,
-		UserID:          device.User.UserID,
+		UserID:          authUser.UserID,
 		DurationMinutes: req.DurationMinutes,
 		Description:     req.Description,
 	}
@@ -548,10 +572,16 @@ func (h *CreateTimeLogFlatHandler) Serve(ctx context.Context, req *CreateTimeLog
 	if device.User == nil {
 		return CreateTimeLogFlatResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	authUser := device.User
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateTimeLogFlatResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.TimeLogInput{
-		OwnerID:         device.User.UserID,
+		OwnerID:         authUser.UserID,
+		BusinessID:      businessID,
 		TaskID:          req.TaskID,
-		UserID:          device.User.UserID,
+		UserID:          authUser.UserID,
 		DurationMinutes: req.DurationMinutes,
 		Description:     req.Description,
 	}

@@ -11,10 +11,10 @@ import (
 )
 
 type repository interface {
-	ListSuppliers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.Supplier, bool, error)
-	CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error)
-	UpdateSupplier(ctx context.Context, ownerID, id int64, input domain.SupplierInput) error
-	DeleteSupplier(ctx context.Context, ownerID, id int64) error
+	ListSuppliers(ctx context.Context, businessID int64, limit, offset int) ([]domain.Supplier, bool, error)
+	CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error)
+	UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error
+	DeleteSupplier(ctx context.Context, businessID, id int64) error
 }
 
 type Service struct {
@@ -38,9 +38,9 @@ func paginateSuppliers(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) ListSuppliers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.Supplier, bool, error) {
+func (s *Service) ListSuppliers(ctx context.Context, businessID, page, pageSize int64) ([]domain.Supplier, bool, error) {
 	limit, offset := paginateSuppliers(page, pageSize)
-	items, hasMore, err := s.repo.ListSuppliers(ctx, ownerID, limit, offset)
+	items, hasMore, err := s.repo.ListSuppliers(ctx, businessID, limit, offset)
 	if err != nil {
 		return nil, false, err
 	}
@@ -50,34 +50,34 @@ func (s *Service) ListSuppliers(ctx context.Context, ownerID, page, pageSize int
 	return items, hasMore, nil
 }
 
-func (s *Service) CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error) {
-	id, err := s.repo.CreateSupplier(ctx, ownerID, input)
+func (s *Service) CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error) {
+	id, err := s.repo.CreateSupplier(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) UpdateSupplier(ctx context.Context, ownerID, id int64, input domain.SupplierInput) error {
-	err := s.repo.UpdateSupplier(ctx, ownerID, id, input)
+func (s *Service) UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error {
+	err := s.repo.UpdateSupplier(ctx, businessID, id, input)
 	if err != nil {
 		return err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return nil
 }
 
-func (s *Service) DeleteSupplier(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.DeleteSupplier(ctx, ownerID, id); err != nil {
+func (s *Service) DeleteSupplier(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.DeleteSupplier(ctx, businessID, id); err != nil {
 		return err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, fmt.Sprintf("*suppliers:%d*", ownerID))
+		cache.DeleteByPattern(ctx, fmt.Sprintf("*suppliers:%d*", businessID))
 	}
 }

@@ -60,8 +60,11 @@ func (m *Module) executeListPurchaseOrdersTool(ctx context.Context, input map[st
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	orders, hasMore, err := m.service.ListPurchaseOrders(ctx, ownerID, parsed.Status, parsed.Page, parsed.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	orders, hasMore, err := m.service.ListPurchaseOrders(ctx, businessID, parsed.Status, parsed.Page, parsed.PageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -94,8 +97,11 @@ func (m *Module) executeCreatePurchaseOrderTool(ctx context.Context, input map[s
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := m.service.CreatePurchaseOrder(ctx, ownerID, parsed, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	id, err := m.service.CreatePurchaseOrder(ctx, businessID, parsed, authUser.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,8 +135,11 @@ func (m *Module) executeApprovePurchaseOrderTool(ctx context.Context, input map[
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := m.service.ApprovePurchaseOrder(ctx, ownerID, poID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	if err := m.service.ApprovePurchaseOrder(ctx, businessID, poID); err != nil {
 		return nil, err
 	}
 
@@ -154,8 +163,11 @@ func (m *Module) executeReceivePurchaseOrderTool(ctx context.Context, input map[
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := m.service.ReceivePurchaseOrder(ctx, ownerID, poID, authUser.UserID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	if err := m.service.ReceivePurchaseOrder(ctx, businessID, poID, authUser.UserID); err != nil {
 		return nil, err
 	}
 

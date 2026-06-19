@@ -10,6 +10,7 @@ var ErrAutomationNotFound = errors.New("automation not found")
 type Automation struct {
 	ID            int64      `json:"id"`
 	OwnerID       int64      `json:"owner_id"`
+	BusinessID    int64      `json:"business_id"`
 	Name          string     `json:"name"`
 	TriggerType   string     `json:"trigger_type"`
 	TriggerConfig []byte     `json:"trigger_config"`
@@ -23,6 +24,7 @@ type Automation struct {
 
 type AutomationInput struct {
 	OwnerID       int64
+	BusinessID    int64
 	Name          string
 	TriggerType   string
 	TriggerConfig []byte
@@ -33,6 +35,7 @@ type AutomationInput struct {
 type AutomationUpdateInput struct {
 	ID            int64
 	OwnerID       int64
+	BusinessID    int64
 	Name          string
 	TriggerType   string
 	TriggerConfig []byte

@@ -16,16 +16,16 @@ type RevenueComparisonRow struct {
 // GetRevenueComparison sums paid invoice revenue for [from, to] and also
 // for the preceding window of the same length, so the frontend can render
 // a "this vs last" bar pair without asking the backend for two windows.
-func (r *Repository) GetRevenueComparison(ctx context.Context, ownerID int64, from, to time.Time) (RevenueComparisonRow, error) {
+func (r *Repository) GetRevenueComparison(ctx context.Context, businessID int64, from, to time.Time) (RevenueComparisonRow, error) {
 	windowDays := int(to.Sub(from).Hours() / 24)
 	priorTo := from.AddDate(0, 0, -1)
 	priorFrom := priorTo.AddDate(0, 0, -windowDays)
 
-	thisAmt, err := r.sumPaidInvoicesMinorUnits(ctx, ownerID, from, to)
+	thisAmt, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, from, to)
 	if err != nil {
 		return RevenueComparisonRow{}, err
 	}
-	lastAmt, err := r.sumPaidInvoicesMinorUnits(ctx, ownerID, priorFrom, priorTo)
+	lastAmt, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, priorFrom, priorTo)
 	if err != nil {
 		return RevenueComparisonRow{}, err
 	}

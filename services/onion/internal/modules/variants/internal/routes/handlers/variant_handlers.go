@@ -29,6 +29,7 @@ type ListVariantsRequest struct {
 type VariantPayload struct {
 	ID            int64   `json:"id"`
 	OwnerID       int64   `json:"owner_id"`
+	BusinessID    int64   `json:"business_id"`
 	ProductID     int64   `json:"product_id"`
 	Name          string  `json:"name"`
 	SKU           string  `json:"sku"`
@@ -50,6 +51,7 @@ func newVariantPayload(v domain.Variant) VariantPayload {
 	return VariantPayload{
 		ID:            v.ID,
 		OwnerID:       v.OwnerID,
+		BusinessID:    v.BusinessID,
 		ProductID:     v.ProductID,
 		Name:          v.Name,
 		SKU:           v.SKU,
@@ -74,8 +76,12 @@ func (h *ListVariantsHandler) Serve(ctx context.Context, req *ListVariantsReques
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	variants, err := h.Service.ListVariants(ctx, ownerID, req.ProductID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListVariantsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	variants, err := h.Service.ListVariants(ctx, businessID, req.ProductID)
 	if err != nil {
 		return ListVariantsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -161,8 +167,12 @@ func (h *CreateVariantHandler) Serve(ctx context.Context, req *CreateVariantRequ
 		IsActive:      req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := h.Service.CreateVariant(ctx, ownerID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateVariantResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateVariant(ctx, businessID, input)
 	if err != nil {
 		return CreateVariantResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -243,8 +253,12 @@ func (h *UpdateVariantHandler) Serve(ctx context.Context, req *UpdateVariantRequ
 		IsActive:      req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.UpdateVariant(ctx, ownerID, req.ID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateVariantResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateVariant(ctx, businessID, req.ID, input); err != nil {
 		return UpdateVariantResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -295,8 +309,12 @@ func (h *DeleteVariantHandler) Serve(ctx context.Context, req *DeleteVariantRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.DeleteVariant(ctx, ownerID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteVariantResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteVariant(ctx, businessID, req.ID); err != nil {
 		return DeleteVariantResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

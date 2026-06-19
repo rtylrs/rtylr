@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateInvoiceStatusRoutes() []string {
@@ -65,7 +66,16 @@ func (h *UpdateInvoiceStatusHandler) Validate(_ context.Context, req *UpdateInvo
 func (h *UpdateInvoiceStatusHandler) Serve(ctx context.Context, req *UpdateInvoiceStatusRequest) (UpdateInvoiceStatusResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	if err := h.FinanceService.UpdateInvoiceStatus(ctx, device.User.UserID, req.ID, req.Status); err != nil {
+	if device.User == nil {
+		return UpdateInvoiceStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateInvoiceStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FinanceService.UpdateInvoiceStatus(ctx, businessID, req.ID, req.Status); err != nil {
 		return UpdateInvoiceStatusResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to update invoice status",

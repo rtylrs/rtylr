@@ -69,8 +69,10 @@ func (r *Repository) ListCycles(ctx context.Context, workspaceID int64) ([]domai
 
 func (r *Repository) CreateCycle(ctx context.Context, input domain.CycleInput) (int64, error) {
 	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_cycles (workspace_id, project_id, name, description, start_date, end_date, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO flow_cycles (owner_id, business_id, workspace_id, project_id, name, description, start_date, end_date, created_by)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		input.BusinessID,
+		input.BusinessID,
 		input.WorkspaceID,
 		nullInt64PtrFromPtr(input.ProjectID),
 		input.Name,
@@ -182,8 +184,9 @@ func (r *Repository) ListMilestones(ctx context.Context, workspaceID int64, proj
 
 func (r *Repository) CreateMilestone(ctx context.Context, input domain.MilestoneInput) (int64, error) {
 	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_milestones (project_id, workspace_id, name, description, due_date, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO flow_milestones (owner_id, business_id, project_id, workspace_id, name, description, due_date, created_by)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		input.CreatedBy, input.BusinessID,
 		input.ProjectID, input.WorkspaceID, input.Name,
 		sql.NullString{String: input.Description, Valid: input.Description != ""},
 		input.DueDate.Format("2006-01-02"), input.CreatedBy,

@@ -23,8 +23,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListBrands(ctx context.Context, ownerID int64) ([]domain.Brand, error) {
-	rows, err := r.queries.ListBrands(ctx, ownerID)
+func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain.Brand, error) {
+	rows, err := r.queries.ListBrands(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list brands", logger.Error(err))
 
@@ -37,6 +37,7 @@ func (r *Repository) ListBrands(ctx context.Context, ownerID int64) ([]domain.Br
 		var b domain.Brand
 		b.ID = row.ID
 		b.OwnerID = row.OwnerID
+		b.BusinessID = row.BusinessID
 		b.Name = row.Name
 		b.ProductCount = row.ProductCount
 
@@ -62,9 +63,10 @@ func (r *Repository) ListBrands(ctx context.Context, ownerID int64) ([]domain.Br
 	return brands, nil
 }
 
-func (r *Repository) CreateBrand(ctx context.Context, ownerID int64, input domain.BrandInput) (int64, error) {
+func (r *Repository) CreateBrand(ctx context.Context, businessID int64, input domain.BrandInput) (int64, error) {
 	result, err := r.queries.CreateBrand(ctx, sqlc.CreateBrandParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		Name:        input.Name,
 		LogoUrl:     nullString(input.LogoURL),
 		Description: nullString(input.Description),
@@ -83,12 +85,12 @@ func (r *Repository) CreateBrand(ctx context.Context, ownerID int64, input domai
 	return id, nil
 }
 
-func (r *Repository) UpdateBrand(ctx context.Context, ownerID, id int64, input domain.BrandInput) error {
+func (r *Repository) UpdateBrand(ctx context.Context, businessID, id int64, input domain.BrandInput) error {
 	err := r.queries.UpdateBrand(ctx, sqlc.UpdateBrandParams{
 		Name:        input.Name,
 		LogoUrl:     nullString(input.LogoURL),
 		Description: nullString(input.Description),
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		ID:          id,
 	})
 	if err != nil {
@@ -100,10 +102,10 @@ func (r *Repository) UpdateBrand(ctx context.Context, ownerID, id int64, input d
 	return nil
 }
 
-func (r *Repository) DeleteBrand(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) DeleteBrand(ctx context.Context, businessID, id int64) error {
 	err := r.queries.DeleteBrand(ctx, sqlc.DeleteBrandParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete brand", logger.Error(err))

@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CampaignDeleteRoutes() []string { return []string{"/crm/campaigns/{id}"} }
@@ -34,7 +35,11 @@ func (h *DeleteCampaignHandler) Serve(ctx context.Context, _ *DeleteCampaignRequ
 	if err != nil || id <= 0 {
 		return DeleteCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid campaign ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if deleteErr := h.Service.Delete(ctx, businessID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrCampaignNotFound) {
 			return DeleteCampaignResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Campaign not found"}
 		}

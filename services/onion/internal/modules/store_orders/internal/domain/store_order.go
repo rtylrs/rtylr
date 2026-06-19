@@ -11,6 +11,7 @@ var ErrInvalidAmount = errors.New("invalid amount: monetary values cannot be neg
 type StoreOrder struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`
+	BusinessID      int64     `json:"business_id"`
 	CustomerEmail   string    `json:"customer_email"`
 	CustomerName    string    `json:"customer_name"`
 	CustomerPhone   string    `json:"customer_phone"`

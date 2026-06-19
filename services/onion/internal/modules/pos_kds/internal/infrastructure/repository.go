@@ -25,8 +25,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error) {
-	rows, err := r.queries.ListActiveKDSOrders(ctx, ownerID)
+func (r *Repository) ListActiveOrders(ctx context.Context, businessID int64) ([]domain.KDSOrder, error) {
+	rows, err := r.queries.ListActiveKDSOrders(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list KDS orders", logger.Error(err))
 		return nil, err
@@ -55,6 +55,8 @@ func (r *Repository) ListActiveOrders(ctx context.Context, ownerID int64) ([]dom
 			CustomerName: row.CustomerName.String,
 			KitchenNotes: row.KitchenNotes.String,
 			CreatedAt:    row.CreatedAt.Time,
+			OwnerID:      row.OwnerID,
+			BusinessID:   row.BusinessID,
 		}
 		o.Items = itemsByOrder[o.ID]
 		orders = append(orders, o)
@@ -127,12 +129,12 @@ func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateIt
 }
 
 // UpdateItemStatusByItemID updates a KDS item status by item id alone, resolving the
-// owning order via join. Owner-scoped to prevent cross-tenant mutation.
-func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error {
+// owning order via join. BusinessID-scoped to prevent cross-tenant mutation.
+func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, businessID, itemID int64, status string) error {
 	err := r.queries.UpdateKDSItemStatusByItemID(ctx, sqlc.UpdateKDSItemStatusByItemIDParams{
-		Status:  sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(status), Valid: true},
-		ID:      itemID,
-		OwnerID: ownerID,
+		Status:     sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(status), Valid: true},
+		ID:         itemID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update KDS item status by item id", logger.Error(err))

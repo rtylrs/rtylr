@@ -19,7 +19,7 @@ func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.Journa
 	return m.list, nil
 }
 
-func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.JournalEntryInput) (int64, error) {
+func (m *mockRepo) Create(_ context.Context, _, _ int64, _ domain.JournalEntryInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
@@ -38,7 +38,7 @@ func TestList_Delegates(t *testing.T) {
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), 1, domain.JournalEntryInput{}); !errors.Is(err, want) {
+	if _, err := s.Create(context.Background(), 1, 1, domain.JournalEntryInput{}); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -53,7 +53,7 @@ func TestPost_PropagatesError(t *testing.T) {
 
 func TestCreate_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 42}}
-	id, err := s.Create(context.Background(), 1, domain.JournalEntryInput{})
+	id, err := s.Create(context.Background(), 1, 1, domain.JournalEntryInput{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -36,14 +36,14 @@ func (r *Repository) ListMovements(ctx context.Context, businessID, ownerID, bra
 		FROM stock_ledger l
 		INNER JOIN stock_locations loc
 		  ON loc.id = l.location_id
-		 AND loc.owner_id = l.owner_id
-		WHERE l.owner_id = ?
+		 AND loc.business_id = l.business_id
+		WHERE l.business_id = ?
 		  AND loc.source_table = 'pos_locations'
 		  AND loc.source_id = ?
 		  AND l.product_id = ?
 		  AND l.channel = 'pos'
 		ORDER BY l.created_at DESC, l.id DESC
-	`, ownerID, branchID, productID)
+	`, businessID, branchID, productID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock movements", logger.Error(err))
 		return nil, err
@@ -170,7 +170,7 @@ func (r *Repository) TransferStock(ctx context.Context, input domain.TransferSto
 		return 0, err
 	}
 	transferGroup := outID
-	if _, err = tx.ExecContext(ctx, `UPDATE stock_ledger SET transfer_group = ? WHERE id = ? AND owner_id = ?`, transferGroup, outID, input.OwnerID); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE stock_ledger SET transfer_group = ? WHERE id = ? AND business_id = ?`, transferGroup, outID, input.BusinessID); err != nil {
 		logger.Ctx(ctx).Error("Failed to mark POS transfer out group", logger.Error(err))
 		return 0, err
 	}
@@ -243,7 +243,7 @@ func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branc
 	}
 	defer rollbackOnError(tx, &err)
 
-	if err = r.ensureInventoryProduct(ctx, tx, ownerID, productID); err != nil {
+	if err = r.ensureInventoryProduct(ctx, tx, businessID, productID); err != nil {
 		return err
 	}
 	locationID, err := stock_core.POSBranchLocationID(ctx, tx, ownerID, branchID)
@@ -276,11 +276,11 @@ func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branc
 
 func (r *Repository) ListBranchInventory(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
 	rows, err := r.pool.QueryContext(ctx, inventorySelectSQL(`
-		WHERE p.owner_id = ?
+		WHERE p.business_id = ?
 		  AND p.is_active = TRUE
 		  AND p.track_inventory = TRUE
 		ORDER BY p.name
-	`), branchID, ownerID)
+	`), branchID, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list branch inventory", logger.Error(err))
 		return nil, err
@@ -292,13 +292,13 @@ func (r *Repository) ListBranchInventory(ctx context.Context, businessID, ownerI
 
 func (r *Repository) ListLowStockItems(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
 	rows, err := r.pool.QueryContext(ctx, inventorySelectSQL(`
-		WHERE p.owner_id = ?
+		WHERE p.business_id = ?
 		  AND p.is_active = TRUE
 		  AND p.track_inventory = TRUE
 		  AND COALESCE(sl.reorder_point, p.low_stock_threshold) IS NOT NULL
 		  AND COALESCE(sl.on_hand, 0) <= COALESCE(sl.reorder_point, p.low_stock_threshold)
 		ORDER BY COALESCE(sl.on_hand, 0) ASC, p.name
-	`), branchID, ownerID)
+	`), branchID, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list low stock items", logger.Error(err))
 		return nil, err
@@ -310,12 +310,12 @@ func (r *Repository) ListLowStockItems(ctx context.Context, businessID, ownerID,
 
 func (r *Repository) GetInventoryItem(ctx context.Context, businessID, ownerID, branchID, productID int64) (domain.BranchInventory, error) {
 	rows, err := r.pool.QueryContext(ctx, inventorySelectSQL(`
-		WHERE p.owner_id = ?
+		WHERE p.business_id = ?
 		  AND p.id = ?
 		  AND p.is_active = TRUE
 		  AND p.track_inventory = TRUE
 		LIMIT 1
-	`), branchID, ownerID, productID)
+	`), branchID, businessID, productID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get inventory item", logger.Error(err))
 		return domain.BranchInventory{}, err
@@ -369,7 +369,7 @@ func (r *Repository) applySingleMovement(ctx context.Context, input movementInpu
 }
 
 func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input movementInput) (int64, error) {
-	if err := r.ensureInventoryProduct(ctx, tx, input.OwnerID, input.ProductID); err != nil {
+	if err := r.ensureInventoryProduct(ctx, tx, input.BusinessID, input.ProductID); err != nil {
 		return 0, err
 	}
 
@@ -406,7 +406,7 @@ func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input move
 		return 0, err
 	}
 
-	ledgerID, err := lastStockLedgerID(ctx, tx, input.OwnerID, locationID, input.ProductID)
+	ledgerID, err := lastStockLedgerID(ctx, tx, input.BusinessID, locationID, input.ProductID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to read POS stock ledger id", logger.Error(err))
 		return 0, err
@@ -414,17 +414,17 @@ func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input move
 	return ledgerID, nil
 }
 
-func (r *Repository) ensureInventoryProduct(ctx context.Context, tx *sql.Tx, ownerID, productID int64) error {
+func (r *Repository) ensureInventoryProduct(ctx context.Context, tx *sql.Tx, businessID, productID int64) error {
 	var exists int
 	err := tx.QueryRowContext(ctx, `
 		SELECT 1
 		FROM erp_products
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND id = ?
 		  AND is_active = TRUE
 		  AND track_inventory = TRUE
 		LIMIT 1
-	`, ownerID, productID).Scan(&exists)
+	`, businessID, productID).Scan(&exists)
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrInventoryNotFound
 	}
@@ -468,11 +468,11 @@ func inventorySelectSQL(whereClause string) string {
 			COALESCE(sl.updated_at, p.updated_at) AS updated_at
 		FROM erp_products p
 		LEFT JOIN stock_locations loc
-		  ON loc.owner_id = p.owner_id
+		  ON loc.business_id = p.business_id
 		 AND loc.source_table = 'pos_locations'
 		 AND loc.source_id = ?
 		LEFT JOIN stock_levels sl
-		  ON sl.owner_id = p.owner_id
+		  ON sl.business_id = p.business_id
 		 AND sl.location_id = loc.id
 		 AND sl.product_id = p.id
 	` + whereClause
@@ -541,17 +541,17 @@ func scanBranchInventoryRows(ctx context.Context, rows *sql.Rows, businessID, br
 	return items, nil
 }
 
-func lastStockLedgerID(ctx context.Context, tx *sql.Tx, ownerID, locationID, productID int64) (int64, error) {
+func lastStockLedgerID(ctx context.Context, tx *sql.Tx, businessID, locationID, productID int64) (int64, error) {
 	var id int64
 	err := tx.QueryRowContext(ctx, `
 		SELECT id
 		FROM stock_ledger
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND location_id = ?
 		  AND product_id = ?
 		ORDER BY id DESC
 		LIMIT 1
-	`, ownerID, locationID, productID).Scan(&id)
+	`, businessID, locationID, productID).Scan(&id)
 	return id, err
 }
 

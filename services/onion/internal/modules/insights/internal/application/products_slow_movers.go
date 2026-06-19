@@ -16,19 +16,19 @@ type SlowMoverPayload struct {
 }
 
 // GetSlowMovers returns products with zero sales in the trailing window.
-func (s *Service) GetSlowMovers(ctx context.Context, ownerID int64, days int32) ([]SlowMoverPayload, error) {
+func (s *Service) GetSlowMovers(ctx context.Context, businessID int64, days int32) ([]SlowMoverPayload, error) {
 	if days <= 0 {
 		days = 60
 	}
 	if days > 365 {
 		days = 365
 	}
-	key := fmt.Sprintf("insights:%d:products:slow:%d", ownerID, days)
+	key := fmt.Sprintf("insights:%d:products:slow:%d", businessID, days)
 	type result struct {
 		Rows []SlowMoverPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetSlowMovers(ctx, ownerID, days)
+		rows, rerr := s.repo.GetSlowMovers(ctx, businessID, days)
 		if rerr != nil {
 			return result{}, rerr
 		}

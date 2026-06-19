@@ -65,8 +65,11 @@ func (h *ListSuppliersHandler) Serve(ctx context.Context, req *ListSuppliersRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	suppliers, hasMore, err := h.Service.ListSuppliers(ctx, ownerID, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListSuppliersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	suppliers, hasMore, err := h.Service.ListSuppliers(ctx, businessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListSuppliersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -154,8 +157,11 @@ func (h *CreateSupplierHandler) Serve(ctx context.Context, req *CreateSupplierRe
 		IsActive:     req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := h.Service.CreateSupplier(ctx, ownerID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateSupplierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.CreateSupplier(ctx, businessID, input)
 	if err != nil {
 		return CreateSupplierResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -237,8 +243,11 @@ func (h *UpdateSupplierHandler) Serve(ctx context.Context, req *UpdateSupplierRe
 		IsActive:     req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.UpdateSupplier(ctx, ownerID, req.ID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateSupplierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.UpdateSupplier(ctx, businessID, req.ID, input); err != nil {
 		if errors.Is(err, domain.ErrSupplierNotFound) {
 			return UpdateSupplierResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,

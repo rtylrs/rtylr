@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrovertimev1 "github.com/voxire/voxie/gen/go/hr/overtime/v1"
 )
 
@@ -34,11 +35,16 @@ func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOverti
 		return ListOvertimeRequestsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	requests, total, err := h.Service.ListOvertimeRequests(ctx, device.User.UserID, domain.ListOvertimeRequestsParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListOvertimeRequestsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	requests, total, err := h.Service.ListOvertimeRequests(ctx, businessID, domain.ListOvertimeRequestsParams{
 		Limit: req.Limit, Offset: req.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list overtime requests", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list overtime requests", logger.Any("business_id", businessID), logger.Error(err))
 		return ListOvertimeRequestsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list overtime requests"}
 	}
 

@@ -32,27 +32,27 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidatePosSessionsScope(ctx context.Context, ownerID int64) {
+func invalidatePosSessionsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posSessionsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posSessionsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Session, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Session, error) {
 	return cacher.Of[[]domain.Session]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(posSessionsScope, ownerID, "list"),
+		cacheKeys.Scoped(posSessionsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Session, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, posSessionsTTL),
 	)
 }
 
-func (s *Service) Get(ctx context.Context, ownerID, id int64) (*domain.Session, error) {
-	key := cacheKeys.Scoped(posSessionsScope, ownerID, fmt.Sprintf("id=%d", id))
+func (s *Service) Get(ctx context.Context, businessID, id int64) (*domain.Session, error) {
+	key := cacheKeys.Scoped(posSessionsScope, businessID, fmt.Sprintf("id=%d", id))
 	return cacher.Of[*domain.Session]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*domain.Session, error) {
-			return s.repo.Get(ctx, ownerID, id)
+			return s.repo.Get(ctx, businessID, id)
 		},
 		cacher.WithExpiry(ctx, posSessionsTTL),
 	)
@@ -66,7 +66,7 @@ func (s *Service) Open(ctx context.Context, input domain.OpenSessionInput) (int6
 	if err != nil {
 		return 0, err
 	}
-	invalidatePosSessionsScope(ctx, input.OwnerID)
+	invalidatePosSessionsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
@@ -77,6 +77,6 @@ func (s *Service) Close(ctx context.Context, input domain.CloseSessionInput) err
 	if err := s.repo.Close(ctx, input); err != nil {
 		return err
 	}
-	invalidatePosSessionsScope(ctx, input.OwnerID)
+	invalidatePosSessionsScope(ctx, input.BusinessID)
 	return nil
 }

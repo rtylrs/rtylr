@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CreateRoutes() []string   { return []string{"/store/checkout/create"} }
@@ -42,7 +43,13 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	id, err := h.Service.Create(ctx, authUser.UserID, domain.CheckoutCreateInput{
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.Create(ctx, businessID, authUser.UserID, domain.CheckoutCreateInput{
 		SessionID: req.SessionID, CustomerEmail: req.CustomerEmail, Items: req.Items,
 		Subtotal: req.Subtotal, Tax: req.Tax, Total: req.Total,
 	})
@@ -75,7 +82,13 @@ func (h *CompleteHandler) Serve(ctx context.Context, req *CompleteRequest) (Comp
 	if !ok {
 		return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	if err := h.Service.Complete(ctx, authUser.UserID, req.ID); err != nil {
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CompleteResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.Complete(ctx, businessID, req.ID, authUser.UserID); err != nil {
 		return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to complete checkout"}
 	}
 	return CompleteResponse{Message: "Checkout completed"}, nil

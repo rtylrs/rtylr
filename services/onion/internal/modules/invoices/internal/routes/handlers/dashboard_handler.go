@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func DashboardRoutes() []string {
@@ -29,7 +30,16 @@ type DashboardResponse struct {
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	dashboard, err := h.FinanceService.GetDashboard(ctx, device.User.UserID)
+	if device.User == nil {
+		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	dashboard, err := h.FinanceService.GetDashboard(ctx, businessID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

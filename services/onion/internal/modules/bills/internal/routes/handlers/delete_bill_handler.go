@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func DeleteBillRoutes() []string { return []string{"/finance/bills/{id}"} }
@@ -30,6 +31,10 @@ func (h *DeleteBillHandler) Serve(ctx context.Context, _ *DeleteBillRequest) (De
 	if device.IsAnonymous || device.User == nil {
 		return DeleteBillResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteBillResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -37,7 +42,7 @@ func (h *DeleteBillHandler) Serve(ctx context.Context, _ *DeleteBillRequest) (De
 		return DeleteBillResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid bill id"}
 	}
 
-	if err := h.Service.DeleteBill(ctx, device.User.UserID, id); err != nil {
+	if err := h.Service.DeleteBill(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrBillNotFound) {
 			return DeleteBillResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Bill not found"}
 		}

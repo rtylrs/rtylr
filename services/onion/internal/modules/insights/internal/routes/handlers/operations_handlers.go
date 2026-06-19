@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/operations
@@ -24,7 +25,11 @@ func (h *GetOperationsKPIsHandler) Serve(ctx context.Context, _ *GetOperationsKP
 	if device.User == nil {
 		return GetOperationsKPIsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	payload, err := h.Service.GetOperationsKPIs(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetOperationsKPIsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	payload, err := h.Service.GetOperationsKPIs(ctx, businessID)
 	if err != nil {
 		return GetOperationsKPIsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

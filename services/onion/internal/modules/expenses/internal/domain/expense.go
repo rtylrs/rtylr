@@ -13,6 +13,7 @@ var (
 type Expense struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	CategoryID  *int64    `json:"category_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
@@ -26,15 +27,17 @@ type Expense struct {
 }
 
 type ExpenseCategory struct {
-	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"owner_id"`
-	Name      string    `json:"name"`
-	Color     string    `json:"color"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         int64     `json:"id"`
+	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
+	Name       string    `json:"name"`
+	Color      string    `json:"color"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type ExpenseInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	CategoryID  *int64
 	Amount      float64
 	Currency    string
@@ -47,6 +50,7 @@ type ExpenseInput struct {
 type ExpenseUpdateInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	CategoryID  *int64
 	Amount      float64
 	Currency    string

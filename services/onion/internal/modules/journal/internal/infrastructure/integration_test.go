@@ -42,7 +42,7 @@ func TestCreateJournalEntry_NoLines_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-01",
 		Description: "Test entry no lines",
 		Lines:       []domain.JournalLineInput{},
@@ -60,7 +60,7 @@ func TestCreateJournalEntry_WithLines_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-02",
 		Description: "Test entry with lines",
 		Lines: []domain.JournalLineInput{
@@ -81,7 +81,7 @@ func TestGetJournalEntry_AfterCreate(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-03",
 		Description: "Get after create",
 	})
@@ -117,7 +117,7 @@ func TestGetLines_AfterCreateWithLines(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-04",
 		Description: "Lines test",
 		Lines: []domain.JournalLineInput{
@@ -143,7 +143,7 @@ func TestPostJournalEntry_ChangesStatus(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-05",
 		Description: "Post test",
 	})
@@ -169,7 +169,7 @@ func TestPostJournalEntry_AlreadyPosted_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-06-06",
 		Description: "Double post test",
 	})
@@ -203,7 +203,7 @@ func TestCreateJournalEntry_EmptyDescription_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:  "2025-06-07",
 		Lines: nil,
 	})
@@ -237,7 +237,7 @@ func TestCreateJournalEntry_FieldsPersisted(t *testing.T) {
 	wantDate := "2025-08-15"
 	wantDesc := "Rent payment Aug 2025"
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        wantDate,
 		Description: wantDesc,
 	})
@@ -262,7 +262,7 @@ func TestGetJournalEntry_WrongOwner_ReturnsError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-09-01",
 		Description: "Isolation check",
 	})
@@ -282,11 +282,11 @@ func TestListJournalEntries_DateRange_ReturnsResults(t *testing.T) {
 	ctx := context.Background()
 
 	// Create two entries at known dates.
-	_, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{Date: "2025-07-01", Description: "July start"})
+	_, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{Date: "2025-07-01", Description: "July start"})
 	if err != nil {
 		t.Fatalf("Create July start: %v", err)
 	}
-	_, err = repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{Date: "2025-07-31", Description: "July end"})
+	_, err = repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{Date: "2025-07-31", Description: "July end"})
 	if err != nil {
 		t.Fatalf("Create July end: %v", err)
 	}
@@ -306,7 +306,7 @@ func TestCreateJournalEntry_DefaultStatusIsDraft(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-10-01",
 		Description: "Status check",
 	})
@@ -328,7 +328,7 @@ func TestGetLines_NoLines_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-10-02",
 		Description: "No lines",
 		Lines:       []domain.JournalLineInput{},
@@ -351,7 +351,7 @@ func TestGetLines_LineDeltaMatch(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-10-03",
 		Description: "Delta check",
 		Lines: []domain.JournalLineInput{
@@ -383,7 +383,7 @@ func TestCreateJournalEntry_OwnerIDStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-11-01",
 		Description: "OwnerID stored check",
 	})
@@ -407,7 +407,7 @@ func TestListJournalEntries_LimitIsRespected(t *testing.T) {
 
 	// Create enough entries to exceed the limit.
 	for i := 0; i < 5; i++ {
-		if _, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+		if _, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 			Date:        "2025-11-15",
 			Description: "Limit test",
 		}); err != nil {
@@ -429,7 +429,7 @@ func TestPostJournalEntry_PostedAtIsSet(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-12-01",
 		Description: "Posted-at check",
 	})
@@ -455,7 +455,7 @@ func TestGetJournalEntry_IDIsPositive(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2025-12-15",
 		Description: "ID positive check",
 	})
@@ -494,7 +494,7 @@ func TestCreateJournalEntry_MultipleLines_CountMatches(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2026-01-10",
 		Description: "Multi-line count",
 		Lines: []domain.JournalLineInput{
@@ -521,7 +521,7 @@ func TestCreateJournalEntry_CreatedAtIsSet(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2026-02-01",
 		Description: "CreatedAt check",
 	})
@@ -569,7 +569,7 @@ func TestCountByStatus_Journal_ReflectsCreatedEntry(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+	_, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.JournalEntryInput{
 		Date:        "2026-01-01",
 		Description: "Count test",
 	})

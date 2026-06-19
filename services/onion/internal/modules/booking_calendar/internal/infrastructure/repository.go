@@ -21,10 +21,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) FetchAppointments(ctx context.Context, ownerID int64, from, to string) ([]domain.CalendarAppointment, error) {
-	query, args, err := sq.Select("id", "service_id", "customer_name", "start_time", "end_time", "status").
+func (r *Repository) FetchAppointments(ctx context.Context, businessID int64, from, to string) ([]domain.CalendarAppointment, error) {
+	query, args, err := sq.Select("id", "service_id", "customer_name", "start_time", "end_time", "status", "business_id").
 		From("booking_appointments").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"start_time": from}).
 		Where(sq.Lt{"start_time": to}).
 		OrderBy("start_time ASC").
@@ -51,14 +51,16 @@ func (r *Repository) FetchAppointments(ctx context.Context, ownerID int64, from,
 			startTime time.Time
 			endTime   time.Time
 			status    sql.NullString
+			bizID     int64
 		)
-		if err := rows.Scan(&id, &serviceID, &custName, &startTime, &endTime, &status); err != nil {
+		if err := rows.Scan(&id, &serviceID, &custName, &startTime, &endTime, &status, &bizID); err != nil {
 			return nil, err
 		}
 		appt := domain.CalendarAppointment{
-			ID:        id,
-			StartTime: startTime.Format("2006-01-02T15:04:05Z07:00"),
-			EndTime:   endTime.Format("2006-01-02T15:04:05Z07:00"),
+			ID:         id,
+			BusinessID: bizID,
+			StartTime:  startTime.Format("2006-01-02T15:04:05Z07:00"),
+			EndTime:    endTime.Format("2006-01-02T15:04:05Z07:00"),
 		}
 		if serviceID.Valid {
 			appt.ServiceID = serviceID.Int64

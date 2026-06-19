@@ -19,8 +19,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, userID int64) ([]domain.Notification, error) {
-	rows, err := r.queries.ListNotifications(ctx, userID)
+func (r *Repository) List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error) {
+	rows, err := r.queries.ListNotifications(ctx, sqlc.ListNotificationsParams{
+		BusinessID: businessID,
+		UserID:     userID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list notifications", logger.Error(err))
 		return nil, err
@@ -31,6 +34,7 @@ func (r *Repository) List(ctx context.Context, userID int64) ([]domain.Notificat
 		var n domain.Notification
 		n.ID = row.ID
 		n.OwnerID = row.OwnerID
+		n.BusinessID = row.BusinessID
 		n.UserID = row.UserID
 		n.Title = row.Title
 		n.Body = row.Body

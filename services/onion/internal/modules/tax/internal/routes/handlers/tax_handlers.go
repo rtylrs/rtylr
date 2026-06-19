@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/tax/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── Get Tax Config ───────────────────────────────────────────────────────────
@@ -39,7 +40,11 @@ func (h *GetTaxConfigHandler) Serve(ctx context.Context, _ *GetTaxConfigRequest)
 	if device.User == nil {
 		return GetTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	cfg, err := h.Service.GetConfig(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	cfg, err := h.Service.GetConfig(ctx, businessID)
 	if err != nil {
 		return GetTaxConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get tax config"}
 	}
@@ -87,8 +92,13 @@ func (h *UpdateTaxConfigHandler) Serve(ctx context.Context, req *UpdateTaxConfig
 	if device.User == nil {
 		return UpdateTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	err := h.Service.UpdateConfig(ctx, domain.TaxConfigInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		TaxName:     req.TaxName,
 		TaxRate:     req.TaxRate,
 		IsInclusive: req.IsInclusive,
@@ -121,7 +131,11 @@ func (h *GetPLReportHandler) Serve(ctx context.Context, _ *GetPLReportRequest) (
 	if device.User == nil {
 		return PLReportResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	report, err := h.Service.GetPLReport(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return PLReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	report, err := h.Service.GetPLReport(ctx, businessID)
 	if err != nil {
 		return PLReportResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get P&L report"}
 	}

@@ -14,4 +14,5 @@ type Receipt struct {
 	Total         float64   `json:"total"`
 	PaymentMethod string    `json:"payment_method"`
 	PaidAt        time.Time `json:"paid_at"`
+	BusinessID    int64     `json:"business_id"`
 }

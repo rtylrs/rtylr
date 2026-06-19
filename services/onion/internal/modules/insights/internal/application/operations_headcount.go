@@ -16,10 +16,10 @@ type HeadcountPayload struct {
 }
 
 // GetHeadcount returns current active staff + month-over-month change.
-func (s *Service) GetHeadcount(ctx context.Context, ownerID int64) (HeadcountPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:headcount", ownerID)
+func (s *Service) GetHeadcount(ctx context.Context, businessID int64) (HeadcountPayload, error) {
+	key := fmt.Sprintf("insights:%d:operations:headcount", businessID)
 	out, err := cacher.Of[HeadcountPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (HeadcountPayload, error) {
-		snap, rerr := s.repo.GetHeadcount(ctx, ownerID)
+		snap, rerr := s.repo.GetHeadcount(ctx, businessID)
 		if rerr != nil {
 			return HeadcountPayload{}, rerr
 		}

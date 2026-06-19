@@ -19,8 +19,8 @@ import (
 const receiptsCacheTTL = 5 * time.Minute
 
 type repository interface {
-	List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error)
-	Get(ctx context.Context, ownerID, id int64) (*domain.Receipt, error)
+	List(ctx context.Context, businessID int64, dateFrom, dateTo string) ([]domain.Receipt, error)
+	Get(ctx context.Context, businessID, id int64) (*domain.Receipt, error)
 }
 
 type Service struct {
@@ -31,30 +31,30 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
-	key := fmt.Sprintf("%s|receipts|f=%s|t=%s", cacheKeys.OrdersList(ownerID), dateFrom, dateTo)
+func (s *Service) List(ctx context.Context, businessID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
+	key := fmt.Sprintf("%s|receipts|f=%s|t=%s", cacheKeys.OrdersList(businessID), dateFrom, dateTo)
 	return cacher.Of[[]domain.Receipt]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Receipt, error) {
-			return s.repo.List(ctx, ownerID, dateFrom, dateTo)
+			return s.repo.List(ctx, businessID, dateFrom, dateTo)
 		},
 		cacher.WithExpiry(ctx, receiptsCacheTTL),
 	)
 }
 
-func (s *Service) Get(ctx context.Context, ownerID, id int64) (*domain.Receipt, error) {
-	key := fmt.Sprintf("%s|receipt=%d", cacheKeys.OrdersList(ownerID), id)
+func (s *Service) Get(ctx context.Context, businessID, id int64) (*domain.Receipt, error) {
+	key := fmt.Sprintf("%s|receipt=%d", cacheKeys.OrdersList(businessID), id)
 	return cacher.Of[*domain.Receipt]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*domain.Receipt, error) {
-			return s.repo.Get(ctx, ownerID, id)
+			return s.repo.Get(ctx, businessID, id)
 		},
 		cacher.WithExpiry(ctx, receiptsCacheTTL),
 	)
 }
 
 // EmailReceipt emails a previously-generated receipt to the provided address.
-// Returns ErrReceiptNotFound when the receipt does not exist or is not owned by ownerID.
-func (s *Service) EmailReceipt(ctx context.Context, ownerID, id int64, toEmail string) error {
-	receipt, err := s.repo.Get(ctx, ownerID, id)
+// Returns ErrReceiptNotFound when the receipt does not exist or is not owned by businessID.
+func (s *Service) EmailReceipt(ctx context.Context, businessID, id int64, toEmail string) error {
+	receipt, err := s.repo.Get(ctx, businessID, id)
 	if err != nil {
 		return err
 	}

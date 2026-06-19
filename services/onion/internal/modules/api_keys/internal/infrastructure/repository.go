@@ -20,8 +20,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.APIKey, error) {
-	rows, err := r.queries.ListAPIKeys(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.APIKey, error) {
+	rows, err := r.queries.ListAPIKeys(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list API keys", logger.Error(err))
 		return nil, err
@@ -32,6 +32,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.APIKey, 
 		var k domain.APIKey
 		k.ID = row.ID
 		k.OwnerID = row.OwnerID
+		k.BusinessID = row.BusinessID
 		k.Name = row.Name
 		k.KeyPrefix = row.KeyPrefix
 		k.IsActive = row.IsActive
@@ -53,18 +54,19 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.APIKey, 
 	return keys, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, name, keyHash, keyPrefix string, scopes []string) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, name, keyHash, keyPrefix string, scopes []string) (int64, error) {
 	scopesJSON, err := json.Marshal(scopes)
 	if err != nil {
 		return 0, err
 	}
 
 	res, err := r.queries.CreateAPIKey(ctx, sqlc.CreateAPIKeyParams{
-		OwnerID:   ownerID,
-		Name:      name,
-		KeyHash:   keyHash,
-		KeyPrefix: keyPrefix,
-		Scopes:    scopesJSON,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		Name:       name,
+		KeyHash:    keyHash,
+		KeyPrefix:  keyPrefix,
+		Scopes:     scopesJSON,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create API key", logger.Error(err))
@@ -74,10 +76,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, name, keyHash, k
 	return res.LastInsertId()
 }
 
-func (r *Repository) Revoke(ctx context.Context, ownerID, keyID int64) error {
+func (r *Repository) Revoke(ctx context.Context, businessID, keyID int64) error {
 	err := r.queries.RevokeAPIKey(ctx, sqlc.RevokeAPIKeyParams{
-		ID:      keyID,
-		OwnerID: ownerID,
+		ID:         keyID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to revoke API key", logger.Error(err))

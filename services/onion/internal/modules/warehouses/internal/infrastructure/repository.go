@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListWarehouses(ctx context.Context, ownerID int64) ([]domain.Warehouse, error) {
-	rows, err := r.queries.ListWarehouses(ctx, ownerID)
+func (r *Repository) ListWarehouses(ctx context.Context, businessID int64) ([]domain.Warehouse, error) {
+	rows, err := r.queries.ListWarehouses(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list warehouses", logger.Error(err))
 
@@ -38,6 +38,7 @@ func (r *Repository) ListWarehouses(ctx context.Context, ownerID int64) ([]domai
 		var w domain.Warehouse
 		w.ID = row.ID
 		w.OwnerID = row.OwnerID
+		w.BusinessID = row.BusinessID
 		w.Name = row.Name
 
 		if row.Address.Valid {
@@ -82,9 +83,10 @@ func (r *Repository) ListWarehouses(ctx context.Context, ownerID int64) ([]domai
 	return warehouses, nil
 }
 
-func (r *Repository) CreateWarehouse(ctx context.Context, ownerID int64, input domain.WarehouseInput) (int64, error) {
+func (r *Repository) CreateWarehouse(ctx context.Context, businessID int64, input domain.WarehouseInput) (int64, error) {
 	result, err := r.queries.CreateWarehouse(ctx, sqlc.CreateWarehouseParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		Name:        input.Name,
 		Address:     nullString(input.Address),
 		City:        nullString(input.City),
@@ -108,7 +110,7 @@ func (r *Repository) CreateWarehouse(ctx context.Context, ownerID int64, input d
 	return id, nil
 }
 
-func (r *Repository) UpdateWarehouse(ctx context.Context, ownerID, id int64, input domain.WarehouseInput) error {
+func (r *Repository) UpdateWarehouse(ctx context.Context, businessID, id int64, input domain.WarehouseInput) error {
 	err := r.queries.UpdateWarehouse(ctx, sqlc.UpdateWarehouseParams{
 		Name:        input.Name,
 		Address:     nullString(input.Address),
@@ -118,7 +120,7 @@ func (r *Repository) UpdateWarehouse(ctx context.Context, ownerID, id int64, inp
 		Capacity:    nullInt64(input.Capacity),
 		IsDefault:   sql.NullBool{Bool: input.IsDefault, Valid: true},
 		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		ID:          id,
 	})
 	if err != nil {
@@ -130,10 +132,10 @@ func (r *Repository) UpdateWarehouse(ctx context.Context, ownerID, id int64, inp
 	return nil
 }
 
-func (r *Repository) DeleteWarehouse(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) DeleteWarehouse(ctx context.Context, businessID, id int64) error {
 	err := r.queries.DeleteWarehouse(ctx, sqlc.DeleteWarehouseParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete warehouse", logger.Error(err))
@@ -144,16 +146,16 @@ func (r *Repository) DeleteWarehouse(ctx context.Context, ownerID, id int64) err
 	return nil
 }
 
-// CountWarehouses returns the total number of warehouses for the given owner.
+// CountWarehouses returns the total number of warehouses for the given business.
 // Pass activeOnly=true to count only active warehouses.
-func (r *Repository) CountWarehouses(ctx context.Context, ownerID int64, activeOnly bool) (int64, error) {
+func (r *Repository) CountWarehouses(ctx context.Context, businessID int64, activeOnly bool) (int64, error) {
 	var count int64
 	var err error
 
 	if activeOnly {
-		count, err = r.queries.CountActiveWarehouses(ctx, ownerID)
+		count, err = r.queries.CountActiveWarehouses(ctx, businessID)
 	} else {
-		count, err = r.queries.CountWarehouses(ctx, ownerID)
+		count, err = r.queries.CountWarehouses(ctx, businessID)
 	}
 
 	if err != nil {
@@ -164,12 +166,12 @@ func (r *Repository) CountWarehouses(ctx context.Context, ownerID int64, activeO
 	return count, nil
 }
 
-// GetWarehouseByID fetches a single warehouse by primary key for the given owner.
+// GetWarehouseByID fetches a single warehouse by primary key for the given business.
 // Returns ErrWarehouseNotFound when no matching row exists.
-func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (domain.Warehouse, error) {
+func (r *Repository) GetWarehouseByID(ctx context.Context, businessID, id int64) (domain.Warehouse, error) {
 	row, err := r.queries.GetWarehouseByID(ctx, sqlc.GetWarehouseByIDParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -182,6 +184,7 @@ func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (d
 	var w domain.Warehouse
 	w.ID = row.ID
 	w.OwnerID = row.OwnerID
+	w.BusinessID = row.BusinessID
 	w.Name = row.Name
 
 	if row.Address.Valid {

@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
@@ -34,6 +35,11 @@ func (h *GetEmployeeChecklistHandler) Serve(ctx context.Context, req *GetEmploye
 		return GetEmployeeChecklistResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetEmployeeChecklistResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	checklistID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
@@ -44,7 +50,7 @@ func (h *GetEmployeeChecklistHandler) Serve(ctx context.Context, req *GetEmploye
 		return GetEmployeeChecklistResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
 	}
 
-	checklist, err := h.Service.GetEmployeeChecklist(ctx, device.User.UserID, req.EmployeeID, checklistID)
+	checklist, err := h.Service.GetEmployeeChecklist(ctx, businessID, req.EmployeeID, checklistID)
 	if err != nil {
 		if errors.Is(err, domain.ErrChecklistNotFound) {
 			return GetEmployeeChecklistResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Checklist not found"}

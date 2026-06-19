@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerRecordVisitRoutes() []string {
@@ -52,8 +53,14 @@ func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest)
 		return RecordVisitResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RecordVisitResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	err := h.CRMService.RecordVisit(ctx, domain.RecordVisitInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		CustomerID:  req.CustomerID,
 		Amount:      req.Amount,
 		AwardPoints: req.AwardPoints,

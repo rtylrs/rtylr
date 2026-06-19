@@ -1,23 +1,23 @@
 -- name: ListJournalEntries :many
-SELECT id, owner_id, date, description, status, posted_at, created_at
+SELECT id, owner_id, business_id, date, description, status, posted_at, created_at
 FROM finance_journal_entries
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY date DESC
 LIMIT ? OFFSET ?;
 
 -- name: GetJournalEntry :one
-SELECT id, owner_id, date, description, status, posted_at, created_at
+SELECT id, owner_id, business_id, date, description, status, posted_at, created_at
 FROM finance_journal_entries
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: CreateJournalEntry :execresult
-INSERT INTO finance_journal_entries (owner_id, date, description)
-VALUES (?, ?, ?);
+INSERT INTO finance_journal_entries (owner_id, business_id, date, description)
+VALUES (?, ?, ?, ?);
 
 -- name: PostJournalEntry :execresult
 UPDATE finance_journal_entries
 SET status = 'posted', posted_at = CURRENT_TIMESTAMP
-WHERE id = ? AND owner_id = ? AND status = 'draft';
+WHERE id = ? AND business_id = ? AND status = 'draft';
 
 -- name: GetJournalLines :many
 SELECT id, entry_id, account_id, debit, credit
@@ -32,7 +32,7 @@ VALUES (?, ?, ?, ?);
 -- name: CountJournalEntriesByStatus :many
 SELECT status, COUNT(*) AS cnt
 FROM finance_journal_entries
-WHERE owner_id = ?
+WHERE business_id = ?
 GROUP BY status;
 
 -- name: SumJournalLinesByAccount :one
@@ -41,6 +41,6 @@ SELECT
     COALESCE(SUM(CAST(l.credit AS REAL)), 0) AS total_credit
 FROM finance_journal_lines l
 JOIN finance_journal_entries e ON e.id = l.entry_id
-WHERE e.owner_id = ?
+WHERE e.business_id = ?
   AND l.account_id = ?
   AND e.status = 'posted';

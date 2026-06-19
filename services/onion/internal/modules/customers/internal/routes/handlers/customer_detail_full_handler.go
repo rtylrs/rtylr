@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
@@ -49,7 +50,12 @@ func (h *GetCustomerDetailFullHandler) Serve(ctx context.Context, req *GetCustom
 		return GetCustomerDetailFullResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	detail, err := h.CRMService.GetCustomerDetail(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCustomerDetailFullResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	detail, err := h.CRMService.GetCustomerDetail(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
 			return GetCustomerDetailFullResponse{}, &errorModels.ServerError{

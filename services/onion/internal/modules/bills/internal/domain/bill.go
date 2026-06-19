@@ -11,6 +11,7 @@ var ErrBillNotFound = errors.New("bill not found")
 type Bill struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	SupplierID  int64     `json:"supplier_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
@@ -29,7 +30,7 @@ func (b *Bill) FromRow(row *sql.Rows) error {
 	)
 
 	err := row.Scan(
-		&b.ID, &b.OwnerID, &supplierID, &b.Amount, &currency,
+		&b.ID, &b.OwnerID, &b.BusinessID, &supplierID, &b.Amount, &currency,
 		&b.DueDate, &b.Status, &description, &b.CreatedAt, &b.UpdatedAt,
 	)
 	if err != nil {

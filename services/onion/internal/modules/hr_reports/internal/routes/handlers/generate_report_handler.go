@@ -16,6 +16,7 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func GenerateReportRoutes() []string { return []string{"/hr/reports/generate"} }
@@ -42,6 +43,12 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
+		writeError(w, errorModels.PermissionDeniedServerError())
+		return
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
 		writeError(w, errorModels.PermissionDeniedServerError())
 		return
 	}
@@ -117,6 +124,7 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	params := domain.ReportParams{
 		OwnerID:      device.User.UserID,
+		BusinessID:   businessID,
 		DateFrom:     dateFrom,
 		DateTo:       dateTo,
 		LocationID:   req.LocationID,
@@ -125,7 +133,7 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		Format:       req.Format,
 	}
 
-	rows, serviceErr := h.Service.GenerateReport(ctx, device.User.UserID, req.ReportType, params)
+	rows, serviceErr := h.Service.GenerateReport(ctx, businessID, req.ReportType, params)
 	if serviceErr != nil {
 		if errors.Is(serviceErr, domain.ErrUnsupportedReportType) {
 			writeError(w, &errorModels.ServerError{

@@ -9,6 +9,7 @@ import (
 type SetupStep struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	StepKey     string
 	CompletedAt *time.Time
 }
@@ -16,6 +17,7 @@ type SetupStep struct {
 type HRConfig struct {
 	ID               int64
 	OwnerID          int64
+	BusinessID       int64
 	SetupCompletedAt *time.Time
 	CreatedAt        time.Time
 	UpdatedAt        time.Time

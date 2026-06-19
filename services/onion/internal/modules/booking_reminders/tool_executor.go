@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const listBookingRemindersToolName = "booking.list_reminders"
@@ -15,12 +16,12 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 		return nil, false, nil
 	}
 
-	ownerID, err := bookingRemindersToolOwnerID(ctx)
+	businessID, err := bookingRemindersToolBusinessID(ctx)
 	if err != nil {
 		return nil, true, err
 	}
 
-	reminders, err := m.service.List(ctx, ownerID)
+	reminders, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, true, err
 	}
@@ -41,12 +42,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 	}, true, nil
 }
 
-func bookingRemindersToolOwnerID(ctx context.Context) (int64, error) {
+func bookingRemindersToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return businessID, nil
 }
 
 func bookingReminderToolPayload(reminder domain.Reminder) map[string]any {

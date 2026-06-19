@@ -10,6 +10,7 @@ var ErrSegmentNotFound = errors.New("segment not found")
 type Segment struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
 	Filters       []byte    `json:"filters"`
@@ -20,6 +21,7 @@ type Segment struct {
 
 type SegmentInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Filters     []byte
@@ -28,6 +30,7 @@ type SegmentInput struct {
 type SegmentUpdateInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Filters     []byte

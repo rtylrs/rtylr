@@ -26,20 +26,20 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListOvertimeRequests(ctx context.Context, ownerID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
-	total, err := r.queries.CountOvertimeRequests(ctx, ownerID)
+func (r *Repository) ListOvertimeRequests(ctx context.Context, businessID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
+	total, err := r.queries.CountOvertimeRequests(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to count overtime requests", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to count overtime requests", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListOvertimeRequests(ctx, sqlc.ListOvertimeRequestsParams{
-		OwnerID: ownerID,
-		Limit:   params.Limit,
-		Offset:  params.Offset,
+		BusinessID: businessID,
+		Limit:      params.Limit,
+		Offset:     params.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list overtime requests", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list overtime requests", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
@@ -50,27 +50,28 @@ func (r *Repository) ListOvertimeRequests(ctx context.Context, ownerID int64, pa
 	return requests, total, nil
 }
 
-func (r *Repository) GetOvertimeRequest(ctx context.Context, ownerID, requestID int64) (*domain.OvertimeRequestRecord, error) {
-	row, err := r.queries.GetOvertimeRequest(ctx, sqlc.GetOvertimeRequestParams{OwnerID: ownerID, ID: requestID})
+func (r *Repository) GetOvertimeRequest(ctx context.Context, businessID, requestID int64) (*domain.OvertimeRequestRecord, error) {
+	row, err := r.queries.GetOvertimeRequest(ctx, sqlc.GetOvertimeRequestParams{BusinessID: businessID, ID: requestID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrOvertimeRequestNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get overtime request", logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get overtime request", logger.Any("business_id", businessID), logger.Any("request_id", requestID), logger.Error(err))
 		return nil, err
 	}
 	req := overtimeRequestFromRow(row)
 	return &req, nil
 }
 
-func (r *Repository) CreateOvertimeRequest(ctx context.Context, ownerID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
+func (r *Repository) CreateOvertimeRequest(ctx context.Context, businessID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
 	reqDate, err := time.Parse("2006-01-02", req.Date)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := r.queries.CreateOvertimeRequest(ctx, sqlc.CreateOvertimeRequestParams{
-		OwnerID:              ownerID,
+		OwnerID:              businessID,
+		BusinessID:           businessID,
 		EmployeeID:           req.EmployeeID,
 		Date:                 reqDate,
 		PlannedExtraMinutes:  req.PlannedExtraMinutes,
@@ -79,7 +80,7 @@ func (r *Repository) CreateOvertimeRequest(ctx context.Context, ownerID int64, r
 		CurrentApprovalLevel: req.CurrentApprovalLevel,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create overtime request", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create overtime request", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	id, err := result.LastInsertId()
@@ -87,34 +88,36 @@ func (r *Repository) CreateOvertimeRequest(ctx context.Context, ownerID int64, r
 		return nil, err
 	}
 	req.ID = id
-	req.OwnerID = ownerID
+	req.OwnerID = businessID
+	req.BusinessID = businessID
 	return &req, nil
 }
 
-func (r *Repository) ApproveOvertimeRequest(ctx context.Context, ownerID, requestID, approverID int64, multiplier float64) error {
+func (r *Repository) ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error {
 	return r.queries.ApproveOvertimeRequest(ctx, sqlc.ApproveOvertimeRequestParams{
 		ApprovedBy:        sql.NullInt64{Int64: approverID, Valid: approverID != 0},
 		MultiplierApplied: nullStringFromFloat(multiplier),
 		ID:                requestID,
-		OwnerID:           ownerID,
+		BusinessID:        businessID,
 	})
 }
 
-func (r *Repository) AdvanceOvertimeApprovalLevel(ctx context.Context, ownerID, requestID int64) error {
-	return r.queries.AdvanceOvertimeApprovalLevel(ctx, sqlc.AdvanceOvertimeApprovalLevelParams{ID: requestID, OwnerID: ownerID})
+func (r *Repository) AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64) error {
+	return r.queries.AdvanceOvertimeApprovalLevel(ctx, sqlc.AdvanceOvertimeApprovalLevelParams{ID: requestID, BusinessID: businessID})
 }
 
-func (r *Repository) RejectOvertimeRequest(ctx context.Context, ownerID, requestID int64) error {
-	return r.queries.RejectOvertimeRequest(ctx, sqlc.RejectOvertimeRequestParams{ID: requestID, OwnerID: ownerID})
+func (r *Repository) RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error {
+	return r.queries.RejectOvertimeRequest(ctx, sqlc.RejectOvertimeRequestParams{ID: requestID, BusinessID: businessID})
 }
 
-func (r *Repository) CreateFlaggedOvertimeRequest(ctx context.Context, ownerID, employeeID int64, date string, extraMinutes int32) error {
+func (r *Repository) CreateFlaggedOvertimeRequest(ctx context.Context, businessID, employeeID int64, date string, extraMinutes int32) error {
 	reqDate, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return err
 	}
 	_, err = r.queries.CreateFlaggedOvertimeRequest(ctx, sqlc.CreateFlaggedOvertimeRequestParams{
-		OwnerID:             ownerID,
+		OwnerID:             businessID,
+		BusinessID:          businessID,
 		EmployeeID:          employeeID,
 		Date:                reqDate,
 		PlannedExtraMinutes: extraMinutes,
@@ -122,12 +125,12 @@ func (r *Repository) CreateFlaggedOvertimeRequest(ctx context.Context, ownerID, 
 	return err
 }
 
-func (r *Repository) ListFlaggedForDate(ctx context.Context, ownerID int64, date string) ([]domain.OvertimeRequestRecord, error) {
+func (r *Repository) ListFlaggedForDate(ctx context.Context, businessID int64, date string) ([]domain.OvertimeRequestRecord, error) {
 	d, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := r.queries.ListFlaggedForDate(ctx, sqlc.ListFlaggedForDateParams{OwnerID: ownerID, Date: d})
+	rows, err := r.queries.ListFlaggedForDate(ctx, sqlc.ListFlaggedForDateParams{BusinessID: businessID, Date: d})
 	if err != nil {
 		return nil, err
 	}
@@ -138,8 +141,8 @@ func (r *Repository) ListFlaggedForDate(ctx context.Context, ownerID int64, date
 	return requests, nil
 }
 
-func (r *Repository) GetOvertimeConfig(ctx context.Context, ownerID int64) (*domain.OvertimeConfigRecord, error) {
-	row, err := r.queries.GetOvertimeConfig(ctx, ownerID)
+func (r *Repository) GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error) {
+	row, err := r.queries.GetOvertimeConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrOvertimeConfigNotFound
@@ -150,9 +153,10 @@ func (r *Repository) GetOvertimeConfig(ctx context.Context, ownerID int64) (*dom
 	return &cfg, nil
 }
 
-func (r *Repository) UpsertOvertimeConfig(ctx context.Context, ownerID int64, cfg domain.OvertimeConfigRecord) error {
+func (r *Repository) UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error {
 	_, err := r.queries.UpsertOvertimeConfig(ctx, sqlc.UpsertOvertimeConfigParams{
-		OwnerID:               ownerID,
+		OwnerID:               businessID,
+		BusinessID:            businessID,
 		DailyThresholdMinutes: cfg.DailyThresholdMinutes,
 		DefaultMultiplier:     fmt.Sprintf("%.2f", cfg.DefaultMultiplier),
 		AutoDetectEnabled:     cfg.AutoDetectEnabled,
@@ -170,6 +174,7 @@ func overtimeRequestFromRow(row sqlc.HrOvertimeRequest) domain.OvertimeRequestRe
 	return domain.OvertimeRequestRecord{
 		ID:                   row.ID,
 		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
 		EmployeeID:           row.EmployeeID,
 		Date:                 row.Date.Format("2006-01-02"),
 		PlannedExtraMinutes:  row.PlannedExtraMinutes,
@@ -187,6 +192,7 @@ func overtimeConfigFromRow(row sqlc.HrOvertimeConfig) domain.OvertimeConfigRecor
 	return domain.OvertimeConfigRecord{
 		ID:                    row.ID,
 		OwnerID:               row.OwnerID,
+		BusinessID:            row.BusinessID,
 		DailyThresholdMinutes: row.DailyThresholdMinutes,
 		DefaultMultiplier:     parseFloat(row.DefaultMultiplier),
 		AutoDetectEnabled:     row.AutoDetectEnabled,

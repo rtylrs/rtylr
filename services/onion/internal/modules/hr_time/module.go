@@ -18,8 +18,8 @@ type hrCoreApprovalAdapter struct {
 	core *hrcore.Module
 }
 
-func (a *hrCoreApprovalAdapter) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*domain.ApprovalChainInfo, error) {
-	chain, err := a.core.GetApprovalChain(ctx, ownerID, requestType)
+func (a *hrCoreApprovalAdapter) GetApprovalChain(ctx context.Context, businessID int64, requestType string) (*domain.ApprovalChainInfo, error) {
+	chain, err := a.core.GetApprovalChain(ctx, businessID, requestType)
 	if err != nil {
 		return nil, err
 	}

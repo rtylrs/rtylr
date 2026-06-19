@@ -79,6 +79,7 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 	// Legacy ledger row for read-compatibility, mirroring the movement.
 	_, err = qtx.InsertInventoryTransaction(ctx, sqlc.InsertInventoryTransactionParams{
 		OwnerID:        ownerID,
+		BusinessID:     ownerID,
 		ProductID:      productID,
 		Type:           sqlc.ErpInventoryTransactionsType(txType),
 		QuantityChange: strconv.FormatFloat(change, 'f', -1, 64),

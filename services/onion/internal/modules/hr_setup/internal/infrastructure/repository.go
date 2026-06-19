@@ -21,10 +21,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]*domain.SetupStep, error) {
-	listSQL, args, err := sq.Select("id", "owner_id", "step_key", "completed_at").
+func (r *Repository) GetSetupSteps(ctx context.Context, businessID int64) ([]*domain.SetupStep, error) {
+	listSQL, args, err := sq.Select("id", "owner_id", "business_id", "step_key", "completed_at").
 		From("hr_setup_steps").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]*domai
 	steps := make([]*domain.SetupStep, 0)
 	for rows.Next() {
 		var s domain.SetupStep
-		if err := rows.Scan(&s.ID, &s.OwnerID, &s.StepKey, &s.CompletedAt); err != nil {
+		if err := rows.Scan(&s.ID, &s.OwnerID, &s.BusinessID, &s.StepKey, &s.CompletedAt); err != nil {
 			return nil, err
 		}
 		steps = append(steps, &s)
@@ -52,10 +52,10 @@ func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]*domai
 	return steps, nil
 }
 
-func (r *Repository) UpsertSetupStep(ctx context.Context, ownerID int64, stepKey string, completedAt time.Time) error {
+func (r *Repository) UpsertSetupStep(ctx context.Context, businessID int64, stepKey string, completedAt time.Time) error {
 	upsertSQL, args, err := sq.Insert("hr_setup_steps").
-		Columns("owner_id", "step_key", "completed_at").
-		Values(ownerID, stepKey, completedAt).
+		Columns("owner_id", "business_id", "step_key", "completed_at").
+		Values(businessID, businessID, stepKey, completedAt).
 		Suffix("ON DUPLICATE KEY UPDATE completed_at = VALUES(completed_at)").
 		PlaceholderFormat(sq.Question).
 		ToSql()

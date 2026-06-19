@@ -21,9 +21,9 @@ const (
 	posUsersTTL   = 2 * time.Minute
 )
 
-func invalidatePosUsersScope(ctx context.Context, ownerID int64) {
+func invalidatePosUsersScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posUsersScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posUsersScope, businessID))
 	}
 }
 
@@ -41,11 +41,11 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) ListByOwner(ctx context.Context, ownerID int64) ([]domain.POSUser, error) {
+func (s *Service) ListByOwner(ctx context.Context, businessID int64) ([]domain.POSUser, error) {
 	return cacher.Of[[]domain.POSUser]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(posUsersScope, ownerID, "by_owner"),
+		cacheKeys.Scoped(posUsersScope, businessID, "by_owner"),
 		func(ctx context.Context) ([]domain.POSUser, error) {
-			users, err := s.repo.ListByOwner(ctx, ownerID)
+			users, err := s.repo.ListByOwner(ctx, businessID)
 			if err != nil {
 				return nil, err
 			}
@@ -55,11 +55,11 @@ func (s *Service) ListByOwner(ctx context.Context, ownerID int64) ([]domain.POSU
 	)
 }
 
-func (s *Service) ListByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.POSUser, error) {
-	key := cacheKeys.Scoped(posUsersScope, ownerID, fmt.Sprintf("by_loc=%d", locationID))
+func (s *Service) ListByLocation(ctx context.Context, businessID, locationID int64) ([]domain.POSUser, error) {
+	key := cacheKeys.Scoped(posUsersScope, businessID, fmt.Sprintf("by_loc=%d", locationID))
 	return cacher.Of[[]domain.POSUser]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.POSUser, error) {
-			users, err := s.repo.ListByLocation(ctx, ownerID, locationID)
+			users, err := s.repo.ListByLocation(ctx, businessID, locationID)
 			if err != nil {
 				return nil, err
 			}
@@ -69,7 +69,7 @@ func (s *Service) ListByLocation(ctx context.Context, ownerID, locationID int64)
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID, createdBy int64, input domain.CreatePOSUserInput) (int64, error) {
+func (s *Service) Create(ctx context.Context, businessID, createdBy int64, input domain.CreatePOSUserInput) (int64, error) {
 	if strings.TrimSpace(input.Name) == "" {
 		return 0, ErrInvalidInput
 	}
@@ -81,18 +81,18 @@ func (s *Service) Create(ctx context.Context, ownerID, createdBy int64, input do
 		return 0, err
 	}
 	input.PIN = ""
-	id, err := s.repo.Create(ctx, ownerID, createdBy, input, hashed)
+	id, err := s.repo.Create(ctx, businessID, createdBy, input, hashed)
 	if err != nil {
 		return 0, err
 	}
-	invalidatePosUsersScope(ctx, ownerID)
+	invalidatePosUsersScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.UpdatePOSUserInput) error {
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.UpdatePOSUserInput) error {
 	newPIN := input.PIN
 	input.PIN = ""
-	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
 	if newPIN != "" {
@@ -100,19 +100,19 @@ func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.Up
 		if err != nil {
 			return err
 		}
-		if err := s.repo.UpdatePINHash(ctx, ownerID, id, hashed); err != nil {
+		if err := s.repo.UpdatePINHash(ctx, businessID, id, hashed); err != nil {
 			return err
 		}
 	}
-	invalidatePosUsersScope(ctx, ownerID)
+	invalidatePosUsersScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) Deactivate(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Deactivate(ctx, ownerID, id); err != nil {
+func (s *Service) Deactivate(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Deactivate(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidatePosUsersScope(ctx, ownerID)
+	invalidatePosUsersScope(ctx, businessID)
 	return nil
 }
 
@@ -122,7 +122,7 @@ type SetPINActor struct {
 	TeamRole string
 }
 
-func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, input domain.SetPINInput) error {
+func (s *Service) SetPIN(ctx context.Context, businessID int64, actor SetPINActor, input domain.SetPINInput) error {
 	if input.UserID <= 0 || input.LocationID <= 0 {
 		return ErrInvalidInput
 	}
@@ -130,7 +130,7 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 		return ErrInvalidInput
 	}
 
-	access, err := s.repo.GetMemberLocationAccess(ctx, ownerID, input.UserID, input.LocationID)
+	access, err := s.repo.GetMemberLocationAccess(ctx, businessID, input.UserID, input.LocationID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrUserNotFound) {
 			return ErrInvalidInput
@@ -139,12 +139,12 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 	}
 
 	if input.UserID != actor.UserID {
-		if mgrErr := s.requireLocationManager(ctx, ownerID, actor, input.LocationID); mgrErr != nil {
+		if mgrErr := s.requireLocationManager(ctx, businessID, actor, input.LocationID); mgrErr != nil {
 			return mgrErr
 		}
 	}
 
-	existing, err := s.repo.FindByUserAndLocation(ctx, ownerID, input.UserID, input.LocationID)
+	existing, err := s.repo.FindByUserAndLocation(ctx, businessID, input.UserID, input.LocationID)
 	if err != nil && !errors.Is(err, infrastructure.ErrUserNotFound) {
 		return err
 	}
@@ -160,7 +160,7 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 
 	role := roleForAccess(access)
 	caps := domain.DefaultCapabilities(role)
-	_, err = s.repo.Create(ctx, ownerID, input.UserID, domain.CreatePOSUserInput{
+	_, err = s.repo.Create(ctx, businessID, input.UserID, domain.CreatePOSUserInput{
 		UserID:           input.UserID,
 		LocationID:       input.LocationID,
 		Name:             input.Name,
@@ -174,15 +174,15 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, 
 	if err != nil {
 		return err
 	}
-	invalidatePosUsersScope(ctx, ownerID)
+	invalidatePosUsersScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) requireLocationManager(ctx context.Context, ownerID int64, actor SetPINActor, locationID int64) error {
+func (s *Service) requireLocationManager(ctx context.Context, businessID int64, actor SetPINActor, locationID int64) error {
 	if actor.IsOwner || actor.TeamRole == "owner" || actor.TeamRole == "admin" {
 		return nil
 	}
-	access, err := s.repo.GetMemberLocationAccess(ctx, ownerID, actor.UserID, locationID)
+	access, err := s.repo.GetMemberLocationAccess(ctx, businessID, actor.UserID, locationID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrUserNotFound) {
 			return ErrForbidden
@@ -202,13 +202,13 @@ func roleForAccess(access *infrastructure.LocationAccess) domain.POSUserRole {
 	return domain.RoleCashier
 }
 
-func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int64, pin string) (*domain.VerifiedPOSUser, error) {
+func (s *Service) VerifyPIN(ctx context.Context, businessID, locationID, userID int64, pin string) (*domain.VerifiedPOSUser, error) {
 	pin = strings.TrimSpace(pin)
 	if locationID <= 0 || userID <= 0 || pin == "" {
 		return nil, domain.ErrInvalidPIN
 	}
 
-	user, err := s.repo.FindForVerify(ctx, ownerID, locationID, userID)
+	user, err := s.repo.FindForVerify(ctx, businessID, locationID, userID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrUserNotFound) {
 			return nil, domain.ErrInvalidPIN
@@ -216,7 +216,7 @@ func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int
 		return nil, err
 	}
 
-	if err := s.verifyAndMigratePIN(ctx, ownerID, user, pin); err != nil {
+	if err := s.verifyAndMigratePIN(ctx, businessID, user, pin); err != nil {
 		if errors.Is(err, domain.ErrInvalidPIN) {
 			return nil, domain.ErrInvalidPIN
 		}
@@ -239,7 +239,7 @@ func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int
 	}, nil
 }
 
-func (s *Service) verifyAndMigratePIN(ctx context.Context, ownerID int64, user *domain.POSUser, pin string) error {
+func (s *Service) verifyAndMigratePIN(ctx context.Context, businessID int64, user *domain.POSUser, pin string) error {
 	hashMatches := user.PINHash != "" && passwordutils.CheckPINHash(pin, user.PINHash)
 	legacyPIN := strings.TrimSpace(user.PIN)
 	legacyMatches := legacyPIN != "" && subtle.ConstantTimeCompare([]byte(legacyPIN), []byte(pin)) == 1
@@ -259,10 +259,10 @@ func (s *Service) verifyAndMigratePIN(ctx context.Context, ownerID int64, user *
 				return err
 			}
 		}
-		if err := s.repo.UpdatePINHash(ctx, ownerID, user.ID, hash); err != nil {
+		if err := s.repo.UpdatePINHash(ctx, businessID, user.ID, hash); err != nil {
 			return err
 		}
-		invalidatePosUsersScope(ctx, ownerID)
+		invalidatePosUsersScope(ctx, businessID)
 	}
 
 	return nil

@@ -29,8 +29,12 @@ func (h *SearchCustomersHandler) Serve(ctx context.Context, req *SearchCustomers
 		return SearchCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	customers, err := h.Service.Search(ctx, ownerID, req.Query)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SearchCustomersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	customers, err := h.Service.Search(ctx, businessID, req.Query)
 	if err != nil {
 		return SearchCustomersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to search customers"}
 	}

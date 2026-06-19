@@ -27,6 +27,7 @@ const (
 type Lead struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	CompanyName  string    `json:"company_name"`
 	Industry     string    `json:"industry"`
 	Size         string    `json:"size"`
@@ -64,6 +65,7 @@ type UpdateLeadRequest struct {
 type Contact struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
 	LeadID     int64     `json:"lead_id"`
 	CustomerID int64     `json:"customer_id"`
 	Name       string    `json:"name"`
@@ -101,6 +103,7 @@ type UpdateContactRequest struct {
 type Touchpoint struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	LeadID       int64     `json:"lead_id"`
 	ContactID    *int64    `json:"contact_id"`
 	Type         string    `json:"type"`
@@ -123,6 +126,7 @@ type CreateTouchpointRequest struct {
 type Contract struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	LeadID       int64     `json:"lead_id"`
 	Plan         string    `json:"plan"`
 	MRR          float64   `json:"mrr"`

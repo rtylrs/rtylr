@@ -45,9 +45,12 @@ func (h *DaySummaryHandler) Serve(ctx context.Context, req *DaySummaryRequest) (
 	if device.User == nil {
 		return DaySummaryResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DaySummaryResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	summary, err := h.Service.GetDaySummary(ctx, ownerID, req.Date)
+	summary, err := h.Service.GetDaySummary(ctx, businessID, req.Date)
 	if err != nil {
 		return DaySummaryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get day summary"}
 	}

@@ -15,13 +15,13 @@ func TestListCombos_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := repo.List(ctx, testutil.OwnerID)
+	_, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
 }
 
-func TestListCombos_UnknownOwnerReturnsEmpty(t *testing.T) {
+func TestListCombos_UnknownBusinessReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -31,7 +31,7 @@ func TestListCombos_UnknownOwnerReturnsEmpty(t *testing.T) {
 		t.Fatalf("List error: %v", err)
 	}
 	if len(combos) != 0 {
-		t.Errorf("expected empty list for owner_id=0, got %d combos", len(combos))
+		t.Errorf("expected empty list for business_id=0, got %d combos", len(combos))
 	}
 }
 
@@ -40,7 +40,7 @@ func TestListCombos_EachHasNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	combos, err := repo.List(ctx, testutil.OwnerID)
+	combos, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -51,18 +51,18 @@ func TestListCombos_EachHasNonZeroID(t *testing.T) {
 	}
 }
 
-func TestListCombos_EachOwnerIDMatches(t *testing.T) {
+func TestListCombos_EachBusinessIDMatches(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	combos, err := repo.List(ctx, testutil.OwnerID)
+	combos, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
 	for i, c := range combos {
-		if c.OwnerID != testutil.OwnerID {
-			t.Errorf("combo[%d] has OwnerID=%d, want %d", i, c.OwnerID, testutil.OwnerID)
+		if c.BusinessID != testutil.BusinessID {
+			t.Errorf("combo[%d] has BusinessID=%d, want %d", i, c.BusinessID, testutil.BusinessID)
 		}
 	}
 }
@@ -88,7 +88,7 @@ func TestCreateCombo_InsertsRow(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	before, err := repo.List(ctx, testutil.OwnerID)
+	before, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List before: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestCreateCombo_InsertsRow(t *testing.T) {
 		Items:       `[{"id":1,"qty":1},{"id":2,"qty":1}]`,
 		IsActive:    true,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestCreateCombo_InsertsRow(t *testing.T) {
 		db.ExecContext(ctx, "DELETE FROM pos_combos WHERE id = ?", id)
 	})
 
-	after, err := repo.List(ctx, testutil.OwnerID)
+	after, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestCreateCombo_PricePersisted(t *testing.T) {
 		Items:    `[]`,
 		IsActive: true,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestCreateCombo_PricePersisted(t *testing.T) {
 		db.ExecContext(ctx, "DELETE FROM pos_combos WHERE id = ?", id)
 	})
 
-	combos, err := repo.List(ctx, testutil.OwnerID)
+	combos, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -166,7 +166,7 @@ func TestUpdateCombo_UpdatesName(t *testing.T) {
 		Items:    `[]`,
 		IsActive: true,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -180,11 +180,11 @@ func TestUpdateCombo_UpdatesName(t *testing.T) {
 		Items:    `[]`,
 		IsActive: true,
 	}
-	if err := repo.Update(ctx, testutil.OwnerID, id, updateInput); err != nil {
+	if err := repo.Update(ctx, testutil.BusinessID, id, updateInput); err != nil {
 		t.Fatalf("Update error: %v", err)
 	}
 
-	combos, err := repo.List(ctx, testutil.OwnerID)
+	combos, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -210,16 +210,16 @@ func TestDeleteCombo_RemovesRow(t *testing.T) {
 		Items:    `[]`,
 		IsActive: true,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
 
-	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+	if err := repo.Delete(ctx, testutil.BusinessID, id); err != nil {
 		t.Fatalf("Delete error: %v", err)
 	}
 
-	combos, err := repo.List(ctx, testutil.OwnerID)
+	combos, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after delete: %v", err)
 	}
@@ -236,7 +236,7 @@ func TestUpdateCombo_UnknownIDReturnsErrComboNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.ComboInput{Name: "ghost", Price: 1.00, Items: `[]`, IsActive: false}
-	err := repo.Update(ctx, testutil.OwnerID, 0, input)
+	err := repo.Update(ctx, testutil.BusinessID, 0, input)
 	if !errors.Is(err, domain.ErrComboNotFound) {
 		t.Errorf("expected ErrComboNotFound, got %v", err)
 	}
@@ -247,7 +247,7 @@ func TestDeleteCombo_UnknownIDReturnsErrComboNotFound(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.Delete(ctx, testutil.OwnerID, 0)
+	err := repo.Delete(ctx, testutil.BusinessID, 0)
 	if !errors.Is(err, domain.ErrComboNotFound) {
 		t.Errorf("expected ErrComboNotFound, got %v", err)
 	}
@@ -258,11 +258,11 @@ func TestListCombos_TwiceReturnsSameCount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	first, err := repo.List(ctx, testutil.OwnerID)
+	first, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("first List: %v", err)
 	}
-	second, err := repo.List(ctx, testutil.OwnerID)
+	second, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("second List: %v", err)
 	}

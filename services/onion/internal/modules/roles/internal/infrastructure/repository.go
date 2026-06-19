@@ -21,7 +21,8 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Role, error) {
-	rows, err := r.queries.ListRoles(ctx, ownerID)
+	businessID := ownerID
+	rows, err := r.queries.ListRoles(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list roles", logger.Error(err))
 		return nil, err
@@ -32,6 +33,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Role, er
 		var role domain.Role
 		role.ID = row.ID
 		role.OwnerID = row.OwnerID
+		role.BusinessID = row.BusinessID
 		role.Name = row.Name
 		role.IsSystem = row.IsSystem
 		if row.CreatedAt.Valid {
@@ -50,13 +52,15 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Role, er
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, name string, permissions []string) (int64, error) {
+	businessID := ownerID
 	permsJSON, err := json.Marshal(permissions)
 	if err != nil {
 		return 0, err
 	}
 
 	res, err := r.queries.CreateRole(ctx, sqlc.CreateRoleParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		Name:        name,
 		Permissions: permsJSON,
 	})
@@ -69,6 +73,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, name string, per
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, roleID int64, name string, permissions []string) error {
+	businessID := ownerID
 	permsJSON, err := json.Marshal(permissions)
 	if err != nil {
 		return err
@@ -78,7 +83,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, roleID int64, name str
 		Name:        name,
 		Permissions: permsJSON,
 		ID:          roleID,
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update role", logger.Error(err))
@@ -89,9 +94,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, roleID int64, name str
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, roleID int64) error {
+	businessID := ownerID
 	err := r.queries.DeleteRole(ctx, sqlc.DeleteRoleParams{
-		ID:      roleID,
-		OwnerID: ownerID,
+		ID:         roleID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete role", logger.Error(err))

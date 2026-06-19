@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -49,12 +50,17 @@ func (m *Module) executeListStoreOrdersTool(ctx context.Context, input map[strin
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("permission denied")
+	}
+
 	parsed, err := parseListStoreOrdersToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	orders, err := m.service.List(ctx, authUser.UserID)
+	orders, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +101,11 @@ func (m *Module) executeGetStoreOrderTool(ctx context.Context, input map[string]
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("permission denied")
+	}
+
 	orderID, err := storeOrderToolInt64(firstStoreOrderToolValue(input, "order_id", "id"))
 	if err != nil {
 		return nil, fmt.Errorf("invalid order_id: %w", err)
@@ -103,7 +114,7 @@ func (m *Module) executeGetStoreOrderTool(ctx context.Context, input map[string]
 		return nil, errors.New("order_id is required")
 	}
 
-	detail, err := m.service.GetDetail(ctx, authUser.UserID, orderID)
+	detail, err := m.service.GetDetail(ctx, businessID, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -190,6 +201,7 @@ func storeOrderToolPayload(order domain.StoreOrder) map[string]any {
 	return map[string]any{
 		"id":               order.ID,
 		"owner_id":         order.OwnerID,
+		"business_id":      order.BusinessID,
 		"customer_email":   order.CustomerEmail,
 		"customer_name":    order.CustomerName,
 		"customer_phone":   order.CustomerPhone,

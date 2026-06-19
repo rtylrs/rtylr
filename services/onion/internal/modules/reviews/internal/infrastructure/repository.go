@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Review, error) {
-	rows, err := r.queries.ListReviews(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Review, error) {
+	rows, err := r.queries.ListReviews(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list reviews", logger.Error(err))
 		return nil, err
@@ -36,6 +36,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Review, 
 		var item domain.Review
 		item.ID = row.ID
 		item.OwnerID = row.OwnerID
+		item.BusinessID = row.BusinessID
 		item.StaffID = row.StaffID
 		if row.ReviewerID.Valid {
 			item.ReviewerID = row.ReviewerID.Int64
@@ -104,14 +105,15 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Review, 
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ReviewInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.ReviewInput) (int64, error) {
 	status := input.Status
 	if status == "" {
 		status = "draft"
 	}
 
 	res, err := r.queries.CreateReview(ctx, sqlc.CreateReviewParams{
-		OwnerID:      ownerID,
+		OwnerID:      businessID,
+		BusinessID:   businessID,
 		StaffID:      input.StaffID,
 		ReviewerID:   sql.NullInt64{Int64: input.ReviewerID, Valid: input.ReviewerID != 0},
 		Period:       sql.NullString{String: input.Period, Valid: input.Period != ""},

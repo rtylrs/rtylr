@@ -8,6 +8,7 @@ import (
 type DashboardWidget struct {
 	ID         int64
 	OwnerID    int64
+	BusinessID int64
 	RoleID     int64
 	WidgetType string
 	PositionX  int32
@@ -20,6 +21,6 @@ type DashboardWidget struct {
 }
 
 type Repository interface {
-	GetWidgets(ctx context.Context, ownerID int64) ([]*DashboardWidget, error)
-	UpsertWidgets(ctx context.Context, ownerID int64, widgets []*DashboardWidget) error
+	GetWidgets(ctx context.Context, businessID int64) ([]*DashboardWidget, error)
+	UpsertWidgets(ctx context.Context, businessID int64, widgets []*DashboardWidget) error
 }

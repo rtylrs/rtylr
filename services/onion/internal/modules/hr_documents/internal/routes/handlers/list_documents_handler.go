@@ -8,6 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
@@ -34,11 +35,16 @@ func (h *ListDocumentsHandler) Serve(ctx context.Context, req *ListDocumentsRequ
 		return ListDocumentsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListDocumentsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	if req.EmployeeID == 0 {
 		return ListDocumentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
 	}
 
-	docs, total, err := h.Service.ListDocuments(ctx, device.User.UserID, req.EmployeeID, req.Limit, req.Offset)
+	docs, total, err := h.Service.ListDocuments(ctx, businessID, req.EmployeeID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list documents", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
 		return ListDocumentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list documents"}

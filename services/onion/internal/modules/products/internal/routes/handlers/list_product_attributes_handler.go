@@ -37,7 +37,11 @@ func ListProductAttributesHandlerFunc(svc *application.Service) http.HandlerFunc
 			return
 		}
 
-		ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+		ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if bizErr != nil {
+			writeProductErr(ctx, w, http.StatusForbidden, "forbidden")
+			return
+		}
 		attrs, err := svc.ListProductAttributes(ctx, ownerID, id)
 		if err != nil {
 			logger.Ctx(ctx).Error("failed to list product attributes",

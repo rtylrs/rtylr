@@ -17,9 +17,9 @@ const (
 )
 
 type repository interface {
-	GetConfig(ctx context.Context, ownerID int64) (domain.TaxConfig, error)
+	GetConfig(ctx context.Context, businessID int64) (domain.TaxConfig, error)
 	UpsertConfig(ctx context.Context, input domain.TaxConfigInput) error
-	GetPLReport(ctx context.Context, ownerID int64) (domain.PLReport, error)
+	GetPLReport(ctx context.Context, businessID int64) (domain.PLReport, error)
 }
 
 type Service struct {
@@ -30,17 +30,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateTaxScope(ctx context.Context, ownerID int64) {
+func invalidateTaxScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(taxScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(taxScope, businessID))
 	}
 }
 
-func (s *Service) GetConfig(ctx context.Context, ownerID int64) (domain.TaxConfig, error) {
+func (s *Service) GetConfig(ctx context.Context, businessID int64) (domain.TaxConfig, error) {
 	return cacher.Of[domain.TaxConfig]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(taxScope, ownerID, "config"),
+		cacheKeys.Scoped(taxScope, businessID, "config"),
 		func(ctx context.Context) (domain.TaxConfig, error) {
-			return s.repo.GetConfig(ctx, ownerID)
+			return s.repo.GetConfig(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, taxTTL),
 	)
@@ -50,17 +50,17 @@ func (s *Service) UpdateConfig(ctx context.Context, input domain.TaxConfigInput)
 	if err := s.repo.UpsertConfig(ctx, input); err != nil {
 		return err
 	}
-	invalidateTaxScope(ctx, input.OwnerID)
+	invalidateTaxScope(ctx, input.BusinessID)
 	return nil
 }
 
 // GetPLReport derives from orders/expenses; piggyback on order namespace so
 // any order or expense mutation invalidates today's P&L.
-func (s *Service) GetPLReport(ctx context.Context, ownerID int64) (domain.PLReport, error) {
-	key := cacheKeys.OrdersList(ownerID) + "|pl_report"
+func (s *Service) GetPLReport(ctx context.Context, businessID int64) (domain.PLReport, error) {
+	key := cacheKeys.OrdersList(businessID) + "|pl_report"
 	return cacher.Of[domain.PLReport]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.PLReport, error) {
-			return s.repo.GetPLReport(ctx, ownerID)
+			return s.repo.GetPLReport(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, 2*time.Minute),
 	)

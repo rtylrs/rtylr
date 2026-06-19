@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Document, error) {
-	rows, err := r.queries.ListDocuments(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Document, error) {
+	rows, err := r.queries.ListDocuments(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list documents", logger.Error(err))
 		return nil, err
@@ -36,6 +36,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Document
 		var item domain.Document
 		item.ID = row.ID
 		item.OwnerID = row.OwnerID
+		item.BusinessID = row.BusinessID
 		if row.StaffID.Valid {
 			item.StaffID = row.StaffID.Int64
 		}
@@ -57,9 +58,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Document
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.DocumentInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error) {
 	res, err := r.queries.CreateDocument(ctx, sqlc.CreateDocumentParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		StaffID:    sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
 		Name:       input.Name,
 		Type:       sql.NullString{String: input.Type, Valid: input.Type != ""},
@@ -73,10 +75,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Doc
 	return res.LastInsertId()
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	err := r.queries.DeleteDocument(ctx, sqlc.DeleteDocumentParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete document", logger.Error(err))

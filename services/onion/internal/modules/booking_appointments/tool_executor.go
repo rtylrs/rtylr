@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -54,6 +55,10 @@ func (m *Module) executeListAppointmentsTool(ctx context.Context, input map[stri
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("authentication is required")
+	}
 
 	parsed, err := parseListAppointmentsToolInput(input)
 	if err != nil {
@@ -62,9 +67,9 @@ func (m *Module) executeListAppointmentsTool(ctx context.Context, input map[stri
 
 	var appointments []domain.Appointment
 	if parsed.Today {
-		appointments, err = m.service.ListToday(ctx, authUser.UserID)
+		appointments, err = m.service.ListToday(ctx, businessID)
 	} else {
-		appointments, err = m.service.List(ctx, authUser.UserID)
+		appointments, err = m.service.List(ctx, businessID)
 	}
 	if err != nil {
 		return nil, err
@@ -93,17 +98,21 @@ func (m *Module) executeCreateAppointmentTool(ctx context.Context, input map[str
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("authentication is required")
+	}
 
 	parsed, err := parseCreateAppointmentToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := m.service.Create(ctx, authUser.UserID, parsed)
+	id, err := m.service.Create(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}
-	invalidateAppointmentToolCache(ctx, authUser.UserID)
+	invalidateAppointmentToolCache(ctx, businessID)
 
 	return map[string]any{
 		"appointment": map[string]any{

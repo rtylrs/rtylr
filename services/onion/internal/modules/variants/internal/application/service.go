@@ -25,48 +25,48 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) ListVariants(ctx context.Context, ownerID, productID int64) ([]domain.Variant, error) {
-	cacheKey := fmt.Sprintf("variants:%d:%d", ownerID, productID)
+func (s *Service) ListVariants(ctx context.Context, businessID, productID int64) ([]domain.Variant, error) {
+	cacheKey := fmt.Sprintf("variants:%d:%d", businessID, productID)
 
 	return cacher.Of[[]domain.Variant]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Variant, error) {
-		return s.repo.ListVariants(ctx, ownerID, productID)
+		return s.repo.ListVariants(ctx, businessID, productID)
 	}, cacher.WithExpiry(ctx, variantsCacheTTL))
 }
 
-func (s *Service) CreateVariant(ctx context.Context, ownerID int64, input domain.VariantInput) (int64, error) {
-	id, err := s.repo.CreateVariant(ctx, ownerID, input)
+func (s *Service) CreateVariant(ctx context.Context, businessID int64, input domain.VariantInput) (int64, error) {
+	id, err := s.repo.CreateVariant(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return id, nil
 }
 
-func (s *Service) UpdateVariant(ctx context.Context, ownerID, id int64, input domain.VariantInput) error {
-	err := s.repo.UpdateVariant(ctx, ownerID, id, input)
+func (s *Service) UpdateVariant(ctx context.Context, businessID, id int64, input domain.VariantInput) error {
+	err := s.repo.UpdateVariant(ctx, businessID, id, input)
 	if err != nil {
 		return err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return nil
 }
 
-func (s *Service) DeleteVariant(ctx context.Context, ownerID, id int64) error {
-	err := s.repo.DeleteVariant(ctx, ownerID, id)
+func (s *Service) DeleteVariant(ctx context.Context, businessID, id int64) error {
+	err := s.repo.DeleteVariant(ctx, businessID, id)
 	if err != nil {
 		return err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	prefix := fmt.Sprintf("variants:%d:", ownerID)
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
+	prefix := fmt.Sprintf("variants:%d:", businessID)
 	cacher.Of[[]domain.Variant]().Invalidate(ctx, []string{prefix})
 }

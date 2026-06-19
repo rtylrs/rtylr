@@ -20,8 +20,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Automation, error) {
-	rows, err := r.queries.ListAutomations(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Automation, error) {
+	rows, err := r.queries.ListAutomations(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list automations", logger.Error(err))
 
@@ -40,6 +40,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Automati
 func (r *Repository) Create(ctx context.Context, input domain.AutomationInput) (int64, error) {
 	result, err := r.queries.CreateAutomation(ctx, sqlc.CreateAutomationParams{
 		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 		Name:          input.Name,
 		TriggerType:   input.TriggerType,
 		TriggerConfig: json.RawMessage(input.TriggerConfig),
@@ -63,7 +64,7 @@ func (r *Repository) Update(ctx context.Context, input domain.AutomationUpdateIn
 		Actions:       json.RawMessage(input.Actions),
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:            input.ID,
-		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update automation", logger.Error(err))
@@ -83,10 +84,10 @@ func (r *Repository) Update(ctx context.Context, input domain.AutomationUpdateIn
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, automationID int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, automationID int64) error {
 	result, err := r.queries.DeleteAutomation(ctx, sqlc.DeleteAutomationParams{
-		ID:      automationID,
-		OwnerID: ownerID,
+		ID:         automationID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete automation", logger.Error(err))
@@ -110,6 +111,7 @@ func automationFromRow(row sqlc.CrmAutomation) domain.Automation {
 	a := domain.Automation{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Name:        row.Name,
 		TriggerType: row.TriggerType,
 		IsActive:    row.IsActive.Bool,

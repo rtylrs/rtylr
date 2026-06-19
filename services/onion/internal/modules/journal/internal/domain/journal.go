@@ -14,6 +14,7 @@ var (
 type JournalEntry struct {
 	ID          int64         `json:"id"`
 	OwnerID     int64         `json:"owner_id"`
+	BusinessID  int64         `json:"business_id"`
 	Date        time.Time     `json:"date"`
 	Description string        `json:"description"`
 	Status      string        `json:"status"`

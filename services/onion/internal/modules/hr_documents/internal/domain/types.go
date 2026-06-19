@@ -5,6 +5,7 @@ import "time"
 type EmployeeDocumentRecord struct {
 	ID           int64      `json:"id"`
 	OwnerID      int64      `json:"owner_id"`
+	BusinessID   int64      `json:"business_id"`
 	EmployeeID   int64      `json:"employee_id"`
 	DocumentType string     `json:"document_type"`
 	Title        string     `json:"title"`

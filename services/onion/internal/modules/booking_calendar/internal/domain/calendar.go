@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type Repository interface {
-	FetchAppointments(ctx context.Context, ownerID int64, from, to string) ([]CalendarAppointment, error)
+	FetchAppointments(ctx context.Context, businessID int64, from, to string) ([]CalendarAppointment, error)
 }
 
 type CalendarDay struct {
@@ -13,6 +13,7 @@ type CalendarDay struct {
 
 type CalendarAppointment struct {
 	ID           int64  `json:"id"`
+	BusinessID   int64  `json:"business_id"`
 	ServiceID    int64  `json:"service_id"`
 	CustomerName string `json:"customer_name"`
 	StartTime    string `json:"start_time"`

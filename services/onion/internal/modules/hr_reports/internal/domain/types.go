@@ -29,6 +29,7 @@ type ReportRecord struct {
 
 type ReportParams struct {
 	OwnerID      int64
+	BusinessID   int64
 	DateFrom     time.Time
 	DateTo       time.Time
 	LocationID   *int64

@@ -14,9 +14,9 @@ import (
 const stockTransfersCacheTTL = 5 * time.Minute
 
 type repository interface {
-	ListStockTransfers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTransfer, bool, error)
-	CreateStockTransfer(ctx context.Context, ownerID int64, input domain.StockTransferInput) (int64, error)
-	UpdateStockTransferStatus(ctx context.Context, ownerID, id int64, status domain.StockTransferStatus) error
+	ListStockTransfers(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTransfer, bool, error)
+	CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error)
+	UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error
 }
 
 type Service struct {
@@ -44,9 +44,9 @@ func paginateStockTransfers(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) ListStockTransfers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StockTransfer, bool, error) {
+func (s *Service) ListStockTransfers(ctx context.Context, businessID, page, pageSize int64) ([]domain.StockTransfer, bool, error) {
 	limit, offset := paginateStockTransfers(page, pageSize)
-	cacheKey := fmt.Sprintf("stock_transfers:%d|p=%d|ps=%d", ownerID, page, pageSize)
+	cacheKey := fmt.Sprintf("stock_transfers:%d|p=%d|ps=%d", businessID, page, pageSize)
 
 	type pageResult struct {
 		items   []domain.StockTransfer
@@ -54,7 +54,7 @@ func (s *Service) ListStockTransfers(ctx context.Context, ownerID, page, pageSiz
 	}
 
 	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
-		items, hasMore, err := s.repo.ListStockTransfers(ctx, ownerID, limit, offset)
+		items, hasMore, err := s.repo.ListStockTransfers(ctx, businessID, limit, offset)
 		return pageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, stockTransfersCacheTTL))
 	if err != nil {
@@ -63,30 +63,30 @@ func (s *Service) ListStockTransfers(ctx context.Context, ownerID, page, pageSiz
 	return res.items, res.hasMore, nil
 }
 
-func (s *Service) CreateStockTransfer(ctx context.Context, ownerID int64, input domain.StockTransferInput) (int64, error) {
-	id, err := s.repo.CreateStockTransfer(ctx, ownerID, input)
+func (s *Service) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error) {
+	id, err := s.repo.CreateStockTransfer(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return id, nil
 }
 
-func (s *Service) UpdateStockTransferStatus(ctx context.Context, ownerID, id int64, status domain.StockTransferStatus) error {
-	err := s.repo.UpdateStockTransferStatus(ctx, ownerID, id, status)
+func (s *Service) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error {
+	err := s.repo.UpdateStockTransferStatus(ctx, businessID, id, status)
 	if err != nil {
 		return err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	prefix := fmt.Sprintf("stock_transfers:%d", ownerID)
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
+	prefix := fmt.Sprintf("stock_transfers:%d", businessID)
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, prefix)
 	}

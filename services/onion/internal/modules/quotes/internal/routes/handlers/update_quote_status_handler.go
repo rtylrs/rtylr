@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateQuoteStatusRoutes() []string { return []string{"/finance/quotes/{id}/status"} }
@@ -43,13 +44,18 @@ func (h *UpdateQuoteStatusHandler) Serve(ctx context.Context, req *UpdateQuoteSt
 		return UpdateQuoteStatusResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateQuoteStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateQuoteStatusResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid quote id"}
 	}
 
-	if err := h.Service.UpdateStatus(ctx, device.User.UserID, id, strings.TrimSpace(req.Status)); err != nil {
+	if err := h.Service.UpdateStatus(ctx, businessID, id, strings.TrimSpace(req.Status)); err != nil {
 		return UpdateQuoteStatusResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update quote status"}
 	}
 

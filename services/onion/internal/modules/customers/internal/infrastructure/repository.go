@@ -48,7 +48,7 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 		return r.listCustomersFiltered(ctx, filter, offset)
 	}
 
-	total, err := r.queries.CountCustomers(ctx, filter.OwnerID)
+	total, err := r.queries.CountCustomers(ctx, filter.BusinessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count customers", logger.Error(err))
 
@@ -56,9 +56,9 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 	}
 
 	rows, err := r.queries.ListCustomers(ctx, sqlc.ListCustomersParams{
-		OwnerID: filter.OwnerID,
-		Limit:   int32(filter.PageSize),
-		Offset:  int32(offset),
+		BusinessID: filter.BusinessID,
+		Limit:      int32(filter.PageSize),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list customers", logger.Error(err))
@@ -76,7 +76,7 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 }
 
 func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.CustomerListFilter, offset int) ([]domain.Customer, int, error) {
-	conds := sq.And{sq.Eq{"owner_id": filter.OwnerID}}
+	conds := sq.And{sq.Eq{"business_id": filter.BusinessID}}
 
 	if filter.Search != "" {
 		like := "%" + filter.Search + "%"
@@ -118,7 +118,7 @@ func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.Cu
 	}
 
 	listSQL, listArgs, err := sq.Select(
-		"id", "owner_id", "first_name", "last_name", "email", "phone", "date_of_birth", "gender",
+		"id", "owner_id", "business_id", "first_name", "last_name", "email", "phone", "date_of_birth", "gender",
 		"address", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at",
 		"loyalty_tier", "tags", "notes", "is_active", "created_at", "updated_at",
 	).
@@ -163,10 +163,10 @@ func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.Cu
 	return customers, total, nil
 }
 
-func (r *Repository) GetCustomerByID(ctx context.Context, ownerID, customerID int64) (domain.Customer, error) {
+func (r *Repository) GetCustomerByID(ctx context.Context, businessID, customerID int64) (domain.Customer, error) {
 	row, err := r.queries.GetCustomerByID(ctx, sqlc.GetCustomerByIDParams{
-		ID:      customerID,
-		OwnerID: ownerID,
+		ID:         customerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -189,6 +189,7 @@ func (r *Repository) CreateCustomer(ctx context.Context, input domain.CustomerIn
 
 	result, err := r.queries.CreateCustomer(ctx, sqlc.CreateCustomerParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		FirstName:   input.FirstName,
 		LastName:    sql.NullString{String: input.LastName, Valid: input.LastName != ""},
 		Email:       sql.NullString{String: input.Email, Valid: input.Email != ""},
@@ -240,7 +241,7 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 		Notes:       sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		IsActive:    sql.NullBool{Bool: isActive, Valid: true},
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update customer", logger.Error(err))
@@ -260,10 +261,10 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 	return nil
 }
 
-func (r *Repository) DeleteCustomer(ctx context.Context, ownerID, customerID int64) error {
+func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID int64) error {
 	result, err := r.queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
-		ID:      customerID,
-		OwnerID: ownerID,
+		ID:         customerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete customer", logger.Error(err))
@@ -297,11 +298,11 @@ func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, customerID int64
 	return err
 }
 
-func (r *Repository) RecordVisit(ctx context.Context, ownerID, customerID int64, amount float64) error {
+func (r *Repository) RecordVisit(ctx context.Context, businessID, customerID int64, amount float64) error {
 	err := r.queries.RecordVisit(ctx, sqlc.RecordVisitParams{
 		TotalSpent: sql.NullString{String: strconv.FormatFloat(amount, 'f', 2, 64), Valid: true},
 		ID:         customerID,
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to record visit", logger.Error(err))
@@ -315,6 +316,7 @@ func (r *Repository) RecordVisit(ctx context.Context, ownerID, customerID int64,
 func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.LoyaltyTransaction) error {
 	err := r.queries.CreateLoyaltyTransaction(ctx, sqlc.CreateLoyaltyTransactionParams{
 		OwnerID:       tx.OwnerID,
+		BusinessID:    tx.BusinessID,
 		CustomerID:    tx.CustomerID,
 		Type:          sqlc.CrmLoyaltyTransactionsType(tx.Type),
 		Points:        int32(tx.Points),
@@ -331,7 +333,7 @@ func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.Loy
 	return err
 }
 
-func (r *Repository) ListLoyaltyTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
+func (r *Repository) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -343,7 +345,7 @@ func (r *Repository) ListLoyaltyTransactions(ctx context.Context, ownerID, custo
 	offset := (page - 1) * pageSize
 
 	total, err := r.queries.CountLoyaltyTransactions(ctx, sqlc.CountLoyaltyTransactionsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		CustomerID: customerID,
 	})
 	if err != nil {
@@ -351,7 +353,7 @@ func (r *Repository) ListLoyaltyTransactions(ctx context.Context, ownerID, custo
 	}
 
 	rows, err := r.queries.ListLoyaltyTransactions(ctx, sqlc.ListLoyaltyTransactionsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		CustomerID: customerID,
 		Limit:      int32(pageSize),
 		Offset:     int32(offset),
@@ -368,6 +370,7 @@ func (r *Repository) ListLoyaltyTransactions(ctx context.Context, ownerID, custo
 		tx := domain.LoyaltyTransaction{
 			ID:            row.ID,
 			OwnerID:       row.OwnerID,
+			BusinessID:    row.BusinessID,
 			CustomerID:    row.CustomerID,
 			Type:          string(row.Type),
 			Points:        int(row.Points),
@@ -386,8 +389,8 @@ func (r *Repository) ListLoyaltyTransactions(ctx context.Context, ownerID, custo
 
 // ─── Loyalty Config ───────────────────────────────────────────────────────────
 
-func (r *Repository) GetLoyaltyConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
-	row, err := r.queries.GetLoyaltyConfig(ctx, ownerID)
+func (r *Repository) GetLoyaltyConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {
+	row, err := r.queries.GetLoyaltyConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.LoyaltyConfig{}, nil
@@ -408,6 +411,7 @@ func (r *Repository) GetLoyaltyConfig(ctx context.Context, ownerID int64) (domai
 	return domain.LoyaltyConfig{
 		ID:                    row.ID,
 		OwnerID:               row.OwnerID,
+		BusinessID:            row.BusinessID,
 		IsEnabled:             row.IsEnabled.Bool,
 		PointsPerCurrencyUnit: ppcu,
 		CurrencyPerPoint:      cpp,
@@ -427,6 +431,7 @@ func (r *Repository) GetLoyaltyConfig(ctx context.Context, ownerID int64) (domai
 func (r *Repository) UpsertLoyaltyConfig(ctx context.Context, input domain.LoyaltyConfigInput) error {
 	err := r.queries.UpsertLoyaltyConfig(ctx, sqlc.UpsertLoyaltyConfigParams{
 		OwnerID:               input.OwnerID,
+		BusinessID:            input.BusinessID,
 		IsEnabled:             sql.NullBool{Bool: input.IsEnabled, Valid: true},
 		PointsPerCurrencyUnit: sql.NullString{String: strconv.FormatFloat(input.PointsPerCurrencyUnit, 'f', 2, 64), Valid: true},
 		CurrencyPerPoint:      sql.NullString{String: strconv.FormatFloat(input.CurrencyPerPoint, 'f', 4, 64), Valid: true},
@@ -449,8 +454,8 @@ func (r *Repository) UpsertLoyaltyConfig(ctx context.Context, input domain.Loyal
 
 // ─── Segments ─────────────────────────────────────────────────────────────────
 
-func (r *Repository) ListSegments(ctx context.Context, ownerID int64) ([]domain.Segment, error) {
-	rows, err := r.queries.ListSegments(ctx, ownerID)
+func (r *Repository) ListSegments(ctx context.Context, businessID int64) ([]domain.Segment, error) {
+	rows, err := r.queries.ListSegments(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list segments", logger.Error(err))
 
@@ -466,10 +471,10 @@ func (r *Repository) ListSegments(ctx context.Context, ownerID int64) ([]domain.
 	return segments, nil
 }
 
-func (r *Repository) GetSegmentByID(ctx context.Context, ownerID, segmentID int64) (domain.Segment, error) {
+func (r *Repository) GetSegmentByID(ctx context.Context, businessID, segmentID int64) (domain.Segment, error) {
 	row, err := r.queries.GetSegmentByID(ctx, sqlc.GetSegmentByIDParams{
-		ID:      segmentID,
-		OwnerID: ownerID,
+		ID:         segmentID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -485,6 +490,7 @@ func (r *Repository) GetSegmentByID(ctx context.Context, ownerID, segmentID int6
 func (r *Repository) CreateSegment(ctx context.Context, input domain.SegmentInput) (int64, error) {
 	result, err := r.queries.CreateSegment(ctx, sqlc.CreateSegmentParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Rules:       json.RawMessage(input.Rules),
@@ -504,7 +510,7 @@ func (r *Repository) UpdateSegment(ctx context.Context, input domain.SegmentUpda
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Rules:       json.RawMessage(input.Rules),
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update segment", logger.Error(err))
@@ -524,10 +530,10 @@ func (r *Repository) UpdateSegment(ctx context.Context, input domain.SegmentUpda
 	return nil
 }
 
-func (r *Repository) DeleteSegment(ctx context.Context, ownerID, segmentID int64) error {
+func (r *Repository) DeleteSegment(ctx context.Context, businessID, segmentID int64) error {
 	result, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
-		ID:      segmentID,
-		OwnerID: ownerID,
+		ID:         segmentID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete segment", logger.Error(err))
@@ -549,12 +555,12 @@ func (r *Repository) DeleteSegment(ctx context.Context, ownerID, segmentID int64
 
 // ─── Campaigns ────────────────────────────────────────────────────────────────
 
-func (r *Repository) ListCampaigns(ctx context.Context, ownerID int64, status string) ([]domain.Campaign, error) {
+func (r *Repository) ListCampaigns(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
 	if status != "" {
-		return r.listCampaignsFiltered(ctx, ownerID, status)
+		return r.listCampaignsFiltered(ctx, businessID, status)
 	}
 
-	rows, err := r.queries.ListCampaigns(ctx, ownerID)
+	rows, err := r.queries.ListCampaigns(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list campaigns", logger.Error(err))
 
@@ -570,14 +576,14 @@ func (r *Repository) ListCampaigns(ctx context.Context, ownerID int64, status st
 	return campaigns, nil
 }
 
-func (r *Repository) listCampaignsFiltered(ctx context.Context, ownerID int64, status string) ([]domain.Campaign, error) {
+func (r *Repository) listCampaignsFiltered(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
 	listSQL, listArgs, err := sq.Select(
-		"id", "owner_id", "name", "description", "channel", "status", "segment_id", "subject",
+		"id", "owner_id", "business_id", "name", "description", "channel", "status", "segment_id", "subject",
 		"content", "scheduled_at", "sent_at", "audience_count", "sent_count", "delivered_count",
 		"opened_count", "clicked_count", "created_at", "updated_at",
 	).
 		From("crm_campaigns").
-		Where(sq.Eq{"owner_id": ownerID, "status": status}).
+		Where(sq.Eq{"business_id": businessID, "status": status}).
 		OrderBy("created_at DESC").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -609,10 +615,10 @@ func (r *Repository) listCampaignsFiltered(ctx context.Context, ownerID int64, s
 	return campaigns, rows.Err()
 }
 
-func (r *Repository) GetCampaignByID(ctx context.Context, ownerID, campaignID int64) (domain.Campaign, error) {
+func (r *Repository) GetCampaignByID(ctx context.Context, businessID, campaignID int64) (domain.Campaign, error) {
 	row, err := r.queries.GetCampaignByID(ctx, sqlc.GetCampaignByIDParams{
-		ID:      campaignID,
-		OwnerID: ownerID,
+		ID:         campaignID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -633,6 +639,7 @@ func (r *Repository) CreateCampaign(ctx context.Context, input domain.CampaignIn
 
 	result, err := r.queries.CreateCampaign(ctx, sqlc.CreateCampaignParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Channel:     sqlc.CrmCampaignsChannel(input.Channel),
@@ -665,7 +672,7 @@ func (r *Repository) UpdateCampaign(ctx context.Context, input domain.CampaignUp
 		Content:     input.Content,
 		ScheduledAt: nullableTime(input.ScheduledAt),
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update campaign", logger.Error(err))
@@ -685,11 +692,11 @@ func (r *Repository) UpdateCampaign(ctx context.Context, input domain.CampaignUp
 	return nil
 }
 
-func (r *Repository) UpdateCampaignStatus(ctx context.Context, ownerID, campaignID int64, status string) error {
+func (r *Repository) UpdateCampaignStatus(ctx context.Context, businessID, campaignID int64, status string) error {
 	result, err := r.queries.UpdateCampaignStatus(ctx, sqlc.UpdateCampaignStatusParams{
-		Status:  sqlc.NullCrmCampaignsStatus{CrmCampaignsStatus: sqlc.CrmCampaignsStatus(status), Valid: true},
-		ID:      campaignID,
-		OwnerID: ownerID,
+		Status:     sqlc.NullCrmCampaignsStatus{CrmCampaignsStatus: sqlc.CrmCampaignsStatus(status), Valid: true},
+		ID:         campaignID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update campaign status", logger.Error(err))
@@ -711,7 +718,7 @@ func (r *Repository) UpdateCampaignStatus(ctx context.Context, ownerID, campaign
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
+func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (domain.DashboardStats, error) {
 	var (
 		totalCustomers int64
 		newThisMonth   int64
@@ -722,7 +729,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 	group, groupCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		var err error
-		totalCustomers, err = r.queries.CountActiveCustomers(groupCtx, ownerID)
+		totalCustomers, err = r.queries.CountActiveCustomers(groupCtx, businessID)
 		if err != nil {
 			logger.Ctx(groupCtx).Error("Failed to get total customers", logger.Error(err))
 		}
@@ -730,7 +737,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 	})
 	group.Go(func() error {
 		var err error
-		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, ownerID)
+		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, businessID)
 		if err != nil {
 			logger.Ctx(groupCtx).Error("Failed to get new customers this month", logger.Error(err))
 		}
@@ -738,7 +745,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 	})
 	group.Go(func() error {
 		var err error
-		activeMembers, err = r.queries.CountActiveLoyaltyMembers(groupCtx, ownerID)
+		activeMembers, err = r.queries.CountActiveLoyaltyMembers(groupCtx, businessID)
 		if err != nil {
 			logger.Ctx(groupCtx).Error("Failed to get active loyalty members", logger.Error(err))
 		}
@@ -746,7 +753,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 	})
 	group.Go(func() error {
 		var err error
-		topRows, err = r.queries.ListTopCustomers(groupCtx, ownerID)
+		topRows, err = r.queries.ListTopCustomers(groupCtx, businessID)
 		if err != nil {
 			logger.Ctx(groupCtx).Error("Failed to get top customers", logger.Error(err))
 		}
@@ -780,9 +787,9 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 
-func (r *Repository) GetCustomerTimeline(ctx context.Context, ownerID, customerID int64) ([]domain.TimelineEntry, error) {
+func (r *Repository) GetCustomerTimeline(ctx context.Context, businessID, customerID int64) ([]domain.TimelineEntry, error) {
 	rows, err := r.queries.GetCustomerTimeline(ctx, sqlc.GetCustomerTimelineParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		CustomerID: customerID,
 	})
 	if err != nil {
@@ -797,6 +804,7 @@ func (r *Repository) GetCustomerTimeline(ctx context.Context, ownerID, customerI
 		e := domain.TimelineEntry{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
 			CustomerID:  row.CustomerID,
 			Type:        row.Type,
 			Description: row.Description.String,
@@ -818,6 +826,7 @@ func (r *Repository) GetCustomerTimeline(ctx context.Context, ownerID, customerI
 func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.TimelineEntry) error {
 	err := r.queries.InsertTimelineEntry(ctx, sqlc.InsertTimelineEntryParams{
 		OwnerID:     entry.OwnerID,
+		BusinessID:  entry.BusinessID,
 		CustomerID:  entry.CustomerID,
 		Type:        entry.Type,
 		Description: sql.NullString{String: entry.Description, Valid: entry.Description != ""},
@@ -832,7 +841,7 @@ func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.Timel
 
 // ─── Import ──────────────────────────────────────────────────────────────────
 
-func (r *Repository) BulkCreateCustomers(ctx context.Context, ownerID int64, items []domain.CustomerImportItem) (int, int, error) {
+func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem) (int, int, error) {
 	imported := 0
 	failed := 0
 
@@ -852,7 +861,8 @@ func (r *Repository) BulkCreateCustomers(ctx context.Context, ownerID int64, ite
 		}
 
 		_, err = r.queries.CreateCustomer(ctx, sqlc.CreateCustomerParams{
-			OwnerID:     ownerID,
+			OwnerID:     businessID,
+			BusinessID:  businessID,
 			FirstName:   item.FirstName,
 			LastName:    sql.NullString{String: item.LastName, Valid: item.LastName != ""},
 			Email:       sql.NullString{String: item.Email, Valid: item.Email != ""},
@@ -878,18 +888,18 @@ func (r *Repository) BulkCreateCustomers(ctx context.Context, ownerID int64, ite
 
 // ─── Export (GDPR) ──────────────────────────────────────────────────────────
 
-func (r *Repository) ExportCustomerData(ctx context.Context, ownerID, customerID int64) (domain.CustomerExport, error) {
-	customer, err := r.GetCustomerByID(ctx, ownerID, customerID)
+func (r *Repository) ExportCustomerData(ctx context.Context, businessID, customerID int64) (domain.CustomerExport, error) {
+	customer, err := r.GetCustomerByID(ctx, businessID, customerID)
 	if err != nil {
 		return domain.CustomerExport{}, err
 	}
 
-	txs, _, err := r.ListLoyaltyTransactions(ctx, ownerID, customerID, 1, 100)
+	txs, _, err := r.ListLoyaltyTransactions(ctx, businessID, customerID, 1, 100)
 	if err != nil {
 		return domain.CustomerExport{}, err
 	}
 
-	timeline, err := r.GetCustomerTimeline(ctx, ownerID, customerID)
+	timeline, err := r.GetCustomerTimeline(ctx, businessID, customerID)
 	if err != nil {
 		return domain.CustomerExport{}, err
 	}
@@ -904,12 +914,12 @@ func (r *Repository) ExportCustomerData(ctx context.Context, ownerID, customerID
 // ─── Merge ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCustomersInput) error {
-	secondary, err := r.GetCustomerByID(ctx, input.OwnerID, input.SecondaryID)
+	secondary, err := r.GetCustomerByID(ctx, input.BusinessID, input.SecondaryID)
 	if err != nil {
 		return err
 	}
 
-	primary, err := r.GetCustomerByID(ctx, input.OwnerID, input.PrimaryID)
+	primary, err := r.GetCustomerByID(ctx, input.BusinessID, input.PrimaryID)
 	if err != nil {
 		return err
 	}
@@ -923,7 +933,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		TotalSpent:    sql.NullString{String: strconv.FormatFloat(newSpent, 'f', 2, 64), Valid: true},
 		VisitCount:    sql.NullInt32{Int32: int32(newVisits), Valid: true},
 		ID:            input.PrimaryID,
-		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update primary customer during merge", logger.Error(err))
@@ -934,7 +944,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 	err = r.queries.MigrateLoyaltyTransactions(ctx, sqlc.MigrateLoyaltyTransactionsParams{
 		CustomerID:   input.PrimaryID,
 		CustomerID_2: input.SecondaryID,
-		OwnerID:      input.OwnerID,
+		BusinessID:   input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to migrate loyalty transactions during merge", logger.Error(err))
@@ -945,7 +955,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 	err = r.queries.MigrateTimeline(ctx, sqlc.MigrateTimelineParams{
 		CustomerID:   input.PrimaryID,
 		CustomerID_2: input.SecondaryID,
-		OwnerID:      input.OwnerID,
+		BusinessID:   input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to migrate timeline during merge", logger.Error(err))
@@ -954,8 +964,8 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 	}
 
 	_, err = r.queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
-		ID:      input.SecondaryID,
-		OwnerID: input.OwnerID,
+		ID:         input.SecondaryID,
+		BusinessID: input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete secondary customer during merge", logger.Error(err))
@@ -968,8 +978,8 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 
 // ─── Loyalty Tiers ──────────────────────────────────────────────────────────
 
-func (r *Repository) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]domain.LoyaltyTier, error) {
-	rows, err := r.queries.ListLoyaltyTiers(ctx, ownerID)
+func (r *Repository) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]domain.LoyaltyTier, error) {
+	rows, err := r.queries.ListLoyaltyTiers(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty tiers", logger.Error(err))
 
@@ -984,6 +994,7 @@ func (r *Repository) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]dom
 		t := domain.LoyaltyTier{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
 			Name:        row.Name,
 			MinPoints:   int(row.MinPoints.Int32),
 			DiscountPct: dp,
@@ -1007,6 +1018,7 @@ func (r *Repository) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]dom
 func (r *Repository) CreateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierInput) (int64, error) {
 	result, err := r.queries.CreateLoyaltyTier(ctx, sqlc.CreateLoyaltyTierParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		MinPoints:   sql.NullInt32{Int32: int32(input.MinPoints), Valid: true},
 		DiscountPct: sql.NullString{String: strconv.FormatFloat(input.DiscountPct, 'f', 2, 64), Valid: true},
@@ -1030,7 +1042,7 @@ func (r *Repository) UpdateLoyaltyTier(ctx context.Context, input domain.Loyalty
 		Perks:       json.RawMessage(input.Perks),
 		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update loyalty tier", logger.Error(err))
@@ -1050,28 +1062,28 @@ func (r *Repository) UpdateLoyaltyTier(ctx context.Context, input domain.Loyalty
 	return nil
 }
 
-func (r *Repository) DeleteLoyaltyTier(ctx context.Context, ownerID, tierID int64) error {
+func (r *Repository) DeleteLoyaltyTier(ctx context.Context, businessID, tierID int64) error {
 	tier, err := r.queries.GetLoyaltyTierByID(ctx, sqlc.GetLoyaltyTierByIDParams{
-		ID:      tierID,
-		OwnerID: ownerID,
+		ID:         tierID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrTierNotFound
 		}
 
-		logger.Ctx(ctx).Error("Failed to look up loyalty tier", logger.Error(err), logger.Any("owner_id", ownerID), logger.Any("tier_id", tierID))
+		logger.Ctx(ctx).Error("Failed to look up loyalty tier", logger.Error(err), logger.Any("business_id", businessID), logger.Any("tier_id", tierID))
 
 		return err
 	}
 
 	// cross-schema read from crm_customers — active members on this tier
 	count, err := r.queries.CountActiveMembersOnTier(ctx, sqlc.CountActiveMembersOnTierParams{
-		OwnerID: ownerID,
-		LOWER:   tier.Name,
+		BusinessID: businessID,
+		LOWER:      tier.Name,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to count active members on tier", logger.Error(err), logger.Any("owner_id", ownerID), logger.Any("tier_id", tierID))
+		logger.Ctx(ctx).Error("Failed to count active members on tier", logger.Error(err), logger.Any("business_id", businessID), logger.Any("tier_id", tierID))
 
 		return err
 	}
@@ -1081,11 +1093,11 @@ func (r *Repository) DeleteLoyaltyTier(ctx context.Context, ownerID, tierID int6
 	}
 
 	result, err := r.queries.DeleteLoyaltyTier(ctx, sqlc.DeleteLoyaltyTierParams{
-		ID:      tierID,
-		OwnerID: ownerID,
+		ID:         tierID,
+		BusinessID: businessID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to delete loyalty tier", logger.Error(err), logger.Any("owner_id", ownerID), logger.Any("tier_id", tierID))
+		logger.Ctx(ctx).Error("Failed to delete loyalty tier", logger.Error(err), logger.Any("business_id", businessID), logger.Any("tier_id", tierID))
 
 		return err
 	}
@@ -1104,8 +1116,8 @@ func (r *Repository) DeleteLoyaltyTier(ctx context.Context, ownerID, tierID int6
 
 // ─── Campaign Stats ─────────────────────────────────────────────────────────
 
-func (r *Repository) GetCampaignStats(ctx context.Context, ownerID, campaignID int64) (domain.CampaignStats, error) {
-	campaign, err := r.GetCampaignByID(ctx, ownerID, campaignID)
+func (r *Repository) GetCampaignStats(ctx context.Context, businessID, campaignID int64) (domain.CampaignStats, error) {
+	campaign, err := r.GetCampaignByID(ctx, businessID, campaignID)
 	if err != nil {
 		return domain.CampaignStats{}, err
 	}
@@ -1135,7 +1147,7 @@ func (r *Repository) GetCampaignStats(ctx context.Context, ownerID, campaignID i
 
 // ─── Segment Customers ─────────────────────────────────────────────────────
 
-func (r *Repository) GetSegmentCustomers(ctx context.Context, ownerID, segmentID int64, page, pageSize int) ([]domain.Customer, int, error) {
+func (r *Repository) GetSegmentCustomers(ctx context.Context, businessID, segmentID int64, page, pageSize int) ([]domain.Customer, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -1146,20 +1158,20 @@ func (r *Repository) GetSegmentCustomers(ctx context.Context, ownerID, segmentID
 
 	offset := (page - 1) * pageSize
 
-	_, err := r.GetSegmentByID(ctx, ownerID, segmentID)
+	_, err := r.GetSegmentByID(ctx, businessID, segmentID)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	total, err := r.queries.CountActiveCustomers(ctx, ownerID)
+	total, err := r.queries.CountActiveCustomers(ctx, businessID)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListActiveCustomers(ctx, sqlc.ListActiveCustomersParams{
-		OwnerID: ownerID,
-		Limit:   int32(pageSize),
-		Offset:  int32(offset),
+		BusinessID: businessID,
+		Limit:      int32(pageSize),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get segment customers", logger.Error(err))
@@ -1182,6 +1194,7 @@ func customerFromRow(row sqlc.CrmCustomer) domain.Customer {
 	c := domain.Customer{
 		ID:            row.ID,
 		OwnerID:       row.OwnerID,
+		BusinessID:    row.BusinessID,
 		FirstName:     row.FirstName,
 		LastName:      row.LastName.String,
 		Email:         row.Email.String,
@@ -1227,6 +1240,7 @@ func segmentFromRow(row sqlc.CrmSegment) domain.Segment {
 	seg := domain.Segment{
 		ID:            row.ID,
 		OwnerID:       row.OwnerID,
+		BusinessID:    row.BusinessID,
 		Name:          row.Name,
 		Description:   row.Description.String,
 		CustomerCount: int(row.CustomerCount.Int32),
@@ -1250,6 +1264,7 @@ func campaignFromRow(row sqlc.CrmCampaign) domain.Campaign {
 	c := domain.Campaign{
 		ID:             row.ID,
 		OwnerID:        row.OwnerID,
+		BusinessID:     row.BusinessID,
 		Name:           row.Name,
 		Description:    row.Description.String,
 		Channel:        string(row.Channel),
@@ -1300,7 +1315,7 @@ func scanCustomerRaw(rows *sql.Rows) (domain.Customer, error) {
 	)
 
 	if err := rows.Scan(
-		&c.ID, &c.OwnerID, &c.FirstName, &lastName, &email, &phone, &dob, &gender,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.FirstName, &lastName, &email, &phone, &dob, &gender,
 		&address, &city, &country, &c.LoyaltyPoints, &c.TotalSpent, &c.VisitCount, &lastVisitAt,
 		&c.LoyaltyTier, &tagsJSON, &notes, &c.IsActive, &c.CreatedAt, &c.UpdatedAt,
 	); err != nil {
@@ -1350,7 +1365,7 @@ func scanCampaignRaw(rows *sql.Rows) (domain.Campaign, error) {
 	)
 
 	if err := rows.Scan(
-		&c.ID, &c.OwnerID, &c.Name, &desc, &c.Channel, &c.Status, &segmentID, &subject,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.Name, &desc, &c.Channel, &c.Status, &segmentID, &subject,
 		&c.Content, &scheduledAt, &sentAt, &c.AudienceCount, &c.SentCount, &c.DeliveredCount,
 		&c.OpenedCount, &c.ClickedCount, &c.CreatedAt, &c.UpdatedAt,
 	); err != nil {

@@ -25,7 +25,7 @@ var churnWindows = []int32{30, 60, 90, 180}
 // GetChurnRates returns churn percentages for each of the standard
 // windows. A fresh tenant with no orders at all returns zero-valued
 // rows rather than an error, per the fallback rules in CLAUDE.md §8.
-func (r *Repository) GetChurnRates(ctx context.Context, ownerID int64) ([]ChurnRateRow, error) {
+func (r *Repository) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnRateRow, error) {
 	now := nowFn()
 	out := make([]ChurnRateRow, 0, len(churnWindows))
 	for _, days := range churnWindows {
@@ -40,8 +40,8 @@ func (r *Repository) GetChurnRates(ctx context.Context, ownerID int64) ([]ChurnR
 		inner := sq.
 			Select("c.id", "MAX(o.created_at) AS last_order_at").
 			From("crm_customers c").
-			LeftJoin("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id").
-			Where(sq.Eq{"c.owner_id": ownerID}).
+			LeftJoin("pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id").
+			Where(sq.Eq{"c.business_id": businessID}).
 			GroupBy("c.id").
 			Having("MAX(o.created_at) IS NOT NULL")
 		q, args, err := sq.

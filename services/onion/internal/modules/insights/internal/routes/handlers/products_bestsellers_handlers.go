@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/products/best-sellers?limit=10
@@ -35,6 +36,10 @@ func (h *GetBestSellersHandler) Serve(ctx context.Context, req *GetBestSellersRe
 	if device.User == nil {
 		return GetBestSellersResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetBestSellersResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	var limit int32 = 10
 	if req.Limit != "" {
 		parsed, err := strconv.ParseInt(req.Limit, 10, 32)
@@ -47,7 +52,7 @@ func (h *GetBestSellersHandler) Serve(ctx context.Context, req *GetBestSellersRe
 		}
 		limit = int32(parsed)
 	}
-	rows, err := h.Service.GetBestSellers(ctx, device.User.UserID, limit)
+	rows, err := h.Service.GetBestSellers(ctx, businessID, limit)
 	if err != nil {
 		return GetBestSellersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

@@ -37,8 +37,12 @@ func (m *Module) executeListCategoriesTool(ctx context.Context) (map[string]any,
 		return nil, errors.New("authentication is required")
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	categories, err := m.service.ListCategories(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	categories, err := m.service.ListCategories(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +69,12 @@ func (m *Module) executeCreateCategoryTool(ctx context.Context, input map[string
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := m.service.CreateCategory(ctx, ownerID, parsed)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	id, err := m.service.CreateCategory(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}

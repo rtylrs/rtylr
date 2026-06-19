@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
@@ -151,6 +152,15 @@ func (h *CreateInvoiceHandler) Validate(_ context.Context, req *CreateInvoiceReq
 func (h *CreateInvoiceHandler) Serve(ctx context.Context, req *CreateInvoiceRequest) (CreateInvoiceResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return CreateInvoiceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateInvoiceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	items := make([]domain.InvoiceItemInput, 0, len(req.Items))
 	for _, item := range req.Items {
 		items = append(items, domain.InvoiceItemInput{
@@ -180,7 +190,7 @@ func (h *CreateInvoiceHandler) Serve(ctx context.Context, req *CreateInvoiceRequ
 		Items:         items,
 	}
 
-	inv, err := h.FinanceService.CreateInvoice(ctx, device.User.UserID, input)
+	inv, err := h.FinanceService.CreateInvoice(ctx, businessID, input)
 	if err != nil {
 		return CreateInvoiceResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

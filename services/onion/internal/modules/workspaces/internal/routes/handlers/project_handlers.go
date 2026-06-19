@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/wsbus"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 )
@@ -100,6 +101,10 @@ func (h *ListProjectsHandler) Serve(ctx context.Context, req *ListProjectsReques
 	if !ok {
 		return ListProjectsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListProjectsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
 	if err != nil || workspaceID == 0 {
@@ -109,7 +114,7 @@ func (h *ListProjectsHandler) Serve(ctx context.Context, req *ListProjectsReques
 		}
 	}
 
-	projects, err := h.FlowService.ListProjects(ctx, workspaceID, authUser.UserID)
+	projects, err := h.FlowService.ListProjects(ctx, workspaceID, businessID)
 	if err != nil {
 		return ListProjectsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -165,6 +170,10 @@ func (h *CreateProjectHandler) Serve(ctx context.Context, req *CreateProjectRequ
 	if !ok {
 		return CreateProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
 	if err != nil || workspaceID == 0 {
@@ -177,6 +186,7 @@ func (h *CreateProjectHandler) Serve(ctx context.Context, req *CreateProjectRequ
 	input := domain.ProjectInput{
 		WorkspaceID: workspaceID,
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Icon:        req.Icon,
@@ -238,6 +248,10 @@ func (h *UpdateProjectHandler) Serve(ctx context.Context, req *UpdateProjectRequ
 	if !ok {
 		return UpdateProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	status := req.Status
 	if status == "" {
@@ -247,6 +261,7 @@ func (h *UpdateProjectHandler) Serve(ctx context.Context, req *UpdateProjectRequ
 	input := domain.UpdateProjectInput{
 		ID:          req.ID.Int64(),
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Icon:        req.Icon,
@@ -353,12 +368,16 @@ func (h *DeleteProjectHandler) Serve(ctx context.Context, req *DeleteProjectRequ
 	if !ok {
 		return DeleteProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	// Capture the owning workspace before archiving so the realtime
 	// event can route to the correct topic.
 	workspaceID := h.FlowService.GetProjectWorkspace(ctx, req.ID.Int64())
 
-	if err := h.FlowService.DeleteProject(ctx, req.ID.Int64(), authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteProject(ctx, req.ID.Int64(), businessID); err != nil {
 		return DeleteProjectResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete project",

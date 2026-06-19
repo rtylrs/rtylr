@@ -1,16 +1,16 @@
 -- name: ListTimeOffRequests :many
-SELECT id, owner_id, staff_id, type, start_date, end_date, days_count,
+SELECT id, owner_id, business_id, staff_id, type, start_date, end_date, days_count,
        status, reason, approved_by, approved_at, notes, created_at, updated_at
 FROM hr_time_off_requests
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY created_at DESC;
 
 -- name: CreateTimeOffRequest :execresult
 INSERT INTO hr_time_off_requests
-(owner_id, staff_id, type, start_date, end_date, days_count, reason, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+(owner_id, business_id, staff_id, type, start_date, end_date, days_count, reason, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: ApproveTimeOffRequest :exec
 UPDATE hr_time_off_requests
 SET status = ?, approved_by = ?, approved_at = NOW(), notes = ?, updated_at = NOW()
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;

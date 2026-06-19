@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
+func (r *Repository) ListTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -39,11 +39,11 @@ func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID i
 
 	if customerID > 0 {
 		total, err = r.queries.CountTransactionsByCustomer(ctx, sqlc.CountTransactionsByCustomerParams{
-			OwnerID:    ownerID,
+			BusinessID: businessID,
 			CustomerID: customerID,
 		})
 	} else {
-		total, err = r.queries.CountTransactions(ctx, ownerID)
+		total, err = r.queries.CountTransactions(ctx, businessID)
 	}
 
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID i
 
 	if customerID > 0 {
 		rows, qErr := r.queries.ListTransactionsByCustomer(ctx, sqlc.ListTransactionsByCustomerParams{
-			OwnerID:    ownerID,
+			BusinessID: businessID,
 			CustomerID: customerID,
 			Limit:      int32(pageSize),
 			Offset:     int32(offset),
@@ -68,6 +68,7 @@ func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID i
 			txs = append(txs, domain.LoyaltyTransaction{
 				ID:            row.ID,
 				OwnerID:       row.OwnerID,
+				BusinessID:    row.BusinessID,
 				CustomerID:    row.CustomerID,
 				Points:        int(row.Points),
 				Type:          string(row.Type),
@@ -82,9 +83,9 @@ func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID i
 	}
 
 	rows, err := r.queries.ListTransactions(ctx, sqlc.ListTransactionsParams{
-		OwnerID: ownerID,
-		Limit:   int32(pageSize),
-		Offset:  int32(offset),
+		BusinessID: businessID,
+		Limit:      int32(pageSize),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty transactions", logger.Error(err))
@@ -113,6 +114,7 @@ func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID i
 func (r *Repository) CreateTransaction(ctx context.Context, input domain.AwardInput, txType string) error {
 	err := r.queries.CreateTransaction(ctx, sqlc.CreateTransactionParams{
 		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
 		Points:        int32(input.Points),
 		Type:          sqlc.CrmLoyaltyTransactionsType(txType),
@@ -130,6 +132,7 @@ func (r *Repository) CreateTransaction(ctx context.Context, input domain.AwardIn
 func (r *Repository) CreateRedeemTransaction(ctx context.Context, input domain.RedeemInput) error {
 	err := r.queries.CreateRedeemTransaction(ctx, sqlc.CreateRedeemTransactionParams{
 		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
 		Points:        int32(input.Points),
 		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -158,8 +161,8 @@ func parseLoyaltyDecimal(ctx context.Context, s string) float64 {
 	return f
 }
 
-func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
-	row, err := r.queries.GetConfig(ctx, ownerID)
+func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {
+	row, err := r.queries.GetConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.LoyaltyConfig{}, domain.ErrLoyaltyConfigNotFound
@@ -176,6 +179,7 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.Loyal
 	return domain.LoyaltyConfig{
 		ID:                  row.ID,
 		OwnerID:             row.OwnerID,
+		BusinessID:          row.BusinessID,
 		PointsPerDollar:     ppd,
 		MinRedemptionPoints: int(row.MinRedemptionPoints.Int32),
 		PointsValue:         pv,
@@ -187,6 +191,7 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.Loyal
 func (r *Repository) UpsertConfig(ctx context.Context, input domain.LoyaltyConfigInput) error {
 	err := r.queries.UpsertConfig(ctx, sqlc.UpsertConfigParams{
 		OwnerID:               input.OwnerID,
+		BusinessID:            input.BusinessID,
 		PointsPerCurrencyUnit: sql.NullString{String: strconv.FormatFloat(input.PointsPerDollar, 'f', 2, 64), Valid: true},
 		CurrencyPerPoint:      sql.NullString{String: strconv.FormatFloat(input.PointsValue, 'f', 4, 64), Valid: true},
 		MinRedemptionPoints:   sql.NullInt32{Int32: int32(input.MinRedemptionPoints), Valid: true},
@@ -202,7 +207,7 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.LoyaltyConfi
 // ListMembers returns customers with loyalty engagement (points or visits),
 // ordered by points desc. Projection over crm_customers — tracked here rather
 // than in the customers module so the loyalty domain stays self-contained.
-func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
+func (r *Repository) ListMembers(ctx context.Context, businessID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
 	if limit <= 0 || limit > 200 {
 		limit = 50
 	}
@@ -221,7 +226,7 @@ func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offs
 		"COALESCE(last_visit_at, created_at) AS last_active_at",
 	).
 		From("crm_customers").
-		Where(sq.Eq{"owner_id": ownerID, "is_active": true}).
+		Where(sq.Eq{"business_id": businessID, "is_active": true}).
 		Where(sq.Or{sq.Gt{"loyalty_points": 0}, sq.Gt{"visit_count": 0}}).
 		OrderBy("loyalty_points DESC", "visit_count DESC").
 		Limit(uint64(limit)).
@@ -267,7 +272,7 @@ func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offs
 }
 
 // ListRewards returns the catalog of rewards for an owner.
-func (r *Repository) ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
+func (r *Repository) ListRewards(ctx context.Context, businessID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
 	builder := sq.Select(
 		"id", "owner_id", "name",
 		"COALESCE(description, '')",
@@ -278,7 +283,7 @@ func (r *Repository) ListRewards(ctx context.Context, ownerID int64, activeOnly 
 		"created_at", "updated_at",
 	).
 		From("crm_loyalty_rewards").
-		Where(sq.Eq{"owner_id": ownerID})
+		Where(sq.Eq{"business_id": businessID})
 
 	if activeOnly {
 		builder = builder.Where(sq.Eq{"active": true})
@@ -341,6 +346,7 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 	if rw.ID == 0 {
 		res, err := r.queries.CreateReward(ctx, sqlc.CreateRewardParams{
 			OwnerID:     rw.OwnerID,
+			BusinessID:  rw.BusinessID,
 			Name:        rw.Name,
 			Description: sql.NullString{String: rw.Description, Valid: true},
 			Category:    sql.NullString{String: rw.Category, Valid: true},
@@ -368,7 +374,7 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		Icon:        sql.NullString{String: rw.Icon, Valid: true},
 		Active:      sql.NullBool{Bool: rw.Active, Valid: true},
 		ID:          rw.ID,
-		OwnerID:     rw.OwnerID,
+		BusinessID:  rw.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update loyalty reward", logger.Error(err))

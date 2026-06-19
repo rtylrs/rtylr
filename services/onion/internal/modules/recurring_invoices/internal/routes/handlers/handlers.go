@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---- Payload ----
@@ -51,7 +52,12 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	items, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list recurring invoices"}
 	}
@@ -108,6 +114,11 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.RecurringInvoiceInput{
 		TemplateInvoiceID: req.TemplateInvoiceID,
 		Frequency:         req.Frequency,
@@ -116,7 +127,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		IsActive:          req.IsActive,
 	}
 
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, businessID, input)
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create recurring invoice"}
 	}
@@ -168,6 +179,11 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.RecurringInvoiceInput{
 		TemplateInvoiceID: req.TemplateInvoiceID,
 		Frequency:         req.Frequency,
@@ -176,7 +192,7 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		IsActive:          req.IsActive,
 	}
 
-	if err := h.Service.Update(ctx, device.User.UserID, req.ID, input); err != nil {
+	if err := h.Service.Update(ctx, businessID, req.ID, input); err != nil {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update recurring invoice"}
 	}
 

@@ -17,9 +17,9 @@ const (
 )
 
 type repository interface {
-	ListTimeOffRequests(ctx context.Context, ownerID int64) ([]domain.TimeOffRequest, error)
+	ListTimeOffRequests(ctx context.Context, businessID int64) ([]domain.TimeOffRequest, error)
 	CreateTimeOffRequest(ctx context.Context, input domain.TimeOffInput) (int64, error)
-	ApproveTimeOffRequest(ctx context.Context, ownerID int64, input domain.TimeOffApprovalInput) error
+	ApproveTimeOffRequest(ctx context.Context, businessID int64, input domain.TimeOffApprovalInput) error
 }
 
 type Service struct {
@@ -30,17 +30,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateTimeOffScope(ctx context.Context, ownerID int64) {
+func invalidateTimeOffScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(timeOffScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(timeOffScope, businessID))
 	}
 }
 
-func (s *Service) ListTimeOffRequests(ctx context.Context, ownerID int64) ([]domain.TimeOffRequest, error) {
+func (s *Service) ListTimeOffRequests(ctx context.Context, businessID int64) ([]domain.TimeOffRequest, error) {
 	return cacher.Of[[]domain.TimeOffRequest]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(timeOffScope, ownerID, "list"),
+		cacheKeys.Scoped(timeOffScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.TimeOffRequest, error) {
-			return s.repo.ListTimeOffRequests(ctx, ownerID)
+			return s.repo.ListTimeOffRequests(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, timeOffTTL),
 	)
@@ -51,14 +51,14 @@ func (s *Service) SubmitTimeOffRequest(ctx context.Context, input domain.TimeOff
 	if err != nil {
 		return 0, err
 	}
-	invalidateTimeOffScope(ctx, input.OwnerID)
+	invalidateTimeOffScope(ctx, input.BusinessID)
 	return id, nil
 }
 
-func (s *Service) ApproveTimeOffRequest(ctx context.Context, ownerID int64, input domain.TimeOffApprovalInput) error {
-	if err := s.repo.ApproveTimeOffRequest(ctx, ownerID, input); err != nil {
+func (s *Service) ApproveTimeOffRequest(ctx context.Context, businessID int64, input domain.TimeOffApprovalInput) error {
+	if err := s.repo.ApproveTimeOffRequest(ctx, businessID, input); err != nil {
 		return err
 	}
-	invalidateTimeOffScope(ctx, ownerID)
+	invalidateTimeOffScope(ctx, businessID)
 	return nil
 }

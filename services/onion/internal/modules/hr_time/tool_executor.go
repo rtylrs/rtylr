@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -39,7 +40,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListTimeEntriesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrTimeToolOwnerID(ctx)
+	businessID, err := hrTimeToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func (m *Module) executeListTimeEntriesTool(ctx context.Context, input map[strin
 		return nil, err
 	}
 
-	entries, total, err := m.service.ListTimeEntries(ctx, ownerID, domain.ListTimeEntriesParams{
+	entries, total, err := m.service.ListTimeEntries(ctx, businessID, domain.ListTimeEntriesParams{
 		EmployeeID:  employeeID,
 		PeriodStart: periodStart,
 		PeriodEnd:   periodEnd,
@@ -87,7 +88,7 @@ func (m *Module) executeListTimeEntriesTool(ctx context.Context, input map[strin
 }
 
 func (m *Module) executeListTimesheetsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrTimeToolOwnerID(ctx)
+	businessID, err := hrTimeToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func (m *Module) executeListTimesheetsTool(ctx context.Context, input map[string
 		return nil, fmt.Errorf("invalid employee_id: %w", err)
 	}
 
-	timesheets, total, err := m.service.ListTimesheets(ctx, ownerID, domain.ListTimesheetsParams{
+	timesheets, total, err := m.service.ListTimesheets(ctx, businessID, domain.ListTimesheetsParams{
 		EmployeeID: employeeID,
 		Limit:      limit,
 		Offset:     offset,
@@ -127,7 +128,7 @@ func (m *Module) executeListTimesheetsTool(ctx context.Context, input map[string
 }
 
 func (m *Module) executeGetTimesheetTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrTimeToolOwnerID(ctx)
+	businessID, err := hrTimeToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (m *Module) executeGetTimesheetTool(ctx context.Context, input map[string]a
 
 	var timesheet *domain.TimesheetRecord
 	if timesheetID > 0 {
-		timesheet, err = m.service.GetTimesheet(ctx, ownerID, timesheetID)
+		timesheet, err = m.service.GetTimesheet(ctx, businessID, timesheetID)
 	} else {
 		employeeID, employeeErr := hrTimeToolPositiveInt64(firstHRTimeToolValue(input, "employee_id", "employee"))
 		if employeeErr != nil {
@@ -151,7 +152,7 @@ func (m *Module) executeGetTimesheetTool(ctx context.Context, input map[string]a
 		if periodStart == "" {
 			return nil, errors.New("period_start is required when timesheet_id is omitted")
 		}
-		timesheet, err = m.service.GetTimesheetForPeriod(ctx, ownerID, employeeID, periodStart)
+		timesheet, err = m.service.GetTimesheetForPeriod(ctx, businessID, employeeID, periodStart)
 	}
 	if err != nil {
 		return nil, err
@@ -162,12 +163,16 @@ func (m *Module) executeGetTimesheetTool(ctx context.Context, input map[string]a
 	}, nil
 }
 
-func hrTimeToolOwnerID(ctx context.Context) (int64, error) {
+func hrTimeToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return businessID, nil
 }
 
 func hrTimeToolPagination(input map[string]any) (int32, int32, error) {

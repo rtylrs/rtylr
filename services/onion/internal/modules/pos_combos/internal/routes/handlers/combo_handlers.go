@@ -19,6 +19,7 @@ import (
 type ComboPayload struct {
 	ID          int64   `json:"id"`
 	OwnerID     int64   `json:"owner_id"`
+	BusinessID  int64   `json:"business_id"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
@@ -32,6 +33,7 @@ func newComboPayload(c domain.Combo) ComboPayload {
 	return ComboPayload{
 		ID:          c.ID,
 		OwnerID:     c.OwnerID,
+		BusinessID:  c.BusinessID,
 		Name:        c.Name,
 		Description: c.Description,
 		Price:       c.Price,
@@ -59,8 +61,11 @@ func (h *ListCombosHandler) Serve(ctx context.Context, _ *ListCombosRequest) (Li
 	if device.User == nil {
 		return ListCombosResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	items, err := h.Service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListCombosResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListCombosResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list combos"}
 	}
@@ -106,8 +111,11 @@ func (h *CreateComboHandler) Serve(ctx context.Context, req *CreateComboRequest)
 	if device.User == nil {
 		return CreateComboResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	id, err := h.Service.Create(ctx, ownerID, domain.ComboInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateComboResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, device.User.UserID, businessID, domain.ComboInput{
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
@@ -154,13 +162,16 @@ func (h *UpdateComboHandler) Serve(ctx context.Context, req *UpdateComboRequest)
 	if device.User == nil {
 		return UpdateComboResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateComboResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateComboResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid combo ID"}
 	}
-	if updateErr := h.Service.Update(ctx, ownerID, id, domain.ComboInput{
+	if updateErr := h.Service.Update(ctx, businessID, id, domain.ComboInput{
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
@@ -192,13 +203,16 @@ func (h *DeleteComboHandler) Serve(ctx context.Context, _ *DeleteComboRequest) (
 	if device.User == nil {
 		return DeleteComboResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteComboResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteComboResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid combo ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, ownerID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, businessID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrComboNotFound) {
 			return DeleteComboResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Combo not found"}
 		}

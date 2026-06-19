@@ -47,8 +47,11 @@ func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequ
 	if req.BranchID == 0 || req.ProductID == 0 {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id and product_id are required"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	movements, err := h.Service.ListMovements(ctx, device.User.BusinessID, ownerID, req.BranchID, req.ProductID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListMovementsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	movements, err := h.Service.ListMovements(ctx, businessID, businessID, req.BranchID, req.ProductID)
 	if err != nil {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list stock movements"}
 	}
@@ -98,9 +101,12 @@ func (h *ReceiveStockHandler) Serve(ctx context.Context, req *ReceiveStockReques
 	if req.BranchID == 0 || req.ProductID == 0 || req.Quantity <= 0 {
 		return ReceiveStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ReceiveStockResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.ReceiveStock(ctx, domain.ReceiveStockInput{
-		BusinessID: device.User.BusinessID, OwnerID: ownerID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: businessID, OwnerID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -143,9 +149,12 @@ func (h *AdjustStockHandler) Serve(ctx context.Context, req *AdjustStockRequest)
 	if device.User == nil {
 		return AdjustStockResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return AdjustStockResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.AdjustStock(ctx, domain.AdjustStockInput{
-		BusinessID: device.User.BusinessID, OwnerID: ownerID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: businessID, OwnerID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -181,9 +190,12 @@ func (h *WasteStockHandler) Serve(ctx context.Context, req *WasteStockRequest) (
 	if req.BranchID == 0 || req.ProductID == 0 || req.Quantity <= 0 {
 		return WasteStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId, productId, and positive quantity are required"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return WasteStockResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.RecordWaste(ctx, domain.WasteStockInput{
-		BusinessID: device.User.BusinessID, OwnerID: ownerID, BranchID: req.BranchID, ProductID: req.ProductID,
+		BusinessID: businessID, OwnerID: device.User.UserID, BranchID: req.BranchID, ProductID: req.ProductID,
 		Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -220,9 +232,12 @@ func (h *TransferStockHandler) Serve(ctx context.Context, req *TransferStockRequ
 	if req.FromBranchID == 0 || req.ToBranchID == 0 || req.ProductID == 0 || req.Quantity <= 0 {
 		return TransferStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "fromBranchId, toBranchId, productId, and positive quantity are required"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return TransferStockResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.TransferStock(ctx, domain.TransferStockInput{
-		BusinessID: device.User.BusinessID, OwnerID: ownerID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
+		BusinessID: businessID, OwnerID: device.User.UserID, FromBranchID: req.FromBranchID, ToBranchID: req.ToBranchID,
 		ProductID: req.ProductID, Quantity: req.Quantity, Note: req.Note, EmployeeID: req.EmployeeID,
 	})
 	if err != nil {
@@ -297,8 +312,11 @@ func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequ
 	if req.BranchID == 0 {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	items, err := h.Service.ListBranchInventory(ctx, device.User.BusinessID, ownerID, req.BranchID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListInventoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.ListBranchInventory(ctx, businessID, businessID, req.BranchID)
 	if err != nil {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inventory"}
 	}
@@ -332,8 +350,11 @@ func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowS
 	if req.BranchID == 0 {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branch_id is required"}
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	items, err := h.Service.ListLowStockItems(ctx, device.User.BusinessID, ownerID, req.BranchID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return LowStockResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.ListLowStockItems(ctx, businessID, businessID, req.BranchID)
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list low stock items"}
 	}

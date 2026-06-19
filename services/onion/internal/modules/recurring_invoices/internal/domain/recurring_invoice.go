@@ -11,6 +11,7 @@ var ErrRecurringInvoiceNotFound = errors.New("recurring invoice not found")
 type RecurringInvoice struct {
 	ID                int64     `json:"id"`
 	OwnerID           int64     `json:"owner_id"`
+	BusinessID        int64     `json:"business_id"`
 	TemplateInvoiceID int64     `json:"template_invoice_id"`
 	Frequency         string    `json:"frequency"`
 	NextInvoiceDate   time.Time `json:"next_invoice_date"`

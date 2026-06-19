@@ -23,11 +23,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListPriceLists(ctx context.Context, ownerID int64) ([]domain.PriceList, error) {
-	rows, err := r.queries.ListPriceLists(ctx, ownerID)
+func (r *Repository) ListPriceLists(ctx context.Context, businessID int64) ([]domain.PriceList, error) {
+	rows, err := r.queries.ListPriceLists(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list price lists",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Error(err),
 		)
 
@@ -37,11 +37,12 @@ func (r *Repository) ListPriceLists(ctx context.Context, ownerID int64) ([]domai
 	result := make([]domain.PriceList, 0, len(rows))
 	for _, row := range rows {
 		pl := domain.PriceList{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Currency:  row.Currency,
-			IsDefault: row.IsDefault,
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Currency:   row.Currency,
+			IsDefault:  row.IsDefault,
 		}
 
 		if row.CreatedAt.Valid {
@@ -57,16 +58,17 @@ func (r *Repository) ListPriceLists(ctx context.Context, ownerID int64) ([]domai
 	return result, nil
 }
 
-func (r *Repository) CreatePriceList(ctx context.Context, ownerID int64, input domain.PriceListInput) (int64, error) {
+func (r *Repository) CreatePriceList(ctx context.Context, businessID int64, input domain.PriceListInput) (int64, error) {
 	res, err := r.queries.CreatePriceList(ctx, sqlc.CreatePriceListParams{
-		OwnerID:   ownerID,
-		Name:      input.Name,
-		Currency:  input.Currency,
-		IsDefault: input.IsDefault,
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		Name:       input.Name,
+		Currency:   input.Currency,
+		IsDefault:  input.IsDefault,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create price list",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Error(err),
 		)
 
@@ -76,7 +78,7 @@ func (r *Repository) CreatePriceList(ctx context.Context, ownerID int64, input d
 	id, err := res.LastInsertId()
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to read inserted price list id",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Error(err),
 		)
 

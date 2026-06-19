@@ -24,9 +24,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) CreateTemplate(ctx context.Context, ownerID int64, params domain.CreateTemplateParams) (*domain.ChecklistTemplateRecord, error) {
+func (r *Repository) CreateTemplate(ctx context.Context, businessID int64, params domain.CreateTemplateParams) (*domain.ChecklistTemplateRecord, error) {
 	result, err := r.queries.CreateChecklistTemplate(ctx, sqlc.CreateChecklistTemplateParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		Name:        params.Name,
 		TriggerType: params.TriggerType,
 		RoleID:      nullInt64(params.RoleID),
@@ -40,13 +41,13 @@ func (r *Repository) CreateTemplate(ctx context.Context, ownerID int64, params d
 		return nil, err
 	}
 
-	return r.GetTemplate(ctx, ownerID, id)
+	return r.GetTemplate(ctx, businessID, id)
 }
 
-func (r *Repository) GetTemplate(ctx context.Context, ownerID, id int64) (*domain.ChecklistTemplateRecord, error) {
+func (r *Repository) GetTemplate(ctx context.Context, businessID, id int64) (*domain.ChecklistTemplateRecord, error) {
 	row, err := r.queries.GetChecklistTemplate(ctx, sqlc.GetChecklistTemplateParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -56,7 +57,7 @@ func (r *Repository) GetTemplate(ctx context.Context, ownerID, id int64) (*domai
 	}
 
 	items, err := r.queries.ListChecklistItems(ctx, sqlc.ListChecklistItemsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		TemplateID: id,
 	})
 	if err != nil {
@@ -72,16 +73,16 @@ func (r *Repository) GetTemplate(ctx context.Context, ownerID, id int64) (*domai
 	return &record, nil
 }
 
-func (r *Repository) ListTemplates(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.ChecklistTemplateRecord, int64, error) {
-	total, err := r.queries.CountChecklistTemplates(ctx, ownerID)
+func (r *Repository) ListTemplates(ctx context.Context, businessID int64, limit, offset int32) ([]domain.ChecklistTemplateRecord, int64, error) {
+	total, err := r.queries.CountChecklistTemplates(ctx, businessID)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListChecklistTemplates(ctx, sqlc.ListChecklistTemplatesParams{
-		OwnerID: ownerID,
-		Limit:   limit,
-		Offset:  offset,
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		return nil, 0, err
@@ -95,19 +96,20 @@ func (r *Repository) ListTemplates(ctx context.Context, ownerID int64, limit, of
 	return templates, total, nil
 }
 
-func (r *Repository) UpdateTemplate(ctx context.Context, ownerID, id int64, params domain.UpdateTemplateParams) error {
+func (r *Repository) UpdateTemplate(ctx context.Context, businessID, id int64, params domain.UpdateTemplateParams) error {
 	return r.queries.UpdateChecklistTemplate(ctx, sqlc.UpdateChecklistTemplateParams{
 		Name:        params.Name,
 		TriggerType: params.TriggerType,
 		RoleID:      nullInt64(params.RoleID),
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		ID:          id,
 	})
 }
 
-func (r *Repository) CreateTemplateItem(ctx context.Context, ownerID, templateID int64, params domain.CreateTemplateItemParams) (*domain.ChecklistItemRecord, error) {
+func (r *Repository) CreateTemplateItem(ctx context.Context, businessID, templateID int64, params domain.CreateTemplateItemParams) (*domain.ChecklistItemRecord, error) {
 	result, err := r.queries.CreateChecklistItem(ctx, sqlc.CreateChecklistItemParams{
-		OwnerID:            ownerID,
+		OwnerID:            businessID,
+		BusinessID:         businessID,
 		TemplateID:         templateID,
 		Title:              params.Title,
 		Description:        nullString(params.Description),
@@ -125,8 +127,8 @@ func (r *Repository) CreateTemplateItem(ctx context.Context, ownerID, templateID
 	}
 
 	row, err := r.queries.GetChecklistItem(ctx, sqlc.GetChecklistItemParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		return nil, err
@@ -136,9 +138,9 @@ func (r *Repository) CreateTemplateItem(ctx context.Context, ownerID, templateID
 	return &item, nil
 }
 
-func (r *Repository) ListTemplateItems(ctx context.Context, ownerID, templateID int64) ([]domain.ChecklistItemRecord, error) {
+func (r *Repository) ListTemplateItems(ctx context.Context, businessID, templateID int64) ([]domain.ChecklistItemRecord, error) {
 	rows, err := r.queries.ListChecklistItems(ctx, sqlc.ListChecklistItemsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		TemplateID: templateID,
 	})
 	if err != nil {
@@ -153,7 +155,7 @@ func (r *Repository) ListTemplateItems(ctx context.Context, ownerID, templateID 
 	return items, nil
 }
 
-func (r *Repository) TriggerChecklist(ctx context.Context, ownerID, employeeID, templateID int64, triggerDate time.Time) (*domain.EmployeeChecklistRecord, error) {
+func (r *Repository) TriggerChecklist(ctx context.Context, businessID, employeeID, templateID int64, triggerDate time.Time) (*domain.EmployeeChecklistRecord, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -168,7 +170,8 @@ func (r *Repository) TriggerChecklist(ctx context.Context, ownerID, employeeID, 
 	qtx := r.queries.WithTx(tx)
 
 	result, err := qtx.CreateEmployeeChecklist(ctx, sqlc.CreateEmployeeChecklistParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		EmployeeID:  employeeID,
 		TemplateID:  templateID,
 		Status:      "in_progress",
@@ -186,7 +189,7 @@ func (r *Repository) TriggerChecklist(ctx context.Context, ownerID, employeeID, 
 	}
 
 	templateItems, err := qtx.ListChecklistItems(ctx, sqlc.ListChecklistItemsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		TemplateID: templateID,
 	})
 	if err != nil {
@@ -197,7 +200,8 @@ func (r *Repository) TriggerChecklist(ctx context.Context, ownerID, employeeID, 
 	for _, item := range templateItems {
 		dueDate := triggerDate.AddDate(0, 0, int(item.DueOffsetDays))
 		err := qtx.CreateEmployeeChecklistItem(ctx, sqlc.CreateEmployeeChecklistItemParams{
-			OwnerID:              ownerID,
+			OwnerID:              businessID,
+			BusinessID:           businessID,
 			EmployeeChecklistID:  checklistID,
 			ChecklistItemID:      item.ID,
 			AssignedToEmployeeID: employeeID,
@@ -214,12 +218,12 @@ func (r *Repository) TriggerChecklist(ctx context.Context, ownerID, employeeID, 
 		return nil, err
 	}
 
-	return r.GetEmployeeChecklist(ctx, ownerID, employeeID, checklistID)
+	return r.GetEmployeeChecklist(ctx, businessID, employeeID, checklistID)
 }
 
-func (r *Repository) GetEmployeeChecklist(ctx context.Context, ownerID, employeeID, checklistID int64) (*domain.EmployeeChecklistRecord, error) {
+func (r *Repository) GetEmployeeChecklist(ctx context.Context, businessID, employeeID, checklistID int64) (*domain.EmployeeChecklistRecord, error) {
 	row, err := r.queries.GetEmployeeChecklist(ctx, sqlc.GetEmployeeChecklistParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 		ID:         checklistID,
 	})
@@ -231,7 +235,7 @@ func (r *Repository) GetEmployeeChecklist(ctx context.Context, ownerID, employee
 	}
 
 	items, err := r.queries.ListEmployeeChecklistItems(ctx, sqlc.ListEmployeeChecklistItemsParams{
-		OwnerID:             ownerID,
+		BusinessID:          businessID,
 		EmployeeChecklistID: checklistID,
 	})
 	if err != nil {
@@ -247,9 +251,9 @@ func (r *Repository) GetEmployeeChecklist(ctx context.Context, ownerID, employee
 	return &record, nil
 }
 
-func (r *Repository) ListEmployeeChecklists(ctx context.Context, ownerID, employeeID int64, limit, offset int32) ([]domain.EmployeeChecklistRecord, int64, error) {
+func (r *Repository) ListEmployeeChecklists(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.EmployeeChecklistRecord, int64, error) {
 	total, err := r.queries.CountEmployeeChecklists(ctx, sqlc.CountEmployeeChecklistsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 	})
 	if err != nil {
@@ -257,7 +261,7 @@ func (r *Repository) ListEmployeeChecklists(ctx context.Context, ownerID, employ
 	}
 
 	rows, err := r.queries.ListEmployeeChecklists(ctx, sqlc.ListEmployeeChecklistsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Limit:      limit,
 		Offset:     offset,
@@ -274,22 +278,23 @@ func (r *Repository) ListEmployeeChecklists(ctx context.Context, ownerID, employ
 	return checklists, total, nil
 }
 
-func (r *Repository) UpdateEmployeeChecklistStatus(ctx context.Context, ownerID, checklistID int64, status string) error {
+func (r *Repository) UpdateEmployeeChecklistStatus(ctx context.Context, businessID, checklistID int64, status string) error {
 	return r.queries.UpdateEmployeeChecklistStatus(ctx, sqlc.UpdateEmployeeChecklistStatusParams{
-		Status:  status,
-		OwnerID: ownerID,
-		ID:      checklistID,
+		Status:     status,
+		BusinessID: businessID,
+		ID:         checklistID,
 	})
 }
 
-func (r *Repository) CreateEmployeeChecklistItem(ctx context.Context, ownerID, employeeChecklistID, checklistItemID, assignedToEmployeeID int64, dueDate string) error {
+func (r *Repository) CreateEmployeeChecklistItem(ctx context.Context, businessID, employeeChecklistID, checklistItemID, assignedToEmployeeID int64, dueDate string) error {
 	parsed, err := time.Parse("2006-01-02", dueDate)
 	if err != nil {
 		return fmt.Errorf("invalid due_date format: %w", err)
 	}
 
 	return r.queries.CreateEmployeeChecklistItem(ctx, sqlc.CreateEmployeeChecklistItemParams{
-		OwnerID:              ownerID,
+		OwnerID:              businessID,
+		BusinessID:           businessID,
 		EmployeeChecklistID:  employeeChecklistID,
 		ChecklistItemID:      checklistItemID,
 		AssignedToEmployeeID: assignedToEmployeeID,
@@ -298,10 +303,10 @@ func (r *Repository) CreateEmployeeChecklistItem(ctx context.Context, ownerID, e
 	})
 }
 
-func (r *Repository) GetChecklistItem(ctx context.Context, ownerID, itemID int64) (*domain.EmployeeChecklistItemRecord, error) {
+func (r *Repository) GetChecklistItem(ctx context.Context, businessID, itemID int64) (*domain.EmployeeChecklistItemRecord, error) {
 	row, err := r.queries.GetEmployeeChecklistItem(ctx, sqlc.GetEmployeeChecklistItemParams{
-		OwnerID: ownerID,
-		ID:      itemID,
+		BusinessID: businessID,
+		ID:         itemID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -314,17 +319,17 @@ func (r *Repository) GetChecklistItem(ctx context.Context, ownerID, itemID int64
 	return &item, nil
 }
 
-func (r *Repository) CompleteChecklistItem(ctx context.Context, ownerID, itemID, completedBy int64) error {
+func (r *Repository) CompleteChecklistItem(ctx context.Context, businessID, itemID, completedBy int64) error {
 	return r.queries.CompleteEmployeeChecklistItem(ctx, sqlc.CompleteEmployeeChecklistItemParams{
 		CompletedBy: sql.NullInt64{Int64: completedBy, Valid: true},
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		ID:          itemID,
 	})
 }
 
-func (r *Repository) GetChecklistCompletionStats(ctx context.Context, ownerID, checklistID int64) (int, int, error) {
+func (r *Repository) GetChecklistCompletionStats(ctx context.Context, businessID, checklistID int64) (int, int, error) {
 	total, err := r.queries.CountChecklistItemsTotal(ctx, sqlc.CountChecklistItemsTotalParams{
-		OwnerID:             ownerID,
+		BusinessID:          businessID,
 		EmployeeChecklistID: checklistID,
 	})
 	if err != nil {
@@ -332,7 +337,7 @@ func (r *Repository) GetChecklistCompletionStats(ctx context.Context, ownerID, c
 	}
 
 	completed, err := r.queries.CountChecklistItemsCompleted(ctx, sqlc.CountChecklistItemsCompletedParams{
-		OwnerID:             ownerID,
+		BusinessID:          businessID,
 		EmployeeChecklistID: checklistID,
 	})
 	if err != nil {
@@ -342,9 +347,9 @@ func (r *Repository) GetChecklistCompletionStats(ctx context.Context, ownerID, c
 	return int(total), int(completed), nil
 }
 
-func (r *Repository) ListEmployeeChecklistItems(ctx context.Context, ownerID, employeeChecklistID int64) ([]domain.EmployeeChecklistItemRecord, error) {
+func (r *Repository) ListEmployeeChecklistItems(ctx context.Context, businessID, employeeChecklistID int64) ([]domain.EmployeeChecklistItemRecord, error) {
 	rows, err := r.queries.ListEmployeeChecklistItems(ctx, sqlc.ListEmployeeChecklistItemsParams{
-		OwnerID:             ownerID,
+		BusinessID:          businessID,
 		EmployeeChecklistID: employeeChecklistID,
 	})
 	if err != nil {
@@ -363,6 +368,7 @@ func templateFromRow(row sqlc.HrOnboardingChecklistTemplate) domain.ChecklistTem
 	return domain.ChecklistTemplateRecord{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Name:        row.Name,
 		TriggerType: row.TriggerType,
 		RoleID:      row.RoleID.Int64,
@@ -375,6 +381,7 @@ func checklistItemFromRow(row sqlc.HrOnboardingChecklistItem) domain.ChecklistIt
 	return domain.ChecklistItemRecord{
 		ID:                 row.ID,
 		OwnerID:            row.OwnerID,
+		BusinessID:         row.BusinessID,
 		TemplateID:         row.TemplateID,
 		Title:              row.Title,
 		Description:        row.Description.String,
@@ -390,6 +397,7 @@ func employeeChecklistFromRow(row sqlc.HrOnboardingEmployeeChecklist) domain.Emp
 	return domain.EmployeeChecklistRecord{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		EmployeeID:  row.EmployeeID,
 		TemplateID:  row.TemplateID,
 		Status:      row.Status,
@@ -403,6 +411,7 @@ func employeeChecklistItemFromRow(row sqlc.HrOnboardingEmployeeChecklistItem) do
 	return domain.EmployeeChecklistItemRecord{
 		ID:                   row.ID,
 		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
 		EmployeeChecklistID:  row.EmployeeChecklistID,
 		ChecklistItemID:      row.ChecklistItemID,
 		AssignedToEmployeeID: row.AssignedToEmployeeID,

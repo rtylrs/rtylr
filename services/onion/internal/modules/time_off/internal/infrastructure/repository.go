@@ -26,8 +26,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListTimeOffRequests(ctx context.Context, ownerID int64) ([]domain.TimeOffRequest, error) {
-	rows, err := r.queries.ListTimeOffRequests(ctx, ownerID)
+func (r *Repository) ListTimeOffRequests(ctx context.Context, businessID int64) ([]domain.TimeOffRequest, error) {
+	rows, err := r.queries.ListTimeOffRequests(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list time off requests", logger.Error(err))
 		return nil, err
@@ -38,6 +38,7 @@ func (r *Repository) ListTimeOffRequests(ctx context.Context, ownerID int64) ([]
 		var t domain.TimeOffRequest
 		t.ID = row.ID
 		t.OwnerID = row.OwnerID
+		t.BusinessID = row.BusinessID
 		t.StaffID = row.StaffID
 		t.Type = string(row.Type)
 		t.StartDate = row.StartDate
@@ -72,9 +73,10 @@ func (r *Repository) ListTimeOffRequests(ctx context.Context, ownerID int64) ([]
 
 func (r *Repository) CreateTimeOffRequest(ctx context.Context, input domain.TimeOffInput) (int64, error) {
 	result, err := r.queries.CreateTimeOffRequest(ctx, sqlc.CreateTimeOffRequestParams{
-		OwnerID:   input.OwnerID,
-		StaffID:   input.StaffID,
-		Type:      sqlc.HrTimeOffRequestsType(input.Type),
+		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
+		StaffID:    input.StaffID,
+		Type:       sqlc.HrTimeOffRequestsType(input.Type),
 		StartDate: parseDate(input.StartDate),
 		EndDate:   parseDate(input.EndDate),
 		DaysCount: fmt.Sprintf("%g", input.DaysCount),
@@ -89,13 +91,13 @@ func (r *Repository) CreateTimeOffRequest(ctx context.Context, input domain.Time
 	return result.LastInsertId()
 }
 
-func (r *Repository) ApproveTimeOffRequest(ctx context.Context, ownerID int64, input domain.TimeOffApprovalInput) error {
+func (r *Repository) ApproveTimeOffRequest(ctx context.Context, businessID int64, input domain.TimeOffApprovalInput) error {
 	err := r.queries.ApproveTimeOffRequest(ctx, sqlc.ApproveTimeOffRequestParams{
 		Status:     sqlc.NullHrTimeOffRequestsStatus{HrTimeOffRequestsStatus: sqlc.HrTimeOffRequestsStatus(input.Status), Valid: input.Status != ""},
 		ApprovedBy: sql.NullInt64{Int64: input.ApprovedBy, Valid: input.ApprovedBy != 0},
 		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		ID:         input.ID,
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update time off request", logger.Error(err))

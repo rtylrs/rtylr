@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
@@ -43,7 +44,16 @@ func (h *GetInvoiceHandler) Validate(_ context.Context, req *GetInvoiceRequest) 
 func (h *GetInvoiceHandler) Serve(ctx context.Context, req *GetInvoiceRequest) (GetInvoiceResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	inv, err := h.FinanceService.GetInvoice(ctx, device.User.UserID, req.ID)
+	if device.User == nil {
+		return GetInvoiceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetInvoiceResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	inv, err := h.FinanceService.GetInvoice(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvoiceNotFound) {
 			return GetInvoiceResponse{}, &errorModels.ServerError{

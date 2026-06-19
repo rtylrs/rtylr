@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 )
 
@@ -76,6 +77,11 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 		return ListCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListCustomersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	if req.Page < 1 {
 		req.Page = 1
 	}
@@ -85,12 +91,12 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 	}
 
 	result, err := h.CRMService.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  device.User.UserID,
-		Search:   req.Search,
-		Tier:     req.Tier,
-		Tag:      req.Tag,
-		Page:     req.Page,
-		PageSize: req.PageSize,
+		BusinessID: businessID,
+		Search:     req.Search,
+		Tier:       req.Tier,
+		Tag:        req.Tag,
+		Page:       req.Page,
+		PageSize:   req.PageSize,
 	})
 	if err != nil {
 		return ListCustomersResponse{}, &errorModels.ServerError{

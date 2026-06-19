@@ -19,8 +19,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.PaymentMethod, error) {
-	rows, err := r.queries.ListPaymentMethods(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.PaymentMethod, error) {
+	rows, err := r.queries.ListPaymentMethods(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list payment methods", logger.Error(err))
 		return nil, err
@@ -32,9 +32,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.PaymentM
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.PaymentMethodInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.PaymentMethodInput) (int64, error) {
 	result, err := r.queries.CreatePaymentMethod(ctx, sqlc.CreatePaymentMethodParams{
-		OwnerID: ownerID, Provider: input.Provider,
+		OwnerID: ownerID, BusinessID: businessID, Provider: input.Provider,
 		Config: nullJSON(input.Config), IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
@@ -45,10 +45,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Pay
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.PaymentMethodInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.PaymentMethodInput) error {
 	err := r.queries.UpdatePaymentMethod(ctx, sqlc.UpdatePaymentMethodParams{
 		Provider: input.Provider, Config: nullJSON(input.Config),
-		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true}, OwnerID: ownerID, ID: id,
+		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true}, BusinessID: businessID, ID: id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update payment method", logger.Error(err))
@@ -58,7 +58,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 }
 
 func fromRow(row sqlc.StorePaymentMethod) domain.PaymentMethod {
-	p := domain.PaymentMethod{ID: row.ID, OwnerID: row.OwnerID, Provider: row.Provider}
+	p := domain.PaymentMethod{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Provider: row.Provider}
 	if row.Config != nil {
 		p.Config = string(row.Config)
 	}

@@ -18,12 +18,12 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.Quote, error)
-	Create(ctx context.Context, ownerID int64, input domain.QuoteInput) (int64, error)
-	Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error
-	UpdateStatus(ctx context.Context, ownerID, id int64, status string) error
-	Delete(ctx context.Context, ownerID, id int64) error
-	ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error)
+	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Quote, error)
+	Create(ctx context.Context, businessID int64, input domain.QuoteInput) (int64, error)
+	Update(ctx context.Context, businessID, id int64, input domain.QuoteInput) error
+	UpdateStatus(ctx context.Context, businessID, id int64, status string) error
+	Delete(ctx context.Context, businessID, id int64) error
+	ConvertToInvoice(ctx context.Context, businessID, quoteID int64) (int64, error)
 }
 
 type Service struct {
@@ -34,18 +34,18 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateQuotesScope(ctx context.Context, ownerID int64) {
+func invalidateQuotesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(quotesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(quotesScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID, page, pageSize int64) ([]domain.Quote, bool, error) {
+func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([]domain.Quote, bool, error) {
 	limit, offset := paginate(page, pageSize)
-	key := cacheKeys.Scoped(quotesScope, ownerID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
+	key := cacheKeys.Scoped(quotesScope, businessID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
 	rows, err := cacher.Of[[]domain.Quote]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Quote, error) {
-			return s.repo.List(ctx, ownerID, int32(limit+1), int32(offset))
+			return s.repo.List(ctx, businessID, int32(limit+1), int32(offset))
 		},
 		cacher.WithExpiry(ctx, quotesTTL),
 	)
@@ -72,44 +72,44 @@ func paginate(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.QuoteInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.QuoteInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateQuotesScope(ctx, ownerID)
+	invalidateQuotesScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error {
-	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.QuoteInput) error {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
-	invalidateQuotesScope(ctx, ownerID)
+	invalidateQuotesScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
-	if err := s.repo.UpdateStatus(ctx, ownerID, id, status); err != nil {
+func (s *Service) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
+	if err := s.repo.UpdateStatus(ctx, businessID, id, status); err != nil {
 		return err
 	}
-	invalidateQuotesScope(ctx, ownerID)
+	invalidateQuotesScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateQuotesScope(ctx, ownerID)
+	invalidateQuotesScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error) {
-	id, err := s.repo.ConvertToInvoice(ctx, ownerID, quoteID)
+func (s *Service) ConvertToInvoice(ctx context.Context, businessID, quoteID int64) (int64, error) {
+	id, err := s.repo.ConvertToInvoice(ctx, businessID, quoteID)
 	if err != nil {
 		return 0, err
 	}
-	invalidateQuotesScope(ctx, ownerID)
+	invalidateQuotesScope(ctx, businessID)
 	return id, nil
 }

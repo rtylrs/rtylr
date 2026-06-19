@@ -11,6 +11,7 @@ var ErrStaffNotFound = errors.New("staff not found")
 type Staff struct {
 	ID                    int64     `json:"id"`
 	OwnerID               int64     `json:"owner_id"`
+	BusinessID            int64     `json:"business_id"`
 	UserID                int64     `json:"user_id"`
 	DepartmentID          int64     `json:"department_id"`
 	DepartmentName        string    `json:"department_name"`
@@ -143,6 +144,7 @@ func (s *Staff) FromRow(row *sql.Rows) error {
 
 type StaffInput struct {
 	OwnerID               int64   `json:"owner_id"`
+	BusinessID            int64   `json:"business_id"`
 	UserID                int64   `json:"user_id"`
 	DepartmentID          int64   `json:"department_id"`
 	FirstName             string  `json:"first_name"`

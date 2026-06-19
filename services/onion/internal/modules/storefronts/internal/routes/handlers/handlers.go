@@ -9,11 +9,13 @@ import (
 	"github.com/voxire/onion/internal/modules/storefronts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	tenant "github.com/voxire/onion/internal/platform/tenant"
 )
 
 type Payload struct {
 	ID          int64  `json:"id"`
 	OwnerID     int64  `json:"owner_id"`
+	BusinessID  int64  `json:"business_id"`
 	Name        string `json:"name"`
 	Domain      string `json:"domain"`
 	LogoURL     string `json:"logo_url"`
@@ -25,7 +27,7 @@ type Payload struct {
 
 func toPayload(s domain.Storefront) Payload {
 	return Payload{
-		ID: s.ID, OwnerID: s.OwnerID, Name: s.Name, Domain: s.Domain,
+		ID: s.ID, OwnerID: s.OwnerID, BusinessID: s.BusinessID, Name: s.Name, Domain: s.Domain,
 		LogoURL: s.LogoURL, ThemeID: s.ThemeID, IsPublished: s.IsPublished,
 		CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt: s.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
@@ -49,7 +51,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	items, err := h.Service.List(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list sites"}
 	}
@@ -92,7 +98,11 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	id, err := h.Service.Create(ctx, authUser.UserID, domain.StorefrontInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, authUser.UserID, businessID, domain.StorefrontInput{
 		Name: req.Name, Domain: req.Domain, LogoURL: req.LogoURL, ThemeID: req.ThemeID, IsPublished: req.IsPublished,
 	})
 	if err != nil {
@@ -136,7 +146,11 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if !ok {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.StorefrontInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Update(ctx, businessID, req.ID, domain.StorefrontInput{
 		Name: req.Name, Domain: req.Domain, LogoURL: req.LogoURL, ThemeID: req.ThemeID, IsPublished: req.IsPublished,
 	}); err != nil {
 		return UpdateResponse{}, errorModels.FromError(err, "Failed to update site")

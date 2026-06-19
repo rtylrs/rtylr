@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const getBookingDashboardToolName = "booking.get_dashboard"
@@ -13,21 +14,25 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 	if name != getBookingDashboardToolName {
 		return nil, false, nil
 	}
-	ownerID, err := bookingDashboardToolOwnerID(ctx)
+	businessID, err := bookingDashboardToolBusinessID(ctx)
 	if err != nil {
 		return nil, true, err
 	}
-	dashboard, err := m.service.GetDashboard(ctx, ownerID)
+	dashboard, err := m.service.GetDashboard(ctx, businessID)
 	if err != nil {
 		return nil, true, err
 	}
 	return map[string]any{"dashboard": dashboard}, true, nil
 }
 
-func bookingDashboardToolOwnerID(ctx context.Context) (int64, error) {
+func bookingDashboardToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return businessID, nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const listBookingResourcesToolName = "booking.list_resources"
@@ -15,12 +16,12 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 		return nil, false, nil
 	}
 
-	ownerID, err := bookingResourcesToolOwnerID(ctx)
+	businessID, err := bookingResourcesToolBusinessID(ctx)
 	if err != nil {
 		return nil, true, err
 	}
 
-	resources, err := m.service.List(ctx, ownerID)
+	resources, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, true, err
 	}
@@ -36,12 +37,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 	}, true, nil
 }
 
-func bookingResourcesToolOwnerID(ctx context.Context) (int64, error) {
+func bookingResourcesToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return businessID, nil
 }
 
 func bookingResourceToolPayload(resource domain.Resource) map[string]any {

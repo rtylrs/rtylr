@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/dashboard
@@ -33,8 +34,12 @@ func (h *GetDashboardHandler) Serve(ctx context.Context, _ *GetDashboardRequest)
 	if device.User == nil {
 		return GetDashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetDashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	snap, err := h.Service.GetDashboard(ctx, device.User.UserID)
+	snap, err := h.Service.GetDashboard(ctx, businessID)
 	if err != nil {
 		return GetDashboardResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

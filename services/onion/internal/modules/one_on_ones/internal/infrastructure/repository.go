@@ -25,8 +25,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.OneOnOne, error) {
-	rows, err := r.queries.ListOneOnOnes(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.OneOnOne, error) {
+	rows, err := r.queries.ListOneOnOnes(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list one-on-ones", logger.Error(err))
 		return nil, err
@@ -37,6 +37,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.OneOnOne
 		var item domain.OneOnOne
 		item.ID = row.ID
 		item.OwnerID = row.OwnerID
+		item.BusinessID = row.BusinessID
 		item.ManagerID = row.ManagerID
 		item.StaffID = row.StaffID
 		item.ScheduledAt = row.ScheduledAt
@@ -57,7 +58,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.OneOnOne
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.OneOnOneInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.OneOnOneInput) (int64, error) {
 	status := input.Status
 	if status == "" {
 		status = "scheduled"
@@ -69,7 +70,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.One
 	}
 
 	res, err := r.queries.CreateOneOnOne(ctx, sqlc.CreateOneOnOneParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		ManagerID:   input.ManagerID,
 		StaffID:     input.StaffID,
 		ScheduledAt: parseTime(ctx, input.ScheduledAt),

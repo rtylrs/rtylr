@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/financial/expenses?from=&to=
@@ -36,6 +37,10 @@ func (h *GetExpensesByCategoryHandler) Serve(ctx context.Context, req *GetExpens
 	if device.User == nil {
 		return GetExpensesByCategoryResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetExpensesByCategoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	from, to, err := application.ResolveDateRange(req.From, req.To)
 	if err != nil {
 		return GetExpensesByCategoryResponse{}, &errorModels.ServerError{
@@ -44,7 +49,7 @@ func (h *GetExpensesByCategoryHandler) Serve(ctx context.Context, req *GetExpens
 			Message:  "Invalid date range",
 		}
 	}
-	rows, err := h.Service.GetExpensesByCategory(ctx, device.User.UserID, from, to)
+	rows, err := h.Service.GetExpensesByCategory(ctx, businessID, from, to)
 	if err != nil {
 		return GetExpensesByCategoryResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

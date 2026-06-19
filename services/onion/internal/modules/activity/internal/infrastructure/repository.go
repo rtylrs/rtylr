@@ -19,10 +19,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-// ListActivity returns one page of activity for an owner (optionally filtered to
-// a single app — pass "" for all apps) plus the total count for that same filter,
-// so callers can paginate. limit is clamped to [1,200]; offset is floored at 0.
-func (r *Repository) ListActivity(ctx context.Context, ownerID int64, app string, limit, offset int) ([]domain.ActivityLog, int64, error) {
+// ListActivity returns one page of activity for a business (optionally filtered
+// to a single app — pass "" for all apps) plus the total count for that same
+// filter, so callers can paginate. limit is clamped to [1,200]; offset is floored at 0.
+func (r *Repository) ListActivity(ctx context.Context, businessID int64, app string, limit, offset int) ([]domain.ActivityLog, int64, error) {
 	if limit <= 0 {
 		limit = 50
 	}
@@ -36,11 +36,11 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, app string
 	}
 
 	rows, err := r.queries.ListActivity(ctx, sqlc.ListActivityParams{
-		OwnerID: ownerID,
-		Column2: app, // matches the `? = ''` short-circuit; empty app = all apps
-		App:     app,
-		Limit:   int32(limit),
-		Offset:  int32(offset),
+		BusinessID: businessID,
+		Column2:    app, // matches the `? = ''` short-circuit; empty app = all apps
+		App:        app,
+		Limit:      int32(limit),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list activity", logger.Error(err))
@@ -54,6 +54,7 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, app string
 		var a domain.ActivityLog
 		a.ID = row.ID
 		a.OwnerID = row.OwnerID
+		a.BusinessID = row.BusinessID
 		a.App = row.App
 		a.EntityType = row.EntityType
 		a.Action = row.Action
@@ -82,9 +83,9 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, app string
 	}
 
 	total, err := r.queries.CountActivity(ctx, sqlc.CountActivityParams{
-		OwnerID: ownerID,
-		Column2: app,
-		App:     app,
+		BusinessID: businessID,
+		Column2:    app,
+		App:        app,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count activity", logger.Error(err))

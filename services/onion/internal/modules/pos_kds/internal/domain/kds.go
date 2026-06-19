@@ -11,6 +11,8 @@ type KDSOrder struct {
 	CustomerName string    `json:"customer_name"`
 	KitchenNotes string    `json:"kitchen_notes"`
 	CreatedAt    time.Time `json:"created_at"`
+	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	Items        []KDSItem `json:"items"`
 }
 
@@ -24,8 +26,9 @@ type KDSItem struct {
 }
 
 type UpdateItemStatusInput struct {
-	OwnerID int64
-	OrderID int64
-	ItemID  int64
-	Status  string
+	OwnerID    int64
+	BusinessID int64
+	OrderID    int64
+	ItemID     int64
+	Status     string
 }

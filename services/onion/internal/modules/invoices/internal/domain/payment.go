@@ -14,6 +14,7 @@ var (
 type Payment struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	InvoiceID   int64     `json:"invoice_id"`
 	Amount      float64   `json:"amount"`
 	Currency    string    `json:"currency"`
@@ -34,6 +35,7 @@ func (p *Payment) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&p.ID,
 		&p.OwnerID,
+		&p.BusinessID,
 		&p.InvoiceID,
 		&p.Amount,
 		&currency,

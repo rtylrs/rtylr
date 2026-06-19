@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -83,7 +84,11 @@ func (h *ListFormFieldsHandler) Serve(ctx context.Context, req *ListFormFieldsRe
 	if !ok {
 		return ListFormFieldsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	fields, err := h.CareersService.ListFormFields(ctx, authUser.UserID, req.CareerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListFormFieldsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	fields, err := h.CareersService.ListFormFields(ctx, businessID, req.CareerID)
 	if err != nil {
 		return ListFormFieldsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -137,10 +142,15 @@ func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormField
 	if !ok {
 		return CreateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	in := domain.FormFieldInput{
 		CareerID:    req.CareerID,
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		Kind:        req.Kind,
 		Label:       req.Label,
 		Placeholder: req.Placeholder,
@@ -158,7 +168,7 @@ func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormField
 	// Return the full field list so the client stays in sync without
 	// re-hitting the list endpoint — simpler than juggling the fresh
 	// ID client-side for drag-reorder.
-	fields, _ := h.CareersService.ListFormFields(ctx, authUser.UserID, req.CareerID)
+	fields, _ := h.CareersService.ListFormFields(ctx, businessID, req.CareerID)
 	if len(fields) == 0 {
 		return CreateFormFieldResponse{Field: nil}, nil
 	}
@@ -203,11 +213,16 @@ func (h *UpdateFormFieldHandler) Serve(ctx context.Context, req *UpdateFormField
 	if !ok {
 		return UpdateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	in := domain.FormFieldInput{
 		ID:          req.ID,
 		CareerID:    req.CareerID,
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		Kind:        req.Kind,
 		Label:       req.Label,
 		Placeholder: req.Placeholder,
@@ -258,7 +273,11 @@ func (h *DeleteFormFieldHandler) Serve(ctx context.Context, req *DeleteFormField
 	if !ok {
 		return DeleteFormFieldResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.CareersService.DeleteFormField(ctx, authUser.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.CareersService.DeleteFormField(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return DeleteFormFieldResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,

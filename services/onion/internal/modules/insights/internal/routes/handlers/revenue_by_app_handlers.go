@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/revenue/by-app
@@ -29,7 +30,11 @@ func (h *GetRevenueByAppHandler) Serve(ctx context.Context, _ *GetRevenueByAppRe
 	if device.User == nil {
 		return GetRevenueByAppResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	shares, err := h.Service.GetRevenueByApp(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetRevenueByAppResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	shares, err := h.Service.GetRevenueByApp(ctx, businessID)
 	if err != nil {
 		return GetRevenueByAppResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

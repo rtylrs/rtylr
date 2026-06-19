@@ -18,13 +18,13 @@ type ProductKPIs struct {
 // Margin % per product = (sale_price - cost_price) / sale_price * 100
 // when sale_price > 0; rows with zero sale_price are excluded from the
 // average so they don't skew the result to negative infinity.
-func (r *Repository) GetProductKPIs(ctx context.Context, ownerID int64) (ProductKPIs, error) {
+func (r *Repository) GetProductKPIs(ctx context.Context, businessID int64) (ProductKPIs, error) {
 	out := ProductKPIs{}
 
 	// cross-schema read from erp_products — total SKU count for the product KPI card
 	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_products WHERE owner_id = ?`,
-		ownerID,
+		`SELECT COUNT(*) FROM erp_products WHERE business_id = ?`,
+		businessID,
 	).Scan(&out.TotalSKUs); err != nil {
 		logger.Ctx(ctx).Error("insights: product total failed", logger.Error(err))
 		return ProductKPIs{}, err
@@ -32,8 +32,8 @@ func (r *Repository) GetProductKPIs(ctx context.Context, ownerID int64) (Product
 
 	// cross-schema read from erp_products — active SKU count
 	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND is_active = TRUE`,
-		ownerID,
+		`SELECT COUNT(*) FROM erp_products WHERE business_id = ? AND is_active = TRUE`,
+		businessID,
 	).Scan(&out.ActiveSKUs); err != nil {
 		logger.Ctx(ctx).Error("insights: product active failed", logger.Error(err))
 		return ProductKPIs{}, err
@@ -42,10 +42,10 @@ func (r *Repository) GetProductKPIs(ctx context.Context, ownerID int64) (Product
 	// cross-schema read from erp_products — out-of-stock count
 	if err := r.pool.QueryRowContext(ctx,
 		`SELECT COUNT(*) FROM erp_products
-		 WHERE owner_id = ?
+		 WHERE business_id = ?
 		   AND track_inventory = TRUE
 		   AND stock_quantity <= 0`,
-		ownerID,
+		businessID,
 	).Scan(&out.OutOfStock); err != nil {
 		logger.Ctx(ctx).Error("insights: product oos failed", logger.Error(err))
 		return ProductKPIs{}, err
@@ -56,10 +56,10 @@ func (r *Repository) GetProductKPIs(ctx context.Context, ownerID int64) (Product
 	if err := r.pool.QueryRowContext(ctx,
 		`SELECT COALESCE(AVG((sale_price - cost_price) / sale_price * 100), 0)
 		 FROM erp_products
-		 WHERE owner_id = ?
+		 WHERE business_id = ?
 		   AND is_active = TRUE
 		   AND sale_price > 0`,
-		ownerID,
+		businessID,
 	).Scan(&margin); err != nil {
 		logger.Ctx(ctx).Error("insights: product margin failed", logger.Error(err))
 		return ProductKPIs{}, err

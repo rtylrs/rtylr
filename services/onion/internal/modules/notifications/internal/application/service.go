@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/domain"
@@ -16,7 +17,7 @@ import (
 const notificationsTTL = 30 * time.Second
 
 type repository interface {
-	List(ctx context.Context, userID int64) ([]domain.Notification, error)
+	List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error)
 	MarkRead(ctx context.Context, userID, notificationID int64) error
 	MarkAllRead(ctx context.Context, userID int64) error
 }
@@ -31,34 +32,39 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateNotificationsScope(ctx context.Context, userID int64) {
+func notificationsKey(businessID, userID int64) string {
+	return cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d", userID))
+}
+
+func invalidateNotificationsScope(ctx context.Context, businessID, userID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
+		cache.DeleteByPattern(ctx, notificationsKey(businessID, userID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, userID int64) ([]domain.Notification, error) {
+func (s *Service) List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error) {
 	return cacher.Of[[]domain.Notification]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped("user", userID, "notifications"),
+		notificationsKey(businessID, userID),
 		func(ctx context.Context) ([]domain.Notification, error) {
-			return s.repo.List(ctx, userID)
+			return s.repo.List(ctx, businessID, userID)
 		},
 		cacher.WithExpiry(ctx, notificationsTTL),
 	)
 }
 
-func (s *Service) MarkRead(ctx context.Context, userID, notificationID int64) error {
+func (s *Service) MarkRead(ctx context.Context, businessID, userID, notificationID int64) error {
 	if err := s.repo.MarkRead(ctx, userID, notificationID); err != nil {
 		return err
 	}
-	invalidateNotificationsScope(ctx, userID)
+	invalidateNotificationsScope(ctx, businessID, userID)
 	return nil
 }
 
-func (s *Service) MarkAllRead(ctx context.Context, userID int64) error {
+func (s *Service) MarkAllRead(ctx context.Context, businessID, userID int64) error {
 	if err := s.repo.MarkAllRead(ctx, userID); err != nil {
 		return err
 	}
-	invalidateNotificationsScope(ctx, userID)
+	invalidateNotificationsScope(ctx, businessID, userID)
 	return nil
 }

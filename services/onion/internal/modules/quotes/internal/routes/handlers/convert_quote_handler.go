@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ConvertQuoteRoutes() []string { return []string{"/finance/quotes/{id}/convert"} }
@@ -32,13 +33,18 @@ func (h *ConvertQuoteHandler) Serve(ctx context.Context, _ *ConvertQuoteRequest)
 		return ConvertQuoteResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ConvertQuoteResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return ConvertQuoteResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid quote id"}
 	}
 
-	invoiceID, err := h.Service.ConvertToInvoice(ctx, device.User.UserID, id)
+	invoiceID, err := h.Service.ConvertToInvoice(ctx, businessID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrQuoteNotFound) {
 			return ConvertQuoteResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Quote not found"}

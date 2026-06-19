@@ -14,7 +14,7 @@ func TestModifiers_List_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mods, err := repo.List(context.Background(), testutil.OwnerID)
+	mods, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -25,7 +25,7 @@ func TestModifiers_List_ReturnsNonNilSlice(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mods, err := repo.List(context.Background(), testutil.OwnerID)
+	mods, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -51,13 +51,13 @@ func TestModifiers_List_AllBelongToOwner(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mods, err := repo.List(context.Background(), testutil.OwnerID)
+	mods, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 	for i, m := range mods {
-		if m.OwnerID != testutil.OwnerID {
-			t.Errorf("mods[%d].OwnerID = %d, want %d", i, m.OwnerID, testutil.OwnerID)
+		if m.BusinessID != testutil.BusinessID {
+			t.Errorf("mods[%d].BusinessID = %d, want %d", i, m.BusinessID, testutil.BusinessID)
 		}
 	}
 }
@@ -66,7 +66,7 @@ func TestModifiers_List_AllHaveNonZeroID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mods, err := repo.List(context.Background(), testutil.OwnerID)
+	mods, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestModifiers_List_AllHaveNonEmptyName(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	mods, err := repo.List(context.Background(), testutil.OwnerID)
+	mods, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -97,7 +97,7 @@ func TestModifiers_Create_ThenListContainsNew(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.ModifierInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.ModifierInput{
 		Name:       "Extra Cheese",
 		PriceDelta: 1.5,
 		GroupName:  "Add-ons",
@@ -110,7 +110,7 @@ func TestModifiers_Create_ThenListContainsNew(t *testing.T) {
 		t.Fatal("Create returned ID=0")
 	}
 
-	mods, err := repo.List(ctx, testutil.OwnerID)
+	mods, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after create: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestModifiers_Update_ChangesName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.ModifierInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.ModifierInput{
 		Name:       "Before Update",
 		PriceDelta: 0,
 	})
@@ -139,7 +139,7 @@ func TestModifiers_Update_ChangesName(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	err = repo.Update(ctx, testutil.OwnerID, id, domain.ModifierInput{
+	err = repo.Update(ctx, testutil.BusinessID, id, domain.ModifierInput{
 		Name:       "After Update",
 		PriceDelta: 2.0,
 	})
@@ -147,7 +147,7 @@ func TestModifiers_Update_ChangesName(t *testing.T) {
 		t.Fatalf("Update: %v", err)
 	}
 
-	mods, err := repo.List(ctx, testutil.OwnerID)
+	mods, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -167,7 +167,7 @@ func TestModifiers_Update_UnknownIDReturnsNotFound(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.Update(ctx, testutil.OwnerID, 9999999, domain.ModifierInput{Name: "Ghost"})
+	err := repo.Update(ctx, testutil.BusinessID, 9999999, domain.ModifierInput{Name: "Ghost"})
 	if !errors.Is(err, domain.ErrModifierNotFound) {
 		t.Fatalf("expected ErrModifierNotFound, got %v", err)
 	}
@@ -178,7 +178,7 @@ func TestModifiers_Delete_ThenNotInList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.ModifierInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.ModifierInput{
 		Name:       "To Be Deleted",
 		PriceDelta: 0,
 	})
@@ -186,12 +186,12 @@ func TestModifiers_Delete_ThenNotInList(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	err = repo.Delete(ctx, testutil.OwnerID, id)
+	err = repo.Delete(ctx, testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
 
-	mods, err := repo.List(ctx, testutil.OwnerID)
+	mods, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after delete: %v", err)
 	}
@@ -207,7 +207,7 @@ func TestModifiers_Delete_UnknownIDReturnsNotFound(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.Delete(ctx, testutil.OwnerID, 9999999)
+	err := repo.Delete(ctx, testutil.BusinessID, 9999999)
 	if !errors.Is(err, domain.ErrModifierNotFound) {
 		t.Fatalf("expected ErrModifierNotFound, got %v", err)
 	}
@@ -218,7 +218,7 @@ func TestModifiers_Create_PriceDeltaStoredCorrectly(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.ModifierInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.ModifierInput{
 		Name:       "Price Check",
 		PriceDelta: 3.75,
 	})
@@ -226,7 +226,7 @@ func TestModifiers_Create_PriceDeltaStoredCorrectly(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	mods, err := repo.List(ctx, testutil.OwnerID)
+	mods, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}

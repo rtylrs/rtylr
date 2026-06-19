@@ -11,6 +11,7 @@ import "time"
 type RecruitCareer struct {
 	ID             int64
 	OwnerID        int64
+	BusinessID     int64
 	Slug           string
 	Title          string
 	Department     string
@@ -35,6 +36,7 @@ type RecruitCareer struct {
 type RecruitCareerInput struct {
 	ID             int64
 	OwnerID        int64
+	BusinessID     int64
 	Slug           string
 	Title          string
 	Department     string
@@ -61,6 +63,7 @@ type RecruitCareerInput struct {
 type Customization struct {
 	ID             int64
 	OwnerID        int64
+	BusinessID     int64
 	Slug           string
 	BrandName      string
 	Tagline        string
@@ -104,6 +107,7 @@ type Customization struct {
 // backstop, not the front line.
 type CustomizationInput struct {
 	OwnerID            int64
+	BusinessID         int64
 	Slug               string
 	BrandName          string
 	Tagline            string
@@ -143,6 +147,7 @@ type Submission struct {
 	ID            int64
 	CareerID      int64
 	OwnerID       int64
+	BusinessID    int64
 	CandidateName string
 	Email         string
 	Phone         string
@@ -163,6 +168,7 @@ type Submission struct {
 type SubmissionInput struct {
 	CareerID      int64
 	OwnerID       int64
+	BusinessID    int64
 	CandidateName string
 	Email         string
 	Phone         string

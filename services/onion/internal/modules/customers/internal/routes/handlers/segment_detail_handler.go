@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
@@ -53,7 +54,12 @@ func (h *GetSegmentDetailHandler) Serve(ctx context.Context, req *GetSegmentDeta
 		return GetSegmentDetailResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	detail, err := h.CRMService.GetSegmentDetail(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSegmentDetailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	detail, err := h.CRMService.GetSegmentDetail(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
 			return GetSegmentDetailResponse{}, &errorModels.ServerError{
@@ -115,6 +121,11 @@ func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentC
 		return GetSegmentCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSegmentCustomersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	if req.Page < 1 {
 		req.Page = 1
 	}
@@ -123,7 +134,7 @@ func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentC
 		req.PageSize = 20
 	}
 
-	customers, total, err := h.CRMService.GetSegmentCustomers(ctx, device.User.UserID, req.SegmentID, req.Page, req.PageSize)
+	customers, total, err := h.CRMService.GetSegmentCustomers(ctx, businessID, req.SegmentID, req.Page, req.PageSize)
 	if err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
 			return GetSegmentCustomersResponse{}, &errorModels.ServerError{

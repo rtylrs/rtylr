@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
@@ -35,7 +36,12 @@ func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRe
 		return ListTimesheetsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	timesheets, total, err := h.Service.ListTimesheets(ctx, device.User.UserID, domain.ListTimesheetsParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTimesheetsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	timesheets, total, err := h.Service.ListTimesheets(ctx, businessID, domain.ListTimesheetsParams{
 		EmployeeID: req.EmployeeID,
 		Limit:      req.Limit,
 		Offset:     req.Offset,

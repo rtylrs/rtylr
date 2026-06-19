@@ -20,7 +20,7 @@ var (
 
 type Workspace struct {
 	ID          int64
-	BusinessID  *int64
+	BusinessID  int64
 	OwnerID     int64
 	Name        string
 	Description string
@@ -45,7 +45,7 @@ type WorkspaceMember struct {
 }
 
 type WorkspaceInput struct {
-	BusinessID  *int64
+	BusinessID  int64
 	OwnerID     int64
 	Name        string
 	Description string
@@ -58,6 +58,7 @@ type WorkspaceInput struct {
 type UpdateWorkspaceInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Icon        string

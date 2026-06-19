@@ -12,7 +12,7 @@ import (
 func TestStoreOrders_List_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.List(context.Background(), testutil.OwnerID)
+	_, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -21,13 +21,13 @@ func TestStoreOrders_List_NoError(t *testing.T) {
 func TestStoreOrders_List_OwnerScoped(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 	for _, o := range items {
-		if o.OwnerID != testutil.OwnerID {
-			t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, o.OwnerID)
+		if o.BusinessID != testutil.BusinessID {
+			t.Errorf("expected business_id %d, got %d", testutil.BusinessID, o.BusinessID)
 		}
 	}
 }
@@ -35,7 +35,7 @@ func TestStoreOrders_List_OwnerScoped(t *testing.T) {
 func TestStoreOrders_Create_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		CustomerEmail: "customer@example.com",
 		CustomerName:  "Test Customer",
 		Status:        "pending",
@@ -65,7 +65,7 @@ func TestStoreOrders_Create_WithItems(t *testing.T) {
 			{Name: "Widget", Quantity: 2, Price: 25.0, Total: 50.0},
 		},
 	}
-	id, err := repo.Create(context.Background(), testutil.OwnerID, input)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create with items: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestStoreOrders_Create_WithItems(t *testing.T) {
 func TestStoreOrders_GetDetail_ReturnsOrder(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		CustomerName: "Detail Test",
 		Status:       "pending",
 		Subtotal:     10.0,
@@ -88,7 +88,7 @@ func TestStoreOrders_GetDetail_ReturnsOrder(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestStoreOrders_GetDetail_ReturnsOrder(t *testing.T) {
 func TestStoreOrders_GetDetail_IncludesItems(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status:   "pending",
 		Subtotal: 30.0,
 		Total:    30.0,
@@ -112,7 +112,7 @@ func TestStoreOrders_GetDetail_IncludesItems(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -127,20 +127,20 @@ func TestStoreOrders_GetDetail_IncludesItems(t *testing.T) {
 func TestStoreOrders_Update_ChangesStatus(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: "pending", Subtotal: 5.0, Total: 5.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreOrderInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreOrderInput{
 		Status: "shipped", Subtotal: 5.0, Total: 5.0,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail after Update: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestStoreOrders_List_UnknownOwner_Empty(t *testing.T) {
 func TestStoreOrders_Create_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		CustomerEmail: "appears@example.com",
 		Status:        "pending",
 		Total:         15.0,
@@ -173,7 +173,7 @@ func TestStoreOrders_Create_AppearsInList(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -191,7 +191,7 @@ func TestStoreOrders_Create_AppearsInList(t *testing.T) {
 func TestStoreOrders_GetDetail_CrossOwner_Fails(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: "pending", Total: 5.0,
 	})
 	if err != nil {
@@ -207,7 +207,7 @@ func TestStoreOrders_GetDetail_CrossOwner_Fails(t *testing.T) {
 func TestStoreOrders_Create_WithShippingAddress(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status:          "pending",
 		Subtotal:        25.0,
 		Total:           25.0,
@@ -224,7 +224,7 @@ func TestStoreOrders_Create_WithShippingAddress(t *testing.T) {
 func TestStoreOrders_List_IsNotNil(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -237,14 +237,14 @@ func TestStoreOrders_Create_CustomerEmailStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	const want = "email-stored@example.com"
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		CustomerEmail: want, Status: "pending", Total: 10.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -257,14 +257,14 @@ func TestStoreOrders_Create_CustomerNameStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	const want = "Jane Doe"
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		CustomerName: want, Status: "pending", Total: 5.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -277,14 +277,14 @@ func TestStoreOrders_Create_StatusIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	const want = "processing"
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: want, Total: 8.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -296,14 +296,14 @@ func TestStoreOrders_Create_StatusIsStored(t *testing.T) {
 func TestStoreOrders_GetDetail_OwnerIDMatches(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: "pending", Total: 10.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -315,7 +315,7 @@ func TestStoreOrders_GetDetail_OwnerIDMatches(t *testing.T) {
 func TestStoreOrders_Create_MultipleItems(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status:   "pending",
 		Subtotal: 70.0,
 		Total:    70.0,
@@ -328,7 +328,7 @@ func TestStoreOrders_Create_MultipleItems(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -340,20 +340,20 @@ func TestStoreOrders_Create_MultipleItems(t *testing.T) {
 func TestStoreOrders_Update_ChangesCustomerEmail(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		CustomerEmail: "old@example.com", Status: "pending", Total: 5.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreOrderInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreOrderInput{
 		CustomerEmail: "new@example.com", Status: "pending", Total: 5.0,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}
@@ -365,14 +365,14 @@ func TestStoreOrders_Update_ChangesCustomerEmail(t *testing.T) {
 func TestStoreOrders_Update_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: "pending", Total: 3.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	err = repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreOrderInput{
+	err = repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreOrderInput{
 		Status: "completed", Total: 3.0,
 	})
 	if err != nil {
@@ -383,19 +383,19 @@ func TestStoreOrders_Update_NoError(t *testing.T) {
 func TestStoreOrders_List_AfterCreate_CountIncreases(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	before, err := repo.List(context.Background(), testutil.OwnerID)
+	before, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List before: %v", err)
 	}
 
-	_, err = repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	_, err = repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: "pending", Total: 1.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	after, err := repo.List(context.Background(), testutil.OwnerID)
+	after, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after: %v", err)
 	}
@@ -407,11 +407,11 @@ func TestStoreOrders_List_AfterCreate_CountIncreases(t *testing.T) {
 func TestStoreOrders_Create_IDsAreUnique(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id1, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{Status: "pending", Total: 1.0})
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{Status: "pending", Total: 1.0})
 	if err != nil {
 		t.Fatalf("Create A: %v", err)
 	}
-	id2, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{Status: "pending", Total: 2.0})
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{Status: "pending", Total: 2.0})
 	if err != nil {
 		t.Fatalf("Create B: %v", err)
 	}
@@ -435,7 +435,7 @@ func TestStoreOrders_Create_ZeroOwnerReturnsEmpty(t *testing.T) {
 func TestStoreOrders_GetDetail_NonExistent_Fails(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.GetDetail(context.Background(), testutil.OwnerID, 9999999)
+	_, err := repo.GetDetail(context.Background(), testutil.BusinessID, 9999999)
 	if err == nil {
 		t.Error("expected error for non-existent order, got nil")
 	}
@@ -445,14 +445,14 @@ func TestStoreOrders_Create_TotalIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	const want = 123.45
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: "pending", Subtotal: 100.0, Tax: 23.45, Total: want,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	detail, err := repo.GetDetail(context.Background(), testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetDetail: %v", err)
 	}

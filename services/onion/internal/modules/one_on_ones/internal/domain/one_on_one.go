@@ -11,6 +11,7 @@ var ErrOneOnOneNotFound = errors.New("one-on-one not found")
 type OneOnOne struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	ManagerID   int64     `json:"manager_id"`
 	StaffID     int64     `json:"staff_id"`
 	ScheduledAt time.Time `json:"scheduled_at"`

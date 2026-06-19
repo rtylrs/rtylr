@@ -5,6 +5,7 @@ import "time"
 type MenuItem struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	CategoryID  int64     `json:"category_id"`
 	Category    string    `json:"category"`
 	Name        string    `json:"name"`

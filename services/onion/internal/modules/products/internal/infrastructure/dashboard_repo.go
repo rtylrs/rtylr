@@ -102,7 +102,7 @@ func (r *Repository) inventoryValue(ctx context.Context, ownerID int64) (float64
 	query, args, err := squirrel.
 		Select("COALESCE(SUM(stock_quantity * cost_price), 0)").
 		From("erp_products").
-		Where(squirrel.Eq{"owner_id": ownerID, "is_active": true, "track_inventory": true}).
+		Where(squirrel.Eq{"business_id": ownerID, "is_active": true, "track_inventory": true}).
 		PlaceholderFormat(squirrel.Question).
 		ToSql()
 	if err != nil {
@@ -131,7 +131,7 @@ func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit 
 			"''",
 		).
 		From("erp_products p").
-		Where(squirrel.Eq{"p.owner_id": ownerID, "p.is_active": true, "p.track_inventory": true}).
+		Where(squirrel.Eq{"p.business_id": ownerID, "p.is_active": true, "p.track_inventory": true}).
 		Where("p.low_stock_threshold IS NOT NULL").
 		Where("p.stock_quantity <= p.low_stock_threshold").
 		OrderBy("(p.stock_quantity - p.low_stock_threshold) ASC", "p.stock_quantity ASC").
@@ -175,7 +175,7 @@ func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, li
 		).
 		From("erp_purchase_orders po").
 		LeftJoin("erp_suppliers s ON s.id = po.supplier_id").
-		Where(squirrel.Eq{"po.owner_id": ownerID}).
+		Where(squirrel.Eq{"po.business_id": ownerID}).
 		OrderBy("po.created_at DESC").
 		Limit(uint64(limit)).
 		PlaceholderFormat(squirrel.Question).
@@ -221,7 +221,7 @@ func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int
 		).
 		From("erp_products p").
 		LeftJoin("erp_categories c ON c.id = p.category_id").
-		Where(squirrel.Eq{"p.owner_id": ownerID, "p.is_active": true}).
+		Where(squirrel.Eq{"p.business_id": ownerID, "p.is_active": true}).
 		GroupBy("c.id", "c.name").
 		OrderBy("product_count DESC").
 		Limit(uint64(limit)).
@@ -267,7 +267,7 @@ func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) 
 			"COALESCE(reorder_quantity, 0)",
 		).
 		From("erp_products").
-		Where(squirrel.Eq{"owner_id": ownerID, "is_active": true, "track_inventory": true}).
+		Where(squirrel.Eq{"business_id": ownerID, "is_active": true, "track_inventory": true}).
 		Where("low_stock_threshold IS NOT NULL").
 		Where("stock_quantity <= low_stock_threshold").
 		OrderBy("(stock_quantity - low_stock_threshold) ASC").

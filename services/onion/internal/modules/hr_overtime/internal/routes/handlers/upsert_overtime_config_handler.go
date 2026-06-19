@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpsertOvertimeConfigRoutes() []string { return []string{"/hr/overtime/config"} }
@@ -41,13 +42,18 @@ func (h *UpsertOvertimeConfigHandler) Serve(ctx context.Context, req *UpsertOver
 		return UpsertOvertimeConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	err := h.Service.UpsertOvertimeConfig(ctx, device.User.UserID, domain.OvertimeConfigRecord{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpsertOvertimeConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	err := h.Service.UpsertOvertimeConfig(ctx, businessID, domain.OvertimeConfigRecord{
 		DailyThresholdMinutes: req.DailyThresholdMinutes,
 		DefaultMultiplier:     req.DefaultMultiplier,
 		AutoDetectEnabled:     req.AutoDetectEnabled,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to upsert overtime config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to upsert overtime config", logger.Any("business_id", businessID), logger.Error(err))
 		return UpsertOvertimeConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update overtime config"}
 	}
 

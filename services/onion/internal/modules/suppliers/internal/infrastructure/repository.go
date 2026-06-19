@@ -24,11 +24,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.Supplier, bool, error) {
+func (r *Repository) ListSuppliers(ctx context.Context, businessID int64, limit, offset int) ([]domain.Supplier, bool, error) {
 	rows, err := r.queries.ListSuppliersPaginated(ctx, sqlc.ListSuppliersPaginatedParams{
-		OwnerID: ownerID,
-		Limit:   int32(limit + 1),
-		Offset:  int32(offset),
+		BusinessID: businessID,
+		Limit:      int32(limit + 1),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list suppliers", logger.Error(err))
@@ -48,9 +48,10 @@ func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64, limit, of
 	return suppliers, hasMore, nil
 }
 
-func (r *Repository) CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error) {
+func (r *Repository) CreateSupplier(ctx context.Context, businessID int64, input domain.SupplierInput) (int64, error) {
 	result, err := r.queries.CreateSupplier(ctx, sqlc.CreateSupplierParams{
-		OwnerID:      ownerID,
+		OwnerID:      businessID,
+		BusinessID:   businessID,
 		Name:         input.Name,
 		Email:        nullString(input.Email),
 		Phone:        nullString(input.Phone),
@@ -70,7 +71,7 @@ func (r *Repository) CreateSupplier(ctx context.Context, ownerID int64, input do
 	return result.LastInsertId()
 }
 
-func (r *Repository) UpdateSupplier(ctx context.Context, ownerID, id int64, input domain.SupplierInput) error {
+func (r *Repository) UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error {
 	err := r.queries.UpdateSupplier(ctx, sqlc.UpdateSupplierParams{
 		Name:         input.Name,
 		Email:        nullString(input.Email),
@@ -82,7 +83,7 @@ func (r *Repository) UpdateSupplier(ctx context.Context, ownerID, id int64, inpu
 		PaymentTerms: nullString(input.PaymentTerms),
 		Notes:        nullString(input.Notes),
 		IsActive:     sql.NullBool{Bool: input.IsActive, Valid: true},
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		ID:           id,
 	})
 	if err != nil {
@@ -93,14 +94,14 @@ func (r *Repository) UpdateSupplier(ctx context.Context, ownerID, id int64, inpu
 	return nil
 }
 
-func (r *Repository) DeleteSupplier(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) DeleteSupplier(ctx context.Context, businessID, id int64) error {
 	err := r.queries.DeleteSupplier(ctx, sqlc.DeleteSupplierParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete supplier",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("supplier_id", id),
 			logger.Error(err),
 		)
@@ -111,16 +112,16 @@ func (r *Repository) DeleteSupplier(ctx context.Context, ownerID, id int64) erro
 	return nil
 }
 
-// CountSuppliers returns the total number of suppliers for the given owner.
+// CountSuppliers returns the total number of suppliers for the given business.
 // Pass activeOnly=true to count only active suppliers.
-func (r *Repository) CountSuppliers(ctx context.Context, ownerID int64, activeOnly bool) (int64, error) {
+func (r *Repository) CountSuppliers(ctx context.Context, businessID int64, activeOnly bool) (int64, error) {
 	var count int64
 	var err error
 
 	if activeOnly {
-		count, err = r.queries.CountActiveSuppliers(ctx, ownerID)
+		count, err = r.queries.CountActiveSuppliers(ctx, businessID)
 	} else {
-		count, err = r.queries.CountSuppliers(ctx, ownerID)
+		count, err = r.queries.CountSuppliers(ctx, businessID)
 	}
 
 	if err != nil {
@@ -131,12 +132,12 @@ func (r *Repository) CountSuppliers(ctx context.Context, ownerID int64, activeOn
 	return count, nil
 }
 
-// GetSupplierByID fetches a single supplier by its primary key for the given owner.
+// GetSupplierByID fetches a single supplier by its primary key for the given business.
 // Returns ErrSupplierNotFound when no matching row exists.
-func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (domain.Supplier, error) {
+func (r *Repository) GetSupplierByID(ctx context.Context, businessID, id int64) (domain.Supplier, error) {
 	row, err := r.queries.GetSupplierByID(ctx, sqlc.GetSupplierByIDParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -153,9 +154,10 @@ func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (do
 // collapsing nullable columns to their zero value when NULL.
 func supplierFromRow(row sqlc.ErpSupplier) domain.Supplier {
 	s := domain.Supplier{
-		ID:      row.ID,
-		OwnerID: row.OwnerID,
-		Name:    row.Name,
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID,
+		Name:       row.Name,
 	}
 
 	if row.Email.Valid {

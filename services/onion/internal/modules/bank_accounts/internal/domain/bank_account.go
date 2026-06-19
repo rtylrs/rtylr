@@ -11,6 +11,7 @@ var ErrBankAccountNotFound = errors.New("bank account not found")
 type BankAccount struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	Name         string    `json:"name"`
 	Institution  string    `json:"institution"`
 	AccountType  string    `json:"account_type"`
@@ -30,7 +31,7 @@ func (b *BankAccount) FromRow(row *sql.Rows) error {
 	)
 
 	err := row.Scan(
-		&b.ID, &b.OwnerID, &b.Name, &institution, &accountType,
+		&b.ID, &b.OwnerID, &b.BusinessID, &b.Name, &institution, &accountType,
 		&b.Balance, &currency, &b.IsConnected, &lastSyncedAt, &b.CreatedAt,
 	)
 	if err != nil {

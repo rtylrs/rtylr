@@ -52,8 +52,12 @@ func (m *Module) executeListPOSMenuItemsTool(ctx context.Context, input map[stri
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	items, err := m.service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("failed to resolve business scope")
+	}
+
+	items, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}

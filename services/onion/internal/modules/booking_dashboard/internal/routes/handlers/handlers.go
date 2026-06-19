@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func DashboardRoutes() []string { return []string{"/book/dashboard"} }
@@ -27,7 +28,11 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 	if !ok {
 		return DashboardResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	data, err := h.Service.GetDashboard(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	data, err := h.Service.GetDashboard(ctx, businessID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to get dashboard"}
 	}

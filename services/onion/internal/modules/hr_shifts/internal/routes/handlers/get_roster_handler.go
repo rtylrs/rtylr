@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
@@ -32,12 +33,17 @@ func (h *GetRosterHandler) Serve(ctx context.Context, req *GetRosterRequest) (Ge
 		return GetRosterResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	assignments, conflicts, err := h.Service.GetRoster(ctx, device.User.UserID, domain.RosterParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetRosterResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	assignments, conflicts, err := h.Service.GetRoster(ctx, businessID, domain.RosterParams{
 		LocationID: req.LocationID,
 		WeekStart:  req.WeekStart,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to get roster", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get roster", logger.Any("business_id", businessID), logger.Error(err))
 		return GetRosterResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get roster"}
 	}
 

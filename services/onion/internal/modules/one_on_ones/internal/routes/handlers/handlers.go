@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 var scheduledAtLayouts = []string{
@@ -62,7 +63,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list one-on-ones"}
 	}
@@ -113,11 +118,15 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.OneOnOneInput{
 		ManagerID: req.ManagerID, StaffID: req.StaffID, ScheduledAt: req.ScheduledAt,
 		Notes: req.Notes, ActionItems: req.ActionItems, Status: req.Status,
 	}
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, businessID, input)
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create one-on-one"}
 	}

@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
@@ -46,13 +47,18 @@ func (h *AddItemToTemplateHandler) Serve(ctx context.Context, req *AddItemToTemp
 		return AddItemToTemplateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return AddItemToTemplateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	templateID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return AddItemToTemplateResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid template id"}
 	}
 
-	item, err := h.Service.AddItemToTemplate(ctx, device.User.UserID, templateID, domain.CreateTemplateItemParams{
+	item, err := h.Service.AddItemToTemplate(ctx, businessID, templateID, domain.CreateTemplateItemParams{
 		Title:              req.Title,
 		Description:        req.Description,
 		AssigneeRole:       req.AssigneeRole,

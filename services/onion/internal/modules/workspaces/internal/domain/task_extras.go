@@ -6,6 +6,7 @@ type TaskAttachment struct {
 	ID         int64
 	TaskID     int64
 	OwnerID    int64
+	BusinessID int64
 	Name       string
 	URL        string
 	Size       int64
@@ -16,6 +17,7 @@ type TaskAttachment struct {
 type TaskAttachmentInput struct {
 	TaskID     int64
 	OwnerID    int64
+	BusinessID int64
 	Name       string
 	URL        string
 	Size       int64
@@ -25,6 +27,7 @@ type TaskAttachmentInput struct {
 type TimeLog struct {
 	ID              int64
 	OwnerID         int64
+	BusinessID      int64
 	TaskID          int64
 	UserID          int64
 	DurationMinutes int
@@ -35,6 +38,7 @@ type TimeLog struct {
 
 type TimeLogInput struct {
 	OwnerID         int64
+	BusinessID      int64
 	TaskID          int64
 	UserID          int64
 	DurationMinutes int

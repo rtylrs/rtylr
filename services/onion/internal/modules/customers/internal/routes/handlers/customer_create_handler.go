@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerCreateRoutes() []string {
@@ -55,9 +56,15 @@ func (h *CreateCustomerHandler) Serve(ctx context.Context, req *CreateCustomerRe
 		return CreateCustomerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.CustomerInput{
-		OwnerID:   device.User.UserID,
-		FirstName: req.FirstName,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
+		FirstName:  req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
 		Phone:     req.Phone,

@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── Approve Purchase Order ───────────────────────────────────────────────────
@@ -54,7 +55,12 @@ func (h *ApprovePurchaseOrderHandler) Serve(ctx context.Context, _ *ApprovePurch
 		}
 	}
 
-	if err := h.Service.ApprovePurchaseOrder(ctx, authUser.UserID, poID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ApprovePurchaseOrderResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.ApprovePurchaseOrder(ctx, businessID, poID); err != nil {
 		if stderrors.Is(err, domain.ErrPurchaseOrderNotFound) {
 			return ApprovePurchaseOrderResponse{}, &errorModels.ServerError{
 				Code:     http.StatusNotFound,

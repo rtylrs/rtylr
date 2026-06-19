@@ -18,7 +18,7 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error)
+	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error)
 }
 
 type Service struct {
@@ -34,7 +34,7 @@ type bankFeedsListResult struct {
 	Total int64
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
+func (s *Service) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -44,10 +44,10 @@ func (s *Service) List(ctx context.Context, ownerID int64, limit, offset int32) 
 	if offset < 0 {
 		offset = 0
 	}
-	key := cacheKeys.Scoped(bankFeedsScope, ownerID, fmt.Sprintf("list|l=%d|o=%d", limit, offset))
+	key := cacheKeys.Scoped(bankFeedsScope, businessID, fmt.Sprintf("list|l=%d|o=%d", limit, offset))
 	res, err := cacher.Of[bankFeedsListResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (bankFeedsListResult, error) {
-			items, total, err := s.repo.List(ctx, ownerID, limit, offset)
+			items, total, err := s.repo.List(ctx, businessID, limit, offset)
 			return bankFeedsListResult{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, bankFeedsTTL),

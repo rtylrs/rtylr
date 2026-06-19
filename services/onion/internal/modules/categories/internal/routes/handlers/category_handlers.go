@@ -57,8 +57,12 @@ func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	categories, err := h.Service.ListCategories(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListCategoriesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	categories, err := h.Service.ListCategories(ctx, businessID)
 	if err != nil {
 		return ListCategoriesResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -122,8 +126,12 @@ func (h *CreateCategoryHandler) Serve(ctx context.Context, req *CreateCategoryRe
 		Description: req.Description,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := h.Service.CreateCategory(ctx, ownerID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateCategoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateCategory(ctx, businessID, input)
 	if err != nil {
 		return CreateCategoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -190,8 +198,12 @@ func (h *UpdateCategoryHandler) Serve(ctx context.Context, req *UpdateCategoryRe
 		Description: req.Description,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.UpdateCategory(ctx, ownerID, req.ID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateCategoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateCategory(ctx, businessID, req.ID, input); err != nil {
 		return UpdateCategoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -242,8 +254,12 @@ func (h *DeleteCategoryHandler) Serve(ctx context.Context, req *DeleteCategoryRe
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.DeleteCategory(ctx, ownerID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteCategoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteCategory(ctx, businessID, req.ID); err != nil {
 		return DeleteCategoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

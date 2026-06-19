@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	sqlnull "github.com/voxire/onion/internal/platform/utils/queries"
 )
 
 type Repository struct {
@@ -176,8 +177,8 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID int64) error {
 	// cross-schema write to hr_core — every invited user is also an hr_employees row
 	_, err := r.pool.ExecContext(ctx, `
-INSERT INTO hr_employees (owner_id, user_id, first_name, last_name, email, status)
-SELECT ?, u.id,
+INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
+SELECT ?, COALESCE(u.business_id, 0), u.id,
        COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
        CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
        u.email, 'active'
@@ -254,6 +255,63 @@ func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64, limit, o
 		for i := range users {
 			if groups := groupsByUser[users[i].ID]; groups != nil {
 				users[i].Groups = groups
+			}
+		}
+	}
+
+	return users, nil
+}
+
+// ListStaffUsersByBusinessID lists team members scoped to a single business
+// (via user_app_permissions.business_id), so each business sees only its own
+// team. Group enrichment stays owner-scoped (groups are owner-level), resolved
+// from the business's owner.
+func (r *Repository) ListStaffUsersByBusinessID(ctx context.Context, businessID int64, limit, offset int32) ([]domain.StaffUser, error) {
+	rows, err := r.queries.ListStaffUsersByBusinessID(ctx, sqlc.ListStaffUsersByBusinessIDParams{
+		BusinessID: sqlnull.Int64(businessID),
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list staff users by business", logger.Error(err))
+
+		return nil, err
+	}
+
+	users := make([]domain.StaffUser, 0, len(rows))
+
+	for _, row := range rows {
+		var su domain.StaffUser
+		su.ID = row.ID
+		su.Email = row.Email
+		su.FullName = row.FullName
+		if row.CreatedAt.Valid {
+			su.CreatedAt = row.CreatedAt.Time
+		}
+		su.Role = domain.Role(row.Role.UserAppPermissionsRole)
+		if row.IsActive.Valid {
+			su.IsActive = row.IsActive.Bool
+		}
+
+		if err := json.Unmarshal(row.Apps, &su.Apps); err != nil {
+			su.Apps = []string{}
+		}
+
+		users = append(users, su)
+	}
+
+	userIDs := make([]int64, len(users))
+	for i := range users {
+		userIDs[i] = users[i].ID
+		users[i].Groups = []domain.GroupSummary{}
+	}
+
+	if _, ownerID, ownerErr := r.GetBusinessByID(ctx, businessID); ownerErr == nil {
+		if groupsByUser, gErr := r.groupsForUsers(ctx, ownerID, userIDs); gErr == nil {
+			for i := range users {
+				if groups := groupsByUser[users[i].ID]; groups != nil {
+					users[i].Groups = groups
+				}
 			}
 		}
 	}

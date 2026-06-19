@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- List Stock Takes --------------------------------------------------------
@@ -91,7 +92,12 @@ func (h *ListStockTakesHandler) Serve(ctx context.Context, req *ListStockTakesRe
 		}
 	}
 
-	stockTakes, hasMore, err := h.Service.ListStockTakes(ctx, authUser.UserID, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListStockTakesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	stockTakes, hasMore, err := h.Service.ListStockTakes(ctx, businessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListStockTakesResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -180,7 +186,12 @@ func (h *CreateStockTakeHandler) Serve(ctx context.Context, req *CreateStockTake
 		Items:       items,
 	}
 
-	id, err := h.Service.CreateStockTake(ctx, authUser.UserID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateStockTakeResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateStockTake(ctx, businessID, input)
 	if err != nil {
 		return CreateStockTakeResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -279,7 +290,12 @@ func (h *UpdateStockTakeHandler) Serve(ctx context.Context, req *UpdateStockTake
 		Items:  items,
 	}
 
-	if err := h.Service.UpdateStockTake(ctx, authUser.UserID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateStockTakeResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateStockTake(ctx, businessID, input); err != nil {
 		return UpdateStockTakeResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

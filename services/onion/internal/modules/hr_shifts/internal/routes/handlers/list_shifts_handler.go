@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
@@ -34,11 +35,16 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	shifts, total, err := h.Service.ListShifts(ctx, device.User.UserID, domain.ListShiftsParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	shifts, total, err := h.Service.ListShifts(ctx, businessID, domain.ListShiftsParams{
 		Limit: req.Limit, Offset: req.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list shifts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list shifts", logger.Any("business_id", businessID), logger.Error(err))
 		return ListShiftsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
 	}
 

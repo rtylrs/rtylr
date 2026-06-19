@@ -18,10 +18,10 @@ const (
 )
 
 type repository interface {
-	ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error)
+	ListShifts(ctx context.Context, businessID, staffID int64, date string) ([]domain.Shift, error)
 	CreateShift(ctx context.Context, input domain.ShiftInput) (int64, error)
-	UpdateShift(ctx context.Context, ownerID int64, input domain.ShiftUpdateInput) error
-	DeleteShift(ctx context.Context, ownerID, shiftID int64) error
+	UpdateShift(ctx context.Context, businessID int64, input domain.ShiftUpdateInput) error
+	DeleteShift(ctx context.Context, businessID, shiftID int64) error
 }
 
 type Service struct {
@@ -32,17 +32,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateShiftsScope(ctx context.Context, ownerID int64) {
+func invalidateShiftsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(shiftsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(shiftsScope, businessID))
 	}
 }
 
-func (s *Service) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
-	key := cacheKeys.Scoped(shiftsScope, ownerID, fmt.Sprintf("list|s=%d|d=%s", staffID, date))
+func (s *Service) ListShifts(ctx context.Context, businessID, staffID int64, date string) ([]domain.Shift, error) {
+	key := cacheKeys.Scoped(shiftsScope, businessID, fmt.Sprintf("list|s=%d|d=%s", staffID, date))
 	return cacher.Of[[]domain.Shift]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Shift, error) {
-			return s.repo.ListShifts(ctx, ownerID, staffID, date)
+			return s.repo.ListShifts(ctx, businessID, staffID, date)
 		},
 		cacher.WithExpiry(ctx, shiftsTTL),
 	)
@@ -53,22 +53,22 @@ func (s *Service) CreateShift(ctx context.Context, input domain.ShiftInput) (int
 	if err != nil {
 		return 0, err
 	}
-	invalidateShiftsScope(ctx, input.OwnerID)
+	invalidateShiftsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
-func (s *Service) UpdateShift(ctx context.Context, ownerID int64, input domain.ShiftUpdateInput) error {
-	if err := s.repo.UpdateShift(ctx, ownerID, input); err != nil {
+func (s *Service) UpdateShift(ctx context.Context, businessID int64, input domain.ShiftUpdateInput) error {
+	if err := s.repo.UpdateShift(ctx, businessID, input); err != nil {
 		return err
 	}
-	invalidateShiftsScope(ctx, ownerID)
+	invalidateShiftsScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) DeleteShift(ctx context.Context, ownerID, shiftID int64) error {
-	if err := s.repo.DeleteShift(ctx, ownerID, shiftID); err != nil {
+func (s *Service) DeleteShift(ctx context.Context, businessID, shiftID int64) error {
+	if err := s.repo.DeleteShift(ctx, businessID, shiftID); err != nil {
 		return err
 	}
-	invalidateShiftsScope(ctx, ownerID)
+	invalidateShiftsScope(ctx, businessID)
 	return nil
 }

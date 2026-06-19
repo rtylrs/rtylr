@@ -7,6 +7,7 @@ type Task struct {
 	ProjectID      int64
 	WorkspaceID    int64
 	OwnerID        int64
+	BusinessID     int64
 	ParentTaskID   *int64
 	SectionID      *int64
 	CycleID        *int64
@@ -98,6 +99,7 @@ type TaskInput struct {
 	ProjectID      int64
 	WorkspaceID    int64
 	OwnerID        int64
+	BusinessID     int64
 	ParentTaskID   *int64
 	SectionID      *int64
 	Title          string
@@ -114,6 +116,7 @@ type TaskInput struct {
 type UpdateTaskInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	SectionID   *int64
 	Title       string
 	Description string
@@ -127,9 +130,10 @@ type UpdateTaskInput struct {
 }
 
 type UpdateTaskStatusInput struct {
-	ID      int64
-	OwnerID int64
-	Status  string
+	ID         int64
+	OwnerID    int64
+	BusinessID int64
+	Status     string
 }
 
 type ListTasksFilter struct {

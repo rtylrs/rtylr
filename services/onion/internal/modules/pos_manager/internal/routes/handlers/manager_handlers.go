@@ -39,8 +39,12 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 		return VerifyPINResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	result, err := h.Service.VerifyPIN(ctx, ownerID, req.PIN)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return VerifyPINResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	result, err := h.Service.VerifyPIN(ctx, businessID, req.PIN)
 	if err != nil {
 		return VerifyPINResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to verify PIN"}
 	}

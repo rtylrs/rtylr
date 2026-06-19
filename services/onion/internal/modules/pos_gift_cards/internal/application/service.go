@@ -18,10 +18,10 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.GiftCard, error)
-	Create(ctx context.Context, ownerID int64, input domain.GiftCardInput) (int64, error)
-	GetByCode(ctx context.Context, ownerID int64, code string) (*domain.GiftCard, error)
-	Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error)
+	List(ctx context.Context, businessID int64) ([]domain.GiftCard, error)
+	Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error)
+	GetByCode(ctx context.Context, businessID int64, code string) (*domain.GiftCard, error)
+	Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error)
 }
 
 type Service struct {
@@ -32,52 +32,52 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidatePosGiftCardsScope(ctx context.Context, ownerID int64) {
+func invalidatePosGiftCardsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posGiftCardsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posGiftCardsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.GiftCard, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.GiftCard, error) {
 	return cacher.Of[[]domain.GiftCard]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(posGiftCardsScope, ownerID, "list"),
+		cacheKeys.Scoped(posGiftCardsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.GiftCard, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, posGiftCardsTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.GiftCardInput) (int64, error) {
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error) {
 	if err := domain.ValidateGiftCardInput(input); err != nil {
 		return 0, err
 	}
-	id, err := s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidatePosGiftCardsScope(ctx, ownerID)
+	invalidatePosGiftCardsScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) GetByCode(ctx context.Context, ownerID int64, code string) (*domain.GiftCard, error) {
-	key := cacheKeys.Scoped(posGiftCardsScope, ownerID, fmt.Sprintf("code=%s", code))
+func (s *Service) GetByCode(ctx context.Context, businessID int64, code string) (*domain.GiftCard, error) {
+	key := cacheKeys.Scoped(posGiftCardsScope, businessID, fmt.Sprintf("code=%s", code))
 	return cacher.Of[*domain.GiftCard]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*domain.GiftCard, error) {
-			return s.repo.GetByCode(ctx, ownerID, code)
+			return s.repo.GetByCode(ctx, businessID, code)
 		},
 		cacher.WithExpiry(ctx, posGiftCardsTTL),
 	)
 }
 
-func (s *Service) Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
+func (s *Service) Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
 	if err := domain.ValidateRedeemInput(input); err != nil {
 		return nil, err
 	}
-	card, err := s.repo.Redeem(ctx, ownerID, input)
+	card, err := s.repo.Redeem(ctx, businessID, input)
 	if err != nil {
 		return nil, err
 	}
-	invalidatePosGiftCardsScope(ctx, ownerID)
+	invalidatePosGiftCardsScope(ctx, businessID)
 	return card, nil
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
@@ -32,13 +33,18 @@ func (h *GetTimesheetByIDHandler) Serve(ctx context.Context, _ *GetTimesheetByID
 		return GetTimesheetByIDResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetTimesheetByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return GetTimesheetByIDResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid timesheet id"}
 	}
 
-	ts, err := h.Service.GetTimesheet(ctx, device.User.UserID, id)
+	ts, err := h.Service.GetTimesheet(ctx, businessID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrTimesheetNotFound) {
 			return GetTimesheetByIDResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Timesheet not found"}

@@ -15,6 +15,7 @@ var (
 type Invoice struct {
 	ID             int64         `json:"id"`
 	OwnerID        int64         `json:"owner_id"`
+	BusinessID     int64         `json:"business_id"`
 	InvoiceNumber  string        `json:"invoice_number"`
 	ClientName     string        `json:"client_name"`
 	ClientEmail    string        `json:"client_email"`
@@ -57,6 +58,7 @@ func (inv *Invoice) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&inv.ID,
 		&inv.OwnerID,
+		&inv.BusinessID,
 		&inv.InvoiceNumber,
 		&inv.ClientName,
 		&clientEmail,

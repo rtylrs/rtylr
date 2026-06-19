@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/kpis/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubdashboardv1 "github.com/voxire/voxie/gen/go/hub/dashboard/v1"
 )
 
@@ -25,7 +26,12 @@ func (h *KPIHandler) Serve(ctx context.Context, _ *KPIRequest) (KPIResponse, *er
 		return KPIResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	kpi, err := h.Service.GetKPIs(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return KPIResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	kpi, err := h.Service.GetKPIs(ctx, businessID)
 	if err != nil {
 		return KPIResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

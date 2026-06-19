@@ -1,17 +1,17 @@
 -- name: ListCategories :many
-SELECT id, owner_id, name, description, created_at, updated_at
+SELECT id, owner_id, business_id, name, description, created_at, updated_at
 FROM erp_categories
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY name ASC;
 
 -- name: CreateCategory :execresult
-INSERT INTO erp_categories (owner_id, name, description)
-VALUES (?, ?, ?);
+INSERT INTO erp_categories (owner_id, business_id, name, description)
+VALUES (?, ?, ?, ?);
 
 -- name: UpdateCategory :exec
 UPDATE erp_categories
 SET name = ?, description = ?
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: DeleteCategory :exec
-DELETE FROM erp_categories WHERE owner_id = ? AND id = ?;
+DELETE FROM erp_categories WHERE business_id = ? AND id = ?;

@@ -1,6 +1,7 @@
 -- name: GetConfig :many
-SELECT 
+SELECT
     owner_id,
+    business_id,
     site_name,
     logo_url,
     favicon_url,
@@ -16,7 +17,7 @@ SELECT
     enable_newsletter_signup,
     about_content,
     footer_sub_text
-FROM config WHERE owner_id = ?;
+FROM config WHERE business_id = ?;
 
 -- name: UpdateConfig :exec
 UPDATE config SET
@@ -35,11 +36,12 @@ UPDATE config SET
     enable_newsletter_signup = ?,
     about_content = ?,
     footer_sub_text = ?
-WHERE owner_id = ?;
+WHERE business_id = ?;
 
 -- name: CreateConfig :exec
 INSERT INTO config (
     owner_id,
+    business_id,
     site_name,
     logo_url,
     favicon_url,
@@ -56,7 +58,7 @@ INSERT INTO config (
     about_content,
     footer_sub_text
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 
 -- name: GetBusinessSlugByOwnerID :one

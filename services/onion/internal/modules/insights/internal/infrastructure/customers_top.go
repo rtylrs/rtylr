@@ -24,7 +24,7 @@ type TopCustomerRow struct {
 // GetTopCustomers returns up to `limit` customers by lifetime POS spend.
 // A limit of 0 is coerced upstream; we cap at 100 to prevent abuse, in
 // line with the pagination cap documented in onion/CLAUDE.md §4.
-func (r *Repository) GetTopCustomers(ctx context.Context, ownerID int64, limit int32) ([]TopCustomerRow, error) {
+func (r *Repository) GetTopCustomers(ctx context.Context, businessID int64, limit int32) ([]TopCustomerRow, error) {
 	if limit <= 0 {
 		limit = 10
 	}
@@ -42,8 +42,8 @@ func (r *Repository) GetTopCustomers(ctx context.Context, ownerID int64, limit i
 			"COUNT(o.id) AS orders",
 		).
 		From("crm_customers c").
-		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id AND o.payment_status = 'paid'").
-		Where(sq.Eq{"c.owner_id": ownerID}).
+		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id AND o.payment_status = 'paid'").
+		Where(sq.Eq{"c.business_id": businessID}).
 		GroupBy("c.id", "c.first_name", "c.last_name", "c.email").
 		OrderBy("spend DESC").
 		Limit(uint64(limit)).

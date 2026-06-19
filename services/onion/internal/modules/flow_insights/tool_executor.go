@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 )
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string]any) (map[string]any, bool, error) {
-	ownerID, err := flowInsightsToolOwnerID(ctx)
+	businessID, err := flowInsightsToolBusinessID(ctx)
 	if err != nil {
 		switch name {
 		case getFlowInsightsToolName, getFlowTeamWorkloadToolName, getFlowRoadmapToolName:
@@ -26,13 +27,13 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 
 	switch name {
 	case getFlowInsightsToolName:
-		stats, err := m.service.GetInsights(ctx, ownerID)
+		stats, err := m.service.GetInsights(ctx, businessID)
 		if err != nil {
 			return nil, true, err
 		}
 		return map[string]any{"insights": stats}, true, nil
 	case getFlowTeamWorkloadToolName:
-		workload, err := m.service.GetTeamWorkload(ctx, ownerID)
+		workload, err := m.service.GetTeamWorkload(ctx, businessID)
 		if err != nil {
 			return nil, true, err
 		}
@@ -41,7 +42,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 			"returned": len(workload.Members),
 		}, true, nil
 	case getFlowRoadmapToolName:
-		roadmap, err := m.service.GetRoadmap(ctx, ownerID)
+		roadmap, err := m.service.GetRoadmap(ctx, businessID)
 		if err != nil {
 			return nil, true, err
 		}
@@ -54,10 +55,14 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 	}
 }
 
-func flowInsightsToolOwnerID(ctx context.Context) (int64, error) {
+func flowInsightsToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, errors.New("business context is required")
+	}
+	return businessID, nil
 }

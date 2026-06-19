@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type SegmentPayload struct {
@@ -60,7 +61,11 @@ func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest)
 	if device.User == nil {
 		return ListSegmentsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	segs, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListSegmentsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	segs, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListSegmentsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list segments"}
 	}
@@ -100,12 +105,17 @@ func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequ
 	if device.User == nil {
 		return CreateSegmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	filters := []byte(req.Filters)
 	if filters == nil {
 		filters = []byte("{}")
 	}
 	id, err := h.Service.Create(ctx, domain.SegmentInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Filters:     filters,
@@ -149,6 +159,10 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 	if err != nil {
 		return UpdateSegmentResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid segment ID"}
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	filters := []byte(req.Filters)
 	if filters == nil {
 		filters = []byte("{}")
@@ -156,6 +170,7 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 	if updateErr := h.Service.Update(ctx, domain.SegmentUpdateInput{
 		ID:          id,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Filters:     filters,
@@ -190,7 +205,11 @@ func (h *DeleteSegmentHandler) Serve(ctx context.Context, _ *DeleteSegmentReques
 	if err != nil {
 		return DeleteSegmentResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid segment ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteSegmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if deleteErr := h.Service.Delete(ctx, businessID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrSegmentNotFound) {
 			return DeleteSegmentResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Segment not found"}
 		}

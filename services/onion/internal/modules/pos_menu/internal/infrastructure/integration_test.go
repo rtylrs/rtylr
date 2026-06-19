@@ -13,7 +13,7 @@ func TestMenu_List_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -24,7 +24,7 @@ func TestMenu_List_ReturnsNonNilSlice(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -33,30 +33,30 @@ func TestMenu_List_ReturnsNonNilSlice(t *testing.T) {
 	}
 }
 
-func TestMenu_List_WrongOwnerReturnsEmpty(t *testing.T) {
+func TestMenu_List_WrongBusinessReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
 	items, err := repo.List(context.Background(), 999999)
 	if err != nil {
-		t.Fatalf("List wrong owner: %v", err)
+		t.Fatalf("List wrong business: %v", err)
 	}
 	if len(items) != 0 {
-		t.Fatalf("expected 0 items for unknown owner, got %d", len(items))
+		t.Fatalf("expected 0 items for unknown business, got %d", len(items))
 	}
 }
 
-func TestMenu_List_AllBelongToOwner(t *testing.T) {
+func TestMenu_List_AllBelongToBusinessID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 	for i, item := range items {
-		if item.OwnerID != testutil.OwnerID {
-			t.Errorf("items[%d].OwnerID = %d, want %d", i, item.OwnerID, testutil.OwnerID)
+		if item.BusinessID != testutil.BusinessID {
+			t.Errorf("items[%d].BusinessID = %d, want %d", i, item.BusinessID, testutil.BusinessID)
 		}
 	}
 }
@@ -65,7 +65,7 @@ func TestMenu_List_AllHaveNonZeroID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestMenu_List_AllHaveNonEmptyName(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -95,7 +95,7 @@ func TestMenu_List_AllHaveNonNegativeSalePrice(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestMenu_QuickCreate_ReturnsNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "Integration Test Item",
 		SKU:       "INT-001",
 		SalePrice: 9.99,
@@ -129,7 +129,7 @@ func TestMenu_QuickCreate_ThenListContainsNew(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "List Check Item",
 		SalePrice: 5.0,
 	})
@@ -137,7 +137,7 @@ func TestMenu_QuickCreate_ThenListContainsNew(t *testing.T) {
 		t.Fatalf("QuickCreate: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after create: %v", err)
 	}
@@ -159,7 +159,7 @@ func TestMenu_QuickCreate_NameStoredCorrectly(t *testing.T) {
 	ctx := context.Background()
 
 	const itemName = "Name Check Burger"
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
 		Name:      itemName,
 		SalePrice: 12.50,
 	})
@@ -167,7 +167,7 @@ func TestMenu_QuickCreate_NameStoredCorrectly(t *testing.T) {
 		t.Fatalf("QuickCreate: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -187,7 +187,7 @@ func TestMenu_List_AtLeastOneItemAfterCreate(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := repo.QuickCreate(ctx, testutil.OwnerID, domain.MenuItemInput{
+	_, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "Ensure Non-Empty",
 		SalePrice: 1.0,
 	})
@@ -195,7 +195,7 @@ func TestMenu_List_AtLeastOneItemAfterCreate(t *testing.T) {
 		t.Fatalf("QuickCreate: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -209,7 +209,7 @@ func TestMenu_QuickCreate_ZeroPriceAllowed(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.QuickCreate(ctx, testutil.OwnerID, domain.MenuItemInput{
+	id, err := repo.QuickCreate(ctx, testutil.OwnerID, testutil.BusinessID, domain.MenuItemInput{
 		Name:      "Free Item",
 		SalePrice: 0,
 	})

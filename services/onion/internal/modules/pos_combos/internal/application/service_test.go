@@ -20,7 +20,7 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Combo, error) {
 	return m.list, nil
 }
 
-func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.ComboInput) (int64, error) {
+func (m *mockRepo) Create(_ context.Context, _, _ int64, _ domain.ComboInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
@@ -34,7 +34,7 @@ func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 
 func TestCreate_RejectsBlankName(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 1}}
-	_, err := s.Create(context.Background(), 1, domain.ComboInput{Price: 10})
+	_, err := s.Create(context.Background(), 1, 1, domain.ComboInput{Price: 10})
 	if err == nil {
 		t.Fatal("expected error for blank name")
 	}
@@ -42,7 +42,7 @@ func TestCreate_RejectsBlankName(t *testing.T) {
 
 func TestCreate_RejectsNegativePrice(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 1}}
-	_, err := s.Create(context.Background(), 1, domain.ComboInput{Name: "Meal", Price: -5})
+	_, err := s.Create(context.Background(), 1, 1, domain.ComboInput{Name: "Meal", Price: -5})
 	if err == nil {
 		t.Fatal("expected error for negative price")
 	}
@@ -51,7 +51,7 @@ func TestCreate_RejectsNegativePrice(t *testing.T) {
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("db error")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	_, err := s.Create(context.Background(), 1, domain.ComboInput{Name: "Valid", Price: 10})
+	_, err := s.Create(context.Background(), 1, 1, domain.ComboInput{Name: "Valid", Price: 10})
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel error, got %v", err)
 	}

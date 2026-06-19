@@ -18,7 +18,7 @@ type ShiftMetricsRow struct {
 // window, by reading hr_shift_assignments.status. "Scheduled" is the
 // total of non-cancelled rows; "Completed" matches status = 'completed'.
 // No-shows are explicit: status = 'no_show'.
-func (r *Repository) GetShiftMetrics(ctx context.Context, ownerID int64, from, to time.Time) (ShiftMetricsRow, error) {
+func (r *Repository) GetShiftMetrics(ctx context.Context, businessID int64, from, to time.Time) (ShiftMetricsRow, error) {
 	// cross-schema read from hr_shift_assignments — shifts scheduled/completed/no-show in window
 	const q = `
 		SELECT
@@ -26,11 +26,11 @@ func (r *Repository) GetShiftMetrics(ctx context.Context, ownerID int64, from, t
 		  SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END)  AS completed,
 		  SUM(CASE WHEN status = 'no_show'   THEN 1 ELSE 0 END)  AS no_shows
 		FROM hr_shift_assignments
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND date BETWEEN ? AND ?
 	`
 	var scheduled, completed, noShows int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02")).Scan(
+	if err := r.pool.QueryRowContext(ctx, q, businessID, from.Format("2006-01-02"), to.Format("2006-01-02")).Scan(
 		&nullableInt64{&scheduled}, &nullableInt64{&completed}, &nullableInt64{&noShows},
 	); err != nil {
 		logger.Ctx(ctx).Error("insights: shift metrics failed", logger.Error(err))

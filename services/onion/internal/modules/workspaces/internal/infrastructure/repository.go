@@ -32,8 +32,8 @@ func NewRepository(db *sql.DB) *Repository {
 // Workspaces
 // ─────────────────────────────────────────────
 
-func (r *Repository) CountWorkspacesByOwner(ctx context.Context, ownerID int64) (int64, error) {
-	count, err := r.queries.CountWorkspacesByOwner(ctx, ownerID)
+func (r *Repository) CountWorkspacesByOwner(ctx context.Context, businessID int64) (int64, error) {
+	count, err := r.queries.CountWorkspacesByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("CountWorkspacesByOwner failed", logger.Error(err))
 		return 0, err
@@ -53,6 +53,7 @@ func (r *Repository) CreateWorkspace(ctx context.Context, input domain.Workspace
 
 	res, err := r.queries.CreateWorkspace(ctx, sqlc.CreateWorkspaceParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Icon:        sql.NullString{String: icon, Valid: true},
@@ -67,8 +68,8 @@ func (r *Repository) CreateWorkspace(ctx context.Context, input domain.Workspace
 	return res.LastInsertId()
 }
 
-func (r *Repository) GetWorkspacesByOwner(ctx context.Context, ownerID int64) ([]domain.Workspace, error) {
-	rows, err := r.queries.GetWorkspacesByOwner(ctx, ownerID)
+func (r *Repository) GetWorkspacesByOwner(ctx context.Context, businessID int64) ([]domain.Workspace, error) {
+	rows, err := r.queries.GetWorkspacesByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetWorkspacesByOwner failed", logger.Error(err))
 		return nil, err
@@ -78,6 +79,7 @@ func (r *Repository) GetWorkspacesByOwner(ctx context.Context, ownerID int64) ([
 	for _, row := range rows {
 		workspaces = append(workspaces, domain.Workspace{
 			ID:          row.ID,
+			BusinessID:  row.BusinessID,
 			OwnerID:     row.OwnerID,
 			Name:        row.Name,
 			Description: row.Description.String,
@@ -99,7 +101,7 @@ func (r *Repository) UpdateWorkspace(ctx context.Context, input domain.UpdateWor
 		Icon:        sql.NullString{String: input.Icon, Valid: input.Icon != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateWorkspace failed", logger.Error(err))
@@ -108,10 +110,10 @@ func (r *Repository) UpdateWorkspace(ctx context.Context, input domain.UpdateWor
 	return nil
 }
 
-func (r *Repository) DeleteWorkspace(ctx context.Context, id, ownerID int64) error {
+func (r *Repository) DeleteWorkspace(ctx context.Context, id, businessID int64) error {
 	err := r.queries.DeleteWorkspace(ctx, sqlc.DeleteWorkspaceParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteWorkspace failed", logger.Error(err))
@@ -167,6 +169,7 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 	res, err := r.queries.CreateProject(ctx, sqlc.CreateProjectParams{
 		WorkspaceID: input.WorkspaceID,
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Icon:        sql.NullString{String: icon, Valid: true},
@@ -182,13 +185,13 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 	return res.LastInsertId()
 }
 
-func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, ownerID int64) ([]domain.Project, error) {
+func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, businessID int64) ([]domain.Project, error) {
 	// Enriched projection: task_count, completed_count, and member_count
 	// are computed via correlated subqueries so the list view doesn't
 	// need separate fetches per project.
 	q, args, err := sq.
 		Select(
-			"p.id", "p.workspace_id", "p.owner_id", "p.name",
+			"p.id", "p.workspace_id", "p.owner_id", "p.business_id", "p.name",
 			"COALESCE(p.description, '')", "COALESCE(p.icon, '')", "COALESCE(p.color, '')",
 			"COALESCE(p.status, 'active')",
 			"p.start_date", "p.due_date",
@@ -198,7 +201,7 @@ func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, ow
 			"COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count",
 		).
 		From("flow_projects p").
-		Where(sq.Eq{"p.workspace_id": workspaceID, "p.owner_id": ownerID}).
+		Where(sq.Eq{"p.workspace_id": workspaceID, "p.business_id": businessID}).
 		OrderBy("p.created_at DESC").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -224,7 +227,7 @@ func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, ow
 		var startDate, dueDate sql.NullTime
 		var createdAt, updatedAt sql.NullTime
 		if scanErr := rows.Scan(
-			&p.ID, &p.WorkspaceID, &p.OwnerID, &p.Name,
+			&p.ID, &p.WorkspaceID, &p.OwnerID, &p.BusinessID, &p.Name,
 			&p.Description, &p.Icon, &p.Color, &p.Status,
 			&startDate, &dueDate,
 			&p.CreatedBy, &createdAt, &updatedAt,
@@ -260,7 +263,7 @@ func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProje
 		StartDate:   nullTimePtrToSql(input.StartDate),
 		DueDate:     nullTimePtrToSql(input.DueDate),
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateProject failed", logger.Error(err))
@@ -269,10 +272,10 @@ func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProje
 	return nil
 }
 
-func (r *Repository) ArchiveProject(ctx context.Context, id, ownerID int64) error {
+func (r *Repository) ArchiveProject(ctx context.Context, id, businessID int64) error {
 	err := r.queries.ArchiveProject(ctx, sqlc.ArchiveProjectParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ArchiveProject failed", logger.Error(err))
@@ -305,6 +308,7 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 		ProjectID:      input.ProjectID,
 		WorkspaceID:    input.WorkspaceID,
 		OwnerID:        input.OwnerID,
+		BusinessID:     input.BusinessID,
 		ParentTaskID:   nullInt64Ptr(input.ParentTaskID),
 		Title:          input.Title,
 		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -480,7 +484,7 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 			statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? = 'done'
 			statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? != 'done'
 		)).
-		Where(sq.Eq{"id": input.ID, "owner_id": input.OwnerID}).
+		Where(sq.Eq{"id": input.ID, "business_id": input.BusinessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -498,11 +502,11 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 
 func (r *Repository) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskStatusInput) error {
 	err := r.queries.UpdateTaskStatus(ctx, sqlc.UpdateTaskStatusParams{
-		Status:  sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: true},
-		Column2: input.Status,
-		Column3: input.Status,
-		ID:      input.ID,
-		OwnerID: input.OwnerID,
+		Status:     sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: true},
+		Column2:    input.Status,
+		Column3:    input.Status,
+		ID:         input.ID,
+		BusinessID: input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateTaskStatus failed", logger.Error(err))
@@ -511,10 +515,10 @@ func (r *Repository) UpdateTaskStatus(ctx context.Context, input domain.UpdateTa
 	return nil
 }
 
-func (r *Repository) DeleteTask(ctx context.Context, taskID, ownerID int64) error {
+func (r *Repository) DeleteTask(ctx context.Context, taskID, businessID int64) error {
 	err := r.queries.DeleteTask(ctx, sqlc.DeleteTaskParams{
-		ID:      taskID,
-		OwnerID: ownerID,
+		ID:         taskID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteTask failed", logger.Error(err))
@@ -644,9 +648,10 @@ func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit 
 
 func (r *Repository) CreateAttachment(ctx context.Context, input domain.TaskAttachmentInput) (int64, error) {
 	res, err := r.queries.CreateAttachment(ctx, sqlc.CreateAttachmentParams{
-		TaskID:     input.TaskID,
-		OwnerID:    input.OwnerID,
-		Name:       input.Name,
+		TaskID:      input.TaskID,
+		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
+		Name:        input.Name,
 		Url:        input.URL,
 		Size:       sql.NullInt64{Int64: input.Size, Valid: true},
 		UploadedBy: input.UploadedBy,
@@ -671,6 +676,7 @@ func (r *Repository) GetAttachmentsByTask(ctx context.Context, taskID int64) ([]
 			ID:         row.ID,
 			TaskID:     row.TaskID,
 			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
 			Name:       row.Name,
 			URL:        row.Url,
 			Size:       row.Size.Int64,
@@ -681,10 +687,10 @@ func (r *Repository) GetAttachmentsByTask(ctx context.Context, taskID int64) ([]
 	return attachments, nil
 }
 
-func (r *Repository) DeleteAttachment(ctx context.Context, attachmentID, ownerID int64) error {
+func (r *Repository) DeleteAttachment(ctx context.Context, attachmentID, businessID int64) error {
 	err := r.queries.DeleteAttachment(ctx, sqlc.DeleteAttachmentParams{
-		ID:      attachmentID,
-		OwnerID: ownerID,
+		ID:         attachmentID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteAttachment failed", logger.Error(err))
@@ -700,6 +706,7 @@ func (r *Repository) DeleteAttachment(ctx context.Context, attachmentID, ownerID
 func (r *Repository) CreateTimeLog(ctx context.Context, input domain.TimeLogInput) (int64, error) {
 	res, err := r.queries.CreateTimeLog(ctx, sqlc.CreateTimeLogParams{
 		OwnerID:         input.OwnerID,
+		BusinessID:      input.BusinessID,
 		TaskID:          input.TaskID,
 		UserID:          input.UserID,
 		DurationMinutes: int32(input.DurationMinutes),
@@ -724,6 +731,7 @@ func (r *Repository) GetTimeLogsByTask(ctx context.Context, taskID int64) ([]dom
 		logs = append(logs, domain.TimeLog{
 			ID:              row.ID,
 			OwnerID:         row.OwnerID,
+			BusinessID:      row.BusinessID,
 			TaskID:          row.TaskID,
 			UserID:          row.UserID,
 			DurationMinutes: int(row.DurationMinutes),
@@ -900,7 +908,7 @@ func (r *Repository) RecalcActualHours(ctx context.Context, taskID int64) error 
 // Dashboard
 // ─────────────────────────────────────────────
 
-func (r *Repository) GetDashboardStats(ctx context.Context, workspaceID, ownerID int64) (domain.DashboardStats, error) {
+func (r *Repository) GetDashboardStats(ctx context.Context, workspaceID, businessID int64) (domain.DashboardStats, error) {
 	var stats domain.DashboardStats
 
 	weekStart := time.Now().AddDate(0, 0, -int(time.Now().Weekday()))
@@ -910,7 +918,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, workspaceID, ownerID
 		CompletedAt:   sql.NullTime{Time: weekStart, Valid: true},
 		CompletedAt_2: sql.NullTime{Time: weekEnd, Valid: true},
 		WorkspaceID:   workspaceID,
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetDashboardStats failed", logger.Error(err))

@@ -13,6 +13,7 @@ var ErrBankFeedTransactionNotFound = errors.New("bank feed transaction not found
 type BankFeedTransaction struct {
 	ID               int64     `json:"id"`
 	OwnerID          int64     `json:"owner_id"`
+	BusinessID       int64     `json:"business_id"`
 	BankAccountID    int64     `json:"bank_account_id"`
 	AmountMinorUnits int64     `json:"amount_minor_units"`
 	Currency         string    `json:"currency"`

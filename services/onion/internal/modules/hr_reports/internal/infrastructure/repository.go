@@ -73,7 +73,7 @@ func scanRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 }
 
 // cross-schema aggregation read.
-func (r *Repository) GenerateHeadcountReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (r *Repository) GenerateHeadcountReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	builder := sq.Select(
 		"COALESCE(d.name, 'Unassigned') AS department",
 		"COALESCE(l.name, 'Unassigned') AS location",
@@ -82,9 +82,9 @@ func (r *Repository) GenerateHeadcountReport(ctx context.Context, ownerID int64,
 		"COUNT(*) AS employee_count",
 	).
 		From("hr_employees e").
-		LeftJoin("hr_departments d ON d.id = e.department_id AND d.owner_id = e.owner_id").
-		LeftJoin("hr_locations l ON l.id = e.location_id AND l.owner_id = e.owner_id").
-		Where(sq.Eq{"e.owner_id": ownerID}).
+		LeftJoin("hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id").
+		LeftJoin("hr_locations l ON l.id = e.location_id AND l.business_id = e.business_id").
+		Where(sq.Eq{"e.business_id": businessID}).
 		Where(sq.Eq{"e.status": "active"}).
 		Where(sq.LtOrEq{"e.created_at": params.DateTo})
 
@@ -110,7 +110,7 @@ func (r *Repository) GenerateHeadcountReport(ctx context.Context, ownerID int64,
 }
 
 // cross-schema aggregation read.
-func (r *Repository) GenerateAttendanceSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (r *Repository) GenerateAttendanceSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	builder := sq.Select(
 		"e.id AS employee_id",
 		"CONCAT(e.first_name, ' ', e.last_name) AS employee_name",
@@ -122,9 +122,9 @@ func (r *Repository) GenerateAttendanceSummaryReport(ctx context.Context, ownerI
 		"COALESCE(SUM(a.duration_minutes), 0) AS total_duration_minutes",
 	).
 		From("hr_employees e").
-		LeftJoin("hr_departments d ON d.id = e.department_id AND d.owner_id = e.owner_id").
-		LeftJoin("hr_attendance_records a ON a.employee_id = e.id AND a.owner_id = e.owner_id AND a.date BETWEEN ? AND ?", params.DateFrom, params.DateTo).
-		Where(sq.Eq{"e.owner_id": ownerID}).
+		LeftJoin("hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id").
+		LeftJoin("hr_attendance_records a ON a.employee_id = e.id AND a.business_id = e.business_id AND a.date BETWEEN ? AND ?", params.DateFrom, params.DateTo).
+		Where(sq.Eq{"e.business_id": businessID}).
 		Where(sq.Eq{"e.status": "active"})
 
 	builder = appendOptionalFilters(builder, params, "e")
@@ -149,7 +149,7 @@ func (r *Repository) GenerateAttendanceSummaryReport(ctx context.Context, ownerI
 }
 
 // cross-schema aggregation read.
-func (r *Repository) GenerateLeaveSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (r *Repository) GenerateLeaveSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	builder := sq.Select(
 		"e.id AS employee_id",
 		"CONCAT(e.first_name, ' ', e.last_name) AS employee_name",
@@ -163,11 +163,11 @@ func (r *Repository) GenerateLeaveSummaryReport(ctx context.Context, ownerID int
 		"COALESCE(SUM(CASE WHEN lr.status = 'approved' THEN lr.total_days ELSE 0 END), 0) AS approved_days_in_period",
 	).
 		From("hr_employees e").
-		LeftJoin("hr_departments d ON d.id = e.department_id AND d.owner_id = e.owner_id").
-		CrossJoin("hr_leave_types lt ON lt.owner_id = e.owner_id AND lt.is_active = TRUE").
-		LeftJoin("hr_leave_balances lb ON lb.employee_id = e.id AND lb.owner_id = e.owner_id AND lb.leave_type_id = lt.id AND lb.year = YEAR(?)", params.DateTo).
-		LeftJoin("hr_leave_requests lr ON lr.employee_id = e.id AND lr.owner_id = e.owner_id AND lr.leave_type_id = lt.id AND lr.start_date <= ? AND lr.end_date >= ?", params.DateTo, params.DateFrom).
-		Where(sq.Eq{"e.owner_id": ownerID}).
+		LeftJoin("hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id").
+		CrossJoin("hr_leave_types lt ON lt.business_id = e.business_id AND lt.is_active = TRUE").
+		LeftJoin("hr_leave_balances lb ON lb.employee_id = e.id AND lb.business_id = e.business_id AND lb.leave_type_id = lt.id AND lb.year = YEAR(?)", params.DateTo).
+		LeftJoin("hr_leave_requests lr ON lr.employee_id = e.id AND lr.business_id = e.business_id AND lr.leave_type_id = lt.id AND lr.start_date <= ? AND lr.end_date >= ?", params.DateTo, params.DateFrom).
+		Where(sq.Eq{"e.business_id": businessID}).
 		Where(sq.Eq{"e.status": "active"})
 
 	builder = appendOptionalFilters(builder, params, "e")
@@ -192,7 +192,7 @@ func (r *Repository) GenerateLeaveSummaryReport(ctx context.Context, ownerID int
 }
 
 // cross-schema aggregation read.
-func (r *Repository) GeneratePayrollSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (r *Repository) GeneratePayrollSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	builder := sq.Select(
 		"e.id AS employee_id",
 		"CONCAT(e.first_name, ' ', e.last_name) AS employee_name",
@@ -207,10 +207,10 @@ func (r *Repository) GeneratePayrollSummaryReport(ctx context.Context, ownerID i
 		"COALESCE(SUM(pe.overtime_hours), 0) AS total_overtime_hours",
 	).
 		From("hr_employees e").
-		LeftJoin("hr_departments d ON d.id = e.department_id AND d.owner_id = e.owner_id").
-		LeftJoin("hr_payroll_entries pe ON pe.employee_id = e.id AND pe.owner_id = e.owner_id").
-		LeftJoin("hr_payroll_runs pr ON pr.id = pe.payroll_run_id AND pr.owner_id = e.owner_id AND pr.period_start >= ? AND pr.period_end <= ?", params.DateFrom, params.DateTo).
-		Where(sq.Eq{"e.owner_id": ownerID}).
+		LeftJoin("hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id").
+		LeftJoin("hr_payroll_entries pe ON pe.employee_id = e.id AND pe.business_id = e.business_id").
+		LeftJoin("hr_payroll_runs pr ON pr.id = pe.payroll_run_id AND pr.business_id = e.business_id AND pr.period_start >= ? AND pr.period_end <= ?", params.DateFrom, params.DateTo).
+		Where(sq.Eq{"e.business_id": businessID}).
 		Where(sq.Eq{"e.status": "active"})
 
 	builder = appendOptionalFilters(builder, params, "e")
@@ -235,7 +235,7 @@ func (r *Repository) GeneratePayrollSummaryReport(ctx context.Context, ownerID i
 }
 
 // cross-schema aggregation read.
-func (r *Repository) GenerateOvertimeSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (r *Repository) GenerateOvertimeSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	builder := sq.Select(
 		"e.id AS employee_id",
 		"CONCAT(e.first_name, ' ', e.last_name) AS employee_name",
@@ -248,9 +248,9 @@ func (r *Repository) GenerateOvertimeSummaryReport(ctx context.Context, ownerID 
 		"COALESCE(AVG(CASE WHEN o.status = 'approved' THEN o.multiplier_applied ELSE NULL END), 0) AS avg_multiplier",
 	).
 		From("hr_employees e").
-		LeftJoin("hr_departments d ON d.id = e.department_id AND d.owner_id = e.owner_id").
-		LeftJoin("hr_overtime_requests o ON o.employee_id = e.id AND o.owner_id = e.owner_id AND o.date BETWEEN ? AND ?", params.DateFrom, params.DateTo).
-		Where(sq.Eq{"e.owner_id": ownerID}).
+		LeftJoin("hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id").
+		LeftJoin("hr_overtime_requests o ON o.employee_id = e.id AND o.business_id = e.business_id AND o.date BETWEEN ? AND ?", params.DateFrom, params.DateTo).
+		Where(sq.Eq{"e.business_id": businessID}).
 		Where(sq.Eq{"e.status": "active"})
 
 	builder = appendOptionalFilters(builder, params, "e")
@@ -275,7 +275,7 @@ func (r *Repository) GenerateOvertimeSummaryReport(ctx context.Context, ownerID 
 }
 
 // cross-schema aggregation read.
-func (r *Repository) GenerateTimesheetSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (r *Repository) GenerateTimesheetSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	builder := sq.Select(
 		"e.id AS employee_id",
 		"CONCAT(e.first_name, ' ', e.last_name) AS employee_name",
@@ -287,9 +287,9 @@ func (r *Repository) GenerateTimesheetSummaryReport(ctx context.Context, ownerID
 		"COALESCE(SUM(CASE WHEN ts.status = 'submitted' THEN ts.total_minutes ELSE 0 END), 0) AS submitted_minutes",
 	).
 		From("hr_employees e").
-		LeftJoin("hr_departments d ON d.id = e.department_id AND d.owner_id = e.owner_id").
-		LeftJoin("hr_timesheets ts ON ts.employee_id = e.id AND ts.owner_id = e.owner_id AND ts.period_start >= ? AND ts.period_end <= ?", params.DateFrom, params.DateTo).
-		Where(sq.Eq{"e.owner_id": ownerID}).
+		LeftJoin("hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id").
+		LeftJoin("hr_timesheets ts ON ts.employee_id = e.id AND ts.business_id = e.business_id AND ts.period_start >= ? AND ts.period_end <= ?", params.DateFrom, params.DateTo).
+		Where(sq.Eq{"e.business_id": businessID}).
 		Where(sq.Eq{"e.status": "active"})
 
 	builder = appendOptionalFilters(builder, params, "e")

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -59,7 +60,16 @@ func newTaxConfigPayload(t domain.TaxConfig) TaxConfigPayload {
 func (h *ListTaxConfigHandler) Serve(ctx context.Context, _ *ListTaxConfigRequest) (ListTaxConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	configs, err := h.FinanceService.ListTaxConfigs(ctx, device.User.UserID)
+	if device.User == nil {
+		return ListTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	configs, err := h.FinanceService.ListTaxConfigs(ctx, businessID)
 	if err != nil {
 		return ListTaxConfigResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -119,6 +129,15 @@ func (h *CreateTaxConfigHandler) Validate(_ context.Context, req *CreateTaxConfi
 func (h *CreateTaxConfigHandler) Serve(ctx context.Context, req *CreateTaxConfigRequest) (CreateTaxConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return CreateTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateTaxConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.TaxConfigInput{
 		Name:      req.Name,
 		Rate:      req.Rate,
@@ -126,7 +145,7 @@ func (h *CreateTaxConfigHandler) Serve(ctx context.Context, req *CreateTaxConfig
 		IsDefault: req.IsDefault,
 	}
 
-	t, err := h.FinanceService.CreateTaxConfig(ctx, device.User.UserID, input)
+	t, err := h.FinanceService.CreateTaxConfig(ctx, businessID, input)
 	if err != nil {
 		return CreateTaxConfigResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -163,12 +182,21 @@ type TaxReportResponse struct {
 func (h *TaxReportHandler) Serve(ctx context.Context, req *TaxReportRequest) (TaxReportResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return TaxReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return TaxReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	period := req.Period
 	if period == "" {
 		period = "month"
 	}
 
-	report, err := h.FinanceService.GetTaxReport(ctx, device.User.UserID, period, req.Date)
+	report, err := h.FinanceService.GetTaxReport(ctx, businessID, period, req.Date)
 	if err != nil {
 		return TaxReportResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

@@ -56,8 +56,12 @@ func (m *Module) executeListStockTransfersTool(ctx context.Context, input map[st
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	transfers, hasMore, err := m.service.ListStockTransfers(ctx, ownerID, parsed.Page, parsed.PageSize)
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	transfers, hasMore, err := m.service.ListStockTransfers(ctx, businessID, parsed.Page, parsed.PageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +97,12 @@ func (m *Module) executeCreateStockTransferTool(ctx context.Context, input map[s
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := m.service.CreateStockTransfer(ctx, ownerID, parsed)
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := m.service.CreateStockTransfer(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +131,12 @@ func (m *Module) executeReceiveStockTransferTool(ctx context.Context, input map[
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := m.service.UpdateStockTransferStatus(ctx, ownerID, transferID, domain.StockTransferStatusReceived); err != nil {
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := m.service.UpdateStockTransferStatus(ctx, businessID, transferID, domain.StockTransferStatusReceived); err != nil {
 		return nil, err
 	}
 

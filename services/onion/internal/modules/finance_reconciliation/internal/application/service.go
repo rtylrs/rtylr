@@ -33,11 +33,11 @@ const (
 )
 
 type repository interface {
-	ListUnmatchedBankFeeds(ctx context.Context, ownerID int64) ([]domain.UnmatchedBankTransaction, error)
-	ListUnmatchedInvoices(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error)
-	ListUnmatchedExpenses(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error)
-	BankFeedExists(ctx context.Context, ownerID, id int64) (bool, error)
-	CreateMatch(ctx context.Context, ownerID int64, input domain.MatchInput) (int64, error)
+	ListUnmatchedBankFeeds(ctx context.Context, businessID int64) ([]domain.UnmatchedBankTransaction, error)
+	ListUnmatchedInvoices(ctx context.Context, businessID int64) ([]domain.UnmatchedInvoice, error)
+	ListUnmatchedExpenses(ctx context.Context, businessID int64) ([]domain.UnmatchedInvoice, error)
+	BankFeedExists(ctx context.Context, businessID, id int64) (bool, error)
+	CreateMatch(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error)
 }
 
 type Service struct {
@@ -48,28 +48,28 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) Overview(ctx context.Context, ownerID int64) (domain.ReconciliationOverview, error) {
+func (s *Service) Overview(ctx context.Context, businessID int64) (domain.ReconciliationOverview, error) {
 	return cacher.Of[domain.ReconciliationOverview]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(financeReconScope, ownerID, "overview"),
+		cacheKeys.Scoped(financeReconScope, businessID, "overview"),
 		func(ctx context.Context) (domain.ReconciliationOverview, error) {
-			return s.computeOverview(ctx, ownerID)
+			return s.computeOverview(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, financeReconTTL),
 	)
 }
 
-func (s *Service) computeOverview(ctx context.Context, ownerID int64) (domain.ReconciliationOverview, error) {
-	bankTxns, err := s.repo.ListUnmatchedBankFeeds(ctx, ownerID)
+func (s *Service) computeOverview(ctx context.Context, businessID int64) (domain.ReconciliationOverview, error) {
+	bankTxns, err := s.repo.ListUnmatchedBankFeeds(ctx, businessID)
 	if err != nil {
 		return domain.ReconciliationOverview{}, err
 	}
 
-	invoices, err := s.repo.ListUnmatchedInvoices(ctx, ownerID)
+	invoices, err := s.repo.ListUnmatchedInvoices(ctx, businessID)
 	if err != nil {
 		return domain.ReconciliationOverview{}, err
 	}
 
-	expenses, err := s.repo.ListUnmatchedExpenses(ctx, ownerID)
+	expenses, err := s.repo.ListUnmatchedExpenses(ctx, businessID)
 	if err != nil {
 		return domain.ReconciliationOverview{}, err
 	}
@@ -83,7 +83,7 @@ func (s *Service) computeOverview(ctx context.Context, ownerID int64) (domain.Re
 	}, nil
 }
 
-func (s *Service) Match(ctx context.Context, ownerID int64, input domain.MatchInput) (int64, error) {
+func (s *Service) Match(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error) {
 	if input.TargetType != domain.TargetTypeInvoice && input.TargetType != domain.TargetTypeExpense {
 		return 0, domain.ErrInvalidTarget
 	}
@@ -91,7 +91,7 @@ func (s *Service) Match(ctx context.Context, ownerID int64, input domain.MatchIn
 		return 0, domain.ErrInvalidTarget
 	}
 
-	exists, err := s.repo.BankFeedExists(ctx, ownerID, input.BankFeedID)
+	exists, err := s.repo.BankFeedExists(ctx, businessID, input.BankFeedID)
 	if err != nil {
 		return 0, err
 	}
@@ -99,10 +99,10 @@ func (s *Service) Match(ctx context.Context, ownerID int64, input domain.MatchIn
 		return 0, domain.ErrBankFeedNotFound
 	}
 
-	id, err := s.repo.CreateMatch(ctx, ownerID, input)
+	id, err := s.repo.CreateMatch(ctx, businessID, input)
 	if err == nil {
 		if cache := cacher.GetRedisCache(); cache != nil {
-			cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(financeReconScope, ownerID))
+			cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(financeReconScope, businessID))
 		}
 	}
 	return id, err

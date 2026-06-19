@@ -23,12 +23,12 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) ClockIn(ctx context.Context, ownerID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
+func (s *Service) ClockIn(ctx context.Context, businessID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
 	if !domain.IsValidClockInMethod(record.ClockInMethod) {
 		return nil, domain.ErrInvalidClockInMethod
 	}
 
-	cfg, err := s.repo.GetAttendanceConfig(ctx, ownerID)
+	cfg, err := s.repo.GetAttendanceConfig(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (s *Service) ClockIn(ctx context.Context, ownerID int64, record domain.Atte
 		}
 	}
 
-	active, err := s.repo.GetActiveClockIn(ctx, ownerID, record.EmployeeID)
+	active, err := s.repo.GetActiveClockIn(ctx, businessID, record.EmployeeID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (s *Service) ClockIn(ctx context.Context, ownerID int64, record domain.Atte
 		refLng := cfg.DefaultLocationLng
 
 		if record.LocationID != 0 {
-			loc, locErr := s.repo.GetLocationCoordinates(ctx, ownerID, record.LocationID)
+			loc, locErr := s.repo.GetLocationCoordinates(ctx, businessID, record.LocationID)
 			if locErr != nil {
 				return nil, locErr
 			}
@@ -78,7 +78,7 @@ func (s *Service) ClockIn(ctx context.Context, ownerID int64, record domain.Atte
 		record.Status = "present"
 	}
 
-	return s.repo.CreateAttendanceRecord(ctx, ownerID, record)
+	return s.repo.CreateAttendanceRecord(ctx, businessID, record)
 }
 
 func (s *Service) ClockOut(ctx context.Context, ownerID, employeeID int64) (*domain.AttendanceRecordRecord, error) {

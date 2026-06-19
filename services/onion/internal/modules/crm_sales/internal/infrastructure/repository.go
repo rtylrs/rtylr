@@ -24,13 +24,13 @@ func NewRepository(db *sql.DB) *Repository {
 // Leads
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListLeads(ctx context.Context, ownerID int64) ([]domain.Lead, error) {
+func (r *Repository) ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
+		Select("id", "owner_id", "business_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
 			"source", "stage", "assigned_to", "mrr_potential", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_leads").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		OrderBy("created_at DESC").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -62,13 +62,13 @@ func (r *Repository) ListLeads(ctx context.Context, ownerID int64) ([]domain.Lea
 	return leads, nil
 }
 
-func (r *Repository) GetLead(ctx context.Context, id, ownerID int64) (domain.Lead, error) {
+func (r *Repository) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
+		Select("id", "owner_id", "business_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
 			"source", "stage", "assigned_to", "mrr_potential", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_leads").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -98,8 +98,8 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 
 	query, args, err := sq.
 		Insert("crm_leads").
-		Columns("owner_id", "company_name", "industry", "size", "source", "stage", "assigned_to", "mrr_potential", "notes").
-		Values(ownerID, req.CompanyName, nullableString(req.Industry), nullableString(req.Size),
+		Columns("owner_id", "business_id", "company_name", "industry", "size", "source", "stage", "assigned_to", "mrr_potential", "notes").
+		Values(ownerID, ownerID, req.CompanyName, nullableString(req.Industry), nullableString(req.Size),
 			source, string(stage), nullableInt64(req.AssignedTo), nullableFloat64(req.MRRPotential),
 			nullableString(req.Notes)).
 		PlaceholderFormat(sq.Question).
@@ -119,7 +119,7 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 	return r.GetLead(ctx, id, ownerID)
 }
 
-func (r *Repository) UpdateLead(ctx context.Context, id, ownerID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
+func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
 	query, args, err := sq.
 		Update("crm_leads").
 		Set("company_name", req.CompanyName).
@@ -130,7 +130,7 @@ func (r *Repository) UpdateLead(ctx context.Context, id, ownerID int64, req doma
 		Set("assigned_to", nullableInt64(req.AssignedTo)).
 		Set("mrr_potential", nullableFloat64(req.MRRPotential)).
 		Set("notes", nullableString(req.Notes)).
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -141,13 +141,13 @@ func (r *Repository) UpdateLead(ctx context.Context, id, ownerID int64, req doma
 	if err != nil {
 		return domain.Lead{}, err
 	}
-	return r.GetLead(ctx, id, ownerID)
+	return r.GetLead(ctx, id, businessID)
 }
 
-func (r *Repository) DeleteLead(ctx context.Context, id, ownerID int64) error {
+func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error {
 	query, args, err := sq.
 		Delete("crm_leads").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -168,11 +168,11 @@ func (r *Repository) DeleteLead(ctx context.Context, id, ownerID int64) error {
 	return nil
 }
 
-func (r *Repository) GetPipeline(ctx context.Context, ownerID int64) ([]domain.PipelineSummary, error) {
+func (r *Repository) GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error) {
 	query, args, err := sq.
 		Select("stage", "COUNT(*) as cnt", "COALESCE(SUM(mrr_potential), 0) as total_mrr").
 		From("crm_leads").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		GroupBy("stage").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -208,13 +208,13 @@ func (r *Repository) GetPipeline(ctx context.Context, ownerID int64) ([]domain.P
 // Contacts
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListContacts(ctx context.Context, ownerID int64, leadID *int64) ([]domain.Contact, error) {
+func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error) {
 	builder := sq.
-		Select("id", "owner_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
+		Select("id", "owner_id", "business_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
 			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_contacts").
-		Where(sq.Eq{"owner_id": ownerID})
+		Where(sq.Eq{"business_id": businessID})
 	if leadID != nil {
 		builder = builder.Where(sq.Eq{"lead_id": *leadID})
 	}
@@ -249,13 +249,13 @@ func (r *Repository) ListContacts(ctx context.Context, ownerID int64, leadID *in
 	return contacts, nil
 }
 
-func (r *Repository) GetContact(ctx context.Context, id, ownerID int64) (domain.Contact, error) {
+func (r *Repository) GetContact(ctx context.Context, id, businessID int64) (domain.Contact, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
+		Select("id", "owner_id", "business_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
 			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_contacts").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -291,8 +291,8 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 
 	query, args, err := sq.
 		Insert("crm_contacts").
-		Columns("owner_id", "lead_id", "customer_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
-		Values(ownerID, req.LeadID, nullableInt64Value(customerID), req.Name, nullableString(req.Role), nullableString(req.Email),
+		Columns("owner_id", "business_id", "lead_id", "customer_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
+		Values(ownerID, ownerID, req.LeadID, nullableInt64Value(customerID), req.Name, nullableString(req.Role), nullableString(req.Email),
 			nullableString(req.Phone), nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes)).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -314,7 +314,7 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 	return r.GetContact(ctx, id, ownerID)
 }
 
-func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
+func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return domain.Contact{}, err
@@ -323,8 +323,8 @@ func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req d
 
 	var existingContactID int64
 	if err := tx.QueryRowContext(ctx,
-		`SELECT id FROM crm_contacts WHERE owner_id = ? AND id = ? LIMIT 1`,
-		ownerID, id,
+		`SELECT id FROM crm_contacts WHERE business_id = ? AND id = ? LIMIT 1`,
+		businessID, id,
 	).Scan(&existingContactID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Contact{}, domain.ErrContactNotFound
@@ -332,7 +332,7 @@ func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req d
 		return domain.Contact{}, err
 	}
 
-	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  req.Name,
 		Email: req.Email,
 		Phone: req.Phone,
@@ -351,7 +351,7 @@ func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req d
 		Set("linkedin", nullableString(req.LinkedIn)).
 		Set("is_primary", req.IsPrimary).
 		Set("notes", nullableString(req.Notes)).
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -365,13 +365,13 @@ func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req d
 	if err := tx.Commit(); err != nil {
 		return domain.Contact{}, err
 	}
-	return r.GetContact(ctx, id, ownerID)
+	return r.GetContact(ctx, id, businessID)
 }
 
-func (r *Repository) DeleteContact(ctx context.Context, id, ownerID int64) error {
+func (r *Repository) DeleteContact(ctx context.Context, id, businessID int64) error {
 	query, args, err := sq.
 		Delete("crm_contacts").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -396,12 +396,12 @@ func (r *Repository) DeleteContact(ctx context.Context, id, ownerID int64) error
 // Touchpoints
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListTouchpoints(ctx context.Context, ownerID, leadID int64) ([]domain.Touchpoint, error) {
+func (r *Repository) ListTouchpoints(ctx context.Context, businessID, leadID int64) ([]domain.Touchpoint, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "lead_id", "contact_id", "type", "outcome",
+		Select("id", "owner_id", "business_id", "lead_id", "contact_id", "type", "outcome",
 			"COALESCE(notes,'')", "next_follow_up", "created_by", "created_at").
 		From("crm_touchpoints").
-		Where(sq.Eq{"owner_id": ownerID, "lead_id": leadID}).
+		Where(sq.Eq{"business_id": businessID, "lead_id": leadID}).
 		OrderBy("created_at DESC").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -433,12 +433,12 @@ func (r *Repository) ListTouchpoints(ctx context.Context, ownerID, leadID int64)
 	return tps, nil
 }
 
-func (r *Repository) GetTouchpoint(ctx context.Context, id, ownerID int64) (domain.Touchpoint, error) {
+func (r *Repository) GetTouchpoint(ctx context.Context, id, businessID int64) (domain.Touchpoint, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "lead_id", "contact_id", "type", "outcome",
+		Select("id", "owner_id", "business_id", "lead_id", "contact_id", "type", "outcome",
 			"COALESCE(notes,'')", "next_follow_up", "created_by", "created_at").
 		From("crm_touchpoints").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -468,8 +468,8 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 
 	query, args, err := sq.
 		Insert("crm_touchpoints").
-		Columns("owner_id", "lead_id", "contact_id", "type", "outcome", "notes", "next_follow_up", "created_by").
-		Values(ownerID, req.LeadID, nullableInt64(req.ContactID), tp, outcome,
+		Columns("owner_id", "business_id", "lead_id", "contact_id", "type", "outcome", "notes", "next_follow_up", "created_by").
+		Values(ownerID, ownerID, req.LeadID, nullableInt64(req.ContactID), tp, outcome,
 			nullableString(req.Notes), nullableStringPtr(req.NextFollowUp), createdBy).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -488,10 +488,10 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 	return r.GetTouchpoint(ctx, id, ownerID)
 }
 
-func (r *Repository) DeleteTouchpoint(ctx context.Context, id, ownerID int64) error {
+func (r *Repository) DeleteTouchpoint(ctx context.Context, id, businessID int64) error {
 	query, args, err := sq.
 		Delete("crm_touchpoints").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -516,13 +516,13 @@ func (r *Repository) DeleteTouchpoint(ctx context.Context, id, ownerID int64) er
 // Contracts
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListContracts(ctx context.Context, ownerID int64) ([]domain.Contract, error) {
+func (r *Repository) ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "lead_id", "plan", "mrr", "seats",
+		Select("id", "owner_id", "business_id", "lead_id", "plan", "mrr", "seats",
 			"signed_at", "COALESCE(signed_by_name,'')", "closed_by", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_contracts").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		OrderBy("created_at DESC").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -554,13 +554,13 @@ func (r *Repository) ListContracts(ctx context.Context, ownerID int64) ([]domain
 	return contracts, nil
 }
 
-func (r *Repository) GetContract(ctx context.Context, id, ownerID int64) (domain.Contract, error) {
+func (r *Repository) GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error) {
 	query, args, err := sq.
-		Select("id", "owner_id", "lead_id", "plan", "mrr", "seats",
+		Select("id", "owner_id", "business_id", "lead_id", "plan", "mrr", "seats",
 			"signed_at", "COALESCE(signed_by_name,'')", "closed_by", "COALESCE(notes,'')",
 			"created_at", "updated_at").
 		From("crm_contracts").
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -590,8 +590,8 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 
 	query, args, err := sq.
 		Insert("crm_contracts").
-		Columns("owner_id", "lead_id", "plan", "mrr", "seats", "signed_at", "signed_by_name", "closed_by", "notes").
-		Values(ownerID, req.LeadID, plan, req.MRR, seats, nullableStringPtr(req.SignedAt),
+		Columns("owner_id", "business_id", "lead_id", "plan", "mrr", "seats", "signed_at", "signed_by_name", "closed_by", "notes").
+		Values(ownerID, ownerID, req.LeadID, plan, req.MRR, seats, nullableStringPtr(req.SignedAt),
 			nullableString(req.SignedByName), nullableInt64(req.ClosedBy), nullableString(req.Notes)).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -610,7 +610,7 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 	return r.GetContract(ctx, id, ownerID)
 }
 
-func (r *Repository) UpdateContract(ctx context.Context, id, ownerID int64, req domain.UpdateContractRequest) (domain.Contract, error) {
+func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error) {
 	seats := req.Seats
 	if seats == 0 {
 		seats = 1
@@ -624,7 +624,7 @@ func (r *Repository) UpdateContract(ctx context.Context, id, ownerID int64, req 
 		Set("signed_by_name", nullableString(req.SignedByName)).
 		Set("closed_by", nullableInt64(req.ClosedBy)).
 		Set("notes", nullableString(req.Notes)).
-		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		Where(sq.Eq{"id": id, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -635,7 +635,7 @@ func (r *Repository) UpdateContract(ctx context.Context, id, ownerID int64, req 
 	if err != nil {
 		return domain.Contract{}, err
 	}
-	return r.GetContract(ctx, id, ownerID)
+	return r.GetContract(ctx, id, businessID)
 }
 
 // ---------------------------------------------------------------------------
@@ -651,7 +651,7 @@ func scanLead(s leadScanner) (domain.Lead, error) {
 	var assignedTo sql.NullInt64
 	var mrrPotential sql.NullFloat64
 	err := s.Scan(
-		&l.ID, &l.OwnerID, &l.CompanyName, &l.Industry, &l.Size,
+		&l.ID, &l.OwnerID, &l.BusinessID, &l.CompanyName, &l.Industry, &l.Size,
 		&l.Source, &l.Stage, &assignedTo, &mrrPotential, &l.Notes,
 		&l.CreatedAt, &l.UpdatedAt,
 	)
@@ -672,7 +672,7 @@ func scanLeadRow(row *sql.Row) (domain.Lead, error) {
 	var assignedTo sql.NullInt64
 	var mrrPotential sql.NullFloat64
 	err := row.Scan(
-		&l.ID, &l.OwnerID, &l.CompanyName, &l.Industry, &l.Size,
+		&l.ID, &l.OwnerID, &l.BusinessID, &l.CompanyName, &l.Industry, &l.Size,
 		&l.Source, &l.Stage, &assignedTo, &mrrPotential, &l.Notes,
 		&l.CreatedAt, &l.UpdatedAt,
 	)
@@ -696,7 +696,7 @@ func scanContact(s contactScanner) (domain.Contact, error) {
 	var c domain.Contact
 	var customerID sql.NullInt64
 	err := s.Scan(
-		&c.ID, &c.OwnerID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
 		&c.Phone, &c.LinkedIn, &c.IsPrimary, &c.Notes,
 		&c.CreatedAt, &c.UpdatedAt,
 	)
@@ -713,7 +713,7 @@ func scanContactRow(row *sql.Row) (domain.Contact, error) {
 	var c domain.Contact
 	var customerID sql.NullInt64
 	err := row.Scan(
-		&c.ID, &c.OwnerID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
 		&c.Phone, &c.LinkedIn, &c.IsPrimary, &c.Notes,
 		&c.CreatedAt, &c.UpdatedAt,
 	)
@@ -735,7 +735,7 @@ func scanTouchpoint(s touchpointScanner) (domain.Touchpoint, error) {
 	var contactID sql.NullInt64
 	var nextFollowUp sql.NullString
 	err := s.Scan(
-		&tp.ID, &tp.OwnerID, &tp.LeadID, &contactID, &tp.Type, &tp.Outcome,
+		&tp.ID, &tp.OwnerID, &tp.BusinessID, &tp.LeadID, &contactID, &tp.Type, &tp.Outcome,
 		&tp.Notes, &nextFollowUp, &tp.CreatedBy, &tp.CreatedAt,
 	)
 	if err != nil {
@@ -755,7 +755,7 @@ func scanTouchpointRow(row *sql.Row) (domain.Touchpoint, error) {
 	var contactID sql.NullInt64
 	var nextFollowUp sql.NullString
 	err := row.Scan(
-		&tp.ID, &tp.OwnerID, &tp.LeadID, &contactID, &tp.Type, &tp.Outcome,
+		&tp.ID, &tp.OwnerID, &tp.BusinessID, &tp.LeadID, &contactID, &tp.Type, &tp.Outcome,
 		&tp.Notes, &nextFollowUp, &tp.CreatedBy, &tp.CreatedAt,
 	)
 	if err != nil {
@@ -779,7 +779,7 @@ func scanContract(s contractScanner) (domain.Contract, error) {
 	var signedAt sql.NullString
 	var closedBy sql.NullInt64
 	err := s.Scan(
-		&c.ID, &c.OwnerID, &c.LeadID, &c.Plan, &c.MRR, &c.Seats,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &c.Plan, &c.MRR, &c.Seats,
 		&signedAt, &c.SignedByName, &closedBy, &c.Notes,
 		&c.CreatedAt, &c.UpdatedAt,
 	)
@@ -800,7 +800,7 @@ func scanContractRow(row *sql.Row) (domain.Contract, error) {
 	var signedAt sql.NullString
 	var closedBy sql.NullInt64
 	err := row.Scan(
-		&c.ID, &c.OwnerID, &c.LeadID, &c.Plan, &c.MRR, &c.Seats,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &c.Plan, &c.MRR, &c.Seats,
 		&signedAt, &c.SignedByName, &closedBy, &c.Notes,
 		&c.CreatedAt, &c.UpdatedAt,
 	)

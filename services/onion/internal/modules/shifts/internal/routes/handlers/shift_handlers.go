@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type ShiftPayload struct {
@@ -57,7 +58,11 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	shifts, err := h.Service.ListShifts(ctx, device.User.UserID, req.StaffID, req.Date)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	shifts, err := h.Service.ListShifts(ctx, businessID, req.StaffID, req.Date)
 	if err != nil {
 		return ListShiftsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
 	}
@@ -107,8 +112,12 @@ func (h *CreateShiftHandler) Serve(ctx context.Context, req *CreateShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return CreateShiftResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateShiftResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.ShiftInput{
-		OwnerID: device.User.UserID, StaffID: req.StaffID, Date: req.Date,
+		OwnerID: device.User.UserID, BusinessID: businessID, StaffID: req.StaffID, Date: req.Date,
 		StartTime: req.StartTime, EndTime: req.EndTime,
 		BreakDurationMinutes: req.BreakMinutes, Notes: req.Notes,
 	}
@@ -149,11 +158,15 @@ func (h *UpdateShiftHandler) Serve(ctx context.Context, req *UpdateShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateShiftResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateShiftResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.ShiftUpdateInput{
 		ID: req.ID, Date: req.Date, StartTime: req.StartTime, EndTime: req.EndTime,
 		BreakDurationMinutes: req.BreakMinutes, Status: req.Status, Notes: req.Notes,
 	}
-	if err := h.Service.UpdateShift(ctx, device.User.UserID, input); err != nil {
+	if err := h.Service.UpdateShift(ctx, businessID, input); err != nil {
 		return UpdateShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update shift"}
 	}
 	return UpdateShiftResponse{Success: true}, nil
@@ -183,7 +196,11 @@ func (h *DeleteShiftHandler) Serve(ctx context.Context, req *DeleteShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return DeleteShiftResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.Service.DeleteShift(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteShiftResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.DeleteShift(ctx, businessID, req.ID); err != nil {
 		return DeleteShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete shift"}
 	}
 	return DeleteShiftResponse{Success: true}, nil

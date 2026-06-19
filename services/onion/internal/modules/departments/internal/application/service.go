@@ -17,10 +17,10 @@ const (
 )
 
 type repository interface {
-	ListDepartments(ctx context.Context, ownerID int64) ([]domain.Department, error)
+	ListDepartments(ctx context.Context, businessID int64) ([]domain.Department, error)
 	CreateDepartment(ctx context.Context, input domain.DepartmentInput) (int64, error)
-	UpdateDepartment(ctx context.Context, ownerID int64, input domain.DepartmentInput) error
-	DeleteDepartment(ctx context.Context, ownerID, departmentID int64) error
+	UpdateDepartment(ctx context.Context, businessID int64, input domain.DepartmentInput) error
+	DeleteDepartment(ctx context.Context, businessID, departmentID int64) error
 }
 
 type Service struct {
@@ -31,17 +31,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateDepartmentsScope(ctx context.Context, ownerID int64) {
+func invalidateDepartmentsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(departmentsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(departmentsScope, businessID))
 	}
 }
 
-func (s *Service) ListDepartments(ctx context.Context, ownerID int64) ([]domain.Department, error) {
+func (s *Service) ListDepartments(ctx context.Context, businessID int64) ([]domain.Department, error) {
 	return cacher.Of[[]domain.Department]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(departmentsScope, ownerID, "list"),
+		cacheKeys.Scoped(departmentsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Department, error) {
-			return s.repo.ListDepartments(ctx, ownerID)
+			return s.repo.ListDepartments(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, departmentsTTL),
 	)
@@ -52,22 +52,22 @@ func (s *Service) CreateDepartment(ctx context.Context, input domain.DepartmentI
 	if err != nil {
 		return 0, err
 	}
-	invalidateDepartmentsScope(ctx, input.OwnerID)
+	invalidateDepartmentsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
-func (s *Service) UpdateDepartment(ctx context.Context, ownerID int64, input domain.DepartmentInput) error {
-	if err := s.repo.UpdateDepartment(ctx, ownerID, input); err != nil {
+func (s *Service) UpdateDepartment(ctx context.Context, businessID int64, input domain.DepartmentInput) error {
+	if err := s.repo.UpdateDepartment(ctx, businessID, input); err != nil {
 		return err
 	}
-	invalidateDepartmentsScope(ctx, ownerID)
+	invalidateDepartmentsScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) DeleteDepartment(ctx context.Context, ownerID, departmentID int64) error {
-	if err := s.repo.DeleteDepartment(ctx, ownerID, departmentID); err != nil {
+func (s *Service) DeleteDepartment(ctx context.Context, businessID, departmentID int64) error {
+	if err := s.repo.DeleteDepartment(ctx, businessID, departmentID); err != nil {
 		return err
 	}
-	invalidateDepartmentsScope(ctx, ownerID)
+	invalidateDepartmentsScope(ctx, businessID)
 	return nil
 }

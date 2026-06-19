@@ -26,15 +26,15 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
+func (r *Repository) ListShifts(ctx context.Context, businessID, staffID int64, date string) ([]domain.Shift, error) {
 	// Dynamic WHERE clauses - built with squirrel
 	builder := sq.Select(
-		"id", "owner_id", "staff_id", "department_id", "date", "start_time", "end_time",
+		"id", "owner_id", "business_id", "staff_id", "department_id", "date", "start_time", "end_time",
 		"break_duration_minutes", "status", "clock_in_at", "clock_out_at",
 		"hours_worked", "overtime_hours", "notes", "created_at", "updated_at",
 	).
 		From("hr_shifts").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Expr("staff_id IS NOT NULL"))
 
 	if staffID != 0 {
@@ -74,6 +74,7 @@ func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, dat
 func (r *Repository) CreateShift(ctx context.Context, input domain.ShiftInput) (int64, error) {
 	result, err := r.queries.CreateShift(ctx, sqlc.CreateShiftParams{
 		OwnerID:              input.OwnerID,
+		BusinessID:           input.BusinessID,
 		StaffID:              sql.NullInt64{Int64: input.StaffID, Valid: true},
 		DepartmentID:         sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
 		Date:                 sql.NullTime{Time: parseDate(input.Date), Valid: true},
@@ -89,7 +90,7 @@ func (r *Repository) CreateShift(ctx context.Context, input domain.ShiftInput) (
 	return result.LastInsertId()
 }
 
-func (r *Repository) UpdateShift(ctx context.Context, ownerID int64, input domain.ShiftUpdateInput) error {
+func (r *Repository) UpdateShift(ctx context.Context, businessID int64, input domain.ShiftUpdateInput) error {
 	err := r.queries.UpdateShift(ctx, sqlc.UpdateShiftParams{
 		DepartmentID:         sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
 		Date:                 sql.NullTime{Time: parseDate(input.Date), Valid: true},
@@ -99,7 +100,7 @@ func (r *Repository) UpdateShift(ctx context.Context, ownerID int64, input domai
 		Status:               sqlc.NullHrShiftsStatus{HrShiftsStatus: sqlc.HrShiftsStatus(input.Status), Valid: input.Status != ""},
 		Notes:                sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		ID:                   input.ID,
-		OwnerID:              ownerID,
+		BusinessID:           businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update shift", logger.Error(err))
@@ -108,10 +109,10 @@ func (r *Repository) UpdateShift(ctx context.Context, ownerID int64, input domai
 	return nil
 }
 
-func (r *Repository) DeleteShift(ctx context.Context, ownerID, shiftID int64) error {
+func (r *Repository) DeleteShift(ctx context.Context, businessID, shiftID int64) error {
 	err := r.queries.DeleteShift(ctx, sqlc.DeleteShiftParams{
-		ID:      shiftID,
-		OwnerID: ownerID,
+		ID:         shiftID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete shift", logger.Error(err))

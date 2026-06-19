@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/settings/scheduled-reports
@@ -32,7 +33,11 @@ func (h *ListScheduledReportsHandler) Serve(ctx context.Context, _ *ListSchedule
 	if device.User == nil {
 		return ListScheduledReportsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	rows, err := h.Service.ListScheduledReports(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListScheduledReportsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	rows, err := h.Service.ListScheduledReports(ctx, businessID)
 	if err != nil {
 		return ListScheduledReportsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -92,7 +97,11 @@ func (h *CreateScheduledReportHandler) Serve(ctx context.Context, req *CreateSch
 	if device.User == nil {
 		return CreateScheduledReportResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	out, err := h.Service.CreateScheduledReport(ctx, device.User.UserID, application.ScheduledReportPayload{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateScheduledReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	out, err := h.Service.CreateScheduledReport(ctx, businessID, application.ScheduledReportPayload{
 		TemplateID: req.TemplateID,
 		Cadence:    req.Cadence,
 		Channel:    req.Channel,
@@ -160,6 +169,10 @@ func (h *UpdateScheduledReportHandler) Serve(ctx context.Context, req *UpdateSch
 	if device.User == nil {
 		return UpdateScheduledReportResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateScheduledReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := parseIDParam(ctx)
 	if err != nil {
 		return UpdateScheduledReportResponse{}, &errorModels.ServerError{
@@ -168,7 +181,7 @@ func (h *UpdateScheduledReportHandler) Serve(ctx context.Context, req *UpdateSch
 			Message:  "Invalid id",
 		}
 	}
-	out, err := h.Service.UpdateScheduledReport(ctx, device.User.UserID, id, application.ScheduledReportPayload{
+	out, err := h.Service.UpdateScheduledReport(ctx, businessID, id, application.ScheduledReportPayload{
 		TemplateID: req.TemplateID,
 		Cadence:    req.Cadence,
 		Channel:    req.Channel,
@@ -211,6 +224,10 @@ func (h *DeleteScheduledReportHandler) Serve(ctx context.Context, _ *DeleteSched
 	if device.User == nil {
 		return DeleteScheduledReportResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteScheduledReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := parseIDParam(ctx)
 	if err != nil {
 		return DeleteScheduledReportResponse{}, &errorModels.ServerError{
@@ -219,7 +236,7 @@ func (h *DeleteScheduledReportHandler) Serve(ctx context.Context, _ *DeleteSched
 			Message:  "Invalid id",
 		}
 	}
-	if delErr := h.Service.DeleteScheduledReport(ctx, device.User.UserID, id); delErr != nil {
+	if delErr := h.Service.DeleteScheduledReport(ctx, businessID, id); delErr != nil {
 		if errors.Is(delErr, application.ScheduledReportErrNotFound) {
 			return DeleteScheduledReportResponse{}, &errorModels.ServerError{
 				HTTPCode: http.StatusNotFound,

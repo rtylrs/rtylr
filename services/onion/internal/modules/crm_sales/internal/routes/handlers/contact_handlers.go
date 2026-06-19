@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -38,7 +39,12 @@ func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsReques
 		return ListContactsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	contacts, err := h.Service.ListContacts(ctx, device.User.UserID, req.LeadID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListContactsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contacts, err := h.Service.ListContacts(ctx, businessID, req.LeadID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contacts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListContactsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list contacts"}
@@ -73,7 +79,12 @@ func (h *ListLeadTouchpointsHandler) Serve(ctx context.Context, _ *ListLeadTouch
 		return ListLeadTouchpointsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
 	}
 
-	tps, err := h.Service.ListTouchpoints(ctx, device.User.UserID, leadID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListLeadTouchpointsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	tps, err := h.Service.ListTouchpoints(ctx, businessID, leadID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list touchpoints", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", leadID), logger.Error(err))
 		return ListLeadTouchpointsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list touchpoints"}
@@ -121,7 +132,12 @@ func (h *CreateContactHandler) Serve(ctx context.Context, req *CreateContactRequ
 		return CreateContactResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	contact, err := h.Service.CreateContact(ctx, device.User.UserID, domain.CreateContactRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateContactResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contact, err := h.Service.CreateContact(ctx, businessID, domain.CreateContactRequest{
 		LeadID:    req.LeadID,
 		Name:      req.Name,
 		Role:      req.Role,
@@ -180,7 +196,12 @@ func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequ
 		return UpdateContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contact id"}
 	}
 
-	contact, err := h.Service.UpdateContact(ctx, id, device.User.UserID, domain.UpdateContactRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateContactResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contact, err := h.Service.UpdateContact(ctx, id, businessID, domain.UpdateContactRequest{
 		Name:      req.Name,
 		Role:      req.Role,
 		Email:     req.Email,
@@ -226,7 +247,12 @@ func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactReques
 		return DeleteContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contact id"}
 	}
 
-	if err := h.Service.DeleteContact(ctx, id, device.User.UserID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteContactResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteContact(ctx, id, businessID); err != nil {
 		if errors.Is(err, domain.ErrContactNotFound) {
 			return DeleteContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contact not found"}
 		}

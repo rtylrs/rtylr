@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -52,7 +53,16 @@ func newExpenseCategoryPayload(c domain.ExpenseCategory) ExpenseCategoryPayload 
 func (h *ListExpenseCategoriesHandler) Serve(ctx context.Context, _ *ListExpenseCategoriesRequest) (ListExpenseCategoriesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	categories, err := h.FinanceService.ListExpenseCategories(ctx, device.User.UserID)
+	if device.User == nil {
+		return ListExpenseCategoriesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListExpenseCategoriesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	categories, err := h.FinanceService.ListExpenseCategories(ctx, businessID)
 	if err != nil {
 		return ListExpenseCategoriesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -104,13 +114,22 @@ func (h *CreateExpenseCategoryHandler) Validate(_ context.Context, req *CreateEx
 func (h *CreateExpenseCategoryHandler) Serve(ctx context.Context, req *CreateExpenseCategoryRequest) (CreateExpenseCategoryResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return CreateExpenseCategoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateExpenseCategoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.ExpenseCategoryInput{
 		Name:  req.Name,
 		Color: req.Color,
 		Icon:  req.Icon,
 	}
 
-	c, err := h.FinanceService.CreateExpenseCategory(ctx, device.User.UserID, input)
+	c, err := h.FinanceService.CreateExpenseCategory(ctx, businessID, input)
 	if err != nil {
 		return CreateExpenseCategoryResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

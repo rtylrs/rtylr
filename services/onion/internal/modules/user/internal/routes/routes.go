@@ -71,6 +71,24 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		http.PerRouteRateLimit(20, time.Minute),
 	)
 
+	// GET /get-business-exists?name= -- inline business-name availability check
+	// for the onboarding "create your business" screen. Returns {exists: bool}.
+	http.RegisterGETWithValidation[handlers.BusinessExistsRequest, handlers.BusinessExistsResponse](
+		ctx,
+		router,
+		handlers.BusinessExistsRoutes(),
+		&handlers.BusinessExistsHandler{UserService: userService},
+	)
+
+	// POST /onboarding/business -- authenticated; creates the owner's first
+	// business (globally-unique name) and returns a fresh token with its business_id.
+	http.RegisterPOSTWithValidation[handlers.OnboardBusinessRequest, handlers.OnboardBusinessResponse](
+		ctx,
+		router,
+		handlers.OnboardBusinessRoutes(),
+		&handlers.OnboardBusinessHandler{UserService: userService},
+	)
+
 	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](
 		ctx,
 		router,

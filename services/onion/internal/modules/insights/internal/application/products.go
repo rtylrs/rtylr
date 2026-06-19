@@ -17,10 +17,10 @@ type ProductKPIPayload struct {
 }
 
 // GetProductKPIs returns aggregate product counters for the dashboard.
-func (s *Service) GetProductKPIs(ctx context.Context, ownerID int64) (ProductKPIPayload, error) {
-	key := fmt.Sprintf("insights:%d:products:kpis", ownerID)
+func (s *Service) GetProductKPIs(ctx context.Context, businessID int64) (ProductKPIPayload, error) {
+	key := fmt.Sprintf("insights:%d:products:kpis", businessID)
 	out, err := cacher.Of[ProductKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (ProductKPIPayload, error) {
-		k, rerr := s.repo.GetProductKPIs(ctx, ownerID)
+		k, rerr := s.repo.GetProductKPIs(ctx, businessID)
 		if rerr != nil {
 			return ProductKPIPayload{}, rerr
 		}

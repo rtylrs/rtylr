@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
@@ -49,7 +50,12 @@ func (h *CreateEquipmentRequestHandler) Serve(ctx context.Context, req *CreateEq
 		return CreateEquipmentRequestResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	created, err := h.Service.CreateEquipmentRequest(ctx, device.User.UserID, domain.CreateEquipmentRequestParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateEquipmentRequestResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	created, err := h.Service.CreateEquipmentRequest(ctx, businessID, domain.CreateEquipmentRequestParams{
 		EmployeeID:   req.EmployeeID,
 		ItemName:     req.ItemName,
 		Quantity:     req.Quantity,

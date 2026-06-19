@@ -20,10 +20,10 @@ const (
 )
 
 // invalidateCustomerScope wipes every customer-related cache entry for the
-// owner. Called by every mutation (create/update/delete/loyalty change).
-func invalidateCustomerScope(ctx context.Context, ownerID int64) {
+// business. Called by every mutation (create/update/delete/loyalty change).
+func invalidateCustomerScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(businessID))
 	}
 }
 
@@ -42,7 +42,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 func (s *Service) ListCustomers(ctx context.Context, filter domain.CustomerListFilter) (domain.CustomerListResult, error) {
 	key := fmt.Sprintf(
 		"%s|s=%s|t=%s|tag=%s|p=%d|ps=%d",
-		cacheKeys.CustomersList(filter.OwnerID),
+		cacheKeys.CustomersList(filter.BusinessID),
 		filter.Search, filter.Tier, filter.Tag, filter.Page, filter.PageSize,
 	)
 	return cacher.Of[domain.CustomerListResult]().GetOrComputeSingle(
@@ -64,12 +64,12 @@ func (s *Service) ListCustomers(ctx context.Context, filter domain.CustomerListF
 	)
 }
 
-func (s *Service) GetCustomer(ctx context.Context, ownerID, customerID int64) (domain.Customer, error) {
+func (s *Service) GetCustomer(ctx context.Context, businessID, customerID int64) (domain.Customer, error) {
 	return cacher.Of[domain.Customer]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Customer(ownerID, customerID),
+		cacheKeys.Customer(businessID, customerID),
 		func(ctx context.Context) (domain.Customer, error) {
-			return s.repo.GetCustomerByID(ctx, ownerID, customerID)
+			return s.repo.GetCustomerByID(ctx, businessID, customerID)
 		},
 		cacher.WithExpiry(ctx, customerCacheTTL),
 	)
@@ -78,7 +78,7 @@ func (s *Service) GetCustomer(ctx context.Context, ownerID, customerID int64) (d
 func (s *Service) CreateCustomer(ctx context.Context, input domain.CustomerInput) (int64, error) {
 	id, err := s.repo.CreateCustomer(ctx, input)
 	if err == nil {
-		invalidateCustomerScope(ctx, input.OwnerID)
+		invalidateCustomerScope(ctx, input.BusinessID)
 	}
 	return id, err
 }
@@ -89,30 +89,30 @@ func (s *Service) UpdateCustomer(ctx context.Context, input domain.CustomerUpdat
 	}
 	if input.LoyaltyTier != "" {
 		// Preserve existing points — only update tier label
-		existing, err := s.repo.GetCustomerByID(ctx, input.OwnerID, input.ID)
+		existing, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.ID)
 		if err == nil {
 			_ = s.repo.UpdateCustomerLoyalty(ctx, input.ID, existing.LoyaltyPoints, input.LoyaltyTier)
 		}
 	}
-	invalidateCustomerScope(ctx, input.OwnerID)
+	invalidateCustomerScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) DeleteCustomer(ctx context.Context, ownerID, customerID int64) error {
-	if err := s.repo.DeleteCustomer(ctx, ownerID, customerID); err != nil {
+func (s *Service) DeleteCustomer(ctx context.Context, businessID, customerID int64) error {
+	if err := s.repo.DeleteCustomer(ctx, businessID, customerID); err != nil {
 		return err
 	}
-	invalidateCustomerScope(ctx, ownerID)
+	invalidateCustomerScope(ctx, businessID)
 	return nil
 }
 
 func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput) error {
-	if err := s.repo.RecordVisit(ctx, input.OwnerID, input.CustomerID, input.Amount); err != nil {
+	if err := s.repo.RecordVisit(ctx, input.BusinessID, input.CustomerID, input.Amount); err != nil {
 		return err
 	}
 
 	if input.AwardPoints && input.Amount > 0 {
-		cfg, err := s.GetLoyaltyConfig(ctx, input.OwnerID)
+		cfg, err := s.GetLoyaltyConfig(ctx, input.BusinessID)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get loyalty config for visit award", logger.Error(err))
 
@@ -124,6 +124,7 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 			if points > 0 {
 				if awardErr := s.AwardPoints(ctx, domain.AwardPointsInput{
 					OwnerID:     input.OwnerID,
+					BusinessID:  input.BusinessID,
 					CustomerID:  input.CustomerID,
 					Points:      points,
 					Description: fmt.Sprintf("Points earned for visit (spend: %.2f)", input.Amount),
@@ -134,7 +135,7 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 		}
 	}
 
-	s.invalidateDashboardCache(ctx, input.OwnerID)
+	s.invalidateDashboardCache(ctx, input.BusinessID)
 
 	return nil
 }
@@ -142,7 +143,7 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 // ─── Loyalty ──────────────────────────────────────────────────────────────────
 
 func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput) error {
-	customer, err := s.repo.GetCustomerByID(ctx, input.OwnerID, input.CustomerID)
+	customer, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.CustomerID)
 	if err != nil {
 		return err
 	}
@@ -152,6 +153,7 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput
 
 	tx := domain.LoyaltyTransaction{
 		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
 		Type:          "earn",
 		Points:        input.Points,
@@ -166,7 +168,7 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput
 		return err
 	}
 
-	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.OwnerID)
+	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
 	if cfgErr != nil {
 		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
 	}
@@ -177,7 +179,7 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) error {
-	customer, err := s.repo.GetCustomerByID(ctx, input.OwnerID, input.CustomerID)
+	customer, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.CustomerID)
 	if err != nil {
 		return err
 	}
@@ -191,6 +193,7 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 
 	tx := domain.LoyaltyTransaction{
 		OwnerID:       input.OwnerID,
+		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
 		Type:          "redeem",
 		Points:        input.Points,
@@ -205,7 +208,7 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 		return err
 	}
 
-	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.OwnerID)
+	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
 	if cfgErr != nil {
 		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
 	}
@@ -215,15 +218,15 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 	return s.repo.UpdateCustomerLoyalty(ctx, input.CustomerID, balanceAfter, newTier)
 }
 
-func (s *Service) ListLoyaltyTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
-	return s.repo.ListLoyaltyTransactions(ctx, ownerID, customerID, page, pageSize)
+func (s *Service) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
+	return s.repo.ListLoyaltyTransactions(ctx, businessID, customerID, page, pageSize)
 }
 
-func (s *Service) GetLoyaltyConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
-	cacheKey := fmt.Sprintf("crm:loyalty_config:%d", ownerID)
+func (s *Service) GetLoyaltyConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {
+	cacheKey := fmt.Sprintf("crm:loyalty_config:%d", businessID)
 
 	return cacher.Of[domain.LoyaltyConfig]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.LoyaltyConfig, error) {
-		return s.repo.GetLoyaltyConfig(ctx, ownerID)
+		return s.repo.GetLoyaltyConfig(ctx, businessID)
 	}, cacher.WithExpiry(ctx, loyaltyCacheTTL))
 }
 
@@ -232,7 +235,7 @@ func (s *Service) UpsertLoyaltyConfig(ctx context.Context, input domain.LoyaltyC
 		return err
 	}
 
-	cacheKey := fmt.Sprintf("crm:loyalty_config:%d", input.OwnerID)
+	cacheKey := fmt.Sprintf("crm:loyalty_config:%d", input.BusinessID)
 	cacher.Of[domain.LoyaltyConfig]().Invalidate(ctx, []string{cacheKey})
 
 	return nil
@@ -270,12 +273,12 @@ func RecalculateTier(points int, cfg domain.LoyaltyConfig) string {
 
 // ─── Segments ─────────────────────────────────────────────────────────────────
 
-func (s *Service) ListSegments(ctx context.Context, ownerID int64) ([]domain.Segment, error) {
-	return s.repo.ListSegments(ctx, ownerID)
+func (s *Service) ListSegments(ctx context.Context, businessID int64) ([]domain.Segment, error) {
+	return s.repo.ListSegments(ctx, businessID)
 }
 
-func (s *Service) GetSegment(ctx context.Context, ownerID, segmentID int64) (domain.Segment, error) {
-	return s.repo.GetSegmentByID(ctx, ownerID, segmentID)
+func (s *Service) GetSegment(ctx context.Context, businessID, segmentID int64) (domain.Segment, error) {
+	return s.repo.GetSegmentByID(ctx, businessID, segmentID)
 }
 
 func (s *Service) CreateSegment(ctx context.Context, input domain.SegmentInput) (int64, error) {
@@ -286,18 +289,18 @@ func (s *Service) UpdateSegment(ctx context.Context, input domain.SegmentUpdateI
 	return s.repo.UpdateSegment(ctx, input)
 }
 
-func (s *Service) DeleteSegment(ctx context.Context, ownerID, segmentID int64) error {
-	return s.repo.DeleteSegment(ctx, ownerID, segmentID)
+func (s *Service) DeleteSegment(ctx context.Context, businessID, segmentID int64) error {
+	return s.repo.DeleteSegment(ctx, businessID, segmentID)
 }
 
 // ─── Campaigns ────────────────────────────────────────────────────────────────
 
-func (s *Service) ListCampaigns(ctx context.Context, ownerID int64, status string) ([]domain.Campaign, error) {
-	return s.repo.ListCampaigns(ctx, ownerID, status)
+func (s *Service) ListCampaigns(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
+	return s.repo.ListCampaigns(ctx, businessID, status)
 }
 
-func (s *Service) GetCampaign(ctx context.Context, ownerID, campaignID int64) (domain.Campaign, error) {
-	return s.repo.GetCampaignByID(ctx, ownerID, campaignID)
+func (s *Service) GetCampaign(ctx context.Context, businessID, campaignID int64) (domain.Campaign, error) {
+	return s.repo.GetCampaignByID(ctx, businessID, campaignID)
 }
 
 func (s *Service) CreateCampaign(ctx context.Context, input domain.CampaignInput) (int64, error) {
@@ -308,46 +311,46 @@ func (s *Service) UpdateCampaign(ctx context.Context, input domain.CampaignUpdat
 	return s.repo.UpdateCampaign(ctx, input)
 }
 
-func (s *Service) UpdateCampaignStatus(ctx context.Context, ownerID, campaignID int64, status string) error {
-	return s.repo.UpdateCampaignStatus(ctx, ownerID, campaignID, status)
+func (s *Service) UpdateCampaignStatus(ctx context.Context, businessID, campaignID int64, status string) error {
+	return s.repo.UpdateCampaignStatus(ctx, businessID, campaignID, status)
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
-	cacheKey := fmt.Sprintf("crm:dashboard:%d", ownerID)
+func (s *Service) GetDashboardStats(ctx context.Context, businessID int64) (domain.DashboardStats, error) {
+	cacheKey := fmt.Sprintf("crm:dashboard:%d", businessID)
 
 	return cacher.Of[domain.DashboardStats]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.DashboardStats, error) {
-		return s.repo.GetDashboardStats(ctx, ownerID)
+		return s.repo.GetDashboardStats(ctx, businessID)
 	}, cacher.WithExpiry(ctx, dashboardCacheTTL))
 }
 
-func (s *Service) invalidateDashboardCache(ctx context.Context, ownerID int64) {
-	cacheKey := fmt.Sprintf("crm:dashboard:%d", ownerID)
+func (s *Service) invalidateDashboardCache(ctx context.Context, businessID int64) {
+	cacheKey := fmt.Sprintf("crm:dashboard:%d", businessID)
 	cacher.Of[domain.DashboardStats]().Invalidate(ctx, []string{cacheKey})
 }
 
 // -- Timeline ----------------------------------------------------------------
 
-func (s *Service) GetCustomerTimeline(ctx context.Context, ownerID, customerID int64) ([]domain.TimelineEntry, error) {
-	return s.repo.GetCustomerTimeline(ctx, ownerID, customerID)
+func (s *Service) GetCustomerTimeline(ctx context.Context, businessID, customerID int64) ([]domain.TimelineEntry, error) {
+	return s.repo.GetCustomerTimeline(ctx, businessID, customerID)
 }
 
 // -- Customer Detail with Loyalty --------------------------------------------
 
-func (s *Service) GetCustomerDetail(ctx context.Context, ownerID, customerID int64) (domain.CustomerDetail, error) {
-	customer, err := s.repo.GetCustomerByID(ctx, ownerID, customerID)
+func (s *Service) GetCustomerDetail(ctx context.Context, businessID, customerID int64) (domain.CustomerDetail, error) {
+	customer, err := s.repo.GetCustomerByID(ctx, businessID, customerID)
 	if err != nil {
 		return domain.CustomerDetail{}, err
 	}
 
-	txs, _, txErr := s.repo.ListLoyaltyTransactions(ctx, ownerID, customerID, 1, 10)
+	txs, _, txErr := s.repo.ListLoyaltyTransactions(ctx, businessID, customerID, 1, 10)
 	if txErr != nil {
 		logger.Ctx(ctx).Error("Failed to get loyalty transactions for detail", logger.Error(txErr))
 		txs = []domain.LoyaltyTransaction{}
 	}
 
-	timeline, tlErr := s.repo.GetCustomerTimeline(ctx, ownerID, customerID)
+	timeline, tlErr := s.repo.GetCustomerTimeline(ctx, businessID, customerID)
 	if tlErr != nil {
 		logger.Ctx(ctx).Error("Failed to get timeline for detail", logger.Error(tlErr))
 		timeline = []domain.TimelineEntry{}
@@ -362,13 +365,13 @@ func (s *Service) GetCustomerDetail(ctx context.Context, ownerID, customerID int
 
 // -- Import ------------------------------------------------------------------
 
-func (s *Service) ImportCustomers(ctx context.Context, ownerID int64, items []domain.CustomerImportItem) (domain.CustomerImportResult, error) {
-	imported, failed, err := s.repo.BulkCreateCustomers(ctx, ownerID, items)
+func (s *Service) ImportCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem) (domain.CustomerImportResult, error) {
+	imported, failed, err := s.repo.BulkCreateCustomers(ctx, businessID, items)
 	if err != nil {
 		return domain.CustomerImportResult{}, err
 	}
 
-	s.invalidateDashboardCache(ctx, ownerID)
+	s.invalidateDashboardCache(ctx, businessID)
 
 	return domain.CustomerImportResult{
 		TotalProcessed: len(items),
@@ -379,8 +382,8 @@ func (s *Service) ImportCustomers(ctx context.Context, ownerID int64, items []do
 
 // -- Export (GDPR) -----------------------------------------------------------
 
-func (s *Service) ExportCustomerData(ctx context.Context, ownerID, customerID int64) (domain.CustomerExport, error) {
-	return s.repo.ExportCustomerData(ctx, ownerID, customerID)
+func (s *Service) ExportCustomerData(ctx context.Context, businessID, customerID int64) (domain.CustomerExport, error) {
+	return s.repo.ExportCustomerData(ctx, businessID, customerID)
 }
 
 // -- Merge -------------------------------------------------------------------
@@ -390,15 +393,15 @@ func (s *Service) MergeCustomers(ctx context.Context, input domain.MergeCustomer
 		return err
 	}
 
-	s.invalidateDashboardCache(ctx, input.OwnerID)
+	s.invalidateDashboardCache(ctx, input.BusinessID)
 
 	return nil
 }
 
 // -- Loyalty Tiers -----------------------------------------------------------
 
-func (s *Service) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]domain.LoyaltyTier, error) {
-	return s.repo.ListLoyaltyTiers(ctx, ownerID)
+func (s *Service) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]domain.LoyaltyTier, error) {
+	return s.repo.ListLoyaltyTiers(ctx, businessID)
 }
 
 func (s *Service) CreateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierInput) (int64, error) {
@@ -409,25 +412,25 @@ func (s *Service) UpdateLoyaltyTier(ctx context.Context, input domain.LoyaltyTie
 	return s.repo.UpdateLoyaltyTier(ctx, input)
 }
 
-func (s *Service) DeleteLoyaltyTier(ctx context.Context, ownerID, tierID int64) error {
-	return s.repo.DeleteLoyaltyTier(ctx, ownerID, tierID)
+func (s *Service) DeleteLoyaltyTier(ctx context.Context, businessID, tierID int64) error {
+	return s.repo.DeleteLoyaltyTier(ctx, businessID, tierID)
 }
 
 // -- Campaign Stats ----------------------------------------------------------
 
-func (s *Service) GetCampaignStats(ctx context.Context, ownerID, campaignID int64) (domain.CampaignStats, error) {
-	return s.repo.GetCampaignStats(ctx, ownerID, campaignID)
+func (s *Service) GetCampaignStats(ctx context.Context, businessID, campaignID int64) (domain.CampaignStats, error) {
+	return s.repo.GetCampaignStats(ctx, businessID, campaignID)
 }
 
 // -- Campaign Detail ---------------------------------------------------------
 
-func (s *Service) GetCampaignDetail(ctx context.Context, ownerID, campaignID int64) (domain.CampaignDetail, error) {
-	campaign, err := s.repo.GetCampaignByID(ctx, ownerID, campaignID)
+func (s *Service) GetCampaignDetail(ctx context.Context, businessID, campaignID int64) (domain.CampaignDetail, error) {
+	campaign, err := s.repo.GetCampaignByID(ctx, businessID, campaignID)
 	if err != nil {
 		return domain.CampaignDetail{}, err
 	}
 
-	stats, sErr := s.repo.GetCampaignStats(ctx, ownerID, campaignID)
+	stats, sErr := s.repo.GetCampaignStats(ctx, businessID, campaignID)
 	if sErr != nil {
 		logger.Ctx(ctx).Error("Failed to get campaign stats for detail", logger.Error(sErr))
 		stats = domain.CampaignStats{CampaignID: campaignID}
@@ -441,13 +444,13 @@ func (s *Service) GetCampaignDetail(ctx context.Context, ownerID, campaignID int
 
 // -- Segment Detail ----------------------------------------------------------
 
-func (s *Service) GetSegmentDetail(ctx context.Context, ownerID, segmentID int64) (domain.SegmentDetail, error) {
-	segment, err := s.repo.GetSegmentByID(ctx, ownerID, segmentID)
+func (s *Service) GetSegmentDetail(ctx context.Context, businessID, segmentID int64) (domain.SegmentDetail, error) {
+	segment, err := s.repo.GetSegmentByID(ctx, businessID, segmentID)
 	if err != nil {
 		return domain.SegmentDetail{}, err
 	}
 
-	customers, _, cErr := s.repo.GetSegmentCustomers(ctx, ownerID, segmentID, 1, 50)
+	customers, _, cErr := s.repo.GetSegmentCustomers(ctx, businessID, segmentID, 1, 50)
 	if cErr != nil {
 		logger.Ctx(ctx).Error("Failed to get segment customers for detail", logger.Error(cErr))
 		customers = []domain.Customer{}
@@ -461,6 +464,6 @@ func (s *Service) GetSegmentDetail(ctx context.Context, ownerID, segmentID int64
 
 // -- Segment Customers -------------------------------------------------------
 
-func (s *Service) GetSegmentCustomers(ctx context.Context, ownerID, segmentID int64, page, pageSize int) ([]domain.Customer, int, error) {
-	return s.repo.GetSegmentCustomers(ctx, ownerID, segmentID, page, pageSize)
+func (s *Service) GetSegmentCustomers(ctx context.Context, businessID, segmentID int64, page, pageSize int) ([]domain.Customer, int, error) {
+	return s.repo.GetSegmentCustomers(ctx, businessID, segmentID, page, pageSize)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func TemplateListRoutes() []string {
@@ -75,7 +76,11 @@ func (h *ListTemplatesHandler) Serve(ctx context.Context, _ *ListTemplatesReques
 		return ListTemplatesResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	items, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTemplatesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListTemplatesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -147,8 +152,13 @@ func (h *CreateTemplateHandler) Serve(ctx context.Context, req *CreateTemplateRe
 		variables = []byte("[]")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateTemplateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.Create(ctx, domain.TemplateInput{
-		OwnerID:   device.User.UserID,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
 		Name:      req.Name,
 		Type:      req.Type,
 		Subject:   req.Subject,
@@ -215,9 +225,14 @@ func (h *UpdateTemplateHandler) Serve(ctx context.Context, req *UpdateTemplateRe
 		variables = []byte("[]")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateTemplateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if err := h.Service.Update(ctx, domain.TemplateUpdateInput{
-		ID:        req.ID,
-		OwnerID:   device.User.UserID,
+		ID:         req.ID,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
 		Name:      req.Name,
 		Type:      req.Type,
 		Subject:   req.Subject,
@@ -272,7 +287,11 @@ func (h *DeleteTemplateHandler) Serve(ctx context.Context, req *DeleteTemplateRe
 		return DeleteTemplateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.Delete(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteTemplateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return DeleteTemplateResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,

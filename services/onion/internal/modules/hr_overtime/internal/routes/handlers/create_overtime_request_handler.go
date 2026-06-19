@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrovertimev1 "github.com/voxire/voxie/gen/go/hr/overtime/v1"
 )
 
@@ -50,14 +51,19 @@ func (h *CreateOvertimeRequestHandler) Serve(ctx context.Context, req *CreateOve
 		return CreateOvertimeRequestResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	created, err := h.Service.CreateOvertimeRequest(ctx, device.User.UserID, domain.OvertimeRequestRecord{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateOvertimeRequestResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	created, err := h.Service.CreateOvertimeRequest(ctx, businessID, domain.OvertimeRequestRecord{
 		EmployeeID:          req.EmployeeID,
 		Date:                req.Date,
 		PlannedExtraMinutes: req.PlannedExtraMinutes,
 		Reason:              req.Reason,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create overtime request", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create overtime request", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateOvertimeRequestResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create overtime request"}
 	}
 

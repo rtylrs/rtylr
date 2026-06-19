@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetTimesheets(ctx context.Context, ownerID int64, weekStart string) ([]domain.TimesheetEntry, error) {
+func (r *Repository) GetTimesheets(ctx context.Context, businessID int64, weekStart string) ([]domain.TimesheetEntry, error) {
 	// Dynamic WHERE clause and complex aggregation - built with squirrel
 	builder := sq.
 		Select(
@@ -37,8 +37,8 @@ func (r *Repository) GetTimesheets(ctx context.Context, ownerID int64, weekStart
 			"COALESCE(SUM(s.overtime_hours), 0) AS overtime_hours",
 		).
 		From("hr_shifts s").
-		Join("hr_staff st ON st.id = s.staff_id AND st.owner_id = s.owner_id").
-		Where(sq.Eq{"s.owner_id": ownerID}).
+		Join("hr_staff st ON st.id = s.staff_id AND st.business_id = s.business_id").
+		Where(sq.Eq{"s.business_id": businessID}).
 		Where(sq.Eq{"s.status": "completed"})
 
 	if weekStart != "" {

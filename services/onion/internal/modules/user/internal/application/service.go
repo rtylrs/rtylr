@@ -37,6 +37,8 @@ var (
 	ErrWeakPassword        = infrastructure.ErrWeakPassword
 	ErrInvalidEmail        = infrastructure.ErrInvalidEmail
 	ErrBusinessAccessDenied = errors.New("business access denied")
+	ErrBusinessNameRequired = errors.New("business name is required")
+	ErrBusinessNameTaken    = errors.New("business name already taken")
 )
 
 type Service struct {
@@ -339,6 +341,48 @@ func (s *Service) EmailExists(ctx context.Context, email string) (bool, error) {
 		return false, nil
 	}
 	return s.repo.EmailExists(ctx, normalized)
+}
+
+// BusinessNameExists reports whether a business with the given name already
+// exists. Business names are globally unique; this drives onboarding's inline
+// availability check.
+func (s *Service) BusinessNameExists(ctx context.Context, name string) (bool, error) {
+	trimmed := strings.TrimSpace(name)
+	if trimmed == "" {
+		return false, nil
+	}
+	return s.repo.BusinessNameExists(ctx, trimmed)
+}
+
+// OnboardCreateBusiness creates the authenticated user's first business during
+// onboarding, sets it as their current business, and returns a fresh JWT that
+// carries the new business_id. Enforces the global business-name uniqueness.
+func (s *Service) OnboardCreateBusiness(ctx context.Context, userID int64, name string) (string, error) {
+	trimmed := strings.TrimSpace(name)
+	if trimmed == "" {
+		return "", ErrBusinessNameRequired
+	}
+
+	exists, err := s.repo.BusinessNameExists(ctx, trimmed)
+	if err != nil {
+		return "", err
+	}
+	if exists {
+		return "", ErrBusinessNameTaken
+	}
+
+	if err := s.CreateBusinessForUser(ctx, userID, trimmed); err != nil {
+		return "", err
+	}
+
+	businessID, err := s.repo.GetUserBusinessID(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+
+	claims := &AccessTokenClaims{UserID: userID, BusinessID: businessID}
+	s.hydrateAccessTokenClaims(ctx, claims)
+	return s.JWT.CreateJWT(claims)
 }
 
 func (s *Service) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {

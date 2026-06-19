@@ -11,6 +11,7 @@ var ErrReviewNotFound = errors.New("review not found")
 type Review struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	StaffID      int64     `json:"staff_id"`
 	ReviewerID   int64     `json:"reviewer_id"`
 	Period       string    `json:"period"`

@@ -11,6 +11,7 @@ var ErrDepartmentNotFound = errors.New("department not found")
 type Department struct {
 	ID             int64     `json:"id"`
 	OwnerID        int64     `json:"owner_id"`
+	BusinessID     int64     `json:"business_id"`
 	Name           string    `json:"name"`
 	Description    string    `json:"description"`
 	ManagerStaffID int64     `json:"manager_staff_id"`
@@ -27,6 +28,7 @@ func (d *Department) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&d.ID,
 		&d.OwnerID,
+		&d.BusinessID,
 		&d.Name,
 		&description,
 		&managerStaffID,
@@ -51,6 +53,7 @@ func (d *Department) FromRow(row *sql.Rows) error {
 type DepartmentInput struct {
 	ID             int64  `json:"id"`
 	OwnerID        int64  `json:"owner_id"`
+	BusinessID     int64  `json:"business_id"`
 	Name           string `json:"name"`
 	Description    string `json:"description"`
 	ManagerStaffID int64  `json:"manager_staff_id"`

@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
@@ -57,7 +58,12 @@ func (h *GetLoyaltyConfigHandler) Serve(ctx context.Context, _ *GetLoyaltyConfig
 		return GetLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	cfg, err := h.CRMService.GetLoyaltyConfig(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	cfg, err := h.CRMService.GetLoyaltyConfig(ctx, businessID)
 	if err != nil {
 		return GetLoyaltyConfigResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -121,8 +127,14 @@ func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyal
 		return UpdateLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.LoyaltyConfigInput{
 		OwnerID:               device.User.UserID,
+		BusinessID:            businessID,
 		IsEnabled:             req.IsEnabled,
 		PointsPerCurrencyUnit: req.PointsPerCurrencyUnit,
 		CurrencyPerPoint:      req.CurrencyPerPoint,

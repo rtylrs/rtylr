@@ -15,7 +15,7 @@ import (
 const posCustomersCacheTTL = 2 * time.Minute
 
 type repository interface {
-	Search(ctx context.Context, ownerID int64, query string) ([]domain.Customer, error)
+	Search(ctx context.Context, businessID int64, query string) ([]domain.Customer, error)
 }
 
 type Service struct {
@@ -28,11 +28,11 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 // Search piggybacks on the canonical customer namespace so any upstream
 // customer mutation wipes these results too.
-func (s *Service) Search(ctx context.Context, ownerID int64, query string) ([]domain.Customer, error) {
-	key := fmt.Sprintf("%s|pos_search=%s", cacheKeys.CustomersList(ownerID), query)
+func (s *Service) Search(ctx context.Context, businessID int64, query string) ([]domain.Customer, error) {
+	key := fmt.Sprintf("%s|pos_search=%s", cacheKeys.CustomersList(businessID), query)
 	return cacher.Of[[]domain.Customer]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Customer, error) {
-			return s.repo.Search(ctx, ownerID, query)
+			return s.repo.Search(ctx, businessID, query)
 		},
 		cacher.WithExpiry(ctx, posCustomersCacheTTL),
 	)

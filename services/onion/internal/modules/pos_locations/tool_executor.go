@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -50,8 +51,11 @@ func (m *Module) executeListPOSLocationsTool(ctx context.Context, input map[stri
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	locations, err := m.service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+	locations, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}

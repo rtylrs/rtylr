@@ -22,12 +22,12 @@ type UtilizationRow struct {
 //
 // This is deliberately a rough heuristic at P3 — the strict calculation
 // lives under hr_payroll and wouldn't fit in a dashboard card anyway.
-func (r *Repository) GetUtilization(ctx context.Context, ownerID int64) (UtilizationRow, error) {
+func (r *Repository) GetUtilization(ctx context.Context, businessID int64) (UtilizationRow, error) {
 	// cross-schema read from hr_employees — active headcount for the utilization denominator
 	var active int64
 	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_employees WHERE owner_id = ? AND status = 'active'`,
-		ownerID,
+		`SELECT COUNT(*) FROM hr_employees WHERE business_id = ? AND status = 'active'`,
+		businessID,
 	).Scan(&active); err != nil {
 		logger.Ctx(ctx).Error("insights: utilization active count failed", logger.Error(err))
 		return UtilizationRow{}, err
@@ -40,13 +40,13 @@ func (r *Repository) GetUtilization(ctx context.Context, ownerID int64) (Utiliza
 		  - TIME_TO_SEC(STR_TO_DATE(s.start_time, '%H:%i'))
 		) / 3600, 0)
 		FROM hr_shift_assignments a
-		JOIN hr_shifts s ON s.id = a.shift_id AND s.owner_id = a.owner_id
-		WHERE a.owner_id = ?
+		JOIN hr_shifts s ON s.id = a.shift_id AND s.business_id = a.business_id
+		WHERE a.business_id = ?
 		  AND a.status <> 'cancelled'
 		  AND a.date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
 	`
 	var scheduled interface{}
-	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&scheduled); err != nil {
+	if err := r.pool.QueryRowContext(ctx, q, businessID).Scan(&scheduled); err != nil {
 		logger.Ctx(ctx).Error("insights: utilization scheduled failed", logger.Error(err))
 		return UtilizationRow{}, err
 	}

@@ -12,6 +12,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
@@ -28,12 +30,17 @@ func (m *Module) executeCreateQuoteTool(ctx context.Context, input map[string]an
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
 	parsed, err := parseCreateQuoteToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := m.service.Create(ctx, authUser.UserID, parsed)
+	id, err := m.service.Create(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}

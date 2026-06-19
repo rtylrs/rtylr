@@ -12,7 +12,7 @@ import (
 func TestStoreCategories_List_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.List(context.Background(), testutil.OwnerID)
+	_, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List returned error: %v", err)
 	}
@@ -21,7 +21,7 @@ func TestStoreCategories_List_NoError(t *testing.T) {
 func TestStoreCategories_List_ReturnsOwnerData(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestStoreCategories_Create_ReturnsPositiveID(t *testing.T) {
 		Description: "Created by integration test",
 		SortOrder:   99,
 	}
-	id, err := repo.Create(context.Background(), testutil.OwnerID, input)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestStoreCategories_Create_ReturnsPositiveID(t *testing.T) {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
 	t.Cleanup(func() {
-		_ = repo.Delete(context.Background(), testutil.OwnerID, id)
+		_ = repo.Delete(context.Background(), testutil.BusinessID, id)
 	})
 }
 
@@ -57,13 +57,13 @@ func TestStoreCategories_Create_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	input := domain.StoreCategoryInput{Name: "ListTestCategory", Slug: "list-test-category"}
-	id, err := repo.Create(context.Background(), testutil.OwnerID, input)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, input)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -82,17 +82,17 @@ func TestStoreCategories_Create_AppearsInList(t *testing.T) {
 func TestStoreCategories_Update_ChangesName(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreCategoryInput{Name: "BeforeUpdate", Slug: "before-update"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{Name: "BeforeUpdate", Slug: "before-update"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreCategoryInput{Name: "AfterUpdate", Slug: "after-update"}); err != nil {
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreCategoryInput{Name: "AfterUpdate", Slug: "after-update"}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
 
-	items, _ := repo.List(context.Background(), testutil.OwnerID)
+	items, _ := repo.List(context.Background(), testutil.BusinessID)
 	for _, c := range items {
 		if c.ID == id && c.Name != "AfterUpdate" {
 			t.Errorf("expected name AfterUpdate, got %s", c.Name)
@@ -103,16 +103,16 @@ func TestStoreCategories_Update_ChangesName(t *testing.T) {
 func TestStoreCategories_Delete_RemovesFromList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreCategoryInput{Name: "ToDelete", Slug: "to-delete"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{Name: "ToDelete", Slug: "to-delete"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Delete(context.Background(), testutil.OwnerID, id); err != nil {
+	if err := repo.Delete(context.Background(), testutil.BusinessID, id); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
 
-	items, _ := repo.List(context.Background(), testutil.OwnerID)
+	items, _ := repo.List(context.Background(), testutil.BusinessID)
 	for _, c := range items {
 		if c.ID == id {
 			t.Errorf("deleted category id=%d still appears in list", id)
@@ -135,21 +135,21 @@ func TestStoreCategories_List_UnknownOwner_Empty(t *testing.T) {
 func TestStoreCategories_Create_WithParentID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	parentID, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreCategoryInput{Name: "Parent", Slug: "parent-cat"})
+	parentID, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{Name: "Parent", Slug: "parent-cat"})
 	if err != nil {
 		t.Fatalf("Create parent: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, parentID) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, parentID) })
 
-	childID, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreCategoryInput{
+	childID, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "Child", Slug: "child-cat", ParentID: parentID,
 	})
 	if err != nil {
 		t.Fatalf("Create child: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, childID) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, childID) })
 
-	items, _ := repo.List(context.Background(), testutil.OwnerID)
+	items, _ := repo.List(context.Background(), testutil.BusinessID)
 	for _, c := range items {
 		if c.ID == childID && c.ParentID != parentID {
 			t.Errorf("expected parent_id %d, got %d", parentID, c.ParentID)
@@ -160,19 +160,19 @@ func TestStoreCategories_Create_WithParentID(t *testing.T) {
 func TestStoreCategories_Update_DoesNotAffectOtherOwner(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreCategoryInput{Name: "OwnerScoped", Slug: "owner-scoped"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{Name: "OwnerScoped", Slug: "owner-scoped"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 
-	// Update with different ownerID should silently affect 0 rows, not error
+	// Update with different businessID should silently affect 0 rows, not error
 	_ = repo.Update(context.Background(), 9999999, id, domain.StoreCategoryInput{Name: "Hijacked", Slug: "hijacked"})
 
-	items, _ := repo.List(context.Background(), testutil.OwnerID)
+	items, _ := repo.List(context.Background(), testutil.BusinessID)
 	for _, c := range items {
 		if c.ID == id && c.Name == "Hijacked" {
-			t.Error("cross-owner update succeeded unexpectedly")
+			t.Error("cross-business update succeeded unexpectedly")
 		}
 	}
 }
@@ -180,7 +180,7 @@ func TestStoreCategories_Update_DoesNotAffectOtherOwner(t *testing.T) {
 func TestStoreCategories_Create_WithImageURL(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name:     "WithImage",
 		Slug:     "with-image",
 		ImageURL: "https://example.com/image.png",
@@ -188,7 +188,7 @@ func TestStoreCategories_Create_WithImageURL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 	if id <= 0 {
 		t.Errorf("expected positive ID, got %d", id)
 	}
@@ -213,7 +213,7 @@ func TestListStoreCategories_IsNotNil(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -227,7 +227,7 @@ func TestCreateStoreCategory_PersistsAndReturnsID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "PersistCat",
 		Slug: "persist-cat",
 	})
@@ -237,7 +237,7 @@ func TestCreateStoreCategory_PersistsAndReturnsID(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 }
 
 func TestCreateStoreCategory_NameIsStored(t *testing.T) {
@@ -245,16 +245,16 @@ func TestCreateStoreCategory_NameIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "NameStoredCat",
 		Slug: "name-stored-cat",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -274,23 +274,23 @@ func TestUpdateStoreCategory_ChangesName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "OldCatName",
 		Slug: "old-cat-name",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreCategoryInput{
+	if err := repo.Update(ctx, testutil.BusinessID, id, domain.StoreCategoryInput{
 		Name: "NewCatName",
 		Slug: "new-cat-name",
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -306,7 +306,7 @@ func TestDeleteStoreCategory_RemovesRow(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "DeleteCat",
 		Slug: "delete-cat-row",
 	})
@@ -314,11 +314,11 @@ func TestDeleteStoreCategory_RemovesRow(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+	if err := repo.Delete(ctx, testutil.BusinessID, id); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -334,16 +334,16 @@ func TestCreate_ThenList_FindsCategory(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "FindMeCat",
 		Slug: "find-me-cat",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -360,7 +360,7 @@ func TestDeleteStoreCategory_NonExistentIsNoop(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	if err := repo.Delete(ctx, testutil.OwnerID, 99999999); err != nil {
+	if err := repo.Delete(ctx, testutil.BusinessID, 99999999); err != nil {
 		t.Fatalf("Delete non-existent: %v", err)
 	}
 }
@@ -370,21 +370,21 @@ func TestListStoreCategories_AfterCreate_CountIncreases(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	before, err := repo.List(ctx, testutil.OwnerID)
+	before, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List before: %v", err)
 	}
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "CountCat",
 		Slug: "count-cat",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	after, err := repo.List(ctx, testutil.OwnerID)
+	after, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after: %v", err)
 	}
@@ -398,7 +398,7 @@ func TestCreateStoreCategory_DescriptionIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name:        "DescCat",
 		Slug:        "desc-cat",
 		Description: "A test category with description",
@@ -406,9 +406,9 @@ func TestCreateStoreCategory_DescriptionIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -428,7 +428,7 @@ func TestUpdateStoreCategory_ChangesDescription(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name:        "DescUpdateCat",
 		Slug:        "desc-update-cat",
 		Description: "Old description",
@@ -436,9 +436,9 @@ func TestUpdateStoreCategory_ChangesDescription(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreCategoryInput{
+	if err := repo.Update(ctx, testutil.BusinessID, id, domain.StoreCategoryInput{
 		Name:        "DescUpdateCat",
 		Slug:        "desc-update-cat",
 		Description: "New description",
@@ -446,7 +446,7 @@ func TestUpdateStoreCategory_ChangesDescription(t *testing.T) {
 		t.Fatalf("Update: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err := repo.List(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -462,14 +462,14 @@ func TestListStoreCategories_MultipleOwners_Scoped(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreCategoryInput{
 		Name: "ScopedCat",
 		Slug: "scoped-cat",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
 	other, err := repo.List(ctx, 9999999)
 	if err != nil {

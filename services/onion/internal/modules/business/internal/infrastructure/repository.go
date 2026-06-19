@@ -42,7 +42,7 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 			COALESCE(b.currency, 'USD') AS currency,
 			COALESCE(b.timezone, 'UTC') AS timezone
 		FROM businesses b
-		LEFT JOIN config c ON c.owner_id = b.owner_id
+		LEFT JOIN config c ON c.business_id = b.id
 		WHERE (b.id = ? OR b.owner_id = ?) AND b.is_active = TRUE
 		ORDER BY b.id ASC
 		LIMIT 1

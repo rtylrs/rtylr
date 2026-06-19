@@ -18,7 +18,7 @@ const (
 )
 
 type repository interface {
-	GetTimesheets(ctx context.Context, ownerID int64, weekStart string) ([]domain.TimesheetEntry, error)
+	GetTimesheets(ctx context.Context, businessID int64, weekStart string) ([]domain.TimesheetEntry, error)
 }
 
 type Service struct {
@@ -29,11 +29,11 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) GetTimesheets(ctx context.Context, ownerID int64, weekStart string) ([]domain.TimesheetEntry, error) {
-	key := cacheKeys.Scoped(timesheetsScope, ownerID, fmt.Sprintf("ws=%s", weekStart))
+func (s *Service) GetTimesheets(ctx context.Context, businessID int64, weekStart string) ([]domain.TimesheetEntry, error) {
+	key := cacheKeys.Scoped(timesheetsScope, businessID, fmt.Sprintf("ws=%s", weekStart))
 	return cacher.Of[[]domain.TimesheetEntry]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.TimesheetEntry, error) {
-			return s.repo.GetTimesheets(ctx, ownerID, weekStart)
+			return s.repo.GetTimesheets(ctx, businessID, weekStart)
 		},
 		cacher.WithExpiry(ctx, timesheetsTTL),
 	)

@@ -35,8 +35,11 @@ func (h *ListKDSOrdersHandler) Serve(ctx context.Context, req *ListKDSOrdersRequ
 	if device.User == nil {
 		return ListKDSOrdersResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	orders, err := h.Service.ListActiveOrdersByStation(ctx, ownerID, req.Station)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListKDSOrdersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	orders, err := h.Service.ListActiveOrdersByStation(ctx, businessID, req.Station)
 	if err != nil {
 		return ListKDSOrdersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list KDS orders"}
 	}
@@ -70,7 +73,10 @@ func (h *UpdateKDSItemByIDHandler) Serve(ctx context.Context, req *UpdateKDSItem
 	if device.User == nil {
 		return UpdateKDSItemByIDResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateKDSItemByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	itemIDStr := chi.URLParamFromCtx(ctx, "itemId")
 	itemID, err := strconv.ParseInt(itemIDStr, 10, 64)
@@ -78,7 +84,7 @@ func (h *UpdateKDSItemByIDHandler) Serve(ctx context.Context, req *UpdateKDSItem
 		return UpdateKDSItemByIDResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid item ID"}
 	}
 
-	if updateErr := h.Service.UpdateItemStatusByItemID(ctx, ownerID, itemID, req.Status); updateErr != nil {
+	if updateErr := h.Service.UpdateItemStatusByItemID(ctx, businessID, itemID, req.Status); updateErr != nil {
 		return UpdateKDSItemByIDResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update item status"}
 	}
 	return UpdateKDSItemByIDResponse{Message: "Item status updated"}, nil
@@ -111,7 +117,10 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 	if device.User == nil {
 		return UpdateKDSItemResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateKDSItemResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	orderIDStr := chi.URLParamFromCtx(ctx, "orderId")
 	orderID, err := strconv.ParseInt(orderIDStr, 10, 64)
@@ -126,10 +135,11 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 	}
 
 	if updateErr := h.Service.UpdateItemStatus(ctx, domain.UpdateItemStatusInput{
-		OwnerID: ownerID,
-		OrderID: orderID,
-		ItemID:  itemID,
-		Status:  req.Status,
+		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
+		OrderID:    orderID,
+		ItemID:     itemID,
+		Status:     req.Status,
 	}); updateErr != nil {
 		return UpdateKDSItemResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update item status"}
 	}

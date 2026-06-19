@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -78,8 +79,12 @@ func (h *ListSubmissionsHandler) Serve(ctx context.Context, req *ListSubmissions
 	if !ok {
 		return ListSubmissionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListSubmissionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	submissions, err := h.CareersService.ListSubmissions(ctx, authUser.UserID, req.Status)
+	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, req.Status)
 	if err != nil {
 		return ListSubmissionsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -126,8 +131,12 @@ func (h *UpdateSubmissionStatusHandler) Serve(ctx context.Context, req *UpdateSu
 	if !ok {
 		return UpdateSubmissionStatusResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateSubmissionStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	if err := h.CareersService.UpdateSubmissionStatus(ctx, authUser.UserID, req.ID, req.Status); err != nil {
+	if err := h.CareersService.UpdateSubmissionStatus(ctx, businessID, req.ID, req.Status); err != nil {
 		return UpdateSubmissionStatusResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to update submission status",

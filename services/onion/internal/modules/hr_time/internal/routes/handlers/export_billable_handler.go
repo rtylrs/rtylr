@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -34,7 +35,12 @@ func (h *ExportBillableHandler) Serve(ctx context.Context, _ *ExportBillableRequ
 		return ExportBillableResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	items, batchID, err := h.Service.ExportBillableEntries(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ExportBillableResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	items, batchID, err := h.Service.ExportBillableEntries(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to export billable entries",
 			logger.Any("owner_id", device.User.UserID), logger.Error(err))

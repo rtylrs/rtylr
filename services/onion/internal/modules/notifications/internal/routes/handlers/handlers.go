@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
 )
 
@@ -33,7 +34,12 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	notifications, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	notifications, err := h.Service.List(ctx, businessID, device.User.UserID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -87,7 +93,12 @@ func (h *MarkReadHandler) Serve(ctx context.Context, req *MarkReadRequest) (Mark
 		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.MarkRead(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.MarkRead(ctx, businessID, device.User.UserID, req.ID); err != nil {
 		return MarkReadResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -116,6 +127,11 @@ func (h *MarkReadByIDHandler) Serve(ctx context.Context, _ *MarkReadByIDRequest)
 		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
@@ -126,7 +142,7 @@ func (h *MarkReadByIDHandler) Serve(ctx context.Context, _ *MarkReadByIDRequest)
 		}
 	}
 
-	if err := h.Service.MarkRead(ctx, device.User.UserID, id); err != nil {
+	if err := h.Service.MarkRead(ctx, businessID, device.User.UserID, id); err != nil {
 		return MarkReadResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -153,7 +169,12 @@ func (h *MarkAllReadHandler) Serve(ctx context.Context, _ *MarkAllReadRequest) (
 		return MarkAllReadResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.MarkAllRead(ctx, device.User.UserID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return MarkAllReadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.MarkAllRead(ctx, businessID, device.User.UserID); err != nil {
 		return MarkAllReadResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,

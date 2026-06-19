@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type Payload struct {
@@ -47,7 +48,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	items, err := h.Service.List(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list reminders"}
 	}
@@ -92,7 +97,11 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	id, err := h.Service.Create(ctx, authUser.UserID, domain.ReminderInput{AppointmentID: req.AppointmentID, Type: req.Type, ScheduledAt: req.ScheduledAt})
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, businessID, domain.ReminderInput{AppointmentID: req.AppointmentID, Type: req.Type, ScheduledAt: req.ScheduledAt})
 	if err != nil {
 		if errors.Is(err, domain.ErrAppointmentNotFound) {
 			return CreateResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, HTTPCode: http.StatusNotFound, Message: "Appointment not found"}

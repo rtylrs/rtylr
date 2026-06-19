@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	financeaccountv1 "github.com/voxire/voxie/gen/go/finance/account/v1"
 )
 
@@ -36,7 +37,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list accounts"}
 	}
@@ -80,11 +85,15 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.AccountInput{
 		Name: req.Name, Type: req.Type, Currency: req.Currency,
 		Balance: req.Balance, IsActive: req.IsActive,
 	}
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, businessID, input)
 	if err != nil {
 		if errors.Is(err, domain.ErrNegativeBalance) {
 			return CreateResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Account balance cannot be negative"}
@@ -137,7 +146,12 @@ func (h *ChartOfAccountsHandler) Serve(ctx context.Context, _ *ChartOfAccountsRe
 		return ChartOfAccountsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	roots, err := h.Service.ChartOfAccounts(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ChartOfAccountsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	roots, err := h.Service.ChartOfAccounts(ctx, businessID)
 	if err != nil {
 		return ChartOfAccountsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to load chart of accounts"}
 	}

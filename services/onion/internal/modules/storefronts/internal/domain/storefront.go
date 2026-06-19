@@ -12,6 +12,7 @@ var ErrThemeNotFound = errors.New("theme not found for this owner")
 type Storefront struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	Domain      string    `json:"domain"`
 	LogoURL     string    `json:"logo_url"`

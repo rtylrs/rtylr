@@ -15,12 +15,12 @@ import (
 const financeReportsTTL = 5 * time.Minute
 
 type repository interface {
-	SumAccountsByType(ctx context.Context, ownerID int64, accountType string) (float64, error)
-	SumBankBalances(ctx context.Context, ownerID int64) (float64, error)
-	SumReceivables(ctx context.Context, ownerID int64) (float64, error)
-	SumPayables(ctx context.Context, ownerID int64) (float64, error)
-	SumPaidInvoicesInRange(ctx context.Context, ownerID int64, from, to string) (float64, error)
-	SumExpensesInRange(ctx context.Context, ownerID int64, from, to string) (float64, error)
+	SumAccountsByType(ctx context.Context, businessID int64, accountType string) (float64, error)
+	SumBankBalances(ctx context.Context, businessID int64) (float64, error)
+	SumReceivables(ctx context.Context, businessID int64) (float64, error)
+	SumPayables(ctx context.Context, businessID int64) (float64, error)
+	SumPaidInvoicesInRange(ctx context.Context, businessID int64, from, to string) (float64, error)
+	SumExpensesInRange(ctx context.Context, businessID int64, from, to string) (float64, error)
 }
 
 type Service struct {
@@ -31,43 +31,43 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) GetBalanceSheet(ctx context.Context, ownerID int64) (domain.BalanceSheet, error) {
+func (s *Service) GetBalanceSheet(ctx context.Context, businessID int64) (domain.BalanceSheet, error) {
 	return cacher.Of[domain.BalanceSheet]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped("finance_reports", ownerID, "balance_sheet"),
+		cacheKeys.Scoped("finance_reports", businessID, "balance_sheet"),
 		func(ctx context.Context) (domain.BalanceSheet, error) {
-			return s.computeBalanceSheet(ctx, ownerID)
+			return s.computeBalanceSheet(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, financeReportsTTL),
 	)
 }
 
-func (s *Service) computeBalanceSheet(ctx context.Context, ownerID int64) (domain.BalanceSheet, error) {
-	assets, err := s.repo.SumAccountsByType(ctx, ownerID, "asset")
+func (s *Service) computeBalanceSheet(ctx context.Context, businessID int64) (domain.BalanceSheet, error) {
+	assets, err := s.repo.SumAccountsByType(ctx, businessID, "asset")
 	if err != nil {
 		return domain.BalanceSheet{}, err
 	}
 
-	liabilities, err := s.repo.SumAccountsByType(ctx, ownerID, "liability")
+	liabilities, err := s.repo.SumAccountsByType(ctx, businessID, "liability")
 	if err != nil {
 		return domain.BalanceSheet{}, err
 	}
 
-	equity, err := s.repo.SumAccountsByType(ctx, ownerID, "equity")
+	equity, err := s.repo.SumAccountsByType(ctx, businessID, "equity")
 	if err != nil {
 		return domain.BalanceSheet{}, err
 	}
 
-	cash, err := s.repo.SumBankBalances(ctx, ownerID)
+	cash, err := s.repo.SumBankBalances(ctx, businessID)
 	if err != nil {
 		return domain.BalanceSheet{}, err
 	}
 
-	receivables, err := s.repo.SumReceivables(ctx, ownerID)
+	receivables, err := s.repo.SumReceivables(ctx, businessID)
 	if err != nil {
 		return domain.BalanceSheet{}, err
 	}
 
-	payables, err := s.repo.SumPayables(ctx, ownerID)
+	payables, err := s.repo.SumPayables(ctx, businessID)
 	if err != nil {
 		return domain.BalanceSheet{}, err
 	}
@@ -82,25 +82,25 @@ func (s *Service) computeBalanceSheet(ctx context.Context, ownerID int64) (domai
 	}, nil
 }
 
-func (s *Service) GetCashFlow(ctx context.Context, ownerID int64, period string) (domain.CashFlow, error) {
-	key := cacheKeys.Scoped("finance_reports", ownerID, fmt.Sprintf("cash_flow|p=%s", period))
+func (s *Service) GetCashFlow(ctx context.Context, businessID int64, period string) (domain.CashFlow, error) {
+	key := cacheKeys.Scoped("finance_reports", businessID, fmt.Sprintf("cash_flow|p=%s", period))
 	return cacher.Of[domain.CashFlow]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.CashFlow, error) {
-			return s.computeCashFlow(ctx, ownerID, period)
+			return s.computeCashFlow(ctx, businessID, period)
 		},
 		cacher.WithExpiry(ctx, financeReportsTTL),
 	)
 }
 
-func (s *Service) computeCashFlow(ctx context.Context, ownerID int64, period string) (domain.CashFlow, error) {
+func (s *Service) computeCashFlow(ctx context.Context, businessID int64, period string) (domain.CashFlow, error) {
 	dateFrom, dateTo := resolvePeriodRange(period)
 
-	inflow, err := s.repo.SumPaidInvoicesInRange(ctx, ownerID, dateFrom, dateTo)
+	inflow, err := s.repo.SumPaidInvoicesInRange(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.CashFlow{}, err
 	}
 
-	outflow, err := s.repo.SumExpensesInRange(ctx, ownerID, dateFrom, dateTo)
+	outflow, err := s.repo.SumExpensesInRange(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.CashFlow{}, err
 	}

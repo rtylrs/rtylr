@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Combo, error) {
-	rows, err := r.queries.ListCombosByOwner(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Combo, error) {
+	rows, err := r.queries.ListCombosByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list combos", logger.Error(err))
 		return nil, err
@@ -36,6 +36,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Combo, e
 		items = append(items, domain.Combo{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
 			Name:        row.Name,
 			Description: row.Description.String,
 			Price:       decimalToFloat(row.Price),
@@ -48,9 +49,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Combo, e
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ComboInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.ComboInput) (int64, error) {
 	result, err := r.queries.CreateCombo(ctx, sqlc.CreateComboParams{
 		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Price:       floatToDecimal(input.Price),
@@ -64,7 +66,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Com
 	return result.LastInsertId()
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.ComboInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ComboInput) error {
 	result, err := r.queries.UpdateCombo(ctx, sqlc.UpdateComboParams{
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -72,7 +74,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		Items:       itemsToJSON(input.Items),
 		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:          id,
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update combo", logger.Error(err))
@@ -88,10 +90,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	result, err := r.queries.DeleteCombo(ctx, sqlc.DeleteComboParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete combo", logger.Error(err))

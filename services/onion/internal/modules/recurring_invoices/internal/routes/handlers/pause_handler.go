@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func PauseRoutes() []string { return []string{"/finance/recurring-invoices/{id}/pause"} }
@@ -31,13 +32,18 @@ func (h *PauseHandler) Serve(ctx context.Context, _ *PauseRequest) (PauseRespons
 		return PauseResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return PauseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return PauseResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid recurring invoice id"}
 	}
 
-	if err := h.Service.Pause(ctx, device.User.UserID, id); err != nil {
+	if err := h.Service.Pause(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrRecurringInvoiceNotFound) {
 			return PauseResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Recurring invoice not found"}
 		}

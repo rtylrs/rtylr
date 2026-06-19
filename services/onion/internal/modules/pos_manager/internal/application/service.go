@@ -9,7 +9,7 @@ import (
 )
 
 type repository interface {
-	VerifyPIN(ctx context.Context, ownerID int64, pin string) (*domain.VerifyResult, error)
+	VerifyPIN(ctx context.Context, businessID int64, pin string) (*domain.VerifyResult, error)
 }
 
 type Service struct {
@@ -20,6 +20,6 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) VerifyPIN(ctx context.Context, ownerID int64, pin string) (*domain.VerifyResult, error) {
-	return s.repo.VerifyPIN(ctx, ownerID, pin)
+func (s *Service) VerifyPIN(ctx context.Context, businessID int64, pin string) (*domain.VerifyResult, error) {
+	return s.repo.VerifyPIN(ctx, businessID, pin)
 }

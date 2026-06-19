@@ -14,9 +14,9 @@ import (
 const stockTakesCacheTTL = 5 * time.Minute
 
 type repository interface {
-	ListStockTakes(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTake, bool, error)
-	CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error)
-	UpdateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeUpdateInput) error
+	ListStockTakes(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTake, bool, error)
+	CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput) (int64, error)
+	UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error
 }
 
 type Service struct {
@@ -44,9 +44,9 @@ func paginateStockTakes(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) ListStockTakes(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StockTake, bool, error) {
+func (s *Service) ListStockTakes(ctx context.Context, businessID, page, pageSize int64) ([]domain.StockTake, bool, error) {
 	limit, offset := paginateStockTakes(page, pageSize)
-	cacheKey := fmt.Sprintf("stock_takes:%d|p=%d|ps=%d", ownerID, page, pageSize)
+	cacheKey := fmt.Sprintf("stock_takes:%d|p=%d|ps=%d", businessID, page, pageSize)
 
 	type pageResult struct {
 		items   []domain.StockTake
@@ -54,7 +54,7 @@ func (s *Service) ListStockTakes(ctx context.Context, ownerID, page, pageSize in
 	}
 
 	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
-		items, hasMore, err := s.repo.ListStockTakes(ctx, ownerID, limit, offset)
+		items, hasMore, err := s.repo.ListStockTakes(ctx, businessID, limit, offset)
 		return pageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, stockTakesCacheTTL))
 	if err != nil {
@@ -63,30 +63,30 @@ func (s *Service) ListStockTakes(ctx context.Context, ownerID, page, pageSize in
 	return res.items, res.hasMore, nil
 }
 
-func (s *Service) CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error) {
-	id, err := s.repo.CreateStockTake(ctx, ownerID, input)
+func (s *Service) CreateStockTake(ctx context.Context, businessID int64, input domain.StockTakeInput) (int64, error) {
+	id, err := s.repo.CreateStockTake(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return id, nil
 }
 
-func (s *Service) UpdateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeUpdateInput) error {
-	err := s.repo.UpdateStockTake(ctx, ownerID, input)
+func (s *Service) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error {
+	err := s.repo.UpdateStockTake(ctx, businessID, input)
 	if err != nil {
 		return err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	prefix := fmt.Sprintf("stock_takes:%d", ownerID)
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
+	prefix := fmt.Sprintf("stock_takes:%d", businessID)
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, prefix)
 	}

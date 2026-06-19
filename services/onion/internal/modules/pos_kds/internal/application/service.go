@@ -22,9 +22,9 @@ const kdsCacheTTL = 10 * time.Second
 const kdsScope = "pos_kds"
 
 type repository interface {
-	ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error)
+	ListActiveOrders(ctx context.Context, businessID int64) ([]domain.KDSOrder, error)
 	UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error
-	UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error
+	UpdateItemStatusByItemID(ctx context.Context, businessID, itemID int64, status string) error
 }
 
 type Service struct {
@@ -35,17 +35,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateKDSScope(ctx context.Context, ownerID int64) {
+func invalidateKDSScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(kdsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(kdsScope, businessID))
 	}
 }
 
-func (s *Service) ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error) {
+func (s *Service) ListActiveOrders(ctx context.Context, businessID int64) ([]domain.KDSOrder, error) {
 	return cacher.Of[[]domain.KDSOrder]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(kdsScope, ownerID, "active"),
+		cacheKeys.Scoped(kdsScope, businessID, "active"),
 		func(ctx context.Context) ([]domain.KDSOrder, error) {
-			return s.repo.ListActiveOrders(ctx, ownerID)
+			return s.repo.ListActiveOrders(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, kdsCacheTTL),
 	)
@@ -55,8 +55,8 @@ func (s *Service) ListActiveOrders(ctx context.Context, ownerID int64) ([]domain
 // When station is empty, returns all active orders. Matching is a case-insensitive
 // substring match against the order kitchen_notes field until a dedicated station
 // column is added to the schema.
-func (s *Service) ListActiveOrdersByStation(ctx context.Context, ownerID int64, station string) ([]domain.KDSOrder, error) {
-	orders, err := s.ListActiveOrders(ctx, ownerID)
+func (s *Service) ListActiveOrdersByStation(ctx context.Context, businessID int64, station string) ([]domain.KDSOrder, error) {
+	orders, err := s.ListActiveOrders(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,22 +77,22 @@ func (s *Service) UpdateItemStatus(ctx context.Context, input domain.UpdateItemS
 	if err := s.repo.UpdateItemStatus(ctx, input); err != nil {
 		return err
 	}
-	invalidateKDSScope(ctx, input.OwnerID)
+	invalidateKDSScope(ctx, input.BusinessID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    "owner:" + strconv.FormatInt(input.OwnerID, 10),
+		Topic:    "business:" + strconv.FormatInt(input.BusinessID, 10),
 		Type:     "pos:kds:item:updated",
 		EntityID: input.ItemID,
 	})
 	return nil
 }
 
-func (s *Service) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error {
-	if err := s.repo.UpdateItemStatusByItemID(ctx, ownerID, itemID, status); err != nil {
+func (s *Service) UpdateItemStatusByItemID(ctx context.Context, businessID, itemID int64, status string) error {
+	if err := s.repo.UpdateItemStatusByItemID(ctx, businessID, itemID, status); err != nil {
 		return err
 	}
-	invalidateKDSScope(ctx, ownerID)
+	invalidateKDSScope(ctx, businessID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    "owner:" + strconv.FormatInt(ownerID, 10),
+		Topic:    "business:" + strconv.FormatInt(businessID, 10),
 		Type:     "pos:kds:item:updated",
 		EntityID: itemID,
 	})

@@ -19,30 +19,30 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.PaymentMethod, error) {
-	cacheKey := "store_payments:" + strconv.FormatInt(ownerID, 10)
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.PaymentMethod, error) {
+	cacheKey := "store_payments:" + strconv.FormatInt(businessID, 10)
 	return cacher.Of[[]domain.PaymentMethod]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.PaymentMethod, error) {
-		return s.repo.List(ctx, ownerID)
+		return s.repo.List(ctx, businessID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.PaymentMethodInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input domain.PaymentMethodInput) (int64, error) {
+	id, err := s.repo.Create(ctx, ownerID, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.PaymentMethodInput) error {
-	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.PaymentMethodInput) error {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	cacher.Of[[]domain.PaymentMethod]().Invalidate(ctx, []string{"store_payments:" + strconv.FormatInt(ownerID, 10)})
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
+	cacher.Of[[]domain.PaymentMethod]().Invalidate(ctx, []string{"store_payments:" + strconv.FormatInt(businessID, 10)})
 }

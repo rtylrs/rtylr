@@ -36,9 +36,9 @@ func (r *Repository) ListLeaveTypes(ctx context.Context, ownerID int64, params d
 	}
 
 	rows, err := r.queries.ListLeaveTypes(ctx, sqlc.ListLeaveTypesParams{
-		OwnerID: ownerID,
-		Limit:   params.Limit,
-		Offset:  params.Offset,
+		BusinessID: ownerID,
+		Limit:      params.Limit,
+		Offset:     params.Offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("owner_id", ownerID), logger.Error(err))
@@ -53,7 +53,7 @@ func (r *Repository) ListLeaveTypes(ctx context.Context, ownerID int64, params d
 }
 
 func (r *Repository) GetLeaveType(ctx context.Context, ownerID, leaveTypeID int64) (*domain.LeaveTypeRecord, error) {
-	row, err := r.queries.GetLeaveType(ctx, sqlc.GetLeaveTypeParams{OwnerID: ownerID, ID: leaveTypeID})
+	row, err := r.queries.GetLeaveType(ctx, sqlc.GetLeaveTypeParams{BusinessID: ownerID, ID: leaveTypeID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrLeaveTypeNotFound
@@ -68,6 +68,7 @@ func (r *Repository) GetLeaveType(ctx context.Context, ownerID, leaveTypeID int6
 func (r *Repository) CreateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) (*domain.LeaveTypeRecord, error) {
 	result, err := r.queries.CreateLeaveType(ctx, sqlc.CreateLeaveTypeParams{
 		OwnerID:                        ownerID,
+		BusinessID:                     ownerID,
 		Name:                           lt.Name,
 		IsPaid:                         lt.IsPaid,
 		RequiresApproval:               lt.RequiresApproval,
@@ -88,6 +89,7 @@ func (r *Repository) CreateLeaveType(ctx context.Context, ownerID int64, lt doma
 	}
 	lt.ID = id
 	lt.OwnerID = ownerID
+	lt.BusinessID = ownerID
 	return &lt, nil
 }
 
@@ -103,7 +105,7 @@ func (r *Repository) UpdateLeaveType(ctx context.Context, ownerID int64, lt doma
 		RequiresDocumentationAfterDays: nullInt32(lt.RequiresDocumentationAfterDays),
 		IsActive:                       lt.IsActive,
 		ID:                             lt.ID,
-		OwnerID:                        ownerID,
+		BusinessID:                     ownerID,
 	})
 }
 
@@ -133,9 +135,9 @@ func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, param
 	}
 
 	rows, err := r.queries.ListLeaveRequests(ctx, sqlc.ListLeaveRequestsParams{
-		OwnerID: ownerID,
-		Limit:   params.Limit,
-		Offset:  params.Offset,
+		BusinessID: ownerID,
+		Limit:      params.Limit,
+		Offset:     params.Offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list leave requests", logger.Any("owner_id", ownerID), logger.Error(err))
@@ -150,7 +152,7 @@ func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, param
 }
 
 func (r *Repository) GetLeaveRequest(ctx context.Context, ownerID, requestID int64) (*domain.LeaveRequestRecord, error) {
-	row, err := r.queries.GetLeaveRequest(ctx, sqlc.GetLeaveRequestParams{OwnerID: ownerID, ID: requestID})
+	row, err := r.queries.GetLeaveRequest(ctx, sqlc.GetLeaveRequestParams{BusinessID: ownerID, ID: requestID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrLeaveRequestNotFound
@@ -174,6 +176,7 @@ func (r *Repository) CreateLeaveRequest(ctx context.Context, ownerID int64, req 
 
 	result, err := r.queries.CreateLeaveRequest(ctx, sqlc.CreateLeaveRequestParams{
 		OwnerID:              ownerID,
+		BusinessID:           ownerID,
 		EmployeeID:           req.EmployeeID,
 		LeaveTypeID:          req.LeaveTypeID,
 		StartDate:            startDate,
@@ -193,22 +196,23 @@ func (r *Repository) CreateLeaveRequest(ctx context.Context, ownerID int64, req 
 	}
 	req.ID = id
 	req.OwnerID = ownerID
+	req.BusinessID = ownerID
 	return &req, nil
 }
 
 func (r *Repository) ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error {
-	return r.queries.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, OwnerID: ownerID})
+	return r.queries.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, BusinessID: ownerID})
 }
 
 func (r *Repository) AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error {
-	return r.queries.AdvanceLeaveApprovalLevel(ctx, sqlc.AdvanceLeaveApprovalLevelParams{ID: requestID, OwnerID: ownerID})
+	return r.queries.AdvanceLeaveApprovalLevel(ctx, sqlc.AdvanceLeaveApprovalLevelParams{ID: requestID, BusinessID: ownerID})
 }
 
 func (r *Repository) RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) error {
 	return r.queries.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{
 		RejectionReason: nullString(reason),
 		ID:              requestID,
-		OwnerID:         ownerID,
+		BusinessID:      ownerID,
 	})
 }
 
@@ -223,7 +227,7 @@ func (r *Repository) ListOverlappingLeaveRequests(ctx context.Context, ownerID, 
 	}
 
 	rows, err := r.queries.ListOverlappingLeaveRequests(ctx, sqlc.ListOverlappingLeaveRequestsParams{
-		OwnerID:    ownerID,
+		BusinessID: ownerID,
 		EmployeeID: employeeID,
 		EndDate:    ed,
 		StartDate:  sd,
@@ -250,9 +254,9 @@ func (r *Repository) ListLeaveCalendar(ctx context.Context, ownerID int64, dateF
 	}
 
 	rows, err := r.queries.ListLeaveCalendar(ctx, sqlc.ListLeaveCalendarParams{
-		OwnerID:   ownerID,
-		EndDate:   dt,
-		StartDate: df,
+		BusinessID: ownerID,
+		EndDate:    dt,
+		StartDate:  df,
 	})
 	if err != nil {
 		return nil, err
@@ -269,7 +273,7 @@ func (r *Repository) ListLeaveCalendar(ctx context.Context, ownerID int64, dateF
 
 func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	rows, err := r.queries.ListLeaveBalances(ctx, sqlc.ListLeaveBalancesParams{
-		OwnerID:    ownerID,
+		BusinessID: ownerID,
 		EmployeeID: employeeID,
 		Year:       year,
 	})
@@ -287,7 +291,7 @@ func (r *Repository) ListLeaveBalances(ctx context.Context, ownerID, employeeID 
 
 func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32) (*domain.LeaveBalanceRecord, error) {
 	row, err := r.queries.GetLeaveBalance(ctx, sqlc.GetLeaveBalanceParams{
-		OwnerID:     ownerID,
+		BusinessID:  ownerID,
 		EmployeeID:  employeeID,
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
@@ -296,6 +300,7 @@ func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, l
 		if errors.Is(err, sql.ErrNoRows) {
 			return &domain.LeaveBalanceRecord{
 				OwnerID:     ownerID,
+				BusinessID:  ownerID,
 				EmployeeID:  employeeID,
 				LeaveTypeID: leaveTypeID,
 				Year:        year,
@@ -310,6 +315,7 @@ func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, l
 func (r *Repository) UpsertLeaveBalance(ctx context.Context, ownerID int64, bal domain.LeaveBalanceRecord) error {
 	_, err := r.queries.UpsertLeaveBalance(ctx, sqlc.UpsertLeaveBalanceParams{
 		OwnerID:          ownerID,
+		BusinessID:       ownerID,
 		EmployeeID:       bal.EmployeeID,
 		LeaveTypeID:      bal.LeaveTypeID,
 		Year:             bal.Year,
@@ -325,7 +331,7 @@ func (r *Repository) AddToUsedDays(ctx context.Context, ownerID, employeeID, lea
 	return r.queries.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
 		UsedDays:    fmt.Sprintf("%.2f", days),
 		PendingDays: fmt.Sprintf("%.2f", days),
-		OwnerID:     ownerID,
+		BusinessID:  ownerID,
 		EmployeeID:  employeeID,
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
@@ -335,7 +341,7 @@ func (r *Repository) AddToUsedDays(ctx context.Context, ownerID, employeeID, lea
 func (r *Repository) AddToPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
 	return r.queries.AddToPendingDays(ctx, sqlc.AddToPendingDaysParams{
 		PendingDays: fmt.Sprintf("%.2f", days),
-		OwnerID:     ownerID,
+		BusinessID:  ownerID,
 		EmployeeID:  employeeID,
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
@@ -345,7 +351,7 @@ func (r *Repository) AddToPendingDays(ctx context.Context, ownerID, employeeID, 
 func (r *Repository) SubtractPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
 	return r.queries.SubtractPendingDays(ctx, sqlc.SubtractPendingDaysParams{
 		PendingDays: fmt.Sprintf("%.2f", days),
-		OwnerID:     ownerID,
+		BusinessID:  ownerID,
 		EmployeeID:  employeeID,
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
@@ -354,7 +360,7 @@ func (r *Repository) SubtractPendingDays(ctx context.Context, ownerID, employeeI
 
 func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, year, currentMonth int32) ([]domain.LeaveBalanceRecord, error) {
 	rows, err := r.queries.ListBalancesForAccrual(ctx, sqlc.ListBalancesForAccrualParams{
-		OwnerID:          ownerID,
+		BusinessID:       ownerID,
 		Year:             year,
 		LastAccrualMonth: currentMonth,
 	})
@@ -372,7 +378,7 @@ func (r *Repository) AddToEntitledDays(ctx context.Context, ownerID, employeeID,
 	return r.queries.AddToEntitledDays(ctx, sqlc.AddToEntitledDaysParams{
 		EntitledDays:     fmt.Sprintf("%.2f", days),
 		LastAccrualMonth: month,
-		OwnerID:          ownerID,
+		BusinessID:       ownerID,
 		EmployeeID:       employeeID,
 		LeaveTypeID:      leaveTypeID,
 		Year:             year,

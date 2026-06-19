@@ -18,12 +18,12 @@ const (
 )
 
 type repository interface {
-	GenerateHeadcountReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
-	GenerateAttendanceSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
-	GenerateLeaveSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
-	GeneratePayrollSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
-	GenerateOvertimeSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
-	GenerateTimesheetSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateHeadcountReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateAttendanceSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateLeaveSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GeneratePayrollSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateOvertimeSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateTimesheetSummaryReport(ctx context.Context, businessID int64, params domain.ReportParams) ([]map[string]interface{}, error)
 }
 
 type Service struct {
@@ -53,27 +53,27 @@ func paramsKey(p domain.ReportParams) string {
 		p.DateFrom.Unix(), p.DateTo.Unix(), loc, dep, emp)
 }
 
-func (s *Service) GenerateReport(ctx context.Context, ownerID int64, reportType string, params domain.ReportParams) ([]map[string]interface{}, error) {
+func (s *Service) GenerateReport(ctx context.Context, businessID int64, reportType string, params domain.ReportParams) ([]map[string]interface{}, error) {
 	if !domain.SupportedReportTypes[reportType] {
 		return nil, domain.ErrUnsupportedReportType
 	}
 
-	key := cacheKeys.Scoped(hrReportsScope, ownerID, fmt.Sprintf("%s|%s", reportType, paramsKey(params)))
+	key := cacheKeys.Scoped(hrReportsScope, businessID, fmt.Sprintf("%s|%s", reportType, paramsKey(params)))
 	return cacher.Of[[]map[string]interface{}]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]map[string]interface{}, error) {
 			switch reportType {
 			case domain.ReportTypeHecount:
-				return s.repo.GenerateHeadcountReport(ctx, ownerID, params)
+				return s.repo.GenerateHeadcountReport(ctx, businessID, params)
 			case domain.ReportTypeAttendanceSummary:
-				return s.repo.GenerateAttendanceSummaryReport(ctx, ownerID, params)
+				return s.repo.GenerateAttendanceSummaryReport(ctx, businessID, params)
 			case domain.ReportTypeLeaveSummary:
-				return s.repo.GenerateLeaveSummaryReport(ctx, ownerID, params)
+				return s.repo.GenerateLeaveSummaryReport(ctx, businessID, params)
 			case domain.ReportTypePayrollSummary:
-				return s.repo.GeneratePayrollSummaryReport(ctx, ownerID, params)
+				return s.repo.GeneratePayrollSummaryReport(ctx, businessID, params)
 			case domain.ReportTypeOvertimeSummary:
-				return s.repo.GenerateOvertimeSummaryReport(ctx, ownerID, params)
+				return s.repo.GenerateOvertimeSummaryReport(ctx, businessID, params)
 			case domain.ReportTypeTimesheetSummary:
-				return s.repo.GenerateTimesheetSummaryReport(ctx, ownerID, params)
+				return s.repo.GenerateTimesheetSummaryReport(ctx, businessID, params)
 			default:
 				return nil, domain.ErrUnsupportedReportType
 			}

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -67,6 +68,11 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	limit := req.Limit
 	if limit <= 0 {
 		limit = 20
@@ -79,7 +85,7 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 		offset = 0
 	}
 
-	items, total, err := h.Service.List(ctx, device.User.UserID, limit, offset)
+	items, total, err := h.Service.List(ctx, businessID, limit, offset)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list bank feed transactions"}
 	}
@@ -110,7 +116,11 @@ func (h *SyncHandler) Serve(ctx context.Context, _ *SyncRequest) (SyncResponse, 
 	if device.IsAnonymous || device.User == nil {
 		return SyncResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	imported, err := h.Service.Sync(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SyncResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	imported, err := h.Service.Sync(ctx, businessID)
 	if err != nil {
 		return SyncResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to sync bank feeds"}
 	}

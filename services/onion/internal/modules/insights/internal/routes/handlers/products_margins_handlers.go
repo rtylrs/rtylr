@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/products/margins
@@ -26,7 +27,11 @@ func (h *GetMarginDistributionHandler) Serve(ctx context.Context, _ *GetMarginDi
 	if device.User == nil {
 		return GetMarginDistributionResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	buckets, err := h.Service.GetMarginDistribution(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetMarginDistributionResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	buckets, err := h.Service.GetMarginDistribution(ctx, businessID)
 	if err != nil {
 		return GetMarginDistributionResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

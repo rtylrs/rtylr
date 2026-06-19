@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerMergeRoutes() []string {
@@ -58,8 +59,14 @@ func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRe
 		return MergeCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return MergeCustomersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	err := h.CRMService.MergeCustomers(ctx, domain.MergeCustomersInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		PrimaryID:   req.PrimaryID,
 		SecondaryID: req.SecondaryID,
 	})

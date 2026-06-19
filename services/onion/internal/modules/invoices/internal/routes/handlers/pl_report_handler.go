@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func PLReportRoutes() []string {
@@ -35,12 +36,21 @@ type PLReportResponse struct {
 func (h *PLReportHandler) Serve(ctx context.Context, req *PLReportRequest) (PLReportResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return PLReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return PLReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	period := req.Period
 	if period == "" {
 		period = "month"
 	}
 
-	report, err := h.FinanceService.GetPLReport(ctx, device.User.UserID, period, req.Date)
+	report, err := h.FinanceService.GetPLReport(ctx, businessID, period, req.Date)
 	if err != nil {
 		return PLReportResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

@@ -54,7 +54,10 @@ func (h *DeleteProductByIDHandler) Serve(ctx context.Context, _ *DeleteProductBy
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteProductByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if err := h.Service.DeleteProduct(ctx, ownerID, id); err != nil {
 		if errors.Is(err, domain.ErrProductNotFound) {
 			return DeleteProductByIDResponse{}, &errorModels.ServerError{

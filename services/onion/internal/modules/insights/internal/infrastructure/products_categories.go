@@ -18,7 +18,7 @@ type CategorySalesRow struct {
 // GetSalesByCategory returns MTD sales grouped by erp_categories.name.
 // Products without a category are bundled under "Uncategorised" so the
 // donut chart never has an orphan segment.
-func (r *Repository) GetSalesByCategory(ctx context.Context, ownerID int64) ([]CategorySalesRow, error) {
+func (r *Repository) GetSalesByCategory(ctx context.Context, businessID int64) ([]CategorySalesRow, error) {
 	thisFrom, thisTo, _, _ := mtdRanges(nowFn())
 	// cross-schema read from erp_categories + erp_products + pos_order_items + pos_orders — MTD category sales
 	const q = `
@@ -28,15 +28,15 @@ func (r *Repository) GetSalesByCategory(ctx context.Context, ownerID int64) ([]C
 		       COALESCE(SUM(oi.total), 0)    AS revenue
 		FROM pos_order_items oi
 		JOIN pos_orders o        ON o.id = oi.order_id
-		JOIN erp_products p      ON p.id = oi.menu_item_id AND p.owner_id = o.owner_id
-		LEFT JOIN erp_categories c ON c.id = p.category_id AND c.owner_id = p.owner_id
-		WHERE o.owner_id = ?
+		JOIN erp_products p      ON p.id = oi.menu_item_id AND p.business_id = o.business_id
+		LEFT JOIN erp_categories c ON c.id = p.category_id AND c.business_id = p.business_id
+		WHERE o.business_id = ?
 		  AND o.created_at >= ?
 		  AND o.created_at <= ?
 		GROUP BY c.id, c.name
 		ORDER BY revenue DESC
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, thisFrom, thisTo)
+	rows, err := r.pool.QueryContext(ctx, q, businessID, thisFrom, thisTo)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: category sales query failed", logger.Error(err))
 		return nil, err

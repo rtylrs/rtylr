@@ -17,19 +17,19 @@ type BestSellerPayload struct {
 }
 
 // GetBestSellers returns the 30-day top-N by units sold, cached per-limit.
-func (s *Service) GetBestSellers(ctx context.Context, ownerID int64, limit int32) ([]BestSellerPayload, error) {
+func (s *Service) GetBestSellers(ctx context.Context, businessID int64, limit int32) ([]BestSellerPayload, error) {
 	if limit <= 0 {
 		limit = 10
 	}
 	if limit > 100 {
 		limit = 100
 	}
-	key := fmt.Sprintf("insights:%d:products:bestsellers:%d", ownerID, limit)
+	key := fmt.Sprintf("insights:%d:products:bestsellers:%d", businessID, limit)
 	type result struct {
 		Rows []BestSellerPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetBestSellers(ctx, ownerID, limit)
+		rows, rerr := s.repo.GetBestSellers(ctx, businessID, limit)
 		if rerr != nil {
 			return result{}, rerr
 		}

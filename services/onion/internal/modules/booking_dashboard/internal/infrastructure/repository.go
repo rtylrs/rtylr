@@ -20,11 +20,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetTodayCount(ctx context.Context, ownerID int64, start, end time.Time) (int, error) {
+func (r *Repository) GetTodayCount(ctx context.Context, businessID int64, start, end time.Time) (int, error) {
 	var count int
 	query, args, err := sq.Select("COUNT(*)").
 		From("booking_appointments").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"start_time": start}).
 		Where(sq.Lt{"start_time": end}).
 		PlaceholderFormat(sq.Question).
@@ -41,11 +41,11 @@ func (r *Repository) GetTodayCount(ctx context.Context, ownerID int64, start, en
 	return count, nil
 }
 
-func (r *Repository) GetUpcomingCount(ctx context.Context, ownerID int64, start time.Time) (int, error) {
+func (r *Repository) GetUpcomingCount(ctx context.Context, businessID int64, start time.Time) (int, error) {
 	var count int
 	query, args, err := sq.Select("COUNT(*)").
 		From("booking_appointments").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"start_time": start}).
 		Where(sq.Eq{"status": []string{"pending", "confirmed"}}).
 		PlaceholderFormat(sq.Question).
@@ -62,10 +62,10 @@ func (r *Repository) GetUpcomingCount(ctx context.Context, ownerID int64, start 
 	return count, nil
 }
 
-func (r *Repository) GetMonthCounts(ctx context.Context, ownerID int64, start time.Time) (total, cancelled int, err error) {
+func (r *Repository) GetMonthCounts(ctx context.Context, businessID int64, start time.Time) (total, cancelled int, err error) {
 	totalSQL, totalArgs, err := sq.Select("COUNT(*)").
 		From("booking_appointments").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"start_time": start}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -81,7 +81,7 @@ func (r *Repository) GetMonthCounts(ctx context.Context, ownerID int64, start ti
 
 	cancelledSQL, cancelledArgs, err := sq.Select("COUNT(*)").
 		From("booking_appointments").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.GtOrEq{"start_time": start}).
 		Where(sq.Eq{"status": "cancelled"}).
 		PlaceholderFormat(sq.Question).
@@ -99,12 +99,12 @@ func (r *Repository) GetMonthCounts(ctx context.Context, ownerID int64, start ti
 	return total, cancelled, nil
 }
 
-func (r *Repository) GetMonthRevenue(ctx context.Context, ownerID int64, start time.Time) (float64, error) {
+func (r *Repository) GetMonthRevenue(ctx context.Context, businessID int64, start time.Time) (float64, error) {
 	var revenue sql.NullFloat64
 	query, args, err := sq.Select("COALESCE(SUM(bs.price), 0)").
 		From("booking_appointments ba").
 		Join("booking_services bs ON ba.service_id = bs.id").
-		Where(sq.Eq{"ba.owner_id": ownerID}).
+		Where(sq.Eq{"ba.business_id": businessID}).
 		Where(sq.GtOrEq{"ba.start_time": start}).
 		Where(sq.Eq{"ba.status": []string{"completed", "confirmed"}}).
 		PlaceholderFormat(sq.Question).

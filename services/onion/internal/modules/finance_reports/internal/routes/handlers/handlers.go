@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---- Balance Sheet ----
@@ -33,7 +34,12 @@ func (h *BalanceSheetHandler) Serve(ctx context.Context, _ *BalanceSheetRequest)
 		return BalanceSheetResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	bs, err := h.Service.GetBalanceSheet(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return BalanceSheetResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	bs, err := h.Service.GetBalanceSheet(ctx, businessID)
 	if err != nil {
 		return BalanceSheetResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to generate balance sheet"}
 	}
@@ -75,12 +81,17 @@ func (h *CashFlowHandler) Serve(ctx context.Context, req *CashFlowRequest) (Cash
 		return CashFlowResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CashFlowResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	period := req.Period
 	if period == "" {
 		period = "month"
 	}
 
-	cf, err := h.Service.GetCashFlow(ctx, device.User.UserID, period)
+	cf, err := h.Service.GetCashFlow(ctx, businessID, period)
 	if err != nil {
 		return CashFlowResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to generate cash flow report"}
 	}

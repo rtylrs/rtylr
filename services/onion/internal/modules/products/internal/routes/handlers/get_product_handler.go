@@ -45,7 +45,11 @@ func GetProductHandlerFunc(svc *application.Service) http.HandlerFunc {
 			return
 		}
 
-		ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+		ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if bizErr != nil {
+			writeProductErr(ctx, w, http.StatusForbidden, "forbidden")
+			return
+		}
 		product, err := svc.GetProduct(ctx, ownerID, id)
 		if err != nil {
 			if errors.Is(err, domain.ErrProductNotFound) {

@@ -14,7 +14,7 @@ import (
 const kpiCacheTTL = 2 * time.Minute
 
 type repository interface {
-	GetKPIs(ctx context.Context, ownerID int64) (domain.KPISummary, error)
+	GetKPIs(ctx context.Context, businessID int64) (domain.KPISummary, error)
 }
 
 type Service struct {
@@ -27,12 +27,12 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) GetKPIs(ctx context.Context, ownerID int64) (domain.KPISummary, error) {
+func (s *Service) GetKPIs(ctx context.Context, businessID int64) (domain.KPISummary, error) {
 	return cacher.Of[domain.KPISummary]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.BusinessKPIs(ownerID),
+		cacheKeys.BusinessKPIs(businessID),
 		func(ctx context.Context) (domain.KPISummary, error) {
-			return s.repo.GetKPIs(ctx, ownerID)
+			return s.repo.GetKPIs(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, kpiCacheTTL),
 	)

@@ -47,8 +47,12 @@ func (h *ValuationHandler) Serve(ctx context.Context, _ *ValuationRequest) (Valu
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	items, err := h.Service.GetValuation(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ValuationResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	items, err := h.Service.GetValuation(ctx, businessID)
 	if err != nil {
 		return ValuationResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

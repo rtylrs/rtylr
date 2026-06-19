@@ -5,6 +5,7 @@ import "time"
 type Feedback struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
 	CustomerID int64     `json:"customer_id"`
 	Type       string    `json:"type"`
 	Score      int       `json:"score"`
@@ -15,6 +16,7 @@ type Feedback struct {
 
 type FeedbackInput struct {
 	OwnerID    int64
+	BusinessID int64
 	CustomerID int64
 	Type       string
 	Score      int

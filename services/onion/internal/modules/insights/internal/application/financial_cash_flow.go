@@ -17,13 +17,13 @@ type CashFlowPointPayload struct {
 
 // GetCashFlowSeries returns the daily (inflow, outflow) series for the
 // given window.
-func (s *Service) GetCashFlowSeries(ctx context.Context, ownerID int64, from, to time.Time) ([]CashFlowPointPayload, error) {
-	key := fmt.Sprintf("insights:%d:financial:cashflow:%s:%s", ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+func (s *Service) GetCashFlowSeries(ctx context.Context, businessID int64, from, to time.Time) ([]CashFlowPointPayload, error) {
+	key := fmt.Sprintf("insights:%d:financial:cashflow:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	type result struct {
 		Points []CashFlowPointPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetCashFlowSeries(ctx, ownerID, from, to)
+		rows, rerr := s.repo.GetCashFlowSeries(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr
 		}

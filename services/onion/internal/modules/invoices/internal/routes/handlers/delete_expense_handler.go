@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func DeleteExpenseRoutes() []string {
@@ -39,7 +40,16 @@ func (h *DeleteExpenseHandler) Validate(_ context.Context, req *DeleteExpenseReq
 func (h *DeleteExpenseHandler) Serve(ctx context.Context, req *DeleteExpenseRequest) (DeleteExpenseResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	if err := h.FinanceService.DeleteExpense(ctx, device.User.UserID, req.ID); err != nil {
+	if device.User == nil {
+		return DeleteExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FinanceService.DeleteExpense(ctx, businessID, req.ID); err != nil {
 		return DeleteExpenseResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete expense",

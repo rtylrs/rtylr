@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateExpenseRoutes() []string {
@@ -82,6 +83,15 @@ func (h *UpdateExpenseHandler) Validate(_ context.Context, req *UpdateExpenseReq
 func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequest) (UpdateExpenseResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return UpdateExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.ExpenseInput{
 		CategoryID:      req.CategoryID,
 		Description:     req.Description,
@@ -96,7 +106,7 @@ func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequ
 		Notes:           req.Notes,
 	}
 
-	e, err := h.FinanceService.UpdateExpense(ctx, device.User.UserID, req.ID, input)
+	e, err := h.FinanceService.UpdateExpense(ctx, businessID, req.ID, input)
 	if err != nil {
 		if errors.Is(err, domain.ErrExpenseNotFound) {
 			return UpdateExpenseResponse{}, &errorModels.ServerError{

@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func DeleteDocumentRoutes() []string { return []string{"/hr/documents/{id}"} }
@@ -31,13 +32,18 @@ func (h *DeleteDocumentHandler) Serve(ctx context.Context, _ *DeleteDocumentRequ
 		return DeleteDocumentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteDocumentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	docID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return DeleteDocumentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid document id"}
 	}
 
-	err := h.Service.DeleteDocument(ctx, device.User.UserID, docID)
+	err := h.Service.DeleteDocument(ctx, businessID, docID)
 	if err != nil {
 		if errors.Is(err, domain.ErrDocumentNotFound) {
 			return DeleteDocumentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Document not found"}

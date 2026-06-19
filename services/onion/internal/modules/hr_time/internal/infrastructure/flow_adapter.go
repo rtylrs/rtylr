@@ -20,7 +20,7 @@ func NewFlowAdapter(db *sql.DB) *FlowAdapter {
 	return &FlowAdapter{pool: db}
 }
 
-func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID, employeeID int64, periodStart, periodEnd string) ([]domain.FlowTaskRecord, error) {
+func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, businessID, employeeID int64, periodStart, periodEnd string) ([]domain.FlowTaskRecord, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
 		return nil, err
@@ -33,12 +33,12 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 	// cross-schema read from hr_core module — resolve employee user_id for flow task lookup
 	userIDSQL, userIDArgs, err := sq.Select("user_id").
 		From("hr_employees").
-		Where(sq.Eq{"id": employeeID, "owner_id": ownerID}).
+		Where(sq.Eq{"id": employeeID, "business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("flow adapter: failed to build employee user_id query",
-			logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return nil, err
 	}
 
@@ -49,7 +49,7 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("flow adapter: failed to resolve employee user_id",
-			logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return nil, err
 	}
 	if !userID.Valid {
@@ -65,7 +65,7 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 	).
 		From("flow_tasks t").
 		LeftJoin("flow_time_logs tl ON tl.task_id = t.id").
-		Where(sq.Eq{"t.assignee_id": userID.Int64, "t.owner_id": ownerID, "t.status": "done"}).
+		Where(sq.Eq{"t.assignee_id": userID.Int64, "t.business_id": businessID, "t.status": "done"}).
 		Where(sq.GtOrEq{"t.completed_at": ps}).
 		Where(sq.LtOrEq{"t.completed_at": pe}).
 		GroupBy("t.id", "t.title", "t.completed_at").
@@ -73,14 +73,14 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("flow adapter: failed to build completed tasks query",
-			logger.Any("owner_id", ownerID), logger.Any("user_id", userID.Int64), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Any("user_id", userID.Int64), logger.Error(err))
 		return nil, err
 	}
 
 	rows, err := a.pool.QueryContext(ctx, tasksSQL, tasksArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("flow adapter: failed to query completed tasks",
-			logger.Any("owner_id", ownerID), logger.Any("user_id", userID.Int64), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Any("user_id", userID.Int64), logger.Error(err))
 		return nil, err
 	}
 	defer func() {

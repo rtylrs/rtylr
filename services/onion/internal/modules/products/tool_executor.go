@@ -36,7 +36,10 @@ func (m *Module) executeCreateProductTool(ctx context.Context, input map[string]
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
 	id, err := m.service.CreateProduct(ctx, ownerID, parsed)
 	if err != nil {
 		return nil, err

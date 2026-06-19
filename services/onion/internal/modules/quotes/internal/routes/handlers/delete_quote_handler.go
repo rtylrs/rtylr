@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func DeleteQuoteByIDRoutes() []string { return []string{"/finance/quotes/{id}"} }
@@ -31,13 +32,18 @@ func (h *DeleteQuoteByIDHandler) Serve(ctx context.Context, _ *DeleteQuoteByIDRe
 		return DeleteQuoteByIDResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteQuoteByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return DeleteQuoteByIDResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid quote id"}
 	}
 
-	if err := h.Service.Delete(ctx, device.User.UserID, id); err != nil {
+	if err := h.Service.Delete(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrQuoteNotFound) {
 			return DeleteQuoteByIDResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Quote not found"}
 		}

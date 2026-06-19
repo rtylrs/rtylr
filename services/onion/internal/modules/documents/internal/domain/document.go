@@ -11,6 +11,7 @@ var ErrDocumentNotFound = errors.New("document not found")
 type Document struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
 	StaffID    int64     `json:"staff_id"`
 	Name       string    `json:"name"`
 	Type       string    `json:"type"`
@@ -27,7 +28,7 @@ func (d *Document) FromRow(row *sql.Rows) error {
 		expiryDate sql.NullTime
 	)
 
-	err := row.Scan(&d.ID, &d.OwnerID, &staffID, &d.Name, &docType, &fileURL, &expiryDate, &d.CreatedAt)
+	err := row.Scan(&d.ID, &d.OwnerID, &d.BusinessID, &staffID, &d.Name, &docType, &fileURL, &expiryDate, &d.CreatedAt)
 	if err != nil {
 		return err
 	}

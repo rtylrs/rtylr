@@ -12,6 +12,7 @@ var ErrAppointmentNotFound = errors.New("appointment not found")
 type Reminder struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	AppointmentID int64     `json:"appointment_id"`
 	Type          string    `json:"type"`
 	ScheduledAt   time.Time `json:"scheduled_at"`

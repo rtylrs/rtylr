@@ -23,8 +23,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Modifier, error) {
-	rows, err := r.queries.ListModifiersByOwner(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Modifier, error) {
+	rows, err := r.queries.ListModifiersByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list modifiers", logger.Error(err))
 		return nil, err
@@ -35,6 +35,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Modifier
 		items = append(items, domain.Modifier{
 			ID:         row.ID,
 			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
 			Name:       row.Name,
 			PriceDelta: decimalToFloat(row.PriceDelta),
 			GroupName:  row.GroupName.String,
@@ -46,9 +47,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Modifier
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ModifierInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.ModifierInput) (int64, error) {
 	result, err := r.queries.CreateModifier(ctx, sqlc.CreateModifierParams{
 		OwnerID:    ownerID,
+		BusinessID: businessID,
 		Name:       input.Name,
 		PriceDelta: floatToDecimal(input.PriceDelta),
 		GroupName:  sql.NullString{String: input.GroupName, Valid: input.GroupName != ""},
@@ -61,14 +63,14 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Mod
 	return result.LastInsertId()
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.ModifierInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ModifierInput) error {
 	result, err := r.queries.UpdateModifier(ctx, sqlc.UpdateModifierParams{
 		Name:       input.Name,
 		PriceDelta: floatToDecimal(input.PriceDelta),
 		GroupName:  sql.NullString{String: input.GroupName, Valid: input.GroupName != ""},
 		IsRequired: sql.NullBool{Bool: input.IsRequired, Valid: true},
 		ID:         id,
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update modifier", logger.Error(err))
@@ -84,10 +86,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	result, err := r.queries.DeleteModifier(ctx, sqlc.DeleteModifierParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete modifier", logger.Error(err))

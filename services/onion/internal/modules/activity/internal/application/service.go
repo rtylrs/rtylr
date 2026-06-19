@@ -14,7 +14,7 @@ import (
 const activityCacheTTL = 1 * time.Minute
 
 type repository interface {
-	ListActivity(ctx context.Context, ownerID int64, app string, limit, offset int) ([]domain.ActivityLog, int64, error)
+	ListActivity(ctx context.Context, businessID int64, app string, limit, offset int) ([]domain.ActivityLog, int64, error)
 }
 
 type Service struct {
@@ -29,13 +29,13 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-// ListActivity returns a single page of activity for the owner, optionally
+// ListActivity returns a single page of activity for the business, optionally
 // filtered to one app (empty = all), with the total count for that filter.
-func (s *Service) ListActivity(ctx context.Context, ownerID int64, app string, limit, offset int) (domain.ActivityPage, error) {
-	cacheKey := fmt.Sprintf("activity:%d:%s:%d:%d", ownerID, app, limit, offset)
+func (s *Service) ListActivity(ctx context.Context, businessID int64, app string, limit, offset int) (domain.ActivityPage, error) {
+	cacheKey := fmt.Sprintf("activity:%d:%s:%d:%d", businessID, app, limit, offset)
 
 	return cacher.Of[domain.ActivityPage]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.ActivityPage, error) {
-		entries, total, err := s.repo.ListActivity(ctx, ownerID, app, limit, offset)
+		entries, total, err := s.repo.ListActivity(ctx, businessID, app, limit, offset)
 		if err != nil {
 			return domain.ActivityPage{}, err
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CreateExpenseRoutes() []string {
@@ -73,6 +74,15 @@ func (h *CreateExpenseHandler) Validate(_ context.Context, req *CreateExpenseReq
 func (h *CreateExpenseHandler) Serve(ctx context.Context, req *CreateExpenseRequest) (CreateExpenseResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return CreateExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.ExpenseInput{
 		CategoryID:      req.CategoryID,
 		Description:     req.Description,
@@ -87,7 +97,7 @@ func (h *CreateExpenseHandler) Serve(ctx context.Context, req *CreateExpenseRequ
 		Notes:           req.Notes,
 	}
 
-	e, err := h.FinanceService.CreateExpense(ctx, device.User.UserID, input)
+	e, err := h.FinanceService.CreateExpense(ctx, businessID, input)
 	if err != nil {
 		return CreateExpenseResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

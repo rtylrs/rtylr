@@ -1,9 +1,9 @@
 -- name: ListTrainingCourses :many
-SELECT id, owner_id, name, description, duration_hours, is_required, created_at
+SELECT id, owner_id, business_id, name, description, duration_hours, is_required, created_at
 FROM hr_training_courses
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY name ASC;
 
 -- name: CreateTrainingCourse :execresult
-INSERT INTO hr_training_courses (owner_id, name, description, duration_hours, is_required)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO hr_training_courses (owner_id, business_id, name, description, duration_hours, is_required)
+VALUES (?, ?, ?, ?, ?, ?);

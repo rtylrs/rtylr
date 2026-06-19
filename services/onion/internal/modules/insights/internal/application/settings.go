@@ -29,8 +29,8 @@ func defaultSettings() SettingsPayload {
 
 // GetSettings returns the insights-settings row, or the default envelope
 // when no row exists yet for this tenant.
-func (s *Service) GetSettings(ctx context.Context, ownerID int64) (SettingsPayload, error) {
-	row, err := s.repo.GetSettings(ctx, ownerID)
+func (s *Service) GetSettings(ctx context.Context, businessID int64) (SettingsPayload, error) {
+	row, err := s.repo.GetSettings(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrSettingsNotFound) {
 			logger.Ctx(ctx).Debug("insights: no settings row, returning defaults")
@@ -48,7 +48,7 @@ func (s *Service) GetSettings(ctx context.Context, ownerID int64) (SettingsPaylo
 // UpdateSettings writes the payload. Missing fields are rejected —
 // partial updates would surprise the UI which always sends the full
 // envelope.
-func (s *Service) UpdateSettings(ctx context.Context, ownerID int64, in SettingsPayload) (SettingsPayload, error) {
+func (s *Service) UpdateSettings(ctx context.Context, businessID int64, in SettingsPayload) (SettingsPayload, error) {
 	if in.DefaultCurrency == "" {
 		in.DefaultCurrency = "USD"
 	}
@@ -59,7 +59,8 @@ func (s *Service) UpdateSettings(ctx context.Context, ownerID int64, in Settings
 		in.Timezone = "UTC"
 	}
 	err := s.repo.UpsertSettings(ctx, infrastructure.SettingsRow{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
+		BusinessID:      businessID,
 		DefaultCurrency: in.DefaultCurrency,
 		FiscalYearStart: in.FiscalYearStart,
 		Timezone:        in.Timezone,

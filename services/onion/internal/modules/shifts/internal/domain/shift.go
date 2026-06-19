@@ -11,6 +11,7 @@ var ErrShiftNotFound = errors.New("shift not found")
 type Shift struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	StaffID              int64     `json:"staff_id"`
 	DepartmentID         int64     `json:"department_id"`
 	Date                 time.Time `json:"date"`
@@ -42,6 +43,7 @@ func (s *Shift) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&s.ID,
 		&s.OwnerID,
+		&s.BusinessID,
 		&s.StaffID,
 		&departmentID,
 		&s.Date,
@@ -98,6 +100,7 @@ func (s *Shift) FromRow(row *sql.Rows) error {
 
 type ShiftInput struct {
 	OwnerID              int64  `json:"owner_id"`
+	BusinessID           int64  `json:"business_id"`
 	StaffID              int64  `json:"staff_id"`
 	DepartmentID         int64  `json:"department_id"`
 	Date                 string `json:"date"`

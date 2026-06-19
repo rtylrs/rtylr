@@ -58,8 +58,11 @@ func (m *Module) executeListProductsTool(ctx context.Context, input map[string]a
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	report, err := m.service.GetInventoryReport(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	report, err := m.service.GetInventoryReport(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +101,11 @@ func (m *Module) executeSetStockTool(ctx context.Context, input map[string]any) 
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	report, err := m.service.GetInventoryReport(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	report, err := m.service.GetInventoryReport(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +128,7 @@ func (m *Module) executeSetStockTool(ctx context.Context, input map[string]any) 
 		if notes == "" {
 			notes = fmt.Sprintf("Caret set stock from %s to %s", formatStockQuantity(current), formatStockQuantity(parsed.Quantity))
 		}
-		if err := m.service.AdjustInventory(ctx, ownerID, domain.InventoryAdjustInput{
+		if err := m.service.AdjustInventory(ctx, businessID, domain.InventoryAdjustInput{
 			ProductID: parsed.ProductID,
 			Change:    change,
 			Type:      domain.InventoryTypeAdjustment,

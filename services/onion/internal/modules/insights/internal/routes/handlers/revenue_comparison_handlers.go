@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/revenue/comparison?from=&to=
@@ -40,6 +41,10 @@ func (h *GetRevenueComparisonHandler) Serve(ctx context.Context, req *GetRevenue
 	if device.User == nil {
 		return GetRevenueComparisonResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetRevenueComparisonResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	from, to, err := application.ResolveDateRange(req.From, req.To)
 	if err != nil {
 		return GetRevenueComparisonResponse{}, &errorModels.ServerError{
@@ -48,7 +53,7 @@ func (h *GetRevenueComparisonHandler) Serve(ctx context.Context, req *GetRevenue
 			Message:  "Invalid date range",
 		}
 	}
-	payload, err := h.Service.GetRevenueComparison(ctx, device.User.UserID, from, to)
+	payload, err := h.Service.GetRevenueComparison(ctx, businessID, from, to)
 	if err != nil {
 		return GetRevenueComparisonResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

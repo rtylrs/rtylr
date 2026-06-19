@@ -17,7 +17,7 @@ type BestSellerRow struct {
 // GetBestSellers returns the top `limit` products by units sold in the
 // last 30 days. Units is a DECIMAL in the source table (pos allows
 // fractional kg/litres) so we carry float64 through.
-func (r *Repository) GetBestSellers(ctx context.Context, ownerID int64, limit int32) ([]BestSellerRow, error) {
+func (r *Repository) GetBestSellers(ctx context.Context, businessID int64, limit int32) ([]BestSellerRow, error) {
 	if limit <= 0 {
 		limit = 10
 	}
@@ -33,14 +33,14 @@ func (r *Repository) GetBestSellers(ctx context.Context, ownerID int64, limit in
 		       COALESCE(SUM(oi.total), 0)    AS revenue
 		FROM erp_products p
 		JOIN pos_order_items oi ON oi.menu_item_id = p.id
-		JOIN pos_orders o       ON o.id = oi.order_id AND o.owner_id = p.owner_id
-		WHERE p.owner_id = ?
+		JOIN pos_orders o       ON o.id = oi.order_id AND o.business_id = p.business_id
+		WHERE p.business_id = ?
 		  AND o.created_at >= ?
 		GROUP BY p.id, p.name
 		ORDER BY units DESC
 		LIMIT ?
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, cutoff, limit)
+	rows, err := r.pool.QueryContext(ctx, q, businessID, cutoff, limit)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: best sellers query failed", logger.Error(err))
 		return nil, err

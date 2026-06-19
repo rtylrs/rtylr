@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
@@ -40,7 +41,12 @@ func (h *CreateTemplateHandler) Serve(ctx context.Context, req *CreateTemplateRe
 		return CreateTemplateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	created, err := h.Service.CreateTemplate(ctx, device.User.UserID, domain.CreateTemplateParams{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateTemplateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	created, err := h.Service.CreateTemplate(ctx, businessID, domain.CreateTemplateParams{
 		Name:        req.Name,
 		TriggerType: req.TriggerType,
 		RoleID:      req.RoleID,

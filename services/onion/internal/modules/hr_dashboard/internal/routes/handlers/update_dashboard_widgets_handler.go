@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateDashboardWidgetsRoutes() []string { return []string{"/hr/dashboard/widgets"} }
@@ -29,9 +30,16 @@ func (h *UpdateDashboardWidgetsHandler) Serve(ctx context.Context, req *UpdateDa
 		return UpdateDashboardWidgetsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateDashboardWidgetsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	widgets := make([]*domain.DashboardWidget, 0, len(req.Widgets))
 	for _, w := range req.Widgets {
 		widgets = append(widgets, &domain.DashboardWidget{
+			OwnerID:    device.User.UserID,
+			BusinessID: businessID,
 			RoleID:     w.RoleID,
 			WidgetType: w.WidgetType,
 			PositionX:  w.PositionX,
@@ -42,9 +50,9 @@ func (h *UpdateDashboardWidgetsHandler) Serve(ctx context.Context, req *UpdateDa
 		})
 	}
 
-	err := h.Service.UpsertWidgets(ctx, device.User.UserID, widgets)
+	err := h.Service.UpsertWidgets(ctx, businessID, widgets)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to update dashboard widgets", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update dashboard widgets", logger.Any("business_id", businessID), logger.Error(err))
 		return UpdateDashboardWidgetsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update dashboard widgets"}
 	}
 

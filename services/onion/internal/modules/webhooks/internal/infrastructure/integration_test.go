@@ -25,8 +25,8 @@ func TestWebhooks_List_OwnerScoped(t *testing.T) {
 		t.Fatalf("List: %v", err)
 	}
 	for _, w := range webhooks {
-		if w.OwnerID != testutil.OwnerID {
-			t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, w.OwnerID)
+		if w.BusinessID != testutil.OwnerID {
+			t.Errorf("expected business_id %d, got %d", testutil.OwnerID, w.BusinessID)
 		}
 	}
 }
@@ -34,7 +34,7 @@ func TestWebhooks_List_OwnerScoped(t *testing.T) {
 func TestWebhooks_Create_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/webhook",
 		"secret123",
 		[]string{"order.created", "order.updated"},
@@ -51,7 +51,7 @@ func TestWebhooks_Create_ReturnsPositiveID(t *testing.T) {
 func TestWebhooks_Create_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/wh-list-test",
 		"secret",
 		[]string{"invoice.paid"},
@@ -83,7 +83,7 @@ func TestWebhooks_Create_EventsPreserved(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	events := []string{"customer.created", "customer.updated", "customer.deleted"}
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/events-webhook",
 		"secret",
 		events,
@@ -106,7 +106,7 @@ func TestWebhooks_Create_EventsPreserved(t *testing.T) {
 func TestWebhooks_Delete_RemovesFromList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/delete-me",
 		"secret",
 		[]string{"test.event"},
@@ -142,7 +142,7 @@ func TestWebhooks_List_UnknownOwner_Empty(t *testing.T) {
 func TestWebhooks_Create_EmptyEvents(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/no-events",
 		"secret",
 		[]string{},
@@ -166,7 +166,7 @@ func TestWebhooks_Create_Multiple(t *testing.T) {
 	}
 	ids := make([]int64, 0, len(urls))
 	for _, url := range urls {
-		id, err := repo.Create(context.Background(), testutil.OwnerID, url, "secret", []string{"test"})
+		id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, url, "secret", []string{"test"})
 		if err != nil {
 			t.Fatalf("Create %s: %v", url, err)
 		}
@@ -185,7 +185,7 @@ func TestWebhooks_Create_Multiple(t *testing.T) {
 func TestWebhooks_Create_SecretStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/secret-test",
 		"mysupersecret",
 		[]string{"order.paid"},
@@ -206,7 +206,7 @@ func TestWebhooks_Create_SecretStored(t *testing.T) {
 func TestWebhooks_List_EachHasPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/id-check-wh",
 		"secret",
 		[]string{"test"},
@@ -230,7 +230,7 @@ func TestWebhooks_List_EachHasPositiveID(t *testing.T) {
 func TestWebhooks_List_EachHasNonEmptyURL(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/url-check-wh",
 		"secret",
 		[]string{"test"},
@@ -264,7 +264,7 @@ func TestWebhooks_Delete_WrongOwner_NoError(t *testing.T) {
 func TestWebhooks_Create_SingleEvent(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/single-event-wh",
 		"secret",
 		[]string{"shipment.delivered"},
@@ -285,7 +285,7 @@ func TestWebhooks_Create_SingleEvent(t *testing.T) {
 func TestWebhooks_Create_UniqueIDsForDifferentURLs(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id1, err := repo.Create(context.Background(), testutil.OwnerID,
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/unique-1",
 		"secret",
 		[]string{"test"},
@@ -293,7 +293,7 @@ func TestWebhooks_Create_UniqueIDsForDifferentURLs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create 1: %v", err)
 	}
-	id2, err := repo.Create(context.Background(), testutil.OwnerID,
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/unique-2",
 		"secret",
 		[]string{"test"},
@@ -313,7 +313,7 @@ func TestWebhooks_Create_UniqueIDsForDifferentURLs(t *testing.T) {
 func TestWebhooks_List_AfterDeleteAll_CountDecreases(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/delete-count-wh",
 		"secret",
 		[]string{"test"},
@@ -356,7 +356,7 @@ func TestWebhooks_Create_ManyEvents(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	events := []string{"a.b", "c.d", "e.f", "g.h", "i.j"}
-	id, err := repo.Create(context.Background(), testutil.OwnerID,
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID,
 		"https://example.com/many-events-wh",
 		"secret",
 		events,

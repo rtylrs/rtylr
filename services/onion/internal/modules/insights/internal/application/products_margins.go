@@ -17,13 +17,13 @@ type MarginBucketPayload struct {
 }
 
 // GetMarginDistribution returns the bucketed margin histogram.
-func (s *Service) GetMarginDistribution(ctx context.Context, ownerID int64) ([]MarginBucketPayload, error) {
-	key := fmt.Sprintf("insights:%d:products:margins", ownerID)
+func (s *Service) GetMarginDistribution(ctx context.Context, businessID int64) ([]MarginBucketPayload, error) {
+	key := fmt.Sprintf("insights:%d:products:margins", businessID)
 	type result struct {
 		Buckets []MarginBucketPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetMarginDistribution(ctx, ownerID)
+		rows, rerr := s.repo.GetMarginDistribution(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr
 		}

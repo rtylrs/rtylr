@@ -24,16 +24,16 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
+func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
 	rows, err := r.queries.ListBankFeedTransactions(ctx, sqlc.ListBankFeedTransactionsParams{
-		OwnerID: ownerID,
-		Limit:   limit,
-		Offset:  offset,
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list bank feed transactions",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 		return nil, 0, err
 	}
@@ -43,6 +43,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 		items = append(items, domain.BankFeedTransaction{
 			ID:               row.ID,
 			OwnerID:          row.OwnerID,
+			BusinessID:       row.BusinessID,
 			BankAccountID:    row.BankAccountID,
 			AmountMinorUnits: row.AmountMinorUnits,
 			Currency:         row.Currency,
@@ -55,11 +56,11 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 		})
 	}
 
-	total, err := r.queries.CountBankFeedTransactions(ctx, ownerID)
+	total, err := r.queries.CountBankFeedTransactions(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count bank feed transactions",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 		)
 		return nil, 0, err
 	}
@@ -70,9 +71,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 // SumAmountByAccountID returns the net amount (sum of AmountMinorUnits) for
 // all feed transactions belonging to a specific bank account. Positive values
 // indicate net credits; negative values indicate net debits.
-func (r *Repository) SumAmountByAccountID(ctx context.Context, ownerID, bankAccountID int64) (int64, error) {
+func (r *Repository) SumAmountByAccountID(ctx context.Context, businessID, bankAccountID int64) (int64, error) {
 	result, err := r.queries.SumBankFeedAmountByAccount(ctx, sqlc.SumBankFeedAmountByAccountParams{
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		BankAccountID: bankAccountID,
 	})
 	if err != nil {
@@ -85,8 +86,8 @@ func (r *Repository) SumAmountByAccountID(ctx context.Context, ownerID, bankAcco
 
 // CountUnmatched returns the number of transactions that have neither a
 // matched_expense_id nor a matched_invoice_id.
-func (r *Repository) CountUnmatched(ctx context.Context, ownerID int64) (int64, error) {
-	cnt, err := r.queries.CountUnmatchedBankFeedTransactions(ctx, ownerID)
+func (r *Repository) CountUnmatched(ctx context.Context, businessID int64) (int64, error) {
+	cnt, err := r.queries.CountUnmatchedBankFeedTransactions(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count unmatched bank feed transactions", logger.Error(err))
 		return 0, err

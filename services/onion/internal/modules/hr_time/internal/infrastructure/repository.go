@@ -28,7 +28,7 @@ func NewRepository(db *sql.DB) *Repository {
 
 // --- Time Entries ---
 
-func (r *Repository) ListTimeEntries(ctx context.Context, ownerID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
+func (r *Repository) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
 	periodStart, err := time.Parse("2006-01-02", params.PeriodStart)
 	if err != nil {
 		return nil, 0, err
@@ -39,18 +39,18 @@ func (r *Repository) ListTimeEntries(ctx context.Context, ownerID int64, params 
 	}
 
 	total, err := r.queries.CountTimeEntries(ctx, sqlc.CountTimeEntriesParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: params.EmployeeID,
 		Date:       periodStart,
 		Date_2:     periodEnd,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to count time entries", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to count time entries", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListTimeEntries(ctx, sqlc.ListTimeEntriesParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: params.EmployeeID,
 		Date:       periodStart,
 		Date_2:     periodEnd,
@@ -58,7 +58,7 @@ func (r *Repository) ListTimeEntries(ctx context.Context, ownerID int64, params 
 		Offset:     params.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list time entries", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list time entries", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
@@ -69,27 +69,28 @@ func (r *Repository) ListTimeEntries(ctx context.Context, ownerID int64, params 
 	return entries, total, nil
 }
 
-func (r *Repository) GetTimeEntry(ctx context.Context, ownerID, entryID int64) (*domain.TimeEntryRecord, error) {
-	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{OwnerID: ownerID, ID: entryID})
+func (r *Repository) GetTimeEntry(ctx context.Context, businessID, entryID int64) (*domain.TimeEntryRecord, error) {
+	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{BusinessID: businessID, ID: entryID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTimeEntryNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get time entry", logger.Any("owner_id", ownerID), logger.Any("entry_id", entryID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get time entry", logger.Any("business_id", businessID), logger.Any("entry_id", entryID), logger.Error(err))
 		return nil, err
 	}
 	entry := timeEntryFromRow(row)
 	return &entry, nil
 }
 
-func (r *Repository) CreateTimeEntry(ctx context.Context, ownerID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
+func (r *Repository) CreateTimeEntry(ctx context.Context, businessID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
 	entryDate, err := time.Parse("2006-01-02", entry.Date)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := r.queries.CreateTimeEntry(ctx, sqlc.CreateTimeEntryParams{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
+		BusinessID:      businessID,
 		EmployeeID:      entry.EmployeeID,
 		TimesheetID:     nullInt64(entry.TimesheetID),
 		ProjectID:       nullInt64(entry.ProjectID),
@@ -107,7 +108,7 @@ func (r *Repository) CreateTimeEntry(ctx context.Context, ownerID int64, entry d
 		Source:          entry.Source,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create time entry", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create time entry", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	id, err := result.LastInsertId()
@@ -115,11 +116,12 @@ func (r *Repository) CreateTimeEntry(ctx context.Context, ownerID int64, entry d
 		return nil, err
 	}
 	entry.ID = id
-	entry.OwnerID = ownerID
+	entry.OwnerID = businessID
+	entry.BusinessID = businessID
 	return &entry, nil
 }
 
-func (r *Repository) UpdateTimeEntry(ctx context.Context, ownerID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
+func (r *Repository) UpdateTimeEntry(ctx context.Context, businessID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
 	entryDate, err := time.Parse("2006-01-02", entry.Date)
 	if err != nil {
 		return nil, err
@@ -142,45 +144,45 @@ func (r *Repository) UpdateTimeEntry(ctx context.Context, ownerID int64, entry d
 		ApprovedBy:      nullInt64(entry.ApprovedBy),
 		Source:          entry.Source,
 		ID:              entry.ID,
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to update time entry", logger.Any("owner_id", ownerID), logger.Any("entry_id", entry.ID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update time entry", logger.Any("business_id", businessID), logger.Any("entry_id", entry.ID), logger.Error(err))
 		return nil, err
 	}
-	entry.OwnerID = ownerID
+	entry.BusinessID = businessID
 	return &entry, nil
 }
 
-func (r *Repository) DeleteTimeEntry(ctx context.Context, ownerID, entryID int64) error {
+func (r *Repository) DeleteTimeEntry(ctx context.Context, businessID, entryID int64) error {
 	return r.queries.DeleteTimeEntry(ctx, sqlc.DeleteTimeEntryParams{
-		OwnerID: ownerID,
-		ID:      entryID,
+		BusinessID: businessID,
+		ID:         entryID,
 	})
 }
 
 // --- Timesheets ---
 
-func (r *Repository) GetTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
-	row, err := r.queries.GetTimesheet(ctx, sqlc.GetTimesheetParams{OwnerID: ownerID, ID: timesheetID})
+func (r *Repository) GetTimesheet(ctx context.Context, businessID, timesheetID int64) (*domain.TimesheetRecord, error) {
+	row, err := r.queries.GetTimesheet(ctx, sqlc.GetTimesheetParams{BusinessID: businessID, ID: timesheetID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTimesheetNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get timesheet", logger.Any("owner_id", ownerID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get timesheet", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
 		return nil, err
 	}
 	ts := timesheetFromRow(row)
 	return &ts, nil
 }
 
-func (r *Repository) GetTimesheetForPeriod(ctx context.Context, ownerID, employeeID int64, periodStart string) (*domain.TimesheetRecord, error) {
+func (r *Repository) GetTimesheetForPeriod(ctx context.Context, businessID, employeeID int64, periodStart string) (*domain.TimesheetRecord, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
 		return nil, err
 	}
 	row, err := r.queries.GetTimesheetForPeriod(ctx, sqlc.GetTimesheetForPeriodParams{
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		EmployeeID:  employeeID,
 		PeriodStart: ps,
 	})
@@ -194,7 +196,7 @@ func (r *Repository) GetTimesheetForPeriod(ctx context.Context, ownerID, employe
 	return &ts, nil
 }
 
-func (r *Repository) UpsertTimesheet(ctx context.Context, ownerID int64, ts domain.TimesheetRecord) (*domain.TimesheetRecord, error) {
+func (r *Repository) UpsertTimesheet(ctx context.Context, businessID int64, ts domain.TimesheetRecord) (*domain.TimesheetRecord, error) {
 	ps, err := time.Parse("2006-01-02", ts.PeriodStart)
 	if err != nil {
 		return nil, err
@@ -205,7 +207,8 @@ func (r *Repository) UpsertTimesheet(ctx context.Context, ownerID int64, ts doma
 	}
 
 	result, err := r.queries.CreateTimesheet(ctx, sqlc.CreateTimesheetParams{
-		OwnerID:              ownerID,
+		OwnerID:              businessID,
+		BusinessID:           businessID,
 		EmployeeID:           ts.EmployeeID,
 		PeriodStart:          ps,
 		PeriodEnd:            pe,
@@ -214,7 +217,7 @@ func (r *Repository) UpsertTimesheet(ctx context.Context, ownerID int64, ts doma
 		TotalMinutes:         ts.TotalMinutes,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create timesheet", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create timesheet", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	id, err := result.LastInsertId()
@@ -222,28 +225,29 @@ func (r *Repository) UpsertTimesheet(ctx context.Context, ownerID int64, ts doma
 		return nil, err
 	}
 	ts.ID = id
-	ts.OwnerID = ownerID
+	ts.OwnerID = businessID
+	ts.BusinessID = businessID
 	return &ts, nil
 }
 
-func (r *Repository) ListTimesheets(ctx context.Context, ownerID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
+func (r *Repository) ListTimesheets(ctx context.Context, businessID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
 	total, err := r.queries.CountTimesheets(ctx, sqlc.CountTimesheetsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: params.EmployeeID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to count timesheets", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to count timesheets", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListTimesheets(ctx, sqlc.ListTimesheetsParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: params.EmployeeID,
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list timesheets", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list timesheets", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
@@ -254,7 +258,7 @@ func (r *Repository) ListTimesheets(ctx context.Context, ownerID int64, params d
 	return timesheets, total, nil
 }
 
-func (r *Repository) SubmitTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
+func (r *Repository) SubmitTimesheet(ctx context.Context, businessID, timesheetID int64) (*domain.TimesheetRecord, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -268,14 +272,15 @@ func (r *Repository) SubmitTimesheet(ctx context.Context, ownerID, timesheetID i
 
 	qtx := r.queries.WithTx(tx)
 
-	if err := qtx.SubmitTimesheet(ctx, sqlc.SubmitTimesheetParams{ID: timesheetID, OwnerID: ownerID}); err != nil {
+	if err := qtx.SubmitTimesheet(ctx, sqlc.SubmitTimesheetParams{ID: timesheetID, BusinessID: businessID}); err != nil {
 		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("failed to submit timesheet", logger.Any("owner_id", ownerID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to submit timesheet", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
 		return nil, err
 	}
 
 	if err := qtx.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		TimesheetID: timesheetID,
 		ApproverID:  0,
 		Action:      "submitted",
@@ -283,7 +288,7 @@ func (r *Repository) SubmitTimesheet(ctx context.Context, ownerID, timesheetID i
 		Comment:     nullString(""),
 	}); err != nil {
 		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("failed to create submission approval action", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create submission approval action", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 
@@ -291,11 +296,11 @@ func (r *Repository) SubmitTimesheet(ctx context.Context, ownerID, timesheetID i
 		return nil, err
 	}
 
-	return r.GetTimesheet(ctx, ownerID, timesheetID)
+	return r.GetTimesheet(ctx, businessID, timesheetID)
 }
 
-func (r *Repository) AdvanceApprovalLevel(ctx context.Context, ownerID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
-	ts, err := r.GetTimesheet(ctx, ownerID, timesheetID)
+func (r *Repository) AdvanceApprovalLevel(ctx context.Context, businessID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
+	ts, err := r.GetTimesheet(ctx, businessID, timesheetID)
 	if err != nil {
 		return nil, err
 	}
@@ -313,13 +318,14 @@ func (r *Repository) AdvanceApprovalLevel(ctx context.Context, ownerID, timeshee
 
 	qtx := r.queries.WithTx(tx)
 
-	if err := qtx.AdvanceApprovalLevel(ctx, sqlc.AdvanceApprovalLevelParams{ID: timesheetID, OwnerID: ownerID}); err != nil {
+	if err := qtx.AdvanceApprovalLevel(ctx, sqlc.AdvanceApprovalLevelParams{ID: timesheetID, BusinessID: businessID}); err != nil {
 		_ = tx.Rollback()
 		return nil, err
 	}
 
 	if err := qtx.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		TimesheetID: timesheetID,
 		ApproverID:  approverID,
 		Action:      "approved",
@@ -334,32 +340,33 @@ func (r *Repository) AdvanceApprovalLevel(ctx context.Context, ownerID, timeshee
 		return nil, err
 	}
 
-	return r.GetTimesheet(ctx, ownerID, timesheetID)
+	return r.GetTimesheet(ctx, businessID, timesheetID)
 }
 
-func (r *Repository) RejectTimesheet(ctx context.Context, ownerID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
+func (r *Repository) RejectTimesheet(ctx context.Context, businessID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
 	err := r.queries.RejectTimesheet(ctx, sqlc.RejectTimesheetParams{
 		RejectionReason: nullString(reason),
 		ID:              timesheetID,
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to reject timesheet", logger.Any("owner_id", ownerID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to reject timesheet", logger.Any("business_id", businessID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
 		return nil, err
 	}
-	return r.GetTimesheet(ctx, ownerID, timesheetID)
+	return r.GetTimesheet(ctx, businessID, timesheetID)
 }
 
-func (r *Repository) LockTimesheet(ctx context.Context, ownerID, timesheetID int64) error {
+func (r *Repository) LockTimesheet(ctx context.Context, businessID, timesheetID int64) error {
 	return r.queries.LockTimesheet(ctx, sqlc.LockTimesheetParams{
-		ID:      timesheetID,
-		OwnerID: ownerID,
+		ID:         timesheetID,
+		BusinessID: businessID,
 	})
 }
 
-func (r *Repository) CreateApprovalAction(ctx context.Context, ownerID int64, action domain.ApprovalActionRecord) error {
+func (r *Repository) CreateApprovalAction(ctx context.Context, businessID int64, action domain.ApprovalActionRecord) error {
 	return r.queries.CreateApprovalAction(ctx, sqlc.CreateApprovalActionParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		TimesheetID: action.TimesheetID,
 		ApproverID:  action.ApproverID,
 		Action:      action.Action,
@@ -368,9 +375,9 @@ func (r *Repository) CreateApprovalAction(ctx context.Context, ownerID int64, ac
 	})
 }
 
-func (r *Repository) GetTimeEntryBySourceAndTask(ctx context.Context, ownerID, employeeID int64, source string, taskID int64) (*domain.TimeEntryRecord, error) {
+func (r *Repository) GetTimeEntryBySourceAndTask(ctx context.Context, businessID, employeeID int64, source string, taskID int64) (*domain.TimeEntryRecord, error) {
 	row, err := r.queries.GetTimeEntryBySourceAndTask(ctx, sqlc.GetTimeEntryBySourceAndTaskParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Source:     source,
 		TaskID:     nullInt64(taskID),
@@ -386,10 +393,10 @@ func (r *Repository) GetTimeEntryBySourceAndTask(ctx context.Context, ownerID, e
 }
 
 // GetExistingTaskIDsBySource returns the set of task IDs (from the given
-// candidate list) that already have a time entry for the owner/employee/source
+// candidate list) that already have a time entry for the business/employee/source
 // combination. This batches what would otherwise be a per-task existence check
 // into a single WHERE task_id IN (...) query.
-func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, ownerID, employeeID int64, source string, taskIDs []int64) (map[int64]struct{}, error) {
+func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, businessID, employeeID int64, source string, taskIDs []int64) (map[int64]struct{}, error) {
 	existing := make(map[int64]struct{}, len(taskIDs))
 	if len(taskIDs) == 0 {
 		return existing, nil
@@ -398,7 +405,7 @@ func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, ownerID, em
 	sqlStr, args, err := sq.Select("task_id").
 		From("hr_time_entries").
 		Where(sq.Eq{
-			"owner_id":    ownerID,
+			"business_id": businessID,
 			"employee_id": employeeID,
 			"source":      source,
 			"task_id":     taskIDs,
@@ -407,14 +414,14 @@ func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, ownerID, em
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to build existing task entries query",
-			logger.Any("owner_id", ownerID), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 
 	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to batch-check existing task entries",
-			logger.Any("owner_id", ownerID), logger.Error(err))
+			logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	defer rows.Close()
@@ -432,10 +439,10 @@ func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, ownerID, em
 	return existing, rows.Err()
 }
 
-func (r *Repository) ListApprovedBillableEntries(ctx context.Context, ownerID int64) ([]domain.TimeEntryRecord, error) {
-	rows, err := r.queries.ListApprovedBillableEntries(ctx, ownerID)
+func (r *Repository) ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]domain.TimeEntryRecord, error) {
+	rows, err := r.queries.ListApprovedBillableEntries(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list approved billable entries", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list approved billable entries", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	entries := make([]domain.TimeEntryRecord, 0, len(rows))
@@ -445,15 +452,15 @@ func (r *Repository) ListApprovedBillableEntries(ctx context.Context, ownerID in
 	return entries, nil
 }
 
-func (r *Repository) MarkEntryExported(ctx context.Context, ownerID, entryID, billableInvoiceID int64) error {
+func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID, billableInvoiceID int64) error {
 	return r.queries.MarkEntryExported(ctx, sqlc.MarkEntryExportedParams{
 		BillableInvoiceID: nullInt64(billableInvoiceID),
 		ID:                entryID,
-		OwnerID:           ownerID,
+		BusinessID:        businessID,
 	})
 }
 
-func (r *Repository) ListUnsubmittedEmployees(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]int64, error) {
+func (r *Repository) ListUnsubmittedEmployees(ctx context.Context, businessID int64, periodStart, periodEnd string) ([]int64, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
 		return nil, err
@@ -464,7 +471,7 @@ func (r *Repository) ListUnsubmittedEmployees(ctx context.Context, ownerID int64
 	}
 	return r.queries.ListUnsubmittedEmployees(ctx, sqlc.ListUnsubmittedEmployeesParams{
 		PeriodStart: ps,
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		Date:        ps,
 		Date_2:      pe,
 	})
@@ -476,6 +483,7 @@ func timeEntryFromRow(row sqlc.HrTimeEntry) domain.TimeEntryRecord {
 	return domain.TimeEntryRecord{
 		ID:                row.ID,
 		OwnerID:           row.OwnerID,
+		BusinessID:        row.BusinessID,
 		EmployeeID:        row.EmployeeID,
 		TimesheetID:       row.TimesheetID.Int64,
 		ProjectID:         row.ProjectID.Int64,
@@ -501,6 +509,7 @@ func timesheetFromRow(row sqlc.HrTimesheet) domain.TimesheetRecord {
 	return domain.TimesheetRecord{
 		ID:                   row.ID,
 		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
 		EmployeeID:           row.EmployeeID,
 		PeriodStart:          row.PeriodStart.Format("2006-01-02"),
 		PeriodEnd:            row.PeriodEnd.Format("2006-01-02"),

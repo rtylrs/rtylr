@@ -19,42 +19,42 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Appointment, error) {
-	cacheKey := "booking_appointments:" + strconv.FormatInt(ownerID, 10)
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Appointment, error) {
+	cacheKey := "booking_appointments:" + strconv.FormatInt(businessID, 10)
 	return cacher.Of[[]domain.Appointment]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Appointment, error) {
-		return s.repo.List(ctx, ownerID)
+		return s.repo.List(ctx, businessID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
 }
 
-func (s *Service) ListToday(ctx context.Context, ownerID int64) ([]domain.Appointment, error) {
-	return s.repo.ListToday(ctx, ownerID)
+func (s *Service) ListToday(ctx context.Context, businessID int64) ([]domain.Appointment, error) {
+	return s.repo.ListToday(ctx, businessID)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.AppointmentInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.AppointmentInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.AppointmentInput) error {
-	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.AppointmentInput) error {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
 		return err
 	}
-	s.invalidateCache(ctx, ownerID)
+	s.invalidateCache(ctx, businessID)
 	return nil
 }
 
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	cacher.Of[[]domain.Appointment]().Invalidate(ctx, []string{"booking_appointments:" + strconv.FormatInt(ownerID, 10)})
+func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
+	cacher.Of[[]domain.Appointment]().Invalidate(ctx, []string{"booking_appointments:" + strconv.FormatInt(businessID, 10)})
 }

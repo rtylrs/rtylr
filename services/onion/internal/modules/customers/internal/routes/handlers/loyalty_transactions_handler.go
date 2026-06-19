@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
@@ -65,6 +66,11 @@ func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoy
 		return ListLoyaltyTransactionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListLoyaltyTransactionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	if req.Page < 1 {
 		req.Page = 1
 	}
@@ -73,7 +79,7 @@ func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoy
 		req.PageSize = 20
 	}
 
-	txs, total, err := h.CRMService.ListLoyaltyTransactions(ctx, device.User.UserID, req.CustomerID, req.Page, req.PageSize)
+	txs, total, err := h.CRMService.ListLoyaltyTransactions(ctx, businessID, req.CustomerID, req.Page, req.PageSize)
 	if err != nil {
 		return ListLoyaltyTransactionsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

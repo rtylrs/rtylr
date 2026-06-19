@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -42,12 +43,17 @@ func (m *Module) executeListBillsTool(ctx context.Context, input map[string]any)
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
 	parsed, err := parseListBillsToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	bills, err := m.service.List(ctx, authUser.UserID)
+	bills, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,12 +81,17 @@ func (m *Module) executeRecordBillTool(ctx context.Context, input map[string]any
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
 	parsed, err := parseRecordBillToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := m.service.Create(ctx, authUser.UserID, parsed)
+	id, err := m.service.Create(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}

@@ -70,8 +70,12 @@ func (h *ListWarehousesHandler) Serve(ctx context.Context, _ *ListWarehousesRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	warehouses, err := h.Service.ListWarehouses(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListWarehousesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	warehouses, err := h.Service.ListWarehouses(ctx, businessID)
 	if err != nil {
 		return ListWarehousesResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -147,8 +151,12 @@ func (h *CreateWarehouseHandler) Serve(ctx context.Context, req *CreateWarehouse
 		IsActive:    req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := h.Service.CreateWarehouse(ctx, ownerID, input)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateWarehouseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreateWarehouse(ctx, businessID, input)
 	if err != nil {
 		return CreateWarehouseResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -227,8 +235,12 @@ func (h *UpdateWarehouseHandler) Serve(ctx context.Context, req *UpdateWarehouse
 		IsActive:    req.IsActive,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.UpdateWarehouse(ctx, ownerID, req.ID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateWarehouseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.UpdateWarehouse(ctx, businessID, req.ID, input); err != nil {
 		return UpdateWarehouseResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -279,8 +291,12 @@ func (h *DeleteWarehouseHandler) Serve(ctx context.Context, req *DeleteWarehouse
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.DeleteWarehouse(ctx, ownerID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteWarehouseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteWarehouse(ctx, businessID, req.ID); err != nil {
 		return DeleteWarehouseResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

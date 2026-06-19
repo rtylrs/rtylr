@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // POST /insights/reports/generate/revenue
@@ -67,5 +68,9 @@ func (h *GenerateRevenueReportHandler) Serve(ctx context.Context, _ *GenerateRev
 	if device.User == nil {
 		return GenerateRevenueReportResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	return h.Service.QueueRevenueReport(ctx, device.User.UserID), nil
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GenerateRevenueReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	return h.Service.QueueRevenueReport(ctx, businessID), nil
 }

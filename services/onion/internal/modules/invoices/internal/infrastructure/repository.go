@@ -34,16 +34,16 @@ func NewRepository(db *sql.DB) *Repository {
 // Invoices
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
+func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
 	// Dynamic filters: built with squirrel since sqlc cannot handle optional WHERE clauses.
 	qb := squirrel.Select(
-		"id", "owner_id", "invoice_number", "client_name", "client_email", "client_address", "client_tax_id",
+		"id", "owner_id", "business_id", "invoice_number", "client_name", "client_email", "client_address", "client_tax_id",
 		"status", "issue_date", "due_date", "paid_date", "currency", "subtotal", "discount_type",
 		"discount_value", "discount_amount", "tax_rate", "tax_amount", "total", "amount_paid", "amount_due",
 		"notes", "terms", "created_at", "updated_at",
 	).
 		From("finance_invoices").
-		Where(squirrel.Eq{"owner_id": ownerID})
+		Where(squirrel.Eq{"business_id": businessID})
 
 	if status != "" {
 		qb = qb.Where(squirrel.Eq{"status": status})
@@ -91,10 +91,10 @@ func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, se
 	return invoices, rows.Err()
 }
 
-func (r *Repository) GetInvoiceByID(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error) {
+func (r *Repository) GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error) {
 	row, err := r.queries.GetInvoiceByID(ctx, sqlc.GetInvoiceByIDParams{
-		ID:      invoiceID,
-		OwnerID: ownerID,
+		ID:         invoiceID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -110,7 +110,7 @@ func (r *Repository) GetInvoiceByID(ctx context.Context, ownerID, invoiceID int6
 	return &inv, nil
 }
 
-func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) (int64, error) {
+func (r *Repository) CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin invoice transaction", logger.Error(err))
@@ -122,7 +122,7 @@ func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domai
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  inv.ClientName,
 		Email: inv.ClientEmail,
 	}); err != nil {
@@ -131,7 +131,8 @@ func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domai
 	}
 
 	result, err := r.queries.WithTx(tx).CreateInvoice(ctx, sqlc.CreateInvoiceParams{
-		OwnerID:        ownerID,
+		OwnerID:        businessID,
+		BusinessID:     businessID,
 		InvoiceNumber:  inv.InvoiceNumber,
 		ClientName:     inv.ClientName,
 		ClientEmail:    sqlNullString(inv.ClientEmail),
@@ -242,7 +243,7 @@ func (r *Repository) DeleteInvoiceItems(ctx context.Context, invoiceID int64) er
 	return err
 }
 
-func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) error {
+func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin invoice update transaction", logger.Error(err))
@@ -254,7 +255,7 @@ func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domai
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  inv.ClientName,
 		Email: inv.ClientEmail,
 	}); err != nil {
@@ -281,7 +282,7 @@ func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domai
 		Notes:          sqlNullString(inv.Notes),
 		Terms:          sqlNullString(inv.Terms),
 		ID:             inv.ID,
-		OwnerID:        ownerID,
+		BusinessID:     businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice", logger.Error(err))
@@ -296,11 +297,11 @@ func (r *Repository) UpdateInvoice(ctx context.Context, ownerID int64, inv domai
 	return nil
 }
 
-func (r *Repository) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error {
+func (r *Repository) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
 	err := r.queries.UpdateInvoiceStatus(ctx, sqlc.UpdateInvoiceStatusParams{
-		Status:  sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
-		ID:      invoiceID,
-		OwnerID: ownerID,
+		Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
+		ID:         invoiceID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice status", logger.Error(err))
@@ -309,7 +310,7 @@ func (r *Repository) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID
 	return err
 }
 
-func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, ownerID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error {
+func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error {
 	if paidDate != nil {
 		err := r.queries.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
 			AmountPaid: sqlNullString(fmtFloat(amountPaid)),
@@ -317,7 +318,7 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, ownerID, in
 			Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
 			PaidDate:   sql.NullTime{Time: *paidDate, Valid: true},
 			ID:         invoiceID,
-			OwnerID:    ownerID,
+			BusinessID: businessID,
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to update invoice payment totals", logger.Error(err))
@@ -331,7 +332,7 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, ownerID, in
 		AmountDue:  sqlNullString(fmtFloat(amountDue)),
 		Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
 		ID:         invoiceID,
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice payment totals", logger.Error(err))
@@ -340,10 +341,10 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, ownerID, in
 	return err
 }
 
-func (r *Repository) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error {
+func (r *Repository) DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error {
 	err := r.queries.DeleteInvoice(ctx, sqlc.DeleteInvoiceParams{
-		ID:      invoiceID,
-		OwnerID: ownerID,
+		ID:         invoiceID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete invoice", logger.Error(err))
@@ -352,10 +353,10 @@ func (r *Repository) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64
 	return err
 }
 
-func (r *Repository) CountInvoiceSequence(ctx context.Context, ownerID int64, year int) (int64, error) {
+func (r *Repository) CountInvoiceSequence(ctx context.Context, businessID int64, year int) (int64, error) {
 	count, err := r.queries.CountInvoiceSequence(ctx, sqlc.CountInvoiceSequenceParams{
-		OwnerID:   ownerID,
-		CreatedAt: sql.NullTime{Time: time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		BusinessID: businessID,
+		CreatedAt:  sql.NullTime{Time: time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count invoice sequence", logger.Error(err))
@@ -370,9 +371,10 @@ func (r *Repository) CountInvoiceSequence(ctx context.Context, ownerID int64, ye
 // Payments
 // ---------------------------------------------------------------------------
 
-func (r *Repository) CreatePayment(ctx context.Context, ownerID int64, p domain.Payment) (int64, error) {
+func (r *Repository) CreatePayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error) {
 	result, err := r.queries.CreatePayment(ctx, sqlc.CreatePaymentParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		InvoiceID:   p.InvoiceID,
 		Amount:      fmtFloat(p.Amount),
 		Currency:    sqlNullString(p.Currency),
@@ -410,6 +412,7 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 		payments = append(payments, domain.Payment{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
 			InvoiceID:   row.InvoiceID,
 			Amount:      parseFloat(row.Amount),
 			Currency:    nullStr(row.Currency, "USD"),
@@ -428,14 +431,14 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error) {
+func (r *Repository) ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error) {
 	// Dynamic filters: built with squirrel since sqlc cannot handle optional WHERE clauses.
 	qb := squirrel.Select(
-		"id", "owner_id", "category_id", "description", "amount", "currency", "expense_date", "vendor",
+		"id", "owner_id", "business_id", "category_id", "description", "amount", "currency", "expense_date", "vendor",
 		"payment_method", "receipt_url", "is_tax_deductible", "tax_amount", "notes", "created_at", "updated_at",
 	).
 		From("finance_expenses").
-		Where(squirrel.Eq{"owner_id": ownerID})
+		Where(squirrel.Eq{"business_id": businessID})
 
 	if categoryID > 0 {
 		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
@@ -483,10 +486,10 @@ func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64
 	return expenses, rows.Err()
 }
 
-func (r *Repository) GetExpenseByID(ctx context.Context, ownerID, expenseID int64) (*domain.Expense, error) {
+func (r *Repository) GetExpenseByID(ctx context.Context, businessID, expenseID int64) (*domain.Expense, error) {
 	row, err := r.queries.GetExpenseByID(ctx, sqlc.GetExpenseByIDParams{
-		ID:      expenseID,
-		OwnerID: ownerID,
+		ID:         expenseID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -502,9 +505,10 @@ func (r *Repository) GetExpenseByID(ctx context.Context, ownerID, expenseID int6
 	return &e, nil
 }
 
-func (r *Repository) CreateExpense(ctx context.Context, ownerID int64, e domain.Expense) (int64, error) {
+func (r *Repository) CreateExpense(ctx context.Context, businessID int64, e domain.Expense) (int64, error) {
 	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
+		BusinessID:      businessID,
 		CategoryID:      sqlNullInt64(e.CategoryID),
 		Description:     e.Description,
 		Amount:          fmtFloat(e.Amount),
@@ -533,7 +537,7 @@ func (r *Repository) CreateExpense(ctx context.Context, ownerID int64, e domain.
 	return id, nil
 }
 
-func (r *Repository) UpdateExpense(ctx context.Context, ownerID int64, e domain.Expense) error {
+func (r *Repository) UpdateExpense(ctx context.Context, businessID int64, e domain.Expense) error {
 	err := r.queries.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 		CategoryID:      sqlNullInt64(e.CategoryID),
 		Description:     e.Description,
@@ -547,7 +551,7 @@ func (r *Repository) UpdateExpense(ctx context.Context, ownerID int64, e domain.
 		TaxAmount:       sqlNullString(fmtFloat(e.TaxAmount)),
 		Notes:           sqlNullString(e.Notes),
 		ID:              e.ID,
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense", logger.Error(err))
@@ -556,10 +560,10 @@ func (r *Repository) UpdateExpense(ctx context.Context, ownerID int64, e domain.
 	return err
 }
 
-func (r *Repository) DeleteExpense(ctx context.Context, ownerID, expenseID int64) error {
+func (r *Repository) DeleteExpense(ctx context.Context, businessID, expenseID int64) error {
 	err := r.queries.DeleteExpense(ctx, sqlc.DeleteExpenseParams{
-		ID:      expenseID,
-		OwnerID: ownerID,
+		ID:         expenseID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete expense", logger.Error(err))
@@ -572,8 +576,8 @@ func (r *Repository) DeleteExpense(ctx context.Context, ownerID, expenseID int64
 // Expense Categories
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListExpenseCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
-	rows, err := r.queries.ListExpenseCategories(ctx, ownerID)
+func (r *Repository) ListExpenseCategories(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error) {
+	rows, err := r.queries.ListExpenseCategories(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expense categories", logger.Error(err))
 
@@ -583,24 +587,26 @@ func (r *Repository) ListExpenseCategories(ctx context.Context, ownerID int64) (
 	categories := make([]domain.ExpenseCategory, 0, len(rows))
 	for _, row := range rows {
 		categories = append(categories, domain.ExpenseCategory{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Color:     nullStr(row.Color, ""),
-			Icon:      nullStr(row.Icon, ""),
-			CreatedAt: nullTime(row.CreatedAt),
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Color:      nullStr(row.Color, ""),
+			Icon:       nullStr(row.Icon, ""),
+			CreatedAt:  nullTime(row.CreatedAt),
 		})
 	}
 
 	return categories, nil
 }
 
-func (r *Repository) CreateExpenseCategory(ctx context.Context, ownerID int64, c domain.ExpenseCategory) (int64, error) {
+func (r *Repository) CreateExpenseCategory(ctx context.Context, businessID int64, c domain.ExpenseCategory) (int64, error) {
 	result, err := r.queries.CreateExpenseCategory(ctx, sqlc.CreateExpenseCategoryParams{
-		OwnerID: ownerID,
-		Name:    c.Name,
-		Color:   sqlNullString(c.Color),
-		Icon:    sqlNullString(c.Icon),
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		Name:       c.Name,
+		Color:      sqlNullString(c.Color),
+		Icon:       sqlNullString(c.Icon),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense category", logger.Error(err))
@@ -622,8 +628,8 @@ func (r *Repository) CreateExpenseCategory(ctx context.Context, ownerID int64, c
 // Tax Config
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListTaxConfigs(ctx context.Context, ownerID int64) ([]domain.TaxConfig, error) {
-	rows, err := r.queries.ListTaxConfigs(ctx, ownerID)
+func (r *Repository) ListTaxConfigs(ctx context.Context, businessID int64) ([]domain.TaxConfig, error) {
+	rows, err := r.queries.ListTaxConfigs(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list tax configs", logger.Error(err))
 
@@ -633,28 +639,30 @@ func (r *Repository) ListTaxConfigs(ctx context.Context, ownerID int64) ([]domai
 	configs := make([]domain.TaxConfig, 0, len(rows))
 	for _, row := range rows {
 		configs = append(configs, domain.TaxConfig{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Rate:      parseFloat(row.Rate),
-			Type:      nullEnumStr(row.Type.FinanceTaxConfigType, row.Type.Valid, "vat"),
-			IsDefault: nullBool(row.IsDefault),
-			IsActive:  nullBool(row.IsActive),
-			CreatedAt: nullTime(row.CreatedAt),
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Rate:       parseFloat(row.Rate),
+			Type:       nullEnumStr(row.Type.FinanceTaxConfigType, row.Type.Valid, "vat"),
+			IsDefault:  nullBool(row.IsDefault),
+			IsActive:   nullBool(row.IsActive),
+			CreatedAt:  nullTime(row.CreatedAt),
 		})
 	}
 
 	return configs, nil
 }
 
-func (r *Repository) CreateTaxConfig(ctx context.Context, ownerID int64, t domain.TaxConfig) (int64, error) {
+func (r *Repository) CreateTaxConfig(ctx context.Context, businessID int64, t domain.TaxConfig) (int64, error) {
 	result, err := r.queries.CreateTaxConfig(ctx, sqlc.CreateTaxConfigParams{
-		OwnerID:   ownerID,
-		Name:      t.Name,
-		Rate:      fmtFloat(t.Rate),
-		Type:      sqlc.NullFinanceTaxConfigType{FinanceTaxConfigType: sqlc.FinanceTaxConfigType(t.Type), Valid: t.Type != ""},
-		IsDefault: sql.NullBool{Bool: t.IsDefault, Valid: true},
-		IsActive:  sql.NullBool{Bool: true, Valid: true},
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		Name:       t.Name,
+		Rate:       fmtFloat(t.Rate),
+		Type:       sqlc.NullFinanceTaxConfigType{FinanceTaxConfigType: sqlc.FinanceTaxConfigType(t.Type), Valid: t.Type != ""},
+		IsDefault:  sql.NullBool{Bool: t.IsDefault, Valid: true},
+		IsActive:   sql.NullBool{Bool: true, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create tax config", logger.Error(err))
@@ -676,9 +684,9 @@ func (r *Repository) CreateTaxConfig(ctx context.Context, ownerID int64, t domai
 // Reports
 // ---------------------------------------------------------------------------
 
-func (r *Repository) SumPaidInvoices(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+func (r *Repository) SumPaidInvoices(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	result, err := r.queries.SumPaidInvoices(ctx, sqlc.SumPaidInvoicesParams{
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		FromPaidDate: sqlNullTimeStr(dateFrom),
 		ToPaidDate:   sqlNullTimeStr(dateTo),
 	})
@@ -691,7 +699,7 @@ func (r *Repository) SumPaidInvoices(ctx context.Context, ownerID int64, dateFro
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumExpenses(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+func (r *Repository) SumExpenses(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	dfTime, err := time.Parse("2006-01-02", dateFrom)
 	if err != nil && dateFrom != "" {
 		logger.Ctx(ctx).Error("Failed to parse dateFrom for SumExpenses", logger.Error(err))
@@ -704,7 +712,7 @@ func (r *Repository) SumExpenses(ctx context.Context, ownerID int64, dateFrom, d
 	}
 
 	result, err := r.queries.SumExpenses(ctx, sqlc.SumExpensesParams{
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		FromExpenseDate: dfTime,
 		ToExpenseDate:   dtTime,
 	})
@@ -717,8 +725,8 @@ func (r *Repository) SumExpenses(ctx context.Context, ownerID int64, dateFrom, d
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumTotalReceivable(ctx context.Context, ownerID int64) (float64, error) {
-	result, err := r.queries.SumTotalReceivable(ctx, ownerID)
+func (r *Repository) SumTotalReceivable(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumTotalReceivable(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum total receivable", logger.Error(err))
 
@@ -728,8 +736,8 @@ func (r *Repository) SumTotalReceivable(ctx context.Context, ownerID int64) (flo
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumOverdueAmount(ctx context.Context, ownerID int64) (float64, error) {
-	result, err := r.queries.SumOverdueAmount(ctx, ownerID)
+func (r *Repository) SumOverdueAmount(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumOverdueAmount(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum overdue amount", logger.Error(err))
 
@@ -739,9 +747,9 @@ func (r *Repository) SumOverdueAmount(ctx context.Context, ownerID int64) (float
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumTaxCollected(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+func (r *Repository) SumTaxCollected(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	result, err := r.queries.SumTaxCollected(ctx, sqlc.SumTaxCollectedParams{
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		FromPaidDate: sqlNullTimeStr(dateFrom),
 		ToPaidDate:   sqlNullTimeStr(dateTo),
 	})
@@ -754,7 +762,7 @@ func (r *Repository) SumTaxCollected(ctx context.Context, ownerID int64, dateFro
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+func (r *Repository) SumTaxOwed(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	dfTime, err := time.Parse("2006-01-02", dateFrom)
 	if err != nil && dateFrom != "" {
 		logger.Ctx(ctx).Error("Failed to parse dateFrom for SumTaxOwed", logger.Error(err))
@@ -767,7 +775,7 @@ func (r *Repository) SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, da
 	}
 
 	result, err := r.queries.SumTaxOwed(ctx, sqlc.SumTaxOwedParams{
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		FromExpenseDate: dfTime,
 		ToExpenseDate:   dtTime,
 	})
@@ -783,8 +791,8 @@ func (r *Repository) SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, da
 // CountInvoicesByStatus returns how many invoices the owner has in each
 // status bucket. The returned map uses status strings as keys (e.g. "draft",
 // "paid"). An empty map is returned when the owner has no invoices.
-func (r *Repository) CountInvoicesByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	rows, err := r.queries.CountInvoicesByStatus(ctx, ownerID)
+func (r *Repository) CountInvoicesByStatus(ctx context.Context, businessID int64) (map[string]int64, error) {
+	rows, err := r.queries.CountInvoicesByStatus(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count invoices by status", logger.Error(err))
 
@@ -802,7 +810,7 @@ func (r *Repository) CountInvoicesByStatus(ctx context.Context, ownerID int64) (
 // GetOverdueInvoices returns all unpaid invoices whose due_date is before
 // the given cutoff (expressed as YYYY-MM-DD). Pass an empty string to use
 // today's date.
-func (r *Repository) GetOverdueInvoices(ctx context.Context, ownerID int64, beforeDate string) ([]domain.Invoice, error) {
+func (r *Repository) GetOverdueInvoices(ctx context.Context, businessID int64, beforeDate string) ([]domain.Invoice, error) {
 	if beforeDate == "" {
 		beforeDate = time.Now().Format("2006-01-02")
 	}
@@ -815,8 +823,8 @@ func (r *Repository) GetOverdueInvoices(ctx context.Context, ownerID int64, befo
 	}
 
 	rows, err := r.queries.ListOverdueInvoices(ctx, sqlc.ListOverdueInvoicesParams{
-		OwnerID: ownerID,
-		DueDate: before,
+		BusinessID: businessID,
+		DueDate:    before,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list overdue invoices", logger.Error(err))
@@ -840,6 +848,7 @@ func invoiceFromSqlc(row sqlc.FinanceInvoice) domain.Invoice {
 	inv := domain.Invoice{
 		ID:             row.ID,
 		OwnerID:        row.OwnerID,
+		BusinessID:     row.BusinessID,
 		InvoiceNumber:  row.InvoiceNumber,
 		ClientName:     row.ClientName,
 		ClientEmail:    nullStr(row.ClientEmail, ""),
@@ -876,6 +885,7 @@ func expenseFromSqlc(row sqlc.FinanceExpense) domain.Expense {
 	return domain.Expense{
 		ID:              row.ID,
 		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
 		CategoryID:      toInt64(row.CategoryID),
 		Description:     row.Description,
 		Amount:          parseFloat(row.Amount),

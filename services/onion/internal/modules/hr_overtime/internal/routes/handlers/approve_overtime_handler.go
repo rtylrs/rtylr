@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ApproveOvertimeRoutes() []string { return []string{"/hr/overtime/requests/{id}/approve"} }
@@ -39,11 +40,16 @@ func (h *ApproveOvertimeHandler) Serve(ctx context.Context, req *ApproveOvertime
 		return ApproveOvertimeRequestRes{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ApproveOvertimeRequestRes{}, errorModels.PermissionDeniedServerError()
+	}
+
 	var err error
 	if req.Approved {
-		err = h.Service.ApproveOvertime(ctx, device.User.UserID, req.RequestID, device.User.UserID, req.MultiplierApplied)
+		err = h.Service.ApproveOvertime(ctx, businessID, req.RequestID, device.User.UserID, req.MultiplierApplied)
 	} else {
-		err = h.Service.RejectOvertime(ctx, device.User.UserID, req.RequestID)
+		err = h.Service.RejectOvertime(ctx, businessID, req.RequestID)
 	}
 
 	if err != nil {
@@ -53,7 +59,7 @@ func (h *ApproveOvertimeHandler) Serve(ctx context.Context, req *ApproveOvertime
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApproveOvertimeRequestRes{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: "Approval chain not configured for overtime requests"}
 		}
-		logger.Ctx(ctx).Error("failed to process overtime approval", logger.Any("owner_id", device.User.UserID), logger.Any("request_id", req.RequestID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to process overtime approval", logger.Any("business_id", businessID), logger.Any("request_id", req.RequestID), logger.Error(err))
 		return ApproveOvertimeRequestRes{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to process overtime approval"}
 	}
 

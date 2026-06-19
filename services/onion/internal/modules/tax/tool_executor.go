@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/tax/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -27,12 +28,12 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 }
 
 func (m *Module) executeGetTaxConfigTool(ctx context.Context) (map[string]any, error) {
-	ownerID, err := taxToolOwnerID(ctx)
+	businessID, err := taxToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	config, err := m.service.GetConfig(ctx, ownerID)
+	config, err := m.service.GetConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrTaxConfigNotFound) {
 			return map[string]any{
@@ -50,12 +51,12 @@ func (m *Module) executeGetTaxConfigTool(ctx context.Context) (map[string]any, e
 }
 
 func (m *Module) executeGetPLReportTool(ctx context.Context) (map[string]any, error) {
-	ownerID, err := taxToolOwnerID(ctx)
+	businessID, err := taxToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	report, err := m.service.GetPLReport(ctx, ownerID)
+	report, err := m.service.GetPLReport(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,12 +71,16 @@ func (m *Module) executeGetPLReportTool(ctx context.Context) (map[string]any, er
 	}, nil
 }
 
-func taxToolOwnerID(ctx context.Context) (int64, error) {
+func taxToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return businessID, nil
 }
 
 func taxConfigToolPayload(config domain.TaxConfig) map[string]any {

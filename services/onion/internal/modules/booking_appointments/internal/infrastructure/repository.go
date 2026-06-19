@@ -21,8 +21,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Appointment, error) {
-	rows, err := r.queries.ListAppointments(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Appointment, error) {
+	rows, err := r.queries.ListAppointments(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list appointments", logger.Error(err))
 		return nil, err
@@ -34,12 +34,12 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Appointm
 	return items, nil
 }
 
-func (r *Repository) ListToday(ctx context.Context, ownerID int64) ([]domain.Appointment, error) {
+func (r *Repository) ListToday(ctx context.Context, businessID int64) ([]domain.Appointment, error) {
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 	rows, err := r.queries.ListAppointmentsByDateRange(ctx, sqlc.ListAppointmentsByDateRangeParams{
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		StartTime:   startOfDay,
 		StartTime_2: endOfDay,
 	})
@@ -54,7 +54,7 @@ func (r *Repository) ListToday(ctx context.Context, ownerID int64) ([]domain.App
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.AppointmentInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.AppointmentInput) (int64, error) {
 	startTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse start_time", logger.Error(err))
@@ -76,7 +76,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 		Phone: input.CustomerPhone,
@@ -86,7 +86,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 	}
 
 	result, err := r.queries.WithTx(tx).CreateAppointment(ctx, sqlc.CreateAppointmentParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		ResourceID:    sql.NullInt64{Int64: input.ResourceID, Valid: input.ResourceID != 0},
 		StaffID:       sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
@@ -113,7 +114,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.AppointmentInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.AppointmentInput) error {
 	startTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse start_time", logger.Error(err))
@@ -135,7 +136,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 		Phone: input.CustomerPhone,
@@ -153,8 +154,8 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		CustomerPhone: sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
 		StartTime:     startTime, EndTime: endTime,
 		Status:  sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(input.Status), Valid: input.Status != ""},
-		Notes:   sql.NullString{String: input.Notes, Valid: input.Notes != ""},
-		OwnerID: ownerID, ID: id,
+		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		BusinessID: businessID, ID: id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update appointment", logger.Error(err))
@@ -167,8 +168,8 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	err := r.queries.DeleteAppointment(ctx, sqlc.DeleteAppointmentParams{OwnerID: ownerID, ID: id})
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	err := r.queries.DeleteAppointment(ctx, sqlc.DeleteAppointmentParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete appointment", logger.Error(err))
 		return err
@@ -177,7 +178,7 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func fromRow(row sqlc.BookingAppointment) domain.Appointment {
-	a := domain.Appointment{ID: row.ID, OwnerID: row.OwnerID, StartTime: row.StartTime, EndTime: row.EndTime}
+	a := domain.Appointment{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, StartTime: row.StartTime, EndTime: row.EndTime}
 	if row.ServiceID.Valid {
 		a.ServiceID = row.ServiceID.Int64
 	}

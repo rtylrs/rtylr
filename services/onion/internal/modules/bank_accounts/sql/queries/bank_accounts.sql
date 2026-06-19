@@ -1,19 +1,19 @@
 -- name: ListBankAccounts :many
-SELECT id, owner_id, name, institution, account_type, balance, currency, is_connected, last_synced_at, created_at
+SELECT id, owner_id, business_id, name, institution, account_type, balance, currency, is_connected, last_synced_at, created_at
 FROM finance_bank_accounts
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY name ASC;
 
 -- name: CreateBankAccount :execresult
-INSERT INTO finance_bank_accounts (owner_id, name, institution, account_type, balance, currency, is_connected)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO finance_bank_accounts (owner_id, business_id, name, institution, account_type, balance, currency, is_connected)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: SumBankAccountBalances :one
 SELECT COALESCE(SUM(balance), 0)
 FROM finance_bank_accounts
-WHERE owner_id = ?;
+WHERE business_id = ?;
 
 -- name: CountConnectedBankAccounts :one
 SELECT COUNT(*)
 FROM finance_bank_accounts
-WHERE owner_id = ? AND is_connected = TRUE;
+WHERE business_id = ? AND is_connected = TRUE;

@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
 
@@ -67,7 +68,12 @@ func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest)
 		return ListSegmentsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	segments, err := h.CRMService.ListSegments(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListSegmentsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	segments, err := h.CRMService.ListSegments(ctx, businessID)
 	if err != nil {
 		return ListSegmentsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -124,6 +130,11 @@ func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequ
 		return CreateSegmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	rules := []byte(req.Rules)
 	if rules == nil {
 		rules = []byte("[]")
@@ -131,6 +142,7 @@ func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequ
 
 	id, err := h.CRMService.CreateSegment(ctx, domain.SegmentInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Rules:       rules,
@@ -186,6 +198,11 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 		return UpdateSegmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	rules := []byte(req.Rules)
 	if rules == nil {
 		rules = []byte("[]")
@@ -194,6 +211,7 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 	if err := h.CRMService.UpdateSegment(ctx, domain.SegmentUpdateInput{
 		ID:          req.ID,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Rules:       rules,
@@ -245,7 +263,12 @@ func (h *DeleteSegmentHandler) Serve(ctx context.Context, req *DeleteSegmentRequ
 		return DeleteSegmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.CRMService.DeleteSegment(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteSegmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.CRMService.DeleteSegment(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
 			return DeleteSegmentResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,

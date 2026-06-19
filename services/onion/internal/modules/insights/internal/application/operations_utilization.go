@@ -18,10 +18,10 @@ type UtilizationPayload struct {
 // GetUtilization returns the 7-day scheduled-vs-available utilization
 // ratio as a percentage. A fresh tenant with no active staff returns 0%
 // rather than divide-by-zero.
-func (s *Service) GetUtilization(ctx context.Context, ownerID int64) (UtilizationPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:utilization", ownerID)
+func (s *Service) GetUtilization(ctx context.Context, businessID int64) (UtilizationPayload, error) {
+	key := fmt.Sprintf("insights:%d:operations:utilization", businessID)
 	out, err := cacher.Of[UtilizationPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (UtilizationPayload, error) {
-		row, rerr := s.repo.GetUtilization(ctx, ownerID)
+		row, rerr := s.repo.GetUtilization(ctx, businessID)
 		if rerr != nil {
 			return UtilizationPayload{}, rerr
 		}

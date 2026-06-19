@@ -20,41 +20,41 @@ const (
 	invoicesTTL   = 5 * time.Minute
 )
 
-func invalidateInvoicesScope(ctx context.Context, ownerID int64) {
+func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(invoicesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(invoicesScope, businessID))
 	}
 }
 
 type repository interface {
-	ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
-	GetInvoiceByID(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error)
-	CreateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) (int64, error)
+	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
+	GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error)
+	CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error)
 	CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error
 	GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error)
 	DeleteInvoiceItems(ctx context.Context, invoiceID int64) error
-	UpdateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) error
-	UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error
-	UpdateInvoicePaymentTotals(ctx context.Context, ownerID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
-	DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error
-	CountInvoiceSequence(ctx context.Context, ownerID int64, year int) (int64, error)
-	CreatePayment(ctx context.Context, ownerID int64, p domain.Payment) (int64, error)
+	UpdateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) error
+	UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error
+	UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
+	DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error
+	CountInvoiceSequence(ctx context.Context, businessID int64, year int) (int64, error)
+	CreatePayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error)
 	GetPaymentsByInvoice(ctx context.Context, invoiceID int64) ([]domain.Payment, error)
-	ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error)
-	GetExpenseByID(ctx context.Context, ownerID, expenseID int64) (*domain.Expense, error)
-	CreateExpense(ctx context.Context, ownerID int64, e domain.Expense) (int64, error)
-	UpdateExpense(ctx context.Context, ownerID int64, e domain.Expense) error
-	DeleteExpense(ctx context.Context, ownerID, expenseID int64) error
-	ListExpenseCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error)
-	CreateExpenseCategory(ctx context.Context, ownerID int64, c domain.ExpenseCategory) (int64, error)
-	ListTaxConfigs(ctx context.Context, ownerID int64) ([]domain.TaxConfig, error)
-	CreateTaxConfig(ctx context.Context, ownerID int64, t domain.TaxConfig) (int64, error)
-	SumPaidInvoices(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
-	SumExpenses(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
-	SumTotalReceivable(ctx context.Context, ownerID int64) (float64, error)
-	SumOverdueAmount(ctx context.Context, ownerID int64) (float64, error)
-	SumTaxCollected(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
-	SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
+	ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error)
+	GetExpenseByID(ctx context.Context, businessID, expenseID int64) (*domain.Expense, error)
+	CreateExpense(ctx context.Context, businessID int64, e domain.Expense) (int64, error)
+	UpdateExpense(ctx context.Context, businessID int64, e domain.Expense) error
+	DeleteExpense(ctx context.Context, businessID, expenseID int64) error
+	ListExpenseCategories(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error)
+	CreateExpenseCategory(ctx context.Context, businessID int64, c domain.ExpenseCategory) (int64, error)
+	ListTaxConfigs(ctx context.Context, businessID int64) ([]domain.TaxConfig, error)
+	CreateTaxConfig(ctx context.Context, businessID int64, t domain.TaxConfig) (int64, error)
+	SumPaidInvoices(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error)
+	SumExpenses(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error)
+	SumTotalReceivable(ctx context.Context, businessID int64) (float64, error)
+	SumOverdueAmount(ctx context.Context, businessID int64) (float64, error)
+	SumTaxCollected(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error)
+	SumTaxOwed(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error)
 }
 
 type Service struct {
@@ -73,12 +73,12 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // Invoices
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Invoice, bool, error) {
+func (s *Service) ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Invoice, bool, error) {
 	limit, offset := paginateInvoices(page, pageSize)
-	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("list|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", status, search, dateFrom, dateTo, page, pageSize))
+	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("list|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", status, search, dateFrom, dateTo, page, pageSize))
 	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Invoice, error) {
-			return s.repo.ListInvoices(ctx, ownerID, status, search, dateFrom, dateTo, limit+1, offset)
+			return s.repo.ListInvoices(ctx, businessID, status, search, dateFrom, dateTo, limit+1, offset)
 		},
 		cacher.WithExpiry(ctx, invoicesTTL),
 	)
@@ -105,8 +105,8 @@ func paginateInvoices(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) GetInvoice(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error) {
-	inv, err := s.repo.GetInvoiceByID(ctx, ownerID, invoiceID)
+func (s *Service) GetInvoice(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error) {
+	inv, err := s.repo.GetInvoiceByID(ctx, businessID, invoiceID)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func (s *Service) GetInvoice(ctx context.Context, ownerID, invoiceID int64) (*do
 	return inv, nil
 }
 
-func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain.InvoiceInput) (*domain.Invoice, error) {
-	defer invalidateInvoicesScope(ctx, ownerID)
+func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input domain.InvoiceInput) (*domain.Invoice, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
 	issueDate, err := time.Parse("2006-01-02", input.IssueDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse issue date", logger.Error(err))
@@ -151,7 +151,7 @@ func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain
 	// Auto-generate invoice number: INV-YYYY-XXXX
 	year := issueDate.Year()
 
-	seq, err := s.repo.CountInvoiceSequence(ctx, ownerID, year)
+	seq, err := s.repo.CountInvoiceSequence(ctx, businessID, year)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain
 	}
 
 	inv := domain.Invoice{
-		OwnerID:        ownerID,
+		OwnerID:        businessID,
 		InvoiceNumber:  invoiceNumber,
 		ClientName:     input.ClientName,
 		ClientEmail:    input.ClientEmail,
@@ -234,7 +234,7 @@ func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain
 		Terms:          input.Terms,
 	}
 
-	invID, err := s.repo.CreateInvoice(ctx, ownerID, inv)
+	invID, err := s.repo.CreateInvoice(ctx, businessID, inv)
 	if err != nil {
 		return nil, err
 	}
@@ -249,9 +249,9 @@ func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain
 	return &inv, nil
 }
 
-func (s *Service) UpdateInvoice(ctx context.Context, ownerID, invoiceID int64, input domain.InvoiceUpdateInput) (*domain.Invoice, error) {
-	defer invalidateInvoicesScope(ctx, ownerID)
-	existing, err := s.repo.GetInvoiceByID(ctx, ownerID, invoiceID)
+func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64, input domain.InvoiceUpdateInput) (*domain.Invoice, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
+	existing, err := s.repo.GetInvoiceByID(ctx, businessID, invoiceID)
 	if err != nil {
 		return nil, err
 	}
@@ -337,7 +337,7 @@ func (s *Service) UpdateInvoice(ctx context.Context, ownerID, invoiceID int64, i
 	existing.Notes = input.Notes
 	existing.Terms = input.Terms
 
-	if err := s.repo.UpdateInvoice(ctx, ownerID, *existing); err != nil {
+	if err := s.repo.UpdateInvoice(ctx, businessID, *existing); err != nil {
 		return nil, err
 	}
 
@@ -354,19 +354,19 @@ func (s *Service) UpdateInvoice(ctx context.Context, ownerID, invoiceID int64, i
 	return existing, nil
 }
 
-func (s *Service) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error {
-	defer invalidateInvoicesScope(ctx, ownerID)
-	return s.repo.UpdateInvoiceStatus(ctx, ownerID, invoiceID, status)
+func (s *Service) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
+	defer invalidateInvoicesScope(ctx, businessID)
+	return s.repo.UpdateInvoiceStatus(ctx, businessID, invoiceID, status)
 }
 
-func (s *Service) SendInvoice(ctx context.Context, ownerID, invoiceID int64) error {
-	defer invalidateInvoicesScope(ctx, ownerID)
-	inv, err := s.GetInvoice(ctx, ownerID, invoiceID)
+func (s *Service) SendInvoice(ctx context.Context, businessID, invoiceID int64) error {
+	defer invalidateInvoicesScope(ctx, businessID)
+	inv, err := s.GetInvoice(ctx, businessID, invoiceID)
 	if err != nil {
 		return err
 	}
 
-	if err := s.repo.UpdateInvoiceStatus(ctx, ownerID, invoiceID, "sent"); err != nil {
+	if err := s.repo.UpdateInvoiceStatus(ctx, businessID, invoiceID, "sent"); err != nil {
 		return err
 	}
 
@@ -386,23 +386,23 @@ func (s *Service) SendInvoice(ctx context.Context, ownerID, invoiceID int64) err
 	return nil
 }
 
-func (s *Service) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error {
-	defer invalidateInvoicesScope(ctx, ownerID)
-	return s.repo.DeleteInvoice(ctx, ownerID, invoiceID)
+func (s *Service) DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error {
+	defer invalidateInvoicesScope(ctx, businessID)
+	return s.repo.DeleteInvoice(ctx, businessID, invoiceID)
 }
 
 // ---------------------------------------------------------------------------
 // Payments
 // ---------------------------------------------------------------------------
 
-func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain.PaymentInput) (*domain.Payment, error) {
-	defer invalidateInvoicesScope(ctx, ownerID)
+func (s *Service) RecordPayment(ctx context.Context, businessID int64, input domain.PaymentInput) (*domain.Payment, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
 
 	if input.Amount <= 0 {
 		return nil, domain.ErrInvalidPaymentAmount
 	}
 
-	inv, err := s.repo.GetInvoiceByID(ctx, ownerID, input.InvoiceID)
+	inv, err := s.repo.GetInvoiceByID(ctx, businessID, input.InvoiceID)
 	if err != nil {
 		return nil, err
 	}
@@ -420,7 +420,7 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 	}
 
 	p := domain.Payment{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
 		InvoiceID:   input.InvoiceID,
 		Amount:      input.Amount,
 		Currency:    currency,
@@ -430,7 +430,7 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 		Notes:       input.Notes,
 	}
 
-	paymentID, err := s.repo.CreatePayment(ctx, ownerID, p)
+	paymentID, err := s.repo.CreatePayment(ctx, businessID, p)
 	if err != nil {
 		return nil, err
 	}
@@ -459,7 +459,7 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 		newStatus = inv.Status
 	}
 
-	if err := s.repo.UpdateInvoicePaymentTotals(ctx, ownerID, input.InvoiceID, newAmountPaid, newAmountDue, newStatus, paidDate); err != nil {
+	if err := s.repo.UpdateInvoicePaymentTotals(ctx, businessID, input.InvoiceID, newAmountPaid, newAmountDue, newStatus, paidDate); err != nil {
 		return nil, err
 	}
 
@@ -470,12 +470,12 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Expense, bool, error) {
+func (s *Service) ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Expense, bool, error) {
 	limit, offset := paginateInvoices(page, pageSize)
-	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("expenses|c=%d|q=%s|f=%s|t=%s|p=%d|ps=%d", categoryID, search, dateFrom, dateTo, page, pageSize))
+	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("expenses|c=%d|q=%s|f=%s|t=%s|p=%d|ps=%d", categoryID, search, dateFrom, dateTo, page, pageSize))
 	rows, err := cacher.Of[[]domain.Expense]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Expense, error) {
-			return s.repo.ListExpenses(ctx, ownerID, categoryID, search, dateFrom, dateTo, limit+1, offset)
+			return s.repo.ListExpenses(ctx, businessID, categoryID, search, dateFrom, dateTo, limit+1, offset)
 		},
 		cacher.WithExpiry(ctx, invoicesTTL),
 	)
@@ -489,8 +489,8 @@ func (s *Service) ListExpenses(ctx context.Context, ownerID, categoryID int64, s
 	return rows, hasMore, nil
 }
 
-func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain.ExpenseInput) (*domain.Expense, error) {
-	defer invalidateInvoicesScope(ctx, ownerID)
+func (s *Service) CreateExpense(ctx context.Context, businessID int64, input domain.ExpenseInput) (*domain.Expense, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
 	expenseDate, err := time.Parse("2006-01-02", input.ExpenseDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse expense date", logger.Error(err))
@@ -509,7 +509,7 @@ func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain
 	}
 
 	e := domain.Expense{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
 		CategoryID:      input.CategoryID,
 		Description:     input.Description,
 		Amount:          input.Amount,
@@ -523,7 +523,7 @@ func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain
 		Notes:           input.Notes,
 	}
 
-	id, err := s.repo.CreateExpense(ctx, ownerID, e)
+	id, err := s.repo.CreateExpense(ctx, businessID, e)
 	if err != nil {
 		return nil, err
 	}
@@ -533,9 +533,9 @@ func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain
 	return &e, nil
 }
 
-func (s *Service) UpdateExpense(ctx context.Context, ownerID, expenseID int64, input domain.ExpenseInput) (*domain.Expense, error) {
-	defer invalidateInvoicesScope(ctx, ownerID)
-	existing, err := s.repo.GetExpenseByID(ctx, ownerID, expenseID)
+func (s *Service) UpdateExpense(ctx context.Context, businessID, expenseID int64, input domain.ExpenseInput) (*domain.Expense, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
+	existing, err := s.repo.GetExpenseByID(ctx, businessID, expenseID)
 	if err != nil {
 		return nil, err
 	}
@@ -567,46 +567,46 @@ func (s *Service) UpdateExpense(ctx context.Context, ownerID, expenseID int64, i
 	existing.TaxAmount = input.TaxAmount
 	existing.Notes = input.Notes
 
-	if err := s.repo.UpdateExpense(ctx, ownerID, *existing); err != nil {
+	if err := s.repo.UpdateExpense(ctx, businessID, *existing); err != nil {
 		return nil, err
 	}
 
 	return existing, nil
 }
 
-func (s *Service) DeleteExpense(ctx context.Context, ownerID, expenseID int64) error {
-	defer invalidateInvoicesScope(ctx, ownerID)
-	return s.repo.DeleteExpense(ctx, ownerID, expenseID)
+func (s *Service) DeleteExpense(ctx context.Context, businessID, expenseID int64) error {
+	defer invalidateInvoicesScope(ctx, businessID)
+	return s.repo.DeleteExpense(ctx, businessID, expenseID)
 }
 
 // ---------------------------------------------------------------------------
 // Expense Categories
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListExpenseCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
-	key := cacheKeys.Scoped(invoicesScope, ownerID, "expense_cats")
+func (s *Service) ListExpenseCategories(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error) {
+	key := cacheKeys.Scoped(invoicesScope, businessID, "expense_cats")
 	return cacher.Of[[]domain.ExpenseCategory]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.ExpenseCategory, error) {
-			return s.listExpenseCategoriesImpl(ctx, ownerID)
+			return s.listExpenseCategoriesImpl(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, 10*time.Minute),
 	)
 }
 
-func (s *Service) listExpenseCategoriesImpl(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
-	return s.repo.ListExpenseCategories(ctx, ownerID)
+func (s *Service) listExpenseCategoriesImpl(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error) {
+	return s.repo.ListExpenseCategories(ctx, businessID)
 }
 
-func (s *Service) CreateExpenseCategory(ctx context.Context, ownerID int64, input domain.ExpenseCategoryInput) (*domain.ExpenseCategory, error) {
-	defer invalidateInvoicesScope(ctx, ownerID)
+func (s *Service) CreateExpenseCategory(ctx context.Context, businessID int64, input domain.ExpenseCategoryInput) (*domain.ExpenseCategory, error) {
+	defer invalidateInvoicesScope(ctx, businessID)
 	c := domain.ExpenseCategory{
-		OwnerID: ownerID,
+		OwnerID: businessID,
 		Name:    input.Name,
 		Color:   input.Color,
 		Icon:    input.Icon,
 	}
 
-	id, err := s.repo.CreateExpenseCategory(ctx, ownerID, c)
+	id, err := s.repo.CreateExpenseCategory(ctx, businessID, c)
 	if err != nil {
 		return nil, err
 	}
@@ -620,18 +620,18 @@ func (s *Service) CreateExpenseCategory(ctx context.Context, ownerID int64, inpu
 // Tax Config
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListTaxConfigs(ctx context.Context, ownerID int64) ([]domain.TaxConfig, error) {
-	return s.repo.ListTaxConfigs(ctx, ownerID)
+func (s *Service) ListTaxConfigs(ctx context.Context, businessID int64) ([]domain.TaxConfig, error) {
+	return s.repo.ListTaxConfigs(ctx, businessID)
 }
 
-func (s *Service) CreateTaxConfig(ctx context.Context, ownerID int64, input domain.TaxConfigInput) (*domain.TaxConfig, error) {
+func (s *Service) CreateTaxConfig(ctx context.Context, businessID int64, input domain.TaxConfigInput) (*domain.TaxConfig, error) {
 	taxType := input.Type
 	if taxType == "" {
 		taxType = "vat"
 	}
 
 	t := domain.TaxConfig{
-		OwnerID:   ownerID,
+		OwnerID:   businessID,
 		Name:      input.Name,
 		Rate:      input.Rate,
 		Type:      taxType,
@@ -639,7 +639,7 @@ func (s *Service) CreateTaxConfig(ctx context.Context, ownerID int64, input doma
 		IsActive:  true,
 	}
 
-	id, err := s.repo.CreateTaxConfig(ctx, ownerID, t)
+	id, err := s.repo.CreateTaxConfig(ctx, businessID, t)
 	if err != nil {
 		return nil, err
 	}
@@ -653,15 +653,15 @@ func (s *Service) CreateTaxConfig(ctx context.Context, ownerID int64, input doma
 // Reports
 // ---------------------------------------------------------------------------
 
-func (s *Service) GetPLReport(ctx context.Context, ownerID int64, period, date string) (domain.PLReport, error) {
+func (s *Service) GetPLReport(ctx context.Context, businessID int64, period, date string) (domain.PLReport, error) {
 	dateFrom, dateTo := resolvePeriodRange(period, date)
 
-	revenue, err := s.repo.SumPaidInvoices(ctx, ownerID, dateFrom, dateTo)
+	revenue, err := s.repo.SumPaidInvoices(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.PLReport{}, err
 	}
 
-	expenses, err := s.repo.SumExpenses(ctx, ownerID, dateFrom, dateTo)
+	expenses, err := s.repo.SumExpenses(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.PLReport{}, err
 	}
@@ -687,18 +687,18 @@ func (s *Service) GetPLReport(ctx context.Context, ownerID int64, period, date s
 	}, nil
 }
 
-func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.Dashboard, error) {
-	key := cacheKeys.Scoped(invoicesScope, ownerID, "dashboard")
+func (s *Service) GetDashboard(ctx context.Context, businessID int64) (domain.Dashboard, error) {
+	key := cacheKeys.Scoped(invoicesScope, businessID, "dashboard")
 
 	return cacher.Of[domain.Dashboard]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.Dashboard, error) {
-			return s.fetchDashboard(ctx, ownerID)
+			return s.fetchDashboard(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, time.Minute),
 	)
 }
 
-func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Dashboard, error) {
+func (s *Service) fetchDashboard(ctx context.Context, businessID int64) (domain.Dashboard, error) {
 	now := time.Now()
 	mtdFrom := fmt.Sprintf("%d-%02d-01", now.Year(), now.Month())
 	mtdTo := now.Format("2006-01-02")
@@ -713,22 +713,22 @@ func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Das
 	group, groupCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		var err error
-		totalReceivable, err = s.repo.SumTotalReceivable(groupCtx, ownerID)
+		totalReceivable, err = s.repo.SumTotalReceivable(groupCtx, businessID)
 		return err
 	})
 	group.Go(func() error {
 		var err error
-		overdueAmount, err = s.repo.SumOverdueAmount(groupCtx, ownerID)
+		overdueAmount, err = s.repo.SumOverdueAmount(groupCtx, businessID)
 		return err
 	})
 	group.Go(func() error {
 		var err error
-		totalExpensesMTD, err = s.repo.SumExpenses(groupCtx, ownerID, mtdFrom, mtdTo)
+		totalExpensesMTD, err = s.repo.SumExpenses(groupCtx, businessID, mtdFrom, mtdTo)
 		return err
 	})
 	group.Go(func() error {
 		var err error
-		revenueMTD, err = s.repo.SumPaidInvoices(groupCtx, ownerID, mtdFrom, mtdTo)
+		revenueMTD, err = s.repo.SumPaidInvoices(groupCtx, businessID, mtdFrom, mtdTo)
 		return err
 	})
 	if err := group.Wait(); err != nil {
@@ -745,15 +745,15 @@ func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Das
 	}, nil
 }
 
-func (s *Service) GetTaxReport(ctx context.Context, ownerID int64, period, date string) (domain.TaxReport, error) {
+func (s *Service) GetTaxReport(ctx context.Context, businessID int64, period, date string) (domain.TaxReport, error) {
 	dateFrom, dateTo := resolvePeriodRange(period, date)
 
-	taxCollected, err := s.repo.SumTaxCollected(ctx, ownerID, dateFrom, dateTo)
+	taxCollected, err := s.repo.SumTaxCollected(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.TaxReport{}, err
 	}
 
-	taxOwed, err := s.repo.SumTaxOwed(ctx, ownerID, dateFrom, dateTo)
+	taxOwed, err := s.repo.SumTaxOwed(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return domain.TaxReport{}, err
 	}

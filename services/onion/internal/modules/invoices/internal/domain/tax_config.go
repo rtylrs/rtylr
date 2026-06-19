@@ -9,14 +9,15 @@ import (
 var ErrTaxConfigNotFound = errors.New("tax config not found")
 
 type TaxConfig struct {
-	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"owner_id"`
-	Name      string    `json:"name"`
-	Rate      float64   `json:"rate"`
-	Type      string    `json:"type"`
-	IsDefault bool      `json:"is_default"`
-	IsActive  bool      `json:"is_active"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         int64     `json:"id"`
+	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
+	Name       string    `json:"name"`
+	Rate       float64   `json:"rate"`
+	Type       string    `json:"type"`
+	IsDefault  bool      `json:"is_default"`
+	IsActive   bool      `json:"is_active"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 func (t *TaxConfig) FromRow(row *sql.Rows) error {
@@ -25,6 +26,7 @@ func (t *TaxConfig) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&t.ID,
 		&t.OwnerID,
+		&t.BusinessID,
 		&t.Name,
 		&t.Rate,
 		&taxType,

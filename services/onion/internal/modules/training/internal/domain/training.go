@@ -11,6 +11,7 @@ var ErrTrainingCourseNotFound = errors.New("training course not found")
 type TrainingCourse struct {
 	ID            int64              `json:"id"`
 	OwnerID       int64              `json:"owner_id"`
+	BusinessID    int64              `json:"business_id"`
 	Name          string             `json:"name"`
 	Description   string             `json:"description"`
 	DurationHours float64            `json:"duration_hours"`
@@ -25,7 +26,7 @@ func (t *TrainingCourse) FromRow(row *sql.Rows) error {
 		durationHours sql.NullFloat64
 	)
 
-	err := row.Scan(&t.ID, &t.OwnerID, &t.Name, &description, &durationHours, &t.IsRequired, &t.CreatedAt)
+	err := row.Scan(&t.ID, &t.OwnerID, &t.BusinessID, &t.Name, &description, &durationHours, &t.IsRequired, &t.CreatedAt)
 	if err != nil {
 		return err
 	}

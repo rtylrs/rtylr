@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const journalDateLayout = "2006-01-02"
@@ -78,7 +79,11 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, hasMore, err := h.Service.List(ctx, device.User.UserID, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, hasMore, err := h.Service.List(ctx, businessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list journal entries"}
 	}
@@ -136,6 +141,10 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	lines := make([]domain.JournalLineInput, 0, len(req.Lines))
 	for _, l := range req.Lines {
@@ -148,7 +157,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		Date: req.Date, Description: req.Description, Lines: lines,
 	}
 
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, device.User.UserID, businessID, input)
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create journal entry"}
 	}
@@ -177,6 +186,10 @@ func (h *PostHandler) Serve(ctx context.Context, _ *PostRequest) (PostResponse, 
 	if device.IsAnonymous || device.User == nil {
 		return PostResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return PostResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -184,7 +197,7 @@ func (h *PostHandler) Serve(ctx context.Context, _ *PostRequest) (PostResponse, 
 		return PostResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid journal entry ID"}
 	}
 
-	if postErr := h.Service.Post(ctx, device.User.UserID, id); postErr != nil {
+	if postErr := h.Service.Post(ctx, businessID, id); postErr != nil {
 		switch {
 		case errors.Is(postErr, domain.ErrJournalEntryNotFound):
 			return PostResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Journal entry not found"}

@@ -17,11 +17,11 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Table, error)
+	List(ctx context.Context, businessID int64) ([]domain.Table, error)
 	Create(ctx context.Context, input domain.TableInput) (int64, error)
 	Update(ctx context.Context, input domain.TableUpdateInput) error
 	UpdateStatus(ctx context.Context, input domain.TableStatusInput) error
-	Delete(ctx context.Context, ownerID, id int64) error
+	Delete(ctx context.Context, businessID, id int64) error
 }
 
 type Service struct {
@@ -32,17 +32,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidatePosTablesScope(ctx context.Context, ownerID int64) {
+func invalidatePosTablesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posTablesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posTablesScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Table, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Table, error) {
 	return cacher.Of[[]domain.Table]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(posTablesScope, ownerID, "list"),
+		cacheKeys.Scoped(posTablesScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Table, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, posTablesTTL),
 	)
@@ -56,7 +56,7 @@ func (s *Service) Create(ctx context.Context, input domain.TableInput) (int64, e
 	if err != nil {
 		return 0, err
 	}
-	invalidatePosTablesScope(ctx, input.OwnerID)
+	invalidatePosTablesScope(ctx, input.BusinessID)
 	return id, nil
 }
 
@@ -67,7 +67,7 @@ func (s *Service) Update(ctx context.Context, input domain.TableUpdateInput) err
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
-	invalidatePosTablesScope(ctx, input.OwnerID)
+	invalidatePosTablesScope(ctx, input.BusinessID)
 	return nil
 }
 
@@ -78,14 +78,14 @@ func (s *Service) UpdateStatus(ctx context.Context, input domain.TableStatusInpu
 	if err := s.repo.UpdateStatus(ctx, input); err != nil {
 		return err
 	}
-	invalidatePosTablesScope(ctx, input.OwnerID)
+	invalidatePosTablesScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidatePosTablesScope(ctx, ownerID)
+	invalidatePosTablesScope(ctx, businessID)
 	return nil
 }

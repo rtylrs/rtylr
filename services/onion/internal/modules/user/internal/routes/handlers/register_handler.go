@@ -56,20 +56,11 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 		return RegisterResponse{}, errorModels.FromError(err, "Registration failed")
 	}
 
-	// Create business for this user (they are the owner)
-	businessName := strings.TrimSpace(req.BusinessName)
-	if businessName == "" {
-		businessName = strings.TrimSpace(req.Name) + "'s Business"
-	}
-
-	if bizErr := h.UserService.CreateBusinessForUser(ctx, userId, businessName); bizErr != nil {
-		// Non-fatal: the user is created even if business bootstrap fails, but
-		// surface the error rather than silently discarding it.
-		logger.Ctx(ctx).Warn("failed to create business for new user",
-			logger.String("business_name", businessName),
-			logger.Error(bizErr),
-		)
-	}
+	// Registration no longer auto-creates a business. The owner creates their
+	// first business through the dash onboarding screen (POST /onboarding/business),
+	// which enforces globally-unique names and re-issues a token with the new
+	// business_id. Until then the user has business_id = 0 and the dash gates them
+	// into onboarding.
 
 	// New owner accounts always start on the free plan. Paid upgrades happen
 	// after signup through billing/checkout so registration is deterministic.

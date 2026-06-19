@@ -19,8 +19,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Theme, error) {
-	rows, err := r.queries.ListThemes(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Theme, error) {
+	rows, err := r.queries.ListThemes(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list themes", logger.Error(err))
 		return nil, err
@@ -32,9 +32,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Theme, e
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ThemeInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, creatorID, businessID int64, input domain.ThemeInput) (int64, error) {
 	result, err := r.queries.CreateTheme(ctx, sqlc.CreateThemeParams{
-		OwnerID: ownerID, Name: input.Name,
+		OwnerID: creatorID, BusinessID: businessID, Name: input.Name,
 		PrimaryColor: sql.NullString{String: input.PrimaryColor, Valid: input.PrimaryColor != ""},
 		Font:         sql.NullString{String: input.Font, Valid: input.Font != ""},
 		HeaderStyle:  sql.NullString{String: input.HeaderStyle, Valid: input.HeaderStyle != ""},
@@ -49,7 +49,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.The
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.ThemeInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ThemeInput) error {
 	err := r.queries.UpdateTheme(ctx, sqlc.UpdateThemeParams{
 		Name:         input.Name,
 		PrimaryColor: sql.NullString{String: input.PrimaryColor, Valid: input.PrimaryColor != ""},
@@ -57,7 +57,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		HeaderStyle:  sql.NullString{String: input.HeaderStyle, Valid: input.HeaderStyle != ""},
 		FooterStyle:  sql.NullString{String: input.FooterStyle, Valid: input.FooterStyle != ""},
 		CustomCss:    sql.NullString{String: input.CustomCSS, Valid: input.CustomCSS != ""},
-		OwnerID:      ownerID, ID: id,
+		BusinessID:   businessID, ID: id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update theme", logger.Error(err))
@@ -67,7 +67,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 }
 
 func fromRow(row sqlc.StoreTheme) domain.Theme {
-	t := domain.Theme{ID: row.ID, OwnerID: row.OwnerID, Name: row.Name}
+	t := domain.Theme{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Name: row.Name}
 	if row.PrimaryColor.Valid {
 		t.PrimaryColor = row.PrimaryColor.String
 	}

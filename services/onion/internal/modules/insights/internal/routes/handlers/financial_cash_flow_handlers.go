@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/financial/cash-flow?from=&to=
@@ -36,6 +37,10 @@ func (h *GetCashFlowHandler) Serve(ctx context.Context, req *GetCashFlowRequest)
 	if device.User == nil {
 		return GetCashFlowResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCashFlowResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	from, to, err := application.ResolveDateRange(req.From, req.To)
 	if err != nil {
 		return GetCashFlowResponse{}, &errorModels.ServerError{
@@ -44,7 +49,7 @@ func (h *GetCashFlowHandler) Serve(ctx context.Context, req *GetCashFlowRequest)
 			Message:  "Invalid date range",
 		}
 	}
-	rows, err := h.Service.GetCashFlowSeries(ctx, device.User.UserID, from, to)
+	rows, err := h.Service.GetCashFlowSeries(ctx, businessID, from, to)
 	if err != nil {
 		return GetCashFlowResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

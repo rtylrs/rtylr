@@ -11,6 +11,7 @@ var ErrBenefitPlanNotFound = errors.New("benefit plan not found")
 type BenefitPlan struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	Name         string    `json:"name"`
 	Type         string    `json:"type"`
 	Provider     string    `json:"provider"`
@@ -27,7 +28,7 @@ func (b *BenefitPlan) FromRow(row *sql.Rows) error {
 	)
 
 	err := row.Scan(
-		&b.ID, &b.OwnerID, &b.Name, &benefitType, &provider,
+		&b.ID, &b.OwnerID, &b.BusinessID, &b.Name, &benefitType, &provider,
 		&b.CostEmployer, &b.CostEmployee, &b.IsActive, &b.CreatedAt,
 	)
 	if err != nil {

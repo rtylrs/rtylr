@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	financeexpensesv1 "github.com/voxire/voxie/gen/go/finance/expenses/v1"
 )
 
@@ -50,7 +51,11 @@ func (h *ListExpensesHandler) Serve(ctx context.Context, _ *ListExpensesRequest)
 	if device.User == nil {
 		return ListExpensesResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	expenses, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListExpensesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	expenses, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListExpensesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list expenses"}
 	}
@@ -78,12 +83,16 @@ func (h *GetExpenseHandler) Serve(ctx context.Context, _ *GetExpenseRequest) (Ge
 	if device.User == nil {
 		return GetExpenseResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return GetExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
 	}
-	expense, getErr := h.Service.GetByID(ctx, device.User.UserID, id)
+	expense, getErr := h.Service.GetByID(ctx, businessID, id)
 	if getErr != nil {
 		if errors.Is(getErr, domain.ErrExpenseNotFound) {
 			return GetExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
@@ -131,6 +140,10 @@ func (h *CreateExpenseHandler) Serve(ctx context.Context, req *CreateExpenseRequ
 	if device.User == nil {
 		return CreateExpenseResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	expDate := time.Now()
 	if req.ExpenseDate != "" {
 		if t, err := time.Parse("2006-01-02", req.ExpenseDate); err == nil {
@@ -139,6 +152,7 @@ func (h *CreateExpenseHandler) Serve(ctx context.Context, req *CreateExpenseRequ
 	}
 	id, err := h.Service.Create(ctx, domain.ExpenseInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		CategoryID:  req.CategoryID,
 		Amount:      req.Amount,
 		Currency:    req.Currency,
@@ -190,6 +204,10 @@ func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequ
 	if device.User == nil {
 		return UpdateExpenseResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -204,6 +222,7 @@ func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequ
 	if updateErr := h.Service.Update(ctx, domain.ExpenseUpdateInput{
 		ID:          id,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		CategoryID:  req.CategoryID,
 		Amount:      req.Amount,
 		Currency:    req.Currency,
@@ -237,12 +256,16 @@ func (h *DeleteExpenseHandler) Serve(ctx context.Context, _ *DeleteExpenseReques
 	if device.User == nil {
 		return DeleteExpenseResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, businessID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrExpenseNotFound) {
 			return DeleteExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
 		}
@@ -275,12 +298,16 @@ func (h *ApproveExpenseHandler) Serve(ctx context.Context, _ *ApproveExpenseRequ
 	if device.User == nil {
 		return ApproveExpenseResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ApproveExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return ApproveExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
 	}
-	if updateErr := h.Service.UpdateStatus(ctx, device.User.UserID, id, "approved"); updateErr != nil {
+	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, "approved"); updateErr != nil {
 		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
 			return ApproveExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
 		}
@@ -294,12 +321,16 @@ func (h *RejectExpenseHandler) Serve(ctx context.Context, _ *RejectExpenseReques
 	if device.User == nil {
 		return RejectExpenseResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RejectExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return RejectExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
 	}
-	if updateErr := h.Service.UpdateStatus(ctx, device.User.UserID, id, "rejected"); updateErr != nil {
+	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, "rejected"); updateErr != nil {
 		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
 			return RejectExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
 		}
@@ -325,7 +356,11 @@ func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequ
 	if device.User == nil {
 		return ListCategoriesResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	cats, err := h.Service.ListCategories(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListCategoriesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	cats, err := h.Service.ListCategories(ctx, businessID)
 	if err != nil {
 		return ListCategoriesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list expense categories"}
 	}

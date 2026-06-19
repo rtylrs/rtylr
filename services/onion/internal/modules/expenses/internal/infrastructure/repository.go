@@ -29,8 +29,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Expense, error) {
-	rows, err := r.queries.ListExpenses(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Expense, error) {
+	rows, err := r.queries.ListExpenses(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expenses", logger.Error(err))
 		return nil, err
@@ -43,10 +43,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Expense,
 	return expenses, nil
 }
 
-func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.Expense, error) {
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Expense, error) {
 	row, err := r.queries.GetExpenseByID(ctx, sqlc.GetExpenseByIDParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -60,6 +60,7 @@ func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.Exp
 func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int64, error) {
 	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		CategoryID:  nullableInt64Ptr(input.CategoryID),
 		Amount:      fmtFloat(input.Amount),
 		Currency:    nullableString(input.Currency),
@@ -85,7 +86,7 @@ func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput
 		ReceiptUrl:  nullableString(input.ReceiptURL),
 		ExpenseDate: input.ExpenseDate,
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense", logger.Error(err))
@@ -101,10 +102,10 @@ func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	result, err := r.queries.DeleteExpense(ctx, sqlc.DeleteExpenseParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete expense", logger.Error(err))
@@ -120,11 +121,11 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
 	result, err := r.queries.UpdateExpenseStatus(ctx, sqlc.UpdateExpenseStatusParams{
-		Status:  sql.NullString{String: status, Valid: true},
-		ID:      id,
-		OwnerID: ownerID,
+		Status:     sql.NullString{String: status, Valid: true},
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense status", logger.Error(err))
@@ -140,8 +141,8 @@ func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status
 	return nil
 }
 
-func (r *Repository) ListCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
-	rows, err := r.queries.ListExpenseCategories(ctx, ownerID)
+func (r *Repository) ListCategories(ctx context.Context, businessID int64) ([]domain.ExpenseCategory, error) {
+	rows, err := r.queries.ListExpenseCategories(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expense categories", logger.Error(err))
 		return nil, err
@@ -150,22 +151,23 @@ func (r *Repository) ListCategories(ctx context.Context, ownerID int64) ([]domai
 	cats := make([]domain.ExpenseCategory, 0, len(rows))
 	for _, row := range rows {
 		cats = append(cats, domain.ExpenseCategory{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Color:     nullStr(row.Color),
-			CreatedAt: nullTime(row.CreatedAt),
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Color:      nullStr(row.Color),
+			CreatedAt:  nullTime(row.CreatedAt),
 		})
 	}
 	return cats, nil
 }
 
-// SumByOwner returns the total expense amount for the given owner, regardless
+// SumByOwner returns the total expense amount for the given business, regardless
 // of category or date.
-func (r *Repository) SumByOwner(ctx context.Context, ownerID int64) (float64, error) {
+func (r *Repository) SumByOwner(ctx context.Context, businessID int64) (float64, error) {
 	sqlStr, args, err := sq.Select("COALESCE(SUM(CAST(amount AS REAL)), 0)").
 		From("finance_expenses").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -182,15 +184,15 @@ func (r *Repository) SumByOwner(ctx context.Context, ownerID int64) (float64, er
 	return total, nil
 }
 
-// CountByCategory returns the number of expenses in each category for the owner.
+// CountByCategory returns the number of expenses in each category for the business.
 // The map key is the category_id (as a string) or "uncategorised" for null values.
-func (r *Repository) CountByCategory(ctx context.Context, ownerID int64) (map[string]int64, error) {
+func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map[string]int64, error) {
 	sqlStr, args, err := sq.Select(
 		"COALESCE(CAST(category_id AS TEXT), 'uncategorised')",
 		"COUNT(*) AS cnt",
 	).
 		From("finance_expenses").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		GroupBy("category_id").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -227,6 +229,7 @@ func expenseFromRow(row sqlc.ListExpensesRow) domain.Expense {
 	e := domain.Expense{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Amount:      parseFloat(row.Amount),
 		Currency:    nullStr(row.Currency),
 		Description: row.Description,
@@ -247,6 +250,7 @@ func expenseFromGetRow(row sqlc.GetExpenseByIDRow) domain.Expense {
 	e := domain.Expense{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Amount:      parseFloat(row.Amount),
 		Currency:    nullStr(row.Currency),
 		Description: row.Description,

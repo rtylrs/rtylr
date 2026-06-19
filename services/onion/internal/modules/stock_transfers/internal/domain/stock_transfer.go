@@ -20,6 +20,7 @@ const (
 type StockTransfer struct {
 	ID              int64               `json:"id"`
 	OwnerID         int64               `json:"owner_id"`
+	BusinessID      int64               `json:"business_id"`
 	FromWarehouseID int64               `json:"from_warehouse_id"`
 	ToWarehouseID   int64               `json:"to_warehouse_id"`
 	Status          StockTransferStatus `json:"status"`
@@ -35,6 +36,7 @@ func (s *StockTransfer) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&s.ID,
 		&s.OwnerID,
+		&s.BusinessID,
 		&s.FromWarehouseID,
 		&s.ToWarehouseID,
 		&s.Status,

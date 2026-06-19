@@ -67,13 +67,17 @@ func toMenuItemPayload(item domain.MenuItem) MenuItemPayload {
 	}
 }
 
-func resolveAuthenticatedMenuOwnerID(ctx context.Context) (int64, *errorModels.ServerError) {
+func resolveAuthenticatedMenuBusinessID(ctx context.Context) (int64, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil {
 		return 0, errorModels.PermissionDeniedServerError()
 	}
 
-	return tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID), nil
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return 0, errorModels.PermissionDeniedServerError()
+	}
+	return businessID, nil
 }
 
 // --- List ---
@@ -89,11 +93,11 @@ type (
 )
 
 func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsRequest) (ListMenuItemsResponse, *errorModels.ServerError) {
-	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx)
-	if ownerErr != nil {
-		return ListMenuItemsResponse{}, ownerErr
+	businessID, bizErr := resolveAuthenticatedMenuBusinessID(ctx)
+	if bizErr != nil {
+		return ListMenuItemsResponse{}, bizErr
 	}
-	items, err := h.Service.List(ctx, ownerID)
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListMenuItemsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list menu items"}
 	}
@@ -133,11 +137,17 @@ func (h *CreateMenuItemHandler) Validate(_ context.Context, req *CreateMenuItemR
 }
 
 func (h *CreateMenuItemHandler) Serve(ctx context.Context, req *CreateMenuItemRequest) (CreateMenuItemResponse, *errorModels.ServerError) {
-	ownerID, ownerErr := resolveAuthenticatedMenuOwnerID(ctx)
-	if ownerErr != nil {
-		return CreateMenuItemResponse{}, ownerErr
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil {
+		return CreateMenuItemResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	id, err := h.Service.QuickCreate(ctx, ownerID, domain.MenuItemInput{
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateMenuItemResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.QuickCreate(ctx, authUser.UserID, businessID, domain.MenuItemInput{
 		Name:      req.Name,
 		SKU:       req.SKU,
 		SalePrice: req.SalePrice,

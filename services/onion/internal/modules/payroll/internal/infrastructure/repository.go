@@ -29,14 +29,14 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error) {
+func (r *Repository) ListPayrollRecords(ctx context.Context, businessID int64, periodLabel string) ([]domain.PayrollRecord, error) {
 	// Dynamic WHERE clause - built with squirrel
 	builder := sq.
-		Select("id", "owner_id", "staff_id", "period_start", "period_end", "period_label",
+		Select("id", "owner_id", "business_id", "staff_id", "period_start", "period_end", "period_label",
 			"regular_hours", "overtime_hours", "base_pay", "overtime_pay", "bonuses",
 			"deductions", "tax_withheld", "net_pay", "status", "paid_at", "notes", "created_at").
 		From("hr_payroll_records").
-		Where(sq.Eq{"owner_id": ownerID})
+		Where(sq.Eq{"business_id": businessID})
 
 	if periodLabel != "" {
 		builder = builder.Where(sq.Eq{"period_label": periodLabel})
@@ -70,9 +70,10 @@ func (r *Repository) ListPayrollRecords(ctx context.Context, ownerID int64, peri
 	return records, rows.Err()
 }
 
-func (r *Repository) CreatePayrollRecord(ctx context.Context, ownerID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error) {
+func (r *Repository) CreatePayrollRecord(ctx context.Context, businessID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error) {
 	result, err := r.queries.CreatePayrollRecord(ctx, sqlc.CreatePayrollRecordParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		StaffID:       staffID,
 		PeriodStart:   periodStart,
 		PeriodEnd:     periodEnd,
@@ -91,10 +92,10 @@ func (r *Repository) CreatePayrollRecord(ctx context.Context, ownerID, staffID i
 	return result.LastInsertId()
 }
 
-func (r *Repository) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int64) error {
+func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error {
 	result, err := r.queries.MarkPayrollPaid(ctx, sqlc.MarkPayrollPaidParams{
-		ID:      payrollID,
-		OwnerID: ownerID,
+		ID:         payrollID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to mark payroll as paid", logger.Error(err))
@@ -114,11 +115,11 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int
 }
 
 // GetCompletedShiftsForPeriod retrieves completed shifts for payroll calculation.
-func (r *Repository) GetCompletedShiftsForPeriod(ctx context.Context, ownerID int64, periodStart, periodEnd time.Time) ([]domain.ShiftSummary, error) {
+func (r *Repository) GetCompletedShiftsForPeriod(ctx context.Context, businessID int64, periodStart, periodEnd time.Time) ([]domain.ShiftSummary, error) {
 	rows, err := r.queries.GetCompletedShiftsForPeriod(ctx, sqlc.GetCompletedShiftsForPeriodParams{
-		OwnerID: ownerID,
-		Date:    sql.NullTime{Time: periodStart, Valid: true},
-		Date_2:  sql.NullTime{Time: periodEnd, Valid: true},
+		BusinessID: businessID,
+		Date:       sql.NullTime{Time: periodStart, Valid: true},
+		Date_2:     sql.NullTime{Time: periodEnd, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get completed shifts for period", logger.Error(err))
@@ -174,10 +175,10 @@ func interfaceToFloat64(v interface{}) float64 {
 }
 
 // GetStaffPayRates returns salary/hourly rate for a staff member for payroll calculation.
-func (r *Repository) GetStaffPayRates(ctx context.Context, ownerID, staffID int64) (domain.StaffPayRates, error) {
+func (r *Repository) GetStaffPayRates(ctx context.Context, businessID, staffID int64) (domain.StaffPayRates, error) {
 	row, err := r.queries.GetStaffPayRates(ctx, sqlc.GetStaffPayRatesParams{
-		ID:      staffID,
-		OwnerID: ownerID,
+		ID:         staffID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		return domain.StaffPayRates{}, err
@@ -200,7 +201,7 @@ func (r *Repository) GetStaffPayRates(ctx context.Context, ownerID, staffID int6
 // GetStaffPayRatesByIDs loads pay rates for the given staff IDs in a single
 // WHERE id IN (...) query, returning a map keyed by staff ID. This replaces a
 // per-staff GetStaffPayRates call (N+1).
-func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error) {
+func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, businessID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error) {
 	out := make(map[int64]domain.StaffPayRates, len(staffIDs))
 	if len(staffIDs) == 0 {
 		return out, nil
@@ -209,7 +210,7 @@ func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, s
 	query, args, err := sq.
 		Select("id", "salary", "hourly_rate", "overtime_rate").
 		From("hr_staff").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Eq{"id": staffIDs}).
 		PlaceholderFormat(sq.Question).
 		ToSql()

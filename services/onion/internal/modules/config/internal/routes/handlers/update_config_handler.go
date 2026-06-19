@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateConfigRoutes() []string {
@@ -46,7 +47,12 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 		return UpdateConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := strconv.FormatInt(device.User.BusinessID, 10)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	ownerID := strconv.FormatInt(businessID, 10)
 
 	current, err := h.ConfigService.GetConfig(ctx, ownerID)
 	if err != nil {

@@ -19,7 +19,7 @@ type InvoiceAgingBucketRow struct {
 // We age each outstanding invoice against the current date relative to
 // its due_date. "0-30" means 0-30 days past due (inclusive of 0 — due
 // today). Invoices with status 'paid' or 'cancelled'/'void' are excluded.
-func (r *Repository) GetInvoiceAging(ctx context.Context, ownerID int64) ([]InvoiceAgingBucketRow, error) {
+func (r *Repository) GetInvoiceAging(ctx context.Context, businessID int64) ([]InvoiceAgingBucketRow, error) {
 	// cross-schema read from finance_invoices — A/R aging buckets for receivables panel
 	const q = `
 		SELECT
@@ -33,12 +33,12 @@ func (r *Repository) GetInvoiceAging(ctx context.Context, ownerID int64) ([]Invo
 		  COUNT(*) AS invoice_count,
 		  COALESCE(SUM(amount_due), 0) AS amount_due
 		FROM finance_invoices
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND status NOT IN ('paid','cancelled','void')
 		  AND amount_due > 0
 		GROUP BY bucket
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.pool.QueryContext(ctx, q, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: invoice aging query failed", logger.Error(err))
 		return nil, err

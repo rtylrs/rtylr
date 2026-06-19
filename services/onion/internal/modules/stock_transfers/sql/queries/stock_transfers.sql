@@ -1,20 +1,20 @@
 -- name: ListStockTransfers :many
-SELECT id, owner_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
+SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
 FROM erp_stock_transfers
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY created_at DESC;
 
 -- name: ListStockTransfersPaged :many
-SELECT id, owner_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
+SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
 FROM erp_stock_transfers
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
 -- name: GetStockTransferForUpdate :one
 SELECT from_warehouse_id, to_warehouse_id, status
 FROM erp_stock_transfers
-WHERE owner_id = ? AND id = ?
+WHERE business_id = ? AND id = ?
 FOR UPDATE;
 
 -- name: GetTransferItems :many
@@ -24,8 +24,8 @@ WHERE transfer_id = ?
 ORDER BY id ASC;
 
 -- name: InsertStockTransfer :execresult
-INSERT INTO erp_stock_transfers (owner_id, from_warehouse_id, to_warehouse_id, status, notes)
-VALUES (?, ?, ?, 'draft', ?);
+INSERT INTO erp_stock_transfers (owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes)
+VALUES (?, ?, ?, ?, 'draft', ?);
 
 -- name: InsertStockTransferItem :execresult
 INSERT INTO erp_stock_transfer_items (transfer_id, product_id, quantity)
@@ -34,4 +34,4 @@ VALUES (?, ?, ?);
 -- name: UpdateStockTransferStatus :exec
 UPDATE erp_stock_transfers
 SET status = ?
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;

@@ -5,6 +5,7 @@ import "time"
 type ShiftRecord struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
 	LocationID int64     `json:"location_id"`
 	Name       string    `json:"name"`
 	StartTime  string    `json:"start_time"`
@@ -17,6 +18,7 @@ type ShiftRecord struct {
 type ShiftAssignmentRecord struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
 	EmployeeID int64     `json:"employee_id"`
 	ShiftID    int64     `json:"shift_id"`
 	Date       string    `json:"date"`

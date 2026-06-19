@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/settings
@@ -25,7 +26,11 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 	if device.User == nil {
 		return GetSettingsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	payload, err := h.Service.GetSettings(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSettingsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	payload, err := h.Service.GetSettings(ctx, businessID)
 	if err != nil {
 		return GetSettingsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -62,7 +67,11 @@ func (h *UpdateSettingsHandler) Serve(ctx context.Context, req *UpdateSettingsRe
 	if device.User == nil {
 		return UpdateSettingsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	payload, err := h.Service.UpdateSettings(ctx, device.User.UserID, application.SettingsPayload{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateSettingsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	payload, err := h.Service.UpdateSettings(ctx, businessID, application.SettingsPayload{
 		DefaultCurrency: req.DefaultCurrency,
 		FiscalYearStart: req.FiscalYearStart,
 		Timezone:        req.Timezone,

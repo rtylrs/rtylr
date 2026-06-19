@@ -36,13 +36,13 @@ var ltvBuckets = []struct {
 // GetLTVDistribution returns per-bucket customer counts based on their
 // lifetime spend from paid POS orders. Customers with no orders at all
 // fall into the 0-100 bucket.
-func (r *Repository) GetLTVDistribution(ctx context.Context, ownerID int64) ([]LTVBucketRow, error) {
+func (r *Repository) GetLTVDistribution(ctx context.Context, businessID int64) ([]LTVBucketRow, error) {
 	// cross-schema read from crm_customers + pos_orders — lifetime spend histogram for LTV widget
 	q, args, err := sq.
 		Select("c.id", "COALESCE(SUM(o.total), 0) AS spend").
 		From("crm_customers c").
-		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id AND o.payment_status = 'paid'").
-		Where(sq.Eq{"c.owner_id": ownerID}).
+		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id AND o.payment_status = 'paid'").
+		Where(sq.Eq{"c.business_id": businessID}).
 		GroupBy("c.id").
 		PlaceholderFormat(sq.Question).
 		ToSql()

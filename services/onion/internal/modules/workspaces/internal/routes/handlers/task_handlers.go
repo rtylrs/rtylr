@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/wsbus"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 )
@@ -281,6 +282,10 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 	if !ok {
 		return CreateTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateTaskResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	// Resolve workspace: missing or "personal" → the caller's personal
 	// workspace (auto-created). Numeric → use as-is.
@@ -315,6 +320,7 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		ProjectID:      projectID,
 		WorkspaceID:    workspaceID,
 		OwnerID:        authUser.UserID,
+		BusinessID:     businessID,
 		ParentTaskID:   req.ParentTaskID,
 		Title:          req.Title,
 		Description:    req.Description,
@@ -451,10 +457,15 @@ func (h *UpdateTaskHandler) Serve(ctx context.Context, req *UpdateTaskRequest) (
 	if !ok {
 		return UpdateTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateTaskResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.UpdateTaskInput{
 		ID:          req.ID.Int64(),
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		Title:       req.Title,
 		Description: req.Description,
 		Status:      req.Status,
@@ -512,6 +523,10 @@ func (h *DeleteTaskHandler) Serve(ctx context.Context, req *DeleteTaskRequest) (
 	if !ok {
 		return DeleteTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteTaskResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	// Capture the project id BEFORE the row is deleted so the realtime
 	// event has a valid topic. If the fetch fails we skip the publish.
@@ -520,7 +535,7 @@ func (h *DeleteTaskHandler) Serve(ctx context.Context, req *DeleteTaskRequest) (
 		projectID = existing.Task.ProjectID
 	}
 
-	if err := h.FlowService.DeleteTask(ctx, req.ID.Int64(), authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteTask(ctx, req.ID.Int64(), businessID); err != nil {
 		return DeleteTaskResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete task",
@@ -565,10 +580,15 @@ func (h *UpdateTaskStatusHandler) Serve(ctx context.Context, req *UpdateTaskStat
 	if !ok {
 		return UpdateTaskStatusResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateTaskStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.UpdateTaskStatusInput{
-		ID:      req.ID.Int64(),
-		OwnerID: authUser.UserID,
+		ID:         req.ID.Int64(),
+		OwnerID:    authUser.UserID,
+		BusinessID: businessID,
 		Status:  req.Status,
 	}
 

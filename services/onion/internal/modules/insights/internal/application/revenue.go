@@ -45,13 +45,13 @@ func ResolveDateRange(fromStr, toStr string) (time.Time, time.Time, error) {
 // GetRevenueSeries returns the daily paid-revenue series for the window.
 // The cache key includes the resolved range so different callers with
 // different windows don't trample each other's entries.
-func (s *Service) GetRevenueSeries(ctx context.Context, ownerID int64, from, to time.Time) ([]domain.RevenuePoint, error) {
-	key := fmt.Sprintf("insights:%d:revenue:%s:%s", ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+func (s *Service) GetRevenueSeries(ctx context.Context, businessID int64, from, to time.Time) ([]domain.RevenuePoint, error) {
+	key := fmt.Sprintf("insights:%d:revenue:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	type result struct {
 		Points []domain.RevenuePoint
 	}
 	cached, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		points, rerr := s.repo.GetRevenueSeries(ctx, ownerID, from, to)
+		points, rerr := s.repo.GetRevenueSeries(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr
 		}

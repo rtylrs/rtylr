@@ -15,6 +15,7 @@ import (
 type ScheduledReportRow struct {
 	ID         int64
 	OwnerID    int64
+	BusinessID int64
 	TemplateID string
 	Cadence    string
 	Channel    string
@@ -31,14 +32,14 @@ var ErrScheduledReportNotFound = errors.New("scheduled report not found")
 // ListScheduledReports returns every scheduled report the owner has
 // configured. The list is not paginated at P3 because a realistic upper
 // bound is low (tens of schedules per tenant).
-func (r *Repository) ListScheduledReports(ctx context.Context, ownerID int64) ([]ScheduledReportRow, error) {
+func (r *Repository) ListScheduledReports(ctx context.Context, businessID int64) ([]ScheduledReportRow, error) {
 	const q = `
-		SELECT id, owner_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
+		SELECT id, owner_id, business_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
 		FROM insights_scheduled_reports
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		ORDER BY created_at DESC
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.pool.QueryContext(ctx, q, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: list scheduled reports failed", logger.Error(err))
 		return nil, err
@@ -53,7 +54,7 @@ func (r *Repository) ListScheduledReports(ctx context.Context, ownerID int64) ([
 	for rows.Next() {
 		var sr ScheduledReportRow
 		if scanErr := rows.Scan(
-			&sr.ID, &sr.OwnerID, &sr.TemplateID, &sr.Cadence,
+			&sr.ID, &sr.OwnerID, &sr.BusinessID, &sr.TemplateID, &sr.Cadence,
 			&sr.Channel, &sr.Recipient, &sr.IsActive,
 			&sr.CreatedAt, &sr.UpdatedAt,
 		); scanErr != nil {
@@ -72,11 +73,11 @@ func (r *Repository) ListScheduledReports(ctx context.Context, ownerID int64) ([
 func (r *Repository) CreateScheduledReport(ctx context.Context, row ScheduledReportRow) (int64, error) {
 	const q = `
 		INSERT INTO insights_scheduled_reports
-		  (owner_id, template_id, cadence, channel, recipient, is_active)
-		VALUES (?, ?, ?, ?, ?, ?)
+		  (owner_id, business_id, template_id, cadence, channel, recipient, is_active)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 	res, err := r.pool.ExecContext(ctx, q,
-		row.OwnerID, row.TemplateID, row.Cadence, row.Channel, row.Recipient, row.IsActive,
+		row.OwnerID, row.BusinessID, row.TemplateID, row.Cadence, row.Channel, row.Recipient, row.IsActive,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: create scheduled report failed", logger.Error(err))
@@ -89,17 +90,17 @@ func (r *Repository) CreateScheduledReport(ctx context.Context, row ScheduledRep
 	return id, nil
 }
 
-// UpdateScheduledReport updates the mutable fields. owner_id is part of
+// UpdateScheduledReport updates the mutable fields. business_id is part of
 // the WHERE clause to prevent cross-tenant writes.
 func (r *Repository) UpdateScheduledReport(ctx context.Context, row ScheduledReportRow) error {
 	const q = `
 		UPDATE insights_scheduled_reports
 		SET template_id = ?, cadence = ?, channel = ?, recipient = ?, is_active = ?
-		WHERE id = ? AND owner_id = ?
+		WHERE id = ? AND business_id = ?
 	`
 	res, err := r.pool.ExecContext(ctx, q,
 		row.TemplateID, row.Cadence, row.Channel, row.Recipient, row.IsActive,
-		row.ID, row.OwnerID,
+		row.ID, row.BusinessID,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: update scheduled report failed", logger.Error(err))
@@ -118,10 +119,10 @@ func (r *Repository) UpdateScheduledReport(ctx context.Context, row ScheduledRep
 // DeleteScheduledReport removes a schedule; safe for missing rows (returns
 // ErrScheduledReportNotFound rather than silently succeeding so the
 // caller can translate that into a 404).
-func (r *Repository) DeleteScheduledReport(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) DeleteScheduledReport(ctx context.Context, businessID, id int64) error {
 	res, err := r.pool.ExecContext(ctx,
-		`DELETE FROM insights_scheduled_reports WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
+		`DELETE FROM insights_scheduled_reports WHERE id = ? AND business_id = ?`,
+		id, businessID,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: delete scheduled report failed", logger.Error(err))
@@ -139,15 +140,15 @@ func (r *Repository) DeleteScheduledReport(ctx context.Context, ownerID, id int6
 
 // GetScheduledReport reads one row; used by the PUT/DELETE paths to
 // surface a 404 before doing the mutation.
-func (r *Repository) GetScheduledReport(ctx context.Context, ownerID, id int64) (ScheduledReportRow, error) {
+func (r *Repository) GetScheduledReport(ctx context.Context, businessID, id int64) (ScheduledReportRow, error) {
 	const q = `
-		SELECT id, owner_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
+		SELECT id, owner_id, business_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
 		FROM insights_scheduled_reports
-		WHERE id = ? AND owner_id = ?
+		WHERE id = ? AND business_id = ?
 	`
-	row := r.pool.QueryRowContext(ctx, q, id, ownerID)
+	row := r.pool.QueryRowContext(ctx, q, id, businessID)
 	var sr ScheduledReportRow
-	if err := row.Scan(&sr.ID, &sr.OwnerID, &sr.TemplateID, &sr.Cadence, &sr.Channel, &sr.Recipient, &sr.IsActive, &sr.CreatedAt, &sr.UpdatedAt); err != nil {
+	if err := row.Scan(&sr.ID, &sr.OwnerID, &sr.BusinessID, &sr.TemplateID, &sr.Cadence, &sr.Channel, &sr.Recipient, &sr.IsActive, &sr.CreatedAt, &sr.UpdatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ScheduledReportRow{}, ErrScheduledReportNotFound
 		}

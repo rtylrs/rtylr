@@ -52,6 +52,15 @@ WHERE p.owner_id = ?
 ORDER BY u.created_at DESC
 LIMIT ? OFFSET ?;
 
+-- name: ListStaffUsersByBusinessID :many
+SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
+       p.apps, p.role, p.is_active
+FROM user_app_permissions p
+JOIN users u ON u.id = p.user_id
+WHERE p.business_id = ?
+ORDER BY u.created_at DESC
+LIMIT ? OFFSET ?;
+
 -- name: GetStaffUserByID :one
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
        p.apps, p.role, p.is_active

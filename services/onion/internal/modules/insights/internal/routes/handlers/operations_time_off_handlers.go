@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/operations/time-off
@@ -24,7 +25,11 @@ func (h *GetTimeOffHandler) Serve(ctx context.Context, _ *GetTimeOffRequest) (Ge
 	if device.User == nil {
 		return GetTimeOffResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	payload, err := h.Service.GetTimeOffSummary(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetTimeOffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	payload, err := h.Service.GetTimeOffSummary(ctx, businessID)
 	if err != nil {
 		return GetTimeOffResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

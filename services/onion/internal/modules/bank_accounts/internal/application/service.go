@@ -17,10 +17,10 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error)
-	Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error)
-	TotalBalance(ctx context.Context, ownerID int64) (float64, error)
-	CountConnected(ctx context.Context, ownerID int64) (int64, error)
+	List(ctx context.Context, businessID int64) ([]domain.BankAccount, error)
+	Create(ctx context.Context, businessID int64, input domain.BankAccountInput) (int64, error)
+	TotalBalance(ctx context.Context, businessID int64) (float64, error)
+	CountConnected(ctx context.Context, businessID int64) (int64, error)
 }
 
 type Service struct {
@@ -31,40 +31,40 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateBankAccountsScope(ctx context.Context, ownerID int64) {
+func invalidateBankAccountsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.BankAccount, error) {
 	return cacher.Of[[]domain.BankAccount]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(bankAccountsScope, ownerID, "list"),
+		cacheKeys.Scoped(bankAccountsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.BankAccount, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, bankAccountsTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.BankAccountInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateBankAccountsScope(ctx, ownerID)
+	invalidateBankAccountsScope(ctx, businessID)
 	return id, nil
 }
 
 // TotalBalance returns the aggregate balance across all bank accounts for the
 // owner. It queries the database directly (no cache) because balance data is
 // time-sensitive and should never be stale.
-func (s *Service) TotalBalance(ctx context.Context, ownerID int64) (float64, error) {
-	return s.repo.TotalBalance(ctx, ownerID)
+func (s *Service) TotalBalance(ctx context.Context, businessID int64) (float64, error) {
+	return s.repo.TotalBalance(ctx, businessID)
 }
 
 // ConnectedCount returns how many accounts have is_connected=TRUE for the
 // owner. Useful for showing integration status in the dashboard.
-func (s *Service) ConnectedCount(ctx context.Context, ownerID int64) (int64, error) {
-	return s.repo.CountConnected(ctx, ownerID)
+func (s *Service) ConnectedCount(ctx context.Context, businessID int64) (int64, error) {
+	return s.repo.CountConnected(ctx, businessID)
 }

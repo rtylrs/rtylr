@@ -20,12 +20,12 @@ type CashFlowDayRow struct {
 // GetCashFlowSeries returns a contiguous daily series of (inflow, outflow)
 // for the window. Missing days are filled with zero entries so the chart
 // renders without gaps.
-func (r *Repository) GetCashFlowSeries(ctx context.Context, ownerID int64, from, to time.Time) ([]CashFlowDayRow, error) {
-	inflow, err := r.dailyPaidInvoices(ctx, ownerID, from, to)
+func (r *Repository) GetCashFlowSeries(ctx context.Context, businessID int64, from, to time.Time) ([]CashFlowDayRow, error) {
+	inflow, err := r.dailyPaidInvoices(ctx, businessID, from, to)
 	if err != nil {
 		return nil, err
 	}
-	outflow, err := r.dailyExpenses(ctx, ownerID, from, to)
+	outflow, err := r.dailyExpenses(ctx, businessID, from, to)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +46,12 @@ func (r *Repository) GetCashFlowSeries(ctx context.Context, ownerID int64, from,
 	return out, nil
 }
 
-func (r *Repository) dailyPaidInvoices(ctx context.Context, ownerID int64, from, to time.Time) (map[string]int64, error) {
+func (r *Repository) dailyPaidInvoices(ctx context.Context, businessID int64, from, to time.Time) (map[string]int64, error) {
 	// cross-schema read from finance_invoices — daily inflow for cash-flow chart
 	q, args, err := sq.
 		Select("DATE(COALESCE(paid_date, issue_date)) AS day", "COALESCE(SUM(total), 0)").
 		From("finance_invoices").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Eq{"status": "paid"}).
 		Where(sq.Expr("COALESCE(paid_date, issue_date) BETWEEN ? AND ?", from.Format("2006-01-02"), to.Format("2006-01-02"))).
 		GroupBy("day").
@@ -64,12 +64,12 @@ func (r *Repository) dailyPaidInvoices(ctx context.Context, ownerID int64, from,
 	return r.scanDailySums(ctx, q, args...)
 }
 
-func (r *Repository) dailyExpenses(ctx context.Context, ownerID int64, from, to time.Time) (map[string]int64, error) {
+func (r *Repository) dailyExpenses(ctx context.Context, businessID int64, from, to time.Time) (map[string]int64, error) {
 	// cross-schema read from finance_expenses — daily outflow for cash-flow chart
 	q, args, err := sq.
 		Select("DATE(expense_date) AS day", "COALESCE(SUM(amount), 0)").
 		From("finance_expenses").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Expr("expense_date BETWEEN ? AND ?", from.Format("2006-01-02"), to.Format("2006-01-02"))).
 		GroupBy("day").
 		PlaceholderFormat(sq.Question).

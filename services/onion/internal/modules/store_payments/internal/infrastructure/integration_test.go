@@ -37,7 +37,7 @@ func TestStorePayments_List_OwnerScoped(t *testing.T) {
 func TestStorePayments_Create_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "stripe",
 		Config:   `{"key":"pk_test_xxx"}`,
 		IsActive: true,
@@ -56,7 +56,7 @@ func TestStorePayments_Create_ReturnsPositiveID(t *testing.T) {
 func TestStorePayments_Create_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "paypal",
 		IsActive: false,
 	})
@@ -85,7 +85,7 @@ func TestStorePayments_Create_AppearsInList(t *testing.T) {
 func TestStorePayments_Update_ChangesProvider(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.PaymentMethodInput{Provider: "cash", IsActive: true})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{Provider: "cash", IsActive: true})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -105,7 +105,7 @@ func TestStorePayments_Update_ChangesProvider(t *testing.T) {
 func TestStorePayments_Update_ActiveFlag(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.PaymentMethodInput{Provider: "cod", IsActive: true})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{Provider: "cod", IsActive: true})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestStorePayments_Create_WithConfig(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	config := `{"publishable_key":"pk_live_xxx","secret_key":"sk_live_xxx"}`
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "stripe",
 		Config:   config,
 		IsActive: true,
@@ -168,7 +168,7 @@ func TestStorePayments_Create_Multiple(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	providers := []string{"stripe", "paypal", "square"}
 	for _, prov := range providers {
-		id, err := repo.Create(context.Background(), testutil.OwnerID, domain.PaymentMethodInput{Provider: prov, IsActive: false})
+		id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{Provider: prov, IsActive: false})
 		if err != nil {
 			t.Fatalf("Create %s: %v", prov, err)
 		}
@@ -211,7 +211,7 @@ func TestCreatePaymentMethod_PersistsAndReturnsID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "test_provider",
 		IsActive: true,
 	})
@@ -228,7 +228,7 @@ func TestCreatePaymentMethod_NameIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "named_provider",
 		IsActive: true,
 	})
@@ -256,7 +256,7 @@ func TestCreatePaymentMethod_TypeIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "type_provider",
 		Config:   `{"type":"gateway"}`,
 		IsActive: true,
@@ -285,7 +285,7 @@ func TestCreatePaymentMethod_IsActiveIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "active_provider",
 		IsActive: true,
 	})
@@ -313,7 +313,7 @@ func TestUpdatePaymentMethod_ChangesName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "old_provider",
 		IsActive: true,
 	})
@@ -344,7 +344,7 @@ func TestCreate_ThenList_FindsPaymentMethod(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "find_provider",
 		IsActive: true,
 	})
@@ -374,7 +374,7 @@ func TestListPaymentMethods_AfterCreate_CountIncreases(t *testing.T) {
 		t.Fatalf("List before: %v", err)
 	}
 
-	_, err = repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	_, err = repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "count_provider",
 		IsActive: false,
 	})
@@ -396,7 +396,7 @@ func TestCreatePaymentMethod_TypeCard(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "card",
 		IsActive: true,
 	})
@@ -424,7 +424,7 @@ func TestCreatePaymentMethod_TypeCash(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "cash",
 		IsActive: true,
 	})
@@ -452,7 +452,7 @@ func TestCreatePaymentMethod_IsActiveFalse(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.PaymentMethodInput{
 		Provider: "inactive_provider",
 		IsActive: false,
 	})

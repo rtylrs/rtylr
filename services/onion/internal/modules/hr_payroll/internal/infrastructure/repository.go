@@ -28,48 +28,49 @@ func NewRepository(db *sql.DB) *Repository {
 
 // --- Payroll Config ---
 
-func (r *Repository) GetPayrollConfig(ctx context.Context, ownerID int64) (*domain.PayrollConfigRecord, error) {
-	row, err := r.queries.GetPayrollConfig(ctx, ownerID)
+func (r *Repository) GetPayrollConfig(ctx context.Context, businessID int64) (*domain.PayrollConfigRecord, error) {
+	row, err := r.queries.GetPayrollConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPayrollNotConfigured
 		}
-		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	cfg := payrollConfigFromRow(row)
 	return &cfg, nil
 }
 
-func (r *Repository) UpsertPayrollConfig(ctx context.Context, ownerID int64, cfg domain.PayrollConfigRecord) error {
+func (r *Repository) UpsertPayrollConfig(ctx context.Context, businessID int64, cfg domain.PayrollConfigRecord) error {
 	_, err := r.queries.UpsertPayrollConfig(ctx, sqlc.UpsertPayrollConfigParams{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
+		BusinessID:      businessID,
 		PeriodType:      cfg.PeriodType,
 		PayDayOfMonth:   cfg.PayDayOfMonth,
 		OvertimeEnabled: cfg.OvertimeEnabled,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to upsert payroll config", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to upsert payroll config", logger.Any("business_id", businessID), logger.Error(err))
 	}
 	return err
 }
 
 // --- Payroll Runs ---
 
-func (r *Repository) ListPayrollRuns(ctx context.Context, ownerID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {
-	total, err := r.queries.CountPayrollRuns(ctx, ownerID)
+func (r *Repository) ListPayrollRuns(ctx context.Context, businessID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {
+	total, err := r.queries.CountPayrollRuns(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to count payroll runs", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to count payroll runs", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListPayrollRuns(ctx, sqlc.ListPayrollRunsParams{
-		OwnerID: ownerID,
-		Limit:   params.Limit,
-		Offset:  params.Offset,
+		BusinessID: businessID,
+		Limit:      params.Limit,
+		Offset:     params.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list payroll runs", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list payroll runs", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
@@ -80,20 +81,20 @@ func (r *Repository) ListPayrollRuns(ctx context.Context, ownerID int64, params 
 	return runs, total, nil
 }
 
-func (r *Repository) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*domain.PayrollRunRecord, error) {
-	row, err := r.queries.GetPayrollRun(ctx, sqlc.GetPayrollRunParams{OwnerID: ownerID, ID: runID})
+func (r *Repository) GetPayrollRun(ctx context.Context, businessID, runID int64) (*domain.PayrollRunRecord, error) {
+	row, err := r.queries.GetPayrollRun(ctx, sqlc.GetPayrollRunParams{BusinessID: businessID, ID: runID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPayrollRunNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("business_id", businessID), logger.Any("run_id", runID), logger.Error(err))
 		return nil, err
 	}
 	run := payrollRunFromRow(row)
 	return &run, nil
 }
 
-func (r *Repository) GetPayrollRunByPeriod(ctx context.Context, ownerID int64, periodStart, periodEnd string) (*domain.PayrollRunRecord, error) {
+func (r *Repository) GetPayrollRunByPeriod(ctx context.Context, businessID int64, periodStart, periodEnd string) (*domain.PayrollRunRecord, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
 		return nil, err
@@ -103,7 +104,7 @@ func (r *Repository) GetPayrollRunByPeriod(ctx context.Context, ownerID int64, p
 		return nil, err
 	}
 	row, err := r.queries.GetPayrollRunByPeriod(ctx, sqlc.GetPayrollRunByPeriodParams{
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		PeriodStart: ps,
 		PeriodEnd:   pe,
 	})
@@ -111,14 +112,14 @@ func (r *Repository) GetPayrollRunByPeriod(ctx context.Context, ownerID int64, p
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPayrollRunNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get payroll run by period", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get payroll run by period", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	run := payrollRunFromRow(row)
 	return &run, nil
 }
 
-func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID int64, run domain.PayrollRunRecord, entries []domain.PayrollEntryRecord) (*domain.PayrollRunRecord, []domain.PayrollEntryRecord, error) {
+func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, businessID int64, run domain.PayrollRunRecord, entries []domain.PayrollEntryRecord) (*domain.PayrollRunRecord, []domain.PayrollEntryRecord, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, nil, err
@@ -144,7 +145,8 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID in
 	}
 
 	result, err := qtx.CreatePayrollRun(ctx, sqlc.CreatePayrollRunParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		PeriodStart: periodStart,
 		PeriodEnd:   periodEnd,
 		Status:      run.Status,
@@ -154,7 +156,7 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID in
 	})
 	if err != nil {
 		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("failed to create payroll run", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create payroll run", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, nil, err
 	}
 
@@ -164,12 +166,14 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID in
 		return nil, nil, err
 	}
 	run.ID = runID
-	run.OwnerID = ownerID
+	run.OwnerID = businessID
+	run.BusinessID = businessID
 
 	createdEntries := make([]domain.PayrollEntryRecord, 0, len(entries))
 	for _, entry := range entries {
 		entryResult, entryErr := qtx.CreatePayrollEntry(ctx, sqlc.CreatePayrollEntryParams{
-			OwnerID:       ownerID,
+			OwnerID:       businessID,
+			BusinessID:    businessID,
 			PayrollRunID:  runID,
 			EmployeeID:    entry.EmployeeID,
 			HoursWorked:   fmt.Sprintf("%.2f", entry.HoursWorked),
@@ -182,7 +186,7 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID in
 		})
 		if entryErr != nil {
 			_ = tx.Rollback()
-			logger.Ctx(ctx).Error("failed to create payroll entry", logger.Any("owner_id", ownerID), logger.Any("employee_id", entry.EmployeeID), logger.Error(entryErr))
+			logger.Ctx(ctx).Error("failed to create payroll entry", logger.Any("business_id", businessID), logger.Any("employee_id", entry.EmployeeID), logger.Error(entryErr))
 			return nil, nil, entryErr
 		}
 
@@ -192,7 +196,8 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID in
 			return nil, nil, idErr
 		}
 		entry.ID = entryID
-		entry.OwnerID = ownerID
+		entry.OwnerID = businessID
+		entry.BusinessID = businessID
 		entry.PayrollRunID = runID
 		createdEntries = append(createdEntries, entry)
 	}
@@ -204,38 +209,38 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID in
 	return &run, createdEntries, nil
 }
 
-func (r *Repository) UpdatePayrollRunStatus(ctx context.Context, ownerID, runID int64, status string) error {
+func (r *Repository) UpdatePayrollRunStatus(ctx context.Context, businessID, runID int64, status string) error {
 	return r.queries.UpdatePayrollRunStatus(ctx, sqlc.UpdatePayrollRunStatusParams{
-		Status:  status,
-		OwnerID: ownerID,
-		ID:      runID,
-	})
-}
-
-func (r *Repository) SetPayrollRunApproved(ctx context.Context, ownerID, runID, approverID int64) error {
-	return r.queries.SetPayrollRunApproved(ctx, sqlc.SetPayrollRunApprovedParams{
-		ApprovedBy: sql.NullInt64{Int64: approverID, Valid: true},
-		OwnerID:    ownerID,
+		Status:     status,
+		BusinessID: businessID,
 		ID:         runID,
 	})
 }
 
-func (r *Repository) SetPayrollRunExported(ctx context.Context, ownerID, runID int64) error {
+func (r *Repository) SetPayrollRunApproved(ctx context.Context, businessID, runID, approverID int64) error {
+	return r.queries.SetPayrollRunApproved(ctx, sqlc.SetPayrollRunApprovedParams{
+		ApprovedBy: sql.NullInt64{Int64: approverID, Valid: true},
+		BusinessID: businessID,
+		ID:         runID,
+	})
+}
+
+func (r *Repository) SetPayrollRunExported(ctx context.Context, businessID, runID int64) error {
 	return r.queries.SetPayrollRunExported(ctx, sqlc.SetPayrollRunExportedParams{
-		OwnerID: ownerID,
-		ID:      runID,
+		BusinessID: businessID,
+		ID:         runID,
 	})
 }
 
 // --- Payroll Entries ---
 
-func (r *Repository) ListPayrollEntries(ctx context.Context, ownerID, runID int64) ([]domain.PayrollEntryRecord, error) {
+func (r *Repository) ListPayrollEntries(ctx context.Context, businessID, runID int64) ([]domain.PayrollEntryRecord, error) {
 	rows, err := r.queries.ListPayrollEntries(ctx, sqlc.ListPayrollEntriesParams{
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		PayrollRunID: runID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list payroll entries", logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list payroll entries", logger.Any("business_id", businessID), logger.Any("run_id", runID), logger.Error(err))
 		return nil, err
 	}
 
@@ -258,7 +263,7 @@ func (r *Repository) ListApprovedTimesheetSummaries(ctx context.Context, ownerID
 	}
 
 	rows, err := r.queries.ListApprovedTimesheetSummaries(ctx, sqlc.ListApprovedTimesheetSummariesParams{
-		OwnerID:     ownerID,
+		BusinessID:  ownerID,
 		PeriodStart: ps,
 		PeriodEnd:   pe,
 	})
@@ -289,9 +294,9 @@ func (r *Repository) ListApprovedOvertimeSummaries(ctx context.Context, ownerID 
 	}
 
 	rows, err := r.queries.ListApprovedOvertimeSummaries(ctx, sqlc.ListApprovedOvertimeSummariesParams{
-		OwnerID: ownerID,
-		Date:    ps,
-		Date_2:  pe,
+		BusinessID: ownerID,
+		Date:       ps,
+		Date_2:     pe,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list overtime summaries", logger.Any("owner_id", ownerID), logger.Error(err))

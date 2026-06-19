@@ -11,6 +11,7 @@ var ErrTimeOffNotFound = errors.New("time off request not found")
 type TimeOffRequest struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
 	StaffID    int64     `json:"staff_id"`
 	Type       string    `json:"type"`
 	StartDate  time.Time `json:"start_date"`
@@ -37,6 +38,7 @@ func (t *TimeOffRequest) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&t.ID,
 		&t.OwnerID,
+		&t.BusinessID,
 		&t.StaffID,
 		&t.Type,
 		&t.StartDate,
@@ -78,8 +80,9 @@ func (t *TimeOffRequest) FromRow(row *sql.Rows) error {
 }
 
 type TimeOffInput struct {
-	OwnerID   int64   `json:"owner_id"`
-	StaffID   int64   `json:"staff_id"`
+	OwnerID    int64   `json:"owner_id"`
+	BusinessID int64   `json:"business_id"`
+	StaffID    int64   `json:"staff_id"`
 	Type      string  `json:"type"`
 	StartDate string  `json:"start_date"`
 	EndDate   string  `json:"end_date"`

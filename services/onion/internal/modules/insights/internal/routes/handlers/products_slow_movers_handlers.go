@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/products/slow-movers?days=60
@@ -35,6 +36,10 @@ func (h *GetSlowMoversHandler) Serve(ctx context.Context, req *GetSlowMoversRequ
 	if device.User == nil {
 		return GetSlowMoversResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSlowMoversResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	var days int32 = 60
 	if req.Days != "" {
 		parsed, err := strconv.ParseInt(req.Days, 10, 32)
@@ -47,7 +52,7 @@ func (h *GetSlowMoversHandler) Serve(ctx context.Context, req *GetSlowMoversRequ
 		}
 		days = int32(parsed)
 	}
-	rows, err := h.Service.GetSlowMovers(ctx, device.User.UserID, days)
+	rows, err := h.Service.GetSlowMovers(ctx, businessID, days)
 	if err != nil {
 		return GetSlowMoversResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

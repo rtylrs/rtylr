@@ -10,6 +10,7 @@ var ErrCampaignNotFound = errors.New("campaign not found")
 type Campaign struct {
 	ID                int64      `json:"id"`
 	OwnerID           int64      `json:"owner_id"`
+	BusinessID        int64      `json:"business_id"`
 	Name              string     `json:"name"`
 	Type              string     `json:"type"`
 	Status            string     `json:"status"`
@@ -26,6 +27,7 @@ type Campaign struct {
 
 type CampaignInput struct {
 	OwnerID           int64
+	BusinessID        int64
 	Name              string
 	Type              string
 	AudienceSegmentID *int64
@@ -37,6 +39,7 @@ type CampaignInput struct {
 type CampaignUpdateInput struct {
 	ID                int64
 	OwnerID           int64
+	BusinessID        int64
 	Name              string
 	Type              string
 	AudienceSegmentID *int64

@@ -22,8 +22,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.WaitlistEntry, error) {
-	rows, err := r.queries.ListWaitlist(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.WaitlistEntry, error) {
+	rows, err := r.queries.ListWaitlist(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list waitlist", logger.Error(err))
 		return nil, err
@@ -36,13 +36,13 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Waitlist
 }
 
 // ServiceBelongsToOwner reports whether the given booking service exists and is
-// owned by ownerID. It returns domain.ErrServiceNotFound when no matching row is
+// owned by businessID. It returns domain.ErrServiceNotFound when no matching row is
 // found, so a caller cannot reference another tenant's service.
-func (r *Repository) ServiceBelongsToOwner(ctx context.Context, ownerID, serviceID int64) error {
+func (r *Repository) ServiceBelongsToOwner(ctx context.Context, businessID, serviceID int64) error {
 	// cross-schema read from booking_services — verify service ownership before linking a waitlist entry
 	_, err := r.queries.GetBookingServiceForOwner(ctx, sqlc.GetBookingServiceForOwnerParams{
-		ID:      serviceID,
-		OwnerID: ownerID,
+		ID:         serviceID,
+		BusinessID: businessID,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrServiceNotFound
@@ -54,7 +54,7 @@ func (r *Repository) ServiceBelongsToOwner(ctx context.Context, ownerID, service
 	return nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.WaitlistInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.WaitlistInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin waitlist transaction", logger.Error(err))
@@ -66,7 +66,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Wai
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 		Phone: input.CustomerPhone,
@@ -76,7 +76,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Wai
 	}
 
 	result, err := r.queries.WithTx(tx).CreateWaitlistEntry(ctx, sqlc.CreateWaitlistEntryParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		CustomerName:  sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
@@ -92,7 +93,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Wai
 	id, err := result.LastInsertId()
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to retrieve last insert ID for waitlist entry",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Error(err),
 		)
 		return 0, err
@@ -104,7 +105,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Wai
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.WaitlistInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.WaitlistInput) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin waitlist update transaction", logger.Error(err))
@@ -116,7 +117,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 		Phone: input.CustomerPhone,
@@ -133,7 +134,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		PreferredDate: parseNullDate(input.PreferredDate),
 		PreferredTime: parseNullTime(input.PreferredTime),
 		Status:        sqlc.NullBookingWaitlistStatus{BookingWaitlistStatus: sqlc.BookingWaitlistStatus(input.Status), Valid: input.Status != ""},
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		ID:            id,
 	})
 	if err != nil {
@@ -148,7 +149,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 }
 
 func fromRow(row sqlc.BookingWaitlist) domain.WaitlistEntry {
-	w := domain.WaitlistEntry{ID: row.ID, OwnerID: row.OwnerID}
+	w := domain.WaitlistEntry{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID}
 	if row.ServiceID.Valid {
 		w.ServiceID = row.ServiceID.Int64
 	}

@@ -31,17 +31,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateCRMSettingsScope(ctx context.Context, ownerID int64) {
+func invalidateCRMSettingsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(crmSettingsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(crmSettingsScope, businessID))
 	}
 }
 
-func (s *Service) Get(ctx context.Context, ownerID int64) (domain.Settings, error) {
+func (s *Service) Get(ctx context.Context, businessID int64) (domain.Settings, error) {
 	return cacher.Of[domain.Settings]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSettingsScope, ownerID, "settings"),
+		cacheKeys.Scoped(crmSettingsScope, businessID, "settings"),
 		func(ctx context.Context) (domain.Settings, error) {
-			return s.repo.Get(ctx, ownerID)
+			return s.repo.Get(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, crmSettingsTTL),
 	)
@@ -51,6 +51,6 @@ func (s *Service) Upsert(ctx context.Context, input domain.SettingsInput) error 
 	if err := s.repo.Upsert(ctx, input); err != nil {
 		return err
 	}
-	invalidateCRMSettingsScope(ctx, input.OwnerID)
+	invalidateCRMSettingsScope(ctx, input.BusinessID)
 	return nil
 }

@@ -11,9 +11,10 @@ import "time"
 // list of objects (perks with icons, FAQ entries, etc.). Plain-text
 // kinds leave it empty and use Body.
 type Section struct {
-	ID        int64
-	OwnerID   int64
-	Kind      string
+	ID         int64
+	OwnerID    int64
+	BusinessID int64
+	Kind       string
 	Title     string
 	Body      string
 	MediaURL  string
@@ -29,9 +30,10 @@ type Section struct {
 // admin UI already has it in that shape; keeping the repository's
 // SQL surface simple is worth more than an extra marshal round-trip.
 type SectionInput struct {
-	ID        int64
-	OwnerID   int64
-	Kind      string
+	ID         int64
+	OwnerID    int64
+	BusinessID int64
+	Kind       string
 	Title     string
 	Body      string
 	MediaURL  string

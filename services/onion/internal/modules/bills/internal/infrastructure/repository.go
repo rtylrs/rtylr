@@ -26,8 +26,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Bill, error) {
-	row, err := r.queries.GetBill(ctx, sqlc.GetBillParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.Bill, error) {
+	row, err := r.queries.GetBill(ctx, sqlc.GetBillParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Bill{}, domain.ErrBillNotFound
@@ -38,8 +38,8 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Bill, e
 	return billFromSqlc(row), nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	res, err := r.queries.DeleteBill(ctx, sqlc.DeleteBillParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	res, err := r.queries.DeleteBill(ctx, sqlc.DeleteBillParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete bill", logger.Error(err))
 		return err
@@ -55,8 +55,8 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Bill, error) {
-	rows, err := r.queries.ListBills(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Bill, error) {
+	rows, err := r.queries.ListBills(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list bills", logger.Error(err))
 		return nil, err
@@ -70,7 +70,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Bill, er
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.BillInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.BillInput) (int64, error) {
 	status := input.Status
 	if status == "" {
 		status = "pending"
@@ -87,7 +87,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Bil
 	}
 
 	res, err := r.queries.CreateBill(ctx, sqlc.CreateBillParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		SupplierID:  sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
 		Amount:      fmtFloat(input.Amount),
 		Currency:    nullableString(currency),
@@ -103,7 +104,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Bil
 	return res.LastInsertId()
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.BillInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.BillInput) error {
 	dueDate, err := time.Parse("2006-01-02", input.DueDate)
 	if err != nil && input.DueDate != "" {
 		logger.Ctx(ctx).Error("Failed to parse due_date", logger.Error(err))
@@ -118,7 +119,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		Status:      sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(input.Status), Valid: input.Status != ""},
 		Description: nullableString(input.Description),
 		ID:          id,
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update bill", logger.Error(err))
@@ -130,10 +131,10 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 
 // SumByStatus returns the total bill amount for a given status and owner.
 // It returns 0 when the owner has no bills with that status.
-func (r *Repository) SumByStatus(ctx context.Context, ownerID int64, status string) (float64, error) {
+func (r *Repository) SumByStatus(ctx context.Context, businessID int64, status string) (float64, error) {
 	query, args, err := sq.Select("COALESCE(SUM(CAST(amount AS REAL)), 0)").
 		From("finance_bills").
-		Where(sq.Eq{"owner_id": ownerID, "status": status}).
+		Where(sq.Eq{"business_id": businessID, "status": status}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -151,8 +152,8 @@ func (r *Repository) SumByStatus(ctx context.Context, ownerID int64, status stri
 }
 
 // CountByStatus returns the number of bills in each status for the owner.
-func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	rows, err := r.queries.CountBillsByStatus(ctx, ownerID)
+func (r *Repository) CountByStatus(ctx context.Context, businessID int64) (map[string]int64, error) {
+	rows, err := r.queries.CountBillsByStatus(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count bills by status", logger.Error(err))
 		return nil, err
@@ -174,6 +175,7 @@ func billFromSqlc(row sqlc.FinanceBill) domain.Bill {
 	return domain.Bill{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		SupplierID:  toInt64(row.SupplierID),
 		Amount:      parseFloat(row.Amount),
 		Currency:    nullStr(row.Currency),

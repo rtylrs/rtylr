@@ -23,10 +23,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) SumAccountsByType(ctx context.Context, ownerID int64, accountType string) (float64, error) {
+func (r *Repository) SumAccountsByType(ctx context.Context, businessID int64, accountType string) (float64, error) {
 	result, err := r.queries.SumAccountsByType(ctx, sqlc.SumAccountsByTypeParams{
-		OwnerID: ownerID,
-		Type:    sqlc.FinanceAccountsType(accountType),
+		BusinessID: businessID,
+		Type:       sqlc.FinanceAccountsType(accountType),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum accounts by type", logger.Error(err))
@@ -35,8 +35,8 @@ func (r *Repository) SumAccountsByType(ctx context.Context, ownerID int64, accou
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumBankBalances(ctx context.Context, ownerID int64) (float64, error) {
-	result, err := r.queries.SumBankBalances(ctx, ownerID)
+func (r *Repository) SumBankBalances(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumBankBalances(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank balances", logger.Error(err))
 		return 0, err
@@ -44,8 +44,8 @@ func (r *Repository) SumBankBalances(ctx context.Context, ownerID int64) (float6
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumReceivables(ctx context.Context, ownerID int64) (float64, error) {
-	result, err := r.queries.SumReceivables(ctx, ownerID)
+func (r *Repository) SumReceivables(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumReceivables(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum receivables", logger.Error(err))
 		return 0, err
@@ -53,8 +53,8 @@ func (r *Repository) SumReceivables(ctx context.Context, ownerID int64) (float64
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumPayables(ctx context.Context, ownerID int64) (float64, error) {
-	result, err := r.queries.SumPayables(ctx, ownerID)
+func (r *Repository) SumPayables(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumPayables(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum payables", logger.Error(err))
 		return 0, err
@@ -62,9 +62,9 @@ func (r *Repository) SumPayables(ctx context.Context, ownerID int64) (float64, e
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumPaidInvoicesInRange(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+func (r *Repository) SumPaidInvoicesInRange(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	result, err := r.queries.SumPaidInvoicesInRange(ctx, sqlc.SumPaidInvoicesInRangeParams{
-		OwnerID:      ownerID,
+		BusinessID:   businessID,
 		FromPaidDate: sqlNullTimeStr(dateFrom),
 		ToPaidDate:   sqlNullTimeStr(dateTo),
 	})
@@ -75,7 +75,7 @@ func (r *Repository) SumPaidInvoicesInRange(ctx context.Context, ownerID int64, 
 	return toFloat64FromInterface(result), nil
 }
 
-func (r *Repository) SumExpensesInRange(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+func (r *Repository) SumExpensesInRange(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
 	dfTime, err := time.Parse("2006-01-02", dateFrom)
 	if err != nil && dateFrom != "" {
 		logger.Ctx(ctx).Error("Failed to parse dateFrom", logger.Error(err))
@@ -88,7 +88,7 @@ func (r *Repository) SumExpensesInRange(ctx context.Context, ownerID int64, date
 	}
 
 	result, err := r.queries.SumExpensesInRange(ctx, sqlc.SumExpensesInRangeParams{
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		FromExpenseDate: dfTime,
 		ToExpenseDate:   dtTime,
 	})
@@ -101,13 +101,13 @@ func (r *Repository) SumExpensesInRange(ctx context.Context, ownerID int64, date
 
 // NetProfit computes revenue minus expenses for the given date range. A
 // positive value means a profit; a negative value means a loss.
-func (r *Repository) NetProfit(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	revenue, err := r.SumPaidInvoicesInRange(ctx, ownerID, dateFrom, dateTo)
+func (r *Repository) NetProfit(ctx context.Context, businessID int64, dateFrom, dateTo string) (float64, error) {
+	revenue, err := r.SumPaidInvoicesInRange(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return 0, err
 	}
 
-	expenses, err := r.SumExpensesInRange(ctx, ownerID, dateFrom, dateTo)
+	expenses, err := r.SumExpensesInRange(ctx, businessID, dateFrom, dateTo)
 	if err != nil {
 		return 0, err
 	}
@@ -118,18 +118,18 @@ func (r *Repository) NetProfit(ctx context.Context, ownerID int64, dateFrom, dat
 // WorkingCapital returns current assets (bank balances + receivables) minus
 // current liabilities (payables). A positive value indicates the owner can
 // meet its short-term obligations.
-func (r *Repository) WorkingCapital(ctx context.Context, ownerID int64) (float64, error) {
-	bankBal, err := r.SumBankBalances(ctx, ownerID)
+func (r *Repository) WorkingCapital(ctx context.Context, businessID int64) (float64, error) {
+	bankBal, err := r.SumBankBalances(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
 
-	receivables, err := r.SumReceivables(ctx, ownerID)
+	receivables, err := r.SumReceivables(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
 
-	payables, err := r.SumPayables(ctx, ownerID)
+	payables, err := r.SumPayables(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}

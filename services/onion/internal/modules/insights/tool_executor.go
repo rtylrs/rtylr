@@ -11,6 +11,8 @@ import (
 
 	insightsapp "github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -78,14 +80,18 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		input = map[string]any{}
 	}
 
-	ownerID, err := insightsToolOwnerID(ctx)
-	if err != nil {
-		return nil, err
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 
 	switch name {
 	case getInsightsDashboardToolName:
-		dashboard, err := m.service.GetDashboard(ctx, ownerID)
+		dashboard, err := m.service.GetDashboard(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +102,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		points, err := m.service.GetRevenueSeries(ctx, ownerID, from, to)
+		points, err := m.service.GetRevenueSeries(ctx, businessID, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +122,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		comparison, err := m.service.GetRevenueComparison(ctx, ownerID, from, to)
+		comparison, err := m.service.GetRevenueComparison(ctx, businessID, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -126,7 +132,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsRevenueByAppToolName:
-		shares, err := m.service.GetRevenueByApp(ctx, ownerID)
+		shares, err := m.service.GetRevenueByApp(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +142,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsCustomerKPIsToolName:
-		kpis, err := m.service.GetCustomerKPIs(ctx, ownerID)
+		kpis, err := m.service.GetCustomerKPIs(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +153,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		customers, err := m.service.GetTopCustomers(ctx, ownerID, limit)
+		customers, err := m.service.GetTopCustomers(ctx, businessID, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -158,7 +164,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsCustomerChurnToolName:
-		windows, err := m.service.GetChurnRates(ctx, ownerID)
+		windows, err := m.service.GetChurnRates(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -168,7 +174,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsLTVDistributionToolName:
-		buckets, err := m.service.GetLTVDistribution(ctx, ownerID)
+		buckets, err := m.service.GetLTVDistribution(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +184,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsProductKPIsToolName:
-		kpis, err := m.service.GetProductKPIs(ctx, ownerID)
+		kpis, err := m.service.GetProductKPIs(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +195,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		products, err := m.service.GetBestSellers(ctx, ownerID, limit)
+		products, err := m.service.GetBestSellers(ctx, businessID, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -204,7 +210,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		products, err := m.service.GetSlowMovers(ctx, ownerID, days)
+		products, err := m.service.GetSlowMovers(ctx, businessID, days)
 		if err != nil {
 			return nil, err
 		}
@@ -215,7 +221,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsSalesByCategoryToolName:
-		categories, err := m.service.GetSalesByCategory(ctx, ownerID)
+		categories, err := m.service.GetSalesByCategory(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -230,7 +236,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsMarginDistributionToolName:
-		buckets, err := m.service.GetMarginDistribution(ctx, ownerID)
+		buckets, err := m.service.GetMarginDistribution(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -244,7 +250,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		points, err := m.service.GetCashFlowSeries(ctx, ownerID, from, to)
+		points, err := m.service.GetCashFlowSeries(ctx, businessID, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -267,7 +273,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		categories, err := m.service.GetExpensesByCategory(ctx, ownerID, from, to)
+		categories, err := m.service.GetExpensesByCategory(ctx, businessID, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +289,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsInvoiceAgingToolName:
-		buckets, err := m.service.GetInvoiceAging(ctx, ownerID)
+		buckets, err := m.service.GetInvoiceAging(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -298,14 +304,14 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsOperationsKPIsToolName:
-		kpis, err := m.service.GetOperationsKPIs(ctx, ownerID)
+		kpis, err := m.service.GetOperationsKPIs(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
 		return map[string]any{"operations_kpis": kpis}, nil
 
 	case getInsightsHeadcountToolName:
-		headcount, err := m.service.GetHeadcount(ctx, ownerID)
+		headcount, err := m.service.GetHeadcount(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -316,7 +322,7 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		if err != nil {
 			return nil, err
 		}
-		metrics, err := m.service.GetShiftMetrics(ctx, ownerID, from, to)
+		metrics, err := m.service.GetShiftMetrics(ctx, businessID, from, to)
 		if err != nil {
 			return nil, err
 		}
@@ -326,21 +332,21 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 		}, nil
 
 	case getInsightsTimeOffToolName:
-		timeOff, err := m.service.GetTimeOffSummary(ctx, ownerID)
+		timeOff, err := m.service.GetTimeOffSummary(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
 		return map[string]any{"time_off": timeOff}, nil
 
 	case getInsightsUtilizationToolName:
-		utilization, err := m.service.GetUtilization(ctx, ownerID)
+		utilization, err := m.service.GetUtilization(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
 		return map[string]any{"utilization": utilization}, nil
 
 	case getInsightsSettingsToolName:
-		settings, err := m.service.GetSettings(ctx, ownerID)
+		settings, err := m.service.GetSettings(ctx, businessID)
 		if err != nil {
 			return nil, err
 		}
@@ -348,14 +354,6 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 	}
 
 	return nil, fmt.Errorf("unsupported insights tool %q", name)
-}
-
-func insightsToolOwnerID(ctx context.Context) (int64, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil || authUser.UserID <= 0 {
-		return 0, errors.New("authentication is required")
-	}
-	return int64(authUser.UserID), nil
 }
 
 func insightsToolDateRange(input map[string]any) (time.Time, time.Time, error) {

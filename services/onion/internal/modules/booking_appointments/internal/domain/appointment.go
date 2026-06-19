@@ -5,6 +5,7 @@ import "time"
 type Appointment struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	ServiceID     int64     `json:"service_id"`
 	ResourceID    int64     `json:"resource_id"`
 	StaffID       int64     `json:"staff_id"`

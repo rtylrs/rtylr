@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
@@ -35,11 +36,16 @@ func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmpl
 		return ListEmployeeChecklistsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListEmployeeChecklistsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	if req.EmployeeID == 0 {
 		return ListEmployeeChecklistsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
 	}
 
-	checklists, total, err := h.Service.ListEmployeeChecklists(ctx, device.User.UserID, req.EmployeeID, domain.ListEmployeeChecklistsParams{
+	checklists, total, err := h.Service.ListEmployeeChecklists(ctx, businessID, req.EmployeeID, domain.ListEmployeeChecklistsParams{
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	})

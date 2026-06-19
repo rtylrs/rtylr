@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
 )
 
@@ -21,7 +22,7 @@ import (
 func toProtoPOSUser(u domain.POSUser) *posuserv1.POSUser {
 	return &posuserv1.POSUser{
 		Id:               u.ID,
-		BusinessId:       u.OwnerID,
+		BusinessId:       u.BusinessID,
 		LocationId:       u.LocationID,
 		Name:             u.Name,
 		Role:             string(u.Role),
@@ -53,18 +54,21 @@ func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersReques
 	if device.User == nil {
 		return ListPOSUsersResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListPOSUsersResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	var users []domain.POSUser
 	var err error
 	if req.LocationID > 0 {
-		users, err = h.Service.ListByLocation(ctx, ownerID, req.LocationID)
+		users, err = h.Service.ListByLocation(ctx, businessID, req.LocationID)
 	} else {
-		users, err = h.Service.ListByOwner(ctx, ownerID)
+		users, err = h.Service.ListByOwner(ctx, businessID)
 	}
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list pos_users",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Error(err),
 		)
 		return ListPOSUsersResponse{}, &errorModels.ServerError{
@@ -128,9 +132,12 @@ func (h *CreatePOSUserHandler) Serve(ctx context.Context, req *CreatePOSUserRequ
 	if device.User == nil {
 		return CreatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	id, err := h.Service.Create(ctx, ownerID, device.User.UserID, domain.CreatePOSUserInput{
+	id, err := h.Service.Create(ctx, businessID, device.User.UserID, domain.CreatePOSUserInput{
 		UserID:           req.UserID,
 		LocationID:       req.LocationID,
 		Name:             req.Name,
@@ -151,7 +158,7 @@ func (h *CreatePOSUserHandler) Serve(ctx context.Context, req *CreatePOSUserRequ
 			return CreatePOSUserResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid input"}
 		}
 		logger.Ctx(ctx).Error("failed to create pos_user",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Error(err),
 		)
 		return CreatePOSUserResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create POS user"}
@@ -195,9 +202,12 @@ func (h *UpdatePOSUserHandler) Serve(ctx context.Context, req *UpdatePOSUserRequ
 	if device.User == nil {
 		return UpdatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	err := h.Service.Update(ctx, ownerID, req.ID, domain.UpdatePOSUserInput{
+	err := h.Service.Update(ctx, businessID, req.ID, domain.UpdatePOSUserInput{
 		Name:             req.Name,
 		PIN:              req.PIN,
 		Role:             domain.POSUserRole(req.Role),
@@ -212,7 +222,7 @@ func (h *UpdatePOSUserHandler) Serve(ctx context.Context, req *UpdatePOSUserRequ
 	req.PIN = ""
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update pos_user",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("pos_user_id", req.ID),
 			logger.Error(err),
 		)
@@ -247,12 +257,15 @@ func (h *DeactivatePOSUserHandler) Serve(ctx context.Context, req *DeactivatePOS
 	if device.User == nil {
 		return DeactivatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeactivatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	err := h.Service.Deactivate(ctx, ownerID, req.ID)
+	err := h.Service.Deactivate(ctx, businessID, req.ID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to deactivate pos_user",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("pos_user_id", req.ID),
 			logger.Error(err),
 		)
@@ -304,16 +317,19 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 	if device.User == nil {
 		return VerifyPINResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return VerifyPINResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	result, err := h.Service.VerifyPIN(ctx, ownerID, req.LocationID, req.UserID, req.PIN)
+	result, err := h.Service.VerifyPIN(ctx, businessID, req.LocationID, req.UserID, req.PIN)
 	req.PIN = ""
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidPIN) {
 			return VerifyPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnauthorized, Code: http.StatusUnauthorized, Message: "Invalid credentials"}
 		}
 		logger.Ctx(ctx).Error("pos_users verify-pin failed",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("pos_user_target", req.UserID),
 			logger.Error(err),
 		)
@@ -372,11 +388,14 @@ func (h *SetPINHandler) Serve(ctx context.Context, req *SetPINRequest) (SetPINRe
 	if device.User == nil {
 		return SetPINResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := device.User.BusinessID
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SetPINResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	err := h.Service.SetPIN(ctx, ownerID, application.SetPINActor{
+	err := h.Service.SetPIN(ctx, businessID, application.SetPINActor{
 		UserID:   device.User.UserID,
-		IsOwner:  device.User.UserID == ownerID,
+		IsOwner:  device.User.UserID == businessID,
 		TeamRole: device.User.Role,
 	}, domain.SetPINInput{
 		UserID:     req.UserID,
@@ -396,7 +415,7 @@ func (h *SetPINHandler) Serve(ctx context.Context, req *SetPINRequest) (SetPINRe
 			return SetPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "A PIN is already set. Ask a manager to reset it."}
 		}
 		logger.Ctx(ctx).Error("pos_users set-pin failed",
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("target_user", req.UserID),
 			logger.Error(err),
 		)

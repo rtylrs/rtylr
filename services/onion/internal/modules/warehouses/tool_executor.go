@@ -39,8 +39,12 @@ func (m *Module) executeListWarehousesTool(ctx context.Context) (map[string]any,
 		return nil, errors.New("authentication is required")
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	warehouses, err := m.service.ListWarehouses(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	warehouses, err := m.service.ListWarehouses(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +71,12 @@ func (m *Module) executeCreateWarehouseTool(ctx context.Context, input map[strin
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := m.service.CreateWarehouse(ctx, ownerID, parsed)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	id, err := m.service.CreateWarehouse(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}

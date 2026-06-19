@@ -5,6 +5,7 @@ import "time"
 type LeaveTypeRecord struct {
 	ID                             int64     `json:"id"`
 	OwnerID                        int64     `json:"owner_id"`
+	BusinessID                     int64     `json:"business_id"`
 	Name                           string    `json:"name"`
 	IsPaid                         bool      `json:"is_paid"`
 	RequiresApproval               bool      `json:"requires_approval"`
@@ -21,6 +22,7 @@ type LeaveTypeRecord struct {
 type LeaveRequestRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	EmployeeID           int64     `json:"employee_id"`
 	LeaveTypeID          int64     `json:"leave_type_id"`
 	StartDate            string    `json:"start_date"`
@@ -37,6 +39,7 @@ type LeaveRequestRecord struct {
 type LeaveBalanceRecord struct {
 	ID               int64     `json:"id"`
 	OwnerID          int64     `json:"owner_id"`
+	BusinessID       int64     `json:"business_id"`
 	EmployeeID       int64     `json:"employee_id"`
 	LeaveTypeID      int64     `json:"leave_type_id"`
 	Year             int32     `json:"year"`

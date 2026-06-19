@@ -9,11 +9,13 @@ import (
 	"github.com/voxire/onion/internal/modules/store_themes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type Payload struct {
 	ID           int64  `json:"id"`
 	OwnerID      int64  `json:"owner_id"`
+	BusinessID   int64  `json:"business_id"`
 	Name         string `json:"name"`
 	PrimaryColor string `json:"primary_color"`
 	Font         string `json:"font"`
@@ -26,7 +28,7 @@ type Payload struct {
 
 func toPayload(t domain.Theme) Payload {
 	return Payload{
-		ID: t.ID, OwnerID: t.OwnerID, Name: t.Name, PrimaryColor: t.PrimaryColor, Font: t.Font,
+		ID: t.ID, OwnerID: t.OwnerID, BusinessID: t.BusinessID, Name: t.Name, PrimaryColor: t.PrimaryColor, Font: t.Font,
 		HeaderStyle: t.HeaderStyle, FooterStyle: t.FooterStyle, CustomCSS: t.CustomCSS,
 		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z07:00"), UpdatedAt: t.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
@@ -49,7 +51,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	items, err := h.Service.List(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list themes"}
 	}
@@ -89,7 +95,11 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	id, err := h.Service.Create(ctx, authUser.UserID, domain.ThemeInput{Name: req.Name, PrimaryColor: req.PrimaryColor, Font: req.Font, HeaderStyle: req.HeaderStyle, FooterStyle: req.FooterStyle, CustomCSS: req.CustomCSS})
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, authUser.UserID, businessID, domain.ThemeInput{Name: req.Name, PrimaryColor: req.PrimaryColor, Font: req.Font, HeaderStyle: req.HeaderStyle, FooterStyle: req.FooterStyle, CustomCSS: req.CustomCSS})
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create theme"}
 	}
@@ -125,7 +135,11 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if !ok {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.ThemeInput{Name: req.Name, PrimaryColor: req.PrimaryColor, Font: req.Font, HeaderStyle: req.HeaderStyle, FooterStyle: req.FooterStyle, CustomCSS: req.CustomCSS}); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Update(ctx, businessID, req.ID, domain.ThemeInput{Name: req.Name, PrimaryColor: req.PrimaryColor, Font: req.Font, HeaderStyle: req.HeaderStyle, FooterStyle: req.FooterStyle, CustomCSS: req.CustomCSS}); err != nil {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update theme"}
 	}
 	return UpdateResponse{Message: "Theme updated"}, nil

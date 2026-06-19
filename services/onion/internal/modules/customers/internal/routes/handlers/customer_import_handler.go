@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerImportRoutes() []string {
@@ -60,6 +61,11 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 		return ImportCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ImportCustomersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	items := make([]domain.CustomerImportItem, len(req.Customers))
 	for i, c := range req.Customers {
 		items[i] = domain.CustomerImportItem{
@@ -77,7 +83,7 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 		}
 	}
 
-	result, err := h.CRMService.ImportCustomers(ctx, device.User.UserID, items)
+	result, err := h.CRMService.ImportCustomers(ctx, businessID, items)
 	if err != nil {
 		return ImportCustomersResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

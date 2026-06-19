@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrdashboardv1 "github.com/voxire/voxie/gen/go/hr/dashboard/v1"
 	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 )
@@ -93,7 +94,12 @@ func (h *ListStaffHandler) Serve(ctx context.Context, req *ListStaffRequest) (Li
 		return ListStaffResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	staffList, err := h.Service.ListStaff(ctx, device.User.UserID, req.Search, req.DepartmentID, req.Status)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListStaffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	staffList, err := h.Service.ListStaff(ctx, businessID, req.Search, req.DepartmentID, req.Status)
 	if err != nil {
 		return ListStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list staff"}
 	}
@@ -165,8 +171,13 @@ func (h *CreateStaffHandler) Serve(ctx context.Context, req *CreateStaffRequest)
 		return CreateStaffResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateStaffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.StaffInput{
-		OwnerID: device.User.UserID, UserID: req.UserID, DepartmentID: req.DepartmentID,
+		OwnerID: device.User.UserID, BusinessID: businessID, UserID: req.UserID, DepartmentID: req.DepartmentID,
 		FirstName: req.FirstName, LastName: req.LastName, Email: req.Email, Phone: req.Phone,
 		Role: req.Role, EmploymentType: req.EmploymentType, Status: req.Status,
 		Salary: req.Salary, HourlyRate: req.HourlyRate, OvertimeRate: req.OvertimeRate,
@@ -229,6 +240,11 @@ func (h *UpdateStaffHandler) Serve(ctx context.Context, req *UpdateStaffRequest)
 		return UpdateStaffResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateStaffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.StaffUpdateInput{
 		ID: req.ID, DepartmentID: req.DepartmentID, FirstName: req.FirstName, LastName: req.LastName,
 		Email: req.Email, Phone: req.Phone, Role: req.Role, EmploymentType: req.EmploymentType,
@@ -238,7 +254,7 @@ func (h *UpdateStaffHandler) Serve(ctx context.Context, req *UpdateStaffRequest)
 		Apps: req.Apps, Notes: req.Notes,
 	}
 
-	if err := h.Service.UpdateStaff(ctx, device.User.UserID, input); err != nil {
+	if err := h.Service.UpdateStaff(ctx, businessID, input); err != nil {
 		return UpdateStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update staff member"}
 	}
 
@@ -274,7 +290,12 @@ func (h *DeleteStaffHandler) Serve(ctx context.Context, req *DeleteStaffRequest)
 		return DeleteStaffResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.DeleteStaff(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteStaffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteStaff(ctx, businessID, req.ID); err != nil {
 		return DeleteStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to terminate staff member"}
 	}
 
@@ -310,7 +331,12 @@ func (h *GetStaffHandler) Serve(ctx context.Context, req *GetStaffRequest) (GetS
 		return GetStaffResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	s, err := h.Service.GetStaffByID(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetStaffResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	s, err := h.Service.GetStaffByID(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrStaffNotFound) {
 			return GetStaffResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Staff member not found"}
@@ -350,7 +376,12 @@ func (h *ClockInHandler) Serve(ctx context.Context, req *ClockInRequest) (ClockI
 		return ClockInResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.ClockIn(ctx, device.User.UserID, req.StaffID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ClockInResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.ClockIn(ctx, businessID, req.StaffID); err != nil {
 		return ClockInResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to clock in"}
 	}
 
@@ -386,7 +417,12 @@ func (h *ClockOutHandler) Serve(ctx context.Context, req *ClockOutRequest) (Cloc
 		return ClockOutResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.ClockOut(ctx, device.User.UserID, req.StaffID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ClockOutResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.ClockOut(ctx, businessID, req.StaffID); err != nil {
 		return ClockOutResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to clock out"}
 	}
 
@@ -413,7 +449,12 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	stats, err := h.Service.GetDashboardStats(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	stats, err := h.Service.GetDashboardStats(ctx, businessID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get dashboard stats"}
 	}

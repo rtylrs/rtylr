@@ -24,7 +24,7 @@ import (
 // tenant-scoped career reads so the order stays locked with the Scan
 // calls below.
 var recruitCareerSelectColumns = []string{
-	"id", "owner_id", "COALESCE(slug,'')", "title",
+	"id", "owner_id", "business_id", "COALESCE(slug,'')", "title",
 	"COALESCE(department,'')", "COALESCE(location,'')",
 	"COALESCE(employment_type,'')", "COALESCE(work_mode,'')",
 	"COALESCE(seniority,'')", "details",
@@ -35,11 +35,11 @@ var recruitCareerSelectColumns = []string{
 	"created_at", "updated_at",
 }
 
-func (r *Repository) ListCareers(ctx context.Context, ownerID int64, publishedOnly bool) ([]domain.RecruitCareer, error) {
+func (r *Repository) ListCareers(ctx context.Context, businessID int64, publishedOnly bool) ([]domain.RecruitCareer, error) {
 	b := sq.
 		Select(recruitCareerSelectColumns...).
 		From("careers").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Eq{"is_active": true})
 	if publishedOnly {
 		b = b.Where(sq.Eq{"is_published": true})
@@ -61,7 +61,7 @@ func (r *Repository) ListCareers(ctx context.Context, ownerID int64, publishedOn
 	out := make([]domain.RecruitCareer, 0)
 	for rows.Next() {
 		var c domain.RecruitCareer
-		if err := rows.Scan(&c.ID, &c.OwnerID, &c.Slug, &c.Title,
+		if err := rows.Scan(&c.ID, &c.OwnerID, &c.BusinessID, &c.Slug, &c.Title,
 			&c.Department, &c.Location, &c.EmploymentType, &c.WorkMode,
 			&c.Seniority, &c.Details, &c.Requirements,
 			&c.SalaryMin, &c.SalaryMax, &c.SalaryCurrency,
@@ -73,11 +73,11 @@ func (r *Repository) ListCareers(ctx context.Context, ownerID int64, publishedOn
 	return out, rows.Err()
 }
 
-func (r *Repository) GetCareerBySlug(ctx context.Context, ownerID int64, slug string) (domain.RecruitCareer, error) {
+func (r *Repository) GetCareerBySlug(ctx context.Context, businessID int64, slug string) (domain.RecruitCareer, error) {
 	q, args, err := sq.
 		Select(recruitCareerSelectColumns...).
 		From("careers").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Eq{"slug": slug}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
@@ -87,7 +87,7 @@ func (r *Repository) GetCareerBySlug(ctx context.Context, ownerID int64, slug st
 	}
 	row := r.pool.QueryRowContext(ctx, q, args...)
 	var c domain.RecruitCareer
-	if err := row.Scan(&c.ID, &c.OwnerID, &c.Slug, &c.Title,
+	if err := row.Scan(&c.ID, &c.OwnerID, &c.BusinessID, &c.Slug, &c.Title,
 		&c.Department, &c.Location, &c.EmploymentType, &c.WorkMode,
 		&c.Seniority, &c.Details, &c.Requirements,
 		&c.SalaryMin, &c.SalaryMax, &c.SalaryCurrency,
@@ -103,10 +103,10 @@ func (r *Repository) GetCareerBySlug(ctx context.Context, ownerID int64, slug st
 func (r *Repository) CreateCareer(ctx context.Context, in domain.RecruitCareerInput) (int64, error) {
 	q, args, err := sq.
 		Insert("careers").
-		Columns("owner_id", "slug", "title", "department", "location", "employment_type", "work_mode",
+		Columns("owner_id", "business_id", "slug", "title", "department", "location", "employment_type", "work_mode",
 			"seniority", "details", "requirements", "salary_min", "salary_max", "salary_currency",
 			"is_published", "is_active").
-		Values(in.OwnerID, in.Slug, in.Title, nullStr(in.Department), nullStr(in.Location),
+		Values(in.OwnerID, in.BusinessID, in.Slug, in.Title, nullStr(in.Department), nullStr(in.Location),
 			nullStr(in.EmploymentType), nullStr(in.WorkMode), nullStr(in.Seniority),
 			in.Details, nullStr(in.Requirements),
 			nullFloat(in.SalaryMin), nullFloat(in.SalaryMax), nullStr(in.SalaryCurrency),
@@ -140,7 +140,7 @@ func (r *Repository) UpdateCareer(ctx context.Context, in domain.RecruitCareerIn
 		Set("salary_currency", nullStr(in.SalaryCurrency)).
 		Set("is_published", in.IsPublished).
 		Where(sq.Eq{"id": in.ID}).
-		Where(sq.Eq{"owner_id": in.OwnerID}).
+		Where(sq.Eq{"business_id": in.BusinessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -150,7 +150,7 @@ func (r *Repository) UpdateCareer(ctx context.Context, in domain.RecruitCareerIn
 	return err
 }
 
-func (r *Repository) DeleteCareer(ctx context.Context, ownerID, careerID int64) error {
+func (r *Repository) DeleteCareer(ctx context.Context, businessID, careerID int64) error {
 	// Soft delete — flip is_active to false so historical submissions
 	// still reference a readable row. Hard delete cascades would orphan
 	// the submissions table.
@@ -159,7 +159,7 @@ func (r *Repository) DeleteCareer(ctx context.Context, ownerID, careerID int64) 
 		Set("is_active", false).
 		Set("is_published", false).
 		Where(sq.Eq{"id": careerID}).
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -174,7 +174,7 @@ func (r *Repository) DeleteCareer(ctx context.Context, ownerID, careerID int64) 
 // customizationSelectColumns is shared by both get-by-owner and
 // get-by-slug so the column order stays locked with Scan.
 var customizationSelectColumns = []string{
-	"id", "owner_id", "slug", "brand_name",
+	"id", "owner_id", "business_id", "slug", "brand_name",
 	"COALESCE(tagline,'')", "COALESCE(about_blurb,'')",
 	"COALESCE(logo_url,'')", "COALESCE(primary_color,'')",
 	"COALESCE(accent_color,'')", "COALESCE(bg_color,'')",
@@ -193,7 +193,7 @@ var customizationSelectColumns = []string{
 func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Customization, error) {
 	var c domain.Customization
 	err := row.Scan(
-		&c.ID, &c.OwnerID, &c.Slug, &c.BrandName,
+		&c.ID, &c.OwnerID, &c.BusinessID, &c.Slug, &c.BrandName,
 		&c.Tagline, &c.AboutBlurb, &c.LogoURL, &c.PrimaryColor,
 		&c.AccentColor, &c.BgColor, &c.TextColor, &c.MutedTextColor,
 		&c.FontPairing, &c.HeroImageURL, &c.FaviconURL,
@@ -208,11 +208,11 @@ func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Cust
 	return c, err
 }
 
-func (r *Repository) GetCustomizationByOwner(ctx context.Context, ownerID int64) (domain.Customization, error) {
+func (r *Repository) GetCustomizationByOwner(ctx context.Context, businessID int64) (domain.Customization, error) {
 	q, args, err := sq.
 		Select(customizationSelectColumns...).
 		From("careers_customizations").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -253,7 +253,7 @@ func (r *Repository) GetCustomizationBySlug(ctx context.Context, slug string) (d
 }
 
 func (r *Repository) UpsertCustomization(ctx context.Context, in domain.CustomizationInput) error {
-	// Upsert keyed by owner_id. The unique index on (owner_id) keeps
+	// Upsert keyed by business_id. The unique index on (business_id) keeps
 	// this to one row per business; the slug index is the backstop
 	// against collisions across tenants.
 	const onDuplicate = `ON DUPLICATE KEY UPDATE
@@ -284,14 +284,14 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 
 	q, args, err := sq.
 		Insert("careers_customizations").
-		Columns("owner_id", "slug", "brand_name", "tagline", "about_blurb", "logo_url",
+		Columns("owner_id", "business_id", "slug", "brand_name", "tagline", "about_blurb", "logo_url",
 			"primary_color", "accent_color", "bg_color", "text_color",
 			"muted_text_color", "font_pairing", "hero_image_url", "favicon_url",
 			"template", "header_html",
 			"meta_title", "meta_description", "privacy_url", "terms_url",
 			"ga_measurement_id", "meta_pixel_id", "require_consent",
 			"notification_email", "email_notifications").
-		Values(in.OwnerID, in.Slug, in.BrandName, nullStr(in.Tagline), nullStr(in.AboutBlurb),
+		Values(in.OwnerID, in.BusinessID, in.Slug, in.BrandName, nullStr(in.Tagline), nullStr(in.AboutBlurb),
 			nullStr(in.LogoURL), nullStr(in.PrimaryColor),
 			nullStr(in.AccentColor), nullStr(in.BgColor),
 			nullStr(in.TextColor), nullStr(in.MutedTextColor),
@@ -317,8 +317,8 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 func (r *Repository) CreateSubmission(ctx context.Context, in domain.SubmissionInput) (int64, error) {
 	q, args, err := sq.
 		Insert("careers_submissions").
-		Columns("career_id", "owner_id", "candidate_name", "email", "phone", "resume_url", "cover_letter", "answers_json").
-		Values(in.CareerID, in.OwnerID, in.CandidateName, in.Email,
+		Columns("career_id", "owner_id", "business_id", "candidate_name", "email", "phone", "resume_url", "cover_letter", "answers_json").
+		Values(in.CareerID, in.OwnerID, in.BusinessID, in.CandidateName, in.Email,
 			nullStr(in.Phone), nullStr(in.ResumeURL), nullStr(in.CoverLetter),
 			nullStr(in.AnswersJSON)).
 		PlaceholderFormat(sq.Question).
@@ -333,9 +333,9 @@ func (r *Repository) CreateSubmission(ctx context.Context, in domain.SubmissionI
 	return res.LastInsertId()
 }
 
-func (r *Repository) ListSubmissions(ctx context.Context, ownerID int64, status string) ([]domain.Submission, error) {
+func (r *Repository) ListSubmissions(ctx context.Context, businessID int64, status string) ([]domain.Submission, error) {
 	b := sq.
-		Select("s.id", "s.career_id", "s.owner_id", "s.candidate_name", "s.email",
+		Select("s.id", "s.career_id", "s.owner_id", "s.business_id", "s.candidate_name", "s.email",
 			"COALESCE(s.phone,'')", "COALESCE(s.resume_url,'')",
 			"COALESCE(s.cover_letter,'')", "s.status",
 			"COALESCE(s.answers_json, '') AS answers_json",
@@ -343,7 +343,7 @@ func (r *Repository) ListSubmissions(ctx context.Context, ownerID int64, status 
 			"COALESCE(c.title, '') AS career_title").
 		From("careers_submissions s").
 		LeftJoin("careers c ON c.id = s.career_id").
-		Where(sq.Eq{"s.owner_id": ownerID})
+		Where(sq.Eq{"s.business_id": businessID})
 	if status != "" {
 		b = b.Where(sq.Eq{"s.status": status})
 	}
@@ -364,7 +364,7 @@ func (r *Repository) ListSubmissions(ctx context.Context, ownerID int64, status 
 	out := make([]domain.Submission, 0)
 	for rows.Next() {
 		var s domain.Submission
-		if err := rows.Scan(&s.ID, &s.CareerID, &s.OwnerID, &s.CandidateName,
+		if err := rows.Scan(&s.ID, &s.CareerID, &s.OwnerID, &s.BusinessID, &s.CandidateName,
 			&s.Email, &s.Phone, &s.ResumeURL, &s.CoverLetter, &s.Status,
 			&s.AnswersJSON,
 			&s.CreatedAt, &s.UpdatedAt, &s.CareerTitle); err != nil {
@@ -375,12 +375,12 @@ func (r *Repository) ListSubmissions(ctx context.Context, ownerID int64, status 
 	return out, rows.Err()
 }
 
-func (r *Repository) UpdateSubmissionStatus(ctx context.Context, ownerID, submissionID int64, status string) error {
+func (r *Repository) UpdateSubmissionStatus(ctx context.Context, businessID, submissionID int64, status string) error {
 	q, args, err := sq.
 		Update("careers_submissions").
 		Set("status", status).
 		Where(sq.Eq{"id": submissionID}).
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

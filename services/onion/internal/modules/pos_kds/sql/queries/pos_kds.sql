@@ -1,7 +1,7 @@
 -- name: ListActiveKDSOrders :many
-SELECT id, order_number, type, status, table_id, customer_name, kitchen_notes, created_at
+SELECT id, order_number, type, status, table_id, customer_name, kitchen_notes, created_at, owner_id, business_id
 FROM pos_orders
-WHERE owner_id = ? AND status IN ('confirmed','preparing','ready')
+WHERE business_id = ? AND status IN ('confirmed','preparing','ready')
 ORDER BY created_at ASC;
 
 -- name: GetKDSOrderItems :many
@@ -15,4 +15,4 @@ UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
 UPDATE pos_order_items oi
 JOIN pos_orders o ON o.id = oi.order_id
 SET oi.status = ?
-WHERE oi.id = ? AND o.owner_id = ?;
+WHERE oi.id = ? AND o.business_id = ?;

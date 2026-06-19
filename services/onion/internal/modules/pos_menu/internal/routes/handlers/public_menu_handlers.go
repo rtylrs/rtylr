@@ -57,18 +57,9 @@ func (h *PublicListMenuItemsHandler) Validate(_ context.Context, req *PublicList
 }
 
 func (h *PublicListMenuItemsHandler) Serve(ctx context.Context, req *PublicListMenuItemsRequest) (PublicListMenuItemsResponse, *errorModels.ServerError) {
-	// No auth check — this is the whole point of the endpoint. Resolve
-	// business_id to the canonical owner tenant before reading products.
-	ownerID, err := h.Service.BusinessOwnerID(ctx, req.BusinessID, req.BusinessID)
-	if err != nil {
-		return PublicListMenuItemsResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to resolve public menu",
-		}
-	}
-
-	items, err := h.Service.List(ctx, ownerID)
+	// No auth check — this is the whole point of the endpoint. The business_id
+	// is passed directly as the public menu scope parameter.
+	items, err := h.Service.List(ctx, req.BusinessID)
 	if err != nil {
 		return PublicListMenuItemsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

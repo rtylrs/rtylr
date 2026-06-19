@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
@@ -52,7 +53,12 @@ func (h *ImportFlowHandler) Serve(ctx context.Context, req *ImportFlowRequest) (
 		return ImportFlowResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	entries, err := h.Service.ImportFlowTasks(ctx, device.User.UserID, req.EmployeeID, req.PeriodStart, req.PeriodEnd)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ImportFlowResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	entries, err := h.Service.ImportFlowTasks(ctx, businessID, req.EmployeeID, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to import flow tasks",
 			logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))

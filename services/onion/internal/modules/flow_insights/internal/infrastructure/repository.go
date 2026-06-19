@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 // Insights
 // ─────────────────────────────────────────────
 
-func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domain.InsightsStats, error) {
+func (r *Repository) GetInsightsStats(ctx context.Context, businessID int64) (domain.InsightsStats, error) {
 	var stats domain.InsightsStats
 	stats.TasksByStatus = make(map[string]int64)
 	stats.TasksByPriority = make(map[string]int64)
@@ -38,7 +38,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 			"COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < CURDATE() THEN 1 END) AS overdue_count",
 		).
 		From("flow_tasks").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -59,7 +59,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	avgQuery, avgArgs, err := sq.
 		Select("COALESCE(AVG(DATEDIFF(completed_at, created_at)), 0) AS avg_days").
 		From("flow_tasks").
-		Where(sq.Eq{"owner_id": ownerID, "status": "done"}).
+		Where(sq.Eq{"business_id": businessID, "status": "done"}).
 		Where(sq.Expr("completed_at IS NOT NULL")).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -76,7 +76,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	velThisQuery, velThisArgs, err := sq.
 		Select("COUNT(*)").
 		From("flow_tasks").
-		Where(sq.Eq{"owner_id": ownerID, "status": "done"}).
+		Where(sq.Eq{"business_id": businessID, "status": "done"}).
 		Where(sq.Expr("completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)")).
 		Where(sq.Expr("completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)")).
 		PlaceholderFormat(sq.Question).
@@ -94,7 +94,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	velLastQuery, velLastArgs, err := sq.
 		Select("COUNT(*)").
 		From("flow_tasks").
-		Where(sq.Eq{"owner_id": ownerID, "status": "done"}).
+		Where(sq.Eq{"business_id": businessID, "status": "done"}).
 		Where(sq.Expr("completed_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)")).
 		Where(sq.Expr("completed_at < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)")).
 		PlaceholderFormat(sq.Question).
@@ -112,7 +112,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	statusQuery, statusArgs, err := sq.
 		Select("status", "COUNT(*) AS cnt").
 		From("flow_tasks").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		GroupBy("status").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -141,7 +141,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	priorityQuery, priorityArgs, err := sq.
 		Select("priority", "COUNT(*) AS cnt").
 		From("flow_tasks").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		GroupBy("priority").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -173,7 +173,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 // Team Workload
 // ─────────────────────────────────────────────
 
-func (r *Repository) GetTeamWorkload(ctx context.Context, ownerID int64) (domain.TeamWorkloadResult, error) {
+func (r *Repository) GetTeamWorkload(ctx context.Context, businessID int64) (domain.TeamWorkloadResult, error) {
 	// cross-schema read from users — joins flow_tasks assignees to user display names
 	query, args, err := sq.
 		Select(
@@ -186,7 +186,7 @@ func (r *Repository) GetTeamWorkload(ctx context.Context, ownerID int64) (domain
 		).
 		From("flow_tasks ft").
 		LeftJoin("users u ON ft.assignee_id = u.id").
-		Where(sq.Eq{"ft.owner_id": ownerID}).
+		Where(sq.Eq{"ft.business_id": businessID}).
 		Where(sq.Expr("ft.assignee_id IS NOT NULL")).
 		GroupBy("ft.assignee_id", "u.full_name").
 		PlaceholderFormat(sq.Question).
@@ -224,7 +224,7 @@ func (r *Repository) GetTeamWorkload(ctx context.Context, ownerID int64) (domain
 // Roadmap
 // ─────────────────────────────────────────────
 
-func (r *Repository) GetRoadmap(ctx context.Context, ownerID int64) (domain.RoadmapResult, error) {
+func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.RoadmapResult, error) {
 	projQuery, projArgs, err := sq.
 		Select(
 			"fp.id",
@@ -236,7 +236,7 @@ func (r *Repository) GetRoadmap(ctx context.Context, ownerID int64) (domain.Road
 		).
 		From("flow_projects fp").
 		LeftJoin("flow_tasks ft ON ft.project_id = fp.id AND ft.parent_task_id IS NULL").
-		Where(sq.Eq{"fp.owner_id": ownerID}).
+		Where(sq.Eq{"fp.business_id": businessID}).
 		Where(sq.NotEq{"fp.status": "archived"}).
 		GroupBy("fp.id", "fp.name", "fp.start_date", "fp.due_date").
 		OrderBy("fp.created_at ASC").

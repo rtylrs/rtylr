@@ -5,6 +5,7 @@ import "time"
 type TimeEntryRecord struct {
 	ID                int64     `json:"id"`
 	OwnerID           int64     `json:"owner_id"`
+	BusinessID        int64     `json:"business_id"`
 	EmployeeID        int64     `json:"employee_id"`
 	TimesheetID       int64     `json:"timesheet_id"`
 	ProjectID         int64     `json:"project_id"`
@@ -28,6 +29,7 @@ type TimeEntryRecord struct {
 type TimesheetRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	EmployeeID           int64     `json:"employee_id"`
 	PeriodStart          string    `json:"period_start"`
 	PeriodEnd            string    `json:"period_end"`
@@ -43,6 +45,7 @@ type TimesheetRecord struct {
 type ApprovalActionRecord struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	TimesheetID int64     `json:"timesheet_id"`
 	ApproverID  int64     `json:"approver_id"`
 	Action      string    `json:"action"`

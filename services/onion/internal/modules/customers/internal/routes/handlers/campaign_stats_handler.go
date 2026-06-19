@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
 
@@ -64,7 +65,12 @@ func (h *GetCampaignStatsHandler) Serve(ctx context.Context, req *GetCampaignSta
 		return GetCampaignStatsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	stats, err := h.CRMService.GetCampaignStats(ctx, device.User.UserID, req.CampaignID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCampaignStatsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	stats, err := h.CRMService.GetCampaignStats(ctx, businessID, req.CampaignID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
 			return GetCampaignStatsResponse{}, &errorModels.ServerError{
@@ -116,7 +122,12 @@ func (h *GetCampaignDetailHandler) Serve(ctx context.Context, req *GetCampaignDe
 		return GetCampaignDetailResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	detail, err := h.CRMService.GetCampaignDetail(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCampaignDetailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	detail, err := h.CRMService.GetCampaignDetail(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
 			return GetCampaignDetailResponse{}, &errorModels.ServerError{

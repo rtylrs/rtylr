@@ -152,7 +152,7 @@ func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCar
 }
 
 func (h *ListPublicCareersHandler) computePublicCareers(ctx context.Context, custom domain.Customization) (ListPublicCareersResponse, error) {
-	careers, err := h.CareersService.ListRecruitCareers(ctx, custom.OwnerID, true)
+	careers, err := h.CareersService.ListRecruitCareers(ctx, custom.BusinessID, true)
 	if err != nil {
 		return ListPublicCareersResponse{}, err
 	}
@@ -165,7 +165,7 @@ func (h *ListPublicCareersHandler) computePublicCareers(ctx context.Context, cus
 	// Include enabled sections inline. Errors here are non-fatal —
 	// the public page still renders without sections if the fetch
 	// fails, which is better than dropping the whole careers list.
-	sections, secErr := h.CareersService.ListSections(ctx, custom.OwnerID, true)
+	sections, secErr := h.CareersService.ListSections(ctx, custom.BusinessID, true)
 	if secErr != nil {
 		sections = nil
 	}
@@ -225,7 +225,7 @@ func (h *GetPublicCareerHandler) Serve(ctx context.Context, req *GetPublicCareer
 		}
 	}
 
-	c, err := h.CareersService.GetCareerBySlug(ctx, custom.OwnerID, req.CareerSlug)
+	c, err := h.CareersService.GetCareerBySlug(ctx, custom.BusinessID, req.CareerSlug)
 	if err != nil || !c.IsPublished {
 		return GetPublicCareerResponse{}, &errorModels.ServerError{
 			Code:    http.StatusNotFound,
@@ -304,7 +304,7 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 		}
 	}
 
-	career, err := h.CareersService.GetCareerBySlug(ctx, custom.OwnerID, req.CareerSlug)
+	career, err := h.CareersService.GetCareerBySlug(ctx, custom.BusinessID, req.CareerSlug)
 	if err != nil || !career.IsPublished {
 		return SubmitApplicationResponse{}, &errorModels.ServerError{
 			Code:    http.StatusNotFound,
@@ -315,6 +315,7 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 	input := domain.SubmissionInput{
 		CareerID:      career.ID,
 		OwnerID:       custom.OwnerID,
+		BusinessID:    custom.BusinessID,
 		CandidateName: req.CandidateName,
 		Email:         req.Email,
 		Phone:         req.Phone,
@@ -339,6 +340,7 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 		ID:            id,
 		CareerID:      career.ID,
 		OwnerID:       custom.OwnerID,
+		BusinessID:    custom.BusinessID,
 		CandidateName: req.CandidateName,
 		Email:         req.Email,
 		Phone:         req.Phone,

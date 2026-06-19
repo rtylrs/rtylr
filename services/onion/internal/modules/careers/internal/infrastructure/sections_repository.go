@@ -19,7 +19,7 @@ var ErrSectionNotFound = errors.New("section not found")
 // sectionSelectColumns is the column projection shared by every
 // section read so the order stays locked with scanSection.
 var sectionSelectColumns = []string{
-	"id", "owner_id", "kind",
+	"id", "owner_id", "business_id", "kind",
 	"COALESCE(title,'')", "COALESCE(body,'')",
 	"COALESCE(media_url,'')", "COALESCE(items_json,'') AS items_json",
 	"position", "enabled",
@@ -29,7 +29,7 @@ var sectionSelectColumns = []string{
 func scanSection(row interface{ Scan(...interface{}) error }) (domain.Section, error) {
 	var s domain.Section
 	err := row.Scan(
-		&s.ID, &s.OwnerID, &s.Kind,
+		&s.ID, &s.OwnerID, &s.BusinessID, &s.Kind,
 		&s.Title, &s.Body,
 		&s.MediaURL, &s.ItemsJSON,
 		&s.Position, &s.Enabled,
@@ -38,11 +38,11 @@ func scanSection(row interface{ Scan(...interface{}) error }) (domain.Section, e
 	return s, err
 }
 
-func (r *Repository) ListSections(ctx context.Context, ownerID int64, enabledOnly bool) ([]domain.Section, error) {
+func (r *Repository) ListSections(ctx context.Context, businessID int64, enabledOnly bool) ([]domain.Section, error) {
 	b := sq.
 		Select(sectionSelectColumns...).
 		From("careers_sections").
-		Where(sq.Eq{"owner_id": ownerID})
+		Where(sq.Eq{"business_id": businessID})
 	if enabledOnly {
 		b = b.Where(sq.Eq{"enabled": true})
 	}
@@ -74,8 +74,8 @@ func (r *Repository) ListSections(ctx context.Context, ownerID int64, enabledOnl
 func (r *Repository) CreateSection(ctx context.Context, in domain.SectionInput) (int64, error) {
 	q, args, err := sq.
 		Insert("careers_sections").
-		Columns("owner_id", "kind", "title", "body", "media_url", "items_json", "position", "enabled").
-		Values(in.OwnerID, in.Kind,
+		Columns("owner_id", "business_id", "kind", "title", "body", "media_url", "items_json", "position", "enabled").
+		Values(in.OwnerID, in.BusinessID, in.Kind,
 			nullStr(in.Title), nullStr(in.Body),
 			nullStr(in.MediaURL), nullStr(in.ItemsJSON),
 			in.Position, in.Enabled).
@@ -102,7 +102,7 @@ func (r *Repository) UpdateSection(ctx context.Context, in domain.SectionInput) 
 		Set("position", in.Position).
 		Set("enabled", in.Enabled).
 		Where(sq.Eq{"id": in.ID}).
-		Where(sq.Eq{"owner_id": in.OwnerID}).
+		Where(sq.Eq{"business_id": in.BusinessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -116,7 +116,7 @@ func (r *Repository) UpdateSection(ctx context.Context, in domain.SectionInput) 
 // sections in one transaction. The admin UI writes the whole
 // ordered list after drag-drop; doing it in a txn means a partial
 // reorder can't leave duplicate positions behind.
-func (r *Repository) ReorderSections(ctx context.Context, ownerID int64, orderedIDs []int64) error {
+func (r *Repository) ReorderSections(ctx context.Context, businessID int64, orderedIDs []int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (r *Repository) ReorderSections(ctx context.Context, ownerID int64, ordered
 			Update("careers_sections").
 			Set("position", int32(idx)).
 			Where(sq.Eq{"id": id}).
-			Where(sq.Eq{"owner_id": ownerID}).
+			Where(sq.Eq{"business_id": businessID}).
 			PlaceholderFormat(sq.Question).
 			ToSql()
 		if buildErr != nil {
@@ -148,11 +148,11 @@ func (r *Repository) ReorderSections(ctx context.Context, ownerID int64, ordered
 	return tx.Commit()
 }
 
-func (r *Repository) DeleteSection(ctx context.Context, ownerID, sectionID int64) error {
+func (r *Repository) DeleteSection(ctx context.Context, businessID, sectionID int64) error {
 	q, args, err := sq.
 		Delete("careers_sections").
 		Where(sq.Eq{"id": sectionID}).
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -175,12 +175,12 @@ func (r *Repository) DeleteSection(ctx context.Context, ownerID, sectionID int64
 // GetSection is used by the handler before mutating — lets us 404
 // cleanly on cross-tenant access rather than silently no-op via the
 // owner_id filter in UPDATE/DELETE.
-func (r *Repository) GetSection(ctx context.Context, ownerID, sectionID int64) (domain.Section, error) {
+func (r *Repository) GetSection(ctx context.Context, businessID, sectionID int64) (domain.Section, error) {
 	q, args, err := sq.
 		Select(sectionSelectColumns...).
 		From("careers_sections").
 		Where(sq.Eq{"id": sectionID}).
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
 		ToSql()

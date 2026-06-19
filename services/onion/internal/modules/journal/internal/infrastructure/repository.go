@@ -29,11 +29,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.JournalEntry, error) {
+func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.JournalEntry, error) {
 	rows, err := r.queries.ListJournalEntries(ctx, sqlc.ListJournalEntriesParams{
-		OwnerID: ownerID,
-		Limit:   limit,
-		Offset:  offset,
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list journal entries", logger.Error(err))
@@ -46,6 +46,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 		entries = append(entries, domain.JournalEntry{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
 			Date:        row.Date,
 			Description: nullStr(row.Description),
 			Status:      row.Status,
@@ -114,8 +115,8 @@ func (r *Repository) getLinesForEntries(ctx context.Context, entryIDs []int64) (
 	return out, dbRows.Err()
 }
 
-func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.JournalEntry, error) {
-	row, err := r.queries.GetJournalEntry(ctx, sqlc.GetJournalEntryParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.JournalEntry, error) {
+	row, err := r.queries.GetJournalEntry(ctx, sqlc.GetJournalEntryParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.JournalEntry{}, domain.ErrJournalEntryNotFound
@@ -135,10 +136,10 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Journal
 	}, nil
 }
 
-func (r *Repository) Post(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Post(ctx context.Context, businessID, id int64) error {
 	// Verify the entry exists and read its current status up-front so the
 	// service can distinguish 404 from 409.
-	entry, err := r.Get(ctx, ownerID, id)
+	entry, err := r.Get(ctx, businessID, id)
 	if err != nil {
 		return err
 	}
@@ -146,11 +147,11 @@ func (r *Repository) Post(ctx context.Context, ownerID, id int64) error {
 		return domain.ErrJournalEntryAlreadyPosted
 	}
 
-	res, err := r.queries.PostJournalEntry(ctx, sqlc.PostJournalEntryParams{ID: id, OwnerID: ownerID})
+	res, err := r.queries.PostJournalEntry(ctx, sqlc.PostJournalEntryParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to post journal entry",
 			logger.Error(err),
-			logger.Any("owner_id", ownerID),
+			logger.Any("business_id", businessID),
 			logger.Any("entry_id", id),
 		)
 		return err
@@ -189,7 +190,7 @@ func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.Jour
 	return lines, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error) {
 	entryDate, err := time.Parse("2006-01-02", input.Date)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse journal entry date", logger.Error(err))
@@ -213,6 +214,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Jou
 
 	res, err := qtx.CreateJournalEntry(ctx, sqlc.CreateJournalEntryParams{
 		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		Date:        entryDate,
 		Description: nullableString(input.Description),
 	})
@@ -252,8 +254,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Jou
 // CountByStatus returns how many journal entries the owner has for each
 // status (e.g. "draft", "posted"). An empty map is returned when the owner
 // has no entries.
-func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	rows, err := r.queries.CountJournalEntriesByStatus(ctx, ownerID)
+func (r *Repository) CountByStatus(ctx context.Context, businessID int64) (map[string]int64, error) {
+	rows, err := r.queries.CountJournalEntriesByStatus(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count journal entries by status", logger.Error(err))
 		return nil, err
@@ -269,10 +271,10 @@ func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[stri
 
 // SumLinesByAccountID returns the total debit and credit amounts posted to a
 // given chart-of-accounts ID across all posted journal entries for an owner.
-func (r *Repository) SumLinesByAccountID(ctx context.Context, ownerID, accountID int64) (debit, credit float64, err error) {
+func (r *Repository) SumLinesByAccountID(ctx context.Context, businessID, accountID int64) (debit, credit float64, err error) {
 	row, err := r.queries.SumJournalLinesByAccount(ctx, sqlc.SumJournalLinesByAccountParams{
-		OwnerID:   ownerID,
-		AccountID: accountID,
+		BusinessID: businessID,
+		AccountID:  accountID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum journal lines by account", logger.Error(err))

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 )
 
@@ -45,7 +46,12 @@ func (h *GetCustomerHandler) Serve(ctx context.Context, req *GetCustomerRequest)
 		return GetCustomerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	customer, err := h.CRMService.GetCustomer(ctx, device.User.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCustomerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	customer, err := h.CRMService.GetCustomer(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
 			return GetCustomerResponse{}, &errorModels.ServerError{

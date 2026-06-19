@@ -22,8 +22,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Location, error) {
-	rows, err := r.queries.ListLocationsByOwner(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Location, error) {
+	rows, err := r.queries.ListLocationsByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list locations", logger.Error(err))
 		return nil, err
@@ -32,14 +32,15 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Location
 	locations := make([]domain.Location, 0, len(rows))
 	for _, row := range rows {
 		locations = append(locations, domain.Location{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Address:   row.Address.String,
-			Phone:     row.Phone.String,
-			IsActive:  row.IsActive.Bool,
-			CreatedAt: row.CreatedAt.Time,
-			UpdatedAt: row.CreatedAt.Time,
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Address:    row.Address.String,
+			Phone:      row.Phone.String,
+			IsActive:   row.IsActive.Bool,
+			CreatedAt:  row.CreatedAt.Time,
+			UpdatedAt:  row.CreatedAt.Time,
 		})
 	}
 	return locations, nil
@@ -47,11 +48,12 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Location
 
 func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (int64, error) {
 	result, err := r.queries.CreateLocation(ctx, sqlc.CreateLocationParams{
-		OwnerID:  input.OwnerID,
-		Name:     input.Name,
-		Address:  sql.NullString{String: input.Address, Valid: input.Address != ""},
-		Phone:    sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
+		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
+		Name:       input.Name,
+		Address:    sql.NullString{String: input.Address, Valid: input.Address != ""},
+		Phone:      sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create location", logger.Error(err))
@@ -66,12 +68,12 @@ func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInpu
 		isActive = sql.NullBool{Bool: *input.IsActive, Valid: true}
 	}
 	result, err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
-		Name:     input.Name,
-		Address:  sql.NullString{String: input.Address, Valid: input.Address != ""},
-		Phone:    sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		IsActive: isActive,
-		ID:       input.ID,
-		OwnerID:  input.OwnerID,
+		Name:       input.Name,
+		Address:    sql.NullString{String: input.Address, Valid: input.Address != ""},
+		Phone:      sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		IsActive:   isActive,
+		ID:         input.ID,
+		BusinessID: input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update location", logger.Error(err))

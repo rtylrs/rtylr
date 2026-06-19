@@ -17,8 +17,8 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.BenefitPlan, error)
-	Create(ctx context.Context, ownerID int64, input domain.BenefitPlanInput) (int64, error)
+	List(ctx context.Context, businessID int64) ([]domain.BenefitPlan, error)
+	Create(ctx context.Context, businessID int64, input domain.BenefitPlanInput) (int64, error)
 }
 
 type Service struct {
@@ -29,27 +29,27 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateBenefitsScope(ctx context.Context, ownerID int64) {
+func invalidateBenefitsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(benefitsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(benefitsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.BenefitPlan, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.BenefitPlan, error) {
 	return cacher.Of[[]domain.BenefitPlan]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(benefitsScope, ownerID, "list"),
+		cacheKeys.Scoped(benefitsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.BenefitPlan, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, benefitsTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.BenefitPlanInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.BenefitPlanInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateBenefitsScope(ctx, ownerID)
+	invalidateBenefitsScope(ctx, businessID)
 	return id, nil
 }

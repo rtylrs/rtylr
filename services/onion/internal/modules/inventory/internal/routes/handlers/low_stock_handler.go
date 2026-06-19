@@ -36,8 +36,12 @@ func (h *LowStockHandler) Serve(ctx context.Context, _ *LowStockRequest) (LowSto
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	items, err := h.Service.GetLowStockProducts(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return LowStockResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	items, err := h.Service.GetLowStockProducts(ctx, businessID)
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

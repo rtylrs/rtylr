@@ -17,10 +17,10 @@ type OperationsKPIPayload struct {
 }
 
 // GetOperationsKPIs returns the headline HR ops counters.
-func (s *Service) GetOperationsKPIs(ctx context.Context, ownerID int64) (OperationsKPIPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:kpis", ownerID)
+func (s *Service) GetOperationsKPIs(ctx context.Context, businessID int64) (OperationsKPIPayload, error) {
+	key := fmt.Sprintf("insights:%d:operations:kpis", businessID)
 	out, err := cacher.Of[OperationsKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (OperationsKPIPayload, error) {
-		k, rerr := s.repo.GetOperationsKPIs(ctx, ownerID)
+		k, rerr := s.repo.GetOperationsKPIs(ctx, businessID)
 		if rerr != nil {
 			return OperationsKPIPayload{}, rerr
 		}

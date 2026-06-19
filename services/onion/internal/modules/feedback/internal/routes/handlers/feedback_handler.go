@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/feedback/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func FeedbackListRoutes() []string {
@@ -80,7 +81,11 @@ func (h *ListFeedbackHandler) Serve(ctx context.Context, req *ListFeedbackReques
 		filters.MaxScoreSet = true
 	}
 
-	items, total, err := h.Service.List(ctx, device.User.UserID, filters, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListFeedbackResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, total, err := h.Service.List(ctx, businessID, filters, req.Page, req.PageSize)
 	if err != nil {
 		return ListFeedbackResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -161,8 +166,13 @@ func (h *CreateFeedbackHandler) Serve(ctx context.Context, req *CreateFeedbackRe
 		return CreateFeedbackResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateFeedbackResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.Create(ctx, domain.FeedbackInput{
 		OwnerID:    device.User.UserID,
+		BusinessID: businessID,
 		CustomerID: req.CustomerID,
 		Type:       req.Type,
 		Score:      req.Score,

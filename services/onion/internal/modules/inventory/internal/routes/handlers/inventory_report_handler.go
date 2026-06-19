@@ -53,8 +53,12 @@ func (h *InventoryReportHandler) Serve(ctx context.Context, _ *InventoryReportRe
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	items, err := h.Service.GetInventoryReport(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return InventoryReportResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	items, err := h.Service.GetInventoryReport(ctx, businessID)
 	if err != nil {
 		return InventoryReportResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

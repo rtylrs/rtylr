@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CalendarRoutes() []string { return []string{"/book/calendar"} }
@@ -42,7 +43,11 @@ func (h *CalendarHandler) Serve(ctx context.Context, req *CalendarRequest) (Cale
 	if !ok {
 		return CalendarResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	days, err := h.Service.GetCalendar(ctx, authUser.UserID, req.From, req.To)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CalendarResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	days, err := h.Service.GetCalendar(ctx, businessID, req.From, req.To)
 	if err != nil {
 		return CalendarResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to get calendar"}
 	}

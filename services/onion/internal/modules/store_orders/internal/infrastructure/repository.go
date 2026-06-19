@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StoreOrder, error) {
-	rows, err := r.queries.ListStoreOrders(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.StoreOrder, error) {
+	rows, err := r.queries.ListStoreOrders(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list store orders", logger.Error(err))
 		return nil, err
@@ -37,13 +37,13 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StoreOrd
 	return items, nil
 }
 
-func (r *Repository) GetDetail(ctx context.Context, ownerID, orderID int64) (domain.StoreOrderDetail, error) {
-	order, err := r.queries.GetStoreOrder(ctx, sqlc.GetStoreOrderParams{OwnerID: ownerID, ID: orderID})
+func (r *Repository) GetDetail(ctx context.Context, businessID, orderID int64) (domain.StoreOrderDetail, error) {
+	order, err := r.queries.GetStoreOrder(ctx, sqlc.GetStoreOrderParams{BusinessID: businessID, ID: orderID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get store order", logger.Error(err))
 		return domain.StoreOrderDetail{}, err
 	}
-	itemRows, err := r.queries.ListStoreOrderItems(ctx, sqlc.ListStoreOrderItemsParams{OwnerID: ownerID, OrderID: orderID})
+	itemRows, err := r.queries.ListStoreOrderItems(ctx, sqlc.ListStoreOrderItemsParams{BusinessID: businessID, OrderID: orderID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list store order items", logger.Error(err))
 		return domain.StoreOrderDetail{}, err
@@ -55,7 +55,7 @@ func (r *Repository) GetDetail(ctx context.Context, ownerID, orderID int64) (dom
 	return domain.StoreOrderDetail{Order: orderFromRow(ctx, order), Items: items}, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.StoreOrderInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.StoreOrderInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return 0, err
@@ -65,6 +65,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Sto
 	qtx := r.queries.WithTx(tx)
 	result, err := qtx.CreateStoreOrder(ctx, sqlc.CreateStoreOrderParams{
 		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		CustomerEmail:   sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerName:    sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
 		CustomerPhone:   sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
@@ -81,7 +82,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Sto
 		return 0, err
 	}
 	id, _ := result.LastInsertId()
-	if err := r.upsertOrderCustomerTx(ctx, tx, ownerID, input); err != nil {
+	if err := r.upsertOrderCustomerTx(ctx, tx, ownerID, businessID, input); err != nil {
 		return 0, err
 	}
 
@@ -154,7 +155,7 @@ func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, own
 		Change:        -float64(item.Quantity),
 		ReferenceID:   int64Ptr(orderID),
 		ReferenceType: "store_order",
-		Channel:       "erp",
+		Channel:       "store",
 		Note:          "store order sale",
 	})
 	if err != nil {
@@ -177,7 +178,7 @@ func (r *Repository) productTracksInventory(ctx context.Context, tx *sql.Tx, own
 	return !tracked.Valid || tracked.Bool, nil
 }
 
-func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, ownerID int64, input domain.StoreOrderInput) error {
+func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, ownerID, businessID int64, input domain.StoreOrderInput) error {
 	email := strings.TrimSpace(input.CustomerEmail)
 	phone := strings.TrimSpace(input.CustomerPhone)
 	name := strings.TrimSpace(input.CustomerName)
@@ -189,17 +190,17 @@ func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, owne
 	var customerID int64
 	err := tx.QueryRowContext(ctx,
 		`SELECT id FROM crm_customers
-		 WHERE owner_id = ?
+		 WHERE business_id = ?
 		   AND ((? <> '' AND email = ?) OR (? <> '' AND phone = ?))
 		 ORDER BY CASE WHEN ? <> '' AND email = ? THEN 0 ELSE 1 END
 		 LIMIT 1`,
-		ownerID, email, email, phone, phone, email, email).Scan(&customerID)
+		businessID, email, email, phone, phone, email, email).Scan(&customerID)
 	if errors.Is(err, sql.ErrNoRows) {
 		_, err = tx.ExecContext(ctx,
 			`INSERT INTO crm_customers
-			 (owner_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
-			 VALUES (?, ?, ?, ?, ?, ?, 1, NOW(), 'bronze', JSON_ARRAY(), TRUE)`,
-			ownerID, firstName, nullString(lastName), nullString(email), nullString(phone), strconv.FormatFloat(input.Total, 'f', 2, 64))
+			 (owner_id, business_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), 'bronze', JSON_ARRAY(), TRUE)`,
+			ownerID, businessID, firstName, nullString(lastName), nullString(email), nullString(phone), strconv.FormatFloat(input.Total, 'f', 2, 64))
 		return err
 	}
 	if err != nil {
@@ -216,13 +217,13 @@ func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, owne
 		     visit_count = visit_count + 1,
 		     last_visit_at = NOW(),
 		     is_active = TRUE
-		 WHERE owner_id = ? AND id = ?`,
+		 WHERE business_id = ? AND id = ?`,
 		firstName, firstName,
 		lastName, lastName,
 		email, email,
 		phone, phone,
 		strconv.FormatFloat(input.Total, 'f', 2, 64),
-		ownerID, customerID)
+		businessID, customerID)
 	return err
 }
 
@@ -250,7 +251,7 @@ func int64Ptr(v int64) *int64 {
 	return &v
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.StoreOrderInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.StoreOrderInput) error {
 	err := r.queries.UpdateStoreOrder(ctx, sqlc.UpdateStoreOrderParams{
 		CustomerEmail:   sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerName:    sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
@@ -262,7 +263,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		Total:           strconv.FormatFloat(input.Total, 'f', 2, 64),
 		ShippingAddress: nullJSON(input.ShippingAddress),
 		Notes:           sql.NullString{String: input.Notes, Valid: input.Notes != ""},
-		OwnerID:         ownerID,
+		BusinessID:      businessID,
 		ID:              id,
 	})
 	if err != nil {
@@ -282,7 +283,7 @@ func parseMonetary(ctx context.Context, s string) float64 {
 }
 
 func orderFromRow(ctx context.Context, row sqlc.StoreOrder) domain.StoreOrder {
-	o := domain.StoreOrder{ID: row.ID, OwnerID: row.OwnerID}
+	o := domain.StoreOrder{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID}
 	if row.CustomerEmail.Valid {
 		o.CustomerEmail = row.CustomerEmail.String
 	}

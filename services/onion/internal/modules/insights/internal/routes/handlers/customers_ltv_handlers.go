@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/customers/ltv
@@ -26,7 +27,11 @@ func (h *GetLTVHandler) Serve(ctx context.Context, _ *GetLTVRequest) (GetLTVResp
 	if device.User == nil {
 		return GetLTVResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	buckets, err := h.Service.GetLTVDistribution(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetLTVResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	buckets, err := h.Service.GetLTVDistribution(ctx, businessID)
 	if err != nil {
 		return GetLTVResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

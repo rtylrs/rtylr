@@ -18,7 +18,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	if name != getPOSDaySummaryToolName {
 		return nil, false, nil
 	}
-	authUser, ownerID, err := posDaySummaryToolAuth(ctx)
+	authUser, businessID, err := posDaySummaryToolAuth(ctx)
 	if err != nil {
 		return nil, true, err
 	}
@@ -26,7 +26,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	if err != nil {
 		return nil, true, err
 	}
-	summary, err := m.service.GetDaySummary(ctx, ownerID, date)
+	summary, err := m.service.GetDaySummary(ctx, businessID, date)
 	if err != nil {
 		return nil, true, err
 	}
@@ -48,7 +48,11 @@ func posDaySummaryToolAuth(ctx context.Context) (*authPkg.AuthUser, int64, error
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, 0, errors.New("authentication is required")
 	}
-	return authUser, tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID), nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, 0, errors.New("failed to resolve business scope")
+	}
+	return authUser, businessID, nil
 }
 
 func posDaySummaryToolDate(input map[string]any) (string, error) {

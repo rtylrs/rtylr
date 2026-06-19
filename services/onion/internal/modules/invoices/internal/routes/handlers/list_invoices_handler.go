@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
@@ -60,7 +61,16 @@ func newInvoiceSummary(inv domain.Invoice) *financeinvoicesv1.InvoiceSummary {
 func (h *ListInvoicesHandler) Serve(ctx context.Context, req *ListInvoicesRequest) (ListInvoicesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	invoices, hasMore, err := h.FinanceService.ListInvoices(ctx, device.User.UserID, req.Status, req.Search, req.DateFrom, req.DateTo, req.Page, req.PageSize)
+	if device.User == nil {
+		return ListInvoicesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListInvoicesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	invoices, hasMore, err := h.FinanceService.ListInvoices(ctx, businessID, req.Status, req.Search, req.DateFrom, req.DateTo, req.Page, req.PageSize)
 	if err != nil {
 		return ListInvoicesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

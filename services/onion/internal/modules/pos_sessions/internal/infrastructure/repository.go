@@ -25,8 +25,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Session, error) {
-	rows, err := r.queries.ListSessionsByOwner(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Session, error) {
+	rows, err := r.queries.ListSessionsByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list sessions", logger.Error(err))
 		return nil, err
@@ -37,6 +37,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Session,
 		s := domain.Session{
 			ID:           row.ID,
 			OwnerID:      row.OwnerID,
+			BusinessID:   row.BusinessID,
 			OpeningFloat: decimalToFloat(row.OpeningCash.String),
 			ClosingFloat: decimalToFloat(row.ClosingCash.String),
 			TotalSales:   decimalToFloat(row.TotalSales.String),
@@ -59,8 +60,8 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Session,
 	return sessions, nil
 }
 
-func (r *Repository) Get(ctx context.Context, ownerID, id int64) (*domain.Session, error) {
-	row, err := r.queries.GetSessionByID(ctx, sqlc.GetSessionByIDParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Session, error) {
+	row, err := r.queries.GetSessionByID(ctx, sqlc.GetSessionByIDParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSessionNotFound
@@ -71,6 +72,7 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (*domain.Sessio
 	s := domain.Session{
 		ID:           row.ID,
 		OwnerID:      row.OwnerID,
+		BusinessID:   row.BusinessID,
 		OpeningFloat: decimalToFloat(row.OpeningCash.String),
 		ClosingFloat: decimalToFloat(row.ClosingCash.String),
 		TotalSales:   decimalToFloat(row.TotalSales.String),
@@ -104,6 +106,7 @@ func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (i
 
 	result, err := r.queries.OpenSession(ctx, sqlc.OpenSessionParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		LocationID:  locID,
 		StaffID:     staffID,
 		OpeningCash: sql.NullString{String: floatToDecimal(input.OpeningFloat), Valid: true},
@@ -119,7 +122,7 @@ func (r *Repository) Close(ctx context.Context, input domain.CloseSessionInput) 
 	result, err := r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
 		ClosingCash: sql.NullString{String: floatToDecimal(input.ClosingFloat), Valid: true},
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to close session", logger.Error(err))

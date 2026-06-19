@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -122,6 +123,10 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("business scope could not be resolved")
+	}
 
 	title := strings.TrimSpace(stringValue(input["title"]))
 	if title == "" {
@@ -189,6 +194,7 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 		ProjectID:      projectID,
 		WorkspaceID:    workspaceID,
 		OwnerID:        authUser.UserID,
+		BusinessID:     businessID,
 		ParentTaskID:   parentTaskID,
 		Title:          title,
 		Description:    strings.TrimSpace(stringValue(input["description"])),

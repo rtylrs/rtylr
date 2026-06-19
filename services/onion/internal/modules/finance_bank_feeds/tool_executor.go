@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -24,7 +25,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		return nil, false, nil
 	}
 
-	ownerID, err := financeBankFeedToolOwnerID(ctx)
+	businessID, err := financeBankFeedToolBusinessID(ctx)
 	if err != nil {
 		return nil, true, err
 	}
@@ -33,7 +34,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		return nil, true, err
 	}
 
-	transactions, total, err := m.service.List(ctx, ownerID, limit, offset)
+	transactions, total, err := m.service.List(ctx, businessID, limit, offset)
 	if err != nil {
 		return nil, true, err
 	}
@@ -57,12 +58,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	}, true, nil
 }
 
-func financeBankFeedToolOwnerID(ctx context.Context) (int64, error) {
+func financeBankFeedToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return businessID, nil
 }
 
 func financeBankFeedToolPagination(input map[string]any) (int32, int32, error) {

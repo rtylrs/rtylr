@@ -27,13 +27,13 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateHRDocumentsScope(ctx context.Context, ownerID int64) {
+func invalidateHRDocumentsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDocumentsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDocumentsScope, businessID))
 	}
 }
 
-func (s *Service) UploadDocument(ctx context.Context, ownerID int64, params domain.CreateDocumentParams) (*domain.EmployeeDocumentRecord, error) {
+func (s *Service) UploadDocument(ctx context.Context, businessID int64, params domain.CreateDocumentParams) (*domain.EmployeeDocumentRecord, error) {
 	if params.StorageMode != "stored" && params.StorageMode != "linked" {
 		return nil, domain.ErrStorageModeInvalid
 	}
@@ -44,11 +44,11 @@ func (s *Service) UploadDocument(ctx context.Context, ownerID int64, params doma
 		return nil, domain.ErrStorageModeInvalid
 	}
 
-	rec, err := s.repo.CreateDocument(ctx, ownerID, params)
+	rec, err := s.repo.CreateDocument(ctx, businessID, params)
 	if err != nil {
 		return nil, err
 	}
-	invalidateHRDocumentsScope(ctx, ownerID)
+	invalidateHRDocumentsScope(ctx, businessID)
 	return rec, nil
 }
 
@@ -57,17 +57,17 @@ type listDocumentsResult struct {
 	Total   int64
 }
 
-func (s *Service) ListDocuments(ctx context.Context, ownerID, employeeID int64, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
+func (s *Service) ListDocuments(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
 	if limit <= 0 {
 		limit = 20
 	}
 	if limit > 100 {
 		limit = 100
 	}
-	key := cacheKeys.Scoped(hrDocumentsScope, ownerID, fmt.Sprintf("list|e=%d|l=%d|o=%d", employeeID, limit, offset))
+	key := cacheKeys.Scoped(hrDocumentsScope, businessID, fmt.Sprintf("list|e=%d|l=%d|o=%d", employeeID, limit, offset))
 	res, err := cacher.Of[listDocumentsResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (listDocumentsResult, error) {
-			recs, total, err := s.repo.ListDocuments(ctx, ownerID, employeeID, limit, offset)
+			recs, total, err := s.repo.ListDocuments(ctx, businessID, employeeID, limit, offset)
 			return listDocumentsResult{Records: recs, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrDocumentsTTL),
@@ -75,7 +75,7 @@ func (s *Service) ListDocuments(ctx context.Context, ownerID, employeeID int64, 
 	return res.Records, res.Total, err
 }
 
-func (s *Service) ListExpiringDocuments(ctx context.Context, ownerID int64, days, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
+func (s *Service) ListExpiringDocuments(ctx context.Context, businessID int64, days, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
 	if days <= 0 {
 		days = 30
 	}
@@ -85,10 +85,10 @@ func (s *Service) ListExpiringDocuments(ctx context.Context, ownerID int64, days
 	if limit > 100 {
 		limit = 100
 	}
-	key := cacheKeys.Scoped(hrDocumentsScope, ownerID, fmt.Sprintf("exp|d=%d|l=%d|o=%d", days, limit, offset))
+	key := cacheKeys.Scoped(hrDocumentsScope, businessID, fmt.Sprintf("exp|d=%d|l=%d|o=%d", days, limit, offset))
 	res, err := cacher.Of[listDocumentsResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (listDocumentsResult, error) {
-			recs, total, err := s.repo.ListExpiringDocuments(ctx, ownerID, days, limit, offset)
+			recs, total, err := s.repo.ListExpiringDocuments(ctx, businessID, days, limit, offset)
 			return listDocumentsResult{Records: recs, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrDocumentsTTL),
@@ -96,23 +96,23 @@ func (s *Service) ListExpiringDocuments(ctx context.Context, ownerID int64, days
 	return res.Records, res.Total, err
 }
 
-func (s *Service) GetDocument(ctx context.Context, ownerID, id int64) (*domain.EmployeeDocumentRecord, error) {
-	key := cacheKeys.Scoped(hrDocumentsScope, ownerID, fmt.Sprintf("id=%d", id))
+func (s *Service) GetDocument(ctx context.Context, businessID, id int64) (*domain.EmployeeDocumentRecord, error) {
+	key := cacheKeys.Scoped(hrDocumentsScope, businessID, fmt.Sprintf("id=%d", id))
 	return cacher.Of[*domain.EmployeeDocumentRecord]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*domain.EmployeeDocumentRecord, error) {
-			return s.repo.GetDocument(ctx, ownerID, id)
+			return s.repo.GetDocument(ctx, businessID, id)
 		},
 		cacher.WithExpiry(ctx, hrDocumentsTTL),
 	)
 }
 
-func (s *Service) DeleteDocument(ctx context.Context, ownerID, id int64) error {
-	if _, err := s.repo.GetDocument(ctx, ownerID, id); err != nil {
+func (s *Service) DeleteDocument(ctx context.Context, businessID, id int64) error {
+	if _, err := s.repo.GetDocument(ctx, businessID, id); err != nil {
 		return err
 	}
-	if err := s.repo.DeleteDocument(ctx, ownerID, id); err != nil {
+	if err := s.repo.DeleteDocument(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateHRDocumentsScope(ctx, ownerID)
+	invalidateHRDocumentsScope(ctx, businessID)
 	return nil
 }

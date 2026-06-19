@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -36,7 +37,12 @@ func (h *ListContractsHandler) Serve(ctx context.Context, _ *ListContractsReques
 		return ListContractsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	contracts, err := h.Service.ListContracts(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListContractsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contracts, err := h.Service.ListContracts(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contracts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListContractsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list contracts"}
@@ -84,7 +90,12 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 		return CreateContractResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	contract, err := h.Service.CreateContract(ctx, device.User.UserID, domain.CreateContractRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateContractResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contract, err := h.Service.CreateContract(ctx, businessID, domain.CreateContractRequest{
 		LeadID:       req.LeadID,
 		Plan:         req.Plan,
 		MRR:          req.MRR,
@@ -128,7 +139,12 @@ func (h *GetContractHandler) Serve(ctx context.Context, _ *GetContractRequest) (
 		return GetContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contract id"}
 	}
 
-	contract, err := h.Service.GetContract(ctx, id, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetContractResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contract, err := h.Service.GetContract(ctx, id, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrContractNotFound) {
 			return GetContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contract not found"}
@@ -184,7 +200,12 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 		return UpdateContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contract id"}
 	}
 
-	contract, err := h.Service.UpdateContract(ctx, id, device.User.UserID, domain.UpdateContractRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateContractResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	contract, err := h.Service.UpdateContract(ctx, id, businessID, domain.UpdateContractRequest{
 		Plan:         req.Plan,
 		MRR:          req.MRR,
 		Seats:        req.Seats,

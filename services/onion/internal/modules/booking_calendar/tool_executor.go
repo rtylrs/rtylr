@@ -10,6 +10,7 @@ import (
 	"time"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const getBookingCalendarToolName = "booking.get_calendar"
@@ -19,7 +20,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		return nil, false, nil
 	}
 
-	ownerID, err := bookingCalendarToolOwnerID(ctx)
+	businessID, err := bookingCalendarToolBusinessID(ctx)
 	if err != nil {
 		return nil, true, err
 	}
@@ -28,7 +29,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		return nil, true, err
 	}
 
-	days, err := m.service.GetCalendar(ctx, ownerID, from, to)
+	days, err := m.service.GetCalendar(ctx, businessID, from, to)
 	if err != nil {
 		return nil, true, err
 	}
@@ -52,12 +53,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	}, true, nil
 }
 
-func bookingCalendarToolOwnerID(ctx context.Context) (int64, error) {
+func bookingCalendarToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, errors.New("authentication is required")
+	}
+	return businessID, nil
 }
 
 func bookingCalendarToolRange(input map[string]any) (string, string, error) {

@@ -17,7 +17,7 @@ func TestListNotifications_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := repo.List(ctx, testutil.OwnerID)
+	_, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestListNotifications_ResultsAreSlice(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestListNotifications_UnknownUserReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, 0)
+	notifications, err := repo.List(ctx, testutil.OwnerID, 0)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestListNotifications_EachHasNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -94,7 +94,7 @@ func TestListNotifications_EachHasNonEmptyTitle(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestListNotifications_UserIDMatchesQuery(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -138,12 +138,12 @@ func TestListNotifications_TwiceReturnsSameCount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	first, err := repo.List(ctx, testutil.OwnerID)
+	first, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("first List error: %v", err)
 	}
 
-	second, err := repo.List(ctx, testutil.OwnerID)
+	second, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("second List error: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestListNotifications_TypeFieldIsString(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List error: %v", err)
 	}
@@ -175,7 +175,7 @@ func TestListNotifications_CancelledContextErrors(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err := repo.List(ctx, testutil.OwnerID)
+	_, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err == nil {
 		t.Log("cancelled context did not return error (driver may buffer); acceptable")
 	}
@@ -212,7 +212,7 @@ func TestMarkAllRead_ThenListReturnsNoError(t *testing.T) {
 	if err := repo.MarkAllRead(ctx, testutil.OwnerID); err != nil {
 		t.Fatalf("MarkAllRead: %v", err)
 	}
-	_, err := repo.List(ctx, testutil.OwnerID)
+	_, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List after MarkAllRead: %v", err)
 	}
@@ -234,7 +234,7 @@ func TestListNotifications_UnknownUserID_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notes, err := repo.List(ctx, 9999999)
+	notes, err := repo.List(ctx, testutil.OwnerID, 9999999)
 	if err != nil {
 		t.Fatalf("List(userID=9999999): %v", err)
 	}
@@ -260,7 +260,7 @@ func TestListNotifications_IsReadFieldAccessible(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -275,7 +275,7 @@ func TestListNotifications_CreatedAtAccessible(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -302,7 +302,7 @@ func TestListNotifications_LargeUserID_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notes, err := repo.List(ctx, 1<<40)
+	notes, err := repo.List(ctx, testutil.OwnerID, 1<<40)
 	if err != nil {
 		t.Fatalf("List(large userID): %v", err)
 	}
@@ -327,7 +327,7 @@ func TestListNotifications_BodyFieldAccessible(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	notifications, err := repo.List(ctx, testutil.OwnerID)
+	notifications, err := repo.List(ctx, testutil.OwnerID, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}

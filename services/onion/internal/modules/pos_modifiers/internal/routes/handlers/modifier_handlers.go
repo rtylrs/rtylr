@@ -57,8 +57,11 @@ func (h *ListModifiersHandler) Serve(ctx context.Context, _ *ListModifiersReques
 	if device.User == nil {
 		return ListModifiersResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	items, err := h.Service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListModifiersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListModifiersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list modifiers"}
 	}
@@ -100,8 +103,11 @@ func (h *CreateModifierHandler) Serve(ctx context.Context, req *CreateModifierRe
 	if device.User == nil {
 		return CreateModifierResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	id, err := h.Service.Create(ctx, ownerID, domain.ModifierInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateModifierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, device.User.UserID, businessID, domain.ModifierInput{
 		Name:       req.Name,
 		PriceDelta: req.PriceDelta,
 		GroupName:  req.GroupName,
@@ -143,13 +149,16 @@ func (h *UpdateModifierHandler) Serve(ctx context.Context, req *UpdateModifierRe
 	if device.User == nil {
 		return UpdateModifierResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateModifierResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateModifierResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid modifier ID"}
 	}
-	if updateErr := h.Service.Update(ctx, ownerID, id, domain.ModifierInput{
+	if updateErr := h.Service.Update(ctx, businessID, id, domain.ModifierInput{
 		Name:       req.Name,
 		PriceDelta: req.PriceDelta,
 		GroupName:  req.GroupName,
@@ -180,13 +189,16 @@ func (h *DeleteModifierHandler) Serve(ctx context.Context, _ *DeleteModifierRequ
 	if device.User == nil {
 		return DeleteModifierResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteModifierResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return DeleteModifierResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid modifier ID"}
 	}
-	if deleteErr := h.Service.Delete(ctx, ownerID, id); deleteErr != nil {
+	if deleteErr := h.Service.Delete(ctx, businessID, id); deleteErr != nil {
 		if errors.Is(deleteErr, domain.ErrModifierNotFound) {
 			return DeleteModifierResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Modifier not found"}
 		}

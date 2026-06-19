@@ -29,11 +29,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTransfer, bool, error) {
+func (r *Repository) ListStockTransfers(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTransfer, bool, error) {
 	rows, err := r.queries.ListStockTransfersPaged(ctx, sqlc.ListStockTransfersPagedParams{
-		OwnerID: ownerID,
-		Limit:   int32(limit + 1),
-		Offset:  int32(offset),
+		BusinessID: businessID,
+		Limit:      int32(limit + 1),
+		Offset:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock transfers", logger.Error(err))
@@ -45,6 +45,7 @@ func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64, limi
 		t := domain.StockTransfer{
 			ID:              row.ID,
 			OwnerID:         row.OwnerID,
+			BusinessID:      row.BusinessID,
 			FromWarehouseID: row.FromWarehouseID,
 			ToWarehouseID:   row.ToWarehouseID,
 		}
@@ -135,7 +136,7 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 	return result, nil
 }
 
-func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, input domain.StockTransferInput) (int64, error) {
+func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
@@ -152,7 +153,8 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, inp
 	qtx := r.queries.WithTx(tx)
 
 	res, err := qtx.InsertStockTransfer(ctx, sqlc.InsertStockTransferParams{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
+		BusinessID:      businessID,
 		FromWarehouseID: input.FromWarehouseID,
 		ToWarehouseID:   input.ToWarehouseID,
 		Notes:           nullString(input.Notes),
@@ -190,13 +192,13 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, inp
 	return transferID, nil
 }
 
-func (r *Repository) UpdateStockTransferStatus(ctx context.Context, ownerID, id int64, status domain.StockTransferStatus) error {
+func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error {
 	// Only 'received' moves stock; other transitions are a plain status update.
 	if status != domain.StockTransferStatusReceived {
 		if err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
-			Status:  sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
-			OwnerID: ownerID,
-			ID:      id,
+			Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
+			BusinessID: businessID,
+			ID:         id,
 		}); err != nil {
 			logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
 			return err
@@ -204,14 +206,14 @@ func (r *Repository) UpdateStockTransferStatus(ctx context.Context, ownerID, id 
 		return nil
 	}
 
-	return r.receiveTransfer(ctx, ownerID, id)
+	return r.receiveTransfer(ctx, businessID, id)
 }
 
 // receiveTransfer atomically moves each line item's quantity from the source
 // warehouse location to the destination location (transfer_out + transfer_in,
 // paired by transfer_group), then marks the transfer received. Owner-verified
 // and row-locked; idempotent on the (stock_transfer, transfer_out) ledger key.
-func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (err error) {
+func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) (err error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -225,8 +227,8 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 	qtx := r.queries.WithTx(tx)
 
 	row, err := qtx.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		err = domain.ErrStockTransferNotFound
@@ -248,11 +250,11 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 		return err
 	}
 
-	fromLoc, err := stock_core.WarehouseLocationID(ctx, tx, ownerID, fromWH)
+	fromLoc, err := stock_core.WarehouseLocationID(ctx, tx, businessID, fromWH)
 	if err != nil {
 		return err
 	}
-	toLoc, err := stock_core.WarehouseLocationID(ctx, tx, ownerID, toWH)
+	toLoc, err := stock_core.WarehouseLocationID(ctx, tx, businessID, toWH)
 	if err != nil {
 		return err
 	}
@@ -275,13 +277,13 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 	group := id
 	for _, l := range lines {
 		out := stock_core.Movement{
-			OwnerID: ownerID, LocationID: fromLoc, ProductID: l.productID,
+			OwnerID: businessID, LocationID: fromLoc, ProductID: l.productID,
 			EntryType: stock_core.EntryTransferOut, Change: -l.qty,
 			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
 			Channel: "erp", Note: "stock transfer",
 		}
 		in := stock_core.Movement{
-			OwnerID: ownerID, LocationID: toLoc, ProductID: l.productID,
+			OwnerID: businessID, LocationID: toLoc, ProductID: l.productID,
 			EntryType: stock_core.EntryTransferIn, Change: l.qty,
 			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
 			Channel: "erp", Note: "stock transfer", AllowNegative: true,
@@ -300,9 +302,9 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 	}
 
 	if err = qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
-		Status:  sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(domain.StockTransferStatusReceived), Valid: true},
-		OwnerID: ownerID,
-		ID:      id,
+		Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(domain.StockTransferStatusReceived), Valid: true},
+		BusinessID: businessID,
+		ID:         id,
 	}); err != nil {
 		return err
 	}

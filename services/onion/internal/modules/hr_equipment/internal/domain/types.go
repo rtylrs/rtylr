@@ -5,6 +5,7 @@ import "time"
 type EquipmentRequestRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	EmployeeID           int64     `json:"employee_id"`
 	ItemName             string    `json:"item_name"`
 	Quantity             int32     `json:"quantity"`
@@ -21,6 +22,7 @@ type EquipmentRequestRecord struct {
 type AssetRecord struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	Name          string    `json:"name"`
 	Category      string    `json:"category"`
 	SerialNumber  string    `json:"serial_number"`

@@ -20,15 +20,15 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetWidgets(ctx context.Context, ownerID int64) ([]*domain.DashboardWidget, error) {
+func (r *Repository) GetWidgets(ctx context.Context, businessID int64) ([]*domain.DashboardWidget, error) {
 	query, args, err := sq.
 		Select(
-			"id", "owner_id", "role_id", "widget_type",
+			"id", "owner_id", "business_id", "role_id", "widget_type",
 			"position_x", "position_y", "width", "height",
 			"config", "created_at", "updated_at",
 		).
 		From("hr_dashboard_widgets").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		OrderBy("position_y ASC", "position_x ASC").
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -47,7 +47,7 @@ func (r *Repository) GetWidgets(ctx context.Context, ownerID int64) ([]*domain.D
 		var w domain.DashboardWidget
 		var configRaw sql.NullString
 		err := rows.Scan(
-			&w.ID, &w.OwnerID, &w.RoleID, &w.WidgetType,
+			&w.ID, &w.OwnerID, &w.BusinessID, &w.RoleID, &w.WidgetType,
 			&w.PositionX, &w.PositionY, &w.Width, &w.Height,
 			&configRaw, &w.CreatedAt, &w.UpdatedAt,
 		)
@@ -68,7 +68,7 @@ func (r *Repository) GetWidgets(ctx context.Context, ownerID int64) ([]*domain.D
 	return widgets, nil
 }
 
-func (r *Repository) UpsertWidgets(ctx context.Context, ownerID int64, widgets []*domain.DashboardWidget) error {
+func (r *Repository) UpsertWidgets(ctx context.Context, businessID int64, widgets []*domain.DashboardWidget) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (r *Repository) UpsertWidgets(ctx context.Context, ownerID int64, widgets [
 
 	deleteQuery, deleteArgs, err := sq.
 		Delete("hr_dashboard_widgets").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -101,14 +101,14 @@ func (r *Repository) UpsertWidgets(ctx context.Context, ownerID int64, widgets [
 		// one round-trip per widget.
 		insert := sq.
 			Insert("hr_dashboard_widgets").
-			Columns("owner_id", "role_id", "widget_type", "position_x", "position_y", "width", "height", "config")
+			Columns("owner_id", "business_id", "role_id", "widget_type", "position_x", "position_y", "width", "height", "config")
 		for _, w := range widgets {
 			configJSON, err := json.Marshal(json.RawMessage(w.Config))
 			if err != nil {
 				_ = tx.Rollback()
 				return err
 			}
-			insert = insert.Values(ownerID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
+			insert = insert.Values(businessID, businessID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
 		}
 
 		query, args, err := insert.PlaceholderFormat(sq.Question).ToSql()

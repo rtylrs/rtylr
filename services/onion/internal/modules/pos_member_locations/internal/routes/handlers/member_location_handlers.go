@@ -37,14 +37,18 @@ func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequ
 	if !ok {
 		return GetMyLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetMyLocationsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	var (
 		locs []infrastructure.MyLocation
 		err  error
 	)
 	if hasBusinessWidePOSAccess(ctx, authUser) {
-		locs, err = h.Service.GetBusinessLocations(ctx, authUser.BusinessID)
+		locs, err = h.Service.GetBusinessLocations(ctx, businessID)
 	} else {
-		locs, err = h.Service.GetMyLocations(ctx, authUser.BusinessID, authUser.UserID)
+		locs, err = h.Service.GetMyLocations(ctx, businessID, authUser.UserID)
 	}
 	if err != nil {
 		return GetMyLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
@@ -73,12 +77,16 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 	if !ok {
 		return GetLocationRosterResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetLocationRosterResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if req.LocationID <= 0 {
 		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "locationId required"}
 	}
 
 	if !hasBusinessWidePOSAccess(ctx, authUser) {
-		assigned, accessErr := h.Service.IsAssignedToLocation(ctx, authUser.BusinessID, authUser.UserID, req.LocationID)
+		assigned, accessErr := h.Service.IsAssignedToLocation(ctx, businessID, authUser.UserID, req.LocationID)
 		if accessErr != nil {
 			return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: accessErr.Error()}
 		}
@@ -87,7 +95,7 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 		}
 	}
 
-	roster, err := h.Service.GetLocationRoster(ctx, authUser.BusinessID, req.LocationID)
+	roster, err := h.Service.GetLocationRoster(ctx, businessID, req.LocationID)
 	if err != nil {
 		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
@@ -108,7 +116,12 @@ func hasBusinessWidePOSAccess(ctx context.Context, u *authPkg.AuthUser) bool {
 	if u.BusinessID <= 0 || u.UserID <= 0 {
 		return false
 	}
-	return tenant.ResolveOwnerID(ctx, u.BusinessID, 0) == u.UserID
+	// Business-wide access is also granted to the business owner (the user whose
+	// id is the business's owner_id). This is an authorization check, NOT tenant
+	// scoping — it must stay on ResolveOwnerID. Do not flip to ResolveBusinessID:
+	// that would return a positive id for any authenticated member (priv-esc).
+	ownerID := tenant.ResolveOwnerID(ctx, u.BusinessID, u.UserID)
+	return ownerID > 0 && ownerID == u.UserID
 }
 
 func MemberLocationsRoutes() []string { return []string{"/pos/access/member-locations"} }
@@ -136,13 +149,17 @@ func (h *GetMemberLocationsHandler) Serve(ctx context.Context, req *GetMemberLoc
 	if !ok {
 		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		return GetMemberLocationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	if req.UserID <= 0 {
 		return GetMemberLocationsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "userId required"}
 	}
-	locs, err := h.Service.ListForUser(ctx, authUser.BusinessID, req.UserID)
+	locs, err := h.Service.ListForUser(ctx, businessID, req.UserID)
 	if err != nil {
 		return GetMemberLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
@@ -214,10 +231,14 @@ func (h *AssignLocationHandler) Serve(ctx context.Context, req *AssignLocationRe
 	if !ok {
 		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		return AssignLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	id, err := h.Service.Assign(ctx, authUser.BusinessID, req.UserID, req.LocationID, req.CanManagePOSUsers, req.CanManageTerminals, req.CanViewReports)
+	id, err := h.Service.Assign(ctx, businessID, req.UserID, req.LocationID, req.CanManagePOSUsers, req.CanManageTerminals, req.CanViewReports)
 	if err != nil {
 		if errors.Is(err, application.ErrInvalidAssignment) {
 			return AssignLocationResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid POS location assignment"}
@@ -252,10 +273,14 @@ func (h *RemoveLocationHandler) Serve(ctx context.Context, req *RemoveLocationRe
 	if !ok {
 		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if !hasBusinessWidePOSAccess(ctx, authUser) {
 		return RemoveLocationResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	err := h.Service.Remove(ctx, authUser.BusinessID, req.ID)
+	err := h.Service.Remove(ctx, businessID, req.ID)
 	if err != nil {
 		return RemoveLocationResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}

@@ -23,8 +23,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListDepartments(ctx context.Context, ownerID int64) ([]domain.Department, error) {
-	rows, err := r.queries.ListDepartments(ctx, ownerID)
+func (r *Repository) ListDepartments(ctx context.Context, businessID int64) ([]domain.Department, error) {
+	rows, err := r.queries.ListDepartments(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list departments", logger.Error(err))
 		return nil, err
@@ -35,6 +35,7 @@ func (r *Repository) ListDepartments(ctx context.Context, ownerID int64) ([]doma
 		var d domain.Department
 		d.ID = row.ID
 		d.OwnerID = row.OwnerID
+		d.BusinessID = row.BusinessID
 		d.Name = row.Name
 		if row.Description.Valid {
 			d.Description = row.Description.String
@@ -57,6 +58,7 @@ func (r *Repository) ListDepartments(ctx context.Context, ownerID int64) ([]doma
 func (r *Repository) CreateDepartment(ctx context.Context, input domain.DepartmentInput) (int64, error) {
 	result, err := r.queries.CreateDepartment(ctx, sqlc.CreateDepartmentParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 	})
@@ -67,12 +69,12 @@ func (r *Repository) CreateDepartment(ctx context.Context, input domain.Departme
 	return result.LastInsertId()
 }
 
-func (r *Repository) UpdateDepartment(ctx context.Context, ownerID int64, input domain.DepartmentInput) error {
+func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, input domain.DepartmentInput) error {
 	err := r.queries.UpdateDepartment(ctx, sqlc.UpdateDepartmentParams{
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		ID:          input.ID,
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update department", logger.Error(err))
@@ -81,10 +83,10 @@ func (r *Repository) UpdateDepartment(ctx context.Context, ownerID int64, input 
 	return nil
 }
 
-func (r *Repository) DeleteDepartment(ctx context.Context, ownerID, departmentID int64) error {
+func (r *Repository) DeleteDepartment(ctx context.Context, businessID, departmentID int64) error {
 	err := r.queries.DeleteDepartment(ctx, sqlc.DeleteDepartmentParams{
-		ID:      departmentID,
-		OwnerID: ownerID,
+		ID:         departmentID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete department", logger.Error(err))

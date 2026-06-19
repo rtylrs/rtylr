@@ -28,14 +28,14 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Config, error) {
-	ownerIDInt, err := strconv.Atoi(ownerID)
+	businessIDInt, err := strconv.ParseInt(ownerID, 10, 64)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to parse owner ID", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to parse business ID", logger.Error(err))
 
 		return domain.Config{}, err
 	}
 
-	rows, err := r.queries.GetConfig(ctx, int32(ownerIDInt))
+	rows, err := r.queries.GetConfig(ctx, businessIDInt)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get config", logger.Error(err))
 
@@ -43,7 +43,7 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 	}
 
 	if len(rows) == 0 {
-		logger.Ctx(ctx).Error("No config found for ownerID", logger.String("ownerID", ownerID))
+		logger.Ctx(ctx).Error("No config found for businessID", logger.String("businessID", ownerID))
 
 		return domain.Config{}, domain.ErrConfigNotFound
 	}
@@ -51,12 +51,9 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 	var config domain.Config
 	config.FromRows(rows[0])
 
-	// Enrich with business slug from the businesses table. owner_id on
-	// businesses maps to the same numeric user id used by configs, so
-	// we can resolve it cheaply with a single targeted query without
-	// reaching into the business module.
+	// Enrich with business slug from the businesses table.
 	// cross-schema read from businesses — resolve config's business slug
-	slug, slugErr := r.queries.GetBusinessSlugByOwnerID(ctx, int64(ownerIDInt))
+	slug, slugErr := r.queries.GetBusinessSlugByOwnerID(ctx, int64(rows[0].OwnerID))
 	if slugErr != nil && !errors.Is(slugErr, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("Failed to load business slug for config", logger.Error(slugErr))
 	} else if slug.Valid {
@@ -67,20 +64,20 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 }
 
 func (r *Repository) GetThemeByOwnerID(ctx context.Context, ownerID string) (domain.Theme, error) {
-	ownerIDInt, err := strconv.Atoi(ownerID)
+	businessIDInt, err := strconv.ParseInt(ownerID, 10, 64)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to parse owner ID", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to parse business ID", logger.Error(err))
 
 		return domain.Theme{}, err
 	}
 
-	row, fetchErr := r.queries.GetThemeByOwnerID(ctx, int32(ownerIDInt))
+	row, fetchErr := r.queries.GetThemeByOwnerID(ctx, businessIDInt)
 	if fetchErr != nil {
 		if errors.Is(fetchErr, sql.ErrNoRows) {
 			return domain.Theme{}, nil
 		}
 
-		logger.Ctx(ctx).Error("Failed to get theme by owner ID", logger.Error(fetchErr))
+		logger.Ctx(ctx).Error("Failed to get theme by business ID", logger.Error(fetchErr))
 
 		return domain.Theme{}, fetchErr
 	}
@@ -121,9 +118,9 @@ func (r *Repository) GetThemeByOwnerID(ctx context.Context, ownerID string) (dom
 }
 
 func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput) error {
-	ownerIDInt, err := strconv.Atoi(input.OwnerId)
+	businessIDInt, err := strconv.ParseInt(input.OwnerId, 10, 64)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to parse owner ID", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to parse business ID", logger.Error(err))
 		return err
 	}
 
@@ -149,7 +146,7 @@ func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput)
 		EnableNewsletterSignup: sql.NullBool{Bool: input.EnableNewsletterSignup, Valid: true},
 		AboutContent:           input.AboutContent,
 		FooterSubText:          sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
-		OwnerID:                int32(ownerIDInt),
+		BusinessID:             businessIDInt,
 	})
 	if execErr != nil {
 		logger.Ctx(ctx).Error("Failed to update config", logger.Error(execErr))
@@ -160,9 +157,9 @@ func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput)
 }
 
 func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput) error {
-	ownerIDInt, err := strconv.Atoi(input.OwnerId)
+	businessIDInt, err := strconv.ParseInt(input.OwnerId, 10, 64)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to parse owner ID", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to parse business ID", logger.Error(err))
 
 		return err
 	}
@@ -175,7 +172,8 @@ func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput)
 	}
 
 	err = r.queries.CreateConfig(ctx, sqlc.CreateConfigParams{
-		OwnerID:                int32(ownerIDInt),
+		OwnerID:                int32(businessIDInt),
+		BusinessID:             businessIDInt,
 		SiteName:               sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
 		LogoUrl:                sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
 		FaviconUrl:             sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},

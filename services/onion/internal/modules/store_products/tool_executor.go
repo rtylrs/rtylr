@@ -12,6 +12,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -45,12 +47,17 @@ func (m *Module) executeListStoreProductsTool(ctx context.Context, input map[str
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
 	parsed, err := parseListStoreProductsToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	products, err := m.service.List(ctx, authUser.UserID)
+	products, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}

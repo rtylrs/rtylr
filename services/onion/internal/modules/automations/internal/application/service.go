@@ -17,10 +17,10 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Automation, error)
+	List(ctx context.Context, businessID int64) ([]domain.Automation, error)
 	Create(ctx context.Context, input domain.AutomationInput) (int64, error)
 	Update(ctx context.Context, input domain.AutomationUpdateInput) error
-	Delete(ctx context.Context, ownerID, automationID int64) error
+	Delete(ctx context.Context, businessID, automationID int64) error
 }
 
 type Service struct {
@@ -33,17 +33,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateAutomationsScope(ctx context.Context, ownerID int64) {
+func invalidateAutomationsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Automation, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Automation, error) {
 	return cacher.Of[[]domain.Automation]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(automationsScope, ownerID, "list"),
+		cacheKeys.Scoped(automationsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Automation, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, automationsTTL),
 	)
@@ -54,7 +54,7 @@ func (s *Service) Create(ctx context.Context, input domain.AutomationInput) (int
 	if err != nil {
 		return 0, err
 	}
-	invalidateAutomationsScope(ctx, input.OwnerID)
+	invalidateAutomationsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
@@ -62,14 +62,14 @@ func (s *Service) Update(ctx context.Context, input domain.AutomationUpdateInput
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
-	invalidateAutomationsScope(ctx, input.OwnerID)
+	invalidateAutomationsScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, automationID int64) error {
-	if err := s.repo.Delete(ctx, ownerID, automationID); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, automationID int64) error {
+	if err := s.repo.Delete(ctx, businessID, automationID); err != nil {
 		return err
 	}
-	invalidateAutomationsScope(ctx, ownerID)
+	invalidateAutomationsScope(ctx, businessID)
 	return nil
 }

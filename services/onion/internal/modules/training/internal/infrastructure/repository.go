@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.TrainingCourse, error) {
-	rows, err := r.queries.ListTrainingCourses(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.TrainingCourse, error) {
+	rows, err := r.queries.ListTrainingCourses(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list training courses", logger.Error(err))
 		return nil, err
@@ -36,6 +36,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Training
 		var item domain.TrainingCourse
 		item.ID = row.ID
 		item.OwnerID = row.OwnerID
+		item.BusinessID = row.BusinessID
 		item.Name = row.Name
 		if row.Description.Valid {
 			item.Description = row.Description.String
@@ -54,9 +55,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Training
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.TrainingCourseInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.TrainingCourseInput) (int64, error) {
 	res, err := r.queries.CreateTrainingCourse(ctx, sqlc.CreateTrainingCourseParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		Name:          input.Name,
 		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
 		DurationHours: sql.NullString{String: strconv.FormatFloat(input.DurationHours, 'f', 1, 64), Valid: true},

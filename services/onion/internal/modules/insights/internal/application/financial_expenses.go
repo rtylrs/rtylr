@@ -17,13 +17,13 @@ type ExpenseByCategoryPayload struct {
 
 // GetExpensesByCategory returns expense spend grouped by category over
 // the requested window.
-func (s *Service) GetExpensesByCategory(ctx context.Context, ownerID int64, from, to time.Time) ([]ExpenseByCategoryPayload, error) {
-	key := fmt.Sprintf("insights:%d:financial:expenses:%s:%s", ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+func (s *Service) GetExpensesByCategory(ctx context.Context, businessID int64, from, to time.Time) ([]ExpenseByCategoryPayload, error) {
+	key := fmt.Sprintf("insights:%d:financial:expenses:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	type result struct {
 		Rows []ExpenseByCategoryPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetExpensesByCategory(ctx, ownerID, from, to)
+		rows, rerr := s.repo.GetExpensesByCategory(ctx, businessID, from, to)
 		if rerr != nil {
 			return result{}, rerr
 		}

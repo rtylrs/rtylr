@@ -11,6 +11,7 @@ var ErrVariantNotFound = errors.New("variant not found")
 type Variant struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	ProductID     int64     `json:"product_id"`
 	Name          string    `json:"name"`
 	SKU           string    `json:"sku"`
@@ -34,6 +35,7 @@ func (v *Variant) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&v.ID,
 		&v.OwnerID,
+		&v.BusinessID,
 		&v.ProductID,
 		&v.Name,
 		&sku,

@@ -27,11 +27,11 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.Quote, error) {
+func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Quote, error) {
 	rows, err := r.queries.ListQuotes(ctx, sqlc.ListQuotesParams{
-		OwnerID: ownerID,
-		Limit:   limit,
-		Offset:  offset,
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list quotes", logger.Error(err))
@@ -46,7 +46,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.QuoteInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.QuoteInput) (int64, error) {
 	status := input.Status
 	if status == "" {
 		status = "draft"
@@ -63,7 +63,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Quo
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 	}); err != nil {
@@ -72,7 +72,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Quo
 	}
 
 	res, err := r.queries.WithTx(tx).CreateQuote(ctx, sqlc.CreateQuoteParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		CustomerName:  input.CustomerName,
 		CustomerEmail: nullableString(input.CustomerEmail),
 		Status:        sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(status), Valid: true},
@@ -100,7 +101,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Quo
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.QuoteInput) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin quote update transaction", logger.Error(err))
@@ -112,7 +113,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 	}); err != nil {
@@ -132,7 +133,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		ValidUntil:    nullTimeStr(input.ValidUntil),
 		Notes:         nullableString(input.Notes),
 		ID:            id,
-		OwnerID:       ownerID,
+		BusinessID:    businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update quote", logger.Error(err))
@@ -147,11 +148,11 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
 	_, err := r.queries.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
-		Status:  sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(status), Valid: status != ""},
-		ID:      id,
-		OwnerID: ownerID,
+		Status:     sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(status), Valid: status != ""},
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update quote status", logger.Error(err))
@@ -161,10 +162,10 @@ func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	err := r.queries.DeleteQuote(ctx, sqlc.DeleteQuoteParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete quote", logger.Error(err))
@@ -174,8 +175,8 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, error) {
-	row, err := r.queries.GetQuote(ctx, sqlc.GetQuoteParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.Quote, error) {
+	row, err := r.queries.GetQuote(ctx, sqlc.GetQuoteParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Quote{}, domain.ErrQuoteNotFound
@@ -191,7 +192,7 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, 
 // quotes module owns finance_quotes and writes directly to finance_invoices
 // here because the operation must be atomic. No cross-module Go imports are
 // introduced — we use dbclient + raw SQL at the infrastructure layer only.
-func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error) {
+func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID int64) (int64, error) {
 	db := r.pool
 
 	tx, err := db.BeginTx(ctx, nil)
@@ -207,7 +208,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 
 	qtx := r.queries.WithTx(tx)
 
-	quoteRow, err := qtx.GetQuote(ctx, sqlc.GetQuoteParams{ID: quoteID, OwnerID: ownerID})
+	quoteRow, err := qtx.GetQuote(ctx, sqlc.GetQuoteParams{ID: quoteID, BusinessID: businessID})
 	if err != nil {
 		_ = tx.Rollback()
 		if errors.Is(err, sql.ErrNoRows) {
@@ -240,7 +241,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 		notes = quoteRow.Notes.String
 	}
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
 		Name:  quoteRow.CustomerName,
 		Email: customerEmail,
 	}); err != nil {
@@ -252,7 +253,8 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 	// cross-schema write from quotes to finance_invoices — materialise quote
 	// header row. Column list matches finance_invoices schema.
 	res, err := qtx.InsertInvoiceFromQuote(ctx, sqlc.InsertInvoiceFromQuoteParams{
-		OwnerID:        ownerID,
+		OwnerID:        businessID,
+		BusinessID:     businessID,
 		InvoiceNumber:  invoiceNumber,
 		ClientName:     quoteRow.CustomerName,
 		ClientEmail:    nullableStringInput(customerEmail),
@@ -326,9 +328,9 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 	}
 
 	if _, statusErr := qtx.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
-		Status:  sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus("converted"), Valid: true},
-		ID:      quoteID,
-		OwnerID: ownerID,
+		Status:     sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus("converted"), Valid: true},
+		ID:         quoteID,
+		BusinessID: businessID,
 	}); statusErr != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to mark quote converted", logger.Error(statusErr))
@@ -342,9 +344,9 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 	return invoiceID, nil
 }
 
-// CountByStatus returns the number of quotes in each status for the owner.
-func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	rows, err := r.queries.CountQuotesByStatus(ctx, ownerID)
+// CountByStatus returns the number of quotes in each status for the business.
+func (r *Repository) CountByStatus(ctx context.Context, businessID int64) (map[string]int64, error) {
+	rows, err := r.queries.CountQuotesByStatus(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count quotes by status", logger.Error(err))
 		return nil, err
@@ -405,6 +407,7 @@ func quoteFromSqlc(row sqlc.FinanceQuote) domain.Quote {
 	q := domain.Quote{
 		ID:            row.ID,
 		OwnerID:       row.OwnerID,
+		BusinessID:    row.BusinessID,
 		CustomerName:  row.CustomerName,
 		CustomerEmail: nullStr(row.CustomerEmail),
 		Status:        string(row.Status.FinanceQuotesStatus),

@@ -11,8 +11,8 @@ import (
 )
 
 type repository interface {
-	Create(ctx context.Context, ownerID int64, input domain.CheckoutCreateInput) (int64, error)
-	Complete(ctx context.Context, ownerID, id int64) error
+	Create(ctx context.Context, businessID int64, ownerID int64, input domain.CheckoutCreateInput) (int64, error)
+	Complete(ctx context.Context, businessID, id int64, ownerID int64) error
 }
 
 type Service struct{ repo repository }
@@ -23,26 +23,26 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 // store_checkout is write-only — no cached reads here. Mutations still wipe
 // the order/customer scopes upstream so derived caches stay fresh.
-func invalidateCheckoutScope(ctx context.Context, ownerID int64) {
+func invalidateCheckoutScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.OrderPrefix(ownerID))
-		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.OrderPrefix(businessID))
+		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(businessID))
 	}
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, ownerID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateCheckoutScope(ctx, ownerID)
+	invalidateCheckoutScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Complete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Complete(ctx, ownerID, id); err != nil {
+func (s *Service) Complete(ctx context.Context, businessID, id int64, ownerID int64) error {
+	if err := s.repo.Complete(ctx, businessID, id, ownerID); err != nil {
 		return err
 	}
-	invalidateCheckoutScope(ctx, ownerID)
+	invalidateCheckoutScope(ctx, businessID)
 	return nil
 }

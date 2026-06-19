@@ -12,22 +12,22 @@ import (
 func TestStoreProducts_List_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.List(context.Background(), testutil.OwnerID)
+	_, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 }
 
-func TestStoreProducts_List_OwnerScoped(t *testing.T) {
+func TestStoreProducts_List_BusinessScoped(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 	for _, p := range items {
-		if p.OwnerID != testutil.OwnerID {
-			t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, p.OwnerID)
+		if p.BusinessID != testutil.BusinessID {
+			t.Errorf("expected business_id %d, got %d", testutil.BusinessID, p.BusinessID)
 		}
 	}
 }
@@ -35,7 +35,7 @@ func TestStoreProducts_List_OwnerScoped(t *testing.T) {
 func TestStoreProducts_Create_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title:       "Integration Test Product",
 		Slug:        "integration-test-product",
 		Price:       29.99,
@@ -47,13 +47,13 @@ func TestStoreProducts_Create_ReturnsPositiveID(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 }
 
 func TestStoreProducts_Create_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "ListAppear Product",
 		Slug:  "list-appear-product",
 		Price: 9.99,
@@ -61,9 +61,9 @@ func TestStoreProducts_Create_AppearsInList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -81,15 +81,15 @@ func TestStoreProducts_Create_AppearsInList(t *testing.T) {
 func TestStoreProducts_Update_ChangesTitle(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "OldTitle", Slug: "old-title", Price: 5.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreProductInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreProductInput{
 		Title: "NewTitle", Slug: "new-title", Price: 5.0,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
@@ -106,14 +106,14 @@ func TestStoreProducts_Update_ChangesTitle(t *testing.T) {
 func TestStoreProducts_Delete_RemovesFromList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "DeleteMe", Slug: "delete-me", Price: 1.0,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Delete(context.Background(), testutil.OwnerID, id); err != nil {
+	if err := repo.Delete(context.Background(), testutil.BusinessID, id); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
 
@@ -140,7 +140,7 @@ func TestStoreProducts_List_UnknownOwner_Empty(t *testing.T) {
 func TestStoreProducts_Create_WithCompareAtPrice(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title:          "Sale Product",
 		Slug:           "sale-product",
 		Price:          49.99,
@@ -150,7 +150,7 @@ func TestStoreProducts_Create_WithCompareAtPrice(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create with compare price: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 	if id <= 0 {
 		t.Errorf("expected positive ID, got %d", id)
 	}
@@ -159,15 +159,15 @@ func TestStoreProducts_Create_WithCompareAtPrice(t *testing.T) {
 func TestStoreProducts_Update_PublishedToggle(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "DraftProduct", Slug: "draft-product", Price: 10.0, IsPublished: false,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreProductInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreProductInput{
 		Title: "DraftProduct", Slug: "draft-product", Price: 10.0, IsPublished: true,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
@@ -177,7 +177,7 @@ func TestStoreProducts_Update_PublishedToggle(t *testing.T) {
 func TestStoreProducts_Create_WithDescription(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title:       "Described Product",
 		Slug:        "described-product",
 		Description: "This is a detailed description of the product.",
@@ -186,7 +186,7 @@ func TestStoreProducts_Create_WithDescription(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.BusinessID, id) })
 	if id <= 0 {
 		t.Errorf("expected positive ID, got %d", id)
 	}
@@ -225,7 +225,7 @@ func TestCreateStoreProduct_PersistsAndReturnsID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "PersistProduct",
 		Slug:  "persist-product",
 		Price: 19.99,
@@ -236,7 +236,7 @@ func TestCreateStoreProduct_PersistsAndReturnsID(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 }
 
 func TestCreateStoreProduct_NameIsStored(t *testing.T) {
@@ -244,7 +244,7 @@ func TestCreateStoreProduct_NameIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "TitleStoredProduct",
 		Slug:  "title-stored-product",
 		Price: 9.99,
@@ -252,7 +252,7 @@ func TestCreateStoreProduct_NameIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -274,7 +274,7 @@ func TestCreateStoreProduct_PriceIsStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "PriceProduct",
 		Slug:  "price-product",
 		Price: 55.55,
@@ -282,7 +282,7 @@ func TestCreateStoreProduct_PriceIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -304,7 +304,7 @@ func TestUpdateStoreProduct_ChangesName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "OldProductName",
 		Slug:  "old-product-name",
 		Price: 10.00,
@@ -312,9 +312,9 @@ func TestUpdateStoreProduct_ChangesName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreProductInput{
+	if err := repo.Update(ctx, testutil.BusinessID, id, domain.StoreProductInput{
 		Title: "NewProductName",
 		Slug:  "new-product-name",
 		Price: 10.00,
@@ -338,7 +338,7 @@ func TestUpdateStoreProduct_ChangesPrice(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "ChangePriceProduct",
 		Slug:  "change-price-product",
 		Price: 5.00,
@@ -346,9 +346,9 @@ func TestUpdateStoreProduct_ChangesPrice(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
-	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreProductInput{
+	if err := repo.Update(ctx, testutil.BusinessID, id, domain.StoreProductInput{
 		Title: "ChangePriceProduct",
 		Slug:  "change-price-product",
 		Price: 125.00,
@@ -372,7 +372,7 @@ func TestDeleteStoreProduct_RemovesRow(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "DeleteProduct",
 		Slug:  "delete-product-row",
 		Price: 1.00,
@@ -381,7 +381,7 @@ func TestDeleteStoreProduct_RemovesRow(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+	if err := repo.Delete(ctx, testutil.BusinessID, id); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
 
@@ -411,7 +411,7 @@ func TestCreate_ThenList_FindsProduct(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "FindMeProduct",
 		Slug:  "find-me-product",
 		Price: 12.00,
@@ -419,7 +419,7 @@ func TestCreate_ThenList_FindsProduct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -443,7 +443,7 @@ func TestListStoreProducts_AfterCreate_CountIncreases(t *testing.T) {
 		t.Fatalf("List before: %v", err)
 	}
 
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title: "CountProduct",
 		Slug:  "count-product",
 		Price: 7.00,
@@ -451,7 +451,7 @@ func TestListStoreProducts_AfterCreate_CountIncreases(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
 	after, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -469,7 +469,7 @@ func TestCreateStoreProduct_StockQuantityIsStored(t *testing.T) {
 
 	// StoreProductInput does not have a StockQuantity field;
 	// verify that creating a product with SortOrder persists without error.
-	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.BusinessID, domain.StoreProductInput{
 		Title:     "StockProduct",
 		Slug:      "stock-product",
 		Price:     29.99,
@@ -481,7 +481,7 @@ func TestCreateStoreProduct_StockQuantityIsStored(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.BusinessID, id) })
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {

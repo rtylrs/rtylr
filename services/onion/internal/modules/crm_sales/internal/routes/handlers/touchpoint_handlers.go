@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -49,7 +50,12 @@ func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpoi
 		return CreateTouchpointResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	tp, err := h.Service.CreateTouchpoint(ctx, device.User.UserID, device.User.UserID, domain.CreateTouchpointRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateTouchpointResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	tp, err := h.Service.CreateTouchpoint(ctx, businessID, device.User.UserID, domain.CreateTouchpointRequest{
 		LeadID:       req.LeadID,
 		ContactID:    req.ContactID,
 		Type:         req.Type,
@@ -91,7 +97,12 @@ func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpoint
 		return DeleteTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid touchpoint id"}
 	}
 
-	if err := h.Service.DeleteTouchpoint(ctx, id, device.User.UserID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteTouchpointResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteTouchpoint(ctx, id, businessID); err != nil {
 		if errors.Is(err, domain.ErrTouchpointNotFound) {
 			return DeleteTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Touchpoint not found"}
 		}

@@ -20,8 +20,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StoreCategory, error) {
-	rows, err := r.queries.ListStoreCategories(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.StoreCategory, error) {
+	rows, err := r.queries.ListStoreCategories(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list store categories", logger.Error(err))
 		return nil, err
@@ -33,8 +33,8 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StoreCat
 	return items, nil
 }
 
-func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.StoreCategory, error) {
-	row, err := r.queries.GetStoreCategory(ctx, sqlc.GetStoreCategoryParams{OwnerID: ownerID, ID: id})
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.StoreCategory, error) {
+	row, err := r.queries.GetStoreCategory(ctx, sqlc.GetStoreCategoryParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.StoreCategory{}, domain.ErrParentNotFound
@@ -45,9 +45,10 @@ func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.Sto
 	return fromRow(row), nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.StoreCategoryInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, input domain.StoreCategoryInput) (int64, error) {
 	result, err := r.queries.CreateStoreCategory(ctx, sqlc.CreateStoreCategoryParams{
 		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		Name:        input.Name,
 		Slug:        sql.NullString{String: input.Slug, Valid: input.Slug != ""},
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -63,7 +64,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Sto
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.StoreCategoryInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.StoreCategoryInput) error {
 	err := r.queries.UpdateStoreCategory(ctx, sqlc.UpdateStoreCategoryParams{
 		Name:        input.Name,
 		Slug:        sql.NullString{String: input.Slug, Valid: input.Slug != ""},
@@ -71,7 +72,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		ImageUrl:    sql.NullString{String: input.ImageURL, Valid: input.ImageURL != ""},
 		ParentID:    sql.NullInt64{Int64: input.ParentID, Valid: input.ParentID != 0},
 		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
-		OwnerID:     ownerID,
+		BusinessID:  businessID,
 		ID:          id,
 	})
 	if err != nil {
@@ -81,8 +82,8 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	err := r.queries.DeleteStoreCategory(ctx, sqlc.DeleteStoreCategoryParams{OwnerID: ownerID, ID: id})
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	err := r.queries.DeleteStoreCategory(ctx, sqlc.DeleteStoreCategoryParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete store category", logger.Error(err))
 		return err
@@ -91,7 +92,7 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func fromRow(row sqlc.StoreCategory) domain.StoreCategory {
-	c := domain.StoreCategory{ID: row.ID, OwnerID: row.OwnerID, Name: row.Name}
+	c := domain.StoreCategory{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Name: row.Name}
 	if row.Slug.Valid {
 		c.Slug = row.Slug.String
 	}

@@ -23,8 +23,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Account, error) {
-	rows, err := r.queries.ListAccounts(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Account, error) {
+	rows, err := r.queries.ListAccounts(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list accounts", logger.Error(err))
 		return nil, err
@@ -33,22 +33,23 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Account,
 	items := make([]domain.Account, 0, len(rows))
 	for _, row := range rows {
 		items = append(items, domain.Account{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Type:      string(row.Type),
-			Currency:  nullStr(row.Currency),
-			Balance:   parseFloatNull(row.Balance),
-			IsActive:  nullBool(row.IsActive),
-			CreatedAt: nullTime(row.CreatedAt),
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Type:       string(row.Type),
+			Currency:   nullStr(row.Currency),
+			Balance:    parseFloatNull(row.Balance),
+			IsActive:   nullBool(row.IsActive),
+			CreatedAt:  nullTime(row.CreatedAt),
 		})
 	}
 
 	return items, nil
 }
 
-func (r *Repository) ListForTree(ctx context.Context, ownerID int64) ([]domain.Account, error) {
-	rows, err := r.queries.ListAccountsForTree(ctx, ownerID)
+func (r *Repository) ListForTree(ctx context.Context, businessID int64) ([]domain.Account, error) {
+	rows, err := r.queries.ListAccountsForTree(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list accounts for tree", logger.Error(err))
 		return nil, err
@@ -61,35 +62,37 @@ func (r *Repository) ListForTree(ctx context.Context, ownerID int64) ([]domain.A
 			parentID = row.ParentID.Int64
 		}
 		items = append(items, domain.Account{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Name:      row.Name,
-			Code:      nullStr(row.Code),
-			ParentID:  parentID,
-			Type:      string(row.Type),
-			Currency:  nullStr(row.Currency),
-			Balance:   parseFloatNull(row.Balance),
-			IsActive:  nullBool(row.IsActive),
-			CreatedAt: nullTime(row.CreatedAt),
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			Code:       nullStr(row.Code),
+			ParentID:   parentID,
+			Type:       string(row.Type),
+			Currency:   nullStr(row.Currency),
+			Balance:    parseFloatNull(row.Balance),
+			IsActive:   nullBool(row.IsActive),
+			CreatedAt:  nullTime(row.CreatedAt),
 		})
 	}
 
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.AccountInput) (int64, error) {
 	currency := input.Currency
 	if currency == "" {
 		currency = "USD"
 	}
 
 	res, err := r.queries.CreateAccount(ctx, sqlc.CreateAccountParams{
-		OwnerID:  ownerID,
-		Name:     input.Name,
-		Type:     sqlc.FinanceAccountsType(input.Type),
-		Currency: nullableString(currency),
-		Balance:  nullableString(fmtFloat(input.Balance)),
-		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		Name:       input.Name,
+		Type:       sqlc.FinanceAccountsType(input.Type),
+		Currency:   nullableString(currency),
+		Balance:    nullableString(fmtFloat(input.Balance)),
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create account", logger.Error(err))
@@ -99,19 +102,19 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Acc
 	return res.LastInsertId()
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.AccountInput) error {
 	currency := input.Currency
 	if currency == "" {
 		currency = "USD"
 	}
 	res, err := r.queries.UpdateAccount(ctx, sqlc.UpdateAccountParams{
-		Name:     input.Name,
-		Type:     sqlc.FinanceAccountsType(input.Type),
-		Currency: nullableString(currency),
-		Balance:  nullableString(fmtFloat(input.Balance)),
-		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
-		ID:       id,
-		OwnerID:  ownerID,
+		Name:       input.Name,
+		Type:       sqlc.FinanceAccountsType(input.Type),
+		Currency:   nullableString(currency),
+		Balance:    nullableString(fmtFloat(input.Balance)),
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update account", logger.Error(err))
@@ -127,8 +130,8 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	res, err := r.queries.DeleteAccount(ctx, sqlc.DeleteAccountParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	res, err := r.queries.DeleteAccount(ctx, sqlc.DeleteAccountParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete account", logger.Error(err))
 		return err

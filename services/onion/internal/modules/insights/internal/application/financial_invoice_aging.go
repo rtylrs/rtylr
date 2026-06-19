@@ -16,13 +16,13 @@ type InvoiceAgingBucketPayload struct {
 }
 
 // GetInvoiceAging returns the four standard A/R aging buckets.
-func (s *Service) GetInvoiceAging(ctx context.Context, ownerID int64) ([]InvoiceAgingBucketPayload, error) {
-	key := fmt.Sprintf("insights:%d:financial:invoice-aging", ownerID)
+func (s *Service) GetInvoiceAging(ctx context.Context, businessID int64) ([]InvoiceAgingBucketPayload, error) {
+	key := fmt.Sprintf("insights:%d:financial:invoice-aging", businessID)
 	type result struct {
 		Rows []InvoiceAgingBucketPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetInvoiceAging(ctx, ownerID)
+		rows, rerr := s.repo.GetInvoiceAging(ctx, businessID)
 		if rerr != nil {
 			return result{}, rerr
 		}

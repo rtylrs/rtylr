@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // appointmentsCacheScope namespaces the per-owner appointment list caches.
@@ -45,11 +46,15 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	res, cacheErr := cacher.Of[ListResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(appointmentsCacheScope, authUser.UserID, "list"),
+		cacheKeys.Scoped(appointmentsCacheScope, businessID, "list"),
 		func(ctx context.Context) (ListResponse, error) {
-			items, err := h.Service.List(ctx, authUser.UserID)
+			items, err := h.Service.List(ctx, businessID)
 			if err != nil {
 				return ListResponse{}, err
 			}
@@ -61,7 +66,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		return res, nil
 	}
 
-	items, err := h.Service.List(ctx, authUser.UserID)
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list appointments"}
 	}
@@ -81,14 +86,18 @@ func (h *TodayHandler) Serve(ctx context.Context, _ *TodayRequest) (TodayRespons
 	if !ok {
 		return TodayResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return TodayResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	// Date-stamp the cache detail so a cache written yesterday can never be
 	// served today, independent of the TTL.
 	todayKey := "today:" + time.Now().Format("2006-01-02")
 	res, cacheErr := cacher.Of[TodayResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(appointmentsCacheScope, authUser.UserID, todayKey),
+		cacheKeys.Scoped(appointmentsCacheScope, businessID, todayKey),
 		func(ctx context.Context) (TodayResponse, error) {
-			items, err := h.Service.ListToday(ctx, authUser.UserID)
+			items, err := h.Service.ListToday(ctx, businessID)
 			if err != nil {
 				return TodayResponse{}, err
 			}
@@ -100,7 +109,7 @@ func (h *TodayHandler) Serve(ctx context.Context, _ *TodayRequest) (TodayRespons
 		return res, nil
 	}
 
-	items, err := h.Service.ListToday(ctx, authUser.UserID)
+	items, err := h.Service.ListToday(ctx, businessID)
 	if err != nil {
 		return TodayResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list today appointments"}
 	}
@@ -160,7 +169,11 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	id, err := h.Service.Create(ctx, authUser.UserID, domain.AppointmentInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, businessID, domain.AppointmentInput{
 		ServiceID: req.ServiceID, ResourceID: req.ResourceID, StaffID: req.StaffID,
 		CustomerName: req.CustomerName, CustomerEmail: req.CustomerEmail, CustomerPhone: req.CustomerPhone,
 		StartTime: req.StartTime, EndTime: req.EndTime, Status: req.Status, Notes: req.Notes,
@@ -168,7 +181,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create appointment"}
 	}
-	invalidateAppointmentsCache(ctx, authUser.UserID)
+	invalidateAppointmentsCache(ctx, businessID)
 	return CreateResponse{ID: id, Message: "Appointment created"}, nil
 }
 
@@ -225,14 +238,18 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if !ok {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.AppointmentInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Update(ctx, businessID, req.ID, domain.AppointmentInput{
 		ServiceID: req.ServiceID, ResourceID: req.ResourceID, StaffID: req.StaffID,
 		CustomerName: req.CustomerName, CustomerEmail: req.CustomerEmail, CustomerPhone: req.CustomerPhone,
 		StartTime: req.StartTime, EndTime: req.EndTime, Status: req.Status, Notes: req.Notes,
 	}); err != nil {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update appointment"}
 	}
-	invalidateAppointmentsCache(ctx, authUser.UserID)
+	invalidateAppointmentsCache(ctx, businessID)
 	return UpdateResponse{Message: "Appointment updated"}, nil
 }
 
@@ -259,9 +276,13 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 	if !ok {
 		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	if err := h.Service.Delete(ctx, authUser.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
 		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to delete appointment"}
 	}
-	invalidateAppointmentsCache(ctx, authUser.UserID)
+	invalidateAppointmentsCache(ctx, businessID)
 	return DeleteResponse{Message: "Appointment deleted"}, nil
 }

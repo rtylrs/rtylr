@@ -17,33 +17,33 @@ const (
 	crmSalesTTL   = 5 * time.Minute
 )
 
-func invalidateCRMSalesScope(ctx context.Context, ownerID int64) {
+func invalidateCRMSalesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(crmSalesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(crmSalesScope, businessID))
 	}
 }
 
 type repository interface {
-	ListLeads(ctx context.Context, ownerID int64) ([]domain.Lead, error)
-	GetLead(ctx context.Context, id, ownerID int64) (domain.Lead, error)
-	CreateLead(ctx context.Context, ownerID int64, req domain.CreateLeadRequest) (domain.Lead, error)
-	UpdateLead(ctx context.Context, id, ownerID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
-	DeleteLead(ctx context.Context, id, ownerID int64) error
-	GetPipeline(ctx context.Context, ownerID int64) ([]domain.PipelineSummary, error)
+	ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error)
+	GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error)
+	CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error)
+	UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
+	DeleteLead(ctx context.Context, id, businessID int64) error
+	GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error)
 
-	ListContacts(ctx context.Context, ownerID int64, leadID *int64) ([]domain.Contact, error)
-	CreateContact(ctx context.Context, ownerID int64, req domain.CreateContactRequest) (domain.Contact, error)
-	UpdateContact(ctx context.Context, id, ownerID int64, req domain.UpdateContactRequest) (domain.Contact, error)
-	DeleteContact(ctx context.Context, id, ownerID int64) error
+	ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error)
+	CreateContact(ctx context.Context, businessID int64, req domain.CreateContactRequest) (domain.Contact, error)
+	UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error)
+	DeleteContact(ctx context.Context, id, businessID int64) error
 
-	ListTouchpoints(ctx context.Context, ownerID, leadID int64) ([]domain.Touchpoint, error)
-	CreateTouchpoint(ctx context.Context, ownerID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error)
-	DeleteTouchpoint(ctx context.Context, id, ownerID int64) error
+	ListTouchpoints(ctx context.Context, businessID, leadID int64) ([]domain.Touchpoint, error)
+	CreateTouchpoint(ctx context.Context, businessID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error)
+	DeleteTouchpoint(ctx context.Context, id, businessID int64) error
 
-	ListContracts(ctx context.Context, ownerID int64) ([]domain.Contract, error)
-	GetContract(ctx context.Context, id, ownerID int64) (domain.Contract, error)
-	CreateContract(ctx context.Context, ownerID int64, req domain.CreateContractRequest) (domain.Contract, error)
-	UpdateContract(ctx context.Context, id, ownerID int64, req domain.UpdateContractRequest) (domain.Contract, error)
+	ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error)
+	GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error)
+	CreateContract(ctx context.Context, businessID int64, req domain.CreateContractRequest) (domain.Contract, error)
+	UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error)
 }
 
 type Service struct {
@@ -54,27 +54,27 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) ListLeads(ctx context.Context, ownerID int64) ([]domain.Lead, error) {
+func (s *Service) ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error) {
 	return cacher.Of[[]domain.Lead]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSalesScope, ownerID, "leads"),
+		cacheKeys.Scoped(crmSalesScope, businessID, "leads"),
 		func(ctx context.Context) ([]domain.Lead, error) {
-			return s.repo.ListLeads(ctx, ownerID)
+			return s.repo.ListLeads(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) GetLead(ctx context.Context, id, ownerID int64) (domain.Lead, error) {
-	key := cacheKeys.Scoped(crmSalesScope, ownerID, fmt.Sprintf("lead=%d", id))
+func (s *Service) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("lead=%d", id))
 	return cacher.Of[domain.Lead]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.Lead, error) {
-			return s.repo.GetLead(ctx, id, ownerID)
+			return s.repo.GetLead(ctx, id, businessID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) CreateLead(ctx context.Context, ownerID int64, req domain.CreateLeadRequest) (domain.Lead, error) {
+func (s *Service) CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error) {
 	if req.CompanyName == "" {
 		req.CompanyName = "Unknown"
 	}
@@ -84,14 +84,14 @@ func (s *Service) CreateLead(ctx context.Context, ownerID int64, req domain.Crea
 	if req.Stage == "" {
 		req.Stage = domain.LeadStageCold
 	}
-	lead, err := s.repo.CreateLead(ctx, ownerID, req)
+	lead, err := s.repo.CreateLead(ctx, businessID, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return lead, err
 }
 
-func (s *Service) UpdateLead(ctx context.Context, id, ownerID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
+func (s *Service) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
 	if req.CompanyName == "" {
 		req.CompanyName = "Unknown"
 	}
@@ -101,145 +101,145 @@ func (s *Service) UpdateLead(ctx context.Context, id, ownerID int64, req domain.
 	if req.Stage == "" {
 		req.Stage = domain.LeadStageCold
 	}
-	lead, err := s.repo.UpdateLead(ctx, id, ownerID, req)
+	lead, err := s.repo.UpdateLead(ctx, id, businessID, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return lead, err
 }
 
-func (s *Service) DeleteLead(ctx context.Context, id, ownerID int64) error {
-	if err := s.repo.DeleteLead(ctx, id, ownerID); err != nil {
+func (s *Service) DeleteLead(ctx context.Context, id, businessID int64) error {
+	if err := s.repo.DeleteLead(ctx, id, businessID); err != nil {
 		return err
 	}
-	invalidateCRMSalesScope(ctx, ownerID)
+	invalidateCRMSalesScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) GetPipeline(ctx context.Context, ownerID int64) ([]domain.PipelineSummary, error) {
+func (s *Service) GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error) {
 	return cacher.Of[[]domain.PipelineSummary]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSalesScope, ownerID, "pipeline"),
+		cacheKeys.Scoped(crmSalesScope, businessID, "pipeline"),
 		func(ctx context.Context) ([]domain.PipelineSummary, error) {
-			return s.repo.GetPipeline(ctx, ownerID)
+			return s.repo.GetPipeline(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) ListContacts(ctx context.Context, ownerID int64, leadID *int64) ([]domain.Contact, error) {
+func (s *Service) ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error) {
 	lead := int64(0)
 	if leadID != nil {
 		lead = *leadID
 	}
-	key := cacheKeys.Scoped(crmSalesScope, ownerID, fmt.Sprintf("contacts|l=%d", lead))
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contacts|l=%d", lead))
 	return cacher.Of[[]domain.Contact]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Contact, error) {
-			return s.repo.ListContacts(ctx, ownerID, leadID)
+			return s.repo.ListContacts(ctx, businessID, leadID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) CreateContact(ctx context.Context, ownerID int64, req domain.CreateContactRequest) (domain.Contact, error) {
-	c, err := s.repo.CreateContact(ctx, ownerID, req)
+func (s *Service) CreateContact(ctx context.Context, businessID int64, req domain.CreateContactRequest) (domain.Contact, error) {
+	c, err := s.repo.CreateContact(ctx, businessID, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return c, err
 }
 
-func (s *Service) UpdateContact(ctx context.Context, id, ownerID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
-	c, err := s.repo.UpdateContact(ctx, id, ownerID, req)
+func (s *Service) UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
+	c, err := s.repo.UpdateContact(ctx, id, businessID, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return c, err
 }
 
-func (s *Service) DeleteContact(ctx context.Context, id, ownerID int64) error {
-	if err := s.repo.DeleteContact(ctx, id, ownerID); err != nil {
+func (s *Service) DeleteContact(ctx context.Context, id, businessID int64) error {
+	if err := s.repo.DeleteContact(ctx, id, businessID); err != nil {
 		return err
 	}
-	invalidateCRMSalesScope(ctx, ownerID)
+	invalidateCRMSalesScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) ListTouchpoints(ctx context.Context, ownerID, leadID int64) ([]domain.Touchpoint, error) {
-	key := cacheKeys.Scoped(crmSalesScope, ownerID, fmt.Sprintf("touchpoints|l=%d", leadID))
+func (s *Service) ListTouchpoints(ctx context.Context, businessID, leadID int64) ([]domain.Touchpoint, error) {
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("touchpoints|l=%d", leadID))
 	return cacher.Of[[]domain.Touchpoint]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Touchpoint, error) {
-			return s.repo.ListTouchpoints(ctx, ownerID, leadID)
+			return s.repo.ListTouchpoints(ctx, businessID, leadID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) CreateTouchpoint(ctx context.Context, ownerID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error) {
+func (s *Service) CreateTouchpoint(ctx context.Context, businessID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error) {
 	if req.Type == "" {
 		req.Type = "call"
 	}
 	if req.Outcome == "" {
 		req.Outcome = "other"
 	}
-	tp, err := s.repo.CreateTouchpoint(ctx, ownerID, createdBy, req)
+	tp, err := s.repo.CreateTouchpoint(ctx, businessID, createdBy, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return tp, err
 }
 
-func (s *Service) DeleteTouchpoint(ctx context.Context, id, ownerID int64) error {
-	if err := s.repo.DeleteTouchpoint(ctx, id, ownerID); err != nil {
+func (s *Service) DeleteTouchpoint(ctx context.Context, id, businessID int64) error {
+	if err := s.repo.DeleteTouchpoint(ctx, id, businessID); err != nil {
 		return err
 	}
-	invalidateCRMSalesScope(ctx, ownerID)
+	invalidateCRMSalesScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) ListContracts(ctx context.Context, ownerID int64) ([]domain.Contract, error) {
+func (s *Service) ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error) {
 	return cacher.Of[[]domain.Contract]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSalesScope, ownerID, "contracts"),
+		cacheKeys.Scoped(crmSalesScope, businessID, "contracts"),
 		func(ctx context.Context) ([]domain.Contract, error) {
-			return s.repo.ListContracts(ctx, ownerID)
+			return s.repo.ListContracts(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) GetContract(ctx context.Context, id, ownerID int64) (domain.Contract, error) {
-	key := cacheKeys.Scoped(crmSalesScope, ownerID, fmt.Sprintf("contract=%d", id))
+func (s *Service) GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error) {
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contract=%d", id))
 	return cacher.Of[domain.Contract]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.Contract, error) {
-			return s.repo.GetContract(ctx, id, ownerID)
+			return s.repo.GetContract(ctx, id, businessID)
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
 }
 
-func (s *Service) CreateContract(ctx context.Context, ownerID int64, req domain.CreateContractRequest) (domain.Contract, error) {
+func (s *Service) CreateContract(ctx context.Context, businessID int64, req domain.CreateContractRequest) (domain.Contract, error) {
 	if req.Plan == "" {
 		req.Plan = "pro"
 	}
 	if req.Seats == 0 {
 		req.Seats = 1
 	}
-	c, err := s.repo.CreateContract(ctx, ownerID, req)
+	c, err := s.repo.CreateContract(ctx, businessID, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return c, err
 }
 
-func (s *Service) UpdateContract(ctx context.Context, id, ownerID int64, req domain.UpdateContractRequest) (domain.Contract, error) {
+func (s *Service) UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error) {
 	if req.Plan == "" {
 		req.Plan = "pro"
 	}
 	if req.Seats == 0 {
 		req.Seats = 1
 	}
-	c, err := s.repo.UpdateContract(ctx, id, ownerID, req)
+	c, err := s.repo.UpdateContract(ctx, id, businessID, req)
 	if err == nil {
-		invalidateCRMSalesScope(ctx, ownerID)
+		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return c, err
 }

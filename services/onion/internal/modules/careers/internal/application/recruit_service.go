@@ -17,12 +17,12 @@ import (
 
 // ── careers ──────────────────────────────────────────────────────────
 
-func (s *Service) ListRecruitCareers(ctx context.Context, ownerID int64, publishedOnly bool) ([]domain.RecruitCareer, error) {
-	return s.repo.ListCareers(ctx, ownerID, publishedOnly)
+func (s *Service) ListRecruitCareers(ctx context.Context, businessID int64, publishedOnly bool) ([]domain.RecruitCareer, error) {
+	return s.repo.ListCareers(ctx, businessID, publishedOnly)
 }
 
-func (s *Service) GetCareerBySlug(ctx context.Context, ownerID int64, slug string) (domain.RecruitCareer, error) {
-	c, err := s.repo.GetCareerBySlug(ctx, ownerID, slug)
+func (s *Service) GetCareerBySlug(ctx context.Context, businessID int64, slug string) (domain.RecruitCareer, error) {
+	c, err := s.repo.GetCareerBySlug(ctx, businessID, slug)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrCareerNotFound) {
 			return domain.RecruitCareer{}, ErrNotFound
@@ -46,14 +46,14 @@ func (s *Service) UpdateCareer(ctx context.Context, in domain.RecruitCareerInput
 	return s.repo.UpdateCareer(ctx, in)
 }
 
-func (s *Service) DeleteCareer(ctx context.Context, ownerID, careerID int64) error {
-	return s.repo.DeleteCareer(ctx, ownerID, careerID)
+func (s *Service) DeleteCareer(ctx context.Context, businessID, careerID int64) error {
+	return s.repo.DeleteCareer(ctx, businessID, careerID)
 }
 
 // ── customization ────────────────────────────────────────────────────
 
-func (s *Service) GetMyCustomization(ctx context.Context, ownerID int64) (domain.Customization, error) {
-	c, err := s.repo.GetCustomizationByOwner(ctx, ownerID)
+func (s *Service) GetMyCustomization(ctx context.Context, businessID int64) (domain.Customization, error) {
+	c, err := s.repo.GetCustomizationByOwner(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrCustomizationNotFound) {
 			return domain.Customization{}, ErrNotFound
@@ -88,12 +88,12 @@ func (s *Service) CreateSubmission(ctx context.Context, in domain.SubmissionInpu
 	return s.repo.CreateSubmission(ctx, in)
 }
 
-func (s *Service) ListSubmissions(ctx context.Context, ownerID int64, status string) ([]domain.Submission, error) {
-	return s.repo.ListSubmissions(ctx, ownerID, status)
+func (s *Service) ListSubmissions(ctx context.Context, businessID int64, status string) ([]domain.Submission, error) {
+	return s.repo.ListSubmissions(ctx, businessID, status)
 }
 
-func (s *Service) UpdateSubmissionStatus(ctx context.Context, ownerID, submissionID int64, status string) error {
-	return s.repo.UpdateSubmissionStatus(ctx, ownerID, submissionID, status)
+func (s *Service) UpdateSubmissionStatus(ctx context.Context, businessID, submissionID int64, status string) error {
+	return s.repo.UpdateSubmissionStatus(ctx, businessID, submissionID, status)
 }
 
 // ── helpers ──────────────────────────────────────────────────────────

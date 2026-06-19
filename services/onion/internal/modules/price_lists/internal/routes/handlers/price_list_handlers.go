@@ -60,8 +60,12 @@ func (h *ListPriceListsHandler) Serve(ctx context.Context, _ *ListPriceListsRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	lists, err := h.Service.ListPriceLists(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListPriceListsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	lists, err := h.Service.ListPriceLists(ctx, businessID)
 	if err != nil {
 		return ListPriceListsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -121,8 +125,12 @@ func (h *CreatePriceListHandler) Serve(ctx context.Context, req *CreatePriceList
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := h.Service.CreatePriceList(ctx, ownerID, domain.PriceListInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreatePriceListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.CreatePriceList(ctx, businessID, domain.PriceListInput{
 		Name:      req.Name,
 		Currency:  req.Currency,
 		IsDefault: req.IsDefault,

@@ -24,20 +24,20 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListShifts(ctx context.Context, ownerID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
-	total, err := r.queries.CountShifts(ctx, ownerID)
+func (r *Repository) ListShifts(ctx context.Context, businessID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
+	total, err := r.queries.CountShifts(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to count shifts", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to count shifts", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListShifts(ctx, sqlc.ListShiftsParams{
-		OwnerID: ownerID,
-		Limit:   params.Limit,
-		Offset:  params.Offset,
+		BusinessID: businessID,
+		Limit:      params.Limit,
+		Offset:     params.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list shifts", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list shifts", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
 	}
 
@@ -48,22 +48,23 @@ func (r *Repository) ListShifts(ctx context.Context, ownerID int64, params domai
 	return shifts, total, nil
 }
 
-func (r *Repository) GetShift(ctx context.Context, ownerID, shiftID int64) (*domain.ShiftRecord, error) {
-	row, err := r.queries.GetShift(ctx, sqlc.GetShiftParams{OwnerID: ownerID, ID: shiftID})
+func (r *Repository) GetShift(ctx context.Context, businessID, shiftID int64) (*domain.ShiftRecord, error) {
+	row, err := r.queries.GetShift(ctx, sqlc.GetShiftParams{BusinessID: businessID, ID: shiftID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrShiftNotFound
 		}
-		logger.Ctx(ctx).Error("failed to get shift", logger.Any("owner_id", ownerID), logger.Any("shift_id", shiftID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get shift", logger.Any("business_id", businessID), logger.Any("shift_id", shiftID), logger.Error(err))
 		return nil, err
 	}
 	s := shiftFromRow(row)
 	return &s, nil
 }
 
-func (r *Repository) CreateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
+func (r *Repository) CreateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	result, err := r.queries.CreateShift(ctx, sqlc.CreateShiftParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		LocationID: shift.LocationID,
 		Name:       shift.Name,
 		StartTime:  shift.StartTime,
@@ -71,7 +72,7 @@ func (r *Repository) CreateShift(ctx context.Context, ownerID int64, shift domai
 		Color:      shift.Color,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create shift", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create shift", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	id, err := result.LastInsertId()
@@ -79,11 +80,12 @@ func (r *Repository) CreateShift(ctx context.Context, ownerID int64, shift domai
 		return nil, err
 	}
 	shift.ID = id
-	shift.OwnerID = ownerID
+	shift.OwnerID = businessID
+	shift.BusinessID = businessID
 	return &shift, nil
 }
 
-func (r *Repository) UpdateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) error {
+func (r *Repository) UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) error {
 	return r.queries.UpdateShift(ctx, sqlc.UpdateShiftParams{
 		LocationID: shift.LocationID,
 		Name:       shift.Name,
@@ -91,13 +93,13 @@ func (r *Repository) UpdateShift(ctx context.Context, ownerID int64, shift domai
 		EndTime:    shift.EndTime,
 		Color:      shift.Color,
 		ID:         shift.ID,
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 	})
 }
 
-func (r *Repository) ListShiftsByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.ShiftRecord, error) {
+func (r *Repository) ListShiftsByLocation(ctx context.Context, businessID, locationID int64) ([]domain.ShiftRecord, error) {
 	rows, err := r.queries.ListShiftsByLocation(ctx, sqlc.ListShiftsByLocationParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		LocationID: locationID,
 	})
 	if err != nil {
@@ -110,7 +112,7 @@ func (r *Repository) ListShiftsByLocation(ctx context.Context, ownerID, location
 	return shifts, nil
 }
 
-func (r *Repository) ListRosterAssignments(ctx context.Context, ownerID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error) {
+func (r *Repository) ListRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error) {
 	ws, err := time.Parse("2006-01-02", weekStart)
 	if err != nil {
 		return nil, err
@@ -121,12 +123,12 @@ func (r *Repository) ListRosterAssignments(ctx context.Context, ownerID int64, w
 	}
 
 	rows, err := r.queries.ListRosterAssignments(ctx, sqlc.ListRosterAssignmentsParams{
-		OwnerID: ownerID,
-		Date:    ws,
-		Date_2:  we,
+		BusinessID: businessID,
+		Date:       ws,
+		Date_2:     we,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list roster assignments", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list roster assignments", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 
@@ -137,20 +139,21 @@ func (r *Repository) ListRosterAssignments(ctx context.Context, ownerID int64, w
 	return assignments, nil
 }
 
-func (r *Repository) CreateShiftAssignment(ctx context.Context, ownerID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
+func (r *Repository) CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
 	assignDate, err := time.Parse("2006-01-02", assignment.Date)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := r.queries.CreateShiftAssignment(ctx, sqlc.CreateShiftAssignmentParams{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		EmployeeID: assignment.EmployeeID,
 		ShiftID:    assignment.ShiftID,
 		Date:       assignDate,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create shift assignment", logger.Any("owner_id", ownerID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create shift assignment", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
 	id, err := result.LastInsertId()
@@ -158,12 +161,13 @@ func (r *Repository) CreateShiftAssignment(ctx context.Context, ownerID int64, a
 		return nil, err
 	}
 	assignment.ID = id
-	assignment.OwnerID = ownerID
+	assignment.OwnerID = businessID
+	assignment.BusinessID = businessID
 	assignment.Status = "scheduled"
 	return &assignment, nil
 }
 
-func (r *Repository) PublishRosterAssignments(ctx context.Context, ownerID int64, weekStart, weekEnd string) error {
+func (r *Repository) PublishRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) error {
 	ws, err := time.Parse("2006-01-02", weekStart)
 	if err != nil {
 		return err
@@ -173,19 +177,19 @@ func (r *Repository) PublishRosterAssignments(ctx context.Context, ownerID int64
 		return err
 	}
 	return r.queries.PublishRosterAssignments(ctx, sqlc.PublishRosterAssignmentsParams{
-		OwnerID: ownerID,
-		Date:    ws,
-		Date_2:  we,
+		BusinessID: businessID,
+		Date:       ws,
+		Date_2:     we,
 	})
 }
 
-func (r *Repository) ListEmployeeAssignmentsForDate(ctx context.Context, ownerID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error) {
+func (r *Repository) ListEmployeeAssignmentsForDate(ctx context.Context, businessID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error) {
 	d, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return nil, err
 	}
 	rows, err := r.queries.ListEmployeeAssignmentsForDate(ctx, sqlc.ListEmployeeAssignmentsForDateParams{
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		EmployeeID: employeeID,
 		Date:       d,
 	})
@@ -203,6 +207,7 @@ func shiftFromRow(row sqlc.HrShift) domain.ShiftRecord {
 	return domain.ShiftRecord{
 		ID:         row.ID,
 		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID,
 		LocationID: row.LocationID,
 		Name:       row.Name,
 		StartTime:  row.StartTime,
@@ -217,6 +222,7 @@ func assignmentFromRow(row sqlc.HrShiftAssignment) domain.ShiftAssignmentRecord 
 	return domain.ShiftAssignmentRecord{
 		ID:         row.ID,
 		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID,
 		EmployeeID: row.EmployeeID,
 		ShiftID:    row.ShiftID,
 		Date:       row.Date.Format("2006-01-02"),

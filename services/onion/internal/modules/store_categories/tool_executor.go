@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_categories/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -44,12 +45,17 @@ func (m *Module) executeListStoreCategoriesTool(ctx context.Context, input map[s
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("no business scope for request")
+	}
+
 	parsed, err := parseListStoreCategoriesToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	categories, err := m.service.List(ctx, authUser.UserID)
+	categories, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}

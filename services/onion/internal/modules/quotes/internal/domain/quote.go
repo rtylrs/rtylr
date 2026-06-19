@@ -14,6 +14,7 @@ var (
 type Quote struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	CustomerName  string    `json:"customer_name"`
 	CustomerEmail string    `json:"customer_email"`
 	Status        string    `json:"status"`
@@ -37,7 +38,7 @@ func (q *Quote) FromRow(row *sql.Rows) error {
 	)
 
 	err := row.Scan(
-		&q.ID, &q.OwnerID, &q.CustomerName, &customerEmail, &q.Status,
+		&q.ID, &q.OwnerID, &q.BusinessID, &q.CustomerName, &customerEmail, &q.Status,
 		&items, &q.Subtotal, &q.Tax, &q.Discount, &q.Total,
 		&validUntil, &notes, &q.CreatedAt, &q.UpdatedAt,
 	)

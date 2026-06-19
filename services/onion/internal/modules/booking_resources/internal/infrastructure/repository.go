@@ -19,8 +19,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Resource, error) {
-	rows, err := r.queries.ListResources(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Resource, error) {
+	rows, err := r.queries.ListResources(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list resources", logger.Error(err))
 		return nil, err
@@ -32,9 +32,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Resource
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ResourceInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.ResourceInput) (int64, error) {
 	result, err := r.queries.CreateResource(ctx, sqlc.CreateResourceParams{
-		OwnerID: ownerID, Name: input.Name,
+		OwnerID: businessID, BusinessID: businessID, Name: input.Name,
 		Type:     sqlc.NullBookingResourcesType{BookingResourcesType: sqlc.BookingResourcesType(input.Type), Valid: input.Type != ""},
 		Capacity: sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
 		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -51,13 +51,13 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Res
 	return id, nil
 }
 
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.ResourceInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ResourceInput) error {
 	err := r.queries.UpdateResource(ctx, sqlc.UpdateResourceParams{
-		Name:     input.Name,
-		Type:     sqlc.NullBookingResourcesType{BookingResourcesType: sqlc.BookingResourcesType(input.Type), Valid: input.Type != ""},
-		Capacity: sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
-		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
-		OwnerID:  ownerID, ID: id,
+		Name:       input.Name,
+		Type:       sqlc.NullBookingResourcesType{BookingResourcesType: sqlc.BookingResourcesType(input.Type), Valid: input.Type != ""},
+		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
+		BusinessID: businessID, ID: id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update resource", logger.Error(err))
@@ -66,8 +66,8 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	err := r.queries.DeleteResource(ctx, sqlc.DeleteResourceParams{OwnerID: ownerID, ID: id})
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	err := r.queries.DeleteResource(ctx, sqlc.DeleteResourceParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete resource", logger.Error(err))
 		return err
@@ -76,7 +76,7 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func fromRow(row sqlc.BookingResource) domain.Resource {
-	res := domain.Resource{ID: row.ID, OwnerID: row.OwnerID, Name: row.Name}
+	res := domain.Resource{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Name: row.Name}
 	if row.Type.Valid {
 		res.Type = string(row.Type.BookingResourcesType)
 	}

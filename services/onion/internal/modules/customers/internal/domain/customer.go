@@ -18,6 +18,7 @@ var (
 type Customer struct {
 	ID            int64      `json:"id"`
 	OwnerID       int64      `json:"owner_id"`
+	BusinessID    int64      `json:"business_id"`
 	FirstName     string     `json:"first_name"`
 	LastName      string     `json:"last_name"`
 	Email         string     `json:"email"`
@@ -41,6 +42,7 @@ type Customer struct {
 
 type CustomerInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	FirstName   string
 	LastName    string
 	Email       string
@@ -57,6 +59,7 @@ type CustomerInput struct {
 type CustomerUpdateInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	FirstName   string
 	LastName    string
 	Email       string
@@ -73,8 +76,9 @@ type CustomerUpdateInput struct {
 }
 
 type CustomerListFilter struct {
-	OwnerID  int64
-	Search   string
+	OwnerID    int64
+	BusinessID int64
+	Search     string
 	Tier     string
 	Tag      string
 	Page     int
@@ -91,6 +95,7 @@ type CustomerListResult struct {
 type LoyaltyTransaction struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	CustomerID    int64     `json:"customer_id"`
 	Type          string    `json:"type"`
 	Points        int       `json:"points"`
@@ -105,6 +110,7 @@ type LoyaltyTransaction struct {
 type LoyaltyConfig struct {
 	ID                    int64     `json:"id"`
 	OwnerID               int64     `json:"owner_id"`
+	BusinessID            int64     `json:"business_id"`
 	IsEnabled             bool      `json:"is_enabled"`
 	PointsPerCurrencyUnit float64   `json:"points_per_currency_unit"`
 	CurrencyPerPoint      float64   `json:"currency_per_point"`
@@ -122,6 +128,7 @@ type LoyaltyConfig struct {
 
 type LoyaltyConfigInput struct {
 	OwnerID               int64
+	BusinessID            int64
 	IsEnabled             bool
 	PointsPerCurrencyUnit float64
 	CurrencyPerPoint      float64
@@ -138,6 +145,7 @@ type LoyaltyConfigInput struct {
 
 type AwardPointsInput struct {
 	OwnerID       int64
+	BusinessID    int64
 	CustomerID    int64
 	Points        int
 	Description   string
@@ -147,6 +155,7 @@ type AwardPointsInput struct {
 
 type RedeemPointsInput struct {
 	OwnerID       int64
+	BusinessID    int64
 	CustomerID    int64
 	Points        int
 	Description   string
@@ -156,6 +165,7 @@ type RedeemPointsInput struct {
 
 type RecordVisitInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	CustomerID  int64
 	Amount      float64
 	AwardPoints bool
@@ -164,6 +174,7 @@ type RecordVisitInput struct {
 type Segment struct {
 	ID               int64      `json:"id"`
 	OwnerID          int64      `json:"owner_id"`
+	BusinessID       int64      `json:"business_id"`
 	Name             string     `json:"name"`
 	Description      string     `json:"description"`
 	Rules            []byte     `json:"rules"`
@@ -175,6 +186,7 @@ type Segment struct {
 
 type SegmentInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Rules       []byte
@@ -183,6 +195,7 @@ type SegmentInput struct {
 type SegmentUpdateInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Rules       []byte
@@ -191,6 +204,7 @@ type SegmentUpdateInput struct {
 type Campaign struct {
 	ID             int64      `json:"id"`
 	OwnerID        int64      `json:"owner_id"`
+	BusinessID     int64      `json:"business_id"`
 	Name           string     `json:"name"`
 	Description    string     `json:"description"`
 	Channel        string     `json:"channel"`
@@ -211,6 +225,7 @@ type Campaign struct {
 
 type CampaignInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Channel     string
@@ -223,6 +238,7 @@ type CampaignInput struct {
 type CampaignUpdateInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Channel     string
@@ -261,6 +277,7 @@ const (
 type TimelineEntry struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	CustomerID  int64     `json:"customer_id"`
 	Type        string    `json:"type"`
 	Description string    `json:"description"`
@@ -310,6 +327,7 @@ type CustomerExport struct {
 
 type MergeCustomersInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	PrimaryID   int64
 	SecondaryID int64
 }
@@ -319,6 +337,7 @@ type MergeCustomersInput struct {
 type LoyaltyTier struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	MinPoints   int       `json:"min_points"`
 	DiscountPct float64   `json:"discount_pct"`
@@ -330,6 +349,7 @@ type LoyaltyTier struct {
 
 type LoyaltyTierInput struct {
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	MinPoints   int
 	DiscountPct float64
@@ -340,6 +360,7 @@ type LoyaltyTierInput struct {
 type LoyaltyTierUpdateInput struct {
 	ID          int64
 	OwnerID     int64
+	BusinessID  int64
 	Name        string
 	MinPoints   int
 	DiscountPct float64

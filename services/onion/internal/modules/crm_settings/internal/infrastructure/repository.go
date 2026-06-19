@@ -20,12 +20,12 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) Get(ctx context.Context, ownerID int64) (domain.Settings, error) {
-	row, err := r.queries.GetSettings(ctx, ownerID)
+func (r *Repository) Get(ctx context.Context, businessID int64) (domain.Settings, error) {
+	row, err := r.queries.GetSettings(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Settings{
-				OwnerID:        ownerID,
+				BusinessID:     businessID,
 				DefaultConsent: true,
 				Timezone:       "UTC",
 			}, nil
@@ -39,6 +39,7 @@ func (r *Repository) Get(ctx context.Context, ownerID int64) (domain.Settings, e
 	s := domain.Settings{
 		ID:             row.ID,
 		OwnerID:        row.OwnerID,
+		BusinessID:     row.BusinessID,
 		DefaultConsent: row.DefaultConsent.Bool,
 		FromEmail:      row.FromEmail.String,
 		FromName:       row.FromName.String,
@@ -58,6 +59,7 @@ func (r *Repository) Get(ctx context.Context, ownerID int64) (domain.Settings, e
 func (r *Repository) Upsert(ctx context.Context, input domain.SettingsInput) error {
 	err := r.queries.UpsertSettings(ctx, sqlc.UpsertSettingsParams{
 		OwnerID:        input.OwnerID,
+		BusinessID:     input.BusinessID,
 		DefaultConsent: sql.NullBool{Bool: input.DefaultConsent, Valid: true},
 		FromEmail:      sql.NullString{String: input.FromEmail, Valid: input.FromEmail != ""},
 		FromName:       sql.NullString{String: input.FromName, Valid: input.FromName != ""},

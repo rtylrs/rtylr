@@ -22,15 +22,15 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) Search(ctx context.Context, ownerID int64, query string) ([]domain.Customer, error) {
+func (r *Repository) Search(ctx context.Context, businessID int64, query string) ([]domain.Customer, error) {
 	searchTerm := "%" + query + "%"
 
 	rows, err := r.queries.SearchPOSCustomers(ctx, sqlc.SearchPOSCustomersParams{
-		OwnerID:   ownerID,
-		Phone:     sql.NullString{String: searchTerm, Valid: true},
-		Email:     sql.NullString{String: searchTerm, Valid: true},
-		FirstName: searchTerm,
-		LastName:  sql.NullString{String: searchTerm, Valid: true},
+		BusinessID: businessID,
+		Phone:      sql.NullString{String: searchTerm, Valid: true},
+		Email:      sql.NullString{String: searchTerm, Valid: true},
+		FirstName:  searchTerm,
+		LastName:   sql.NullString{String: searchTerm, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search POS customers", logger.Error(err))

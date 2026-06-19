@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/departments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
 )
 
@@ -40,7 +41,11 @@ func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRe
 	if device.IsAnonymous || device.User == nil {
 		return ListDepartmentsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	departments, err := h.Service.ListDepartments(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListDepartmentsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	departments, err := h.Service.ListDepartments(ctx, businessID)
 	if err != nil {
 		return ListDepartmentsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list departments"}
 	}
@@ -75,7 +80,11 @@ func (h *CreateDepartmentHandler) Serve(ctx context.Context, req *CreateDepartme
 	if device.IsAnonymous || device.User == nil {
 		return CreateDepartmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	input := domain.DepartmentInput{OwnerID: device.User.UserID, Name: req.Name, Description: req.Description}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateDepartmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	input := domain.DepartmentInput{OwnerID: device.User.UserID, BusinessID: businessID, Name: req.Name, Description: req.Description}
 	id, err := h.Service.CreateDepartment(ctx, input)
 	if err != nil {
 		return CreateDepartmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create department"}
@@ -111,8 +120,12 @@ func (h *UpdateDepartmentHandler) Serve(ctx context.Context, req *UpdateDepartme
 	if device.IsAnonymous || device.User == nil {
 		return UpdateDepartmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateDepartmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.DepartmentInput{ID: req.ID, Name: req.Name, Description: req.Description}
-	if err := h.Service.UpdateDepartment(ctx, device.User.UserID, input); err != nil {
+	if err := h.Service.UpdateDepartment(ctx, businessID, input); err != nil {
 		return UpdateDepartmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update department"}
 	}
 	return UpdateDepartmentResponse{Success: true}, nil
@@ -141,7 +154,11 @@ func (h *DeleteDepartmentHandler) Serve(ctx context.Context, req *DeleteDepartme
 	if device.IsAnonymous || device.User == nil {
 		return DeleteDepartmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.Service.DeleteDepartment(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteDepartmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.DeleteDepartment(ctx, businessID, req.ID); err != nil {
 		return DeleteDepartmentResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete department"}
 	}
 	return DeleteDepartmentResponse{Success: true}, nil

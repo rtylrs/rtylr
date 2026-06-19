@@ -9,9 +9,10 @@ import (
 var ErrPriceListNotFound = errors.New("price list not found")
 
 type PriceList struct {
-	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"owner_id"`
-	Name      string    `json:"name"`
+	ID         int64     `json:"id"`
+	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
+	Name       string    `json:"name"`
 	Currency  string    `json:"currency"`
 	IsDefault bool      `json:"is_default"`
 	CreatedAt time.Time `json:"created_at"`

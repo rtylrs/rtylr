@@ -50,9 +50,12 @@ func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsReques
 		return ListLocationsResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ListLocationsResponse{}, bizErr
+	}
 
-	locations, err := h.Service.ListLocations(ctx, ownerID)
+	locations, err := h.Service.ListLocations(ctx, businessID)
 	if err != nil {
 		return ListLocationsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -102,9 +105,12 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 		return CreateLocationResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return CreateLocationResponse{}, bizErr
+	}
 
-	id, err := h.Service.CreateLocation(ctx, ownerID, domain.LocationInput{
+	id, err := h.Service.CreateLocation(ctx, businessID, domain.LocationInput{
 		Name:    req.Name,
 		Address: req.Address,
 		Phone:   req.Phone,
@@ -141,9 +147,12 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return DashboardResponse{}, bizErr
+	}
 
-	stats, err := h.Service.GetDashboardStats(ctx, ownerID)
+	stats, err := h.Service.GetDashboardStats(ctx, businessID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

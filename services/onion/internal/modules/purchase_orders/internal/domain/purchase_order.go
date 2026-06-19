@@ -60,6 +60,7 @@ type PurchaseOrderItemInput struct {
 type PurchaseOrder struct {
 	ID               int64               `json:"id"`
 	OwnerID          int64               `json:"owner_id"`
+	BusinessID       int64               `json:"business_id"`
 	SupplierID       int64               `json:"supplier_id"`
 	PONumber         string              `json:"po_number"`
 	Status           PurchaseOrderStatus `json:"status"`

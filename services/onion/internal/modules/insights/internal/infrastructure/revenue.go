@@ -11,20 +11,20 @@ import (
 // GetRevenueSeries returns a daily revenue series (paid invoices only) for
 // the [from, to] window, inclusive. Missing days are represented as zero
 // entries so the frontend charting library can render a contiguous axis.
-func (r *Repository) GetRevenueSeries(ctx context.Context, ownerID int64, from, to time.Time) ([]domain.RevenuePoint, error) {
+func (r *Repository) GetRevenueSeries(ctx context.Context, businessID int64, from, to time.Time) ([]domain.RevenuePoint, error) {
 	// cross-schema read from finance_invoices — daily paid revenue for the revenue line chart
 	const q = `
 		SELECT DATE(COALESCE(paid_date, issue_date)) AS day,
 		       COALESCE(SUM(total), 0)               AS amount
 		FROM finance_invoices
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND status = 'paid'
 		  AND COALESCE(paid_date, issue_date) >= ?
 		  AND COALESCE(paid_date, issue_date) <= ?
 		GROUP BY day
 		ORDER BY day ASC
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	rows, err := r.pool.QueryContext(ctx, q, businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: revenue series query failed", logger.Error(err))
 		return nil, err

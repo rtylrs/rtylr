@@ -91,8 +91,12 @@ func (h *AdjustInventoryHandler) Serve(ctx context.Context, req *AdjustInventory
 		Notes:     req.Notes,
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	if err := h.Service.AdjustInventory(ctx, ownerID, input); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return AdjustInventoryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.AdjustInventory(ctx, businessID, input); err != nil {
 		return AdjustInventoryResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,

@@ -18,13 +18,13 @@ const (
 )
 
 type repository interface {
-	ListTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error)
+	ListTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error)
 	CreateTransaction(ctx context.Context, input domain.AwardInput, txType string) error
 	CreateRedeemTransaction(ctx context.Context, input domain.RedeemInput) error
-	GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error)
+	GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error)
 	UpsertConfig(ctx context.Context, input domain.LoyaltyConfigInput) error
-	ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error)
-	ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error)
+	ListMembers(ctx context.Context, businessID int64, limit, offset int) ([]domain.LoyaltyMember, error)
+	ListRewards(ctx context.Context, businessID int64, activeOnly bool) ([]domain.LoyaltyReward, error)
 	UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error)
 }
 
@@ -36,9 +36,9 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateLoyaltyScope(ctx context.Context, ownerID int64) {
+func invalidateLoyaltyScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(loyaltyScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(loyaltyScope, businessID))
 	}
 }
 
@@ -47,11 +47,11 @@ type loyaltyTxResult struct {
 	Total int
 }
 
-func (s *Service) ListTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
-	key := cacheKeys.Scoped(loyaltyScope, ownerID, fmt.Sprintf("tx|c=%d|p=%d|ps=%d", customerID, page, pageSize))
+func (s *Service) ListTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
+	key := cacheKeys.Scoped(loyaltyScope, businessID, fmt.Sprintf("tx|c=%d|p=%d|ps=%d", customerID, page, pageSize))
 	res, err := cacher.Of[loyaltyTxResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (loyaltyTxResult, error) {
-			items, total, err := s.repo.ListTransactions(ctx, ownerID, customerID, page, pageSize)
+			items, total, err := s.repo.ListTransactions(ctx, businessID, customerID, page, pageSize)
 			return loyaltyTxResult{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, loyaltyTTL),
@@ -63,7 +63,7 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardInput) erro
 	if err := s.repo.CreateTransaction(ctx, input, "award"); err != nil {
 		return err
 	}
-	invalidateLoyaltyScope(ctx, input.OwnerID)
+	invalidateLoyaltyScope(ctx, input.BusinessID)
 	return nil
 }
 
@@ -71,15 +71,15 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemInput) er
 	if err := s.repo.CreateRedeemTransaction(ctx, input); err != nil {
 		return err
 	}
-	invalidateLoyaltyScope(ctx, input.OwnerID)
+	invalidateLoyaltyScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
+func (s *Service) GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {
 	return cacher.Of[domain.LoyaltyConfig]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(loyaltyScope, ownerID, "config"),
+		cacheKeys.Scoped(loyaltyScope, businessID, "config"),
 		func(ctx context.Context) (domain.LoyaltyConfig, error) {
-			return s.repo.GetConfig(ctx, ownerID)
+			return s.repo.GetConfig(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, loyaltyTTL),
 	)
@@ -92,25 +92,25 @@ func (s *Service) UpdateConfig(ctx context.Context, input domain.LoyaltyConfigIn
 	if err := s.repo.UpsertConfig(ctx, input); err != nil {
 		return err
 	}
-	invalidateLoyaltyScope(ctx, input.OwnerID)
+	invalidateLoyaltyScope(ctx, input.BusinessID)
 	return nil
 }
 
-func (s *Service) ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
-	key := cacheKeys.Scoped(loyaltyScope, ownerID, fmt.Sprintf("members|l=%d|o=%d", limit, offset))
+func (s *Service) ListMembers(ctx context.Context, businessID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
+	key := cacheKeys.Scoped(loyaltyScope, businessID, fmt.Sprintf("members|l=%d|o=%d", limit, offset))
 	return cacher.Of[[]domain.LoyaltyMember]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.LoyaltyMember, error) {
-			return s.repo.ListMembers(ctx, ownerID, limit, offset)
+			return s.repo.ListMembers(ctx, businessID, limit, offset)
 		},
 		cacher.WithExpiry(ctx, loyaltyTTL),
 	)
 }
 
-func (s *Service) ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
-	key := cacheKeys.Scoped(loyaltyScope, ownerID, fmt.Sprintf("rewards|active=%v", activeOnly))
+func (s *Service) ListRewards(ctx context.Context, businessID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
+	key := cacheKeys.Scoped(loyaltyScope, businessID, fmt.Sprintf("rewards|active=%v", activeOnly))
 	return cacher.Of[[]domain.LoyaltyReward]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.LoyaltyReward, error) {
-			return s.repo.ListRewards(ctx, ownerID, activeOnly)
+			return s.repo.ListRewards(ctx, businessID, activeOnly)
 		},
 		cacher.WithExpiry(ctx, loyaltyTTL),
 	)
@@ -121,6 +121,6 @@ func (s *Service) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (in
 	if err != nil {
 		return 0, err
 	}
-	invalidateLoyaltyScope(ctx, rw.OwnerID)
+	invalidateLoyaltyScope(ctx, rw.BusinessID)
 	return id, nil
 }

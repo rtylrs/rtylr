@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin checkout transaction", logger.Error(err))
@@ -46,6 +46,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Che
 
 	result, err := r.queries.WithTx(tx).CreateCheckout(ctx, sqlc.CreateCheckoutParams{
 		OwnerID:       ownerID,
+		BusinessID:    businessID,
 		SessionID:     sql.NullString{String: input.SessionID, Valid: input.SessionID != ""},
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		Items:         nullJSON(input.Items),
@@ -65,7 +66,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Che
 	return id, nil
 }
 
-func (r *Repository) Complete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Complete(ctx context.Context, businessID, id int64, ownerID int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin checkout completion transaction", logger.Error(err))
@@ -80,8 +81,8 @@ func (r *Repository) Complete(ctx context.Context, ownerID, id int64) error {
 	var customerEmail sql.NullString
 	var totalString string
 	err = tx.QueryRowContext(ctx,
-		`SELECT customer_email, total FROM store_checkouts WHERE owner_id = ? AND id = ? LIMIT 1`,
-		ownerID, id,
+		`SELECT customer_email, total FROM store_checkouts WHERE business_id = ? AND id = ? LIMIT 1`,
+		businessID, id,
 	).Scan(&customerEmail, &totalString)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
@@ -100,7 +101,7 @@ func (r *Repository) Complete(ctx context.Context, ownerID, id int64) error {
 		}
 	}
 
-	err = r.queries.WithTx(tx).CompleteCheckout(ctx, sqlc.CompleteCheckoutParams{OwnerID: ownerID, ID: id})
+	err = r.queries.WithTx(tx).CompleteCheckout(ctx, sqlc.CompleteCheckoutParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to complete checkout", logger.Error(err))
 		return err

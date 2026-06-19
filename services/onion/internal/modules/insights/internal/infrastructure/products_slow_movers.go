@@ -16,7 +16,7 @@ type SlowMoverRow struct {
 
 // GetSlowMovers returns active ERP products that have zero sales in the
 // trailing `days` window. Products never sold are also included.
-func (r *Repository) GetSlowMovers(ctx context.Context, ownerID int64, days int32) ([]SlowMoverRow, error) {
+func (r *Repository) GetSlowMovers(ctx context.Context, businessID int64, days int32) ([]SlowMoverRow, error) {
 	if days <= 0 {
 		days = 60
 	}
@@ -29,17 +29,17 @@ func (r *Repository) GetSlowMovers(ctx context.Context, ownerID int64, days int3
 		SELECT p.id, p.name, p.stock_quantity,
 		       EXISTS (
 		         SELECT 1 FROM pos_order_items oi
-		         JOIN pos_orders o ON o.id = oi.order_id AND o.owner_id = p.owner_id
+		         JOIN pos_orders o ON o.id = oi.order_id AND o.business_id = p.business_id
 		         WHERE oi.menu_item_id = p.id AND o.created_at >= ?
 		       ) AS recent_sale
 		FROM erp_products p
-		WHERE p.owner_id = ?
+		WHERE p.business_id = ?
 		  AND p.is_active = TRUE
 		HAVING recent_sale = 0
 		ORDER BY p.name ASC
 		LIMIT 500
 	`
-	rows, err := r.pool.QueryContext(ctx, q, cutoff, ownerID)
+	rows, err := r.pool.QueryContext(ctx, q, cutoff, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: slow movers query failed", logger.Error(err))
 		return nil, err

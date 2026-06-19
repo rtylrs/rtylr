@@ -17,10 +17,10 @@ type CustomerKPIPayload struct {
 }
 
 // GetCustomerKPIs returns aggregate customer counters for the owner.
-func (s *Service) GetCustomerKPIs(ctx context.Context, ownerID int64) (CustomerKPIPayload, error) {
-	key := fmt.Sprintf("insights:%d:customers:kpis", ownerID)
+func (s *Service) GetCustomerKPIs(ctx context.Context, businessID int64) (CustomerKPIPayload, error) {
+	key := fmt.Sprintf("insights:%d:customers:kpis", businessID)
 	out, err := cacher.Of[CustomerKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (CustomerKPIPayload, error) {
-		k, rerr := s.repo.GetCustomerKPIs(ctx, ownerID)
+		k, rerr := s.repo.GetCustomerKPIs(ctx, businessID)
 		if rerr != nil {
 			return CustomerKPIPayload{}, rerr
 		}

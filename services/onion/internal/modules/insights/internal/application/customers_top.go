@@ -22,19 +22,19 @@ type TopCustomerPayload struct {
 // GetTopCustomers returns the leaderboard. Limit is capped at 100 upstream
 // in the repository. Cache key varies on limit so two callers with
 // different limits get distinct cached responses.
-func (s *Service) GetTopCustomers(ctx context.Context, ownerID int64, limit int32) ([]TopCustomerPayload, error) {
+func (s *Service) GetTopCustomers(ctx context.Context, businessID int64, limit int32) ([]TopCustomerPayload, error) {
 	if limit <= 0 {
 		limit = 10
 	}
 	if limit > 100 {
 		limit = 100
 	}
-	key := fmt.Sprintf("insights:%d:customers:top:%d", ownerID, limit)
+	key := fmt.Sprintf("insights:%d:customers:top:%d", businessID, limit)
 	type result struct {
 		Rows []TopCustomerPayload
 	}
 	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
-		rows, rerr := s.repo.GetTopCustomers(ctx, ownerID, limit)
+		rows, rerr := s.repo.GetTopCustomers(ctx, businessID, limit)
 		if rerr != nil {
 			return result{}, rerr
 		}

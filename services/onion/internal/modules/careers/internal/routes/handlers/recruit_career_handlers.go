@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─────────────────────────────────────────────
@@ -91,8 +92,12 @@ func (h *ListRecruitCareersHandler) Serve(ctx context.Context, req *ListRecruitC
 	if !ok {
 		return ListRecruitCareersResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListRecruitCareersResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	careers, err := h.CareersService.ListRecruitCareers(ctx, authUser.UserID, req.PublishedOnly == "1" || req.PublishedOnly == "true")
+	careers, err := h.CareersService.ListRecruitCareers(ctx, businessID, req.PublishedOnly == "1" || req.PublishedOnly == "true")
 	if err != nil {
 		return ListRecruitCareersResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -150,9 +155,14 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 	if !ok {
 		return CreateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.RecruitCareerInput{
 		OwnerID:        authUser.UserID,
+		BusinessID:     businessID,
 		Slug:           req.Slug,
 		Title:          req.Title,
 		Department:     req.Department,
@@ -178,13 +188,13 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 
 	// Round-trip the freshly-created row so the client gets the
 	// server-generated slug + timestamps without a second request.
-	created, err := h.CareersService.GetCareerBySlug(ctx, authUser.UserID, input.Slug)
+	created, err := h.CareersService.GetCareerBySlug(ctx, businessID, input.Slug)
 	if err != nil {
 		// Fallback — return what we know. The client will refetch on
 		// next list cycle.
-		created = domain.RecruitCareer{ID: id, OwnerID: authUser.UserID, Slug: input.Slug, Title: input.Title}
+		created = domain.RecruitCareer{ID: id, OwnerID: authUser.UserID, BusinessID: businessID, Slug: input.Slug, Title: input.Title}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return CreateRecruitCareerResponse{Career: toRecruitCareerPayload(created)}, nil
 }
 
@@ -232,10 +242,15 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 	if !ok {
 		return UpdateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.RecruitCareerInput{
 		ID:             req.ID,
 		OwnerID:        authUser.UserID,
+		BusinessID:     businessID,
 		Slug:           req.Slug,
 		Title:          req.Title,
 		Department:     req.Department,
@@ -257,7 +272,7 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 			Message: "Failed to update career",
 		}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return UpdateRecruitCareerResponse{Message: "Career updated"}, nil
 }
 
@@ -289,8 +304,12 @@ func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecru
 	if !ok {
 		return DeleteRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	if err := h.CareersService.DeleteCareer(ctx, authUser.UserID, req.ID); err != nil {
+	if err := h.CareersService.DeleteCareer(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
 			return DeleteRecruitCareerResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
@@ -302,6 +321,6 @@ func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecru
 			Message: "Failed to archive career",
 		}
 	}
-	invalidatePublicCareersCache(ctx, authUser.UserID)
+	invalidatePublicCareersCache(ctx, businessID)
 	return DeleteRecruitCareerResponse{Message: "Career archived"}, nil
 }

@@ -58,27 +58,29 @@ type mockRepo struct {
 	createID  int64
 	createErr error
 	createGot struct {
-		ownerID int64
-		name    string
-		hash    string
-		prefix  string
-		scopes  []string
+		ownerID    int64
+		businessID int64
+		name       string
+		hash       string
+		prefix     string
+		scopes     []string
 	}
 
 	revokeErr error
 	revokeGot struct {
-		ownerID int64
-		keyID   int64
+		businessID int64
+		keyID      int64
 	}
 }
 
-func (m *mockRepo) List(_ context.Context, ownerID int64) ([]domain.APIKey, error) {
-	_ = ownerID
+func (m *mockRepo) List(_ context.Context, businessID int64) ([]domain.APIKey, error) {
+	_ = businessID
 	return m.listResult, m.listErr
 }
 
-func (m *mockRepo) Create(_ context.Context, ownerID int64, name, hash, prefix string, scopes []string) (int64, error) {
+func (m *mockRepo) Create(_ context.Context, ownerID, businessID int64, name, hash, prefix string, scopes []string) (int64, error) {
 	m.createGot.ownerID = ownerID
+	m.createGot.businessID = businessID
 	m.createGot.name = name
 	m.createGot.hash = hash
 	m.createGot.prefix = prefix
@@ -86,15 +88,15 @@ func (m *mockRepo) Create(_ context.Context, ownerID int64, name, hash, prefix s
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) Revoke(_ context.Context, ownerID, keyID int64) error {
-	m.revokeGot.ownerID = ownerID
+func (m *mockRepo) Revoke(_ context.Context, businessID, keyID int64) error {
+	m.revokeGot.businessID = businessID
 	m.revokeGot.keyID = keyID
 	return m.revokeErr
 }
 
 func TestCreate_RequiresName(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if _, _, err := s.Create(context.Background(), 1, domain.CreateAPIKeyInput{}); err == nil {
+	if _, _, err := s.Create(context.Background(), 1, 1, domain.CreateAPIKeyInput{}); err == nil {
 		t.Fatalf("expected error for empty name")
 	}
 }
@@ -123,7 +125,7 @@ func TestCreate_HappyPathHashesAndStores(t *testing.T) {
 	m := &mockRepo{createID: 99}
 	s := &Service{repo: m}
 
-	id, raw, err := s.Create(context.Background(), 7, domain.CreateAPIKeyInput{
+	id, raw, err := s.Create(context.Background(), 7, 7, domain.CreateAPIKeyInput{
 		Name:   "test key",
 		Scopes: []string{"read"},
 	})
@@ -153,7 +155,7 @@ func TestCreate_HappyPathHashesAndStores(t *testing.T) {
 func TestCreate_NilScopesNormalizedToEmpty(t *testing.T) {
 	m := &mockRepo{createID: 1}
 	s := &Service{repo: m}
-	if _, _, err := s.Create(context.Background(), 1, domain.CreateAPIKeyInput{Name: "k"}); err != nil {
+	if _, _, err := s.Create(context.Background(), 1, 1, domain.CreateAPIKeyInput{Name: "k"}); err != nil {
 		t.Fatalf("unexpected: %v", err)
 	}
 	if m.createGot.scopes == nil || len(m.createGot.scopes) != 0 {
@@ -164,7 +166,7 @@ func TestCreate_NilScopesNormalizedToEmpty(t *testing.T) {
 func TestCreate_PropagatesRepoError(t *testing.T) {
 	m := &mockRepo{createErr: errSentinel}
 	s := &Service{repo: m}
-	if _, _, err := s.Create(context.Background(), 1, domain.CreateAPIKeyInput{Name: "k"}); err == nil {
+	if _, _, err := s.Create(context.Background(), 1, 1, domain.CreateAPIKeyInput{Name: "k"}); err == nil {
 		t.Fatal("expected error to bubble up")
 	}
 }
@@ -175,7 +177,7 @@ func TestRevoke_DelegatesWithIDs(t *testing.T) {
 	if err := s.Revoke(context.Background(), 7, 42); err != nil {
 		t.Fatalf("unexpected: %v", err)
 	}
-	if m.revokeGot.ownerID != 7 || m.revokeGot.keyID != 42 {
+	if m.revokeGot.businessID != 7 || m.revokeGot.keyID != 42 {
 		t.Errorf("revoke args mismatch: %+v", m.revokeGot)
 	}
 }

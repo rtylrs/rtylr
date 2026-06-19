@@ -5,6 +5,7 @@ import "time"
 type ChecklistTemplateRecord struct {
 	ID          int64                 `json:"id"`
 	OwnerID     int64                 `json:"owner_id"`
+	BusinessID  int64                 `json:"business_id"`
 	Name        string                `json:"name"`
 	TriggerType string                `json:"trigger_type"`
 	RoleID      int64                 `json:"role_id"`
@@ -16,6 +17,7 @@ type ChecklistTemplateRecord struct {
 type ChecklistItemRecord struct {
 	ID                 int64     `json:"id"`
 	OwnerID            int64     `json:"owner_id"`
+	BusinessID         int64     `json:"business_id"`
 	TemplateID         int64     `json:"template_id"`
 	Title              string    `json:"title"`
 	Description        string    `json:"description"`
@@ -29,6 +31,7 @@ type ChecklistItemRecord struct {
 type EmployeeChecklistRecord struct {
 	ID          int64                         `json:"id"`
 	OwnerID     int64                         `json:"owner_id"`
+	BusinessID  int64                         `json:"business_id"`
 	EmployeeID  int64                         `json:"employee_id"`
 	TemplateID  int64                         `json:"template_id"`
 	Status      string                        `json:"status"`
@@ -41,6 +44,7 @@ type EmployeeChecklistRecord struct {
 type EmployeeChecklistItemRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	EmployeeChecklistID  int64     `json:"employee_checklist_id"`
 	ChecklistItemID      int64     `json:"checklist_item_id"`
 	AssignedToEmployeeID int64     `json:"assigned_to_employee_id"`

@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CompleteChecklistItemRoutes() []string {
@@ -33,13 +34,18 @@ func (h *CompleteChecklistItemHandler) Serve(ctx context.Context, _ *CompleteChe
 		return CompleteChecklistItemResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CompleteChecklistItemResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	itemID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return CompleteChecklistItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid item id"}
 	}
 
-	err := h.Service.CompleteChecklistItem(ctx, device.User.UserID, itemID, device.User.UserID)
+	err := h.Service.CompleteChecklistItem(ctx, businessID, itemID, device.User.UserID)
 	if err != nil {
 		if errors.Is(err, domain.ErrChecklistItemNotFound) {
 			return CompleteChecklistItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Checklist item not found"}

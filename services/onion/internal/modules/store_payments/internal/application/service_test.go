@@ -9,9 +9,9 @@ import (
 )
 
 type storePayRepo interface {
-	List(ctx context.Context, ownerID int64) ([]domain.PaymentMethod, error)
-	Create(ctx context.Context, ownerID int64, input domain.PaymentMethodInput) (int64, error)
-	Update(ctx context.Context, ownerID, id int64, input domain.PaymentMethodInput) error
+	List(ctx context.Context, businessID int64) ([]domain.PaymentMethod, error)
+	Create(ctx context.Context, ownerID, businessID int64, input domain.PaymentMethodInput) (int64, error)
+	Update(ctx context.Context, businessID, id int64, input domain.PaymentMethodInput) error
 }
 
 type mockPayRepo struct {
@@ -26,7 +26,7 @@ func (m *mockPayRepo) List(_ context.Context, _ int64) ([]domain.PaymentMethod, 
 	return m.list, m.listErr
 }
 
-func (m *mockPayRepo) Create(_ context.Context, _ int64, _ domain.PaymentMethodInput) (int64, error) {
+func (m *mockPayRepo) Create(_ context.Context, _, _ int64, _ domain.PaymentMethodInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
@@ -36,16 +36,16 @@ func (m *mockPayRepo) Update(_ context.Context, _, _ int64, _ domain.PaymentMeth
 
 type payTestService struct{ repo storePayRepo }
 
-func (s *payTestService) List(ctx context.Context, ownerID int64) ([]domain.PaymentMethod, error) {
-	return s.repo.List(ctx, ownerID)
+func (s *payTestService) List(ctx context.Context, businessID int64) ([]domain.PaymentMethod, error) {
+	return s.repo.List(ctx, businessID)
 }
 
-func (s *payTestService) Create(ctx context.Context, ownerID int64, input domain.PaymentMethodInput) (int64, error) {
-	return s.repo.Create(ctx, ownerID, input)
+func (s *payTestService) Create(ctx context.Context, ownerID, businessID int64, input domain.PaymentMethodInput) (int64, error) {
+	return s.repo.Create(ctx, ownerID, businessID, input)
 }
 
-func (s *payTestService) Update(ctx context.Context, ownerID, id int64, input domain.PaymentMethodInput) error {
-	return s.repo.Update(ctx, ownerID, id, input)
+func (s *payTestService) Update(ctx context.Context, businessID, id int64, input domain.PaymentMethodInput) error {
+	return s.repo.Update(ctx, businessID, id, input)
 }
 
 // --- Tests ---
@@ -84,7 +84,7 @@ func TestStorePay_List_Empty(t *testing.T) {
 
 func TestStorePay_Create_ReturnsID(t *testing.T) {
 	s := &payTestService{repo: &mockPayRepo{createID: 7}}
-	id, err := s.Create(context.Background(), 1, domain.PaymentMethodInput{Provider: "stripe"})
+	id, err := s.Create(context.Background(), 1, 1, domain.PaymentMethodInput{Provider: "stripe"})
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -96,7 +96,7 @@ func TestStorePay_Create_ReturnsID(t *testing.T) {
 func TestStorePay_Create_PropagatesError(t *testing.T) {
 	want := errors.New("insert failed")
 	s := &payTestService{repo: &mockPayRepo{createErr: want}}
-	_, err := s.Create(context.Background(), 1, domain.PaymentMethodInput{})
+	_, err := s.Create(context.Background(), 1, 1, domain.PaymentMethodInput{})
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
@@ -134,7 +134,7 @@ func TestStorePay_List_SingleEntry(t *testing.T) {
 
 func TestStorePay_Create_InactiveMethod(t *testing.T) {
 	s := &payTestService{repo: &mockPayRepo{createID: 3}}
-	id, err := s.Create(context.Background(), 1, domain.PaymentMethodInput{Provider: "bank", IsActive: false})
+	id, err := s.Create(context.Background(), 1, 1, domain.PaymentMethodInput{Provider: "bank", IsActive: false})
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}

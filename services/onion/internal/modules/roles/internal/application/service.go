@@ -34,26 +34,28 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateRolesScope(ctx context.Context, ownerID int64) {
+func invalidateRolesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(rolesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(rolesScope, businessID))
 		// Role changes affect every user's effective permissions, so wipe
 		// the whole business scope (cached /me, team, etc.).
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
 	}
 }
 
 func (s *Service) ListRoles(ctx context.Context, ownerID int64) ([]domain.Role, error) {
+	businessID := ownerID
 	return cacher.Of[[]domain.Role]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(rolesScope, ownerID, "list"),
+		cacheKeys.Scoped(rolesScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Role, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, rolesTTL),
 	)
 }
 
 func (s *Service) CreateRole(ctx context.Context, ownerID int64, input domain.CreateRoleInput) (int64, error) {
+	businessID := ownerID
 	if input.Name == "" {
 		return 0, errors.New("name is required")
 	}
@@ -61,15 +63,16 @@ func (s *Service) CreateRole(ctx context.Context, ownerID int64, input domain.Cr
 	if perms == nil {
 		perms = []string{}
 	}
-	id, err := s.repo.Create(ctx, ownerID, input.Name, perms)
+	id, err := s.repo.Create(ctx, businessID, input.Name, perms)
 	if err != nil {
 		return 0, err
 	}
-	invalidateRolesScope(ctx, ownerID)
+	invalidateRolesScope(ctx, businessID)
 	return id, nil
 }
 
 func (s *Service) UpdateRole(ctx context.Context, ownerID int64, input domain.UpdateRoleInput) error {
+	businessID := ownerID
 	if input.ID == 0 {
 		return errors.New("role id is required")
 	}
@@ -77,21 +80,22 @@ func (s *Service) UpdateRole(ctx context.Context, ownerID int64, input domain.Up
 	if perms == nil {
 		perms = []string{}
 	}
-	if err := s.repo.Update(ctx, ownerID, input.ID, input.Name, perms); err != nil {
+	if err := s.repo.Update(ctx, businessID, input.ID, input.Name, perms); err != nil {
 		return err
 	}
-	invalidateRolesScope(ctx, ownerID)
+	invalidateRolesScope(ctx, businessID)
 	return nil
 }
 
 func (s *Service) DeleteRole(ctx context.Context, ownerID, roleID int64) error {
+	businessID := ownerID
 	if roleID == 0 {
 		return errors.New("role id is required")
 	}
-	if err := s.repo.Delete(ctx, ownerID, roleID); err != nil {
+	if err := s.repo.Delete(ctx, businessID, roleID); err != nil {
 		return err
 	}
-	invalidateRolesScope(ctx, ownerID)
+	invalidateRolesScope(ctx, businessID)
 	return nil
 }
 

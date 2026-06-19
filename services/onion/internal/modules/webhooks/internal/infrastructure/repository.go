@@ -20,8 +20,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Webhook, error) {
-	rows, err := r.queries.ListWebhooks(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
+	rows, err := r.queries.ListWebhooks(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list webhooks", logger.Error(err))
 		return nil, err
@@ -32,6 +32,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Webhook,
 		var w domain.Webhook
 		w.ID = row.ID
 		w.OwnerID = row.OwnerID
+		w.BusinessID = row.BusinessID
 		w.URL = row.Url
 		w.Secret = row.Secret
 		w.IsActive = row.IsActive
@@ -53,17 +54,18 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Webhook,
 	return webhooks, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, url, secret string, events []string) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, url, secret string, events []string) (int64, error) {
 	eventsJSON, err := json.Marshal(events)
 	if err != nil {
 		return 0, err
 	}
 
 	res, err := r.queries.CreateWebhook(ctx, sqlc.CreateWebhookParams{
-		OwnerID: ownerID,
-		Url:     url,
-		Events:  eventsJSON,
-		Secret:  secret,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		Url:        url,
+		Events:     eventsJSON,
+		Secret:     secret,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create webhook", logger.Error(err))
@@ -73,10 +75,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, url, secret stri
 	return res.LastInsertId()
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, webhookID int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) error {
 	err := r.queries.DeleteWebhook(ctx, sqlc.DeleteWebhookParams{
-		ID:      webhookID,
-		OwnerID: ownerID,
+		ID:         webhookID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete webhook", logger.Error(err))

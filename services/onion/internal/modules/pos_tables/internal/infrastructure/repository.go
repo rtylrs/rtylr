@@ -22,8 +22,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Table, error) {
-	rows, err := r.queries.ListTablesByOwner(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Table, error) {
+	rows, err := r.queries.ListTablesByOwner(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list tables", logger.Error(err))
 		return nil, err
@@ -32,13 +32,14 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Table, e
 	tables := make([]domain.Table, 0, len(rows))
 	for _, row := range rows {
 		t := domain.Table{
-			ID:        row.ID,
-			OwnerID:   row.OwnerID,
-			Label:     row.Name,
-			Seats:     int(row.Capacity.Int32),
-			Status:    string(row.Status.PosTablesStatus),
-			CreatedAt: row.CreatedAt.Time,
-			UpdatedAt: row.UpdatedAt.Time,
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Label:      row.Name,
+			Seats:      int(row.Capacity.Int32),
+			Status:     string(row.Status.PosTablesStatus),
+			CreatedAt:  row.CreatedAt.Time,
+			UpdatedAt:  row.UpdatedAt.Time,
 		}
 		if row.LocationID.Valid {
 			t.LocationID = &row.LocationID.Int64
@@ -51,6 +52,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Table, e
 func (r *Repository) Create(ctx context.Context, input domain.TableInput) (int64, error) {
 	result, err := r.queries.CreateTable(ctx, sqlc.CreateTableParams{
 		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
 		LocationID: nullInt64Ptr(input.LocationID),
 		Name:       input.Label,
 		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true},
@@ -69,7 +71,7 @@ func (r *Repository) Update(ctx context.Context, input domain.TableUpdateInput) 
 		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true},
 		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(input.Status), Valid: input.Status != ""},
 		ID:         input.ID,
-		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update table", logger.Error(err))
@@ -82,8 +84,8 @@ func (r *Repository) UpdateStatus(ctx context.Context, input domain.TableStatusI
 	result, err := r.pool.ExecContext(ctx, `
 		UPDATE pos_tables
 		SET status = ?
-		WHERE id = ? AND owner_id = ?
-	`, input.Status, input.ID, input.OwnerID)
+		WHERE id = ? AND business_id = ?
+	`, input.Status, input.ID, input.BusinessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update table status", logger.Error(err))
 		return err
@@ -98,10 +100,10 @@ func (r *Repository) UpdateStatus(ctx context.Context, input domain.TableStatusI
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	_, err := r.queries.DeleteTable(ctx, sqlc.DeleteTableParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete table", logger.Error(err))

@@ -20,7 +20,7 @@ func TestCheckout_Create_ReturnsPositiveID(t *testing.T) {
 		Tax:           5.0,
 		Total:         55.0,
 	}
-	id, err := repo.Create(context.Background(), testutil.OwnerID, input)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -37,7 +37,7 @@ func TestCheckout_Create_EmptyItems(t *testing.T) {
 		Tax:      1.0,
 		Total:    11.0,
 	}
-	id, err := repo.Create(context.Background(), testutil.OwnerID, input)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create with empty items: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestCheckout_Create_MultipleCheckouts(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	for i := 0; i < 3; i++ {
-		id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+		id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 			Subtotal: float64(i) * 10,
 			Tax:      float64(i),
 			Total:    float64(i)*10 + float64(i),
@@ -67,7 +67,7 @@ func TestCheckout_Create_MultipleCheckouts(t *testing.T) {
 func TestCheckout_Complete_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 20.0,
 		Tax:      2.0,
 		Total:    22.0,
@@ -75,7 +75,7 @@ func TestCheckout_Complete_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	if err := repo.Complete(context.Background(), testutil.OwnerID, id); err != nil {
+	if err := repo.Complete(context.Background(), testutil.OwnerID, id, testutil.OwnerID); err != nil {
 		t.Fatalf("Complete: %v", err)
 	}
 }
@@ -84,7 +84,7 @@ func TestCheckout_Complete_UnknownID_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	// Completing a non-existent checkout should not return an error (0 rows affected)
-	err := repo.Complete(context.Background(), testutil.OwnerID, 9999999)
+	err := repo.Complete(context.Background(), testutil.OwnerID, 9999999, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("Complete on missing ID: %v", err)
 	}
@@ -93,7 +93,7 @@ func TestCheckout_Complete_UnknownID_NoError(t *testing.T) {
 func TestCheckout_Create_WithSessionID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		SessionID: "unique-session-xyz",
 		Subtotal:  100.0,
 		Tax:       10.0,
@@ -110,7 +110,7 @@ func TestCheckout_Create_WithSessionID(t *testing.T) {
 func TestCheckout_Create_ZeroTotals(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 0,
 		Tax:      0,
 		Total:    0,
@@ -126,7 +126,7 @@ func TestCheckout_Create_ZeroTotals(t *testing.T) {
 func TestCheckout_Complete_CrossOwner_NoEffect(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 30.0,
 		Tax:      3.0,
 		Total:    33.0,
@@ -134,8 +134,8 @@ func TestCheckout_Complete_CrossOwner_NoEffect(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	// Complete with wrong owner should silently do nothing
-	err = repo.Complete(context.Background(), 9999999, id)
+	// Complete with wrong business should silently do nothing
+	err = repo.Complete(context.Background(), 9999999, id, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("Complete cross-owner: %v", err)
 	}
@@ -144,7 +144,7 @@ func TestCheckout_Complete_CrossOwner_NoEffect(t *testing.T) {
 func TestCheckout_Create_CustomerEmailStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		CustomerEmail: "checkout@example.com",
 		Subtotal:      40.0,
 		Tax:           4.0,
@@ -161,7 +161,7 @@ func TestCheckout_Create_CustomerEmailStored(t *testing.T) {
 func TestCheckout_Create_SubtotalIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 77.77,
 		Tax:      7.77,
 		Total:    85.54,
@@ -177,7 +177,7 @@ func TestCheckout_Create_SubtotalIsStored(t *testing.T) {
 func TestCheckout_Create_TaxIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 50.0,
 		Tax:      8.5,
 		Total:    58.5,
@@ -193,11 +193,11 @@ func TestCheckout_Create_TaxIsStored(t *testing.T) {
 func TestCheckout_Create_IDsAreUnique(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id1, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{Total: 1.0})
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{Total: 1.0})
 	if err != nil {
 		t.Fatalf("Create 1: %v", err)
 	}
-	id2, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{Total: 2.0})
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{Total: 2.0})
 	if err != nil {
 		t.Fatalf("Create 2: %v", err)
 	}
@@ -209,16 +209,16 @@ func TestCheckout_Create_IDsAreUnique(t *testing.T) {
 func TestCheckout_Complete_TwiceSameID_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 25.0, Tax: 2.5, Total: 27.5,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
-	if err := repo.Complete(context.Background(), testutil.OwnerID, id); err != nil {
+	if err := repo.Complete(context.Background(), testutil.OwnerID, id, testutil.OwnerID); err != nil {
 		t.Fatalf("Complete first: %v", err)
 	}
-	if err := repo.Complete(context.Background(), testutil.OwnerID, id); err != nil {
+	if err := repo.Complete(context.Background(), testutil.OwnerID, id, testutil.OwnerID); err != nil {
 		t.Fatalf("Complete second: %v", err)
 	}
 }
@@ -226,7 +226,7 @@ func TestCheckout_Complete_TwiceSameID_NoError(t *testing.T) {
 func TestCheckout_Create_WithItems_PositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Items:    `[{"product_id":5,"qty":3},{"product_id":10,"qty":1}]`,
 		Subtotal: 90.0,
 		Tax:      9.0,
@@ -243,13 +243,13 @@ func TestCheckout_Create_WithItems_PositiveID(t *testing.T) {
 func TestCheckout_Create_SessionIDUnique(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id1, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		SessionID: "sess-unique-001", Total: 10.0,
 	})
 	if err != nil {
 		t.Fatalf("Create 1: %v", err)
 	}
-	id2, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		SessionID: "sess-unique-002", Total: 20.0,
 	})
 	if err != nil {
@@ -263,14 +263,14 @@ func TestCheckout_Create_SessionIDUnique(t *testing.T) {
 func TestCheckout_Complete_ReturnsNoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 15.0, Tax: 1.5, Total: 16.5,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	err = repo.Complete(context.Background(), testutil.OwnerID, id)
+	err = repo.Complete(context.Background(), testutil.OwnerID, id, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("Complete: %v", err)
 	}
@@ -279,7 +279,7 @@ func TestCheckout_Complete_ReturnsNoError(t *testing.T) {
 func TestCheckout_Create_LargeTotalIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 		Subtotal: 9999.99,
 		Tax:      999.99,
 		Total:    10999.98,
@@ -296,7 +296,7 @@ func TestCheckout_Create_ZeroOwner_PositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	// Creating with owner 0 is technically valid at the DB layer
-	id, err := repo.Create(context.Background(), 0, domain.CheckoutCreateInput{
+	id, err := repo.Create(context.Background(), 0, 0, domain.CheckoutCreateInput{
 		Total: 5.0,
 	})
 	if err != nil {
@@ -312,7 +312,7 @@ func TestCheckout_Create_MultipleForSameOwner(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	var ids []int64
 	for i := 0; i < 4; i++ {
-		id, err := repo.Create(context.Background(), testutil.OwnerID, domain.CheckoutCreateInput{
+		id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
 			Subtotal: float64(i) * 5,
 			Total:    float64(i) * 5,
 		})

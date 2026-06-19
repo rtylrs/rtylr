@@ -17,9 +17,9 @@ const (
 )
 
 type repository interface {
-	GetInsightsStats(ctx context.Context, ownerID int64) (domain.InsightsStats, error)
-	GetTeamWorkload(ctx context.Context, ownerID int64) (domain.TeamWorkloadResult, error)
-	GetRoadmap(ctx context.Context, ownerID int64) (domain.RoadmapResult, error)
+	GetInsightsStats(ctx context.Context, businessID int64) (domain.InsightsStats, error)
+	GetTeamWorkload(ctx context.Context, businessID int64) (domain.TeamWorkloadResult, error)
+	GetRoadmap(ctx context.Context, businessID int64) (domain.RoadmapResult, error)
 }
 
 type Service struct {
@@ -32,31 +32,31 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) GetInsights(ctx context.Context, ownerID int64) (domain.InsightsStats, error) {
+func (s *Service) GetInsights(ctx context.Context, businessID int64) (domain.InsightsStats, error) {
 	return cacher.Of[domain.InsightsStats]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(flowInsightsScope, ownerID, "stats"),
+		cacheKeys.Scoped(flowInsightsScope, businessID, "stats"),
 		func(ctx context.Context) (domain.InsightsStats, error) {
-			return s.repo.GetInsightsStats(ctx, ownerID)
+			return s.repo.GetInsightsStats(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, flowInsightsTTL),
 	)
 }
 
-func (s *Service) GetTeamWorkload(ctx context.Context, ownerID int64) (domain.TeamWorkloadResult, error) {
+func (s *Service) GetTeamWorkload(ctx context.Context, businessID int64) (domain.TeamWorkloadResult, error) {
 	return cacher.Of[domain.TeamWorkloadResult]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(flowInsightsScope, ownerID, "workload"),
+		cacheKeys.Scoped(flowInsightsScope, businessID, "workload"),
 		func(ctx context.Context) (domain.TeamWorkloadResult, error) {
-			return s.repo.GetTeamWorkload(ctx, ownerID)
+			return s.repo.GetTeamWorkload(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, flowInsightsTTL),
 	)
 }
 
-func (s *Service) GetRoadmap(ctx context.Context, ownerID int64) (domain.RoadmapResult, error) {
+func (s *Service) GetRoadmap(ctx context.Context, businessID int64) (domain.RoadmapResult, error) {
 	return cacher.Of[domain.RoadmapResult]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(flowInsightsScope, ownerID, "roadmap"),
+		cacheKeys.Scoped(flowInsightsScope, businessID, "roadmap"),
 		func(ctx context.Context) (domain.RoadmapResult, error) {
-			return s.repo.GetRoadmap(ctx, ownerID)
+			return s.repo.GetRoadmap(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, flowInsightsTTL),
 	)

@@ -17,7 +17,7 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Location, error)
+	List(ctx context.Context, businessID int64) ([]domain.Location, error)
 	Create(ctx context.Context, input domain.LocationInput) (int64, error)
 	Update(ctx context.Context, input domain.LocationUpdateInput) error
 }
@@ -30,17 +30,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidatePosLocationsScope(ctx context.Context, ownerID int64) {
+func invalidatePosLocationsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posLocationsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posLocationsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Location, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Location, error) {
 	return cacher.Of[[]domain.Location]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(posLocationsScope, ownerID, "list"),
+		cacheKeys.Scoped(posLocationsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Location, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, posLocationsTTL),
 	)
@@ -54,7 +54,7 @@ func (s *Service) Create(ctx context.Context, input domain.LocationInput) (int64
 	if err != nil {
 		return 0, err
 	}
-	invalidatePosLocationsScope(ctx, input.OwnerID)
+	invalidatePosLocationsScope(ctx, input.BusinessID)
 	return id, nil
 }
 
@@ -65,6 +65,6 @@ func (s *Service) Update(ctx context.Context, input domain.LocationUpdateInput) 
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
-	invalidatePosLocationsScope(ctx, input.OwnerID)
+	invalidatePosLocationsScope(ctx, input.BusinessID)
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ApproveEquipmentRequestRoutes() []string {
@@ -43,13 +44,18 @@ func (h *ApproveEquipmentRequestHandler) Serve(ctx context.Context, req *Approve
 		return ApproveEquipmentRequestResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ApproveEquipmentRequestResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	requestID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return ApproveEquipmentRequestResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid request id"}
 	}
 
-	err := h.Service.ApproveEquipmentRequest(ctx, device.User.UserID, requestID, device.User.UserID, req.Approve, req.Reason)
+	err := h.Service.ApproveEquipmentRequest(ctx, businessID, requestID, device.User.UserID, req.Approve, req.Reason)
 	if err != nil {
 		if errors.Is(err, domain.ErrEquipmentRequestNotFound) {
 			return ApproveEquipmentRequestResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Equipment request not found"}

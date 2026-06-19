@@ -51,8 +51,11 @@ func (m *Module) executeListPOSModifiersTool(ctx context.Context, input map[stri
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	modifiers, err := m.service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("permission denied")
+	}
+	modifiers, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}

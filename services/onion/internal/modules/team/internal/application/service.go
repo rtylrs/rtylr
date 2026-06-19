@@ -111,11 +111,7 @@ func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID, page
 		ctx,
 		key,
 		func(ctx context.Context) ([]domain.StaffUser, error) {
-			_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
-			if err != nil {
-				return nil, err
-			}
-			return s.repo.ListStaffUsers(ctx, ownerID, int32(limit+1), int32(offset))
+			return s.repo.ListStaffUsersByBusinessID(ctx, businessID, int32(limit+1), int32(offset))
 		},
 		cacher.WithExpiry(ctx, teamCacheTTL),
 	)

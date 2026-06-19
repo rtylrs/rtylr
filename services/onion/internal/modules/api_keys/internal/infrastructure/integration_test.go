@@ -42,7 +42,7 @@ func TestCreate_ReturnsPositiveID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, "test-key", "hash-abc123", "sk_test", []string{"read"})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "test-key", "hash-abc123", "sk_test", []string{"read"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -57,7 +57,7 @@ func TestCreate_AppearsInList(t *testing.T) {
 	ctx := context.Background()
 
 	name := fmt.Sprintf("integration-test-key-%d", testutil.OwnerID)
-	id, err := repo.Create(ctx, testutil.OwnerID, name, "hash-xyz789", "sk_int", []string{"read", "write"})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, name, "hash-xyz789", "sk_int", []string{"read", "write"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestCreate_ScopesRoundTrip(t *testing.T) {
 	ctx := context.Background()
 
 	scopes := []string{"orders:read", "products:write"}
-	id, err := repo.Create(ctx, testutil.OwnerID, "scope-test-key", "hash-scope123", "sk_sc", scopes)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "scope-test-key", "hash-scope123", "sk_sc", scopes)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -111,7 +111,7 @@ func TestRevoke_CreatedKey_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, "revoke-test-key", "hash-rev123", "sk_rv", []string{})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "revoke-test-key", "hash-rev123", "sk_rv", []string{})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestRevoke_WrongOwner_NotRevoked(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, "cross-owner-key", "hash-cross123", "sk_cr", []string{})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "cross-owner-key", "hash-cross123", "sk_cr", []string{})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestList_KeysHaveNonEmptyName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, _ = repo.Create(ctx, testutil.OwnerID, "named-key", "hash-name1", "sk_nm", []string{})
+	_, _ = repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "named-key", "hash-name1", "sk_nm", []string{})
 	keys, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
@@ -189,7 +189,7 @@ func TestList_KeysHavePrefix(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, _ = repo.Create(ctx, testutil.OwnerID, "prefix-test-key", "hash-pfx1", "sk_px", []string{})
+	_, _ = repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "prefix-test-key", "hash-pfx1", "sk_px", []string{})
 	keys, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
@@ -206,7 +206,7 @@ func TestCreate_EmptyScopes_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, "empty-scope-key", "hash-empty1", "sk_es", []string{})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "empty-scope-key", "hash-empty1", "sk_es", []string{})
 	if err != nil {
 		t.Fatalf("Create with empty scopes: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestRevoke_ThenNotInList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, "delete-then-check", "hash-del1", "sk_dl", []string{})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "delete-then-check", "hash-del1", "sk_dl", []string{})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -245,11 +245,11 @@ func TestCreate_IDsAreUnique(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id1, err := repo.Create(ctx, testutil.OwnerID, "unique-key-a", "hash-ua1", "sk_ua", []string{})
+	id1, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "unique-key-a", "hash-ua1", "sk_ua", []string{})
 	if err != nil {
 		t.Fatalf("Create A: %v", err)
 	}
-	id2, err := repo.Create(ctx, testutil.OwnerID, "unique-key-b", "hash-ub1", "sk_ub", []string{})
+	id2, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "unique-key-b", "hash-ub1", "sk_ub", []string{})
 	if err != nil {
 		t.Fatalf("Create B: %v", err)
 	}
@@ -268,7 +268,7 @@ func TestCreate_AfterCreate_CountIncreases(t *testing.T) {
 		t.Fatalf("List before: %v", err)
 	}
 
-	_, err = repo.Create(ctx, testutil.OwnerID, "count-inc-key", "hash-ci1", "sk_ci", []string{})
+	_, err = repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "count-inc-key", "hash-ci1", "sk_ci", []string{})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -288,7 +288,7 @@ func TestCreate_MultipleScopesStored(t *testing.T) {
 	ctx := context.Background()
 
 	scopes := []string{"orders:read", "products:read", "customers:write"}
-	id, err := repo.Create(ctx, testutil.OwnerID, "multi-scope-key", "hash-ms1", "sk_ms", scopes)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "multi-scope-key", "hash-ms1", "sk_ms", scopes)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -313,7 +313,7 @@ func TestList_KeysHaveNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, _ = repo.Create(ctx, testutil.OwnerID, "id-check-key", "hash-ic1", "sk_ic", []string{})
+	_, _ = repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "id-check-key", "hash-ic1", "sk_ic", []string{})
 
 	keys, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -343,7 +343,7 @@ func TestCreate_SingleScopeStored(t *testing.T) {
 	ctx := context.Background()
 
 	scopes := []string{"reports:read"}
-	id, err := repo.Create(ctx, testutil.OwnerID, "single-scope-key", "hash-ss1", "sk_ss", scopes)
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "single-scope-key", "hash-ss1", "sk_ss", scopes)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -369,7 +369,7 @@ func TestCreate_NameStored(t *testing.T) {
 	ctx := context.Background()
 
 	const want = "my-production-key"
-	id, err := repo.Create(ctx, testutil.OwnerID, want, "hash-name-stored", "sk_ns", []string{})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, want, "hash-name-stored", "sk_ns", []string{})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -395,7 +395,7 @@ func TestCreate_PrefixStored(t *testing.T) {
 	ctx := context.Background()
 
 	const want = "sk_prod"
-	id, err := repo.Create(ctx, testutil.OwnerID, "prefix-stored-key", "hash-pfx-stored", want, []string{})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "prefix-stored-key", "hash-pfx-stored", want, []string{})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -434,7 +434,7 @@ func TestRevoke_CreatedKey_NoLongerInList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := repo.Create(ctx, testutil.OwnerID, "revoke-list-check", "hash-rlc1", "sk_rlc", []string{"read"})
+	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "revoke-list-check", "hash-rlc1", "sk_rlc", []string{"read"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -459,11 +459,11 @@ func TestCreate_TwoRevoke_One_OtherStillPresent(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id1, err := repo.Create(ctx, testutil.OwnerID, "keep-key", "hash-kk1", "sk_kk", []string{})
+	id1, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "keep-key", "hash-kk1", "sk_kk", []string{})
 	if err != nil {
 		t.Fatalf("Create keep: %v", err)
 	}
-	id2, err := repo.Create(ctx, testutil.OwnerID, "revoke-key", "hash-rk1", "sk_rk", []string{})
+	id2, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, "revoke-key", "hash-rk1", "sk_rk", []string{})
 	if err != nil {
 		t.Fatalf("Create revoke: %v", err)
 	}

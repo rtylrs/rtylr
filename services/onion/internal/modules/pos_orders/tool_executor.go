@@ -64,8 +64,11 @@ func (m *Module) executeListOrdersTool(ctx context.Context, input map[string]any
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	orders, err := m.service.ListOrders(ctx, ownerID, parsed.SessionID, parsed.Status, parsed.DateFrom, parsed.DateTo)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("cannot determine business context")
+	}
+	orders, err := m.service.ListOrders(ctx, businessID, parsed.SessionID, parsed.Status, parsed.DateFrom, parsed.DateTo)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +114,11 @@ func (m *Module) executeRefundOrderTool(ctx context.Context, input map[string]an
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	order, err := m.service.GetOrder(ctx, ownerID, parsed.OrderID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("cannot determine business context")
+	}
+	order, err := m.service.GetOrder(ctx, businessID, parsed.OrderID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +126,7 @@ func (m *Module) executeRefundOrderTool(ctx context.Context, input map[string]an
 		return nil, err
 	}
 
-	refundID, err := m.service.ProcessRefund(ctx, ownerID, authUser.UserID, domain.RefundInput{
+	refundID, err := m.service.ProcessRefund(ctx, businessID, authUser.UserID, domain.RefundInput{
 		OrderID: parsed.OrderID,
 		Amount:  parsed.Amount,
 		Reason:  parsed.Reason,

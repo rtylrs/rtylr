@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerTimelineRoutes() []string {
@@ -52,7 +53,12 @@ func (h *GetTimelineHandler) Serve(ctx context.Context, req *GetTimelineRequest)
 		return GetTimelineResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	entries, err := h.CRMService.GetCustomerTimeline(ctx, device.User.UserID, req.CustomerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetTimelineResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	entries, err := h.CRMService.GetCustomerTimeline(ctx, businessID, req.CustomerID)
 	if err != nil {
 		return GetTimelineResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

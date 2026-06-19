@@ -20,9 +20,9 @@ const (
 	workspacesTTL   = 2 * time.Minute
 )
 
-func invalidateWorkspacesScope(ctx context.Context, ownerID int64) {
+func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(workspacesScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(workspacesScope, businessID))
 	}
 }
 
@@ -42,19 +42,19 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // Workspaces
 // ─────────────────────────────────────────────
 
-func (s *Service) ListWorkspaces(ctx context.Context, ownerID int64) ([]domain.Workspace, error) {
+func (s *Service) ListWorkspaces(ctx context.Context, businessID int64) ([]domain.Workspace, error) {
 	return cacher.Of[[]domain.Workspace]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(workspacesScope, ownerID, "list"),
+		cacheKeys.Scoped(workspacesScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Workspace, error) {
-			return s.repo.GetWorkspacesByOwner(ctx, ownerID)
+			return s.repo.GetWorkspacesByOwner(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, workspacesTTL),
 	)
 }
 
 func (s *Service) CreateWorkspace(ctx context.Context, input domain.WorkspaceInput) (domain.Workspace, error) {
-	defer invalidateWorkspacesScope(ctx, input.OwnerID)
-	count, err := s.repo.CountWorkspacesByOwner(ctx, input.OwnerID)
+	defer invalidateWorkspacesScope(ctx, input.BusinessID)
+	count, err := s.repo.CountWorkspacesByOwner(ctx, input.BusinessID)
 	if err != nil {
 		return domain.Workspace{}, err
 	}
@@ -68,6 +68,7 @@ func (s *Service) CreateWorkspace(ctx context.Context, input domain.WorkspaceInp
 
 	return domain.Workspace{
 		ID:          id,
+		BusinessID:  input.BusinessID,
 		OwnerID:     input.OwnerID,
 		Name:        input.Name,
 		Description: input.Description,
@@ -79,13 +80,13 @@ func (s *Service) CreateWorkspace(ctx context.Context, input domain.WorkspaceInp
 }
 
 func (s *Service) UpdateWorkspace(ctx context.Context, input domain.UpdateWorkspaceInput) error {
-	defer invalidateWorkspacesScope(ctx, input.OwnerID)
+	defer invalidateWorkspacesScope(ctx, input.BusinessID)
 	return s.repo.UpdateWorkspace(ctx, input)
 }
 
-func (s *Service) DeleteWorkspace(ctx context.Context, id, ownerID int64) error {
-	defer invalidateWorkspacesScope(ctx, ownerID)
-	return s.repo.DeleteWorkspace(ctx, id, ownerID)
+func (s *Service) DeleteWorkspace(ctx context.Context, id, businessID int64) error {
+	defer invalidateWorkspacesScope(ctx, businessID)
+	return s.repo.DeleteWorkspace(ctx, id, businessID)
 }
 
 func (s *Service) AddWorkspaceMember(ctx context.Context, input domain.AddWorkspaceMemberInput) error {
@@ -155,12 +156,12 @@ func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
 // Projects
 // ─────────────────────────────────────────────
 
-func (s *Service) ListProjects(ctx context.Context, workspaceID, ownerID int64) ([]domain.Project, error) {
-	return s.repo.GetProjectsByWorkspace(ctx, workspaceID, ownerID)
+func (s *Service) ListProjects(ctx context.Context, workspaceID, businessID int64) ([]domain.Project, error) {
+	return s.repo.GetProjectsByWorkspace(ctx, workspaceID, businessID)
 }
 
 func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) (domain.Project, error) {
-	defer invalidateWorkspacesScope(ctx, input.OwnerID)
+	defer invalidateWorkspacesScope(ctx, input.BusinessID)
 	id, err := s.repo.CreateProject(ctx, input)
 	if err != nil {
 		return domain.Project{}, err
@@ -173,6 +174,7 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 		ID:          id,
 		WorkspaceID: input.WorkspaceID,
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: input.Description,
 		Icon:        input.Icon,
@@ -185,13 +187,13 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 }
 
 func (s *Service) UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error {
-	defer invalidateWorkspacesScope(ctx, input.OwnerID)
+	defer invalidateWorkspacesScope(ctx, input.BusinessID)
 	return s.repo.UpdateProject(ctx, input)
 }
 
-func (s *Service) DeleteProject(ctx context.Context, id, ownerID int64) error {
-	defer invalidateWorkspacesScope(ctx, ownerID)
-	return s.repo.ArchiveProject(ctx, id, ownerID)
+func (s *Service) DeleteProject(ctx context.Context, id, businessID int64) error {
+	defer invalidateWorkspacesScope(ctx, businessID)
+	return s.repo.ArchiveProject(ctx, id, businessID)
 }
 
 func (s *Service) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
@@ -246,7 +248,7 @@ func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) 
 }
 
 func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {
-	defer invalidateWorkspacesScope(ctx, input.OwnerID)
+	defer invalidateWorkspacesScope(ctx, input.BusinessID)
 	id, err := s.repo.CreateTask(ctx, input)
 	if err != nil {
 		return domain.Task{}, err
@@ -304,7 +306,7 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 }
 
 func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, userID int64) error {
-	defer invalidateWorkspacesScope(ctx, input.OwnerID)
+	defer invalidateWorkspacesScope(ctx, input.BusinessID)
 	existing, err := s.repo.GetTaskByID(ctx, input.ID)
 	if err != nil {
 		return err
@@ -361,9 +363,9 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 	return s.repo.UpdateTaskStatus(ctx, input)
 }
 
-func (s *Service) DeleteTask(ctx context.Context, taskID, ownerID int64) error {
-	defer invalidateWorkspacesScope(ctx, ownerID)
-	return s.repo.DeleteTask(ctx, taskID, ownerID)
+func (s *Service) DeleteTask(ctx context.Context, taskID, businessID int64) error {
+	defer invalidateWorkspacesScope(ctx, businessID)
+	return s.repo.DeleteTask(ctx, taskID, businessID)
 }
 
 func (s *Service) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
@@ -421,8 +423,8 @@ func (s *Service) GetCommentTaskID(ctx context.Context, commentID int64) int64 {
 // Dashboard
 // ─────────────────────────────────────────────
 
-func (s *Service) GetDashboard(ctx context.Context, workspaceID, ownerID, userID int64) (domain.DashboardStats, error) {
-	stats, err := s.repo.GetDashboardStats(ctx, workspaceID, ownerID)
+func (s *Service) GetDashboard(ctx context.Context, workspaceID, businessID, userID int64) (domain.DashboardStats, error) {
+	stats, err := s.repo.GetDashboardStats(ctx, workspaceID, businessID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
@@ -469,8 +471,8 @@ func (s *Service) CreateAttachment(ctx context.Context, input domain.TaskAttachm
 	return s.repo.CreateAttachment(ctx, input)
 }
 
-func (s *Service) DeleteAttachment(ctx context.Context, attachmentID, ownerID int64) error {
-	return s.repo.DeleteAttachment(ctx, attachmentID, ownerID)
+func (s *Service) DeleteAttachment(ctx context.Context, attachmentID, businessID int64) error {
+	return s.repo.DeleteAttachment(ctx, attachmentID, businessID)
 }
 
 // ─────────────────────────────────────────────
@@ -807,6 +809,7 @@ func (s *Service) EnsureMyTasksProject(
 	id, err := s.repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: workspaceID,
 		OwnerID:     userID,
+		BusinessID:  userID,
 		Name:        "My Tasks",
 		Description: "Your personal task board. Quick-created tasks land here.",
 		Icon:        "✅",

@@ -1,12 +1,12 @@
 -- name: ListWebhooks :many
-SELECT id, owner_id, url, events, secret, is_active, last_triggered_at, created_at, updated_at
+SELECT id, owner_id, business_id, url, events, secret, is_active, last_triggered_at, created_at, updated_at
 FROM hub_webhooks
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY created_at DESC;
 
 -- name: CreateWebhook :execresult
-INSERT INTO hub_webhooks (owner_id, url, events, secret)
-VALUES (?, ?, ?, ?);
+INSERT INTO hub_webhooks (owner_id, business_id, url, events, secret)
+VALUES (?, ?, ?, ?, ?);
 
 -- name: DeleteWebhook :exec
-DELETE FROM hub_webhooks WHERE id = ? AND owner_id = ?;
+DELETE FROM hub_webhooks WHERE id = ? AND business_id = ?;

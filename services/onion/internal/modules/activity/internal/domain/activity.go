@@ -8,6 +8,7 @@ import (
 type ActivityLog struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	App         string    `json:"app"`
 	EntityType  string    `json:"entity_type"`
 	EntityID    int64     `json:"entity_id"`
@@ -37,6 +38,7 @@ func (a *ActivityLog) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&a.ID,
 		&a.OwnerID,
+		&a.BusinessID,
 		&app,
 		&a.EntityType,
 		&entityID,

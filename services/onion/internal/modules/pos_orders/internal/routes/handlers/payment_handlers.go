@@ -34,7 +34,10 @@ func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayO
 	if authErr != nil {
 		return PayOrderResponse{}, authErr
 	}
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return PayOrderResponse{}, bizErr
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	orderID, err := strconv.ParseInt(idStr, 10, 64)
@@ -46,7 +49,7 @@ func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayO
 		}
 	}
 
-	result, payErr := h.Service.CreatePaddlePayment(ctx, ownerID, orderID, req.CustomerEmail, req.Currency)
+	result, payErr := h.Service.CreatePaddlePayment(ctx, businessID, orderID, req.CustomerEmail, req.Currency)
 	if payErr != nil {
 		if errors.Is(payErr, domain.ErrOrderNotFound) {
 			return PayOrderResponse{}, &errorModels.ServerError{

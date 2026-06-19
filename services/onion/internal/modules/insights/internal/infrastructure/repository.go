@@ -12,7 +12,7 @@ import (
 // because every query in this module is a cross-schema aggregation that
 // would need its own bespoke migration to be parseable by sqlc.
 //
-// All queries must filter by owner_id and must annotate cross-schema reads
+// All queries must filter by business_id and must annotate cross-schema reads
 // with a `// cross-schema read from {table} — {reason}` comment directly
 // above the query, per onion/CLAUDE.md §4.
 type Repository struct {

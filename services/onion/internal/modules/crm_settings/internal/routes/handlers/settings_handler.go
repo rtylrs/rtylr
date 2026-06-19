@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func SettingsGetRoutes() []string {
@@ -48,7 +49,11 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 		return GetSettingsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	settings, err := h.Service.Get(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSettingsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	settings, err := h.Service.Get(ctx, businessID)
 	if err != nil {
 		return GetSettingsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -110,8 +115,13 @@ func (h *UpdateSettingsHandler) Serve(ctx context.Context, req *UpdateSettingsRe
 		timezone = "UTC"
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateSettingsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if err := h.Service.Upsert(ctx, domain.SettingsInput{
 		OwnerID:        device.User.UserID,
+		BusinessID:     businessID,
 		DefaultConsent: req.DefaultConsent,
 		FromEmail:      req.FromEmail,
 		FromName:       req.FromName,

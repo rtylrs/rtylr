@@ -23,11 +23,12 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error) {
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuItem, error) {
 	rows, err := r.pool.QueryContext(ctx, `
 		SELECT
 			p.id,
 			p.owner_id,
+			p.business_id,
 			p.category_id,
 			COALESCE(c.name, 'Other') AS category_name,
 			p.name,
@@ -44,23 +45,23 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 		FROM erp_products p
 		LEFT JOIN erp_categories c
 		  ON c.id = p.category_id
-		 AND c.owner_id = p.owner_id
+		 AND c.business_id = p.business_id
 		LEFT JOIN product_stock_total pst
-		  ON pst.owner_id = p.owner_id
+		  ON pst.business_id = p.business_id
 		 AND pst.product_id = p.id
 		LEFT JOIN erp_product_images img
 		  ON img.id = (
 				SELECT i.id
 				FROM erp_product_images i
-				WHERE i.owner_id = p.owner_id
+				WHERE i.business_id = p.business_id
 				  AND i.product_id = p.id
 				ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
 				LIMIT 1
 		  )
-		WHERE p.owner_id = ?
+		WHERE p.business_id = ?
 		  AND p.is_active = TRUE
 		ORDER BY c.name, p.name
-	`, ownerID)
+	`, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list menu items", logger.Error(err))
 		return nil, err
@@ -87,6 +88,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 		if err := rows.Scan(
 			&item.ID,
 			&item.OwnerID,
+			&item.BusinessID,
 			&categoryID,
 			&category,
 			&item.Name,
@@ -137,6 +139,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 		items = append(items, domain.MenuItem{
 			ID:          item.ID,
 			OwnerID:     item.OwnerID,
+			BusinessID:  item.BusinessID,
 			CategoryID:  item.CategoryID,
 			Category:    item.Category,
 			Name:        item.Name,
@@ -159,12 +162,13 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.MenuItem
 	return items, nil
 }
 
-func (r *Repository) QuickCreate(ctx context.Context, ownerID int64, input domain.MenuItemInput) (int64, error) {
+func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error) {
 	result, err := r.queries.QuickCreateMenuItem(ctx, sqlc.QuickCreateMenuItemParams{
-		OwnerID:   ownerID,
-		Name:      input.Name,
-		Sku:       sql.NullString{String: input.SKU, Valid: input.SKU != ""},
-		SalePrice: floatToDecimal(input.SalePrice),
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		Name:       input.Name,
+		Sku:        sql.NullString{String: input.SKU, Valid: input.SKU != ""},
+		SalePrice:  floatToDecimal(input.SalePrice),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to quick-create menu item", logger.Error(err))

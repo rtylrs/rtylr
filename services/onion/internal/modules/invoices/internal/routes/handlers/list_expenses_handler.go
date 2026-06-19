@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ListExpensesRoutes() []string {
@@ -76,7 +77,16 @@ func newExpensePayload(e domain.Expense) ExpensePayload {
 func (h *ListExpensesHandler) Serve(ctx context.Context, req *ListExpensesRequest) (ListExpensesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	expenses, hasMore, err := h.FinanceService.ListExpenses(ctx, device.User.UserID, req.CategoryID, req.Search, req.DateFrom, req.DateTo, req.Page, req.PageSize)
+	if device.User == nil {
+		return ListExpensesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListExpensesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	expenses, hasMore, err := h.FinanceService.ListExpenses(ctx, businessID, req.CategoryID, req.Search, req.DateFrom, req.DateTo, req.Page, req.PageSize)
 	if err != nil {
 		return ListExpensesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

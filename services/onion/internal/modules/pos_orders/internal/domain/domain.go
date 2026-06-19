@@ -18,13 +18,14 @@ var (
 // ─── Location ────────────────────────────────────────────────────────────────
 
 type Location struct {
-	ID        int64
-	OwnerID   int64
-	Name      string
-	Address   string
-	Phone     string
-	IsActive  bool
-	CreatedAt time.Time
+	ID         int64
+	OwnerID    int64
+	BusinessID int64 `json:"business_id"`
+	Name       string
+	Address    string
+	Phone      string
+	IsActive   bool
+	CreatedAt  time.Time
 }
 
 type LocationInput struct {
@@ -47,6 +48,7 @@ const (
 type Table struct {
 	ID                    int64
 	OwnerID               int64
+	BusinessID            int64 `json:"business_id"`
 	LocationID            int64
 	Name                  string
 	Capacity              int
@@ -77,6 +79,7 @@ const (
 type Session struct {
 	ID               int64
 	OwnerID          int64
+	BusinessID       int64 `json:"business_id"`
 	LocationID       int64
 	StaffID          int64
 	Status           SessionStatus
@@ -162,6 +165,7 @@ const (
 type Order struct {
 	ID              int64
 	OwnerID         int64
+	BusinessID      int64 `json:"business_id"`
 	SessionID       int64
 	TableID         int64
 	LocationID      int64
@@ -260,6 +264,7 @@ type PaymentInput struct {
 type Refund struct {
 	ID         int64
 	OwnerID    int64
+	BusinessID int64 `json:"business_id"`
 	OrderID    int64
 	Amount     float64
 	Reason     string

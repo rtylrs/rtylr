@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
@@ -36,13 +37,18 @@ func (h *SubmitTimesheetHandler) Serve(ctx context.Context, _ *SubmitTimesheetRe
 		return SubmitTimesheetResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return SubmitTimesheetResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
 		return SubmitTimesheetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid timesheet id"}
 	}
 
-	ts, err := h.Service.SubmitTimesheet(ctx, device.User.UserID, id)
+	ts, err := h.Service.SubmitTimesheet(ctx, businessID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrTimesheetAlreadySubmitted) {
 			return SubmitTimesheetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Timesheet already submitted"}

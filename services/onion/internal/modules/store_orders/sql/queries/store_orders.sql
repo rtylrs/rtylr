@@ -1,21 +1,21 @@
 -- name: ListStoreOrders :many
-SELECT id, owner_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at
-FROM store_orders WHERE owner_id = ? ORDER BY created_at DESC;
+SELECT id, owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at
+FROM store_orders WHERE business_id = ? ORDER BY created_at DESC;
 
 -- name: GetStoreOrder :one
-SELECT id, owner_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at
-FROM store_orders WHERE owner_id = ? AND id = ?;
+SELECT id, owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at
+FROM store_orders WHERE business_id = ? AND id = ?;
 
 -- name: ListStoreOrderItems :many
 SELECT store_order_items.id, store_order_items.order_id, store_order_items.product_id, store_order_items.name, store_order_items.quantity, store_order_items.price, store_order_items.total, store_order_items.created_at
 FROM store_order_items
 INNER JOIN store_orders ON store_order_items.order_id = store_orders.id
-WHERE store_orders.owner_id = ? AND store_order_items.order_id = ?
+WHERE store_orders.business_id = ? AND store_order_items.order_id = ?
 ORDER BY store_order_items.id ASC;
 
 -- name: CreateStoreOrder :execresult
-INSERT INTO store_orders (owner_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO store_orders (owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: CreateStoreOrderItem :execresult
 INSERT INTO store_order_items (order_id, product_id, name, quantity, price, total)
@@ -23,4 +23,4 @@ VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: UpdateStoreOrder :exec
 UPDATE store_orders SET customer_email = ?, customer_name = ?, customer_phone = ?, status = ?, subtotal = ?, tax = ?, shipping_cost = ?, total = ?, shipping_address = ?, notes = ?
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;

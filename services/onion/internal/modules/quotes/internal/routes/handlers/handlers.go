@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type QuotePayload struct {
@@ -62,7 +63,12 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	items, hasMore, err := h.Service.List(ctx, device.User.UserID, req.Page, req.PageSize)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	items, hasMore, err := h.Service.List(ctx, businessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list quotes"}
 	}
@@ -126,6 +132,11 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		return CreateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.QuoteInput{
 		CustomerName: req.CustomerName, CustomerEmail: req.CustomerEmail,
 		Status: req.Status, Items: req.Items, Subtotal: req.Subtotal,
@@ -133,7 +144,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		ValidUntil: req.ValidUntil, Notes: req.Notes,
 	}
 
-	id, err := h.Service.Create(ctx, device.User.UserID, input)
+	id, err := h.Service.Create(ctx, businessID, input)
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create quote"}
 	}
@@ -187,6 +198,11 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.QuoteInput{
 		CustomerName: req.CustomerName, CustomerEmail: req.CustomerEmail,
 		Status: req.Status, Items: req.Items, Subtotal: req.Subtotal,
@@ -194,7 +210,7 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		ValidUntil: req.ValidUntil, Notes: req.Notes,
 	}
 
-	if err := h.Service.Update(ctx, device.User.UserID, req.ID, input); err != nil {
+	if err := h.Service.Update(ctx, businessID, req.ID, input); err != nil {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update quote"}
 	}
 
@@ -229,7 +245,12 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 		return DeleteResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.Delete(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
 		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete quote"}
 	}
 

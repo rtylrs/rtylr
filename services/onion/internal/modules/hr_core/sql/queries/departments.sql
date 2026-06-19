@@ -1,14 +1,14 @@
 -- name: ListHRDepartments :many
-SELECT id, owner_id, location_id, parent_department_id, name, default_work_schedule_id, created_at, updated_at
+SELECT id, owner_id, business_id, location_id, parent_department_id, name, default_work_schedule_id, created_at, updated_at
 FROM hr_departments
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY name ASC;
 
 -- name: CreateHRDepartment :execresult
-INSERT INTO hr_departments (owner_id, location_id, parent_department_id, name, default_work_schedule_id)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO hr_departments (owner_id, business_id, location_id, parent_department_id, name, default_work_schedule_id)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: UpdateHRDepartment :exec
 UPDATE hr_departments
 SET location_id = ?, parent_department_id = ?, name = ?, default_work_schedule_id = ?, updated_at = NOW()
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;

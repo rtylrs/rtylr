@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/wsbus"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
@@ -78,8 +79,12 @@ func (h *ListWorkspacesHandler) Serve(ctx context.Context, _ *ListWorkspacesRequ
 	if !ok {
 		return ListWorkspacesResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListWorkspacesResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	workspaces, err := h.FlowService.ListWorkspaces(ctx, authUser.UserID)
+	workspaces, err := h.FlowService.ListWorkspaces(ctx, businessID)
 	if err != nil {
 		return ListWorkspacesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -130,8 +135,13 @@ func (h *CreateWorkspaceHandler) Serve(ctx context.Context, req *CreateWorkspace
 	if !ok {
 		return CreateWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.WorkspaceInput{
+		BusinessID:  businessID,
 		OwnerID:     authUser.UserID,
 		Name:        req.Name,
 		Description: req.Description,
@@ -188,10 +198,15 @@ func (h *UpdateWorkspaceHandler) Serve(ctx context.Context, req *UpdateWorkspace
 	if !ok {
 		return UpdateWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.UpdateWorkspaceInput{
 		ID:          req.ID.Int64(),
 		OwnerID:     authUser.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Icon:        req.Icon,
@@ -237,8 +252,12 @@ func (h *DeleteWorkspaceHandler) Serve(ctx context.Context, req *DeleteWorkspace
 	if !ok {
 		return DeleteWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	if err := h.FlowService.DeleteWorkspace(ctx, req.ID.Int64(), authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteWorkspace(ctx, req.ID.Int64(), businessID); err != nil {
 		return DeleteWorkspaceResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete workspace",

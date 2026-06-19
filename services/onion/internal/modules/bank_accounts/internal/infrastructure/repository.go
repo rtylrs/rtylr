@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error) {
-	rows, err := r.queries.ListBankAccounts(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.BankAccount, error) {
+	rows, err := r.queries.ListBankAccounts(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list bank accounts", logger.Error(err))
 		return nil, err
@@ -39,14 +39,15 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BankAcco
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.BankAccountInput) (int64, error) {
 	currency := input.Currency
 	if currency == "" {
 		currency = "USD"
 	}
 
 	res, err := r.queries.CreateBankAccount(ctx, sqlc.CreateBankAccountParams{
-		OwnerID:     ownerID,
+		OwnerID:     businessID,
+		BusinessID:  businessID,
 		Name:        input.Name,
 		Institution: nullableString(input.Institution),
 		AccountType: nullableString(input.AccountType),
@@ -63,8 +64,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Ban
 }
 
 // TotalBalance returns the sum of all account balances for the owner.
-func (r *Repository) TotalBalance(ctx context.Context, ownerID int64) (float64, error) {
-	result, err := r.queries.SumBankAccountBalances(ctx, ownerID)
+func (r *Repository) TotalBalance(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumBankAccountBalances(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank account balances", logger.Error(err))
 		return 0, err
@@ -74,8 +75,8 @@ func (r *Repository) TotalBalance(ctx context.Context, ownerID int64) (float64, 
 }
 
 // CountConnected returns the number of bank accounts with is_connected = TRUE.
-func (r *Repository) CountConnected(ctx context.Context, ownerID int64) (int64, error) {
-	cnt, err := r.queries.CountConnectedBankAccounts(ctx, ownerID)
+func (r *Repository) CountConnected(ctx context.Context, businessID int64) (int64, error) {
+	cnt, err := r.queries.CountConnectedBankAccounts(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count connected bank accounts", logger.Error(err))
 		return 0, err
@@ -92,6 +93,7 @@ func bankAccountFromSqlc(row sqlc.FinanceBankAccount) domain.BankAccount {
 	ba := domain.BankAccount{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Name:        row.Name,
 		Institution: nullStr(row.Institution),
 		AccountType: nullStr(row.AccountType),

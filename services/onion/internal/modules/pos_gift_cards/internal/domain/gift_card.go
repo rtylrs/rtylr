@@ -15,6 +15,7 @@ var (
 type GiftCard struct {
 	ID             int64      `json:"id"`
 	OwnerID        int64      `json:"owner_id"`
+	BusinessID     int64      `json:"business_id"`
 	CustomerID     int64      `json:"customer_id"`
 	Code           string     `json:"code"`
 	InitialAmount  float64    `json:"initial_amount"`

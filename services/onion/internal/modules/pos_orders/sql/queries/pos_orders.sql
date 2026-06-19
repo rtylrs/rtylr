@@ -1,28 +1,28 @@
 -- name: ListLocationsByOwner :many
-SELECT id, owner_id, name, address, phone, is_active, created_at
-FROM pos_locations WHERE owner_id = ? ORDER BY name ASC LIMIT 500;
+SELECT id, owner_id, business_id, name, address, phone, is_active, created_at
+FROM pos_locations WHERE business_id = ? ORDER BY name ASC LIMIT 500;
 
 -- name: CreateLocation :execresult
-INSERT INTO pos_locations (owner_id, name, address, phone) VALUES (?, ?, ?, ?);
+INSERT INTO pos_locations (owner_id, business_id, name, address, phone) VALUES (?, ?, ?, ?, ?);
 
 -- name: ListTablesByOwner :many
-SELECT id, owner_id, location_id, name, capacity, status,
+SELECT id, owner_id, business_id, location_id, name, capacity, status,
        current_session_order_id, qr_code_url, created_at, updated_at
-FROM pos_tables WHERE owner_id = ? ORDER BY name ASC LIMIT 1000;
+FROM pos_tables WHERE business_id = ? ORDER BY name ASC LIMIT 1000;
 
 -- name: CreatePosTable :execresult
-INSERT INTO pos_tables (owner_id, location_id, name, capacity, qr_code_url)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO pos_tables (owner_id, business_id, location_id, name, capacity, qr_code_url)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: UpdatePosTable :exec
 UPDATE pos_tables SET location_id = ?, name = ?, capacity = ?, qr_code_url = ?
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: UpdateTableStatus :exec
-UPDATE pos_tables SET status = ? WHERE owner_id = ? AND id = ?;
+UPDATE pos_tables SET status = ? WHERE business_id = ? AND id = ?;
 
 -- name: DeletePosTable :exec
-DELETE FROM pos_tables WHERE owner_id = ? AND id = ?;
+DELETE FROM pos_tables WHERE business_id = ? AND id = ?;
 
 -- name: SetTableOccupied :exec
 UPDATE pos_tables SET status = 'occupied', current_session_order_id = ? WHERE id = ?;
@@ -31,24 +31,24 @@ UPDATE pos_tables SET status = 'occupied', current_session_order_id = ? WHERE id
 UPDATE pos_tables SET status = 'available', current_session_order_id = NULL WHERE id = ?;
 
 -- name: GetCurrentOpenSession :one
-SELECT id, owner_id, location_id, staff_id, status,
+SELECT id, owner_id, business_id, location_id, staff_id, status,
        opening_cash, closing_cash, expected_cash, cash_difference,
        total_sales, total_orders, total_cash_sales, total_card_sales,
        total_online_sales, total_refunds, opened_at, closed_at, notes,
-       terminal_id, business_id
+       terminal_id
 FROM pos_sessions
-WHERE owner_id = ? AND staff_id = ? AND status = 'open'
+WHERE business_id = ? AND staff_id = ? AND status = 'open'
 LIMIT 1;
 
 -- name: OpenSession :execresult
-INSERT INTO pos_sessions (owner_id, location_id, staff_id, status, opening_cash)
-VALUES (?, ?, ?, 'open', ?);
+INSERT INTO pos_sessions (owner_id, business_id, location_id, staff_id, status, opening_cash)
+VALUES (?, ?, ?, ?, 'open', ?);
 
 -- name: CloseSession :exec
 UPDATE pos_sessions
 SET status = 'closed', closing_cash = ?, expected_cash = ?, cash_difference = ?,
     closed_at = NOW(), notes = ?
-WHERE owner_id = ? AND id = ? AND status = 'open';
+WHERE business_id = ? AND id = ? AND status = 'open';
 
 -- name: GetSessionTotals :one
 SELECT
@@ -67,43 +67,43 @@ SET total_sales = ?, total_cash_sales = ?, total_card_sales = ?,
 WHERE id = ?;
 
 -- name: GetSessionByID :one
-SELECT id, owner_id, location_id, staff_id, status,
+SELECT id, owner_id, business_id, location_id, staff_id, status,
        opening_cash, closing_cash, expected_cash, cash_difference,
        total_sales, total_orders, total_cash_sales, total_card_sales,
        total_online_sales, total_refunds, opened_at, closed_at, notes,
-       terminal_id, business_id
+       terminal_id
 FROM pos_sessions
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: UpdateSessionRefundTotals :exec
 UPDATE pos_sessions SET total_refunds = total_refunds + ? WHERE id = ?;
 
 -- name: ListOrdersByOwner :many
-SELECT id, owner_id, session_id, table_id, location_id,
+SELECT id, owner_id, business_id, session_id, table_id, location_id,
        order_number, type, status, customer_id, customer_name,
        staff_id, subtotal, discount_amount, tax_amount, total,
        payment_method, payment_status, amount_paid, change_due,
        notes, kitchen_notes, created_at, updated_at, paid_at,
        terminal_id, branch_id, tip_amount, void_reason, voided_by, voided_at, exchange_order_id
 FROM pos_orders
-WHERE owner_id = ?
+WHERE business_id = ?
 ORDER BY created_at DESC LIMIT 500;
 
 -- name: GetOrder :one
-SELECT id, owner_id, session_id, table_id, location_id,
+SELECT id, owner_id, business_id, session_id, table_id, location_id,
        order_number, type, status, customer_id, customer_name,
        staff_id, subtotal, discount_amount, tax_amount, total,
        payment_method, payment_status, amount_paid, change_due,
        notes, kitchen_notes, created_at, updated_at, paid_at,
        terminal_id, branch_id, tip_amount, void_reason, voided_by, voided_at, exchange_order_id
 FROM pos_orders
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: CreateOrder :execresult
 INSERT INTO pos_orders
-(owner_id, session_id, table_id, location_id, order_number, type, status,
+(owner_id, business_id, session_id, table_id, location_id, order_number, type, status,
  customer_id, customer_name, staff_id, subtotal, total, payment_method, notes, kitchen_notes)
-VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: CreateOrderItem :execresult
 INSERT INTO pos_order_items
@@ -112,7 +112,7 @@ INSERT INTO pos_order_items
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateOrderStatus :exec
-UPDATE pos_orders SET status = ? WHERE owner_id = ? AND id = ?;
+UPDATE pos_orders SET status = ? WHERE business_id = ? AND id = ?;
 
 -- name: UpdateOrderItemStatus :exec
 UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
@@ -128,18 +128,18 @@ WHERE order_id = ?;
 UPDATE pos_orders
 SET status = 'paid', payment_status = 'paid', payment_method = ?,
     amount_paid = ?, change_due = ?, paid_at = ?
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: GetOrderForPayment :one
-SELECT total, table_id, type FROM pos_orders WHERE owner_id = ? AND id = ? FOR UPDATE;
+SELECT total, table_id, type FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
 
 -- name: CreateRefund :execresult
-INSERT INTO pos_refunds (owner_id, order_id, amount, reason, refunded_by)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO pos_refunds (owner_id, business_id, order_id, amount, reason, refunded_by)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: MarkOrderRefunded :exec
 UPDATE pos_orders SET status = 'refunded', payment_status = 'refunded'
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: GetDashboardSalesToday :one
 SELECT
@@ -147,18 +147,18 @@ SELECT
     COUNT(*) AS order_count,
     COALESCE(AVG(total), 0) AS avg_order
 FROM pos_orders
-WHERE owner_id = ? AND payment_status = 'paid' AND DATE(paid_at) = CURDATE();
+WHERE business_id = ? AND payment_status = 'paid' AND DATE(paid_at) = CURDATE();
 
 -- name: GetTableTurnover :one
 SELECT COUNT(*) AS table_count,
        COALESCE(SUM(CASE WHEN status != 'available' THEN 1 ELSE 0 END), 0) AS turned_tables
-FROM pos_tables WHERE owner_id = ?;
+FROM pos_tables WHERE business_id = ?;
 
 -- name: GetOrderSessionID :one
 SELECT session_id FROM pos_orders WHERE id = ?;
 
 -- name: CountTodaysOrders :one
-SELECT COUNT(*) AS cnt FROM pos_orders WHERE owner_id = ? AND DATE(created_at) = CURDATE();
+SELECT COUNT(*) AS cnt FROM pos_orders WHERE business_id = ? AND DATE(created_at) = CURDATE();
 
 -- name: MoveOrderItems :exec
 UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?;
@@ -170,26 +170,26 @@ UPDATE pos_orders SET
 WHERE pos_orders.id = ?;
 
 -- name: CancelOrder :exec
-UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND owner_id = ?;
+UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND business_id = ?;
 
 -- name: GetOrderSubtotal :one
-SELECT subtotal FROM pos_orders WHERE owner_id = ? AND id = ?;
+SELECT subtotal FROM pos_orders WHERE business_id = ? AND id = ?;
 
 -- name: ApplyDiscount :exec
 UPDATE pos_orders SET discount_amount = ?, total = ?, notes = CONCAT(COALESCE(notes,''), ?)
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: VoidOrder :execresult
 UPDATE pos_orders SET status = 'voided', notes = CONCAT(COALESCE(notes,''), ?)
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: HoldOrder :execresult
 UPDATE pos_orders SET status = 'held', notes = CONCAT(COALESCE(notes,''), ?)
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: SetOrderPaddleTransactionID :execresult
 UPDATE pos_orders SET paddle_transaction_id = ?
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: MarkOrderPaidByPaddleTransaction :execresult
 UPDATE pos_orders SET status = 'paid', payment_status = 'paid', paid_at = NOW()
@@ -206,10 +206,10 @@ VALUES (?, ?, ?);
 SELECT COUNT(*) FROM pos_paddle_events_processed WHERE transaction_id = ?;
 
 -- name: TransferOrderTable :execresult
-UPDATE pos_orders SET table_id = ? WHERE id = ? AND owner_id = ? AND status NOT IN ('paid','voided','cancelled');
+UPDATE pos_orders SET table_id = ? WHERE id = ? AND business_id = ? AND status NOT IN ('paid','voided','cancelled');
 
 -- name: SetTableStatus :exec
-UPDATE pos_tables SET status = ? WHERE id = ? AND owner_id = ?;
+UPDATE pos_tables SET status = ? WHERE id = ? AND business_id = ?;
 
 -- name: VoidOrderItem :execresult
 UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AND status IN ('pending','preparing');
@@ -218,18 +218,18 @@ UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AN
 UPDATE pos_orders
 SET subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled'),
     total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled') + pos_orders.tax_amount - pos_orders.discount_amount
-WHERE pos_orders.id = ? AND pos_orders.owner_id = ?;
+WHERE pos_orders.id = ? AND pos_orders.business_id = ?;
 
 -- name: UpdateOrderStatusToPreparingFromPending :execresult
-UPDATE pos_orders SET status = 'preparing' WHERE id = ? AND owner_id = ? AND status = 'pending';
+UPDATE pos_orders SET status = 'preparing' WHERE id = ? AND business_id = ? AND status = 'pending';
 
 -- name: IsOnlineOrderingEnabled :one
 SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE;
 
 -- name: CreateOnlineOrder :execresult
 INSERT INTO pos_orders
-(owner_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, kitchen_notes)
-VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
+(owner_id, business_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, kitchen_notes)
+VALUES (?, ?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
 
 -- name: GetPublicOrderStatus :one
 SELECT id, order_number, status FROM pos_orders WHERE id = ? LIMIT 1;

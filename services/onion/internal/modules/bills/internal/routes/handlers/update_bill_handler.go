@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpdateBillByIDRoutes() []string { return []string{"/finance/bills/{id}"} }
@@ -44,6 +45,10 @@ func (h *UpdateBillByIDHandler) Serve(ctx context.Context, req *UpdateBillByIDRe
 	if device.IsAnonymous || device.User == nil {
 		return UpdateBillByIDResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateBillByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -60,7 +65,7 @@ func (h *UpdateBillByIDHandler) Serve(ctx context.Context, req *UpdateBillByIDRe
 		Description: req.Description,
 	}
 
-	if err := h.Service.Update(ctx, device.User.UserID, id, input); err != nil {
+	if err := h.Service.Update(ctx, businessID, id, input); err != nil {
 		if errors.Is(err, domain.ErrBillNotFound) {
 			return UpdateBillByIDResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Bill not found"}
 		}

@@ -6,7 +6,7 @@ SELECT s.staff_id,
        COALESCE(SUM(s.hours_worked) - SUM(s.overtime_hours), 0) AS regular_hours,
        COALESCE(SUM(s.overtime_hours), 0) AS overtime_hours
 FROM hr_shifts s
-JOIN hr_staff st ON st.id = s.staff_id AND st.owner_id = s.owner_id
-WHERE s.owner_id = ? AND s.status = 'completed'
+JOIN hr_staff st ON st.id = s.staff_id AND st.business_id = s.business_id
+WHERE s.business_id = ? AND s.status = 'completed'
 GROUP BY s.staff_id, staff_name, week_start
 ORDER BY week_start DESC, staff_name ASC;

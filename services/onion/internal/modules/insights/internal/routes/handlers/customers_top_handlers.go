@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/customers/top?limit=10
@@ -35,6 +36,10 @@ func (h *GetTopCustomersHandler) Serve(ctx context.Context, req *GetTopCustomers
 	if device.User == nil {
 		return GetTopCustomersResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetTopCustomersResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	var limit int32 = 10
 	if req.Limit != "" {
 		parsed, err := strconv.ParseInt(req.Limit, 10, 32)
@@ -48,7 +53,7 @@ func (h *GetTopCustomersHandler) Serve(ctx context.Context, req *GetTopCustomers
 		limit = int32(parsed)
 	}
 
-	rows, err := h.Service.GetTopCustomers(ctx, device.User.UserID, limit)
+	rows, err := h.Service.GetTopCustomers(ctx, businessID, limit)
 	if err != nil {
 		return GetTopCustomersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

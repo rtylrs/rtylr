@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date string) (domain.DaySummary, error) {
+func (r *Repository) GetDaySummary(ctx context.Context, businessID int64, date string) (domain.DaySummary, error) {
 	var summary domain.DaySummary
 
 	if date != "" {
@@ -35,8 +35,8 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 			return summary, parseErr
 		}
 		row, err := r.queries.GetDaySummaryByDate(ctx, sqlc.GetDaySummaryByDateParams{
-			OwnerID: ownerID,
-			PaidAt:  sql.NullTime{Time: t, Valid: true},
+			BusinessID: businessID,
+			PaidAt:     sql.NullTime{Time: t, Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get day summary", logger.Error(err))
@@ -47,7 +47,7 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 		summary.TotalOrders = int(row.TotalOrders)
 
 		refundTotal, err := r.queries.GetRefundTotalByDate(ctx, sqlc.GetRefundTotalByDateParams{
-			OwnerID:    ownerID,
+			BusinessID: businessID,
 			RefundedAt: sql.NullTime{Time: t, Valid: true},
 		})
 		if err != nil {
@@ -57,8 +57,8 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 		}
 
 		breakdown, err := r.queries.GetPaymentBreakdownByDate(ctx, sqlc.GetPaymentBreakdownByDateParams{
-			OwnerID: ownerID,
-			PaidAt:  sql.NullTime{Time: t, Valid: true},
+			BusinessID: businessID,
+			PaidAt:     sql.NullTime{Time: t, Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
@@ -69,7 +69,7 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 			summary.PaymentBreakdown[string(b.PaymentMethod.PosOrdersPaymentMethod)] = interfaceToFloat(b.MethodTotal)
 		}
 	} else {
-		row, err := r.queries.GetDaySummaryToday(ctx, ownerID)
+		row, err := r.queries.GetDaySummaryToday(ctx, businessID)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get day summary", logger.Error(err))
 			return summary, err
@@ -78,14 +78,14 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 		summary.TotalTax = interfaceToFloat(row.TotalTax)
 		summary.TotalOrders = int(row.TotalOrders)
 
-		refundTotal, err := r.queries.GetRefundTotalToday(ctx, ownerID)
+		refundTotal, err := r.queries.GetRefundTotalToday(ctx, businessID)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get refund total", logger.Error(err))
 		} else {
 			summary.TotalRefunds = interfaceToFloat(refundTotal)
 		}
 
-		breakdown, err := r.queries.GetPaymentBreakdownToday(ctx, ownerID)
+		breakdown, err := r.queries.GetPaymentBreakdownToday(ctx, businessID)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
 			return summary, err

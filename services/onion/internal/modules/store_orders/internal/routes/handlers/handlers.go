@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ListRoutes() []string   { return []string{"/store/orders"} }
@@ -28,7 +29,11 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	items, err := h.Service.List(ctx, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list orders"}
 	}
@@ -59,7 +64,11 @@ func (h *DetailHandler) Serve(ctx context.Context, req *DetailRequest) (DetailRe
 	if !ok {
 		return DetailResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	detail, err := h.Service.GetDetail(ctx, authUser.UserID, req.ID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DetailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	detail, err := h.Service.GetDetail(ctx, businessID, req.ID)
 	if err != nil {
 		return DetailResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to get order detail"}
 	}
@@ -111,10 +120,22 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if !ok {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	id, err := h.Service.Create(ctx, authUser.UserID, domain.StoreOrderInput{
-		CustomerEmail: req.CustomerEmail, CustomerName: req.CustomerName, CustomerPhone: req.CustomerPhone,
-		Status: req.Status, Subtotal: req.Subtotal, Tax: req.Tax, ShippingCost: req.ShippingCost,
-		Total: req.Total, ShippingAddress: req.ShippingAddress, Notes: req.Notes, Items: req.Items,
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Create(ctx, authUser.UserID, businessID, domain.StoreOrderInput{
+		CustomerEmail:   req.CustomerEmail,
+		CustomerName:    req.CustomerName,
+		CustomerPhone:   req.CustomerPhone,
+		Status:          req.Status,
+		Subtotal:        req.Subtotal,
+		Tax:             req.Tax,
+		ShippingCost:    req.ShippingCost,
+		Total:           req.Total,
+		ShippingAddress: req.ShippingAddress,
+		Notes:           req.Notes,
+		Items:           req.Items,
 	})
 	if err != nil {
 		return CreateResponse{}, errorModels.FromError(err, "Failed to create order")
@@ -158,10 +179,21 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if !ok {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.StoreOrderInput{
-		CustomerEmail: req.CustomerEmail, CustomerName: req.CustomerName, CustomerPhone: req.CustomerPhone,
-		Status: req.Status, Subtotal: req.Subtotal, Tax: req.Tax, ShippingCost: req.ShippingCost,
-		Total: req.Total, ShippingAddress: req.ShippingAddress, Notes: req.Notes,
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.Update(ctx, businessID, req.ID, domain.StoreOrderInput{
+		CustomerEmail:   req.CustomerEmail,
+		CustomerName:    req.CustomerName,
+		CustomerPhone:   req.CustomerPhone,
+		Status:          req.Status,
+		Subtotal:        req.Subtotal,
+		Tax:             req.Tax,
+		ShippingCost:    req.ShippingCost,
+		Total:           req.Total,
+		ShippingAddress: req.ShippingAddress,
+		Notes:           req.Notes,
 	}); err != nil {
 		return UpdateResponse{}, errorModels.FromError(err, "Failed to update order")
 	}

@@ -1,22 +1,22 @@
 -- name: ListReceipts :many
-SELECT id, order_number, customer_name, total, payment_method, paid_at
+SELECT id, order_number, customer_name, total, payment_method, paid_at, business_id
 FROM pos_orders
-WHERE owner_id = ? AND payment_status = 'paid'
+WHERE business_id = ? AND payment_status = 'paid'
 ORDER BY paid_at DESC;
 
 -- name: ListReceiptsWithDateFrom :many
-SELECT id, order_number, customer_name, total, payment_method, paid_at
+SELECT id, order_number, customer_name, total, payment_method, paid_at, business_id
 FROM pos_orders
-WHERE owner_id = ? AND payment_status = 'paid' AND paid_at >= ?
+WHERE business_id = ? AND payment_status = 'paid' AND paid_at >= ?
 ORDER BY paid_at DESC;
 
 -- name: ListReceiptsWithDateRange :many
-SELECT id, order_number, customer_name, total, payment_method, paid_at
+SELECT id, order_number, customer_name, total, payment_method, paid_at, business_id
 FROM pos_orders
-WHERE owner_id = ? AND payment_status = 'paid' AND paid_at >= ? AND paid_at <= ?
+WHERE business_id = ? AND payment_status = 'paid' AND paid_at >= ? AND paid_at <= ?
 ORDER BY paid_at DESC;
 
 -- name: GetReceiptByID :one
-SELECT id, order_number, customer_name, total, payment_method, paid_at
+SELECT id, order_number, customer_name, total, payment_method, paid_at, business_id
 FROM pos_orders
-WHERE id = ? AND owner_id = ? AND payment_status = 'paid';
+WHERE id = ? AND business_id = ? AND payment_status = 'paid';

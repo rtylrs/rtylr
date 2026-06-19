@@ -54,3 +54,6 @@ func envOr(key, def string) string {
 
 // OwnerID is the fixture tenant used across all integration tests.
 const OwnerID int64 = 1001
+
+// BusinessID is the fixture business scoping used across all integration tests.
+const BusinessID int64 = 2001

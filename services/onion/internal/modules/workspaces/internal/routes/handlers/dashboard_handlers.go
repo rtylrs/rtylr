@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 )
 
@@ -49,6 +50,10 @@ func (h *GetDashboardHandler) Serve(ctx context.Context, req *GetDashboardReques
 	if !ok {
 		return GetDashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return GetDashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
 	if err != nil || workspaceID == 0 {
@@ -58,7 +63,7 @@ func (h *GetDashboardHandler) Serve(ctx context.Context, req *GetDashboardReques
 		}
 	}
 
-	stats, err := h.FlowService.GetDashboard(ctx, workspaceID, authUser.UserID, authUser.UserID)
+	stats, err := h.FlowService.GetDashboard(ctx, workspaceID, businessID, authUser.UserID)
 	if err != nil {
 		return GetDashboardResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func CustomerDeleteRoutes() []string {
@@ -44,7 +45,12 @@ func (h *DeleteCustomerHandler) Serve(ctx context.Context, req *DeleteCustomerRe
 		return DeleteCustomerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.CRMService.DeleteCustomer(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteCustomerResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.CRMService.DeleteCustomer(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
 			return DeleteCustomerResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,

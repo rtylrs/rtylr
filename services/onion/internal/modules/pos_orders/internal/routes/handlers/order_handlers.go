@@ -162,9 +162,12 @@ func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (
 		return ListOrdersResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ListOrdersResponse{}, bizErr
+	}
 
-	orders, err := h.Service.ListOrders(ctx, ownerID, req.SessionID, req.Status, req.DateFrom, req.DateTo)
+	orders, err := h.Service.ListOrders(ctx, businessID, req.SessionID, req.Status, req.DateFrom, req.DateTo)
 	if err != nil {
 		return ListOrdersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -267,7 +270,10 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 		return CreateOrderResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return CreateOrderResponse{}, bizErr
+	}
 	staffID := user.UserID
 
 	items := make([]domain.OrderItemInput, 0, len(req.Items))
@@ -284,7 +290,7 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 		})
 	}
 
-	orderID, err := h.Service.CreateOrder(ctx, user.BusinessID, ownerID, staffID, domain.OrderInput{
+	orderID, err := h.Service.CreateOrder(ctx, businessID, businessID, staffID, domain.OrderInput{
 		SessionID:     req.SessionID,
 		TableID:       req.TableID,
 		LocationID:    req.LocationID,
@@ -304,7 +310,7 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 		}
 	}
 
-	order, getErr := h.Service.GetOrder(ctx, ownerID, orderID)
+	order, getErr := h.Service.GetOrder(ctx, businessID, orderID)
 	if getErr != nil {
 		return CreateOrderResponse{OrderID: orderID, Message: "Order created"}, nil
 	}
@@ -332,7 +338,10 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 		return GetOrderDetailResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return GetOrderDetailResponse{}, bizErr
+	}
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
@@ -347,7 +356,7 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 		orderID = parsed
 	}
 
-	order, err := h.Service.GetOrder(ctx, ownerID, orderID)
+	order, err := h.Service.GetOrder(ctx, businessID, orderID)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return GetOrderDetailResponse{}, &errorModels.ServerError{
@@ -412,7 +421,10 @@ func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderSt
 		return UpdateOrderStatusResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return UpdateOrderStatusResponse{}, bizErr
+	}
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
@@ -427,7 +439,7 @@ func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderSt
 		orderID = parsed
 	}
 
-	if err := h.Service.UpdateOrderStatus(ctx, ownerID, orderID, domain.OrderStatus(req.Status)); err != nil {
+	if err := h.Service.UpdateOrderStatus(ctx, businessID, orderID, domain.OrderStatus(req.Status)); err != nil {
 		return UpdateOrderStatusResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -480,8 +492,11 @@ func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrd
 		return UpdateOrderItemStatusResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
-	if err := h.Service.UpdateOrderItemStatus(ctx, ownerID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return UpdateOrderItemStatusResponse{}, bizErr
+	}
+	if err := h.Service.UpdateOrderItemStatus(ctx, businessID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
 		return UpdateOrderItemStatusResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -536,7 +551,10 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 		return ProcessPaymentResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ProcessPaymentResponse{}, bizErr
+	}
 
 	orderID := req.OrderID
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
@@ -551,7 +569,7 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 		orderID = parsed
 	}
 
-	if err := h.Service.ProcessPayment(ctx, ownerID, domain.PaymentInput{
+	if err := h.Service.ProcessPayment(ctx, businessID, domain.PaymentInput{
 		OrderID:       orderID,
 		PaymentMethod: domain.PaymentMethod(req.PaymentMethod),
 		AmountPaid:    req.AmountPaid,
@@ -617,7 +635,10 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 		return ProcessRefundResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ProcessRefundResponse{}, bizErr
+	}
 	staffID := user.UserID
 
 	orderID := req.OrderID
@@ -633,7 +654,7 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 		orderID = parsed
 	}
 
-	refundID, err := h.Service.ProcessRefund(ctx, ownerID, staffID, domain.RefundInput{
+	refundID, err := h.Service.ProcessRefund(ctx, businessID, staffID, domain.RefundInput{
 		OrderID: orderID,
 		Amount:  req.Amount,
 		Reason:  req.Reason,

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 )
 
@@ -29,7 +30,11 @@ func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetC
 	if device.User == nil {
 		return GetConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	cfg, err := h.Service.GetConfig(ctx, device.User.BusinessID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	cfg, err := h.Service.GetConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrConfigNotFound) {
 			return GetConfigResponse{Config: nil}, nil
@@ -83,8 +88,12 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 	if device.User == nil {
 		return UpdateConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if err := h.Service.UpdateConfig(ctx, domain.UpdateLoyaltyConfigInput{
-		BusinessID:      device.User.BusinessID,
+		BusinessID:      businessID,
 		IsEnabled:       req.IsEnabled,
 		PointsPerDollar: req.PointsPerDollar,
 		RedemptionRate:  req.RedemptionRate,
@@ -115,10 +124,14 @@ func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactio
 	if device.User == nil {
 		return ListTransactionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListTransactionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if req.CustomerID == 0 {
 		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customer_id is required"}
 	}
-	txns, err := h.Service.ListTransactions(ctx, device.User.BusinessID, req.CustomerID)
+	txns, err := h.Service.ListTransactions(ctx, businessID, req.CustomerID)
 	if err != nil {
 		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list transactions"}
 	}
@@ -166,11 +179,15 @@ func (h *EarnPointsHandler) Serve(ctx context.Context, req *EarnPointsRequest) (
 	if device.User == nil {
 		return EarnPointsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return EarnPointsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if req.CustomerID == 0 || req.Points <= 0 {
 		return EarnPointsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerId and positive points are required"}
 	}
 	id, err := h.Service.EarnPoints(ctx, domain.EarnPointsInput{
-		BusinessID: device.User.BusinessID,
+		BusinessID: businessID,
 		CustomerID: req.CustomerID,
 		OrderID:    req.OrderID,
 		Points:     req.Points,
@@ -202,11 +219,15 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 	if device.User == nil {
 		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if req.CustomerID == 0 || req.Points <= 0 {
 		return RedeemPointsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerId and positive points are required"}
 	}
 	id, err := h.Service.RedeemPoints(ctx, domain.RedeemPointsInput{
-		BusinessID: device.User.BusinessID,
+		BusinessID: businessID,
 		CustomerID: req.CustomerID,
 		Points:     req.Points,
 	})
@@ -240,10 +261,14 @@ func (h *GetBalanceHandler) Serve(ctx context.Context, req *GetBalanceRequest) (
 	if device.User == nil {
 		return GetBalanceResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetBalanceResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if req.CustomerID == 0 {
 		return GetBalanceResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customer_id is required"}
 	}
-	balance, err := h.Service.GetBalance(ctx, device.User.BusinessID, req.CustomerID)
+	balance, err := h.Service.GetBalance(ctx, businessID, req.CustomerID)
 	if err != nil {
 		return GetBalanceResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get balance"}
 	}

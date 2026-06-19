@@ -75,10 +75,13 @@ func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessi
 		return GetCurrentSessionResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return GetCurrentSessionResponse{}, bizErr
+	}
 	staffID := user.UserID
 
-	sess, err := h.Service.GetCurrentOpenSession(ctx, ownerID, staffID)
+	sess, err := h.Service.GetCurrentOpenSession(ctx, businessID, staffID)
 	if err != nil {
 		return GetCurrentSessionResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -130,10 +133,13 @@ func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest)
 		return OpenSessionResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return OpenSessionResponse{}, bizErr
+	}
 	staffID := user.UserID
 
-	id, err := h.Service.OpenSession(ctx, ownerID, staffID, domain.OpenSessionInput{
+	id, err := h.Service.OpenSession(ctx, businessID, staffID, domain.OpenSessionInput{
 		LocationID:  req.LocationID,
 		OpeningCash: req.OpeningCash,
 	})
@@ -190,9 +196,12 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 		return CloseSessionResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return CloseSessionResponse{}, bizErr
+	}
 
-	if err := h.Service.CloseSession(ctx, ownerID, domain.CloseSessionInput{
+	if err := h.Service.CloseSession(ctx, businessID, domain.CloseSessionInput{
 		SessionID:   req.SessionID,
 		ClosingCash: req.ClosingCash,
 		Notes:       req.Notes,
@@ -268,9 +277,12 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsReques
 		return ListSessionsResponse{}, authErr
 	}
 
-	ownerID := resolvedOwnerID(ctx, user)
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ListSessionsResponse{}, bizErr
+	}
 
-	sessions, err := h.Service.ListSessions(ctx, ownerID, req.LocationID, req.DateFrom, req.DateTo)
+	sessions, err := h.Service.ListSessions(ctx, businessID, req.LocationID, req.DateFrom, req.DateTo)
 	if err != nil {
 		return ListSessionsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

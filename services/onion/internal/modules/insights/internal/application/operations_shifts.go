@@ -17,10 +17,10 @@ type ShiftMetricsPayload struct {
 }
 
 // GetShiftMetrics returns scheduled/completed counts for the window.
-func (s *Service) GetShiftMetrics(ctx context.Context, ownerID int64, from, to time.Time) (ShiftMetricsPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:shifts:%s:%s", ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+func (s *Service) GetShiftMetrics(ctx context.Context, businessID int64, from, to time.Time) (ShiftMetricsPayload, error) {
+	key := fmt.Sprintf("insights:%d:operations:shifts:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	out, err := cacher.Of[ShiftMetricsPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (ShiftMetricsPayload, error) {
-		row, rerr := s.repo.GetShiftMetrics(ctx, ownerID, from, to)
+		row, rerr := s.repo.GetShiftMetrics(ctx, businessID, from, to)
 		if rerr != nil {
 			return ShiftMetricsPayload{}, rerr
 		}

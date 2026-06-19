@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
@@ -50,7 +51,12 @@ func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShi
 		return CreateShiftAssignmentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	created, err := h.Service.CreateShiftAssignment(ctx, device.User.UserID, domain.ShiftAssignmentRecord{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateShiftAssignmentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	created, err := h.Service.CreateShiftAssignment(ctx, businessID, domain.ShiftAssignmentRecord{
 		EmployeeID: req.EmployeeID,
 		ShiftID:    req.ShiftID,
 		Date:       req.Date,
@@ -62,7 +68,7 @@ func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShi
 		if errors.Is(err, domain.ErrRosterConflict) {
 			return CreateShiftAssignmentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Shift assignment conflicts with approved leave or another shift"}
 		}
-		logger.Ctx(ctx).Error("failed to create shift assignment", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create shift assignment", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateShiftAssignmentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create shift assignment"}
 	}
 

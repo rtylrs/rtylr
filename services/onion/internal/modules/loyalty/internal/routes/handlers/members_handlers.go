@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ─── List Members ─────────────────────────────────────────────────────────────
@@ -42,7 +43,11 @@ func (h *ListMembersHandler) Serve(ctx context.Context, req *ListMembersRequest)
 	if device.User == nil {
 		return ListMembersResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	members, err := h.Service.ListMembers(ctx, device.User.UserID, req.Limit, req.Offset)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListMembersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	members, err := h.Service.ListMembers(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		return ListMembersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -96,7 +101,11 @@ func (h *ListRewardsHandler) Serve(ctx context.Context, req *ListRewardsRequest)
 	if device.User == nil {
 		return ListRewardsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	rewards, err := h.Service.ListRewards(ctx, device.User.UserID, req.ActiveOnly)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListRewardsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	rewards, err := h.Service.ListRewards(ctx, businessID, req.ActiveOnly)
 	if err != nil {
 		return ListRewardsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -172,9 +181,14 @@ func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardReques
 	if req.Category == "" {
 		req.Category = "general"
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpsertRewardResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.UpsertReward(ctx, domain.LoyaltyReward{
 		ID:          req.ID,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Category:    req.Category,

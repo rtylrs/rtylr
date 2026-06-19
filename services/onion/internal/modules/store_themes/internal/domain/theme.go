@@ -5,6 +5,7 @@ import "time"
 type Theme struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	Name         string    `json:"name"`
 	PrimaryColor string    `json:"primary_color"`
 	Font         string    `json:"font"`

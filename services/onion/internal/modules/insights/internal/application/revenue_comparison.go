@@ -19,10 +19,10 @@ type RevenueComparisonPayload struct {
 
 // GetRevenueComparison resolves the window, fetches this+prior totals, and
 // computes a delta percentage safely even when last period is zero.
-func (s *Service) GetRevenueComparison(ctx context.Context, ownerID int64, from, to time.Time) (RevenueComparisonPayload, error) {
-	key := fmt.Sprintf("insights:%d:revenue:cmp:%s:%s", ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+func (s *Service) GetRevenueComparison(ctx context.Context, businessID int64, from, to time.Time) (RevenueComparisonPayload, error) {
+	key := fmt.Sprintf("insights:%d:revenue:cmp:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	out, err := cacher.Of[RevenueComparisonPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (RevenueComparisonPayload, error) {
-		row, rerr := s.repo.GetRevenueComparison(ctx, ownerID, from, to)
+		row, rerr := s.repo.GetRevenueComparison(ctx, businessID, from, to)
 		if rerr != nil {
 			return RevenueComparisonPayload{}, rerr
 		}

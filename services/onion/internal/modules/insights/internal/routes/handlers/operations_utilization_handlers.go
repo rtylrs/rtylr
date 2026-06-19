@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/operations/utilization
@@ -24,7 +25,11 @@ func (h *GetUtilizationHandler) Serve(ctx context.Context, _ *GetUtilizationRequ
 	if device.User == nil {
 		return GetUtilizationResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	payload, err := h.Service.GetUtilization(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetUtilizationResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	payload, err := h.Service.GetUtilization(ctx, businessID)
 	if err != nil {
 		return GetUtilizationResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

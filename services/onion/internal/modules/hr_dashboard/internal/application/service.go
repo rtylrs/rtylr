@@ -17,8 +17,8 @@ const (
 )
 
 type repository interface {
-	GetWidgets(ctx context.Context, ownerID int64) ([]*domain.DashboardWidget, error)
-	UpsertWidgets(ctx context.Context, ownerID int64, widgets []*domain.DashboardWidget) error
+	GetWidgets(ctx context.Context, businessID int64) ([]*domain.DashboardWidget, error)
+	UpsertWidgets(ctx context.Context, businessID int64, widgets []*domain.DashboardWidget) error
 }
 
 type Service struct {
@@ -31,26 +31,26 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func invalidateHRDashboardScope(ctx context.Context, ownerID int64) {
+func invalidateHRDashboardScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDashboardScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDashboardScope, businessID))
 	}
 }
 
-func (s *Service) GetWidgets(ctx context.Context, ownerID int64) ([]*domain.DashboardWidget, error) {
+func (s *Service) GetWidgets(ctx context.Context, businessID int64) ([]*domain.DashboardWidget, error) {
 	return cacher.Of[[]*domain.DashboardWidget]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(hrDashboardScope, ownerID, "widgets"),
+		cacheKeys.Scoped(hrDashboardScope, businessID, "widgets"),
 		func(ctx context.Context) ([]*domain.DashboardWidget, error) {
-			return s.repo.GetWidgets(ctx, ownerID)
+			return s.repo.GetWidgets(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, hrDashboardTTL),
 	)
 }
 
-func (s *Service) UpsertWidgets(ctx context.Context, ownerID int64, widgets []*domain.DashboardWidget) error {
-	if err := s.repo.UpsertWidgets(ctx, ownerID, widgets); err != nil {
+func (s *Service) UpsertWidgets(ctx context.Context, businessID int64, widgets []*domain.DashboardWidget) error {
+	if err := s.repo.UpsertWidgets(ctx, businessID, widgets); err != nil {
 		return err
 	}
-	invalidateHRDashboardScope(ctx, ownerID)
+	invalidateHRDashboardScope(ctx, businessID)
 	return nil
 }

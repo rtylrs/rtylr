@@ -159,6 +159,19 @@ func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
 	return nil
 }
 
+// BusinessNameExists reports whether a business with the given (trimmed) name
+// already exists. Business names are globally unique.
+func (r *Repository) BusinessNameExists(ctx context.Context, name string) (bool, error) {
+	var exists bool
+	err := r.db.QueryRowContext(ctx,
+		`SELECT EXISTS(SELECT 1 FROM businesses WHERE name = ? LIMIT 1)`, name).Scan(&exists)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to check business name existence", logger.Error(err))
+		return false, err
+	}
+	return exists, nil
+}
+
 // GetUserBusinessID returns the business_id for a user. Returns 0 if not set.
 func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
 	businessID, err := r.queries.GetUserBusinessID(ctx, userID)
@@ -214,8 +227,8 @@ func (r *Repository) SetUserBusinessID(ctx context.Context, userID, businessID i
 func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID int64) error {
 	// cross-schema write to hr_core — every user is also an hr_employees row
 	_, err := r.db.ExecContext(ctx, `
-INSERT INTO hr_employees (owner_id, user_id, first_name, last_name, email, status)
-SELECT ?, u.id,
+INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
+SELECT ?, COALESCE(u.business_id, 0), u.id,
        COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
        CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
        u.email, 'active'

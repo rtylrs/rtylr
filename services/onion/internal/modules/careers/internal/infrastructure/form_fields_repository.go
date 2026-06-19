@@ -15,7 +15,7 @@ var ErrFormFieldNotFound = errors.New("form field not found")
 // formFieldSelectColumns is the column projection shared by every
 // form-field read so the order stays locked with scanFormField.
 var formFieldSelectColumns = []string{
-	"id", "career_id", "owner_id", "kind", "label",
+	"id", "career_id", "owner_id", "business_id", "kind", "label",
 	"COALESCE(placeholder,'')", "required",
 	"COALESCE(options_json,'') AS options_json",
 	"position", "created_at", "updated_at",
@@ -24,7 +24,7 @@ var formFieldSelectColumns = []string{
 func scanFormField(row interface{ Scan(...interface{}) error }) (domain.FormField, error) {
 	var f domain.FormField
 	err := row.Scan(
-		&f.ID, &f.CareerID, &f.OwnerID, &f.Kind, &f.Label,
+		&f.ID, &f.CareerID, &f.OwnerID, &f.BusinessID, &f.Kind, &f.Label,
 		&f.Placeholder, &f.Required,
 		&f.OptionsJSON,
 		&f.Position, &f.CreatedAt, &f.UpdatedAt,
@@ -32,11 +32,11 @@ func scanFormField(row interface{ Scan(...interface{}) error }) (domain.FormFiel
 	return f, err
 }
 
-func (r *Repository) ListFormFields(ctx context.Context, ownerID, careerID int64) ([]domain.FormField, error) {
+func (r *Repository) ListFormFields(ctx context.Context, businessID, careerID int64) ([]domain.FormField, error) {
 	q, args, err := sq.
 		Select(formFieldSelectColumns...).
 		From("careers_form_fields").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Where(sq.Eq{"career_id": careerID}).
 		OrderBy("position ASC", "id ASC").
 		PlaceholderFormat(sq.Question).
@@ -94,8 +94,8 @@ func (r *Repository) ListFormFieldsByCareer(ctx context.Context, careerID int64)
 func (r *Repository) CreateFormField(ctx context.Context, in domain.FormFieldInput) (int64, error) {
 	q, args, err := sq.
 		Insert("careers_form_fields").
-		Columns("career_id", "owner_id", "kind", "label", "placeholder", "required", "options_json", "position").
-		Values(in.CareerID, in.OwnerID, in.Kind, in.Label,
+		Columns("career_id", "owner_id", "business_id", "kind", "label", "placeholder", "required", "options_json", "position").
+		Values(in.CareerID, in.OwnerID, in.BusinessID, in.Kind, in.Label,
 			nullStr(in.Placeholder), in.Required,
 			nullStr(in.OptionsJSON), in.Position).
 		PlaceholderFormat(sq.Question).
@@ -120,7 +120,7 @@ func (r *Repository) UpdateFormField(ctx context.Context, in domain.FormFieldInp
 		Set("options_json", nullStr(in.OptionsJSON)).
 		Set("position", in.Position).
 		Where(sq.Eq{"id": in.ID}).
-		Where(sq.Eq{"owner_id": in.OwnerID}).
+		Where(sq.Eq{"business_id": in.BusinessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -130,11 +130,11 @@ func (r *Repository) UpdateFormField(ctx context.Context, in domain.FormFieldInp
 	return err
 }
 
-func (r *Repository) DeleteFormField(ctx context.Context, ownerID, fieldID int64) error {
+func (r *Repository) DeleteFormField(ctx context.Context, businessID, fieldID int64) error {
 	q, args, err := sq.
 		Delete("careers_form_fields").
 		Where(sq.Eq{"id": fieldID}).
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -156,12 +156,12 @@ func (r *Repository) DeleteFormField(ctx context.Context, ownerID, fieldID int64
 
 // GetFormField is used before update/delete so the handler can 404
 // cleanly on cross-tenant access.
-func (r *Repository) GetFormField(ctx context.Context, ownerID, fieldID int64) (domain.FormField, error) {
+func (r *Repository) GetFormField(ctx context.Context, businessID, fieldID int64) (domain.FormField, error) {
 	q, args, err := sq.
 		Select(formFieldSelectColumns...).
 		From("careers_form_fields").
 		Where(sq.Eq{"id": fieldID}).
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"business_id": businessID}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
 		ToSql()

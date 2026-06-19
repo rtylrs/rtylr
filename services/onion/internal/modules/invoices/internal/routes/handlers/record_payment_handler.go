@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
@@ -66,6 +67,15 @@ func (h *RecordPaymentHandler) Validate(_ context.Context, req *RecordPaymentReq
 func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequest) (RecordPaymentResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	if device.User == nil {
+		return RecordPaymentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RecordPaymentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	paymentDate := req.PaymentDate
 	if paymentDate == "" {
 		paymentDate = time.Now().Format("2006-01-02")
@@ -86,7 +96,7 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 		Notes:       req.Notes,
 	}
 
-	p, err := h.FinanceService.RecordPayment(ctx, device.User.UserID, input)
+	p, err := h.FinanceService.RecordPayment(ctx, businessID, input)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvoiceNotFound) {
 			return RecordPaymentResponse{}, &errorModels.ServerError{

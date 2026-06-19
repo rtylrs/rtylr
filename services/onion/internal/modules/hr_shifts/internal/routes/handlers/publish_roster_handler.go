@@ -8,6 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func PublishRosterRoutes() []string { return []string{"/hr/shifts/roster/publish"} }
@@ -39,9 +40,14 @@ func (h *PublishRosterHandler) Serve(ctx context.Context, req *PublishRosterRequ
 		return PublishRosterResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	err := h.Service.PublishRoster(ctx, device.User.UserID, req.LocationID, req.WeekStart)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return PublishRosterResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	err := h.Service.PublishRoster(ctx, businessID, req.LocationID, req.WeekStart)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to publish roster", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to publish roster", logger.Any("business_id", businessID), logger.Error(err))
 		return PublishRosterResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to publish roster"}
 	}
 

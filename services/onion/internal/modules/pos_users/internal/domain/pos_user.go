@@ -41,6 +41,7 @@ var ErrInvalidPIN = errors.New("invalid pin")
 type POSUser struct {
 	ID               int64
 	OwnerID          int64
+	BusinessID       int64
 	UserID           int64
 	LocationID       int64
 	Name             string

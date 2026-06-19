@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // GET /insights/products/categories
@@ -26,7 +27,11 @@ func (h *GetCategorySalesHandler) Serve(ctx context.Context, _ *GetCategorySales
 	if device.User == nil {
 		return GetCategorySalesResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	rows, err := h.Service.GetSalesByCategory(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetCategorySalesResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	rows, err := h.Service.GetSalesByCategory(ctx, businessID)
 	if err != nil {
 		return GetCategorySalesResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,

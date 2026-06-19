@@ -11,6 +11,7 @@ var ErrBrandNotFound = errors.New("brand not found")
 type Brand struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
 	Name         string    `json:"name"`
 	LogoURL      string    `json:"logo_url"`
 	Description  string    `json:"description"`
@@ -29,6 +30,7 @@ func (b *Brand) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&b.ID,
 		&b.OwnerID,
+		&b.BusinessID,
 		&b.Name,
 		&logoURL,
 		&description,

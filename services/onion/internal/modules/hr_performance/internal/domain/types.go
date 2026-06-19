@@ -5,6 +5,7 @@ import "time"
 type ReviewCycleRecord struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	CycleType   string    `json:"type"`
 	PeriodStart string    `json:"period_start"`
@@ -17,6 +18,7 @@ type ReviewCycleRecord struct {
 type PerformanceReviewRecord struct {
 	ID                   int64     `json:"id"`
 	OwnerID              int64     `json:"owner_id"`
+	BusinessID           int64     `json:"business_id"`
 	EmployeeID           int64     `json:"employee_id"`
 	ReviewCycleID        int64     `json:"review_cycle_id"`
 	ReviewerEmployeeID   int64     `json:"reviewer_employee_id"`
@@ -32,6 +34,7 @@ type PerformanceReviewRecord struct {
 type ReviewGoalRecord struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`
+	BusinessID      int64     `json:"business_id"`
 	EmployeeID      int64     `json:"employee_id"`
 	ReviewCycleID   int64     `json:"review_cycle_id"`
 	Title           string    `json:"title"`
@@ -46,6 +49,7 @@ type ReviewGoalRecord struct {
 type PerformanceConfigRecord struct {
 	ID                  int64     `json:"id"`
 	OwnerID             int64     `json:"owner_id"`
+	BusinessID          int64     `json:"business_id"`
 	RatingScaleType     string    `json:"rating_scale_type"`
 	RatingMin           int32     `json:"rating_min"`
 	RatingMax           int32     `json:"rating_max"`

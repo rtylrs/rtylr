@@ -34,6 +34,7 @@ func staffFromRow(row sqlc.HrStaff) domain.Staff {
 	var s domain.Staff
 	s.ID = row.ID
 	s.OwnerID = row.OwnerID
+	s.BusinessID = row.BusinessID
 	if row.UserID.Valid {
 		s.UserID = row.UserID.Int64
 	}
@@ -91,18 +92,19 @@ func staffFromRow(row sqlc.HrStaff) domain.Staff {
 }
 
 func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
+	businessID := ownerID
 	// cross-schema read from hr_departments — to include department name in staff list response
 	// Dynamic WHERE clause - built with squirrel
 	builder := sq.
-		Select("s.id", "s.owner_id", "s.user_id", "s.department_id",
+		Select("s.id", "s.owner_id", "s.business_id", "s.user_id", "s.department_id",
 			"COALESCE(d.name, '') AS department_name",
 			"s.first_name", "s.last_name", "s.email", "s.phone",
 			"s.role", "s.employment_type", "s.status", "s.salary", "s.hourly_rate", "s.overtime_rate",
 			"s.start_date", "s.end_date", "s.address", "s.emergency_contact_name", "s.emergency_contact_phone",
 			"s.apps", "s.notes", "s.created_at", "s.updated_at").
 		From("hr_staff s").
-		LeftJoin("hr_departments d ON d.id = s.department_id AND d.owner_id = s.owner_id").
-		Where(sq.Eq{"s.owner_id": ownerID})
+		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
+		Where(sq.Eq{"s.business_id": businessID})
 
 	if search != "" {
 		like := "%" + search + "%"
@@ -158,7 +160,7 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 			updatedAt             sql.NullTime
 		)
 		if err := rows.Scan(
-			&s.ID, &s.OwnerID, &userID, &departmentID_, &departmentName,
+			&s.ID, &s.OwnerID, &s.BusinessID, &userID, &departmentID_, &departmentName,
 			&s.FirstName, &s.LastName, &s.Email, &phone,
 			&s.Role, &employmentType, &statusVal, &salary, &hourlyRate, &overtimeRate,
 			&s.StartDate, &endDate, &address, &emergencyContactName, &emergencyContactPhone,
@@ -230,6 +232,7 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 }
 
 func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
+	businessID := ownerID
 	var s domain.Staff
 	var (
 		userID                sql.NullInt64
@@ -251,14 +254,14 @@ func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (
 	)
 
 	err := r.pool.QueryRowContext(ctx, `
-		SELECT id, owner_id, user_id, department_id, first_name, last_name, email, phone,
+		SELECT id, owner_id, business_id, user_id, department_id, first_name, last_name, email, phone,
 		       role, employment_type, status, salary, hourly_rate, overtime_rate,
 		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
 		       apps, notes, created_at, updated_at
 		FROM hr_staff
-		WHERE id = ? AND owner_id = ?
-	`, staffID, ownerID).Scan(
-		&s.ID, &s.OwnerID, &userID, &departmentID,
+		WHERE id = ? AND business_id = ?
+	`, staffID, businessID).Scan(
+		&s.ID, &s.OwnerID, &s.BusinessID, &userID, &departmentID,
 		&s.FirstName, &s.LastName, &s.Email, &phone,
 		&s.Role, &employmentType, &statusVal, &salary, &hourlyRate, &overtimeRate,
 		&s.StartDate, &endDate, &address, &emergencyContactName, &emergencyContactPhone,
@@ -352,12 +355,13 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 
 	result, err := tx.ExecContext(ctx, `
 		INSERT INTO hr_staff
-			(owner_id, user_id, department_id, first_name, last_name, email, phone, role,
+			(owner_id, business_id, user_id, department_id, first_name, last_name, email, phone, role,
 			 employment_type, status, salary, hourly_rate, overtime_rate, start_date, end_date,
 			 address, emergency_contact_name, emergency_contact_phone, apps, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`,
 		input.OwnerID,
+		input.BusinessID,
 		sql.NullInt64{Int64: input.UserID, Valid: input.UserID != 0},
 		sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
 		input.FirstName,
@@ -390,7 +394,7 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 		return 0, err
 	}
 
-	if err := r.syncEmployeeFromStaff(ctx, tx, input.OwnerID, staffID); err != nil {
+	if err := r.syncEmployeeFromStaff(ctx, tx, input.BusinessID, staffID); err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to sync created staff to HR employee", logger.Error(err))
 		return 0, err
@@ -404,6 +408,7 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 }
 
 func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error {
+	businessID := ownerID
 	appsJSON := json.RawMessage("[]")
 	if input.Apps != "" {
 		appsJSON = json.RawMessage(input.Apps)
@@ -426,7 +431,7 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 		    role = ?, employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
 		    overtime_rate = ?, end_date = ?, address = ?, emergency_contact_name = ?,
 		    emergency_contact_phone = ?, apps = ?, notes = ?, updated_at = NOW()
-		WHERE id = ? AND owner_id = ?
+		WHERE id = ? AND business_id = ?
 	`,
 		sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
 		input.FirstName,
@@ -446,7 +451,7 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 		appsJSON,
 		sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		input.ID,
-		ownerID,
+		businessID,
 	)
 	if err != nil {
 		_ = tx.Rollback()
@@ -454,7 +459,7 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 		return err
 	}
 
-	if err := r.syncEmployeeFromStaff(ctx, tx, ownerID, input.ID); err != nil {
+	if err := r.syncEmployeeFromStaff(ctx, tx, businessID, input.ID); err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to sync updated staff to HR employee", logger.Error(err))
 		return err
@@ -464,6 +469,7 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 }
 
 func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) error {
+	businessID := ownerID
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -477,15 +483,15 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 
 	_, err = tx.ExecContext(ctx, `
 		UPDATE hr_staff SET status = 'terminated', updated_at = NOW()
-		WHERE id = ? AND owner_id = ?
-	`, staffID, ownerID)
+		WHERE id = ? AND business_id = ?
+	`, staffID, businessID)
 	if err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to terminate staff", logger.Error(err))
 		return err
 	}
 
-	if err := r.syncEmployeeFromStaff(ctx, tx, ownerID, staffID); err != nil {
+	if err := r.syncEmployeeFromStaff(ctx, tx, businessID, staffID); err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to sync terminated staff to HR employee", logger.Error(err))
 		return err
@@ -496,8 +502,8 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 
 func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error {
 	err := r.queries.ClockIn(ctx, sqlc.ClockInParams{
-		OwnerID: ownerID,
-		StaffID: sql.NullInt64{Int64: staffID, Valid: true},
+		BusinessID: ownerID,
+		StaffID:    sql.NullInt64{Int64: staffID, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to clock in", logger.Error(err))
@@ -508,8 +514,8 @@ func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error 
 
 func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error {
 	err := r.queries.ClockOut(ctx, sqlc.ClockOutParams{
-		OwnerID: ownerID,
-		StaffID: sql.NullInt64{Int64: staffID, Valid: true},
+		BusinessID: ownerID,
+		StaffID:    sql.NullInt64{Int64: staffID, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to clock out", logger.Error(err))
@@ -552,6 +558,7 @@ func (r *Repository) CountDraftPayroll(ctx context.Context, ownerID int64) (int,
 
 type staffEmployeeSyncRow struct {
 	OwnerID               int64
+	BusinessID            int64
 	StaffID               int64
 	EmployeeID            sql.NullInt64
 	UserID                sql.NullInt64
@@ -574,7 +581,8 @@ type staffEmployeeSyncRow struct {
 }
 
 func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, ownerID, staffID int64) error {
-	staff, err := loadStaffEmployeeSyncRow(ctx, tx, ownerID, staffID)
+	businessID := ownerID
+	staff, err := loadStaffEmployeeSyncRow(ctx, tx, businessID, staffID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil
@@ -584,13 +592,13 @@ func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, owne
 
 	employeeID := staff.EmployeeID
 	if !employeeID.Valid && staff.UserID.Valid {
-		employeeID, err = findEmployeeIDByUser(ctx, tx, staff.OwnerID, staff.UserID.Int64)
+		employeeID, err = findEmployeeIDByUser(ctx, tx, staff.BusinessID, staff.UserID.Int64)
 		if err != nil {
 			return err
 		}
 	}
 	if !employeeID.Valid && staff.Email != "" {
-		employeeID, err = findEmployeeIDByEmail(ctx, tx, staff.OwnerID, staff.Email)
+		employeeID, err = findEmployeeIDByEmail(ctx, tx, staff.BusinessID, staff.Email)
 		if err != nil {
 			return err
 		}
@@ -600,17 +608,18 @@ func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, owne
 		if err := updateEmployeeFromStaff(ctx, tx, employeeID.Int64, staff); err != nil {
 			return err
 		}
-		return linkStaffEmployee(ctx, tx, staff.OwnerID, staff.StaffID, employeeID.Int64)
+		return linkStaffEmployee(ctx, tx, staff.BusinessID, staff.StaffID, employeeID.Int64)
 	}
 
 	result, err := tx.ExecContext(ctx, `
 		INSERT INTO hr_employees
-			(owner_id, user_id, department_id, first_name, last_name, email, phone,
+			(owner_id, business_id, user_id, department_id, first_name, last_name, email, phone,
 			 employment_type, status, salary, hourly_rate, overtime_rate, start_date,
 			 end_date, address, emergency_contact_name, emergency_contact_phone, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`,
 		staff.OwnerID,
+		staff.BusinessID,
 		staff.UserID,
 		staff.DepartmentID,
 		staff.FirstName,
@@ -637,19 +646,20 @@ func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, owne
 	if err != nil {
 		return err
 	}
-	return linkStaffEmployee(ctx, tx, staff.OwnerID, staff.StaffID, newEmployeeID)
+	return linkStaffEmployee(ctx, tx, staff.BusinessID, staff.StaffID, newEmployeeID)
 }
 
-func loadStaffEmployeeSyncRow(ctx context.Context, tx *sql.Tx, ownerID, staffID int64) (staffEmployeeSyncRow, error) {
+func loadStaffEmployeeSyncRow(ctx context.Context, tx *sql.Tx, businessID, staffID int64) (staffEmployeeSyncRow, error) {
 	var staff staffEmployeeSyncRow
 	err := tx.QueryRowContext(ctx, `
-		SELECT owner_id, id, employee_id, user_id, department_id, first_name, last_name,
+		SELECT owner_id, business_id, id, employee_id, user_id, department_id, first_name, last_name,
 		       email, phone, employment_type, status, salary, hourly_rate, overtime_rate,
 		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone, notes
 		FROM hr_staff
-		WHERE owner_id = ? AND id = ?
-	`, ownerID, staffID).Scan(
+		WHERE business_id = ? AND id = ?
+	`, businessID, staffID).Scan(
 		&staff.OwnerID,
+		&staff.BusinessID,
 		&staff.StaffID,
 		&staff.EmployeeID,
 		&staff.UserID,
@@ -673,28 +683,28 @@ func loadStaffEmployeeSyncRow(ctx context.Context, tx *sql.Tx, ownerID, staffID 
 	return staff, err
 }
 
-func findEmployeeIDByUser(ctx context.Context, tx *sql.Tx, ownerID, userID int64) (sql.NullInt64, error) {
+func findEmployeeIDByUser(ctx context.Context, tx *sql.Tx, businessID, userID int64) (sql.NullInt64, error) {
 	var employeeID sql.NullInt64
 	err := tx.QueryRowContext(ctx, `
 		SELECT id FROM hr_employees
-		WHERE owner_id = ? AND user_id = ?
+		WHERE business_id = ? AND user_id = ?
 		ORDER BY id ASC
 		LIMIT 1
-	`, ownerID, userID).Scan(&employeeID)
+	`, businessID, userID).Scan(&employeeID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return sql.NullInt64{}, nil
 	}
 	return employeeID, err
 }
 
-func findEmployeeIDByEmail(ctx context.Context, tx *sql.Tx, ownerID int64, email string) (sql.NullInt64, error) {
+func findEmployeeIDByEmail(ctx context.Context, tx *sql.Tx, businessID int64, email string) (sql.NullInt64, error) {
 	var employeeID sql.NullInt64
 	err := tx.QueryRowContext(ctx, `
 		SELECT id FROM hr_employees
-		WHERE owner_id = ? AND LOWER(email) = LOWER(?)
+		WHERE business_id = ? AND LOWER(email) = LOWER(?)
 		ORDER BY id ASC
 		LIMIT 1
-	`, ownerID, email).Scan(&employeeID)
+	`, businessID, email).Scan(&employeeID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return sql.NullInt64{}, nil
 	}
@@ -710,7 +720,7 @@ func updateEmployeeFromStaff(ctx context.Context, tx *sql.Tx, employeeID int64, 
 		    overtime_rate = ?, start_date = ?, end_date = ?, address = ?,
 		    emergency_contact_name = ?, emergency_contact_phone = ?, notes = ?,
 		    updated_at = NOW()
-		WHERE id = ? AND owner_id = ?
+		WHERE id = ? AND business_id = ?
 	`,
 		staff.UserID,
 		staff.DepartmentID,
@@ -730,17 +740,17 @@ func updateEmployeeFromStaff(ctx context.Context, tx *sql.Tx, employeeID int64, 
 		staff.EmergencyContactPhone,
 		staff.Notes,
 		employeeID,
-		staff.OwnerID,
+		staff.BusinessID,
 	)
 	return err
 }
 
-func linkStaffEmployee(ctx context.Context, tx *sql.Tx, ownerID, staffID, employeeID int64) error {
+func linkStaffEmployee(ctx context.Context, tx *sql.Tx, businessID, staffID, employeeID int64) error {
 	_, err := tx.ExecContext(ctx, `
 		UPDATE hr_staff
 		SET employee_id = ?
-		WHERE id = ? AND owner_id = ?
-	`, employeeID, staffID, ownerID)
+		WHERE id = ? AND business_id = ?
+	`, employeeID, staffID, businessID)
 	return err
 }
 

@@ -14,6 +14,7 @@ func TestToPayload_RoundTrip(t *testing.T) {
 	in := domain.Storefront{
 		ID:          1,
 		OwnerID:     1001,
+		BusinessID:  2001,
 		Name:        "Test Shop",
 		Domain:      "shop.example.com",
 		LogoURL:     "https://example.com/logo.png",
@@ -23,7 +24,7 @@ func TestToPayload_RoundTrip(t *testing.T) {
 		UpdatedAt:   now,
 	}
 	out := toPayload(in)
-	if out.ID != in.ID || out.OwnerID != in.OwnerID || out.ThemeID != in.ThemeID {
+	if out.ID != in.ID || out.OwnerID != in.OwnerID || out.BusinessID != in.BusinessID || out.ThemeID != in.ThemeID {
 		t.Error("ids didn't round-trip")
 	}
 	if out.Name != in.Name || out.Domain != in.Domain || out.LogoURL != in.LogoURL {

@@ -8,6 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
@@ -27,12 +28,17 @@ func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpir
 		return ListDocumentsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListDocumentsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	days := req.Days
 	if days == 0 {
 		days = 30
 	}
 
-	docs, total, err := h.Service.ListExpiringDocuments(ctx, device.User.UserID, days, req.Limit, req.Offset)
+	docs, total, err := h.Service.ListExpiringDocuments(ctx, businessID, days, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list expiring documents", logger.Any("owner_id", device.User.UserID), logger.Any("days", days), logger.Error(err))
 		return ListDocumentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list expiring documents"}

@@ -17,8 +17,8 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.TrainingCourse, error)
-	Create(ctx context.Context, ownerID int64, input domain.TrainingCourseInput) (int64, error)
+	List(ctx context.Context, businessID int64) ([]domain.TrainingCourse, error)
+	Create(ctx context.Context, businessID int64, input domain.TrainingCourseInput) (int64, error)
 }
 
 type Service struct {
@@ -29,27 +29,27 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateTrainingScope(ctx context.Context, ownerID int64) {
+func invalidateTrainingScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(trainingScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(trainingScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.TrainingCourse, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.TrainingCourse, error) {
 	return cacher.Of[[]domain.TrainingCourse]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(trainingScope, ownerID, "list"),
+		cacheKeys.Scoped(trainingScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.TrainingCourse, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, trainingTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.TrainingCourseInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.TrainingCourseInput) (int64, error) {
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateTrainingScope(ctx, ownerID)
+	invalidateTrainingScope(ctx, businessID)
 	return id, nil
 }

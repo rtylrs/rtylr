@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -36,7 +37,12 @@ func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (
 		return GetPipelineResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	summaries, err := h.Service.GetPipeline(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetPipelineResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	summaries, err := h.Service.GetPipeline(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get pipeline", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return GetPipelineResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get pipeline"}
@@ -65,7 +71,12 @@ func (h *ListLeadsHandler) Serve(ctx context.Context, _ *ListLeadsRequest) (List
 		return ListLeadsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	leads, err := h.Service.ListLeads(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListLeadsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	leads, err := h.Service.ListLeads(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list leads", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListLeadsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list leads"}
@@ -110,7 +121,12 @@ func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (
 		return CreateLeadResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	lead, err := h.Service.CreateLead(ctx, device.User.UserID, domain.CreateLeadRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateLeadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	lead, err := h.Service.CreateLead(ctx, businessID, domain.CreateLeadRequest{
 		CompanyName:  req.CompanyName,
 		Industry:     req.Industry,
 		Size:         req.Size,
@@ -154,7 +170,12 @@ func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadR
 		return GetLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
 	}
 
-	lead, err := h.Service.GetLead(ctx, id, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetLeadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	lead, err := h.Service.GetLead(ctx, id, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrLeadNotFound) {
 			return GetLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
@@ -208,7 +229,12 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 		return UpdateLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
 	}
 
-	lead, err := h.Service.UpdateLead(ctx, id, device.User.UserID, domain.UpdateLeadRequest{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateLeadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	lead, err := h.Service.UpdateLead(ctx, id, businessID, domain.UpdateLeadRequest{
 		CompanyName:  req.CompanyName,
 		Industry:     req.Industry,
 		Size:         req.Size,
@@ -255,7 +281,12 @@ func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (De
 		return DeleteLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
 	}
 
-	if err := h.Service.DeleteLead(ctx, id, device.User.UserID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteLeadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.DeleteLead(ctx, id, businessID); err != nil {
 		if errors.Is(err, domain.ErrLeadNotFound) {
 			return DeleteLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
 		}

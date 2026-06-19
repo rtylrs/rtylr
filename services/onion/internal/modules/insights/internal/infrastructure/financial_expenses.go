@@ -19,20 +19,20 @@ type ExpenseByCategoryRow struct {
 // GetExpensesByCategory returns category-grouped expense totals for the
 // window. The join to finance_expense_categories is left so expenses
 // without a category remain visible.
-func (r *Repository) GetExpensesByCategory(ctx context.Context, ownerID int64, from, to time.Time) ([]ExpenseByCategoryRow, error) {
+func (r *Repository) GetExpensesByCategory(ctx context.Context, businessID int64, from, to time.Time) ([]ExpenseByCategoryRow, error) {
 	// cross-schema read from finance_expenses + finance_expense_categories — category-grouped expense totals
 	const q = `
 		SELECT COALESCE(c.id, 0) AS cat_id,
 		       COALESCE(c.name, 'Uncategorised') AS cat_name,
 		       COALESCE(SUM(e.amount), 0)
 		FROM finance_expenses e
-		LEFT JOIN finance_expense_categories c ON c.id = e.category_id AND c.owner_id = e.owner_id
-		WHERE e.owner_id = ?
+		LEFT JOIN finance_expense_categories c ON c.id = e.category_id AND c.business_id = e.business_id
+		WHERE e.business_id = ?
 		  AND e.expense_date BETWEEN ? AND ?
 		GROUP BY c.id, c.name
 		ORDER BY SUM(e.amount) DESC
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	rows, err := r.pool.QueryContext(ctx, q, businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: expenses by category query failed", logger.Error(err))
 		return nil, err

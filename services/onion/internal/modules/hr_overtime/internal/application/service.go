@@ -18,23 +18,23 @@ const (
 	hrOvertimeTTL   = 2 * time.Minute
 )
 
-func invalidateHROvertimeScope(ctx context.Context, ownerID int64) {
+func invalidateHROvertimeScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
 	}
 }
 
 type repository interface {
-	ListOvertimeRequests(ctx context.Context, ownerID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error)
-	GetOvertimeRequest(ctx context.Context, ownerID, requestID int64) (*domain.OvertimeRequestRecord, error)
-	CreateOvertimeRequest(ctx context.Context, ownerID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error)
-	ApproveOvertimeRequest(ctx context.Context, ownerID, requestID, approverID int64, multiplier float64) error
-	AdvanceOvertimeApprovalLevel(ctx context.Context, ownerID, requestID int64) error
-	RejectOvertimeRequest(ctx context.Context, ownerID, requestID int64) error
-	CreateFlaggedOvertimeRequest(ctx context.Context, ownerID, employeeID int64, date string, extraMinutes int32) error
-	ListFlaggedForDate(ctx context.Context, ownerID int64, date string) ([]domain.OvertimeRequestRecord, error)
-	GetOvertimeConfig(ctx context.Context, ownerID int64) (*domain.OvertimeConfigRecord, error)
-	UpsertOvertimeConfig(ctx context.Context, ownerID int64, cfg domain.OvertimeConfigRecord) error
+	ListOvertimeRequests(ctx context.Context, businessID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error)
+	GetOvertimeRequest(ctx context.Context, businessID, requestID int64) (*domain.OvertimeRequestRecord, error)
+	CreateOvertimeRequest(ctx context.Context, businessID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error)
+	ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error
+	AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64) error
+	RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error
+	CreateFlaggedOvertimeRequest(ctx context.Context, businessID, employeeID int64, date string, extraMinutes int32) error
+	ListFlaggedForDate(ctx context.Context, businessID int64, date string) ([]domain.OvertimeRequestRecord, error)
+	GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error)
+	UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error
 	ListAllConfiguredOwnerIDs(ctx context.Context) ([]int64, error)
 }
 
@@ -50,21 +50,21 @@ func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalC
 	}
 }
 
-func (s *Service) ListOvertimeRequests(ctx context.Context, ownerID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
+func (s *Service) ListOvertimeRequests(ctx context.Context, businessID int64, params domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	key := cacheKeys.Scoped(hrOvertimeScope, ownerID, fmt.Sprintf("reqs|l=%d|o=%d", params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrOvertimeScope, businessID, fmt.Sprintf("reqs|l=%d|o=%d", params.Limit, params.Offset))
 	type listResult struct {
 		Items []domain.OvertimeRequestRecord
 		Total int64
 	}
 	res, err := cacher.Of[listResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (listResult, error) {
-			items, total, err := s.repo.ListOvertimeRequests(ctx, ownerID, params)
+			items, total, err := s.repo.ListOvertimeRequests(ctx, businessID, params)
 			return listResult{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrOvertimeTTL),
@@ -72,23 +72,23 @@ func (s *Service) ListOvertimeRequests(ctx context.Context, ownerID int64, param
 	return res.Items, res.Total, err
 }
 
-func (s *Service) CreateOvertimeRequest(ctx context.Context, ownerID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
+func (s *Service) CreateOvertimeRequest(ctx context.Context, businessID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
 	req.Status = "pending"
 	req.CurrentApprovalLevel = 0
-	rec, err := s.repo.CreateOvertimeRequest(ctx, ownerID, req)
+	rec, err := s.repo.CreateOvertimeRequest(ctx, businessID, req)
 	if err == nil {
-		invalidateHROvertimeScope(ctx, ownerID)
+		invalidateHROvertimeScope(ctx, businessID)
 	}
 	return rec, err
 }
 
-func (s *Service) ApproveOvertime(ctx context.Context, ownerID, requestID, approverID int64, multiplier float64) error {
-	req, err := s.repo.GetOvertimeRequest(ctx, ownerID, requestID)
+func (s *Service) ApproveOvertime(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error {
+	req, err := s.repo.GetOvertimeRequest(ctx, businessID, requestID)
 	if err != nil {
 		return err
 	}
 
-	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, ownerID, "overtime")
+	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, businessID, "overtime")
 	if chainErr != nil {
 		return chainErr
 	}
@@ -97,11 +97,11 @@ func (s *Service) ApproveOvertime(ctx context.Context, ownerID, requestID, appro
 	}
 
 	if req.CurrentApprovalLevel+1 < chain.TotalLevels {
-		return s.repo.AdvanceOvertimeApprovalLevel(ctx, ownerID, requestID)
+		return s.repo.AdvanceOvertimeApprovalLevel(ctx, businessID, requestID)
 	}
 
 	if multiplier <= 0 {
-		cfg, cfgErr := s.repo.GetOvertimeConfig(ctx, ownerID)
+		cfg, cfgErr := s.repo.GetOvertimeConfig(ctx, businessID)
 		if cfgErr == nil && cfg != nil {
 			multiplier = cfg.DefaultMultiplier
 		} else {
@@ -109,32 +109,32 @@ func (s *Service) ApproveOvertime(ctx context.Context, ownerID, requestID, appro
 		}
 	}
 
-	if err := s.repo.ApproveOvertimeRequest(ctx, ownerID, requestID, approverID, multiplier); err != nil {
+	if err := s.repo.ApproveOvertimeRequest(ctx, businessID, requestID, approverID, multiplier); err != nil {
 		return err
 	}
-	invalidateHROvertimeScope(ctx, ownerID)
+	invalidateHROvertimeScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) RejectOvertime(ctx context.Context, ownerID, requestID int64) error {
-	if _, err := s.repo.GetOvertimeRequest(ctx, ownerID, requestID); err != nil {
+func (s *Service) RejectOvertime(ctx context.Context, businessID, requestID int64) error {
+	if _, err := s.repo.GetOvertimeRequest(ctx, businessID, requestID); err != nil {
 		return err
 	}
-	if err := s.repo.RejectOvertimeRequest(ctx, ownerID, requestID); err != nil {
+	if err := s.repo.RejectOvertimeRequest(ctx, businessID, requestID); err != nil {
 		return err
 	}
-	invalidateHROvertimeScope(ctx, ownerID)
+	invalidateHROvertimeScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) GetOvertimeConfig(ctx context.Context, ownerID int64) (*domain.OvertimeConfigRecord, error) {
+func (s *Service) GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error) {
 	return cacher.Of[*domain.OvertimeConfigRecord]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(hrOvertimeScope, ownerID, "config"),
+		cacheKeys.Scoped(hrOvertimeScope, businessID, "config"),
 		func(ctx context.Context) (*domain.OvertimeConfigRecord, error) {
-			cfg, err := s.repo.GetOvertimeConfig(ctx, ownerID)
+			cfg, err := s.repo.GetOvertimeConfig(ctx, businessID)
 			if err != nil {
 				logger.Ctx(ctx).Debug("no overtime config found, auto-detection disabled",
-					logger.Any("owner_id", ownerID))
+					logger.Any("business_id", businessID))
 				return nil, domain.ErrOvertimeConfigNotFound
 			}
 			return cfg, nil
@@ -143,19 +143,19 @@ func (s *Service) GetOvertimeConfig(ctx context.Context, ownerID int64) (*domain
 	)
 }
 
-func (s *Service) UpsertOvertimeConfig(ctx context.Context, ownerID int64, cfg domain.OvertimeConfigRecord) error {
-	if err := s.repo.UpsertOvertimeConfig(ctx, ownerID, cfg); err != nil {
+func (s *Service) UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error {
+	if err := s.repo.UpsertOvertimeConfig(ctx, businessID, cfg); err != nil {
 		return err
 	}
-	invalidateHROvertimeScope(ctx, ownerID)
+	invalidateHROvertimeScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) DetectAndFlagOvertime(ctx context.Context, ownerID int64, date string) error {
-	cfg, err := s.repo.GetOvertimeConfig(ctx, ownerID)
+func (s *Service) DetectAndFlagOvertime(ctx context.Context, businessID int64, date string) error {
+	cfg, err := s.repo.GetOvertimeConfig(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Debug("overtime auto-detect: no config, skipping",
-			logger.Any("owner_id", ownerID))
+			logger.Any("business_id", businessID))
 		return nil
 	}
 
@@ -163,25 +163,25 @@ func (s *Service) DetectAndFlagOvertime(ctx context.Context, ownerID int64, date
 		return nil
 	}
 
-	existing, err := s.repo.ListFlaggedForDate(ctx, ownerID, date)
+	existing, err := s.repo.ListFlaggedForDate(ctx, businessID, date)
 	if err != nil {
 		return err
 	}
 	if len(existing) > 0 {
 		logger.Ctx(ctx).Debug("overtime auto-detect: already flagged for date, skipping",
-			logger.Any("owner_id", ownerID), logger.Any("date", date))
+			logger.Any("business_id", businessID), logger.Any("date", date))
 		return nil
 	}
 
 	logger.Ctx(ctx).Info("overtime auto-detect: would scan timesheets for date",
-		logger.Any("owner_id", ownerID), logger.Any("date", date),
+		logger.Any("business_id", businessID), logger.Any("date", date),
 		logger.Any("threshold_minutes", cfg.DailyThresholdMinutes))
 
 	return nil
 }
 
 func (s *Service) RunDailyDetection(ctx context.Context) error {
-	ownerIDs, err := s.repo.ListAllConfiguredOwnerIDs(ctx)
+	businessIDs, err := s.repo.ListAllConfiguredOwnerIDs(ctx)
 	if err != nil {
 		logger.Ctx(ctx).Error("overtime daily detection: failed to list owner IDs", logger.Error(err))
 		return err
@@ -189,10 +189,10 @@ func (s *Service) RunDailyDetection(ctx context.Context) error {
 
 	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 
-	for _, ownerID := range ownerIDs {
-		if detectErr := s.DetectAndFlagOvertime(ctx, ownerID, yesterday); detectErr != nil {
+	for _, businessID := range businessIDs {
+		if detectErr := s.DetectAndFlagOvertime(ctx, businessID, yesterday); detectErr != nil {
 			logger.Ctx(ctx).Error("overtime daily detection: failed for owner",
-				logger.Any("owner_id", ownerID), logger.Error(detectErr))
+				logger.Any("business_id", businessID), logger.Error(detectErr))
 		}
 	}
 

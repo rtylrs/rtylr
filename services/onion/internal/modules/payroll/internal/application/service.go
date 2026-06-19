@@ -18,19 +18,19 @@ const (
 	payrollTTL   = 5 * time.Minute
 )
 
-func invalidatePayrollScope(ctx context.Context, ownerID int64) {
+func invalidatePayrollScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(payrollScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(payrollScope, businessID))
 	}
 }
 
 type repository interface {
-	ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error)
-	GetCompletedShiftsForPeriod(ctx context.Context, ownerID int64, start, end time.Time) ([]domain.ShiftSummary, error)
-	GetStaffPayRates(ctx context.Context, ownerID, staffID int64) (domain.StaffPayRates, error)
-	GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error)
-	CreatePayrollRecord(ctx context.Context, ownerID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error)
-	MarkPayrollPaid(ctx context.Context, ownerID, payrollID int64) error
+	ListPayrollRecords(ctx context.Context, businessID int64, periodLabel string) ([]domain.PayrollRecord, error)
+	GetCompletedShiftsForPeriod(ctx context.Context, businessID int64, start, end time.Time) ([]domain.ShiftSummary, error)
+	GetStaffPayRates(ctx context.Context, businessID, staffID int64) (domain.StaffPayRates, error)
+	GetStaffPayRatesByIDs(ctx context.Context, businessID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error)
+	CreatePayrollRecord(ctx context.Context, businessID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error)
+	MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error
 }
 
 type Service struct {
@@ -41,17 +41,17 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error) {
-	key := cacheKeys.Scoped(payrollScope, ownerID, fmt.Sprintf("list|p=%s", periodLabel))
+func (s *Service) ListPayrollRecords(ctx context.Context, businessID int64, periodLabel string) ([]domain.PayrollRecord, error) {
+	key := cacheKeys.Scoped(payrollScope, businessID, fmt.Sprintf("list|p=%s", periodLabel))
 	return cacher.Of[[]domain.PayrollRecord]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.PayrollRecord, error) {
-			return s.repo.ListPayrollRecords(ctx, ownerID, periodLabel)
+			return s.repo.ListPayrollRecords(ctx, businessID, periodLabel)
 		},
 		cacher.WithExpiry(ctx, payrollTTL),
 	)
 }
 
-func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.PayrollRunInput) (int, error) {
+func (s *Service) RunPayroll(ctx context.Context, businessID int64, input domain.PayrollRunInput) (int, error) {
 	periodStart, err := time.Parse("2006-01-02", input.PeriodStart)
 	if err != nil {
 		return 0, fmt.Errorf("invalid period_start date: %w", err)
@@ -62,7 +62,7 @@ func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.Pa
 		return 0, fmt.Errorf("invalid period_end date: %w", err)
 	}
 
-	summaries, err := s.repo.GetCompletedShiftsForPeriod(ctx, ownerID, periodStart, periodEnd)
+	summaries, err := s.repo.GetCompletedShiftsForPeriod(ctx, businessID, periodStart, periodEnd)
 	if err != nil {
 		return 0, err
 	}
@@ -75,7 +75,7 @@ func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.Pa
 	for _, summary := range summaries {
 		staffIDs = append(staffIDs, summary.StaffID)
 	}
-	ratesByStaff, err := s.repo.GetStaffPayRatesByIDs(ctx, ownerID, staffIDs)
+	ratesByStaff, err := s.repo.GetStaffPayRatesByIDs(ctx, businessID, staffIDs)
 	if err != nil {
 		return 0, err
 	}
@@ -110,7 +110,7 @@ func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.Pa
 
 		netPay := basePay + overtimePay
 
-		_, createErr := s.repo.CreatePayrollRecord(ctx, ownerID, summary.StaffID, periodStart, periodEnd,
+		_, createErr := s.repo.CreatePayrollRecord(ctx, businessID, summary.StaffID, periodStart, periodEnd,
 			input.PeriodLabel, regularHours, summary.TotalOvertimeHours, basePay, overtimePay, netPay)
 		if createErr != nil {
 			logger.Ctx(ctx).Error("Failed to create payroll record", logger.Error(createErr), logger.Any("staffId", summary.StaffID))
@@ -121,15 +121,15 @@ func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.Pa
 	}
 
 	if createdCount > 0 {
-		invalidatePayrollScope(ctx, ownerID)
+		invalidatePayrollScope(ctx, businessID)
 	}
 	return createdCount, nil
 }
 
-func (s *Service) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int64) error {
-	if err := s.repo.MarkPayrollPaid(ctx, ownerID, payrollID); err != nil {
+func (s *Service) MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error {
+	if err := s.repo.MarkPayrollPaid(ctx, businessID, payrollID); err != nil {
 		return err
 	}
-	invalidatePayrollScope(ctx, ownerID)
+	invalidatePayrollScope(ctx, businessID)
 	return nil
 }

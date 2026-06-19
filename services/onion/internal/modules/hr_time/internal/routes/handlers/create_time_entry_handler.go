@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
@@ -58,6 +59,11 @@ func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntry
 		return CreateTimeEntryResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateTimeEntryResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	entry := domain.TimeEntryRecord{
 		EmployeeID:      req.EmployeeID,
 		ProjectID:       req.ProjectID,
@@ -72,7 +78,7 @@ func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntry
 		Source:          req.Source,
 	}
 
-	created, err := h.Service.CreateTimeEntry(ctx, device.User.UserID, entry)
+	created, err := h.Service.CreateTimeEntry(ctx, businessID, entry)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidDuration) {
 			return CreateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Duration must be greater than 0"}

@@ -1,20 +1,20 @@
 -- name: CountWorkspacesByOwner :one
-SELECT COUNT(*) AS cnt FROM flow_workspaces WHERE owner_id = ?;
+SELECT COUNT(*) AS cnt FROM flow_workspaces WHERE business_id = ?;
 
 -- name: CreateWorkspace :execresult
-INSERT INTO flow_workspaces (owner_id, name, description, icon, color, is_default, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_workspaces (owner_id, business_id, name, description, icon, color, is_default, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetWorkspacesByOwner :many
-SELECT id, owner_id, name, description, icon, color, is_default, created_by, created_at, updated_at
-FROM flow_workspaces WHERE owner_id = ? ORDER BY is_default DESC, created_at ASC;
+SELECT id, owner_id, business_id, name, description, icon, color, is_default, created_by, created_at, updated_at
+FROM flow_workspaces WHERE business_id = ? ORDER BY is_default DESC, created_at ASC;
 
 -- name: UpdateWorkspace :exec
 UPDATE flow_workspaces SET name = ?, description = ?, icon = ?, color = ?
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: DeleteWorkspace :exec
-DELETE FROM flow_workspaces WHERE id = ? AND owner_id = ?;
+DELETE FROM flow_workspaces WHERE id = ? AND business_id = ?;
 
 -- name: AddWorkspaceMember :exec
 INSERT INTO flow_workspace_members (workspace_id, user_id, role) VALUES (?, ?, ?)
@@ -24,25 +24,25 @@ ON DUPLICATE KEY UPDATE role = VALUES(role);
 DELETE FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?;
 
 -- name: CreateProject :execresult
-INSERT INTO flow_projects (workspace_id, owner_id, name, description, icon, color, start_date, due_date, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, description, icon, color, start_date, due_date, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetProjectsByWorkspace :many
-SELECT id, workspace_id, owner_id, name, description, icon, color, status, start_date, due_date, created_by, created_at, updated_at
-FROM flow_projects WHERE workspace_id = ? AND owner_id = ? AND status != 'archived' ORDER BY created_at ASC;
+SELECT id, workspace_id, owner_id, business_id, name, description, icon, color, status, start_date, due_date, created_by, created_at, updated_at
+FROM flow_projects WHERE workspace_id = ? AND business_id = ? AND status != 'archived' ORDER BY created_at ASC;
 
 -- name: UpdateProject :exec
 UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status = ?, start_date = ?, due_date = ?
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: ArchiveProject :exec
-UPDATE flow_projects SET status = 'archived' WHERE id = ? AND owner_id = ?;
+UPDATE flow_projects SET status = 'archived' WHERE id = ? AND business_id = ?;
 
 -- name: CreateTask :execresult
 INSERT INTO flow_tasks
-(project_id, workspace_id, owner_id, parent_task_id, title, description, priority,
+(project_id, workspace_id, owner_id, business_id, parent_task_id, title, description, priority,
  assignee_id, reporter_id, due_date, start_date, estimated_hours, labels)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetTasksByProject :many
 SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
@@ -76,16 +76,16 @@ UPDATE flow_tasks
 SET title = ?, description = ?, status = ?, priority = ?, assignee_id = ?,
     due_date = ?, start_date = ?, labels = ?,
     completed_at = CASE WHEN ? = 'done' AND completed_at IS NULL THEN NOW() WHEN ? != 'done' THEN NULL ELSE completed_at END
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: UpdateTaskStatus :exec
 UPDATE flow_tasks
 SET status = ?,
     completed_at = CASE WHEN ? = 'done' AND completed_at IS NULL THEN NOW() WHEN ? != 'done' THEN NULL ELSE completed_at END
-WHERE id = ? AND owner_id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: DeleteTask :exec
-DELETE FROM flow_tasks WHERE id = ? AND owner_id = ?;
+DELETE FROM flow_tasks WHERE id = ? AND business_id = ?;
 
 -- name: CreateComment :execresult
 INSERT INTO flow_task_comments (task_id, user_id, content) VALUES (?, ?, ?);
@@ -105,22 +105,22 @@ SELECT id, task_id, user_id, action, old_value, new_value, created_at
 FROM flow_task_activity WHERE task_id = ? ORDER BY created_at DESC LIMIT ?;
 
 -- name: CreateAttachment :execresult
-INSERT INTO flow_task_attachments (task_id, owner_id, name, url, size, uploaded_by)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO flow_task_attachments (task_id, owner_id, business_id, name, url, size, uploaded_by)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetAttachmentsByTask :many
-SELECT id, task_id, owner_id, name, url, size, uploaded_by, created_at
+SELECT id, task_id, owner_id, business_id, name, url, size, uploaded_by, created_at
 FROM flow_task_attachments WHERE task_id = ? ORDER BY created_at DESC;
 
 -- name: DeleteAttachment :exec
-DELETE FROM flow_task_attachments WHERE id = ? AND owner_id = ?;
+DELETE FROM flow_task_attachments WHERE id = ? AND business_id = ?;
 
 -- name: CreateTimeLog :execresult
-INSERT INTO flow_time_logs (owner_id, task_id, user_id, duration_minutes, description)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO flow_time_logs (owner_id, business_id, task_id, user_id, duration_minutes, description)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetTimeLogsByTask :many
-SELECT id, owner_id, task_id, user_id, duration_minutes, description, logged_at, created_at
+SELECT id, owner_id, business_id, task_id, user_id, duration_minutes, description, logged_at, created_at
 FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC;
 
 -- name: CreateLabel :execresult
@@ -136,7 +136,7 @@ SELECT
     COUNT(CASE WHEN status = 'in_progress' THEN 1 END) AS in_progress_tasks,
     COUNT(CASE WHEN status = 'done' AND completed_at >= ? AND completed_at < ? THEN 1 END) AS completed_this_week,
     COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END) AS overdue_tasks
-FROM flow_tasks WHERE workspace_id = ? AND owner_id = ?;
+FROM flow_tasks WHERE workspace_id = ? AND business_id = ?;
 
 -- name: CountProjectColumns :one
 SELECT COUNT(*) FROM flow_project_columns WHERE project_id = ?;

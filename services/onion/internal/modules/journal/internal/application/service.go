@@ -18,9 +18,9 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.JournalEntry, error)
-	Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error)
-	Post(ctx context.Context, ownerID, id int64) error
+	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.JournalEntry, error)
+	Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error)
+	Post(ctx context.Context, businessID, id int64) error
 }
 
 type Service struct {
@@ -31,18 +31,18 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateJournalScope(ctx context.Context, ownerID int64) {
+func invalidateJournalScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(journalScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(journalScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID, page, pageSize int64) ([]domain.JournalEntry, bool, error) {
+func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([]domain.JournalEntry, bool, error) {
 	limit, offset := paginate(page, pageSize)
-	key := cacheKeys.Scoped(journalScope, ownerID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
+	key := cacheKeys.Scoped(journalScope, businessID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
 	rows, err := cacher.Of[[]domain.JournalEntry]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.JournalEntry, error) {
-			return s.repo.List(ctx, ownerID, int32(limit+1), int32(offset))
+			return s.repo.List(ctx, businessID, int32(limit+1), int32(offset))
 		},
 		cacher.WithExpiry(ctx, journalTTL),
 	)
@@ -69,19 +69,19 @@ func paginate(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error) {
-	id, err := s.repo.Create(ctx, ownerID, input)
+func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error) {
+	id, err := s.repo.Create(ctx, ownerID, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateJournalScope(ctx, ownerID)
+	invalidateJournalScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Post(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Post(ctx, ownerID, id); err != nil {
+func (s *Service) Post(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Post(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateJournalScope(ctx, ownerID)
+	invalidateJournalScope(ctx, businessID)
 	return nil
 }

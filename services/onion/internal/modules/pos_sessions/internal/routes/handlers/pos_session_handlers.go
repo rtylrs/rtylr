@@ -66,8 +66,11 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest)
 	if device.User == nil {
 		return ListSessionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
-	sessions, err := h.Service.List(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListSessionsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	sessions, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListSessionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list sessions"}
 	}
@@ -95,13 +98,16 @@ func (h *GetSessionHandler) Serve(ctx context.Context, _ *GetSessionRequest) (Ge
 	if device.User == nil {
 		return GetSessionResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSessionResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
 		return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid session ID"}
 	}
-	session, getErr := h.Service.Get(ctx, ownerID, id)
+	session, getErr := h.Service.Get(ctx, businessID, id)
 	if getErr != nil {
 		if errors.Is(getErr, domain.ErrSessionNotFound) {
 			return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Session not found"}
@@ -134,9 +140,13 @@ func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest)
 	if device.User == nil {
 		return OpenSessionResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return OpenSessionResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.Open(ctx, domain.OpenSessionInput{
-		OwnerID:      ownerID,
+		OwnerID:      device.User.UserID,
+		BusinessID:   businessID,
 		LocationID:   req.LocationID,
 		StaffID:      req.StaffID,
 		OpeningFloat: req.OpeningFloat,
@@ -166,7 +176,10 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 	if device.User == nil {
 		return CloseSessionResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CloseSessionResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -174,7 +187,8 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 	}
 	if closeErr := h.Service.Close(ctx, domain.CloseSessionInput{
 		ID:           id,
-		OwnerID:      ownerID,
+		OwnerID:      device.User.UserID,
+		BusinessID:   businessID,
 		ClosingFloat: req.ClosingFloat,
 	}); closeErr != nil {
 		if errors.Is(closeErr, domain.ErrSessionNotFound) {

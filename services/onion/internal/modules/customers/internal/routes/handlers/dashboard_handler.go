@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmdashboardv1 "github.com/voxire/voxie/gen/go/crm/dashboard/v1"
 )
 
@@ -46,7 +47,12 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	stats, err := h.CRMService.GetDashboardStats(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	stats, err := h.CRMService.GetDashboardStats(ctx, businessID)
 	if err != nil {
 		return DashboardResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

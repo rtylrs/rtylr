@@ -25,14 +25,14 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
+func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
 	var receipts []domain.Receipt
 
 	if dateFrom != "" && dateTo != "" {
 		rows, err := r.queries.ListReceiptsWithDateRange(ctx, sqlc.ListReceiptsWithDateRangeParams{
-			OwnerID:  ownerID,
-			PaidAt:   sql.NullTime{Time: parseTime(dateFrom), Valid: true},
-			PaidAt_2: sql.NullTime{Time: parseTime(dateTo), Valid: true},
+			BusinessID: businessID,
+			PaidAt:     sql.NullTime{Time: parseTime(dateFrom), Valid: true},
+			PaidAt_2:   sql.NullTime{Time: parseTime(dateTo), Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
@@ -47,12 +47,13 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 				Total:         decimalToFloat(row.Total.String),
 				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 				PaidAt:        row.PaidAt.Time,
+				BusinessID:    row.BusinessID,
 			})
 		}
 	} else if dateFrom != "" {
 		rows, err := r.queries.ListReceiptsWithDateFrom(ctx, sqlc.ListReceiptsWithDateFromParams{
-			OwnerID: ownerID,
-			PaidAt:  sql.NullTime{Time: parseTime(dateFrom), Valid: true},
+			BusinessID: businessID,
+			PaidAt:     sql.NullTime{Time: parseTime(dateFrom), Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
@@ -67,10 +68,11 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 				Total:         decimalToFloat(row.Total.String),
 				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 				PaidAt:        row.PaidAt.Time,
+				BusinessID:    row.BusinessID,
 			})
 		}
 	} else {
-		rows, err := r.queries.ListReceipts(ctx, ownerID)
+		rows, err := r.queries.ListReceipts(ctx, businessID)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
 			return nil, err
@@ -84,6 +86,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 				Total:         decimalToFloat(row.Total.String),
 				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 				PaidAt:        row.PaidAt.Time,
+				BusinessID:    row.BusinessID,
 			})
 		}
 	}
@@ -94,8 +97,8 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 	return receipts, nil
 }
 
-func (r *Repository) Get(ctx context.Context, ownerID, id int64) (*domain.Receipt, error) {
-	row, err := r.queries.GetReceiptByID(ctx, sqlc.GetReceiptByIDParams{ID: id, OwnerID: ownerID})
+func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Receipt, error) {
+	row, err := r.queries.GetReceiptByID(ctx, sqlc.GetReceiptByIDParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrReceiptNotFound
@@ -110,6 +113,7 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (*domain.Receip
 		Total:         decimalToFloat(row.Total.String),
 		PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 		PaidAt:        row.PaidAt.Time,
+		BusinessID:    row.BusinessID,
 	}, nil
 }
 

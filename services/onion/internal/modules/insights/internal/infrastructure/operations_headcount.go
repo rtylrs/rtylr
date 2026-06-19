@@ -20,7 +20,7 @@ type HeadcountSnapshot struct {
 // on or before X and whose end_date is NULL or after X. We cannot use
 // status here because status is mutable; a terminated employee's
 // historical active-state would be misrepresented by that column alone.
-func (r *Repository) GetHeadcount(ctx context.Context, ownerID int64) (HeadcountSnapshot, error) {
+func (r *Repository) GetHeadcount(ctx context.Context, businessID int64) (HeadcountSnapshot, error) {
 	now := nowFn()
 	monthAgo := now.AddDate(0, -1, 0)
 
@@ -29,11 +29,11 @@ func (r *Repository) GetHeadcount(ctx context.Context, ownerID int64) (Headcount
 	// cross-schema read from hr_employees — current active headcount
 	if err := r.pool.QueryRowContext(ctx,
 		`SELECT COUNT(*) FROM hr_employees
-		 WHERE owner_id = ?
+		 WHERE business_id = ?
 		   AND (start_date IS NULL OR start_date <= ?)
 		   AND (end_date IS NULL OR end_date > ?)
 		   AND status = 'active'`,
-		ownerID, now.Format("2006-01-02"), now.Format("2006-01-02"),
+		businessID, now.Format("2006-01-02"), now.Format("2006-01-02"),
 	).Scan(&nowCount); err != nil {
 		logger.Ctx(ctx).Error("insights: headcount now failed", logger.Error(err))
 		return HeadcountSnapshot{}, err
@@ -42,10 +42,10 @@ func (r *Repository) GetHeadcount(ctx context.Context, ownerID int64) (Headcount
 	// cross-schema read from hr_employees — headcount as-of one month ago for MoM delta
 	if err := r.pool.QueryRowContext(ctx,
 		`SELECT COUNT(*) FROM hr_employees
-		 WHERE owner_id = ?
+		 WHERE business_id = ?
 		   AND (start_date IS NULL OR start_date <= ?)
 		   AND (end_date IS NULL OR end_date > ?)`,
-		ownerID, monthAgo.Format("2006-01-02"), monthAgo.Format("2006-01-02"),
+		businessID, monthAgo.Format("2006-01-02"), monthAgo.Format("2006-01-02"),
 	).Scan(&priorCount); err != nil {
 		logger.Ctx(ctx).Error("insights: headcount prior failed", logger.Error(err))
 		return HeadcountSnapshot{}, err

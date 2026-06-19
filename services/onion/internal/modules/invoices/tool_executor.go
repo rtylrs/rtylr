@@ -12,6 +12,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -57,12 +59,17 @@ func (m *Module) executeListInvoicesTool(ctx context.Context, input map[string]a
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
 	parsed, err := parseListInvoicesToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	invoices, hasMore, err := m.service.ListInvoices(ctx, authUser.UserID, parsed.Status, parsed.Search, parsed.DateFrom, parsed.DateTo, parsed.Page, parsed.PageSize)
+	invoices, hasMore, err := m.service.ListInvoices(ctx, businessID, parsed.Status, parsed.Search, parsed.DateFrom, parsed.DateTo, parsed.Page, parsed.PageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -93,12 +100,17 @@ func (m *Module) executeCreateInvoiceTool(ctx context.Context, input map[string]
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
 	parsed, err := parseCreateInvoiceToolInput(input, time.Now())
 	if err != nil {
 		return nil, err
 	}
 
-	invoice, err := m.service.CreateInvoice(ctx, authUser.UserID, parsed)
+	invoice, err := m.service.CreateInvoice(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}
@@ -150,12 +162,17 @@ func (m *Module) executeRecordPaymentTool(ctx context.Context, input map[string]
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
 	parsed, err := parseRecordPaymentToolInput(input, time.Now())
 	if err != nil {
 		return nil, err
 	}
 
-	payment, err := m.service.RecordPayment(ctx, authUser.UserID, parsed)
+	payment, err := m.service.RecordPayment(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}
@@ -180,12 +197,17 @@ func (m *Module) executeSendInvoiceTool(ctx context.Context, input map[string]an
 		return nil, errors.New("authentication is required")
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
 	invoiceID, err := parseSendInvoiceToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := m.service.SendInvoice(ctx, authUser.UserID, invoiceID); err != nil {
+	if err := m.service.SendInvoice(ctx, businessID, invoiceID); err != nil {
 		return nil, err
 	}
 

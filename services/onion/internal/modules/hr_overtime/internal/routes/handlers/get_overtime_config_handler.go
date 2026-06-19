@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func GetOvertimeConfigRoutes() []string { return []string{"/hr/overtime/config"} }
@@ -29,7 +30,12 @@ func (h *GetOvertimeConfigHandler) Serve(ctx context.Context, _ *GetOvertimeConf
 		return GetOvertimeConfigResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	cfg, err := h.Service.GetOvertimeConfig(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetOvertimeConfigResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	cfg, err := h.Service.GetOvertimeConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrOvertimeConfigNotFound) {
 			return GetOvertimeConfigResponse{

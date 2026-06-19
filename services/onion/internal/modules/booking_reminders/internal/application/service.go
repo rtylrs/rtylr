@@ -17,9 +17,9 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Reminder, error)
-	Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error)
-	AppointmentExists(ctx context.Context, ownerID, appointmentID int64) (bool, error)
+	List(ctx context.Context, businessID int64) ([]domain.Reminder, error)
+	Create(ctx context.Context, businessID int64, input domain.ReminderInput) (int64, error)
+	AppointmentExists(ctx context.Context, businessID, appointmentID int64) (bool, error)
 }
 
 type Service struct{ repo repository }
@@ -28,36 +28,36 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateBookingRemindersScope(ctx context.Context, ownerID int64) {
+func invalidateBookingRemindersScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bookingRemindersScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bookingRemindersScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Reminder, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Reminder, error) {
 	return cacher.Of[[]domain.Reminder]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(bookingRemindersScope, ownerID, "list"),
+		cacheKeys.Scoped(bookingRemindersScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Reminder, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, bookingRemindersTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error) {
-	// Only create reminders for appointments that exist and are owned by the
-	// requesting user. This prevents probing other tenants' appointment IDs.
-	exists, err := s.repo.AppointmentExists(ctx, ownerID, input.AppointmentID)
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.ReminderInput) (int64, error) {
+	// Only create reminders for appointments that exist and belong to the
+	// requesting business. This prevents probing other tenants' appointment IDs.
+	exists, err := s.repo.AppointmentExists(ctx, businessID, input.AppointmentID)
 	if err != nil {
 		return 0, err
 	}
 	if !exists {
 		return 0, domain.ErrAppointmentNotFound
 	}
-	id, err := s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateBookingRemindersScope(ctx, ownerID)
+	invalidateBookingRemindersScope(ctx, businessID)
 	return id, nil
 }

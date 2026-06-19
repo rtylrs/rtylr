@@ -13,6 +13,7 @@ type FormField struct {
 	ID          int64
 	CareerID    int64
 	OwnerID     int64
+	BusinessID  int64
 	Kind        string
 	Label       string
 	Placeholder string
@@ -29,6 +30,7 @@ type FormFieldInput struct {
 	ID          int64
 	CareerID    int64
 	OwnerID     int64
+	BusinessID  int64
 	Kind        string
 	Label       string
 	Placeholder string

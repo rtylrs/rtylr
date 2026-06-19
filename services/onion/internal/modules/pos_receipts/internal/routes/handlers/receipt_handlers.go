@@ -95,13 +95,16 @@ func (h *EmailReceiptHandler) Serve(ctx context.Context, req *EmailReceiptReques
 	if device.User == nil {
 		return EmailReceiptResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return EmailReceiptResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
 		return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid receipt ID"}
 	}
-	if sendErr := h.Service.EmailReceipt(ctx, ownerID, id, strings.TrimSpace(req.Email)); sendErr != nil {
+	if sendErr := h.Service.EmailReceipt(ctx, businessID, id, strings.TrimSpace(req.Email)); sendErr != nil {
 		if errors.Is(sendErr, domain.ErrReceiptNotFound) {
 			return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Receipt not found"}
 		}
@@ -115,9 +118,12 @@ func (h *ListReceiptsHandler) Serve(ctx context.Context, req *ListReceiptsReques
 	if device.User == nil {
 		return ListReceiptsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	ownerID := tenant.ResolveOwnerID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListReceiptsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
-	receipts, err := h.Service.List(ctx, ownerID, req.From, req.To)
+	receipts, err := h.Service.List(ctx, businessID, req.From, req.To)
 	if err != nil {
 		return ListReceiptsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list receipts"}
 	}

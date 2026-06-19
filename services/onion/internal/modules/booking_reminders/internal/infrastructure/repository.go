@@ -20,8 +20,8 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Reminder, error) {
-	rows, err := r.queries.ListReminders(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Reminder, error) {
+	rows, err := r.queries.ListReminders(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list reminders", logger.Error(err))
 		return nil, err
@@ -33,15 +33,15 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Reminder
 	return items, nil
 }
 
-// AppointmentExists reports whether the given appointment exists and is owned by
-// ownerID. It guards reminder creation against referencing another tenant's
+// AppointmentExists reports whether the given appointment exists and belongs to
+// businessID. It guards reminder creation against referencing another tenant's
 // appointment.
 //
-// cross-schema read from booking_appointments — verify the appointment belongs to the owner before creating a reminder for it
-func (r *Repository) AppointmentExists(ctx context.Context, ownerID, appointmentID int64) (bool, error) {
+// cross-schema read from booking_appointments — verify the appointment belongs to the business before creating a reminder for it
+func (r *Repository) AppointmentExists(ctx context.Context, businessID, appointmentID int64) (bool, error) {
 	count, err := r.queries.CountAppointmentForOwner(ctx, sqlc.CountAppointmentForOwnerParams{
-		ID:      appointmentID,
-		OwnerID: ownerID,
+		ID:         appointmentID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to verify appointment ownership", logger.Error(err))
@@ -50,7 +50,7 @@ func (r *Repository) AppointmentExists(ctx context.Context, ownerID, appointment
 	return count > 0, nil
 }
 
-func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID int64, input domain.ReminderInput) (int64, error) {
 	scheduledAt, err := time.Parse("2006-01-02T15:04:05Z07:00", input.ScheduledAt)
 	if err != nil {
 		// The handler validates scheduled_at is non-empty, so a parse failure
@@ -62,7 +62,8 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rem
 		return 0, err
 	}
 	result, err := r.queries.CreateReminder(ctx, sqlc.CreateReminderParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		AppointmentID: sql.NullInt64{Int64: input.AppointmentID, Valid: input.AppointmentID != 0},
 		Type:          sqlc.NullBookingRemindersType{BookingRemindersType: sqlc.BookingRemindersType(input.Type), Valid: input.Type != ""},
 		ScheduledAt:   sql.NullTime{Time: scheduledAt, Valid: input.ScheduledAt != ""},
@@ -80,7 +81,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rem
 }
 
 func fromRow(row sqlc.BookingReminder) domain.Reminder {
-	rem := domain.Reminder{ID: row.ID, OwnerID: row.OwnerID}
+	rem := domain.Reminder{ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID}
 	if row.AppointmentID.Valid {
 		rem.AppointmentID = row.AppointmentID.Int64
 	}

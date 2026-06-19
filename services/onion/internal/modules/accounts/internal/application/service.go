@@ -17,11 +17,11 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Account, error)
-	Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error)
-	Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error
-	Delete(ctx context.Context, ownerID, id int64) error
-	ListForTree(ctx context.Context, ownerID int64) ([]domain.Account, error)
+	List(ctx context.Context, businessID int64) ([]domain.Account, error)
+	Create(ctx context.Context, businessID int64, input domain.AccountInput) (int64, error)
+	Update(ctx context.Context, businessID, id int64, input domain.AccountInput) error
+	Delete(ctx context.Context, businessID, id int64) error
+	ListForTree(ctx context.Context, businessID int64) ([]domain.Account, error)
 }
 
 type Service struct {
@@ -32,65 +32,65 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func invalidateAccountsScope(ctx context.Context, ownerID int64) {
+func invalidateAccountsScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(accountsScope, ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(accountsScope, businessID))
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Account, error) {
+func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Account, error) {
 	return cacher.Of[[]domain.Account]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(accountsScope, ownerID, "list"),
+		cacheKeys.Scoped(accountsScope, businessID, "list"),
 		func(ctx context.Context) ([]domain.Account, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, accountsTTL),
 	)
 }
 
-func (s *Service) Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error) {
+func (s *Service) Create(ctx context.Context, businessID int64, input domain.AccountInput) (int64, error) {
 	if input.Balance < 0 {
 		return 0, domain.ErrNegativeBalance
 	}
-	id, err := s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {
 		return 0, err
 	}
-	invalidateAccountsScope(ctx, ownerID)
+	invalidateAccountsScope(ctx, businessID)
 	return id, nil
 }
 
-func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error {
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.AccountInput) error {
 	if input.Balance < 0 {
 		return domain.ErrNegativeBalance
 	}
-	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
 		return err
 	}
-	invalidateAccountsScope(ctx, ownerID)
+	invalidateAccountsScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
 		return err
 	}
-	invalidateAccountsScope(ctx, ownerID)
+	invalidateAccountsScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) ChartOfAccounts(ctx context.Context, ownerID int64) ([]*domain.AccountTreeNode, error) {
+func (s *Service) ChartOfAccounts(ctx context.Context, businessID int64) ([]*domain.AccountTreeNode, error) {
 	return cacher.Of[[]*domain.AccountTreeNode]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(accountsScope, ownerID, "tree"),
+		cacheKeys.Scoped(accountsScope, businessID, "tree"),
 		func(ctx context.Context) ([]*domain.AccountTreeNode, error) {
-			return s.buildChartOfAccounts(ctx, ownerID)
+			return s.buildChartOfAccounts(ctx, businessID)
 		},
 		cacher.WithExpiry(ctx, accountsTTL),
 	)
 }
 
-func (s *Service) buildChartOfAccounts(ctx context.Context, ownerID int64) ([]*domain.AccountTreeNode, error) {
-	accounts, err := s.repo.ListForTree(ctx, ownerID)
+func (s *Service) buildChartOfAccounts(ctx context.Context, businessID int64) ([]*domain.AccountTreeNode, error) {
+	accounts, err := s.repo.ListForTree(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}

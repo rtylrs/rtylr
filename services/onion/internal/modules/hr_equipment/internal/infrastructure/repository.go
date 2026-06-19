@@ -26,9 +26,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) CreateEquipmentRequest(ctx context.Context, ownerID int64, params domain.CreateEquipmentRequestParams) (*domain.EquipmentRequestRecord, error) {
+func (r *Repository) CreateEquipmentRequest(ctx context.Context, businessID int64, params domain.CreateEquipmentRequestParams) (*domain.EquipmentRequestRecord, error) {
 	result, err := r.queries.CreateEquipmentRequest(ctx, sqlc.CreateEquipmentRequestParams{
-		OwnerID:      ownerID,
+		OwnerID:      businessID,
+		BusinessID:   businessID,
 		EmployeeID:   params.EmployeeID,
 		ItemName:     params.ItemName,
 		Quantity:     params.Quantity,
@@ -44,13 +45,13 @@ func (r *Repository) CreateEquipmentRequest(ctx context.Context, ownerID int64, 
 		return nil, err
 	}
 
-	return r.GetEquipmentRequest(ctx, ownerID, id)
+	return r.GetEquipmentRequest(ctx, businessID, id)
 }
 
-func (r *Repository) GetEquipmentRequest(ctx context.Context, ownerID, id int64) (*domain.EquipmentRequestRecord, error) {
+func (r *Repository) GetEquipmentRequest(ctx context.Context, businessID, id int64) (*domain.EquipmentRequestRecord, error) {
 	row, err := r.queries.GetEquipmentRequest(ctx, sqlc.GetEquipmentRequestParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -63,7 +64,7 @@ func (r *Repository) GetEquipmentRequest(ctx context.Context, ownerID, id int64)
 	return &record, nil
 }
 
-func (r *Repository) ListEquipmentRequests(ctx context.Context, ownerID int64, params domain.ListEquipmentRequestsParams) ([]domain.EquipmentRequestRecord, int64, error) {
+func (r *Repository) ListEquipmentRequests(ctx context.Context, businessID int64, params domain.ListEquipmentRequestsParams) ([]domain.EquipmentRequestRecord, int64, error) {
 	var total int64
 	var rows []sqlc.HrEquipmentRequest
 	var err error
@@ -74,41 +75,41 @@ func (r *Repository) ListEquipmentRequests(ctx context.Context, ownerID int64, p
 	switch {
 	case hasEmployee && hasStatus:
 		total, err = r.queries.CountEquipmentRequestsByEmployeeAndStatus(ctx, sqlc.CountEquipmentRequestsByEmployeeAndStatusParams{
-			OwnerID: ownerID, EmployeeID: params.EmployeeID, Status: params.Status,
+			BusinessID: businessID, EmployeeID: params.EmployeeID, Status: params.Status,
 		})
 		if err != nil {
 			return nil, 0, err
 		}
 		rows, err = r.queries.ListEquipmentRequestsByEmployeeAndStatus(ctx, sqlc.ListEquipmentRequestsByEmployeeAndStatusParams{
-			OwnerID: ownerID, EmployeeID: params.EmployeeID, Status: params.Status, Limit: params.Limit, Offset: params.Offset,
+			BusinessID: businessID, EmployeeID: params.EmployeeID, Status: params.Status, Limit: params.Limit, Offset: params.Offset,
 		})
 	case hasEmployee:
 		total, err = r.queries.CountEquipmentRequestsByEmployee(ctx, sqlc.CountEquipmentRequestsByEmployeeParams{
-			OwnerID: ownerID, EmployeeID: params.EmployeeID,
+			BusinessID: businessID, EmployeeID: params.EmployeeID,
 		})
 		if err != nil {
 			return nil, 0, err
 		}
 		rows, err = r.queries.ListEquipmentRequestsByEmployee(ctx, sqlc.ListEquipmentRequestsByEmployeeParams{
-			OwnerID: ownerID, EmployeeID: params.EmployeeID, Limit: params.Limit, Offset: params.Offset,
+			BusinessID: businessID, EmployeeID: params.EmployeeID, Limit: params.Limit, Offset: params.Offset,
 		})
 	case hasStatus:
 		total, err = r.queries.CountEquipmentRequestsByStatus(ctx, sqlc.CountEquipmentRequestsByStatusParams{
-			OwnerID: ownerID, Status: params.Status,
+			BusinessID: businessID, Status: params.Status,
 		})
 		if err != nil {
 			return nil, 0, err
 		}
 		rows, err = r.queries.ListEquipmentRequestsByStatus(ctx, sqlc.ListEquipmentRequestsByStatusParams{
-			OwnerID: ownerID, Status: params.Status, Limit: params.Limit, Offset: params.Offset,
+			BusinessID: businessID, Status: params.Status, Limit: params.Limit, Offset: params.Offset,
 		})
 	default:
-		total, err = r.queries.CountEquipmentRequests(ctx, ownerID)
+		total, err = r.queries.CountEquipmentRequests(ctx, businessID)
 		if err != nil {
 			return nil, 0, err
 		}
 		rows, err = r.queries.ListEquipmentRequests(ctx, sqlc.ListEquipmentRequestsParams{
-			OwnerID: ownerID, Limit: params.Limit, Offset: params.Offset,
+			BusinessID: businessID, Limit: params.Limit, Offset: params.Offset,
 		})
 	}
 	if err != nil {
@@ -123,20 +124,21 @@ func (r *Repository) ListEquipmentRequests(ctx context.Context, ownerID int64, p
 	return records, total, nil
 }
 
-func (r *Repository) UpdateEquipmentRequestStatus(ctx context.Context, ownerID, id int64, status string, level int32, approvedBy int64, reason string) error {
+func (r *Repository) UpdateEquipmentRequestStatus(ctx context.Context, businessID, id int64, status string, level int32, approvedBy int64, reason string) error {
 	return r.queries.UpdateEquipmentRequestStatus(ctx, sqlc.UpdateEquipmentRequestStatusParams{
 		Status:               status,
 		CurrentApprovalLevel: level,
 		ApprovedBy:           nullInt64(approvedBy),
 		RejectionReason:      nullString(reason),
-		OwnerID:              ownerID,
+		BusinessID:           businessID,
 		ID:                   id,
 	})
 }
 
-func (r *Repository) CreateAsset(ctx context.Context, ownerID int64, params domain.CreateAssetParams) (*domain.AssetRecord, error) {
+func (r *Repository) CreateAsset(ctx context.Context, businessID int64, params domain.CreateAssetParams) (*domain.AssetRecord, error) {
 	result, err := r.queries.CreateAsset(ctx, sqlc.CreateAssetParams{
-		OwnerID:       ownerID,
+		OwnerID:       businessID,
+		BusinessID:    businessID,
 		Name:          params.Name,
 		Category:      params.Category,
 		SerialNumber:  nullString(params.SerialNumber),
@@ -155,13 +157,13 @@ func (r *Repository) CreateAsset(ctx context.Context, ownerID int64, params doma
 		return nil, err
 	}
 
-	return r.GetAsset(ctx, ownerID, id)
+	return r.GetAsset(ctx, businessID, id)
 }
 
-func (r *Repository) GetAsset(ctx context.Context, ownerID, id int64) (*domain.AssetRecord, error) {
+func (r *Repository) GetAsset(ctx context.Context, businessID, id int64) (*domain.AssetRecord, error) {
 	row, err := r.queries.GetAsset(ctx, sqlc.GetAssetParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -174,7 +176,7 @@ func (r *Repository) GetAsset(ctx context.Context, ownerID, id int64) (*domain.A
 	return &record, nil
 }
 
-func (r *Repository) ListAssets(ctx context.Context, ownerID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, error) {
+func (r *Repository) ListAssets(ctx context.Context, businessID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, error) {
 	var rows []sqlc.HrAsset
 	var err error
 
@@ -184,18 +186,18 @@ func (r *Repository) ListAssets(ctx context.Context, ownerID int64, params domai
 	switch {
 	case hasLocation && hasStatus:
 		rows, err = r.queries.ListAssetsByLocationAndStatus(ctx, sqlc.ListAssetsByLocationAndStatusParams{
-			OwnerID: ownerID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true}, Status: *params.Status,
+			BusinessID: businessID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true}, Status: *params.Status,
 		})
 	case hasLocation:
 		rows, err = r.queries.ListAssetsByLocation(ctx, sqlc.ListAssetsByLocationParams{
-			OwnerID: ownerID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true},
+			BusinessID: businessID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true},
 		})
 	case hasStatus:
 		rows, err = r.queries.ListAssetsByStatus(ctx, sqlc.ListAssetsByStatusParams{
-			OwnerID: ownerID, Status: *params.Status,
+			BusinessID: businessID, Status: *params.Status,
 		})
 	default:
-		rows, err = r.queries.ListAssets(ctx, ownerID)
+		rows, err = r.queries.ListAssets(ctx, businessID)
 	}
 	if err != nil {
 		return nil, err
@@ -209,18 +211,18 @@ func (r *Repository) ListAssets(ctx context.Context, ownerID int64, params domai
 	return records, nil
 }
 
-func (r *Repository) AssignAssetToEmployee(ctx context.Context, ownerID, assetID, employeeID int64) error {
+func (r *Repository) AssignAssetToEmployee(ctx context.Context, businessID, assetID, employeeID int64) error {
 	return r.queries.AssignAsset(ctx, sqlc.AssignAssetParams{
 		AssignedTo: sql.NullInt64{Int64: employeeID, Valid: true},
-		OwnerID:    ownerID,
+		BusinessID: businessID,
 		ID:         assetID,
 	})
 }
 
-func (r *Repository) UnassignAsset(ctx context.Context, ownerID, assetID int64) error {
+func (r *Repository) UnassignAsset(ctx context.Context, businessID, assetID int64) error {
 	return r.queries.UnassignAsset(ctx, sqlc.UnassignAssetParams{
-		OwnerID: ownerID,
-		ID:      assetID,
+		BusinessID: businessID,
+		ID:         assetID,
 	})
 }
 
@@ -233,6 +235,7 @@ func equipmentRequestFromRow(row sqlc.HrEquipmentRequest) domain.EquipmentReques
 	return domain.EquipmentRequestRecord{
 		ID:                   row.ID,
 		OwnerID:              row.OwnerID,
+		BusinessID:           row.BusinessID,
 		EmployeeID:           row.EmployeeID,
 		ItemName:             row.ItemName,
 		Quantity:             row.Quantity,
@@ -256,6 +259,7 @@ func assetFromRow(row sqlc.HrAsset) domain.AssetRecord {
 	return domain.AssetRecord{
 		ID:            row.ID,
 		OwnerID:       row.OwnerID,
+		BusinessID:    row.BusinessID,
 		Name:          row.Name,
 		Category:      row.Category,
 		SerialNumber:  row.SerialNumber.String,

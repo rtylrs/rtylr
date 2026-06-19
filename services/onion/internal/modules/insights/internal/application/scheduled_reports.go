@@ -41,8 +41,8 @@ var validChannels = map[string]bool{
 }
 
 // ListScheduledReports returns all schedules for the owner.
-func (s *Service) ListScheduledReports(ctx context.Context, ownerID int64) ([]ScheduledReportPayload, error) {
-	rows, err := s.repo.ListScheduledReports(ctx, ownerID)
+func (s *Service) ListScheduledReports(ctx context.Context, businessID int64) ([]ScheduledReportPayload, error) {
+	rows, err := s.repo.ListScheduledReports(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -54,12 +54,13 @@ func (s *Service) ListScheduledReports(ctx context.Context, ownerID int64) ([]Sc
 }
 
 // CreateScheduledReport validates input and persists a new schedule.
-func (s *Service) CreateScheduledReport(ctx context.Context, ownerID int64, input ScheduledReportPayload) (ScheduledReportPayload, error) {
+func (s *Service) CreateScheduledReport(ctx context.Context, businessID int64, input ScheduledReportPayload) (ScheduledReportPayload, error) {
 	if err := validateScheduledReport(input); err != nil {
 		return ScheduledReportPayload{}, err
 	}
 	id, err := s.repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportRow{
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		TemplateID: input.TemplateID,
 		Cadence:    input.Cadence,
 		Channel:    input.Channel,
@@ -69,7 +70,7 @@ func (s *Service) CreateScheduledReport(ctx context.Context, ownerID int64, inpu
 	if err != nil {
 		return ScheduledReportPayload{}, err
 	}
-	row, err := s.repo.GetScheduledReport(ctx, ownerID, id)
+	row, err := s.repo.GetScheduledReport(ctx, businessID, id)
 	if err != nil {
 		return ScheduledReportPayload{}, err
 	}
@@ -77,13 +78,14 @@ func (s *Service) CreateScheduledReport(ctx context.Context, ownerID int64, inpu
 }
 
 // UpdateScheduledReport validates input and applies the update.
-func (s *Service) UpdateScheduledReport(ctx context.Context, ownerID, id int64, input ScheduledReportPayload) (ScheduledReportPayload, error) {
+func (s *Service) UpdateScheduledReport(ctx context.Context, businessID, id int64, input ScheduledReportPayload) (ScheduledReportPayload, error) {
 	if err := validateScheduledReport(input); err != nil {
 		return ScheduledReportPayload{}, err
 	}
 	uerr := s.repo.UpdateScheduledReport(ctx, infrastructure.ScheduledReportRow{
 		ID:         id,
-		OwnerID:    ownerID,
+		OwnerID:    businessID,
+		BusinessID: businessID,
 		TemplateID: input.TemplateID,
 		Cadence:    input.Cadence,
 		Channel:    input.Channel,
@@ -93,7 +95,7 @@ func (s *Service) UpdateScheduledReport(ctx context.Context, ownerID, id int64, 
 	if uerr != nil {
 		return ScheduledReportPayload{}, uerr
 	}
-	row, err := s.repo.GetScheduledReport(ctx, ownerID, id)
+	row, err := s.repo.GetScheduledReport(ctx, businessID, id)
 	if err != nil {
 		return ScheduledReportPayload{}, err
 	}
@@ -101,8 +103,8 @@ func (s *Service) UpdateScheduledReport(ctx context.Context, ownerID, id int64, 
 }
 
 // DeleteScheduledReport removes a schedule by id.
-func (s *Service) DeleteScheduledReport(ctx context.Context, ownerID, id int64) error {
-	return s.repo.DeleteScheduledReport(ctx, ownerID, id)
+func (s *Service) DeleteScheduledReport(ctx context.Context, businessID, id int64) error {
+	return s.repo.DeleteScheduledReport(ctx, businessID, id)
 }
 
 func validateScheduledReport(p ScheduledReportPayload) error {

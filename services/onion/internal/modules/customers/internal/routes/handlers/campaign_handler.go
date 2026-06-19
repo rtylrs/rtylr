@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
 
@@ -82,7 +83,12 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequ
 		return ListCampaignsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	campaigns, err := h.CRMService.ListCampaigns(ctx, device.User.UserID, req.Status)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListCampaignsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	campaigns, err := h.CRMService.ListCampaigns(ctx, businessID, req.Status)
 	if err != nil {
 		return ListCampaignsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -150,8 +156,14 @@ func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRe
 		return CreateCampaignResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.CampaignInput{
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Channel:     req.Channel,
@@ -234,9 +246,15 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 		return UpdateCampaignResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	input := domain.CampaignUpdateInput{
 		ID:          req.ID,
 		OwnerID:     device.User.UserID,
+		BusinessID:  businessID,
 		Name:        req.Name,
 		Description: req.Description,
 		Channel:     req.Channel,
@@ -317,7 +335,12 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 		return UpdateCampaignStatusResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.CRMService.UpdateCampaignStatus(ctx, device.User.UserID, req.ID, req.Status); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateCampaignStatusResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.CRMService.UpdateCampaignStatus(ctx, businessID, req.ID, req.Status); err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
 			return UpdateCampaignStatusResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,

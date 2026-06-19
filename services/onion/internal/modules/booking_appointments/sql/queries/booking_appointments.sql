@@ -1,24 +1,24 @@
 -- name: ListAppointments :many
-SELECT id, owner_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes, created_at, updated_at
-FROM booking_appointments WHERE owner_id = ? ORDER BY start_time DESC;
+SELECT id, owner_id, business_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes, created_at, updated_at
+FROM booking_appointments WHERE business_id = ? ORDER BY start_time DESC;
 
 -- name: ListAppointmentsByDateRange :many
-SELECT id, owner_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes, created_at, updated_at
-FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND start_time < ? ORDER BY start_time ASC;
+SELECT id, owner_id, business_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes, created_at, updated_at
+FROM booking_appointments WHERE business_id = ? AND start_time >= ? AND start_time < ? ORDER BY start_time ASC;
 
 -- name: CreateAppointment :execresult
-INSERT INTO booking_appointments (owner_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO booking_appointments (owner_id, business_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateAppointment :exec
 UPDATE booking_appointments SET service_id = ?, resource_id = ?, staff_id = ?, customer_name = ?, customer_email = ?, customer_phone = ?, start_time = ?, end_time = ?, status = ?, notes = ?
-WHERE owner_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?;
 
 -- name: DeleteAppointment :exec
-DELETE FROM booking_appointments WHERE owner_id = ? AND id = ?;
+DELETE FROM booking_appointments WHERE business_id = ? AND id = ?;
 
 -- name: CountTodayAppointments :one
-SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND start_time < ?;
+SELECT COUNT(*) FROM booking_appointments WHERE business_id = ? AND start_time >= ? AND start_time < ?;
 
 -- name: CountCancelledAppointments :one
-SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND status = 'cancelled' AND start_time >= ? AND start_time < ?;
+SELECT COUNT(*) FROM booking_appointments WHERE business_id = ? AND status = 'cancelled' AND start_time >= ? AND start_time < ?;

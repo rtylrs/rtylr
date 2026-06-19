@@ -24,9 +24,9 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{pool: db}
 }
 
-func (r *Repository) ListByOwner(ctx context.Context, ownerID int64) ([]domain.POSUser, error) {
+func (r *Repository) ListByOwner(ctx context.Context, businessID int64) ([]domain.POSUser, error) {
 	q := sqlc.New(r.pool)
-	rows, err := q.ListPOSUsersByOwner(ctx, ownerID)
+	rows, err := q.ListPOSUsersByOwner(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,9 +37,9 @@ func (r *Repository) ListByOwner(ctx context.Context, ownerID int64) ([]domain.P
 	return out, nil
 }
 
-func (r *Repository) ListByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.POSUser, error) {
+func (r *Repository) ListByLocation(ctx context.Context, businessID, locationID int64) ([]domain.POSUser, error) {
 	q := sqlc.New(r.pool)
-	rows, err := q.ListPOSUsersByLocation(ctx, sqlc.ListPOSUsersByLocationParams{OwnerID: ownerID, LocationID: locationID})
+	rows, err := q.ListPOSUsersByLocation(ctx, sqlc.ListPOSUsersByLocationParams{BusinessID: businessID, LocationID: locationID})
 	if err != nil {
 		return nil, err
 	}
@@ -53,10 +53,11 @@ func (r *Repository) ListByLocation(ctx context.Context, ownerID, locationID int
 // Create inserts a new pos_user. The hashedPIN argument is a bcrypt hash;
 // the service layer is responsible for producing it so this layer never
 // handles plaintext PINs.
-func (r *Repository) Create(ctx context.Context, ownerID, createdBy int64, input domain.CreatePOSUserInput, hashedPIN string) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID, createdBy int64, input domain.CreatePOSUserInput, hashedPIN string) (int64, error) {
 	q := sqlc.New(r.pool)
 	res, err := q.CreatePOSUser(ctx, sqlc.CreatePOSUserParams{
-		OwnerID:          ownerID,
+		OwnerID:          businessID,
+		BusinessID:       businessID,
 		UserID:           input.UserID,
 		LocationID:       input.LocationID,
 		Name:             input.Name,
@@ -82,7 +83,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, createdBy int64, input
 
 // Update mutates non-PIN fields on a pos_user. PIN rotation goes through
 // UpdatePINHash, which enforces that only a bcrypt hash can be written.
-func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.UpdatePOSUserInput) error {
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.UpdatePOSUserInput) error {
 	q := sqlc.New(r.pool)
 	return q.UpdatePOSUser(ctx, sqlc.UpdatePOSUserParams{
 		Name:             input.Name,
@@ -94,36 +95,36 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 		CanRefund:        sql.NullBool{Bool: input.CanRefund, Valid: true},
 		CanOpenDrawer:    sql.NullBool{Bool: input.CanOpenDrawer, Valid: true},
 		CanApplyDiscount: sql.NullBool{Bool: input.CanApplyDiscount, Valid: true},
-		OwnerID:          ownerID,
+		BusinessID:       businessID,
 		ID:               id,
 	})
 }
 
 // UpdatePINHash stores a bcrypt hash for the given user and clears the
 // legacy plaintext column in the same statement.
-func (r *Repository) UpdatePINHash(ctx context.Context, ownerID, id int64, hashedPIN string) error {
+func (r *Repository) UpdatePINHash(ctx context.Context, businessID, id int64, hashedPIN string) error {
 	if hashedPIN == "" {
 		return errors.New("refusing to write empty pin hash")
 	}
 	q := sqlc.New(r.pool)
 	return q.UpdatePOSUserPINHash(ctx, sqlc.UpdatePOSUserPINHashParams{
-		PinHash: sql.NullString{String: hashedPIN, Valid: true},
-		OwnerID: ownerID,
-		ID:      id,
+		PinHash:    sql.NullString{String: hashedPIN, Valid: true},
+		BusinessID: businessID,
+		ID:         id,
 	})
 }
 
-func (r *Repository) Deactivate(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Deactivate(ctx context.Context, businessID, id int64) error {
 	q := sqlc.New(r.pool)
-	return q.DeactivatePOSUser(ctx, sqlc.DeactivatePOSUserParams{OwnerID: ownerID, ID: id})
+	return q.DeactivatePOSUser(ctx, sqlc.DeactivatePOSUserParams{BusinessID: businessID, ID: id})
 }
 
 // FindForVerify looks up the single active pos_user PIN row for a team member
 // at a location. The row carries the hashed PIN so the service can verify it;
 // the caller zeroes secrets before returning anything to the transport layer.
-func (r *Repository) FindForVerify(ctx context.Context, ownerID, locationID, userID int64) (*domain.POSUser, error) {
+func (r *Repository) FindForVerify(ctx context.Context, businessID, locationID, userID int64) (*domain.POSUser, error) {
 	q := sqlc.New(r.pool)
-	row, err := q.FindPOSUserForPINVerify(ctx, sqlc.FindPOSUserForPINVerifyParams{OwnerID: ownerID, LocationID: locationID, UserID: userID})
+	row, err := q.FindPOSUserForPINVerify(ctx, sqlc.FindPOSUserForPINVerifyParams{BusinessID: businessID, LocationID: locationID, UserID: userID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound
@@ -136,9 +137,9 @@ func (r *Repository) FindForVerify(ctx context.Context, ownerID, locationID, use
 
 // FindByUserAndLocation returns a member's PIN row at a location regardless of
 // active state, used to decide whether SetPIN creates or rotates.
-func (r *Repository) FindByUserAndLocation(ctx context.Context, ownerID, userID, locationID int64) (*domain.POSUser, error) {
+func (r *Repository) FindByUserAndLocation(ctx context.Context, businessID, userID, locationID int64) (*domain.POSUser, error) {
 	q := sqlc.New(r.pool)
-	row, err := q.FindPOSUserByUserAndLocation(ctx, sqlc.FindPOSUserByUserAndLocationParams{OwnerID: ownerID, UserID: userID, LocationID: locationID})
+	row, err := q.FindPOSUserByUserAndLocation(ctx, sqlc.FindPOSUserByUserAndLocationParams{BusinessID: businessID, UserID: userID, LocationID: locationID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound
@@ -181,6 +182,7 @@ func fromRow(row sqlc.PosUser) domain.POSUser {
 	return domain.POSUser{
 		ID:               row.ID,
 		OwnerID:          row.OwnerID,
+		BusinessID:       row.BusinessID,
 		UserID:           row.UserID,
 		LocationID:       row.LocationID,
 		Name:             row.Name,

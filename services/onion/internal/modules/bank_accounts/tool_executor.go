@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -27,20 +28,20 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, _ map[string
 }
 
 func (m *Module) executeListBankAccountsTool(ctx context.Context) (map[string]any, error) {
-	ownerID, err := bankAccountsToolOwnerID(ctx)
+	businessID, err := bankAccountsToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	accounts, err := m.service.List(ctx, ownerID)
+	accounts, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
-	totalBalance, err := m.service.TotalBalance(ctx, ownerID)
+	totalBalance, err := m.service.TotalBalance(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
-	connectedCount, err := m.service.ConnectedCount(ctx, ownerID)
+	connectedCount, err := m.service.ConnectedCount(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -60,19 +61,19 @@ func (m *Module) executeListBankAccountsTool(ctx context.Context) (map[string]an
 }
 
 func (m *Module) executeGetBankSummaryTool(ctx context.Context) (map[string]any, error) {
-	ownerID, err := bankAccountsToolOwnerID(ctx)
+	businessID, err := bankAccountsToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	totalBalance, err := m.service.TotalBalance(ctx, ownerID)
+	totalBalance, err := m.service.TotalBalance(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
-	connectedCount, err := m.service.ConnectedCount(ctx, ownerID)
+	connectedCount, err := m.service.ConnectedCount(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
-	accounts, err := m.service.List(ctx, ownerID)
+	accounts, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +86,12 @@ func (m *Module) executeGetBankSummaryTool(ctx context.Context) (map[string]any,
 	}, nil
 }
 
-func bankAccountsToolOwnerID(ctx context.Context) (int64, error) {
+func bankAccountsToolBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	return tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 }
 
 func bankAccountToolPayload(account domain.BankAccount) map[string]any {

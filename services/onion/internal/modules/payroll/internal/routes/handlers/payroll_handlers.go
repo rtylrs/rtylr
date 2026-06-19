@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type legacyPayrollPayload struct {
@@ -65,7 +66,11 @@ func (h *ListPayrollHandler) Serve(ctx context.Context, req *ListPayrollRequest)
 	if device.IsAnonymous || device.User == nil {
 		return ListPayrollResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	records, err := h.Service.ListPayrollRecords(ctx, device.User.UserID, req.PeriodLabel)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListPayrollResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	records, err := h.Service.ListPayrollRecords(ctx, businessID, req.PeriodLabel)
 	if err != nil {
 		return ListPayrollResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list payroll records"}
 	}
@@ -108,11 +113,15 @@ func (h *RunPayrollHandler) Serve(ctx context.Context, req *RunPayrollRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return RunPayrollResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RunPayrollResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	input := domain.PayrollRunInput{
-		OwnerID: device.User.UserID, PeriodStart: req.PeriodStart,
+		OwnerID: device.User.UserID, BusinessID: businessID, PeriodStart: req.PeriodStart,
 		PeriodEnd: req.PeriodEnd, PeriodLabel: req.PeriodLabel,
 	}
-	count, err := h.Service.RunPayroll(ctx, device.User.UserID, input)
+	count, err := h.Service.RunPayroll(ctx, businessID, input)
 	if err != nil {
 		return RunPayrollResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to run payroll: " + err.Error()}
 	}
@@ -143,7 +152,11 @@ func (h *MarkPayrollPaidHandler) Serve(ctx context.Context, req *MarkPayrollPaid
 	if device.IsAnonymous || device.User == nil {
 		return MarkPayrollPaidResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	if err := h.Service.MarkPayrollPaid(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return MarkPayrollPaidResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.Service.MarkPayrollPaid(ctx, businessID, req.ID); err != nil {
 		return MarkPayrollPaidResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to mark payroll as paid: " + err.Error()}
 	}
 	return MarkPayrollPaidResponse{Success: true}, nil

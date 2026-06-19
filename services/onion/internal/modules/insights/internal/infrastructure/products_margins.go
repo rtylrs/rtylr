@@ -32,16 +32,16 @@ var marginBuckets = []struct {
 // GetMarginDistribution returns the per-bucket SKU count from erp_products.
 // Products without a sale_price (0) are excluded: a non-priced product
 // doesn't have a meaningful margin.
-func (r *Repository) GetMarginDistribution(ctx context.Context, ownerID int64) ([]MarginBucketRow, error) {
+func (r *Repository) GetMarginDistribution(ctx context.Context, businessID int64) ([]MarginBucketRow, error) {
 	// cross-schema read from erp_products — margin distribution histogram
 	const q = `
 		SELECT (sale_price - cost_price) / sale_price * 100 AS margin_pct
 		FROM erp_products
-		WHERE owner_id = ?
+		WHERE business_id = ?
 		  AND is_active = TRUE
 		  AND sale_price > 0
 	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.pool.QueryContext(ctx, q, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: margin distribution query failed", logger.Error(err))
 		return nil, err

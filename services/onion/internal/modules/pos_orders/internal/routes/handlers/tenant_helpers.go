@@ -16,6 +16,10 @@ func authenticatedPOSUser(ctx context.Context) (*authPkg.AuthUser, *errorModels.
 	return device.User, nil
 }
 
-func resolvedOwnerID(ctx context.Context, user *authPkg.AuthUser) int64 {
-	return tenant.ResolveOwnerID(ctx, user.BusinessID, user.UserID)
+func resolveBusinessID(ctx context.Context, user *authPkg.AuthUser) (int64, *errorModels.ServerError) {
+	businessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if err != nil {
+		return 0, errorModels.PermissionDeniedServerError()
+	}
+	return businessID, nil
 }

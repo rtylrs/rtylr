@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func LoyaltyRedeemRoutes() []string {
@@ -55,8 +56,14 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	err := h.CRMService.RedeemPoints(ctx, domain.RedeemPointsInput{
 		OwnerID:       device.User.UserID,
+		BusinessID:    businessID,
 		CustomerID:    req.CustomerID,
 		Points:        req.Points,
 		Description:   req.Description,

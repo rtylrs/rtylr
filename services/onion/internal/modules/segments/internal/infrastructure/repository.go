@@ -21,8 +21,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Segment, error) {
-	rows, err := r.queries.ListSegments(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Segment, error) {
+	rows, err := r.queries.ListSegments(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list segments", logger.Error(err))
 
@@ -38,10 +38,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Segment,
 	return segments, nil
 }
 
-func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.Segment, error) {
+func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Segment, error) {
 	row, err := r.queries.GetSegmentByID(ctx, sqlc.GetSegmentByIDParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -62,6 +62,7 @@ func (r *Repository) Create(ctx context.Context, input domain.SegmentInput) (int
 
 	result, err := r.queries.CreateSegment(ctx, sqlc.CreateSegmentParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Rules:       json.RawMessage(filters),
@@ -86,7 +87,7 @@ func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Rules:       json.RawMessage(filters),
 		ID:          input.ID,
-		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update segment", logger.Error(err))
@@ -106,10 +107,10 @@ func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	_, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
-		ID:      id,
-		OwnerID: ownerID,
+		ID:         id,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete segment", logger.Error(err))
@@ -124,6 +125,7 @@ func segmentFromRow(row sqlc.CrmSegment) domain.Segment {
 	seg := domain.Segment{
 		ID:            row.ID,
 		OwnerID:       row.OwnerID,
+		BusinessID:    row.BusinessID,
 		Name:          row.Name,
 		Description:   row.Description.String,
 		CustomerCount: int(row.CustomerCount.Int32),

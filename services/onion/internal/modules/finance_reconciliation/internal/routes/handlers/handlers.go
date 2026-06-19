@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // ---------------------------------------------------------------------------
@@ -28,7 +29,11 @@ func (h *OverviewHandler) Serve(ctx context.Context, _ *OverviewRequest) (Overvi
 	if device.IsAnonymous || device.User == nil {
 		return OverviewResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	overview, err := h.Service.Overview(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return OverviewResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	overview, err := h.Service.Overview(ctx, businessID)
 	if err != nil {
 		return OverviewResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to load reconciliation overview"}
 	}
@@ -72,7 +77,11 @@ func (h *MatchHandler) Serve(ctx context.Context, req *MatchRequest) (MatchRespo
 	if device.IsAnonymous || device.User == nil {
 		return MatchResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	id, err := h.Service.Match(ctx, device.User.UserID, domain.MatchInput{
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return MatchResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	id, err := h.Service.Match(ctx, businessID, domain.MatchInput{
 		BankFeedID: req.BankFeedID,
 		TargetType: req.TargetType,
 		TargetID:   req.TargetID,

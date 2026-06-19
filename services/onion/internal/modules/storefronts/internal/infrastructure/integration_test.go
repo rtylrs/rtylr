@@ -12,7 +12,7 @@ import (
 func TestStorefronts_List_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.List(context.Background(), testutil.OwnerID)
+	_, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -21,13 +21,13 @@ func TestStorefronts_List_NoError(t *testing.T) {
 func TestStorefronts_List_OwnerScoped(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 	for _, s := range items {
-		if s.OwnerID != testutil.OwnerID {
-			t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, s.OwnerID)
+		if s.BusinessID != testutil.BusinessID {
+			t.Errorf("expected business_id %d, got %d", testutil.BusinessID, s.BusinessID)
 		}
 	}
 }
@@ -35,7 +35,7 @@ func TestStorefronts_List_OwnerScoped(t *testing.T) {
 func TestStorefronts_Create_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name:        "My Test Store",
 		Domain:      "teststore.example.com",
 		IsPublished: true,
@@ -51,14 +51,14 @@ func TestStorefronts_Create_ReturnsPositiveID(t *testing.T) {
 func TestStorefronts_Create_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name: "List Appear Store",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -76,16 +76,16 @@ func TestStorefronts_Create_AppearsInList(t *testing.T) {
 func TestStorefronts_Update_ChangesName(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "OldStoreName"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "OldStoreName"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{Name: "NewStoreName"}); err != nil {
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{Name: "NewStoreName"}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
 
-	items, _ := repo.List(context.Background(), testutil.OwnerID)
+	items, _ := repo.List(context.Background(), testutil.BusinessID)
 	for _, s := range items {
 		if s.ID == id && s.Name != "NewStoreName" {
 			t.Errorf("expected name NewStoreName, got %s", s.Name)
@@ -96,14 +96,14 @@ func TestStorefronts_Update_ChangesName(t *testing.T) {
 func TestStorefronts_Update_Domain(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name: "DomainTest", Domain: "old.example.com",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{
 		Name: "DomainTest", Domain: "new.example.com",
 	}); err != nil {
 		t.Fatalf("Update domain: %v", err)
@@ -113,14 +113,14 @@ func TestStorefronts_Update_Domain(t *testing.T) {
 func TestStorefronts_Update_IsPublished(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name: "DraftStore", IsPublished: false,
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{
 		Name: "DraftStore", IsPublished: true,
 	}); err != nil {
 		t.Fatalf("Update publish: %v", err)
@@ -135,14 +135,14 @@ func TestStorefronts_List_UnknownOwner_Empty(t *testing.T) {
 		t.Fatalf("List: %v", err)
 	}
 	if len(items) != 0 {
-		t.Errorf("expected 0 for unknown owner, got %d", len(items))
+		t.Errorf("expected 0 for unknown business, got %d", len(items))
 	}
 }
 
 func TestStorefronts_Create_WithLogoURL(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name:    "LogoStore",
 		LogoURL: "https://example.com/logo.png",
 	})
@@ -159,7 +159,7 @@ func TestStorefronts_Create_Multiple(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	names := []string{"Store Alpha", "Store Beta", "Store Gamma"}
 	for _, name := range names {
-		id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: name})
+		id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: name})
 		if err != nil {
 			t.Fatalf("Create %s: %v", name, err)
 		}
@@ -172,7 +172,7 @@ func TestStorefronts_Create_Multiple(t *testing.T) {
 func TestStorefronts_List_IsNotNil(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -185,12 +185,12 @@ func TestStorefronts_Create_NameIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	const want = "StoredNameStorefront"
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: want})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: want})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -209,7 +209,7 @@ func TestStorefronts_Create_DomainIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	const want = "domain-stored.example.com"
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name:   "DomainStored",
 		Domain: want,
 	})
@@ -217,7 +217,7 @@ func TestStorefronts_Create_DomainIsStored(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -235,7 +235,7 @@ func TestStorefronts_Create_DomainIsStored(t *testing.T) {
 func TestStorefronts_Create_IsPublishedStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{
 		Name:        "PublishedStored",
 		IsPublished: true,
 	})
@@ -243,7 +243,7 @@ func TestStorefronts_Create_IsPublishedStored(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -261,12 +261,12 @@ func TestStorefronts_Create_IsPublishedStored(t *testing.T) {
 func TestStorefronts_Update_LogoURL(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "LogoUpdateStore"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "LogoUpdateStore"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{
 		Name:    "LogoUpdateStore",
 		LogoURL: "https://cdn.example.com/new-logo.png",
 	}); err != nil {
@@ -277,12 +277,12 @@ func TestStorefronts_Update_LogoURL(t *testing.T) {
 func TestStorefronts_Update_ThemeID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "ThemeIDStore"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "ThemeIDStore"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{
 		Name:    "ThemeIDStore",
 		ThemeID: 5,
 	}); err != nil {
@@ -293,17 +293,17 @@ func TestStorefronts_Update_ThemeID(t *testing.T) {
 func TestStorefronts_List_AfterCreate_CountIncreases(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	before, err := repo.List(context.Background(), testutil.OwnerID)
+	before, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List before: %v", err)
 	}
 
-	_, err = repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "CountStore"})
+	_, err = repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "CountStore"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	after, err := repo.List(context.Background(), testutil.OwnerID)
+	after, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List after: %v", err)
 	}
@@ -320,19 +320,19 @@ func TestStorefronts_Create_ZeroOwnerReturnsEmpty(t *testing.T) {
 		t.Fatalf("List: %v", err)
 	}
 	if len(items) != 0 {
-		t.Errorf("expected 0 items for owner_id=0, got %d", len(items))
+		t.Errorf("expected 0 items for business_id=0, got %d", len(items))
 	}
 }
 
 func TestStorefronts_Update_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "UpdateNoErrorStore"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "UpdateNoErrorStore"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	err = repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{Name: "UpdateNoErrorStore2"})
+	err = repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{Name: "UpdateNoErrorStore2"})
 	if err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -341,11 +341,11 @@ func TestStorefronts_Update_NoError(t *testing.T) {
 func TestStorefronts_Create_IDsAreUnique(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id1, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "UniqueA"})
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "UniqueA"})
 	if err != nil {
 		t.Fatalf("Create A: %v", err)
 	}
-	id2, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "UniqueB"})
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "UniqueB"})
 	if err != nil {
 		t.Fatalf("Create B: %v", err)
 	}
@@ -357,9 +357,9 @@ func TestStorefronts_Create_IDsAreUnique(t *testing.T) {
 func TestStorefronts_List_EachHasNonZeroID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, _ = repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "IDCheckStore"})
+	_, _ = repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "IDCheckStore"})
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -373,18 +373,18 @@ func TestStorefronts_List_EachHasNonZeroID(t *testing.T) {
 func TestStorefronts_Update_ReflectedInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StorefrontInput{Name: "ReflectStore"})
+	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StorefrontInput{Name: "ReflectStore"})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
-	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StorefrontInput{
+	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StorefrontInput{
 		Name: "ReflectStoreUpdated",
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
 
-	items, err := repo.List(context.Background(), testutil.OwnerID)
+	items, err := repo.List(context.Background(), testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}

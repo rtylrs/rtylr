@@ -37,8 +37,12 @@ func (m *Module) executeListBrandsTool(ctx context.Context) (map[string]any, err
 		return nil, errors.New("authentication is required")
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	brands, err := m.service.ListBrands(ctx, ownerID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	brands, err := m.service.ListBrands(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +69,12 @@ func (m *Module) executeCreateBrandTool(ctx context.Context, input map[string]an
 		return nil, err
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
-	id, err := m.service.CreateBrand(ctx, ownerID, parsed)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	id, err := m.service.CreateBrand(ctx, businessID, parsed)
 	if err != nil {
 		return nil, err
 	}

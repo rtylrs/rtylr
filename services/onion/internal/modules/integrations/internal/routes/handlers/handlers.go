@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubintegrationv1 "github.com/voxire/voxie/gen/go/hub/integration/v1"
 )
 
@@ -31,7 +32,12 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	integrations, err := h.Service.List(ctx, device.User.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	integrations, err := h.Service.List(ctx, businessID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -90,7 +96,12 @@ func (h *ConnectHandler) Serve(ctx context.Context, req *ConnectRequest) (Connec
 		return ConnectResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, err := h.Service.Connect(ctx, device.User.UserID, req.Provider, req.Config)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ConnectResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	id, err := h.Service.Connect(ctx, businessID, req.Provider, req.Config)
 	if err != nil {
 		return ConnectResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -131,7 +142,12 @@ func (h *DisconnectHandler) Serve(ctx context.Context, req *DisconnectRequest) (
 		return DisconnectResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.Disconnect(ctx, device.User.UserID, req.ID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DisconnectResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.Service.Disconnect(ctx, businessID, req.ID); err != nil {
 		return DisconnectResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,

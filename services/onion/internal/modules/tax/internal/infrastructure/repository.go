@@ -25,8 +25,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.TaxConfig, error) {
-	row, err := r.queries.GetTaxConfig(ctx, ownerID)
+func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.TaxConfig, error) {
+	row, err := r.queries.GetTaxConfig(ctx, businessID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.TaxConfig{}, domain.ErrTaxConfigNotFound
@@ -38,6 +38,7 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.TaxCo
 	return domain.TaxConfig{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		TaxName:     nullStr(row.TaxName),
 		TaxRate:     parseFloatNull(row.TaxRate),
 		IsInclusive: nullBool(row.IsInclusive),
@@ -50,6 +51,7 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.TaxCo
 func (r *Repository) UpsertConfig(ctx context.Context, input domain.TaxConfigInput) error {
 	err := r.queries.UpsertTaxConfig(ctx, sqlc.UpsertTaxConfigParams{
 		OwnerID:     input.OwnerID,
+		BusinessID:  input.BusinessID,
 		TaxName:     nullableString(input.TaxName),
 		TaxRate:     nullableString(fmtFloat(input.TaxRate)),
 		IsInclusive: sql.NullBool{Bool: input.IsInclusive, Valid: true},
@@ -61,17 +63,17 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.TaxConfigInp
 	return err
 }
 
-func (r *Repository) GetPLReport(ctx context.Context, ownerID int64) (domain.PLReport, error) {
+func (r *Repository) GetPLReport(ctx context.Context, businessID int64) (domain.PLReport, error) {
 	var report domain.PLReport
 
-	totalRevenue, err := r.queries.SumPaidInvoicesTotal(ctx, ownerID)
+	totalRevenue, err := r.queries.SumPaidInvoicesTotal(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get total revenue", logger.Error(err))
 		return domain.PLReport{}, err
 	}
 	report.TotalRevenue = toFloat64FromInterface(totalRevenue)
 
-	totalExpenses, err := r.queries.SumAllExpensesAmount(ctx, ownerID)
+	totalExpenses, err := r.queries.SumAllExpensesAmount(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get total expenses", logger.Error(err))
 		return domain.PLReport{}, err

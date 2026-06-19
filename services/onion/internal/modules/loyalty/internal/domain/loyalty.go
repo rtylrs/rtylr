@@ -15,6 +15,7 @@ var (
 type LoyaltyTransaction struct {
 	ID            int64     `json:"id"`
 	OwnerID       int64     `json:"owner_id"`
+	BusinessID    int64     `json:"business_id"`
 	CustomerID    int64     `json:"customer_id"`
 	Points        int       `json:"points"`
 	Type          string    `json:"type"`
@@ -27,6 +28,7 @@ type LoyaltyTransaction struct {
 type LoyaltyConfig struct {
 	ID                  int64     `json:"id"`
 	OwnerID             int64     `json:"owner_id"`
+	BusinessID          int64     `json:"business_id"`
 	PointsPerDollar     float64   `json:"points_per_dollar"`
 	MinRedemptionPoints int       `json:"min_redemption_points"`
 	PointsValue         float64   `json:"points_value"`
@@ -37,6 +39,7 @@ type LoyaltyConfig struct {
 
 type AwardInput struct {
 	OwnerID       int64
+	BusinessID    int64
 	CustomerID    int64
 	Points        int
 	Description   string
@@ -46,6 +49,7 @@ type AwardInput struct {
 
 type RedeemInput struct {
 	OwnerID       int64
+	BusinessID    int64
 	CustomerID    int64
 	Points        int
 	Description   string
@@ -55,6 +59,7 @@ type RedeemInput struct {
 
 type LoyaltyConfigInput struct {
 	OwnerID             int64
+	BusinessID          int64
 	PointsPerDollar     float64
 	MinRedemptionPoints int
 	PointsValue         float64
@@ -78,6 +83,7 @@ type LoyaltyMember struct {
 type LoyaltyReward struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Category    string    `json:"category"`
