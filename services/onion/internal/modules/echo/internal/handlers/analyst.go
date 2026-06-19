@@ -63,7 +63,7 @@ func buildSpecGenPrompt(schema, question, today string) string {
 	b.WriteString("\n")
 	b.WriteString(`Q: "how many employees" -> {"view":"ai_employees","aggregations":[{"func":"count","as":"employees"}]}`)
 	b.WriteString("\n")
-	b.WriteString(`Q: "low stock products" -> {"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"where":[{"col":"track_inventory","op":"=","value":true},{"col":"stock_quantity","op":"<=","value_col":"low_stock_threshold"}],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":20}`)
+	b.WriteString(`Q: "low stock products" -> {"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"where":[{"col":"is_active","op":"=","value":true},{"col":"track_inventory","op":"=","value":true},{"col":"low_stock_threshold","op":">=","value":0},{"col":"stock_quantity","op":"<=","value_col":"low_stock_threshold"}],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":20}`)
 	b.WriteString("\n\nIf the question is not answerable from these views (greetings, how-to, general chat), respond with exactly: {}\n\n")
 	b.WriteString("Question: ")
 	b.WriteString(question)

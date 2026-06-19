@@ -35,9 +35,9 @@ type PublicListMenuItemsRequest struct {
 	BusinessID int64 `json:"business_id"`
 	// Optional. Accepted now so menu.rtylr.com/<biz>/<loc> can pass
 	// it through; server-side per-location filtering kicks in when
-	// pos_menu_items get a location_id column. Until then this is
-	// ignored so callers don't need to special-case multi-location
-	// vs single-location tenants.
+	// the ERP-backed menu view gets a location-specific stock scope.
+	// Until then this is ignored so callers don't need to special-case
+	// multi-location vs single-location tenants.
 	LocationID int64 `json:"location_id"`
 }
 

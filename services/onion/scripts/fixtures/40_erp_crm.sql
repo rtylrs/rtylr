@@ -17,7 +17,8 @@ INSERT INTO erp_products (id, owner_id, category_id, supplier_id, name, sku, cos
 VALUES
     (5201, 1001, 5002, 5101, 'Burger', 'BURG-1', 5.00,  10.00, 50.00, 10.00, TRUE, TRUE),
     (5202, 1001, 5001, 5101, 'Soda',   'SODA-1', 0.50,   2.50, 200.00, 50.00, TRUE, TRUE),
-    (5203, 1001, 5002, 5101, 'Salad',  'SAL-1',  3.00,   8.00,  4.00, 10.00, TRUE, TRUE)
+    (5203, 1001, 5002, 5101, 'Salad',  'SAL-1',  3.00,   8.00,  4.00, 10.00, TRUE, TRUE),
+    (5204, 1001, 5001, 5101, 'Coffee', 'COF-1',  1.00,   3.50, 75.00, 20.00, TRUE, TRUE)
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
 INSERT INTO crm_customers (id, owner_id, first_name, last_name, email, phone, loyalty_points, total_spent, visit_count, loyalty_tier, tags)

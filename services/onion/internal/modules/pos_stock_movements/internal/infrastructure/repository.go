@@ -295,8 +295,8 @@ func (r *Repository) ListLowStockItems(ctx context.Context, businessID, ownerID,
 		WHERE p.owner_id = ?
 		  AND p.is_active = TRUE
 		  AND p.track_inventory = TRUE
-		  AND COALESCE(sl.reorder_point, p.low_stock_threshold, 0) > 0
-		  AND COALESCE(sl.on_hand, 0) <= COALESCE(sl.reorder_point, p.low_stock_threshold, 0)
+		  AND COALESCE(sl.reorder_point, p.low_stock_threshold) IS NOT NULL
+		  AND COALESCE(sl.on_hand, 0) <= COALESCE(sl.reorder_point, p.low_stock_threshold)
 		ORDER BY COALESCE(sl.on_hand, 0) ASC, p.name
 	`), branchID, ownerID)
 	if err != nil {

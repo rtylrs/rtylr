@@ -56,13 +56,16 @@ func (r *Repository) GetKPIs(ctx context.Context, ownerID int64) (domain.KPISumm
 		}
 	}
 
-	// Low stock count
-	// cross-schema read from erp_products — products at or below their low-stock threshold
+	// Low stock count: active ERP products at or below their configured threshold.
 	lowStockSQL, lowStockArgs, err := sq.Select("COUNT(*)").
 		From("erp_products").
-		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{
+			"owner_id":        ownerID,
+			"is_active":       true,
+			"track_inventory": true,
+		}).
+		Where(sq.Expr("low_stock_threshold IS NOT NULL")).
 		Where(sq.Expr("stock_quantity <= low_stock_threshold")).
-		Where(sq.Gt{"stock_quantity": 0}).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

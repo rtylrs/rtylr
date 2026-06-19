@@ -24,13 +24,13 @@ VALUES
     (3302, 1001, 3201, 3102, 3001, 'ORD-2', 'dine_in', 'refunded', 'refunded','Walk-in', 1002, 100.00)
 ON DUPLICATE KEY UPDATE status = VALUES(status), payment_status = VALUES(payment_status);
 
-INSERT INTO pos_order_items (id, order_id, name, quantity, unit_price, total)
+INSERT INTO pos_order_items (id, order_id, menu_item_id, name, quantity, unit_price, total)
 VALUES
-    (3401, 3301, 'Burger',  2, 50.00, 100.00),
-    (3402, 3301, 'Soda',    2, 25.00,  50.00),
-    (3403, 3302, 'Salad',   1, 60.00,  60.00),
-    (3404, 3302, 'Coffee',  2, 20.00,  40.00)
-ON DUPLICATE KEY UPDATE total = VALUES(total);
+    (3401, 3301, 5201, 'Burger',  2, 50.00, 100.00),
+    (3402, 3301, 5202, 'Soda',    2, 25.00,  50.00),
+    (3403, 3302, 5203, 'Salad',   1, 60.00,  60.00),
+    (3404, 3302, 5204, 'Coffee',  2, 20.00,  40.00)
+ON DUPLICATE KEY UPDATE menu_item_id = VALUES(menu_item_id), total = VALUES(total);
 
 INSERT INTO pos_refunds (id, owner_id, order_id, amount, reason, refunded_by)
 VALUES

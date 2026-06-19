@@ -78,7 +78,7 @@ func resolveAuthenticatedMenuOwnerID(ctx context.Context) (int64, *errorModels.S
 
 // --- List ---
 
-func ListMenuItemsRoutes() []string { return []string{"/pos/menu/items", "/pos/menu-items"} }
+func ListMenuItemsRoutes() []string { return []string{"/pos/menu-items", "/pos/menu/items"} }
 
 type (
 	ListMenuItemsHandler  struct{ Service *application.Service }
@@ -106,7 +106,7 @@ func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsReques
 
 // --- Quick Create ---
 
-func CreateMenuItemRoutes() []string { return []string{"/pos/menu/items"} }
+func CreateMenuItemRoutes() []string { return []string{"/pos/menu-items", "/pos/menu/items"} }
 
 type CreateMenuItemHandler struct{ Service *application.Service }
 

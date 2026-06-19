@@ -145,7 +145,7 @@ func buildBusinessSnapshotQueries(now time.Time) []businessSnapshotQuery {
 		{
 			Metric: "low_stock_products",
 			Label:  "Low-stock inventory",
-			Spec:   `{"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"where":[{"col":"track_inventory","op":"=","value":true},{"col":"stock_quantity","op":"<=","value_col":"low_stock_threshold"}],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":10}`,
+			Spec:   `{"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"where":[{"col":"is_active","op":"=","value":true},{"col":"track_inventory","op":"=","value":true},{"col":"low_stock_threshold","op":">=","value":0},{"col":"stock_quantity","op":"<=","value_col":"low_stock_threshold"}],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":10}`,
 		},
 		{
 			Metric: "task_status",
