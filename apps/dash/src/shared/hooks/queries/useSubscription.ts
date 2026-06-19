@@ -12,10 +12,12 @@ export interface SubscriptionPayload {
   apps: string[];
   pricePerSeatCents: number;
   status: 'active' | 'trial' | 'cancelled' | 'expired';
+  isGranted?: boolean;
   seatCount: number;
   includedSeatLimit: number;
   includedSeatCount: number;
   billableSeatCount: number;
+  grantExpiresAt?: string | null;
   trialEndsAt: string | null;
   nextBillingDate: string | null;
   paddleSubscriptionId: string | null;
@@ -70,6 +72,8 @@ export interface BillingDetailPayload {
   billableSeatCount: number;
   seatDiscountCents: number;
   status: 'active' | 'trial' | 'cancelled' | 'expired';
+  isGranted?: boolean;
+  grantExpiresAt?: string | null;
   trialEndsAt: string | null;
   paddleSubscriptionId: string | null;
 }

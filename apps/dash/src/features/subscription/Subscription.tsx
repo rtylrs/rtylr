@@ -75,6 +75,11 @@ function splitIncludedSeats(
   return { included, billable: Math.max(0, safeSeats - included) };
 }
 
+function grantDetail(planName: string, grantExpiresAt?: string | null): string {
+  if (!grantExpiresAt) return `${planName} access granted`;
+  return `${planName} access granted until ${new Date(grantExpiresAt).toLocaleDateString()}`;
+}
+
 const StatusBadge: React.FC<{ status: SubStatus }> = ({ status }) => {
   const cfg = STATUS_MAP[status] ?? STATUS_MAP.expired;
   const { Icon } = cfg;
@@ -126,6 +131,7 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
   const { data: billing } = useBillingDetail();
   const daysLeft = trialDaysLeft(sub.trialEndsAt);
   const isTrial = sub.status === 'trial';
+  const isGranted = Boolean(sub.isGranted ?? billing?.isGranted);
   const activeSeats = billing?.currentSeatCount ?? sub.seatCount;
   const includedLimit = billing?.includedSeatLimit ?? sub.includedSeatLimit ?? 10;
   const seatSplit = splitIncludedSeats(activeSeats, includedLimit);
@@ -140,10 +146,12 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-base font-bold" style={{ color: 'var(--dash-text)' }}>
-              {sub.planName}
+              {isGranted ? 'Granted' : sub.planName}
             </p>
             <p className="text-xs mt-0.5 font-mono" style={{ color: 'var(--dash-text-dim)' }}>
-              {sub.planSlug}
+              {isGranted
+                ? grantDetail(sub.planName, sub.grantExpiresAt ?? billing?.grantExpiresAt)
+                : sub.planSlug}
             </p>
           </div>
           <StatusBadge status={sub.status} />
@@ -166,8 +174,9 @@ const CurrentPlanCard: React.FC<{ sub: SubscriptionPayload }> = ({ sub }) => {
                 {centsToDisplay(billing?.totalCents ?? estimatedMonthly)}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                {activeSeats} active seat{activeSeats !== 1 ? 's' : ''} · {includedSeats} of{' '}
-                {includedLimit} included · {billableSeats} billable
+                {isGranted
+                  ? `${activeSeats} active seat${activeSeats !== 1 ? 's' : ''} · plan access granted`
+                  : `${activeSeats} active seat${activeSeats !== 1 ? 's' : ''} · ${includedSeats} of ${includedLimit} included · ${billableSeats} billable`}
               </p>
             </div>
             {isTrial && (
@@ -204,9 +213,10 @@ const PlanCard: React.FC<{
   isCurrent: boolean;
   currentSeats: number;
   includedSeatLimit: number;
+  isGranted?: boolean;
   ownerEmail: string;
   compact?: boolean;
-}> = ({ plan, isCurrent, currentSeats, includedSeatLimit, ownerEmail, compact }) => {
+}> = ({ plan, isCurrent, currentSeats, includedSeatLimit, isGranted, ownerEmail, compact }) => {
   const seatSplit = splitIncludedSeats(currentSeats, includedSeatLimit);
   const estimatedMonthly = seatSplit.billable * plan.pricePerSeatCents;
   const checkout = useCheckout();
@@ -268,7 +278,7 @@ const PlanCard: React.FC<{
             className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0"
             style={{ background: 'var(--accent)', color: '#fff' }}
           >
-            Current
+            {isGranted ? 'Granted' : 'Current'}
           </span>
         )}
       </div>
@@ -336,6 +346,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
   const soloPlans = [...plans].filter((p) => p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
   const currentSeats = sub?.seatCount ?? 1;
   const includedSeatLimit = sub?.includedSeatLimit ?? 10;
+  const isGranted = Boolean(sub?.isGranted);
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -385,6 +396,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
                 isCurrent={plan.slug === sub?.planSlug}
                 currentSeats={currentSeats}
                 includedSeatLimit={includedSeatLimit}
+                isGranted={isGranted && plan.slug === sub?.planSlug}
                 ownerEmail={ownerEmail}
               />
             ))}
@@ -406,6 +418,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
                 isCurrent={plan.slug === sub?.planSlug}
                 currentSeats={currentSeats}
                 includedSeatLimit={includedSeatLimit}
+                isGranted={isGranted && plan.slug === sub?.planSlug}
                 ownerEmail={ownerEmail}
                 compact
               />
