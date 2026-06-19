@@ -71,6 +71,6 @@ ALTER TABLE erp_purchase_orders ADD COLUMN destination_location_id BIGINT NULL;
 -- Transitional read view: owner-wide total across locations (matches the legacy
 -- scalar's semantics) for readers during the migration.
 CREATE OR REPLACE VIEW product_stock_total AS
-    SELECT owner_id, product_id, SUM(on_hand) AS total_quantity
+    SELECT owner_id, business_id, product_id, SUM(on_hand) AS total_quantity
     FROM stock_levels
-    GROUP BY owner_id, product_id;
+    GROUP BY owner_id, business_id, product_id;
