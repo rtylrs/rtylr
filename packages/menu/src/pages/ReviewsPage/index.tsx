@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { BusinessReview } from '../../types';
-import styles from './ReviewsPage.module.scss';
+import React, { useState } from "react";
+import { cdnImageUrl } from "@voxire/config";
+import { BusinessReview } from "../../types";
+import styles from "./ReviewsPage.module.scss";
 
 interface ReviewsPageProps {
   reviews: BusinessReview[];
@@ -27,7 +28,7 @@ const StarRow: React.FC<{
             onMouseEnter={interactive ? () => setHovered(val) : undefined}
             onMouseLeave={interactive ? () => setHovered(0) : undefined}
             onClick={interactive && onChange ? () => onChange(val) : undefined}
-            style={interactive ? { cursor: 'pointer' } : undefined}
+            style={interactive ? { cursor: "pointer" } : undefined}
           >
             ★
           </span>
@@ -37,15 +38,21 @@ const StarRow: React.FC<{
   );
 };
 
-const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, reviewCount }) => {
+const ReviewsPage: React.FC<ReviewsPageProps> = ({
+  reviews,
+  averageRating,
+  reviewCount,
+}) => {
   const [newRating, setNewRating] = useState(0);
-  const [newComment, setNewComment] = useState('');
-  const [newName, setNewName] = useState('');
+  const [newComment, setNewComment] = useState("");
+  const [newName, setNewName] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const avg =
     averageRating ??
-    (reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0);
+    (reviews.length > 0
+      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+      : 0);
   const total = reviewCount ?? reviews.length;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,7 +69,7 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
         <div className={styles.reviews__avgRight}>
           <StarRow rating={Math.round(avg)} />
           <span className={styles.reviews__count}>
-            {total} review{total !== 1 ? 's' : ''}
+            {total} review{total !== 1 ? "s" : ""}
           </span>
         </div>
       </div>
@@ -113,27 +120,34 @@ const ReviewsPage: React.FC<ReviewsPageProps> = ({ reviews, averageRating, revie
       {reviews.length > 0 && (
         <div className={styles.reviews__list}>
           <h3 className={styles.reviews__listTitle}>Reviews</h3>
-          {reviews.map((r) => (
-            <div key={r.id} className={styles.reviews__card}>
-              <div className={styles.reviews__cardHeader}>
-                {r.avatar ? (
-                  <img src={r.avatar} alt={r.author} className={styles.reviews__avatar} />
-                ) : (
-                  <div className={styles.reviews__avatarFallback}>
-                    {r.author.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className={styles.reviews__cardMeta}>
-                  <span className={styles.reviews__author}>{r.author}</span>
-                  <div className={styles.reviews__cardStarRow}>
-                    <StarRow rating={r.rating} />
-                    <span className={styles.reviews__date}>{r.date}</span>
+          {reviews.map((r) => {
+            const avatarUrl = cdnImageUrl(r.avatar);
+            return (
+              <div key={r.id} className={styles.reviews__card}>
+                <div className={styles.reviews__cardHeader}>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={r.author}
+                      className={styles.reviews__avatar}
+                    />
+                  ) : (
+                    <div className={styles.reviews__avatarFallback}>
+                      {r.author.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className={styles.reviews__cardMeta}>
+                    <span className={styles.reviews__author}>{r.author}</span>
+                    <div className={styles.reviews__cardStarRow}>
+                      <StarRow rating={r.rating} />
+                      <span className={styles.reviews__date}>{r.date}</span>
+                    </div>
                   </div>
                 </div>
+                <p className={styles.reviews__comment}>{r.comment}</p>
               </div>
-              <p className={styles.reviews__comment}>{r.comment}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

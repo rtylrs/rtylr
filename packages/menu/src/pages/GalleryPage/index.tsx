@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import styles from './GalleryPage.module.scss';
+import React, { useState } from "react";
+import { cdnImageUrl } from "@voxire/config";
+import styles from "./GalleryPage.module.scss";
 
 interface GalleryPageProps {
   photos: string[];
@@ -21,26 +22,41 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ photos, businessName }) => {
   return (
     <div className={styles.gallery}>
       <div className={styles.gallery__grid}>
-        {photos.map((src, i) => (
-          <button
-            key={i}
-            className={styles.gallery__item}
-            onClick={() => setLightbox(src)}
-            aria-label={`View photo ${i + 1}`}
-          >
-            <img src={src} alt={`${businessName} photo ${i + 1}`} loading="lazy" />
-          </button>
-        ))}
+        {photos.map((src, i) => {
+          const imageUrl = cdnImageUrl(src);
+          return (
+            <button
+              key={i}
+              className={styles.gallery__item}
+              onClick={() => setLightbox(src)}
+              aria-label={`View photo ${i + 1}`}
+            >
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt={`${businessName} photo ${i + 1}`}
+                  loading="lazy"
+                />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Lightbox */}
       {lightbox && (
-        <div className={styles.gallery__lightbox} onClick={() => setLightbox(null)}>
-          <button className={styles.gallery__lightboxClose} onClick={() => setLightbox(null)}>
+        <div
+          className={styles.gallery__lightbox}
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            className={styles.gallery__lightboxClose}
+            onClick={() => setLightbox(null)}
+          >
             ✕
           </button>
           <img
-            src={lightbox}
+            src={cdnImageUrl(lightbox)}
             alt="Enlarged view"
             className={styles.gallery__lightboxImg}
             onClick={(e) => e.stopPropagation()}
