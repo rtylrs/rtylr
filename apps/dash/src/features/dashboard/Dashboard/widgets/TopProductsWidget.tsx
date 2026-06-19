@@ -5,11 +5,23 @@ import { unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 interface WidgetProduct {
+  productId?: number;
   name?: string;
-  sku?: string;
   category?: string;
-  salePrice?: number;
-  price?: number;
+  unitsSold?: number;
+  revenueMinorUnits?: number;
+  revenue?: number;
+}
+
+interface BestSellersResponse {
+  products?: WidgetProduct[];
+}
+
+function productRevenue(product: WidgetProduct): number {
+  if (typeof product.revenueMinorUnits === 'number') {
+    return product.revenueMinorUnits / 100;
+  }
+  return product.revenue ?? 0;
 }
 
 const TopProductsWidget: React.FC = () => {
@@ -18,7 +30,7 @@ const TopProductsWidget: React.FC = () => {
     queryFn: async (): Promise<WidgetProduct[]> => {
       try {
         const res = await unwrap(
-          safe.get<{ products?: WidgetProduct[] } | WidgetProduct[]>('/erp/products', {
+          safe.get<BestSellersResponse | WidgetProduct[]>('/insights/products/best-sellers', {
             params: { limit: 5 },
           })
         );
@@ -63,11 +75,11 @@ const TopProductsWidget: React.FC = () => {
                   {p.name}
                 </p>
                 <p className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
-                  {p.sku || p.category || ''}
+                  {p.category || `${p.unitsSold ?? 0} sold`}
                 </p>
               </div>
               <span className="text-xs font-semibold" style={{ color: 'var(--dash-text)' }}>
-                ${p.salePrice ?? p.price ?? 0}
+                ${productRevenue(p).toFixed(2)}
               </span>
             </div>
           ))

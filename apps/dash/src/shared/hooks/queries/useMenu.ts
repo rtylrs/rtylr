@@ -93,7 +93,7 @@ export const useGetAllMenus = (restaurantId: string | null) => {
   const query = useQuery({
     queryKey: ['menus', restaurantId],
     queryFn: async () => {
-      const response = await unwrap(safe.get<PosMenuItemsResponse>('/pos/menu/items'));
+      const response = await unwrap(safe.get<PosMenuItemsResponse>('/pos/menu-items'));
       return toMenuList(normalizeItems(response));
     },
     enabled: !!restaurantId,
@@ -114,7 +114,7 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
   const query = useQuery({
     queryKey: ['menu', userId, disabled],
     queryFn: async () => {
-      const response = await unwrap(safe.get<PosMenuItemsResponse>('/pos/menu/items'));
+      const response = await unwrap(safe.get<PosMenuItemsResponse>('/pos/menu-items'));
       const items = normalizeItems(response);
       return {
         _id: 'pos-menu',

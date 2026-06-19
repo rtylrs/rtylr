@@ -33,10 +33,8 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   const { data, isLoading, isError } = usePublicMenu(businessId);
   const { clearCart, setBusinessId, addItem } = useCartStore();
 
-  // GridLayout expects a category-grouped list. pos_menu_items is
-  // flat today, so we bucket everything into one "Menu" group and
-  // let the layout render it. When POS adds a category column we
-  // can fan this out.
+  // GridLayout expects a category-grouped list. POS menu items are
+  // ERP products today, so we bucket everything into one "Menu" group.
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!data) return [];
     const items = data.items

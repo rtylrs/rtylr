@@ -1,9 +1,7 @@
 // Local type definitions for /insights/* responses. These mirror the Go
 // payload structs under onion/internal/modules/insights/internal/application
 // and handlers, with snake_case keys automatically converted to camelCase by
-// the @voxire/api response interceptor. They are intentionally kept local to
-// the insights app: the generated contracts in @voxire/contracts/insights do
-// not yet match the shapes the new /insights/* namespace returns.
+// the @voxire/api response interceptor.
 
 export interface MoneyCard {
   value: number;

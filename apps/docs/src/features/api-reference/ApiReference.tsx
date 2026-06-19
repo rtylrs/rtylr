@@ -38,11 +38,11 @@ const endpointGroups: EndpointGroup[] = [
   {
     name: 'Products',
     endpoints: [
-      { method: 'GET', path: '/products', description: 'List all products' },
-      { method: 'GET', path: '/products/:id', description: 'Get a specific product' },
-      { method: 'POST', path: '/products', description: 'Create a new product' },
-      { method: 'PUT', path: '/products/:id', description: 'Replace a product' },
-      { method: 'DELETE', path: '/products/:id', description: 'Delete a product' },
+      { method: 'GET', path: '/erp/products', description: 'List all ERP products' },
+      { method: 'GET', path: '/erp/products/:id', description: 'Get a specific ERP product' },
+      { method: 'POST', path: '/erp/products', description: 'Create a new ERP product' },
+      { method: 'PUT', path: '/erp/products/:id', description: 'Replace an ERP product' },
+      { method: 'DELETE', path: '/erp/products/:id', description: 'Delete an ERP product' },
     ],
   },
   {

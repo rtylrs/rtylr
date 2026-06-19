@@ -5,9 +5,15 @@ import { unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 interface StockItem {
+  productName?: string;
   name?: string;
   stockQuantity?: number;
   stock?: number;
+}
+
+interface LowStockResponse {
+  items?: StockItem[];
+  products?: StockItem[];
 }
 
 const LowStockWidget: React.FC = () => {
@@ -15,9 +21,9 @@ const LowStockWidget: React.FC = () => {
     queryKey: ['low-stock-widget'],
     queryFn: async () => {
       const res = await unwrap(
-        safe.get<{ products?: StockItem[] } | StockItem[]>('/erp/inventory/low-stock')
+        safe.get<LowStockResponse | StockItem[]>('/erp/inventory/low-stock')
       );
-      return (Array.isArray(res) ? res : res.products) ?? [];
+      return (Array.isArray(res) ? res : res.items ?? res.products) ?? [];
     },
     staleTime: 60_000,
   });
@@ -51,7 +57,7 @@ const LowStockWidget: React.FC = () => {
               <AlertTriangle size={12} style={{ color: 'var(--aging-critical)' }} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
-                  {p.name}
+                  {p.productName ?? p.name}
                 </p>
               </div>
               <span

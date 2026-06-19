@@ -26,7 +26,13 @@ interface BestSeller {
   productId: number;
   name: string;
   unitsSold: number;
-  revenueMinorUnits: number;
+  revenueMinorUnits?: number;
+  revenue?: number;
+}
+
+function revenueDollars(item: BestSeller): number {
+  if (typeof item.revenueMinorUnits === 'number') return item.revenueMinorUnits / 100;
+  return item.revenue ?? 0;
 }
 
 const useBestSellers = () =>
@@ -34,11 +40,11 @@ const useBestSellers = () =>
     queryKey: ['dash-best-sellers'],
     queryFn: async (): Promise<BestSeller[]> => {
       const res = await unwrap(
-        safe.get<{ products: BestSeller[] }>('/insights/products/best-sellers', {
+        safe.get<{ products?: BestSeller[] } | BestSeller[]>('/insights/products/best-sellers', {
           params: { limit: 5 },
         })
       );
-      return (res as { products: BestSeller[] }).products ?? [];
+      return (Array.isArray(res) ? res : res.products) ?? [];
     },
     staleTime: 60_000,
   });
@@ -215,7 +221,7 @@ const Analytics: React.FC = () => {
                     <TableRow key={item.productId}>
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell>{item.unitsSold.toLocaleString()}</TableCell>
-                      <TableCell>${(item.revenueMinorUnits / 100).toFixed(2)}</TableCell>
+                      <TableCell>${revenueDollars(item).toFixed(2)}</TableCell>
                     </TableRow>
                   ))
                 )}
