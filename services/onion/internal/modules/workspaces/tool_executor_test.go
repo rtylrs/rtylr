@@ -84,6 +84,30 @@ func TestParseListTasksToolInputRejectsInvalidBool(t *testing.T) {
 	}
 }
 
+func TestParseGetTaskToolInputAcceptsAliases(t *testing.T) {
+	for _, input := range []map[string]any{
+		{"task_id": "17"},
+		{"task": "T-17"},
+		{"id": "#17"},
+		{"task_id": "task-17"},
+	} {
+		got, err := parseGetTaskToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetTaskToolInput(%v) returned error: %v", input, err)
+		}
+		if got != 17 {
+			t.Fatalf("parseGetTaskToolInput(%v) = %d, want 17", input, got)
+		}
+	}
+}
+
+func TestParseGetTaskToolInputRejectsMissingTask(t *testing.T) {
+	_, err := parseGetTaskToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "task_id is required") {
+		t.Fatalf("error = %v, want missing task_id validation", err)
+	}
+}
+
 func TestTaskToolPayload(t *testing.T) {
 	dueDate := time.Date(2026, 6, 21, 0, 0, 0, 0, time.UTC)
 	startDate := time.Date(2026, 6, 19, 0, 0, 0, 0, time.UTC)
@@ -127,5 +151,62 @@ func TestTaskToolPayload(t *testing.T) {
 	}
 	if payload["subtask_count"] != int32(2) {
 		t.Fatalf("subtask_count = %v, want 2", payload["subtask_count"])
+	}
+}
+
+func TestTaskDetailToolPayloadIncludesSubtasksCommentsAndActivity(t *testing.T) {
+	now := time.Date(2026, 6, 20, 10, 0, 0, 0, time.UTC)
+
+	payload := taskDetailToolPayload(domain.TaskDetail{
+		Task: domain.Task{
+			ID:        17,
+			Title:     "Review invoices",
+			Status:    "todo",
+			Priority:  "high",
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
+		Subtasks: []domain.Task{{
+			ID:        18,
+			Title:     "Pull overdue list",
+			Status:    "done",
+			CreatedAt: now,
+			UpdatedAt: now,
+		}},
+		Comments: []domain.TaskComment{{
+			ID:        5,
+			TaskID:    17,
+			UserID:    9,
+			Content:   "Waiting on accounting.",
+			IsEdited:  true,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}},
+		Activity: []domain.TaskActivity{{
+			ID:        7,
+			TaskID:    17,
+			UserID:    9,
+			Action:    "status_changed",
+			OldValue:  "todo",
+			NewValue:  "done",
+			CreatedAt: now,
+		}},
+	})
+
+	if _, ok := payload["task"].(map[string]any); !ok {
+		t.Fatalf("task payload missing: %#v", payload["task"])
+	}
+	if got := payload["subtasks"].([]map[string]any); len(got) != 1 || got[0]["title"] != "Pull overdue list" {
+		t.Fatalf("subtasks = %#v, want one subtask", got)
+	}
+	if got := payload["comments"].([]map[string]any); len(got) != 1 || got[0]["content"] != "Waiting on accounting." {
+		t.Fatalf("comments = %#v, want one comment", got)
+	}
+	if got := payload["activity"].([]map[string]any); len(got) != 1 || got[0]["action"] != "status_changed" {
+		t.Fatalf("activity = %#v, want one activity item", got)
+	}
+	counts := payload["counts"].(map[string]any)
+	if counts["subtasks"] != 1 || counts["comments"] != 1 || counts["activity"] != 1 {
+		t.Fatalf("counts = %#v, want all counts to be 1", counts)
 	}
 }

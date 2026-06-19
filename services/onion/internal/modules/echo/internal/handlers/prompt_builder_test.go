@@ -120,6 +120,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"hr.list_attendance [read]",
 		"hr.get_location_attendance [read]",
 		"flow.list_tasks [read]",
+		"flow.get_task [read]",
 		"flow.get_insights [read]",
 		"flow.get_team_workload [read]",
 		"flow.get_roadmap [read]",

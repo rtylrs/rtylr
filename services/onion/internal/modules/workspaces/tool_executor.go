@@ -17,6 +17,7 @@ import (
 
 const (
 	listTasksToolName           = "flow.list_tasks"
+	getTaskToolName             = "flow.get_task"
 	createTaskToolName          = "flow.create_task"
 	defaultListTasksToolLimit   = int64(20)
 	maxListTasksToolLimit       = int64(50)
@@ -40,6 +41,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	switch name {
 	case listTasksToolName:
 		output, err := m.executeListTasksTool(ctx, input)
+		return output, true, err
+	case getTaskToolName:
+		output, err := m.executeGetTaskTool(ctx, input)
 		return output, true, err
 	case createTaskToolName:
 		output, err := m.executeCreateTaskTool(ctx, input)
@@ -116,6 +120,29 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 			"active_only": parsed.ActiveOnly,
 		},
 	}, nil
+}
+
+func (m *Module) executeGetTaskTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	taskID, err := parseGetTaskToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	if !m.service.IsTaskMember(ctx, authUser.UserID, taskID) {
+		return nil, errors.New("permission denied")
+	}
+
+	detail, err := m.service.GetTaskDetail(ctx, taskID)
+	if err != nil {
+		return nil, err
+	}
+
+	return taskDetailToolPayload(detail), nil
 }
 
 func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -228,6 +255,17 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 			"labels":          task.Labels,
 		},
 	}, nil
+}
+
+func parseGetTaskToolInput(input map[string]any) (int64, error) {
+	taskID, err := taskIDToolValue(firstToolValue(input, "task_id", "task", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid task_id: %w", err)
+	}
+	if taskID <= 0 {
+		return 0, errors.New("task_id is required")
+	}
+	return taskID, nil
 }
 
 func parseListTasksToolInput(input map[string]any, userID int64) (listTasksToolInput, error) {
@@ -392,6 +430,24 @@ func optionalAssigneeID(value any, userID int64) (*int64, error) {
 		return &userID, nil
 	}
 	return optionalInt64(value)
+}
+
+func taskIDToolValue(value any) (int64, error) {
+	if raw, ok := value.(string); ok {
+		text := strings.TrimSpace(raw)
+		if text == "" {
+			return 0, nil
+		}
+		normalized := strings.ToLower(text)
+		normalized = strings.TrimPrefix(normalized, "#")
+		normalized = strings.TrimPrefix(normalized, "task-")
+		normalized = strings.TrimPrefix(normalized, "t-")
+		if normalized == "" {
+			return 0, nil
+		}
+		return strconv.ParseInt(normalized, 10, 64)
+	}
+	return int64Value(value)
 }
 
 func optionalInt64(value any) (*int64, error) {
@@ -596,6 +652,35 @@ func optionalInt64Slice(value any) ([]int64, error) {
 	}
 }
 
+func taskDetailToolPayload(detail domain.TaskDetail) map[string]any {
+	subtasks := make([]map[string]any, 0, len(detail.Subtasks))
+	for _, subtask := range detail.Subtasks {
+		subtasks = append(subtasks, taskToolPayload(subtask))
+	}
+
+	comments := make([]map[string]any, 0, len(detail.Comments))
+	for _, comment := range detail.Comments {
+		comments = append(comments, taskCommentToolPayload(comment))
+	}
+
+	activity := make([]map[string]any, 0, len(detail.Activity))
+	for _, item := range detail.Activity {
+		activity = append(activity, taskActivityToolPayload(item))
+	}
+
+	return map[string]any{
+		"task":     taskToolPayload(detail.Task),
+		"subtasks": subtasks,
+		"comments": comments,
+		"activity": activity,
+		"counts": map[string]any{
+			"subtasks": len(subtasks),
+			"comments": len(comments),
+			"activity": len(activity),
+		},
+	}
+}
+
 func taskToolPayload(task domain.Task) map[string]any {
 	labels := task.Labels
 	if labels == nil {
@@ -629,6 +714,30 @@ func taskToolPayload(task domain.Task) map[string]any {
 		"labels":            labels,
 		"created_at":        formatRequiredTaskToolTime(task.CreatedAt),
 		"updated_at":        formatRequiredTaskToolTime(task.UpdatedAt),
+	}
+}
+
+func taskCommentToolPayload(comment domain.TaskComment) map[string]any {
+	return map[string]any{
+		"id":         comment.ID,
+		"task_id":    comment.TaskID,
+		"user_id":    comment.UserID,
+		"content":    comment.Content,
+		"is_edited":  comment.IsEdited,
+		"created_at": formatRequiredTaskToolTime(comment.CreatedAt),
+		"updated_at": formatRequiredTaskToolTime(comment.UpdatedAt),
+	}
+}
+
+func taskActivityToolPayload(activity domain.TaskActivity) map[string]any {
+	return map[string]any{
+		"id":         activity.ID,
+		"task_id":    activity.TaskID,
+		"user_id":    activity.UserID,
+		"action":     activity.Action,
+		"old_value":  activity.OldValue,
+		"new_value":  activity.NewValue,
+		"created_at": formatRequiredTaskToolTime(activity.CreatedAt),
 	}
 }
 
