@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -14,6 +15,9 @@ import (
 )
 
 const consoleTTL = 1 * time.Minute
+const freeIncludedSeatLimit = 10
+
+var ErrNotOrganizationOwner = errors.New("access can only be granted to organization owners")
 
 // Console is a global admin surface — caches are keyed on the admin namespace
 // rather than per-owner because they aggregate across all tenants.
@@ -370,11 +374,18 @@ func (s *Service) DeleteBusiness(ctx context.Context, id int64) error {
 type SubscriptionDTO struct {
 	ID                  int64   `json:"id"`
 	OwnerID             int64   `json:"owner_id"`
+	OwnerName           string  `json:"owner_name"`
 	OwnerEmail          string  `json:"owner_email"`
+	BusinessID          *int64  `json:"business_id,omitempty"`
+	BusinessName        string  `json:"business_name"`
 	PlanID              int64   `json:"plan_id"`
 	PlanName            string  `json:"plan_name"`
 	Status              string  `json:"status"`
 	SeatCount           int     `json:"seat_count"`
+	ActiveSeatCount     int     `json:"active_seat_count"`
+	IncludedSeatLimit   int     `json:"included_seat_limit"`
+	IncludedSeatCount   int     `json:"included_seat_count"`
+	BillableSeatCount   int     `json:"billable_seat_count"`
 	TrialEndsAt         *string `json:"trial_ends_at,omitempty"`
 	CurrentPeriodEndsAt *string `json:"current_period_ends_at,omitempty"`
 	CreatedAt           string  `json:"created_at"`
@@ -389,9 +400,21 @@ func toSubDTO(s infrastructure.SubscriptionRow) SubscriptionDTO {
 	dto := SubscriptionDTO{
 		ID: s.ID, OwnerID: s.OwnerID, PlanID: s.PlanID,
 		PlanName: s.PlanName, Status: s.Status, SeatCount: s.SeatCount,
+		ActiveSeatCount: s.ActiveSeatCount, IncludedSeatLimit: freeIncludedSeatLimit,
+		IncludedSeatCount: s.IncludedSeatCount, BillableSeatCount: s.BillableSeatCount,
+	}
+	if s.OwnerName.Valid {
+		dto.OwnerName = s.OwnerName.String
 	}
 	if s.OwnerEmail.Valid {
 		dto.OwnerEmail = s.OwnerEmail.String
+	}
+	if s.BusinessID.Valid {
+		id := s.BusinessID.Int64
+		dto.BusinessID = &id
+	}
+	if s.BusinessName.Valid {
+		dto.BusinessName = s.BusinessName.String
 	}
 	if s.TrialEndsAt.Valid {
 		t := s.TrialEndsAt.Time.Format(time.RFC3339)
@@ -448,15 +471,47 @@ func (s *Service) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*S
 }
 
 func (s *Service) UpsertSubscription(ctx context.Context, ownerID, planID int64, status string, seatCount int, expiresAt *time.Time) error {
+	defer invalidateConsoleScope(ctx)
+	seatCount, err := s.activeSeatCountForOwner(ctx, ownerID)
+	if err != nil {
+		return err
+	}
 	return s.repo.UpsertSubscription(ctx, ownerID, planID, status, seatCount, expiresAt)
 }
 
 func (s *Service) UpdateSubscription(ctx context.Context, id, planID int64, status string, seatCount int) error {
+	defer invalidateConsoleScope(ctx)
+	sub, err := s.repo.GetSubscriptionByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	seatCount, err = s.activeSeatCountForOwner(ctx, sub.OwnerID)
+	if err != nil {
+		return err
+	}
 	return s.repo.UpdateSubscription(ctx, id, planID, status, seatCount)
 }
 
 func (s *Service) DeleteSubscription(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.DeleteSubscription(ctx, id)
+}
+
+func (s *Service) activeSeatCountForOwner(ctx context.Context, ownerID int64) (int, error) {
+	if _, err := s.repo.GetActiveBusinessByOwner(ctx, ownerID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrNotOrganizationOwner
+		}
+		return 0, err
+	}
+	seatCount, err := s.repo.CountActiveSeatsForOwner(ctx, ownerID)
+	if err != nil {
+		return 0, err
+	}
+	if seatCount < 1 {
+		return 1, nil
+	}
+	return seatCount, nil
 }
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
@@ -512,17 +567,22 @@ func (s *Service) UpdatePlan(ctx context.Context, id int64, name string, pricePe
 // ── Grants ────────────────────────────────────────────────────────────────────
 
 type GrantDTO struct {
-	ID          int64   `json:"id"`
-	UserID      int64   `json:"user_id"`
-	UserEmail   string  `json:"user_email"`
-	PlanID      int64   `json:"plan_id"`
-	PlanName    string  `json:"plan_name"`
-	GrantedBy   int64   `json:"granted_by"`
-	GranterName string  `json:"granter_name"`
-	Note        string  `json:"note"`
-	ExpiresAt   *string `json:"expires_at,omitempty"`
-	RevokedAt   *string `json:"revoked_at,omitempty"`
-	CreatedAt   string  `json:"created_at"`
+	ID                int64   `json:"id"`
+	UserID            int64   `json:"user_id"`
+	UserName          string  `json:"user_name"`
+	UserEmail         string  `json:"user_email"`
+	BusinessID        *int64  `json:"business_id,omitempty"`
+	BusinessName      string  `json:"business_name"`
+	ActiveSeatCount   int     `json:"active_seat_count"`
+	IncludedSeatLimit int     `json:"included_seat_limit"`
+	PlanID            int64   `json:"plan_id"`
+	PlanName          string  `json:"plan_name"`
+	GrantedBy         int64   `json:"granted_by"`
+	GranterName       string  `json:"granter_name"`
+	Note              string  `json:"note"`
+	ExpiresAt         *string `json:"expires_at,omitempty"`
+	RevokedAt         *string `json:"revoked_at,omitempty"`
+	CreatedAt         string  `json:"created_at"`
 }
 
 type ListGrantsResult struct {
@@ -533,9 +593,20 @@ type ListGrantsResult struct {
 func toGrantDTO(g infrastructure.GrantRow) GrantDTO {
 	dto := GrantDTO{
 		ID: g.ID, UserID: g.UserID, PlanID: g.PlanID, PlanName: g.PlanName, GrantedBy: g.GrantedBy,
+		ActiveSeatCount: g.ActiveSeatCount, IncludedSeatLimit: freeIncludedSeatLimit,
+	}
+	if g.UserName.Valid {
+		dto.UserName = g.UserName.String
 	}
 	if g.UserEmail.Valid {
 		dto.UserEmail = g.UserEmail.String
+	}
+	if g.BusinessID.Valid {
+		id := g.BusinessID.Int64
+		dto.BusinessID = &id
+	}
+	if g.BusinessName.Valid {
+		dto.BusinessName = g.BusinessName.String
 	}
 	if g.GranterName.Valid {
 		dto.GranterName = g.GranterName.String
@@ -570,13 +641,19 @@ func (s *Service) ListGrants(ctx context.Context, limit, offset int) (*ListGrant
 }
 
 func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int64, note string, expiresAt *time.Time) (*GrantDTO, error) {
+	defer invalidateConsoleScope(ctx)
+	seatCount, err := s.activeSeatCountForOwner(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	id, err := s.repo.CreateGrant(ctx, userID, planID, grantedBy, note, expiresAt)
 	if err != nil {
 		return nil, err
 	}
 
-	// Also activate the subscription for that user
-	if subErr := s.repo.UpsertSubscription(ctx, userID, planID, "active", 1, expiresAt); subErr != nil {
+	// Also activate the subscription for that owner.
+	if subErr := s.repo.UpsertSubscription(ctx, userID, planID, "active", seatCount, expiresAt); subErr != nil {
 		logger.Ctx(ctx).Warn("failed to upsert subscription for grant", logger.Error(subErr))
 	}
 
@@ -599,10 +676,12 @@ func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int
 }
 
 func (s *Service) RevokeGrant(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.RevokeGrant(ctx, id)
 }
 
 func (s *Service) DeleteGrant(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.DeleteGrant(ctx, id)
 }
 

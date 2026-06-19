@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -558,6 +559,10 @@ func rawUpdateSubscription(_ context.Context, svc *application.Service) http.Han
 			return
 		}
 		if err := svc.UpdateSubscription(r.Context(), id, req.PlanID, req.Status, req.SeatCount); err != nil {
+			if errors.Is(err, application.ErrNotOrganizationOwner) {
+				writeError(w, http.StatusBadRequest, "Subscriptions can only be set for organization owners")
+				return
+			}
 			writeError(w, http.StatusInternalServerError, "Failed to update subscription")
 			return
 		}

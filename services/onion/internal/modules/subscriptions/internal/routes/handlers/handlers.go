@@ -104,6 +104,9 @@ type SubscriptionPayload struct {
 	PricePerSeatCents    int        `json:"price_per_seat_cents"`
 	Status               string     `json:"status"`
 	SeatCount            int        `json:"seat_count"`
+	IncludedSeatLimit    int        `json:"included_seat_limit"`
+	IncludedSeatCount    int        `json:"included_seat_count"`
+	BillableSeatCount    int        `json:"billable_seat_count"`
 	TrialEndsAt          *time.Time `json:"trial_ends_at,omitempty"`
 	NextBillingDate      *time.Time `json:"next_billing_date,omitempty"`
 	PaddleSubscriptionID string     `json:"paddle_subscription_id,omitempty"`
@@ -140,6 +143,9 @@ func (h *MySubscriptionHandler) Serve(ctx context.Context, _ *MySubscriptionRequ
 			PricePerSeatCents:    sub.PricePerSeatCents,
 			Status:               sub.Status,
 			SeatCount:            sub.SeatCount,
+			IncludedSeatLimit:    sub.IncludedSeatLimit,
+			IncludedSeatCount:    sub.IncludedSeatCount,
+			BillableSeatCount:    sub.BillableSeatCount,
 			TrialEndsAt:          sub.TrialEndsAt,
 			NextBillingDate:      sub.NextBillingDate,
 			PaddleSubscriptionID: sub.PaddleSubscriptionID,
@@ -160,6 +166,10 @@ type BillingLineItemPayload struct {
 	PeriodStart       time.Time  `json:"period_start"`
 	PeriodEnd         *time.Time `json:"period_end"`
 	SeatCount         int        `json:"seat_count"`
+	IncludedSeatLimit int        `json:"included_seat_limit"`
+	IncludedSeatCount int        `json:"included_seat_count"`
+	BillableSeatCount int        `json:"billable_seat_count"`
+	IncludedCents     int        `json:"included_cents"`
 	PricePerSeatCents int        `json:"price_per_seat_cents"`
 	AmountCents       int        `json:"amount_cents"`
 	Type              string     `json:"type"`
@@ -177,6 +187,10 @@ type BillingDetailPayload struct {
 	PlanName             string                   `json:"plan_name"`
 	PricePerSeatCents    int                      `json:"price_per_seat_cents"`
 	CurrentSeatCount     int                      `json:"current_seat_count"`
+	IncludedSeatLimit    int                      `json:"included_seat_limit"`
+	IncludedSeatCount    int                      `json:"included_seat_count"`
+	BillableSeatCount    int                      `json:"billable_seat_count"`
+	SeatDiscountCents    int                      `json:"seat_discount_cents"`
 	Status               string                   `json:"status"`
 	TrialEndsAt          *time.Time               `json:"trial_ends_at"`
 	PaddleSubscriptionID string                   `json:"paddle_subscription_id,omitempty"`
@@ -210,6 +224,10 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 			PeriodStart:       li.PeriodStart,
 			PeriodEnd:         li.PeriodEnd,
 			SeatCount:         li.SeatCount,
+			IncludedSeatLimit: li.IncludedSeatLimit,
+			IncludedSeatCount: li.IncludedSeatCount,
+			BillableSeatCount: li.BillableSeatCount,
+			IncludedCents:     li.IncludedCents,
 			PricePerSeatCents: li.PricePerSeatCents,
 			AmountCents:       li.AmountCents,
 			Type:              li.Type,
@@ -229,6 +247,10 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 			PlanName:             detail.PlanName,
 			PricePerSeatCents:    detail.PricePerSeatCents,
 			CurrentSeatCount:     detail.CurrentSeatCount,
+			IncludedSeatLimit:    detail.IncludedSeatLimit,
+			IncludedSeatCount:    detail.IncludedSeatCount,
+			BillableSeatCount:    detail.BillableSeatCount,
+			SeatDiscountCents:    detail.SeatDiscountCents,
 			Status:               detail.Status,
 			TrialEndsAt:          detail.TrialEndsAt,
 			PaddleSubscriptionID: detail.PaddleSubscriptionID,
@@ -279,6 +301,10 @@ func (h *BillingHistoryHandler) Serve(ctx context.Context, _ *BillingHistoryRequ
 				PeriodStart:       li.PeriodStart,
 				PeriodEnd:         li.PeriodEnd,
 				SeatCount:         li.SeatCount,
+				IncludedSeatLimit: li.IncludedSeatLimit,
+				IncludedSeatCount: li.IncludedSeatCount,
+				BillableSeatCount: li.BillableSeatCount,
+				IncludedCents:     li.IncludedCents,
 				PricePerSeatCents: li.PricePerSeatCents,
 				AmountCents:       li.AmountCents,
 				Type:              li.Type,

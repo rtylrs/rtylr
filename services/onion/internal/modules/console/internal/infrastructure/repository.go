@@ -34,14 +34,20 @@ type BusinessRow struct {
 type SubscriptionRow struct {
 	ID                  int64
 	OwnerID             int64
+	OwnerName           sql.NullString
 	PlanID              int64
 	PlanName            string
 	Status              string
 	SeatCount           int
+	ActiveSeatCount     int
+	IncludedSeatCount   int
+	BillableSeatCount   int
 	TrialEndsAt         sql.NullTime
 	CurrentPeriodEndsAt sql.NullTime
 	CreatedAt           sql.NullTime
 	OwnerEmail          sql.NullString
+	BusinessID          sql.NullInt64
+	BusinessName        sql.NullString
 }
 
 type PlanRow struct {
@@ -62,17 +68,21 @@ type PlanRow struct {
 }
 
 type GrantRow struct {
-	ID          int64
-	UserID      int64
-	PlanID      int64
-	PlanName    string
-	GrantedBy   int64
-	GranterName sql.NullString
-	Note        sql.NullString
-	ExpiresAt   sql.NullTime
-	RevokedAt   sql.NullTime
-	CreatedAt   sql.NullTime
-	UserEmail   sql.NullString
+	ID              int64
+	UserID          int64
+	UserName        sql.NullString
+	PlanID          int64
+	PlanName        string
+	GrantedBy       int64
+	GranterName     sql.NullString
+	Note            sql.NullString
+	ExpiresAt       sql.NullTime
+	RevokedAt       sql.NullTime
+	CreatedAt       sql.NullTime
+	UserEmail       sql.NullString
+	BusinessID      sql.NullInt64
+	BusinessName    sql.NullString
+	ActiveSeatCount int
 }
 
 type StatsRow struct {
@@ -747,6 +757,27 @@ func (r *Repository) GetBusinessByID(ctx context.Context, id int64) (*BusinessRo
 	return &b, nil
 }
 
+func (r *Repository) GetActiveBusinessByOwner(ctx context.Context, ownerID int64) (*BusinessRow, error) {
+	query, args, err := sq.
+		Select("id", "name", "owner_id", "created_at").
+		From("businesses").
+		Where(sq.Eq{"owner_id": ownerID, "is_active": true}).
+		OrderBy("created_at ASC").
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, query, args...)
+	var b BusinessRow
+	if err := row.Scan(&b.ID, &b.Name, &b.OwnerID, &b.CreatedAt); err != nil {
+		return nil, err
+	}
+	return &b, nil
+}
+
 func (r *Repository) UpdateBusiness(ctx context.Context, id int64, name string) error {
 	query, args, err := sq.
 		Update("businesses").
@@ -776,6 +807,50 @@ func (r *Repository) DeleteBusiness(ctx context.Context, id int64) error {
 	return err
 }
 
+func (r *Repository) CountActiveSeatsForOwner(ctx context.Context, ownerID int64) (int, error) {
+	const query = `
+SELECT COUNT(DISTINCT user_id)
+FROM (
+	SELECT b.owner_id AS user_id
+	FROM businesses b
+	JOIN users u ON u.id = b.owner_id
+	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+	UNION
+	SELECT p.user_id AS user_id
+	FROM user_app_permissions p
+	JOIN users u ON u.id = p.user_id
+	WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+	UNION
+	SELECT u.id AS user_id
+	FROM users u
+	JOIN businesses b ON b.id = u.business_id
+	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+) active_users`
+
+	var count int
+	if err := r.pool.QueryRowContext(ctx, query, ownerID, ownerID, ownerID).Scan(&count); err != nil {
+		return 0, err
+	}
+	if count < 1 {
+		return 1, nil
+	}
+	return count, nil
+}
+
+func (r *Repository) decorateSubscriptionSeats(ctx context.Context, sub *SubscriptionRow) error {
+	activeSeats, err := r.CountActiveSeatsForOwner(ctx, sub.OwnerID)
+	if err != nil {
+		return err
+	}
+	sub.ActiveSeatCount = activeSeats
+	sub.IncludedSeatCount = activeSeats
+	if sub.IncludedSeatCount > 10 {
+		sub.IncludedSeatCount = 10
+	}
+	sub.BillableSeatCount = activeSeats - sub.IncludedSeatCount
+	return nil
+}
+
 // ── Subscriptions CRUD ────────────────────────────────────────────────────────
 
 func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, status string) ([]SubscriptionRow, int64, error) {
@@ -802,11 +877,12 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	}
 
 	listSQL, listArgs, err := sq.
-		Select("s.id", "s.owner_id", "s.plan_id", "p.name", "s.status", "s.seat_count",
-			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email").
+		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
+			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email", "b.id", "b.name").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
 		LeftJoin("users u ON u.id = s.owner_id").
+		LeftJoin("businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE").
 		Where(conds).
 		OrderBy("s.created_at DESC").
 		Limit(uint64(limit)).
@@ -826,8 +902,11 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	subs := make([]SubscriptionRow, 0, limit)
 	for rows.Next() {
 		var s SubscriptionRow
-		if err := rows.Scan(&s.ID, &s.OwnerID, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
-			&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail); err != nil {
+		if err := rows.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
+			&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+			return nil, 0, err
+		}
+		if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {
 			return nil, 0, err
 		}
 		subs = append(subs, s)
@@ -837,11 +916,12 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 
 func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*SubscriptionRow, error) {
 	query, args, err := sq.
-		Select("s.id", "s.owner_id", "s.plan_id", "p.name", "s.status", "s.seat_count",
-			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email").
+		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
+			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email", "b.id", "b.name").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
 		LeftJoin("users u ON u.id = s.owner_id").
+		LeftJoin("businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE").
 		Where(sq.Eq{"s.id": id}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
@@ -852,8 +932,11 @@ func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*Subscr
 
 	row := r.pool.QueryRowContext(ctx, query, args...)
 	var s SubscriptionRow
-	if err := row.Scan(&s.ID, &s.OwnerID, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
-		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail); err != nil {
+	if err := row.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
+		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+		return nil, err
+	}
+	if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {
 		return nil, err
 	}
 	return &s, nil
@@ -861,11 +944,12 @@ func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*Subscr
 
 func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*SubscriptionRow, error) {
 	query, args, err := sq.
-		Select("s.id", "s.owner_id", "s.plan_id", "p.name", "s.status", "s.seat_count",
-			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email").
+		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
+			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email", "b.id", "b.name").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
 		LeftJoin("users u ON u.id = s.owner_id").
+		LeftJoin("businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE").
 		Where(sq.Eq{"s.owner_id": ownerID}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
@@ -876,8 +960,11 @@ func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) 
 
 	row := r.pool.QueryRowContext(ctx, query, args...)
 	var s SubscriptionRow
-	if err := row.Scan(&s.ID, &s.OwnerID, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
-		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail); err != nil {
+	if err := row.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
+		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+		return nil, err
+	}
+	if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {
 		return nil, err
 	}
 	return &s, nil
@@ -1006,11 +1093,12 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 	}
 
 	listSQL, listArgs, err := sq.
-		Select("g.id", "g.user_id", "g.plan_id", "p.name", "g.granted_by", "adm.full_name",
-			"g.note", "g.expires_at", "g.revoked_at", "g.created_at", "u.email").
+		Select("g.id", "g.user_id", "COALESCE(u.full_name, '')", "g.plan_id", "p.name", "g.granted_by", "adm.full_name",
+			"g.note", "g.expires_at", "g.revoked_at", "g.created_at", "u.email", "b.id", "b.name").
 		From("manual_access_grants g").
 		Join("plans p ON p.id = g.plan_id").
 		LeftJoin("users u ON u.id = g.user_id").
+		LeftJoin("businesses b ON b.owner_id = g.user_id AND COALESCE(b.is_active, TRUE) = TRUE").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		OrderBy("g.created_at DESC").
 		Limit(uint64(limit)).
@@ -1030,9 +1118,16 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 	grants := make([]GrantRow, 0, limit)
 	for rows.Next() {
 		var g GrantRow
-		if err := rows.Scan(&g.ID, &g.UserID, &g.PlanID, &g.PlanName, &g.GrantedBy, &g.GranterName,
-			&g.Note, &g.ExpiresAt, &g.RevokedAt, &g.CreatedAt, &g.UserEmail); err != nil {
+		if err := rows.Scan(&g.ID, &g.UserID, &g.UserName, &g.PlanID, &g.PlanName, &g.GrantedBy, &g.GranterName,
+			&g.Note, &g.ExpiresAt, &g.RevokedAt, &g.CreatedAt, &g.UserEmail, &g.BusinessID, &g.BusinessName); err != nil {
 			return nil, 0, err
+		}
+		if g.BusinessID.Valid {
+			seatCount, err := r.CountActiveSeatsForOwner(ctx, g.UserID)
+			if err != nil {
+				return nil, 0, err
+			}
+			g.ActiveSeatCount = seatCount
 		}
 		grants = append(grants, g)
 	}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -319,6 +320,9 @@ func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscr
 		}
 	}
 	if err := h.Service.UpsertSubscription(ctx, req.OwnerID, req.PlanID, req.Status, seatCount, expiresAt); err != nil {
+		if errors.Is(err, application.ErrNotOrganizationOwner) {
+			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Subscriptions can only be set for organization owners"}
+		}
 		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to upsert subscription"}
 	}
 	return UpsertSubscriptionResponse{Message: "Subscription updated"}, nil
@@ -436,6 +440,9 @@ func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest)
 	}
 	grant, err := h.Service.CreateGrant(ctx, req.UserID, req.PlanID, admin.UserID, req.Note, expiresAt)
 	if err != nil {
+		if errors.Is(err, application.ErrNotOrganizationOwner) {
+			return CreateGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Access grants can only be created for organization owners"}
+		}
 		return CreateGrantResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create grant"}
 	}
 	return CreateGrantResponse{Grant: *grant, Message: "Access grant created"}, nil

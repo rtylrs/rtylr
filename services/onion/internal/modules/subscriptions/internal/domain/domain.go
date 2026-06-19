@@ -11,6 +11,8 @@ var (
 	ErrSubscriptionNotFound = errors.New("subscription not found")
 )
 
+const FreeIncludedSeatLimit = 10
+
 type Plan struct {
 	ID                      int64     `json:"id"`
 	Name                    string    `json:"name"`
@@ -42,6 +44,9 @@ type Subscription struct {
 	PricePerSeatCents    int        `json:"price_per_seat_cents"`
 	Status               string     `json:"status"`
 	SeatCount            int        `json:"seat_count"`
+	IncludedSeatLimit    int        `json:"included_seat_limit"`
+	IncludedSeatCount    int        `json:"included_seat_count"`
+	BillableSeatCount    int        `json:"billable_seat_count"`
 	TrialEndsAt          *time.Time `json:"trial_ends_at,omitempty"`
 	NextBillingDate      *time.Time `json:"next_billing_date,omitempty"`
 	CurrentPeriodEndsAt  *time.Time `json:"current_period_ends_at,omitempty"`
@@ -65,11 +70,15 @@ type SeatPeriod struct {
 }
 
 // BillingLineItem is a displayable line computed from a SeatPeriod.
-// Amount = seat_count * days * (price_per_seat / days_in_month).
+// Amount = billable_seat_count * days * (price_per_seat / days_in_month).
 type BillingLineItem struct {
 	PeriodStart       time.Time  `json:"period_start"`
 	PeriodEnd         *time.Time `json:"period_end"` // nil = "present"
 	SeatCount         int        `json:"seat_count"`
+	IncludedSeatLimit int        `json:"included_seat_limit"`
+	IncludedSeatCount int        `json:"included_seat_count"`
+	BillableSeatCount int        `json:"billable_seat_count"`
+	IncludedCents     int        `json:"included_cents"`
 	PricePerSeatCents int        `json:"price_per_seat_cents"`
 	AmountCents       int        `json:"amount_cents"`
 	Type              string     `json:"type"`
@@ -98,6 +107,10 @@ type BillingDetail struct {
 	PlanName             string            `json:"plan_name"`
 	PricePerSeatCents    int               `json:"price_per_seat_cents"`
 	CurrentSeatCount     int               `json:"current_seat_count"`
+	IncludedSeatLimit    int               `json:"included_seat_limit"`
+	IncludedSeatCount    int               `json:"included_seat_count"`
+	BillableSeatCount    int               `json:"billable_seat_count"`
+	SeatDiscountCents    int               `json:"seat_discount_cents"`
 	Status               string            `json:"status"`
 	TrialEndsAt          *time.Time        `json:"trial_ends_at"`
 	PaddleSubscriptionID string            `json:"paddle_subscription_id"`
@@ -116,8 +129,9 @@ type Repository interface {
 	GetPlanBySlug(ctx context.Context, slug string) (*Plan, error)
 	GetPlanByID(ctx context.Context, id int64) (*Plan, error)
 	GetSubscription(ctx context.Context, ownerID int64) (*Subscription, error)
-	UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays int) error
+	UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error
 	GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error)
+	CountActiveSeats(ctx context.Context, ownerID int64) (int, error)
 	// Seat period management
 	GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]SeatPeriod, error)
 	GetAddonPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]AddonBillingPeriod, error)

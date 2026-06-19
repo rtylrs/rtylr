@@ -52,7 +52,7 @@ func (s *Service) GetMySubscription(ctx context.Context, ownerID int64) (*domain
 func (s *Service) getSubscriptionOrCreateDefault(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
 	sub, err := s.repo.GetSubscription(ctx, ownerID)
 	if err == nil {
-		return sub, nil
+		return s.syncSubscriptionBillingState(ctx, sub)
 	}
 	if !errors.Is(err, domain.ErrSubscriptionNotFound) {
 		return nil, err
@@ -60,7 +60,11 @@ func (s *Service) getSubscriptionOrCreateDefault(ctx context.Context, ownerID in
 	if upsertErr := s.UpsertSubscription(ctx, ownerID, defaultPlanSlug); upsertErr != nil {
 		return nil, upsertErr
 	}
-	return s.repo.GetSubscription(ctx, ownerID)
+	sub, err = s.repo.GetSubscription(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	return s.withSeatAllowance(sub), nil
 }
 
 func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlug string) error {
@@ -69,31 +73,22 @@ func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlu
 		return err
 	}
 
-	if upsertErr := s.repo.UpsertSubscription(ctx, ownerID, plan.ID, plan.TrialDays); upsertErr != nil {
+	seatCount, err := s.currentActiveSeatCount(ctx, ownerID)
+	if err != nil {
+		return err
+	}
+
+	if upsertErr := s.repo.UpsertSubscription(ctx, ownerID, plan.ID, plan.TrialDays, seatCount); upsertErr != nil {
 		return upsertErr
 	}
 	defer invalidateSubscriptionScope(ctx, ownerID)
 
-	// Ensure a seat period exists for the current month.
 	sub, err := s.repo.GetSubscription(ctx, ownerID)
 	if err != nil {
 		return err
 	}
-
-	activePeriod, err := s.repo.GetActivePeriod(ctx, sub.ID)
-	if err != nil {
-		return err
-	}
-
-	if activePeriod == nil {
-		now := time.Now()
-		billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-		if openErr := s.repo.OpenPeriod(ctx, sub.ID, ownerID, sub.SeatCount, plan.PricePerSeatCents, now, billingMonth); openErr != nil {
-			return openErr
-		}
-	}
-
-	return nil
+	_, err = s.syncSubscriptionBillingState(ctx, sub)
+	return err
 }
 
 func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
@@ -126,10 +121,12 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 
 	lineItems := make([]domain.BillingLineItem, 0, len(periods))
 	totalCents := 0
+	seatDiscountCents := 0
 	for _, p := range periods {
 		item := computeLineItem(p.SeatCount, p.PricePerSeatCents, p.PeriodStart, p.PeriodEnd, currentMonth)
 		lineItems = append(lineItems, item)
 		totalCents += item.AmountCents
+		seatDiscountCents += item.IncludedCents
 	}
 	addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, currentMonth)
 	if err != nil {
@@ -149,6 +146,10 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 		PlanName:             sub.PlanName,
 		PricePerSeatCents:    sub.PricePerSeatCents,
 		CurrentSeatCount:     sub.SeatCount,
+		IncludedSeatLimit:    sub.IncludedSeatLimit,
+		IncludedSeatCount:    sub.IncludedSeatCount,
+		BillableSeatCount:    sub.BillableSeatCount,
+		SeatDiscountCents:    seatDiscountCents,
 		Status:               sub.Status,
 		TrialEndsAt:          sub.TrialEndsAt,
 		PaddleSubscriptionID: sub.PaddleSubscriptionID,
@@ -180,6 +181,9 @@ func (s *Service) GetBillingHistory(ctx context.Context, ownerID, businessID int
 // RecordSeatChange is called when a team member is added or removed.
 // It closes the current seat period and opens a new one reflecting the new count.
 func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64, newSeatCount int) error {
+	if newSeatCount < 1 {
+		newSeatCount = 1
+	}
 	sub, err := s.repo.GetSubscription(ctx, ownerID)
 	if err != nil {
 		return err
@@ -188,10 +192,28 @@ func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64, newSeatCo
 	now := time.Now()
 	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
-	// Close the active period as of yesterday (the last full day at old count).
-	yesterday := now.AddDate(0, 0, -1)
-	if closeErr := s.repo.CloseActivePeriod(ctx, sub.ID, yesterday); closeErr != nil {
-		return closeErr
+	activePeriod, err := s.repo.GetActivePeriod(ctx, sub.ID)
+	if err != nil {
+		return err
+	}
+	if activePeriod != nil &&
+		activePeriod.SeatCount == newSeatCount &&
+		activePeriod.PricePerSeatCents == sub.PricePerSeatCents {
+		if sub.SeatCount != newSeatCount {
+			if err := s.repo.UpdateSeatCount(ctx, ownerID, newSeatCount); err != nil {
+				return err
+			}
+			invalidateSubscriptionScope(ctx, ownerID)
+		}
+		return nil
+	}
+
+	if activePeriod != nil {
+		// Close the active period as of yesterday (the last full day at old count).
+		yesterday := now.AddDate(0, 0, -1)
+		if closeErr := s.repo.CloseActivePeriod(ctx, sub.ID, yesterday); closeErr != nil {
+			return closeErr
+		}
 	}
 
 	// Open a new period starting today with the new seat count.
@@ -207,8 +229,58 @@ func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64, newSeatCo
 	return nil
 }
 
+func (s *Service) currentActiveSeatCount(ctx context.Context, ownerID int64) (int, error) {
+	seatCount, err := s.repo.CountActiveSeats(ctx, ownerID)
+	if err != nil {
+		return 0, err
+	}
+	if seatCount < 1 {
+		return 1, nil
+	}
+	return seatCount, nil
+}
+
+func (s *Service) syncSubscriptionBillingState(ctx context.Context, sub *domain.Subscription) (*domain.Subscription, error) {
+	seatCount, err := s.currentActiveSeatCount(ctx, sub.OwnerID)
+	if err != nil {
+		return nil, err
+	}
+
+	activePeriod, err := s.repo.GetActivePeriod(ctx, sub.ID)
+	if err != nil {
+		return nil, err
+	}
+	needsPeriodSync := activePeriod == nil ||
+		activePeriod.SeatCount != seatCount ||
+		activePeriod.PricePerSeatCents != sub.PricePerSeatCents
+
+	if sub.SeatCount != seatCount || needsPeriodSync {
+		if err := s.RecordSeatChange(ctx, sub.OwnerID, seatCount); err != nil {
+			return nil, err
+		}
+		sub, err = s.repo.GetSubscription(ctx, sub.OwnerID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return s.withSeatAllowance(sub), nil
+}
+
+func (s *Service) withSeatAllowance(sub *domain.Subscription) *domain.Subscription {
+	includedSeats, billableSeats := splitSeats(sub.SeatCount, domain.FreeIncludedSeatLimit)
+	sub.IncludedSeatLimit = domain.FreeIncludedSeatLimit
+	sub.IncludedSeatCount = includedSeats
+	sub.BillableSeatCount = billableSeats
+	return sub
+}
+
 // computeLineItem mirrors the infrastructure helper for use in the service layer.
 func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *time.Time, billingMonth time.Time) domain.BillingLineItem {
+	return computeLineItemWithAllowance(seatCount, pricePerSeatCents, start, end, billingMonth, domain.FreeIncludedSeatLimit)
+}
+
+func computeLineItemWithAllowance(seatCount, pricePerSeatCents int, start time.Time, end *time.Time, billingMonth time.Time, includedSeatLimit int) domain.BillingLineItem {
 	effectiveEnd := time.Now()
 	if end != nil {
 		effectiveEnd = *end
@@ -225,12 +297,18 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		daysUsed = daysInMonth
 	}
 
-	amount := (seatCount * daysUsed * pricePerSeatCents) / daysInMonth
+	includedSeats, billableSeats := splitSeats(seatCount, includedSeatLimit)
+	amount := (billableSeats * daysUsed * pricePerSeatCents) / daysInMonth
+	includedAmount := (includedSeats * daysUsed * pricePerSeatCents) / daysInMonth
 
 	return domain.BillingLineItem{
 		PeriodStart:       start,
 		PeriodEnd:         end,
 		SeatCount:         seatCount,
+		IncludedSeatLimit: includedSeatLimit,
+		IncludedSeatCount: includedSeats,
+		BillableSeatCount: billableSeats,
+		IncludedCents:     includedAmount,
 		PricePerSeatCents: pricePerSeatCents,
 		AmountCents:       amount,
 		Type:              "seat",
@@ -241,7 +319,7 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 }
 
 func computeAddonLineItem(period domain.AddonBillingPeriod) domain.BillingLineItem {
-	item := computeLineItem(1, period.PriceCents, period.PeriodStart, period.PeriodEnd, period.BillingMonth)
+	item := computeLineItemWithAllowance(1, period.PriceCents, period.PeriodStart, period.PeriodEnd, period.BillingMonth, 0)
 	item.Type = "addon"
 	item.Description = period.Name
 	item.AddonID = period.AddonID
@@ -250,6 +328,20 @@ func computeAddonLineItem(period domain.AddonBillingPeriod) domain.BillingLineIt
 	item.SeatCount = 0
 	item.PricePerSeatCents = 0
 	return item
+}
+
+func splitSeats(seatCount, includedLimit int) (int, int) {
+	if seatCount < 0 {
+		seatCount = 0
+	}
+	if includedLimit < 0 {
+		includedLimit = 0
+	}
+	included := seatCount
+	if included > includedLimit {
+		included = includedLimit
+	}
+	return included, seatCount - included
 }
 
 // ── Paddle ─────────────────────────────────────────────────────────────────────

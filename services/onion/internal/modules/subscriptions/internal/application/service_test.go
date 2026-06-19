@@ -26,10 +26,13 @@ type mockRepo struct {
 	upsertOwnerID      int64
 	upsertPlanID       int64
 	upsertTrialDays    int
+	upsertSeatCount    int
+	activeSeats        int
 	listPlansErr       error
 	planBySlugErr      error
 	getSubErr          error
 	upsertSubErr       error
+	countSeatsErr      error
 	getAppsErr         error
 	getPeriodsErr      error
 	getAddonPeriodsErr error
@@ -69,15 +72,26 @@ func (m *mockRepo) GetSubscription(_ context.Context, _ int64) (*domain.Subscrip
 	return m.subscription, nil
 }
 
-func (m *mockRepo) UpsertSubscription(_ context.Context, ownerID, planID int64, trialDays int) error {
+func (m *mockRepo) UpsertSubscription(_ context.Context, ownerID, planID int64, trialDays, seatCount int) error {
 	m.upsertOwnerID = ownerID
 	m.upsertPlanID = planID
 	m.upsertTrialDays = trialDays
+	m.upsertSeatCount = seatCount
 	return m.upsertSubErr
 }
 
 func (m *mockRepo) GetOwnerApps(_ context.Context, _ int64) ([]string, error) {
 	return m.ownerApps, m.getAppsErr
+}
+
+func (m *mockRepo) CountActiveSeats(_ context.Context, _ int64) (int, error) {
+	if m.countSeatsErr != nil {
+		return 0, m.countSeatsErr
+	}
+	if m.activeSeats > 0 {
+		return m.activeSeats, nil
+	}
+	return 1, nil
 }
 
 func (m *mockRepo) GetPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.SeatPeriod, error) {
@@ -121,14 +135,17 @@ func (m *mockRepo) GetOwnerIDByPaddleSubscription(_ context.Context, _ string) (
 func TestComputeLineItem_FullMonth(t *testing.T) {
 	billing := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2026, 4, 30, 23, 59, 59, 0, time.UTC)
-	li := computeLineItem(10, 1000, billing, &end, billing)
+	li := computeLineItem(12, 1000, billing, &end, billing)
 
-	// April has 30 days. 10 seats x 30 days x $10 / 30 = $100 = 10000 cents.
-	if li.AmountCents != 10000 {
-		t.Errorf("expected 10000 cents, got %d", li.AmountCents)
+	// April has 30 days. First 10 seats are included; 2 seats x 30 days x $10 / 30 = $20.
+	if li.AmountCents != 2000 {
+		t.Errorf("expected 2000 cents, got %d", li.AmountCents)
 	}
-	if li.SeatCount != 10 {
+	if li.SeatCount != 12 {
 		t.Errorf("seat count round trip: %d", li.SeatCount)
+	}
+	if li.IncludedSeatCount != 10 || li.BillableSeatCount != 2 {
+		t.Errorf("unexpected seat split: %+v", li)
 	}
 }
 
@@ -137,10 +154,10 @@ func TestComputeLineItem_PartialMonth(t *testing.T) {
 	start := time.Date(2026, 4, 16, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC)
 
-	li := computeLineItem(10, 3000, start, &end, billing)
-	// 10 seats x 15 days (16->30 inclusive) x $30 / 30 days = $150 = 15000 cents.
-	if li.AmountCents != 15000 {
-		t.Errorf("expected 15000 cents for half-month, got %d", li.AmountCents)
+	li := computeLineItem(12, 3000, start, &end, billing)
+	// First 10 seats are included; 2 seats x 15 days x $30 / 30 days = $30.
+	if li.AmountCents != 3000 {
+		t.Errorf("expected 3000 cents for half-month, got %d", li.AmountCents)
 	}
 }
 
@@ -171,7 +188,7 @@ func TestComputeLineItem_OpenEndedUsesNow(t *testing.T) {
 	now := time.Now().UTC()
 	billing := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
-	li := computeLineItem(5, 1000, billing, nil, billing)
+	li := computeLineItem(11, 1000, billing, nil, billing)
 	if li.PeriodEnd != nil {
 		t.Errorf("nil end should be preserved on the line item, got %v", li.PeriodEnd)
 	}
@@ -186,10 +203,10 @@ func TestComputeLineItem_NeverNegativeOrTooSmall(t *testing.T) {
 	start := time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC)
 
-	li := computeLineItem(10, 3000, start, &end, billing)
-	// Bottoms out at 1 day: 10 x 1 x 3000 / 30 = 1000.
-	if li.AmountCents != 1000 {
-		t.Errorf("expected 1000 cents (1-day floor), got %d", li.AmountCents)
+	li := computeLineItem(12, 3000, start, &end, billing)
+	// Bottoms out at 1 day: 2 billable seats x 1 x 3000 / 30 = 200.
+	if li.AmountCents != 200 {
+		t.Errorf("expected 200 cents (1-day floor), got %d", li.AmountCents)
 	}
 }
 

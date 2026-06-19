@@ -207,12 +207,15 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 	return &sub, nil
 }
 
-func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays int) error {
+func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error {
 	status := "active"
 	trialEnd := sql.NullTime{}
 	if trialDays > 0 {
 		status = "trial"
 		trialEnd = sql.NullTime{Time: time.Now().UTC().AddDate(0, 0, trialDays), Valid: true}
+	}
+	if seatCount < 1 {
+		seatCount = 1
 	}
 	// next_billing_date is always the 1st of next month
 	now := time.Now().UTC()
@@ -221,8 +224,8 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	query, args, err := sq.
 		Insert("subscriptions").
 		Columns("owner_id", "plan_id", "status", "seat_count", "trial_ends_at", "next_billing_date").
-		Values(ownerID, planID, status, 1, trialEnd, nextBilling).
-		Suffix("ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status), trial_ends_at = VALUES(trial_ends_at), updated_at = CURRENT_TIMESTAMP").
+		Values(ownerID, planID, status, seatCount, trialEnd, nextBilling).
+		Suffix("ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status), seat_count = VALUES(seat_count), trial_ends_at = VALUES(trial_ends_at), updated_at = CURRENT_TIMESTAMP").
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -231,6 +234,36 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 
 	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
+}
+
+func (r *Repository) CountActiveSeats(ctx context.Context, ownerID int64) (int, error) {
+	const query = `
+SELECT COUNT(DISTINCT user_id)
+FROM (
+	SELECT b.owner_id AS user_id
+	FROM businesses b
+	JOIN users u ON u.id = b.owner_id
+	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+	UNION
+	SELECT p.user_id AS user_id
+	FROM user_app_permissions p
+	JOIN users u ON u.id = p.user_id
+	WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+	UNION
+	SELECT u.id AS user_id
+	FROM users u
+	JOIN businesses b ON b.id = u.business_id
+	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+) active_users`
+
+	var count int
+	if err := r.db.QueryRowContext(ctx, query, ownerID, ownerID, ownerID).Scan(&count); err != nil {
+		return 0, err
+	}
+	if count < 1 {
+		return 1, nil
+	}
+	return count, nil
 }
 
 func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
@@ -544,14 +577,18 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		daysUsed = daysInMonth
 	}
 
-	// amount = seat_count * days_used * (price_per_seat / days_in_month)
-	// Use integer arithmetic: (seat_count * days_used * price_per_seat) / days_in_month
-	amount := (seatCount * daysUsed * pricePerSeatCents) / daysInMonth
+	includedSeats, billableSeats := splitSeats(seatCount, domain.FreeIncludedSeatLimit)
+	amount := (billableSeats * daysUsed * pricePerSeatCents) / daysInMonth
+	includedAmount := (includedSeats * daysUsed * pricePerSeatCents) / daysInMonth
 
 	return domain.BillingLineItem{
 		PeriodStart:       start,
 		PeriodEnd:         end,
 		SeatCount:         seatCount,
+		IncludedSeatLimit: domain.FreeIncludedSeatLimit,
+		IncludedSeatCount: includedSeats,
+		BillableSeatCount: billableSeats,
+		IncludedCents:     includedAmount,
 		PricePerSeatCents: pricePerSeatCents,
 		AmountCents:       amount,
 		Type:              "seat",
@@ -559,6 +596,20 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		Quantity:          seatCount,
 		UnitPriceCents:    pricePerSeatCents,
 	}
+}
+
+func splitSeats(seatCount, includedLimit int) (int, int) {
+	if seatCount < 0 {
+		seatCount = 0
+	}
+	if includedLimit < 0 {
+		includedLimit = 0
+	}
+	included := seatCount
+	if included > includedLimit {
+		included = includedLimit
+	}
+	return included, seatCount - included
 }
 
 func decimalStringToCents(value string) int {

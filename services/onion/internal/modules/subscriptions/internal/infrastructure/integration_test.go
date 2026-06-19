@@ -176,7 +176,7 @@ func TestSubscriptions_UpsertSubscription_ThenGetSubscription(t *testing.T) {
 	}
 
 	const testOwner int64 = 7000001
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 
@@ -203,10 +203,10 @@ func TestSubscriptions_UpsertSubscription_Idempotent(t *testing.T) {
 	}
 
 	const testOwner int64 = 7000002
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("first UpsertSubscription: %v", err)
 	}
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("second UpsertSubscription: %v", err)
 	}
 }
@@ -225,7 +225,7 @@ func TestSubscriptions_UpdateSeatCount_NoError(t *testing.T) {
 	}
 
 	const testOwner int64 = 7000003
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 	if err := repo.UpdateSeatCount(ctx, testOwner, 5); err != nil {
@@ -306,7 +306,7 @@ func TestSubscriptions_UpdatePaddleSubscription_NoError(t *testing.T) {
 	}
 
 	const testOwner int64 = 7000004
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 14); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 14, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 	if err := repo.UpdatePaddleSubscription(ctx, testOwner, "paddle-sub-test-001", "paddle-cust-001", "active"); err != nil {
@@ -329,7 +329,7 @@ func TestSubscriptions_GetOwnerIDByPaddleSubscription_AfterUpdate(t *testing.T) 
 
 	const testOwner int64 = 7000005
 	const paddleSubID = "paddle-sub-lookup-test"
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 	if err := repo.UpdatePaddleSubscription(ctx, testOwner, paddleSubID, "paddle-cust-lookup", "active"); err != nil {
@@ -369,7 +369,7 @@ func TestSubscriptions_GetOwnerApps_NonEmptySubscription(t *testing.T) {
 	}
 
 	const testOwner int64 = 7000006
-	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
 

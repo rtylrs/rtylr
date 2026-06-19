@@ -491,14 +491,35 @@ func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sql
 	return p
 }
 
-// CountActiveMembers returns the number of active non-owner team members for an owner.
+// CountActiveMembers returns the billable active seat count for an owner.
 func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountActiveMembers(ctx, ownerID)
-	if err != nil {
+	const query = `
+SELECT COUNT(DISTINCT user_id)
+FROM (
+	SELECT b.owner_id AS user_id
+	FROM businesses b
+	JOIN users u ON u.id = b.owner_id
+	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+	UNION
+	SELECT p.user_id AS user_id
+	FROM user_app_permissions p
+	JOIN users u ON u.id = p.user_id
+	WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+	UNION
+	SELECT u.id AS user_id
+	FROM users u
+	JOIN businesses b ON b.id = u.business_id
+	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+) active_users`
+
+	var count int
+	if err := r.pool.QueryRowContext(ctx, query, ownerID, ownerID, ownerID).Scan(&count); err != nil {
 		return 0, err
 	}
-
-	return int(count), nil
+	if count < 1 {
+		return 1, nil
+	}
+	return count, nil
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
