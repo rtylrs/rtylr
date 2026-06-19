@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { APP_URLS } from '@voxire/config';
 import { getCookie } from '../cookies';
 import { signOut } from '../signOut';
@@ -141,6 +141,8 @@ export function AppGuard({
   const [status, setStatus] = useState<'loading' | 'allowed' | 'denied' | 'error'>('loading');
   const [attempt, setAttempt] = useState(0);
   const { login } = useUserStore();
+  const fetchUserRef = useRef(fetchUser);
+  fetchUserRef.current = fetchUser;
 
   const verifySession = useCallback((): void => {
     const token = getCookie('token');
@@ -151,7 +153,7 @@ export function AppGuard({
 
     setStatus('loading');
 
-    fetchUser()
+    fetchUserRef.current()
       .then((data) => {
         const user: User = {
           id: String(data.id ?? data.user_id ?? data.userId ?? ''),
@@ -173,7 +175,7 @@ export function AppGuard({
       .catch((): void => {
         setStatus('error');
       });
-  }, [appId, fetchUser, login]);
+  }, [appId, login]);
 
   useEffect((): void => {
     verifySession();
