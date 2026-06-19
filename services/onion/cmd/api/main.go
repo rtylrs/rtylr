@@ -456,6 +456,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
+	posLocationsModule := poslocations.NewModule(ctx, dbclient.Pool())
+	posTerminalsModule := posterminals.NewModule(ctx, dbclient.Pool())
+	posUsersModule := posusers.NewModule(ctx, dbclient.Pool())
 	posSessionsModule := possessions.NewModule(ctx, dbclient.Pool())
 	posCashMovementsModule := poscashmovements.NewModule(ctx, dbclient.Pool())
 	posStockMovementsModule := posstockmovements.NewModule(ctx, dbclient.Pool())
@@ -502,7 +505,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -544,7 +547,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosFloors:             posfloors.NewModule(ctx, dbclient.Pool()),
 		PosGiftCards:          posgiftcards.NewModule(ctx, dbclient.Pool()),
 		PosKDS:                poskds.NewModule(ctx, dbclient.Pool()),
-		PosLocations:          poslocations.NewModule(ctx, dbclient.Pool()),
+		PosLocations:          posLocationsModule,
 		PosLoyalty:            posloyalty.NewModule(ctx, dbclient.Pool()),
 		PosManager:            posmanager.NewModule(ctx, dbclient.Pool()),
 		PosMemberLocations:    posmemberlocations.NewModule(ctx, dbclient.Pool()),
@@ -556,8 +559,8 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosSettings:           possettings.NewModule(ctx, dbclient.Pool()),
 		PosStockMovements:     posStockMovementsModule,
 		PosTables:             postables.NewModule(ctx, dbclient.Pool()),
-		PosTerminals:          posterminals.NewModule(ctx, dbclient.Pool()),
-		PosUsers:              posusers.NewModule(ctx, dbclient.Pool()),
+		PosTerminals:          posTerminalsModule,
+		PosUsers:              posUsersModule,
 		PriceLists:            pricelists.NewModule(ctx, dbclient.Pool()),
 		Products:              productsModule,
 		PurchaseOrders:        purchaseOrdersModule,
