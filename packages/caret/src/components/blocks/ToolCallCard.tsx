@@ -123,9 +123,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
         ) : (
           <ActivityIcon size={14} style={{ flex: '0 0 auto' }} />
         )}
-        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {label}
-        </span>
+        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
       </button>
 
       {open && (
