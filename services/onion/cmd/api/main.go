@@ -480,6 +480,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	warehousesModule := warehouses.NewModule(ctx, dbclient.Pool())
 	purchaseOrdersModule := purchaseorders.NewModule(ctx, dbclient.Pool())
 	stockTransfersModule := stocktransfers.NewModule(ctx, dbclient.Pool())
+	bankAccountsModule := bankaccounts.NewModule(ctx, dbclient.Pool())
 	billsModule := bills.NewModule(ctx, dbclient.Pool())
 	quotesModule := quotes.NewModule(ctx, dbclient.Pool())
 	bookingDashboardModule := bookingdashboard.NewModule(ctx, dbclient.Pool())
@@ -489,8 +490,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	bookingResourcesModule := bookingresources.NewModule(ctx, dbclient.Pool())
 	bookingServicesModule := bookingservices.NewModule(ctx, dbclient.Pool())
 	bookingWaitlistModule := bookingwaitlist.NewModule(ctx, dbclient.Pool())
+	financeBankFeedsModule := financebankfeeds.NewModule(ctx, dbclient.Pool())
+	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool())
 	flowInsightsModule := flowinsights.NewModule(ctx, dbclient.Pool())
+	journalModule := journal.NewModule(ctx, dbclient.Pool())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
 	posDaySummaryModule := posdaysummary.NewModule(ctx, dbclient.Pool())
 	invoicesModule := invoices.NewModule(ctx, dbclient.Pool())
@@ -502,6 +506,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	supportInboxModule := supportinbox.NewModule(ctx, dbclient.Pool())
 	supportKnowledgeModule := supportknowledge.NewModule(ctx, dbclient.Pool())
 	supportTicketsModule := supporttickets.NewModule(ctx, dbclient.Pool())
+	taxModule := tax.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
 		Accounts:              accounts.NewModule(ctx, dbclient.Pool()),
@@ -510,7 +515,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		APIKeys:               apikeys.NewModule(ctx, dbclient.Pool()),
 		Apps:                  apps.NewModule(ctx, dbclient.Pool()),
 		Automations:           automations.NewModule(ctx, dbclient.Pool()),
-		BankAccounts:          bankaccounts.NewModule(ctx, dbclient.Pool()),
+		BankAccounts:          bankAccountsModule,
 		Benefits:              benefits.NewModule(ctx, dbclient.Pool()),
 		Billing:               billing.NewModule(ctx, dbclient.Pool()),
 		Subscriptions:         subscriptions.NewModule(ctx, dbclient.Pool()),
@@ -537,12 +542,12 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, bankAccountsModule, financeBankFeedsModule, financeReconciliationModule, journalModule, taxModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
-		FinanceBankFeeds:      financebankfeeds.NewModule(ctx, dbclient.Pool()),
-		FinanceReconciliation: financereconciliation.NewModule(ctx, dbclient.Pool()),
+		FinanceBankFeeds:      financeBankFeedsModule,
+		FinanceReconciliation: financeReconciliationModule,
 		FinanceReports:        financeReportsModule,
 		FlowInsights:          flowInsightsModule,
 		HRAttendance:          hrAttendanceModule,
@@ -563,7 +568,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Integrations:          integrations.NewModule(ctx, dbclient.Pool()),
 		Inventory:             inventoryModule,
 		Invoices:              invoicesModule,
-		Journal:               journal.NewModule(ctx, dbclient.Pool()),
+		Journal:               journalModule,
 		KPIs:                  kpisModule,
 		Loyalty:               loyaltyModule,
 		Memory:                memoryModule,
@@ -621,7 +626,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		SupportSettings:       supportsettings.NewModule(ctx, dbclient.Pool()),
 		SupportTickets:        supportTicketsModule,
 		Suppliers:             suppliersModule,
-		Tax:                   tax.NewModule(ctx, dbclient.Pool()),
+		Tax:                   taxModule,
 		Team:                  team.NewModule(ctx, dbclient.Pool()),
 		Templates:             templates.NewModule(ctx, dbclient.Pool()),
 		TimeOff:               timeoff.NewModule(ctx, dbclient.Pool()),
