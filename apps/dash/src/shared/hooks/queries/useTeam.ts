@@ -167,3 +167,22 @@ export const useDeactivateMember = () => {
     onError: () => toast.error('Failed to deactivate member'),
   });
 };
+
+export interface AccessRequest {
+  id: number;
+  userId: number;
+  app: string;
+  requesterName: string;
+  requesterEmail: string;
+  createdAt: string;
+}
+
+export const useAccessRequests = () =>
+  useQuery<AccessRequest[]>({
+    queryKey: ['team', 'access-requests'],
+    queryFn: async () => {
+      const res = await unwrap(safe.get<{ requests: AccessRequest[] }>('/team/access-requests'));
+      return res?.requests ?? [];
+    },
+    staleTime: 30_000,
+  });

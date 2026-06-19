@@ -23,7 +23,7 @@ const LowStockWidget: React.FC = () => {
       const res = await unwrap(
         safe.get<LowStockResponse | StockItem[]>('/erp/inventory/low-stock')
       );
-      return (Array.isArray(res) ? res : res.items ?? res.products) ?? [];
+      return (Array.isArray(res) ? res : (res.items ?? res.products)) ?? [];
     },
     staleTime: 60_000,
   });

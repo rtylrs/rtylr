@@ -32,8 +32,6 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState('');
 
-  if (businesses.length <= 1 && !isLoading) return null;
-
   const currentBusiness = businesses.find((b) => b.id === currentBusinessId);
 
   const handleSwitch = (business: OwnedBusiness): void => {

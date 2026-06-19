@@ -18,13 +18,20 @@ import {
   Layers,
   FolderOpen,
   X,
+  Bell,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button, Input } from '../../shared/components/ui';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import { EmptyState, SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
-import { useTeam, useDeactivateMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
+import {
+  useTeam,
+  useDeactivateMember,
+  useAccessRequests,
+  type TeamMember,
+  type AccessRequest,
+} from '../../shared/hooks/queries/useTeam';
 import {
   useMySubscription,
   centsToDisplay,
@@ -81,6 +88,7 @@ const Team: React.FC = (): React.JSX.Element => {
   const [bulkConfirmDeactivate, setBulkConfirmDeactivate] = useState(false);
 
   const { data: groups = [] } = useGroups();
+  const { data: accessRequests = [] } = useAccessRequests();
 
   const addGroupMembers = useAddGroupMembers(selectedGroupId || undefined);
 
@@ -182,6 +190,54 @@ const Team: React.FC = (): React.JSX.Element => {
             </Button>
           </div>
         </motion.div>
+
+        {/* Pending access requests */}
+        {accessRequests.length > 0 && (
+          <div
+            className="rounded-xl border px-4 py-3 space-y-2"
+            style={{ borderColor: 'var(--dash-border)', background: 'rgba(69,131,196,0.06)' }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Bell size={13} style={{ color: '#4583C4' }} />
+              <span className="text-xs font-semibold" style={{ color: '#4583C4' }}>
+                {accessRequests.length} pending access{' '}
+                {accessRequests.length === 1 ? 'request' : 'requests'}
+              </span>
+            </div>
+            {accessRequests.map((req: AccessRequest) => (
+              <div
+                key={req.id}
+                className="flex items-center justify-between text-xs py-1.5 px-2 rounded-lg"
+                style={{ background: 'var(--dash-hover)' }}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold uppercase shrink-0"
+                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                  >
+                    {(req.requesterName || req.requesterEmail).charAt(0)}
+                  </span>
+                  <div>
+                    <span style={{ color: 'var(--dash-text)' }}>
+                      {req.requesterName || req.requesterEmail}
+                    </span>
+                    <span style={{ color: 'var(--dash-text-dim)' }}> wants access to </span>
+                    <span className="font-semibold uppercase" style={{ color: 'var(--dash-text)' }}>
+                      {req.app}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate({ to: `/team/${String(req.userId)}` })}
+                  className="text-[11px] px-2.5 py-1 rounded-md transition-colors"
+                  style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                >
+                  Review
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex items-center gap-3">

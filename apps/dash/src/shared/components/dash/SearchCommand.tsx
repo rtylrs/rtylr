@@ -14,7 +14,6 @@ import {
   Plug2,
   Webhook,
   Activity as ActivityIcon,
-  ScrollText,
   UserCog,
   Package,
   MonitorSpeaker,
@@ -165,13 +164,6 @@ export const SearchCommand: React.FC = () => {
         group: 'Navigate',
         icon: UtensilsCrossed,
         action: go('/menus'),
-      },
-      {
-        id: 'nav-orders',
-        label: 'Orders',
-        group: 'Navigate',
-        icon: ScrollText,
-        action: go('/orders'),
       },
       { id: 'nav-qr', label: 'QR Codes', group: 'Navigate', icon: QrCode, action: go('/qr-codes') },
       {

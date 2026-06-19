@@ -10,7 +10,6 @@ import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
   UtensilsCrossed,
-  ClipboardList,
   QrCode,
   Palette,
   Settings,
@@ -64,7 +63,6 @@ const navItems: NavItem[] = [
 
 const menuSubItems: NavItem[] = [
   { label: 'Menus', path: '/menus', icon: UtensilsCrossed },
-  { label: 'Orders', path: '/orders', icon: ClipboardList },
   { label: 'QR Codes', path: '/qr-codes', icon: QrCode },
   { label: 'Design', path: '/design', icon: Palette },
 ];

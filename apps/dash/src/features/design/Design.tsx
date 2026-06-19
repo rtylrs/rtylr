@@ -56,7 +56,7 @@ function SegmentGroup<T extends string>({
         gap: '3px',
         background: 'var(--dash-input-bg)',
         border: '1px solid var(--dash-border)',
-        borderRadius: '8px',
+        borderRadius: '7px',
         padding: '3px',
       }}
     >
@@ -66,7 +66,7 @@ function SegmentGroup<T extends string>({
           onClick={() => onChange(o.value)}
           style={{
             padding: '4px 10px',
-            borderRadius: '5px',
+            borderRadius: '4px',
             fontSize: '12px',
             fontWeight: 500,
             border: 'none',
@@ -161,7 +161,7 @@ function SectionCard({
       style={{
         background: 'var(--dash-card)',
         border: '1px solid var(--dash-border)',
-        borderRadius: '12px',
+        borderRadius: '8px',
         overflow: 'hidden',
       }}
     >
@@ -185,7 +185,7 @@ function SectionCard({
             fontSize: '11px',
             fontWeight: 600,
             textTransform: 'uppercase',
-            letterSpacing: '0.08em',
+            letterSpacing: 0,
             color: 'var(--dash-text-dim)',
           }}
         >
@@ -628,40 +628,52 @@ const Design: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'flex-end',
             padding: '0 16px',
-            height: 44,
+            height: 52,
             borderBottom: '1px solid var(--dash-border)',
             background: 'var(--dash-surface)',
             flexShrink: 0,
             gap: 12,
           }}
         >
-          {activePreset && (
-            <span style={{ fontSize: 12, color: 'var(--dash-text-dim)' }}>{activePreset.name}</span>
-          )}
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={handleSave}
-            style={{
-              padding: '5px 14px',
-              borderRadius: 8,
-              background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
-              color: saved ? '#4583C4' : '#fff',
-              fontSize: 13,
-              fontWeight: 600,
-              border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            {saved ? 'Saved!' : 'Save'}
-          </motion.button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 style={{ margin: 0, fontSize: 15, fontWeight: 650, color: 'var(--dash-text)' }}>
+              Design
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--dash-text-dim)' }}>
+              Storefront appearance
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {activePreset && (
+              <span style={{ fontSize: 12, color: 'var(--dash-text-dim)' }}>
+                {activePreset.name}
+              </span>
+            )}
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={handleSave}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 7,
+                background: saved ? 'rgba(69,131,196,0.15)' : '#4583C4',
+                color: saved ? '#4583C4' : '#fff',
+                fontSize: 13,
+                fontWeight: 600,
+                border: saved ? '1px solid rgba(69,131,196,0.3)' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {saved ? 'Saved' : 'Save'}
+            </motion.button>
+          </div>
         </div>
 
         {/* ── Body ───────────────────────────────────────────────────────────── */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '200px 320px 1fr',
+            gridTemplateColumns: '220px minmax(300px, 340px) minmax(0, 1fr)',
             overflow: 'hidden',
             height: '100%',
           }}
@@ -689,7 +701,7 @@ const Design: React.FC = () => {
                   fontSize: 10,
                   fontWeight: 600,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: 0,
                   color: 'var(--dash-text-dim)',
                 }}
               >
@@ -777,7 +789,7 @@ const Design: React.FC = () => {
               }}
             >
               <input
-                placeholder="New layout…"
+                placeholder="New layout..."
                 value={newPresetName}
                 onChange={(e) => setNewPresetName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
@@ -1074,7 +1086,7 @@ const Design: React.FC = () => {
                 fontSize: 10,
                 fontWeight: 600,
                 textTransform: 'uppercase',
-                letterSpacing: '0.1em',
+                letterSpacing: 0,
                 color: 'var(--dash-text-dim)',
                 marginBottom: 16,
                 flexShrink: 0,
