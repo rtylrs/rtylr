@@ -2,6 +2,7 @@ package hr_core
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -88,6 +89,91 @@ func TestEmployeeToolPayload(t *testing.T) {
 	}
 	if payload["end_date"] != nil {
 		t.Fatalf("end_date = %#v", payload["end_date"])
+	}
+}
+
+func TestParseListHRDepartmentsToolInput(t *testing.T) {
+	parsed, err := parseListHRDepartmentsToolInput(map[string]any{
+		"location_id": json.Number("9"),
+	})
+	if err != nil {
+		t.Fatalf("parseListHRDepartmentsToolInput: %v", err)
+	}
+	if parsed.LocationID != 9 {
+		t.Fatalf("LocationID = %d", parsed.LocationID)
+	}
+}
+
+func TestParseListHRDepartmentsToolInputRejectsInvalidLocation(t *testing.T) {
+	_, err := parseListHRDepartmentsToolInput(map[string]any{
+		"location_id": -1,
+	})
+	if err == nil || !strings.Contains(err.Error(), "location_id") {
+		t.Fatalf("error = %v, want location_id validation", err)
+	}
+}
+
+func TestHRReferenceToolPayloads(t *testing.T) {
+	schedule := workScheduleToolPayload(domain.WorkScheduleRecord{
+		ID:           12,
+		Name:         "Default",
+		ScheduleData: `{"days":["mon","tue"],"hours":8}`,
+		IsDefault:    true,
+	})
+	scheduleData, ok := schedule["schedule_data"].(map[string]any)
+	if !ok {
+		t.Fatalf("schedule_data = %#v, want decoded object", schedule["schedule_data"])
+	}
+	if scheduleData["hours"] != float64(8) {
+		t.Fatalf("schedule hours = %#v", scheduleData["hours"])
+	}
+
+	role := roleToolPayload(domain.RoleRecord{
+		ID:          4,
+		Name:        "Manager",
+		Permissions: `{"view_team":true,"manage_roles":true,"disabled":false}`,
+	})
+	if !reflect.DeepEqual(role["permission_keys"], []string{"manage_roles", "view_team"}) {
+		t.Fatalf("permission_keys = %#v", role["permission_keys"])
+	}
+
+	department := departmentToolPayload(domain.DepartmentRecord{
+		ID:         6,
+		Name:       "Operations",
+		LocationID: 0,
+	})
+	if department["location_id"] != nil {
+		t.Fatalf("location_id = %#v, want nil for zero id", department["location_id"])
+	}
+}
+
+func TestHRSetupAndConfigToolPayloads(t *testing.T) {
+	completedAt := time.Date(2026, 6, 18, 10, 0, 0, 0, time.FixedZone("EEST", 3*60*60))
+	step := setupStepToolPayload(domain.SetupStepRecord{
+		ID:          1,
+		StepKey:     "company",
+		StepLabel:   "Company profile",
+		IsCompleted: true,
+		CompletedAt: completedAt,
+	})
+	if step["completed_at"] != "2026-06-18T07:00:00Z" {
+		t.Fatalf("completed_at = %#v", step["completed_at"])
+	}
+
+	config := hrConfigToolPayload(&domain.HRCompanyConfigRecord{
+		ID:                   3,
+		CompanyName:          "Suplab",
+		FiscalYearStartMonth: 1,
+		DefaultCurrency:      "USD",
+		DefaultTimezone:      "Asia/Beirut",
+		OvertimeEnabled:      true,
+		OvertimeMultiplier:   1.5,
+	})
+	if config["company_name"] != "Suplab" {
+		t.Fatalf("company_name = %#v", config["company_name"])
+	}
+	if config["default_work_schedule_id"] != nil {
+		t.Fatalf("default_work_schedule_id = %#v, want nil for zero id", config["default_work_schedule_id"])
 	}
 }
 

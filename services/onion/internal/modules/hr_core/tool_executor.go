@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,12 @@ import (
 
 const (
 	listEmployeesToolName         = "hr.list_employees"
+	listHRLocationsToolName       = "hr.list_locations"
+	listHRDepartmentsToolName     = "hr.list_departments"
+	listHRWorkSchedulesToolName   = "hr.list_work_schedules"
+	listHRRolesToolName           = "hr.list_roles"
+	getHRSetupStatusToolName      = "hr.get_setup_status"
+	getHRConfigToolName           = "hr.get_config"
 	createEmployeeToolName        = "hr.create_employee"
 	defaultListEmployeesToolLimit = int64(20)
 	maxListEmployeesToolLimit     = int64(50)
@@ -25,6 +32,10 @@ type listEmployeesToolInput struct {
 	Limit  int32
 	Offset int32
 	Page   int32
+}
+
+type listHRDepartmentsToolInput struct {
+	LocationID int64
 }
 
 type createEmployeeToolInput struct {
@@ -50,6 +61,24 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	switch name {
 	case listEmployeesToolName:
 		output, err := m.executeListEmployeesTool(ctx, input)
+		return output, true, err
+	case listHRLocationsToolName:
+		output, err := m.executeListHRLocationsTool(ctx)
+		return output, true, err
+	case listHRDepartmentsToolName:
+		output, err := m.executeListHRDepartmentsTool(ctx, input)
+		return output, true, err
+	case listHRWorkSchedulesToolName:
+		output, err := m.executeListHRWorkSchedulesTool(ctx)
+		return output, true, err
+	case listHRRolesToolName:
+		output, err := m.executeListHRRolesTool(ctx)
+		return output, true, err
+	case getHRSetupStatusToolName:
+		output, err := m.executeGetHRSetupStatusTool(ctx)
+		return output, true, err
+	case getHRConfigToolName:
+		output, err := m.executeGetHRConfigTool(ctx)
 		return output, true, err
 	case createEmployeeToolName:
 		output, err := m.executeCreateEmployeeTool(ctx, input)
@@ -87,6 +116,153 @@ func (m *Module) executeListEmployeesTool(ctx context.Context, input map[string]
 		"limit":     parsed.Limit,
 		"offset":    parsed.Offset,
 		"page":      parsed.Page,
+	}, nil
+}
+
+func (m *Module) executeListHRLocationsTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	locations, err := m.service.ListLocations(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(locations))
+	for _, location := range locations {
+		payloads = append(payloads, locationToolPayload(location))
+	}
+
+	return map[string]any{
+		"locations": payloads,
+		"returned":  len(payloads),
+	}, nil
+}
+
+func (m *Module) executeListHRDepartmentsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListHRDepartmentsToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	departments, err := m.service.ListDepartments(ctx, authUser.UserID, parsed.LocationID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(departments))
+	for _, department := range departments {
+		payloads = append(payloads, departmentToolPayload(department))
+	}
+
+	return map[string]any{
+		"departments": payloads,
+		"returned":    len(payloads),
+		"filters": map[string]any{
+			"location_id": parsed.LocationID,
+		},
+	}, nil
+}
+
+func (m *Module) executeListHRWorkSchedulesTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	schedules, err := m.service.ListWorkSchedules(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(schedules))
+	for _, schedule := range schedules {
+		payloads = append(payloads, workScheduleToolPayload(schedule))
+	}
+
+	return map[string]any{
+		"work_schedules": payloads,
+		"returned":       len(payloads),
+	}, nil
+}
+
+func (m *Module) executeListHRRolesTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	roles, err := m.service.ListRoles(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(roles))
+	for _, role := range roles {
+		payloads = append(payloads, roleToolPayload(role))
+	}
+
+	return map[string]any{
+		"roles":    payloads,
+		"returned": len(payloads),
+	}, nil
+}
+
+func (m *Module) executeGetHRSetupStatusTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	steps, err := m.service.GetSetupStatus(ctx, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(steps))
+	completed := 0
+	for _, step := range steps {
+		if step.IsCompleted {
+			completed++
+		}
+		payloads = append(payloads, setupStepToolPayload(step))
+	}
+
+	return map[string]any{
+		"steps":      payloads,
+		"total":      len(payloads),
+		"completed":  completed,
+		"incomplete": len(payloads) - completed,
+	}, nil
+}
+
+func (m *Module) executeGetHRConfigTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	config, err := m.service.GetHRConfig(ctx, authUser.UserID)
+	if err != nil {
+		if errors.Is(err, domain.ErrSetupNotComplete) {
+			return map[string]any{
+				"configured": false,
+				"config":     nil,
+			}, nil
+		}
+		return nil, err
+	}
+
+	return map[string]any{
+		"configured": config != nil,
+		"config":     hrConfigToolPayload(config),
 	}, nil
 }
 
@@ -222,6 +398,14 @@ func parseCreateEmployeeToolInput(input map[string]any) (createEmployeeToolInput
 	return parsed, nil
 }
 
+func parseListHRDepartmentsToolInput(input map[string]any) (listHRDepartmentsToolInput, error) {
+	locationID, err := hrToolNonNegativeInt64(firstHRToolValue(input, "location_id", "location"))
+	if err != nil {
+		return listHRDepartmentsToolInput{}, fmt.Errorf("invalid location_id: %w", err)
+	}
+	return listHRDepartmentsToolInput{LocationID: locationID}, nil
+}
+
 func parseListEmployeesToolInput(input map[string]any) (listEmployeesToolInput, error) {
 	limit, err := hrToolNonNegativeInt64(firstHRToolValue(input, "limit", "page_size"))
 	if err != nil {
@@ -295,6 +479,114 @@ func employeeToolPayload(e domain.EmployeeRecord) map[string]any {
 		"start_date":       formatEmployeeToolDate(e.StartDate),
 		"end_date":         formatEmployeeToolDate(e.EndDate),
 	}
+}
+
+func locationToolPayload(location domain.LocationRecord) map[string]any {
+	return map[string]any{
+		"id":         location.ID,
+		"name":       location.Name,
+		"address":    location.Address,
+		"city":       location.City,
+		"country":    location.Country,
+		"timezone":   location.Timezone,
+		"latitude":   location.Latitude,
+		"longitude":  location.Longitude,
+		"is_default": location.IsDefault,
+	}
+}
+
+func departmentToolPayload(department domain.DepartmentRecord) map[string]any {
+	return map[string]any{
+		"id":                       department.ID,
+		"name":                     department.Name,
+		"location_id":              hrToolOptionalID(department.LocationID),
+		"parent_department_id":     hrToolOptionalID(department.ParentDepartmentID),
+		"default_work_schedule_id": hrToolOptionalID(department.DefaultWorkScheduleID),
+	}
+}
+
+func workScheduleToolPayload(schedule domain.WorkScheduleRecord) map[string]any {
+	return map[string]any{
+		"id":            schedule.ID,
+		"name":          schedule.Name,
+		"schedule_data": hrToolJSONPayload(schedule.ScheduleData),
+		"is_default":    schedule.IsDefault,
+	}
+}
+
+func roleToolPayload(role domain.RoleRecord) map[string]any {
+	return map[string]any{
+		"id":              role.ID,
+		"name":            role.Name,
+		"description":     role.Description,
+		"is_system":       role.IsSystem,
+		"permissions":     hrToolJSONPayload(role.Permissions),
+		"permission_keys": roleToolPermissionKeys(role.Permissions),
+	}
+}
+
+func setupStepToolPayload(step domain.SetupStepRecord) map[string]any {
+	return map[string]any{
+		"id":           step.ID,
+		"step_key":     step.StepKey,
+		"step_label":   step.StepLabel,
+		"is_completed": step.IsCompleted,
+		"completed_at": formatHRToolTimestamp(step.CompletedAt),
+	}
+}
+
+func hrConfigToolPayload(config *domain.HRCompanyConfigRecord) map[string]any {
+	if config == nil {
+		return nil
+	}
+	return map[string]any{
+		"id":                       config.ID,
+		"company_name":             config.CompanyName,
+		"fiscal_year_start_month":  config.FiscalYearStartMonth,
+		"default_currency":         config.DefaultCurrency,
+		"default_timezone":         config.DefaultTimezone,
+		"default_work_schedule_id": hrToolOptionalID(config.DefaultWorkScheduleID),
+		"overtime_enabled":         config.OvertimeEnabled,
+		"overtime_multiplier":      config.OvertimeMultiplier,
+		"created_at":               formatHRToolTimestamp(config.CreatedAt),
+		"updated_at":               formatHRToolTimestamp(config.UpdatedAt),
+	}
+}
+
+func hrToolOptionalID(value int64) any {
+	if value <= 0 {
+		return nil
+	}
+	return value
+}
+
+func hrToolJSONPayload(raw string) any {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return nil
+	}
+
+	var payload any
+	if err := json.Unmarshal([]byte(trimmed), &payload); err != nil {
+		return trimmed
+	}
+	return payload
+}
+
+func roleToolPermissionKeys(raw string) []string {
+	var permissions map[string]bool
+	if err := json.Unmarshal([]byte(strings.TrimSpace(raw)), &permissions); err != nil {
+		return nil
+	}
+
+	keys := make([]string, 0, len(permissions))
+	for key, enabled := range permissions {
+		if enabled {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func splitEmployeeName(value string) (string, string) {
@@ -444,4 +736,11 @@ func formatEmployeeToolDate(value time.Time) any {
 		return nil
 	}
 	return value.Format("2006-01-02")
+}
+
+func formatHRToolTimestamp(value time.Time) any {
+	if value.IsZero() {
+		return nil
+	}
+	return value.UTC().Format(time.RFC3339)
 }
