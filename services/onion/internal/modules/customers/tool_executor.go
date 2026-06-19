@@ -12,10 +12,12 @@ import (
 
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
 	listCustomersToolName         = "crm.list_customers"
+	getCustomerToolName           = "crm.get_customer"
 	createCustomerToolName        = "crm.create_customer"
 	defaultListCustomersToolLimit = 20
 	maxListCustomersToolPageSize  = 50
@@ -36,6 +38,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case listCustomersToolName:
 		output, err := m.executeListCustomersTool(ctx, input)
 		return output, true, err
+	case getCustomerToolName:
+		output, err := m.executeGetCustomerTool(ctx, input)
+		return output, true, err
 	case createCustomerToolName:
 		output, err := m.executeCreateCustomerTool(ctx, input)
 		return output, true, err
@@ -55,13 +60,19 @@ func (m *Module) executeListCustomersTool(ctx context.Context, input map[string]
 		return nil, err
 	}
 
+	businessID, err := customerToolBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	result, err := m.service.ListCustomers(ctx, domain.CustomerListFilter{
-		OwnerID:  authUser.UserID,
-		Search:   parsed.Search,
-		Tier:     parsed.Tier,
-		Tag:      parsed.Tag,
-		Page:     parsed.Page,
-		PageSize: parsed.PageSize,
+		OwnerID:    authUser.UserID,
+		BusinessID: businessID,
+		Search:     parsed.Search,
+		Tier:       parsed.Tier,
+		Tag:        parsed.Tag,
+		Page:       parsed.Page,
+		PageSize:   parsed.PageSize,
 	})
 	if err != nil {
 		return nil, err
@@ -83,6 +94,31 @@ func (m *Module) executeListCustomersTool(ctx context.Context, input map[string]
 			"tier":   parsed.Tier,
 			"tag":    parsed.Tag,
 		},
+	}, nil
+}
+
+func (m *Module) executeGetCustomerTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	customerID, err := parseGetCustomerToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, err := customerToolBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+	customer, err := m.service.GetCustomer(ctx, businessID, customerID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"customer": customerDetailToolPayload(customer),
 	}, nil
 }
 
@@ -122,6 +158,11 @@ func (m *Module) executeCreateCustomerTool(ctx context.Context, input map[string
 		return nil, fmt.Errorf("invalid date_of_birth: %w", err)
 	}
 	customer.DateOfBirth = dateOfBirth
+	businessID, err := customerToolBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return nil, err
+	}
+	customer.BusinessID = businessID
 
 	if message := domain.ValidateCustomerInput(customer); message != "" {
 		return nil, errors.New(message)
@@ -148,6 +189,17 @@ func (m *Module) executeCreateCustomerTool(ctx context.Context, input map[string
 			"notes":         customer.Notes,
 		},
 	}, nil
+}
+
+func parseGetCustomerToolInput(input map[string]any) (int64, error) {
+	customerID, err := customerToolNonNegativeInt64(firstCustomerToolValue(input, "customer_id", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid customer_id: %w", err)
+	}
+	if customerID == 0 {
+		return 0, errors.New("customer_id is required")
+	}
+	return customerID, nil
 }
 
 func splitCustomerName(value string) (string, string) {
@@ -216,6 +268,51 @@ func customerToolNonNegativeInt(value any) (int, error) {
 	return out, nil
 }
 
+func customerToolNonNegativeInt64(value any) (int64, error) {
+	out, err := customerToolInt64(value)
+	if err != nil {
+		return 0, err
+	}
+	if out < 0 {
+		return 0, errors.New("must be non-negative")
+	}
+	return out, nil
+}
+
+func customerToolInt64(value any) (int64, error) {
+	switch v := value.(type) {
+	case nil:
+		return 0, nil
+	case int:
+		return int64(v), nil
+	case int64:
+		return v, nil
+	case int32:
+		return int64(v), nil
+	case float64:
+		if math.IsNaN(v) || math.IsInf(v, 0) {
+			return 0, errors.New("must be finite")
+		}
+		if math.Trunc(v) != v {
+			return 0, errors.New("must be an integer")
+		}
+		if v > float64(math.MaxInt) || v < float64(math.MinInt) {
+			return 0, errors.New("out of range")
+		}
+		return int64(v), nil
+	case json.Number:
+		return v.Int64()
+	case string:
+		raw := strings.TrimSpace(v)
+		if raw == "" {
+			return 0, nil
+		}
+		return strconv.ParseInt(raw, 10, 64)
+	default:
+		return 0, fmt.Errorf("unsupported value %T", value)
+	}
+}
+
 func customerToolInt(value any) (int, error) {
 	switch v := value.(type) {
 	case nil:
@@ -264,6 +361,14 @@ func customerToolInt(value any) (int, error) {
 	}
 }
 
+func customerToolBusinessID(ctx context.Context, businessID, userID int64) (int64, error) {
+	resolved, err := tenant.ResolveBusinessID(ctx, businessID, userID)
+	if err != nil {
+		return 0, errors.New("cannot determine business context")
+	}
+	return resolved, nil
+}
+
 func customerToolPayload(c domain.Customer) map[string]any {
 	fullName := strings.TrimSpace(strings.TrimSpace(c.FirstName) + " " + strings.TrimSpace(c.LastName))
 	return map[string]any{
@@ -282,6 +387,19 @@ func customerToolPayload(c domain.Customer) map[string]any {
 		"is_active":      c.IsActive,
 		"created_at":     c.CreatedAt.Format(customerToolTimestampDate),
 	}
+}
+
+func customerDetailToolPayload(c domain.Customer) map[string]any {
+	payload := customerToolPayload(c)
+	payload["business_id"] = c.BusinessID
+	payload["date_of_birth"] = formatCustomerDate(c.DateOfBirth)
+	payload["gender"] = c.Gender
+	payload["address"] = c.Address
+	payload["city"] = c.City
+	payload["country"] = c.Country
+	payload["notes"] = c.Notes
+	payload["updated_at"] = c.UpdatedAt.Format(customerToolTimestampDate)
+	return payload
 }
 
 func toolStringValue(value any) string {
