@@ -449,10 +449,14 @@ func initializeModules(ctx context.Context) *apiModules {
 	aiQueryModule := aiquery.NewModule(ctx)
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
 	customersModule := customers.NewModule(ctx, dbclient.Pool())
+	campaignsModule := campaigns.NewModule(ctx, dbclient.Pool())
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
 	productsModule := products.NewModule(ctx, dbclient.Pool())
 	categoriesModule := categories.NewModule(ctx, dbclient.Pool())
 	brandsModule := brands.NewModule(ctx, dbclient.Pool())
+	loyaltyModule := loyalty.NewModule(ctx, dbclient.Pool())
+	reviewsModule := reviews.NewModule(ctx, dbclient.Pool())
+	segmentsModule := segments.NewModule(ctx, dbclient.Pool())
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
@@ -504,7 +508,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		BookingWaitlist:       bookingwaitlist.NewModule(ctx, dbclient.Pool()),
 		Brands:                brandsModule,
 		Business:              business.NewModule(ctx, dbclient.Pool()),
-		Campaigns:             campaigns.NewModule(ctx, dbclient.Pool()),
+		Campaigns:             campaignsModule,
 		Careers:               careers.NewModule(ctx, dbclient.Pool()),
 		Categories:            categoriesModule,
 		Console:               console.NewModule(ctx, dbclient.Pool()),
@@ -517,7 +521,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -545,7 +549,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Invoices:              invoicesModule,
 		Journal:               journal.NewModule(ctx, dbclient.Pool()),
 		KPIs:                  kpis.NewModule(ctx, dbclient.Pool()),
-		Loyalty:               loyalty.NewModule(ctx, dbclient.Pool()),
+		Loyalty:               loyaltyModule,
 		Memory:                memoryModule,
 		Notifications:         notifications.NewModule(ctx, dbclient.Pool()),
 		OAuth:                 oauth.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.AuthAppURL),
@@ -578,10 +582,10 @@ func initializeModules(ctx context.Context) *apiModules {
 		PurchaseOrders:        purchaseOrdersModule,
 		Quotes:                quotesModule,
 		RecurringInvoices:     recurringinvoices.NewModule(ctx, dbclient.Pool()),
-		Reviews:               reviews.NewModule(ctx, dbclient.Pool()),
+		Reviews:               reviewsModule,
 		Roles:                 roles.NewModule(ctx, dbclient.Pool()),
 		Security:              security.NewModule(ctx, dbclient.Pool()),
-		Segments:              segments.NewModule(ctx, dbclient.Pool()),
+		Segments:              segmentsModule,
 		Shifts:                shifts.NewModule(ctx, dbclient.Pool()),
 		Staff:                 staff.NewModule(ctx, dbclient.Pool()),
 		StockTakes:            stocktakes.NewModule(ctx, dbclient.Pool()),
