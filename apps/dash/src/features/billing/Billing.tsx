@@ -700,6 +700,13 @@ function seatLineDetail(item: BillingLineItem, isGranted?: boolean): string {
   return `${included} included · ${billable} billable at ${centsToDisplay(item.pricePerSeatCents)}/seat/mo`;
 }
 
+function addonLineDetail(item: BillingLineItem): string {
+  const base = `${centsToDisplay(item.unitPriceCents ?? 0)}/mo addon`;
+  if (!item.isGranted) return base;
+  if (!item.grantExpiresAt) return `${base} · granted`;
+  return `${base} · granted until ${formatDate(item.grantExpiresAt)}`;
+}
+
 const CurrentChargesSection: React.FC<{
   billing: BillingDetailPayload | null | undefined;
   loading: boolean;
@@ -768,9 +775,7 @@ const CurrentChargesSection: React.FC<{
                         : `${item.seatCount} active seat${item.seatCount !== 1 ? 's' : ''}`}
                     </p>
                     <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                      {isAddon
-                        ? `${centsToDisplay(item.unitPriceCents ?? 0)}/mo addon`
-                        : seatLineDetail(item, isGranted)}
+                      {isAddon ? addonLineDetail(item) : seatLineDetail(item, isGranted)}
                     </p>
                   </div>
                   <p

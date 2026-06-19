@@ -173,8 +173,13 @@ const Addons: React.FC = () => {
   );
 
   const CONFIRM_PHRASE = 'disable this addon';
+  const grantedAddonIds = new Set(
+    (billing?.lineItems ?? [])
+      .filter((item) => item.type === 'addon' && item.isGranted && item.addonId)
+      .map((item) => item.addonId as string)
+  );
   const enabledPaidMonthlyCents = addons
-    .filter((addon) => addon.isEnabled && !addon.isFree)
+    .filter((addon) => addon.isEnabled && !addon.isFree && !grantedAddonIds.has(addon.id))
     .reduce((sum, addon) => sum + addonPriceCents(addon), 0);
   const recurringBaseCents =
     (billing?.billableSeatCount ?? 0) * (billing?.pricePerSeatCents ?? 0) + enabledPaidMonthlyCents;
@@ -230,6 +235,7 @@ const Addons: React.FC = () => {
               const isEnabling = enablingId === addon.id;
               const justEnabled = showEnableSuccess === addon.id;
               const manageRoute = getAddonManageRoute(addon.id);
+              const isGranted = grantedAddonIds.has(addon.id);
               const handlePaidAddonClick = () => {
                 if (addon.isEnabled && manageRoute) {
                   void navigate({ to: manageRoute });
@@ -265,6 +271,14 @@ const Addons: React.FC = () => {
                           Free
                         </span>
                       )}
+                      {isGranted && (
+                        <span
+                          className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                        >
+                          Granted
+                        </span>
+                      )}
                       {addon.isEnabled && (
                         <span
                           className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
@@ -291,10 +305,12 @@ const Addons: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span
                       className="text-sm font-semibold"
-                      style={{ color: addon.isFree ? '#10b981' : 'var(--dash-text)' }}
+                      style={{
+                        color: addon.isFree || isGranted ? '#10b981' : 'var(--dash-text)',
+                      }}
                     >
-                      {addon.isFree ? 'Free' : `$${addon.price}`}
-                      {!addon.isFree && addon.price > 0 && (
+                      {addon.isFree ? 'Free' : isGranted ? 'Granted' : `$${addon.price}`}
+                      {!addon.isFree && !isGranted && addon.price > 0 && (
                         <span
                           className="text-xs font-normal"
                           style={{ color: 'var(--dash-text-dim)' }}

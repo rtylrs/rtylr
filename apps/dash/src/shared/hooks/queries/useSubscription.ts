@@ -54,6 +54,8 @@ export interface BillingLineItem {
   amountCents: number;
   type?: 'seat' | 'addon';
   description?: string;
+  isGranted?: boolean;
+  grantExpiresAt?: string | null;
   addonId?: string;
   quantity?: number;
   unitPriceCents?: number;
