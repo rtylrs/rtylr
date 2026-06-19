@@ -52,6 +52,11 @@
   padding: 1px 4px;
   border-radius: 4px;
 }
+.caret-md pre .caret-inline-code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
 .caret-md pre.caret-codeblock {
   font-family: SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
