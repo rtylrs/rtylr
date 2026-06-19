@@ -196,29 +196,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Analyst mode: turn the question into a validated, tenant-scoped query,
-	// run it on the read replica, and ground the answer in the real rows. Falls
-	// back to a normal chat answer if the data pipeline can't produce a result.
-	var liveGrounding *analystGroundingResult
-	if mode != ModeSupport {
-		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
-			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
-			liveGrounding = grounding
-		}
-	}
-
 	cachePlan := h.buildCacheWritePlan(ctx, mode, req, enhancedPrompt, businessID, authUserID, requestNow)
-	if liveGrounding != nil {
-		cachePlan.Enabled = false
-		cachePlan.Key = ""
-		cachePlan.Policy.Enabled = false
-		cachePlan.Policy.Reason = "request includes live analyst grounding"
-	}
-
-	log.Info("Starting AI text generation",
-		logger.String("enhanced_prompt_length", strconv.Itoa(len(enhancedPrompt))),
-		logger.String("cache_mode", cachePlan.Mode),
-		logger.String("cache_policy", cachePlan.Policy.Reason))
 
 	h.setupSSEHeaders(w)
 	clientGone := h.monitorClientDisconnect(r)
@@ -253,6 +231,23 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 			CacheKeyPreview: "",
 		})
 	}
+
+	// Analyst grounding may call an internal model and the read replica. Keep it
+	// behind exact-cache lookup so repeated identical business questions can
+	// replay without paying those costs again.
+	var liveGrounding *analystGroundingResult
+	if mode != ModeSupport {
+		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
+			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
+			liveGrounding = grounding
+			cachePlan.PromptChars = len(enhancedPrompt)
+		}
+	}
+
+	log.Info("Starting AI text generation",
+		logger.String("enhanced_prompt_length", strconv.Itoa(len(enhancedPrompt))),
+		logger.String("cache_mode", cachePlan.Mode),
+		logger.String("cache_policy", cachePlan.Policy.Reason))
 
 	tokenChan, err := h.AiService.GenerateTextStream(ctx, enhancedPrompt)
 	if err != nil {
