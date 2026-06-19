@@ -50,3 +50,29 @@ export const useSwitchBusiness = () =>
     mutationFn: (businessId: number) =>
       unwrap(safe.post<SwitchBusinessResponse>('/auth/switch-business', { businessId })),
   });
+
+interface OnboardBusinessResponse {
+  token: string;
+}
+
+// Live availability check for the onboarding screen (business names are globally unique).
+export const useBusinessExists = (name: string) =>
+  useQuery({
+    queryKey: ['business-exists', name.trim()],
+    queryFn: () =>
+      unwrap(
+        safe.get<{ exists: boolean }>(
+          `/get-business-exists?name=${encodeURIComponent(name.trim())}`
+        )
+      ),
+    enabled: name.trim().length > 1,
+    staleTime: 10_000,
+  });
+
+// Creates the owner's first business during onboarding; returns a fresh token
+// carrying the new business_id.
+export const useOnboardBusiness = () =>
+  useMutation({
+    mutationFn: (name: string) =>
+      unwrap(safe.post<OnboardBusinessResponse>('/onboarding/business', { name })),
+  });

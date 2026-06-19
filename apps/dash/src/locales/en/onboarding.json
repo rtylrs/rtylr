@@ -1,0 +1,11 @@
+{
+  "title": "Create your business",
+  "subtitle": "Set up your business to get started. You can add more businesses later.",
+  "businessName": "Business name",
+  "businessNamePlaceholder": "e.g. Acme Coffee",
+  "nameTaken": "That name is already taken",
+  "nameAvailable": "Name is available",
+  "creating": "Creating...",
+  "createButton": "Create business",
+  "createError": "Failed to create business"
+}

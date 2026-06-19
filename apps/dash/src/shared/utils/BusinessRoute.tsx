@@ -2,6 +2,7 @@ import { Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
+import CreateBusinessOnboarding from '../../features/onboarding/CreateBusinessOnboarding';
 import {
   MonitorSpeaker,
   Package,
@@ -437,6 +438,14 @@ function BusinessRoute(): React.JSX.Element | null {
         <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
     );
+  }
+
+  // Freshly-registered owners have no business yet (registration no longer
+  // auto-creates one). Gate them into onboarding to create their first business
+  // before anything else loads.
+  const currentBusinessId = (user?.businessId as number | undefined) ?? 0;
+  if (user && !currentBusinessId) {
+    return <CreateBusinessOnboarding />;
   }
 
   // Staff users (non-owner) see the app cards launcher.

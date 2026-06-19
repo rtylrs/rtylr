@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Building2, Check, ChevronRight, Plus, Loader2 } from 'lucide-react';
-import { setCookie } from '@voxire/auth';
+import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import {
   Dialog,
   DialogContent,
@@ -43,7 +43,12 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
     if (business.id === currentBusinessId) return;
     switchMutation.mutate(business.id, {
       onSuccess: ({ token }) => {
-        setCookie('token', token);
+        removeCookie('token');
+        setCookie('token', token, {
+          days: 30,
+          sameSite: 'lax',
+          domain: getDefaultCookieDomain(),
+        });
         window.location.reload();
       },
       onError: () => {

@@ -1,0 +1,11 @@
+{
+  "title": "Créez votre entreprise",
+  "subtitle": "Configurez votre entreprise pour commencer. Vous pourrez en ajouter d'autres plus tard.",
+  "businessName": "Nom de l'entreprise",
+  "businessNamePlaceholder": "ex. Acme Coffee",
+  "nameTaken": "Ce nom est déjà pris",
+  "nameAvailable": "Nom disponible",
+  "creating": "Création en cours...",
+  "createButton": "Créer l'entreprise",
+  "createError": "Échec de la création de l'entreprise"
+}
