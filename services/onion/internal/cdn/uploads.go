@@ -123,6 +123,10 @@ type uploadResponse struct {
 // serveFile handles GET /files/{id} — streams the original bytes back with an
 // immutable cache header (the UUID namespace means content never changes).
 func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
+	if !c.validateSignedDelivery(w, r) {
+		return
+	}
+
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		http.Error(w, "missing file id", http.StatusBadRequest)

@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -41,6 +40,10 @@ type uploadURLSource struct {
 // serveUploadURL handles GET /upload?url=... as a compatibility read path for
 // image URLs that predate /files/{uuid}. New uploads still use POST /upload.
 func (c *CDN) serveUploadURL(w http.ResponseWriter, r *http.Request) {
+	if !c.validateSignedDelivery(w, r) {
+		return
+	}
+
 	if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
 		c.serveUploadID(w, r, id)
 		return
@@ -74,7 +77,14 @@ func (c *CDN) serveUploadID(w http.ResponseWriter, r *http.Request, id string) {
 		return
 	}
 
-	if uploadURLWantsOriginal(r.URL.Query()) {
+	parsed, err := parseImageParams(r.URL.Query(), r.Header.Get("Accept"), imageParamOptions{
+		defaultFullImage: true,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if parsed.original {
 		http.Redirect(w, r, c.fileURL(id), http.StatusTemporaryRedirect)
 		return
 	}
@@ -199,12 +209,28 @@ func uploadFileUUIDFromPath(rawPath string) (string, bool) {
 }
 
 func (c *CDN) uploadImageReadURL(fileUUID string, query url.Values) string {
-	out := url.Values{}
-	if v := strings.TrimSpace(query.Get("q")); v != "" {
-		out.Set("q", v)
+	out := imageTransformQuery(query)
+	if !hasImageTransformQuery(out) {
+		out.Set("t", "f_webp")
+	} else if out.Get("format") == "" && out.Get("f") == "" && out.Get("t") == "" && out.Get("auto") == "" {
+		out.Set("format", "webp")
 	}
-	out.Set("t", "f_webp")
 	return fmt.Sprintf("%s/images/%s?%s", c.baseURL, fileUUID, out.Encode())
+}
+
+func imageTransformQuery(query url.Values) url.Values {
+	out := url.Values{}
+	for key, values := range query {
+		if !imageTransformQueryKeys[strings.ToLower(key)] {
+			continue
+		}
+		for _, value := range values {
+			if strings.TrimSpace(value) != "" {
+				out.Add(key, value)
+			}
+		}
+	}
+	return out
 }
 
 func storageKeyFromPath(rawPath string) (string, error) {
@@ -267,14 +293,22 @@ func (c *CDN) serveStorageKeyImage(w http.ResponseWriter, r *http.Request, key s
 		return
 	}
 
-	if !uploadURLWantsOriginal(r.URL.Query()) && mimeType != "image/webp" && r.Method == http.MethodHead {
-		w.Header().Set("Content-Type", "image/webp")
+	parsed, err := parseImageParams(r.URL.Query(), r.Header.Get("Accept"), imageParamOptions{
+		defaultFullImage: true,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if uploadURLShouldTransform(parsed, mimeType) && r.Method == http.MethodHead {
+		w.Header().Set("Content-Type", mimeForFormat(parsed.params.Format))
 		w.Header().Set("Cache-Control", uploadURLCacheControl)
+		setImageVariantHeaders(w, parsed.params, parsed.varyAccept, uploadURLSurrogateKey("storage:"+key), parsed.surrogateKey)
 		return
 	}
 
 	etag := quoteETag(cacheKey("upload-url-storage", key))
-	if uploadURLWantsOriginal(r.URL.Query()) || mimeType == "image/webp" {
+	if !uploadURLShouldTransform(parsed, mimeType) {
 		w.Header().Set("ETag", etag)
 		w.Header().Set("Content-Type", mimeType)
 		w.Header().Set("Cache-Control", uploadURLCacheControl)
@@ -296,13 +330,13 @@ func (c *CDN) serveStorageKeyImage(w http.ResponseWriter, r *http.Request, key s
 	}
 	defer func() { _ = reader.Close() }()
 
-	if !uploadURLWantsOriginal(r.URL.Query()) && mimeType != "image/webp" {
-		c.serveUploadURLWebP(w, r, uploadURLImageSource{
+	if uploadURLShouldTransform(parsed, mimeType) {
+		c.serveUploadURLTransform(w, r, uploadURLImageSource{
 			body:      reader,
 			mimeType:  mimeType,
 			size:      size,
 			cacheSeed: "storage:" + key,
-		})
+		}, parsed)
 		return
 	}
 
@@ -315,6 +349,14 @@ func (c *CDN) serveStorageKeyImage(w http.ResponseWriter, r *http.Request, key s
 }
 
 func (c *CDN) proxyRemoteImage(w http.ResponseWriter, r *http.Request, target *url.URL) {
+	parsed, err := parseImageParams(r.URL.Query(), r.Header.Get("Accept"), imageParamOptions{
+		defaultFullImage: true,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	client := imageProxyHTTPClient()
 	ctx, cancel := context.WithTimeout(r.Context(), uploadURLProxyTimeout)
 	defer cancel()
@@ -329,7 +371,7 @@ func (c *CDN) proxyRemoteImage(w http.ResponseWriter, r *http.Request, target *u
 		return
 	}
 	req.Header.Set("Accept", "image/avif,image/webp,image/*,*/*;q=0.8")
-	if uploadURLWantsOriginal(r.URL.Query()) {
+	if parsed.original {
 		if v := r.Header.Get("If-None-Match"); v != "" {
 			req.Header.Set("If-None-Match", v)
 		}
@@ -378,13 +420,13 @@ func (c *CDN) proxyRemoteImage(w http.ResponseWriter, r *http.Request, target *u
 		return
 	}
 
-	if !uploadURLWantsOriginal(r.URL.Query()) && mimeType != "image/webp" {
-		c.serveUploadURLWebP(w, r, uploadURLImageSource{
+	if uploadURLShouldTransform(parsed, mimeType) {
+		c.serveUploadURLTransform(w, r, uploadURLImageSource{
 			body:      body,
 			mimeType:  mimeType,
 			size:      resp.ContentLength,
 			cacheSeed: "remote:" + target.String(),
-		})
+		}, parsed)
 		return
 	}
 
@@ -423,9 +465,21 @@ type stagedUploadURLImage struct {
 }
 
 func (c *CDN) serveUploadURLWebP(w http.ResponseWriter, r *http.Request, source uploadURLImageSource) {
+	p := Params{Chain: "f_webp", Format: "webp", Quality: uploadURLWebPQuality}
+	p.Defaults()
+	c.serveUploadURLTransform(w, r, source, imageParamResult{
+		params:       p,
+		explicit:     true,
+		surrogateKey: imageVariantSurrogateKey(p),
+	})
+}
+
+func (c *CDN) serveUploadURLTransform(w http.ResponseWriter, r *http.Request, source uploadURLImageSource, parsed imageParamResult) {
+	p := parsed.params
 	if r.Method == http.MethodHead {
-		w.Header().Set("Content-Type", "image/webp")
+		w.Header().Set("Content-Type", mimeForFormat(p.Format))
 		w.Header().Set("Cache-Control", uploadURLCacheControl)
+		setImageVariantHeaders(w, p, parsed.varyAccept, uploadURLSurrogateKey(source.cacheSeed), parsed.surrogateKey)
 		return
 	}
 
@@ -441,19 +495,23 @@ func (c *CDN) serveUploadURLWebP(w http.ResponseWriter, r *http.Request, source 
 	}
 	defer staged.cleanup()
 
-	key := uploadURLWebPCacheKey(source.cacheSeed, staged.sourceHash)
+	key := uploadURLTransformCacheKey(source.cacheSeed, staged.sourceHash, p)
 	etag := quoteETag(key)
 	w.Header().Set("ETag", etag)
-	w.Header().Set("Content-Type", "image/webp")
+	w.Header().Set("Content-Type", mimeForFormat(p.Format))
 	w.Header().Set("Cache-Control", uploadURLCacheControl)
+	w.Header().Set("Voxire-CDN-Info", uploadURLInfoHeader(source, p))
+	setImageVariantHeaders(w, p, parsed.varyAccept, uploadURLSurrogateKey(source.cacheSeed), parsed.surrogateKey)
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 
-	if err := c.writeUploadURLWebP(w, r, staged, key); err != nil {
-		logger.Ctx(r.Context()).Warn("cdn: upload-url webp transform failed; falling back to original",
-			logger.String("mime_type", source.mimeType), logger.Error(err))
+	if err := c.writeUploadURLTransform(w, r, source, staged, key, p); err != nil {
+		logger.Ctx(r.Context()).Warn("cdn: upload-url transform failed; falling back to original",
+			logger.String("mime_type", source.mimeType),
+			logger.String("format", p.Format),
+			logger.Error(err))
 		serveStagedUploadURLOriginal(w, r, staged, source)
 	}
 }
@@ -522,39 +580,65 @@ func copyUploadURLSource(dst io.Writer, src io.Reader, maxBytes int64) (int64, e
 }
 
 func uploadURLWebPCacheKey(seed, sourceHash string) string {
-	return cacheKey("upload-url-webp", seed, sourceHash, strconv.Itoa(uploadURLWebPQuality))
+	p := Params{Chain: "f_webp", Format: "webp", Quality: uploadURLWebPQuality}
+	p.Defaults()
+	return uploadURLTransformCacheKey(seed, sourceHash, p)
 }
 
 func uploadURLWebPStorageKey(key string) string {
 	return "upload-url-transformed/" + key + ".webp"
 }
 
-func (c *CDN) writeUploadURLWebP(w http.ResponseWriter, r *http.Request, staged *stagedUploadURLImage, key string) error {
-	transformedKey := uploadURLWebPStorageKey(key)
+func uploadURLTransformCacheKey(seed, sourceHash string, p Params) string {
+	return cacheKey("upload-url-transform", seed, sourceHash, p.CacheKey("params"))
+}
+
+func uploadURLTransformSeedKey(seed string) string {
+	return cacheKey("upload-url-seed", seed)
+}
+
+func uploadURLTransformStoragePrefix(seed string) string {
+	return "upload-url-transformed/" + uploadURLTransformSeedKey(seed) + "/"
+}
+
+func uploadURLTransformStorageKey(seed, key string, p Params) string {
+	return uploadURLTransformStoragePrefix(seed) + key + extensionForFormat(p.Format)
+}
+
+func uploadURLSurrogateKey(seed string) string {
+	return "cdn-upload-url-" + uploadURLTransformSeedKey(seed)
+}
+
+func uploadURLInfoHeader(source uploadURLImageSource, p Params) string {
+	return fmt.Sprintf("ifsz=%d ifmt=%s ofmt=%s", source.size, mimeTypeToFormat(source.mimeType), strings.ToLower(p.Format))
+}
+
+func (c *CDN) writeUploadURLTransform(w http.ResponseWriter, r *http.Request, source uploadURLImageSource, staged *stagedUploadURLImage, key string, p Params) error {
+	transformedKey := uploadURLTransformStorageKey(source.cacheSeed, key, p)
 	if c.storage != nil {
 		if ok, _ := c.storage.Exists(r.Context(), transformedKey); ok {
 			reader, size, err := c.storage.Download(r.Context(), transformedKey)
 			if err != nil {
-				return fmt.Errorf("downloading cached upload-url webp: %w", err)
+				return fmt.Errorf("downloading cached upload-url transform: %w", err)
 			}
 			defer func() { _ = reader.Close() }()
 			if size > 0 {
 				w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
 			}
 			if _, err := io.Copy(w, reader); err != nil {
-				logger.Ctx(r.Context()).Warn("cdn: failed to stream cached upload-url webp", logger.Error(err))
+				logger.Ctx(r.Context()).Warn("cdn: failed to stream cached upload-url transform", logger.Error(err))
 			}
 			return nil
 		}
 	}
 
-	if err := c.generateUploadURLWebP(r.Context(), staged); err != nil {
+	if err := c.generateUploadURLTransform(r.Context(), staged, p); err != nil {
 		return err
 	}
 
 	resultFile, err := os.Open(staged.outputPath)
 	if err != nil {
-		return fmt.Errorf("opening upload-url webp: %w", err)
+		return fmt.Errorf("opening upload-url transform: %w", err)
 	}
 	defer func() { _ = resultFile.Close() }()
 
@@ -563,22 +647,22 @@ func (c *CDN) writeUploadURLWebP(w http.ResponseWriter, r *http.Request, staged 
 	}
 
 	if c.storage != nil {
-		if err := c.storage.Upload(r.Context(), transformedKey, "image/webp", resultFile); err != nil {
-			logger.Ctx(r.Context()).Warn("cdn: failed to cache upload-url webp",
+		if err := c.storage.Upload(r.Context(), transformedKey, mimeForFormat(p.Format), resultFile); err != nil {
+			logger.Ctx(r.Context()).Warn("cdn: failed to cache upload-url transform",
 				logger.String("storage_key", transformedKey), logger.Error(err))
 		}
 		if _, err := resultFile.Seek(0, io.SeekStart); err != nil {
-			return fmt.Errorf("rewinding upload-url webp: %w", err)
+			return fmt.Errorf("rewinding upload-url transform: %w", err)
 		}
 	}
 
 	if _, err = io.Copy(w, resultFile); err != nil {
-		logger.Ctx(r.Context()).Warn("cdn: failed to stream upload-url webp", logger.Error(err))
+		logger.Ctx(r.Context()).Warn("cdn: failed to stream upload-url transform", logger.Error(err))
 	}
 	return nil
 }
 
-func (c *CDN) generateUploadURLWebP(ctx context.Context, staged *stagedUploadURLImage) error {
+func (c *CDN) generateUploadURLTransform(ctx context.Context, staged *stagedUploadURLImage, p Params) error {
 	if c.mediaEngine == "" {
 		return errors.New("media-engine path is not configured")
 	}
@@ -586,7 +670,6 @@ func (c *CDN) generateUploadURLWebP(ctx context.Context, staged *stagedUploadURL
 		return errors.New("media-engine semaphore is not configured")
 	}
 
-	p := Params{Chain: "f_webp", Format: "webp", Quality: uploadURLWebPQuality}
 	p.Defaults()
 	if err := p.Validate(); err != nil {
 		return err
@@ -636,12 +719,25 @@ func serveStagedUploadURLOriginal(w http.ResponseWriter, r *http.Request, staged
 
 func uploadURLWantsOriginal(query url.Values) bool {
 	format := strings.ToLower(strings.TrimSpace(query.Get("format")))
+	if format == "" {
+		format = strings.ToLower(strings.TrimSpace(query.Get("f")))
+	}
 	return format == "original" || format == "source"
+}
+
+func uploadURLShouldTransform(parsed imageParamResult, mimeType string) bool {
+	if parsed.original || !isUploadURLTransformableMIME(mimeType) {
+		return false
+	}
+	if parsed.explicit {
+		return true
+	}
+	return strings.ToLower(parsed.params.Format) != mimeTypeToFormat(strings.ToLower(strings.TrimSpace(mimeType)))
 }
 
 func isUploadURLTransformableMIME(mimeType string) bool {
 	switch strings.ToLower(strings.TrimSpace(mimeType)) {
-	case "image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp":
+	case "image/avif", "image/gif", "image/heic", "image/heif", "image/jpeg", "image/jxl", "image/png", "image/tiff", "image/webp":
 		return true
 	default:
 		return false
@@ -710,8 +806,14 @@ func imageMIMEForStorageKey(key string) string {
 		return "image/avif"
 	case ".gif":
 		return "image/gif"
+	case ".heic":
+		return "image/heic"
+	case ".heif":
+		return "image/heif"
 	case ".jpg", ".jpeg":
 		return "image/jpeg"
+	case ".jxl":
+		return "image/jxl"
 	case ".png":
 		return "image/png"
 	case ".tif", ".tiff":
@@ -734,7 +836,7 @@ func responseImageMIME(header string, head []byte) string {
 		mimeType = strings.ToLower(http.DetectContentType(head))
 	}
 	switch mimeType {
-	case "image/avif", "image/gif", "image/jpeg", "image/png", "image/tiff", "image/webp":
+	case "image/avif", "image/gif", "image/heic", "image/heif", "image/jpeg", "image/jxl", "image/png", "image/tiff", "image/webp":
 		return mimeType
 	default:
 		return ""

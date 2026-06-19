@@ -91,7 +91,16 @@ func (c *CDN) CheckMediaEngine() error {
 // CORS are provided by the shared web server, so they are not registered here.
 func (c *CDN) RegisterRoutes(r chi.Router) {
 	r.Get("/upload", c.serveUploadURL)
+	r.Get("/upload/plan", c.uploadPlan)
+	r.Get("/upload/responsive", c.uploadResponsive)
+	r.Get("/upload/variants", c.uploadVariants)
+	r.Get("/capabilities", c.capabilities)
 	r.Get("/files/{id}", c.serveFile)
+	r.Get("/images/{id}/analyze", c.imageAnalyze)
+	r.Get("/images/{id}/info", c.imageInfo)
+	r.Get("/images/{id}/plan", c.imagePlan)
+	r.Get("/images/{id}/responsive", c.imageResponsive)
+	r.Get("/images/{id}/variants", c.imageVariants)
 	r.Get("/images/{id}", c.serveTransformed)
 	r.Get("/videos/info", c.videoInfo)
 
@@ -104,5 +113,10 @@ func (c *CDN) RegisterRoutes(r chi.Router) {
 	r.Group(func(gr chi.Router) {
 		gr.Use(c.apiKeyAuth)
 		gr.Post("/upload", c.upload)
+		gr.Post("/purge", c.purgeControl)
+		gr.Post("/sign", c.signDelivery)
+		gr.MethodFunc("PURGE", "/upload", c.purgeUploadURL)
+		gr.MethodFunc("PURGE", "/files/{id}", c.purgeFileVariants)
+		gr.MethodFunc("PURGE", "/images/{id}", c.purgeFileVariants)
 	})
 }

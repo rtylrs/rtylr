@@ -7,10 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -168,54 +166,28 @@ func (c *CDN) stageOriginal(ctx context.Context, originalStorageKey string) (inP
 // serveTransformed handles GET /images/{id}?w=&h=&fit=&format=&q=&t=
 // where t= is an optional Cloudinary-style transformation chain.
 func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
+	if !c.validateSignedDelivery(w, r) {
+		return
+	}
+
 	fileUUID := chi.URLParam(r, "id")
 	if fileUUID == "" {
 		http.Error(w, "missing image id", http.StatusBadRequest)
 		return
 	}
 
-	// An explicit ?format= wins; otherwise negotiate from the Accept header so
-	// modern clients get AVIF/WebP. The response varies on Accept accordingly.
-	query := r.URL.Query()
-	format := query.Get("format")
-	if format == "" {
-		if negotiated := negotiateFormat(r.Header.Get("Accept")); negotiated != "" {
-			format = negotiated
-			w.Header().Set("Vary", "Accept")
-		}
-	}
-
-	p := Params{
-		Width:   queryInt(query, "w"),
-		Height:  queryInt(query, "h"),
-		Fit:     query.Get("fit"),
-		Format:  format,
-		Quality: queryInt(query, "q"),
-	}
-
-	// ?t= carries a Cloudinary-style transformation chain (e.g.
-	// "w_400,c_fill,g_auto/e_blur:300"). When present it drives the transform,
-	// and any f_/q_ inside it sets the output format/quality the CDN serves.
-	if chain := query.Get("t"); chain != "" {
-		p.Chain = chain
-		chainFmt, chainQ := parseChainParams(chain)
-		if chainFmt != "" && chainFmt != "auto" {
-			p.Format = chainFmt
-		} else if p.Format == "" || p.Format == "auto" {
-			p.Format = "webp"
-		}
-		if chainQ > 0 {
-			p.Quality = chainQ
-		}
-	}
-
-	// Validate the request before touching the DB so malformed query params
-	// fail fast with a 400 instead of a 500 from deep in transform().
-	p.Defaults()
-	if err := p.Validate(); err != nil {
+	parsed, err := parseImageParams(r.URL.Query(), r.Header.Get("Accept"), imageParamOptions{
+		negotiateDefault: true,
+	})
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if parsed.original {
+		http.Redirect(w, r, c.fileURL(fileUUID), http.StatusTemporaryRedirect)
+		return
+	}
+	p := parsed.params
 
 	meta, err := c.fileByUUID(r.Context(), fileUUID)
 	if err != nil {
@@ -235,6 +207,7 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("ETag", etag)
 	w.Header().Set("Content-Type", mimeForFormat(p.Format))
 	w.Header().Set("Cache-Control", immutableCacheControl)
+	setImageVariantHeaders(w, p, parsed.varyAccept, "cdn-file-"+meta.FileUUID, parsed.surrogateKey)
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)
 		return
@@ -259,16 +232,4 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(w, reader); err != nil {
 		logger.Ctx(r.Context()).Warn("cdn: failed to stream transformation", logger.Error(err))
 	}
-}
-
-func queryInt(query url.Values, key string) int {
-	v := query.Get(key)
-	if v == "" {
-		return 0
-	}
-	n, err := strconv.Atoi(v)
-	if err != nil {
-		return 0
-	}
-	return n
 }

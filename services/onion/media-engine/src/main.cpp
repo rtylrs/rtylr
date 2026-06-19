@@ -164,7 +164,7 @@ static void cmdTransform(const Args& args) {
     for (const auto& step : voxire::transform::splitSteps(chain)) {
         auto p = voxire::transform::parseParams(step);
         if (p.count("f")) enc.format = voxire::parseOutputFormat(p["f"]);
-        if (p.count("q")) enc.quality = std::stoi(p["q"]);
+        if (p.count("q") && p["q"].rfind("auto", 0) != 0) enc.quality = std::stoi(p["q"]);
     }
     const std::string fmtFlag = getStr(args, "format");
     if (!fmtFlag.empty()) enc.format = voxire::parseOutputFormat(fmtFlag);

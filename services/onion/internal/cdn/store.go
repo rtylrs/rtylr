@@ -118,3 +118,48 @@ func (c *CDN) insertTransformation(ctx context.Context, fileID int64, cacheKey, 
 	}
 	return nil
 }
+
+func (c *CDN) transformationStorageKeysByFileUUID(ctx context.Context, fileUUID string) ([]string, error) {
+	rows, err := c.db.QueryContext(ctx,
+		`SELECT t.storage_key
+		   FROM cdn_transformations t
+		   JOIN cdn_files f ON f.id = t.file_id
+		  WHERE f.file_uuid = ?`,
+		fileUUID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("listing cdn transformations: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	keys := []string{}
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, fmt.Errorf("scanning cdn transformation key: %w", err)
+		}
+		keys = append(keys, key)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating cdn transformation keys: %w", err)
+	}
+	return keys, nil
+}
+
+func (c *CDN) deleteTransformationsByFileUUID(ctx context.Context, fileUUID string) (int64, error) {
+	res, err := c.db.ExecContext(ctx,
+		`DELETE t
+		   FROM cdn_transformations t
+		   JOIN cdn_files f ON f.id = t.file_id
+		  WHERE f.file_uuid = ?`,
+		fileUUID,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("deleting cdn transformations: %w", err)
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("reading deleted transformation count: %w", err)
+	}
+	return rows, nil
+}

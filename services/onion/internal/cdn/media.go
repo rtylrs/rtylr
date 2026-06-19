@@ -18,7 +18,10 @@ var allowedUploadMIMETypes = map[string]bool{
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
 	"image/avif":      true,
 	"image/gif":       true,
+	"image/heic":      true,
+	"image/heif":      true,
 	"image/jpeg":      true,
+	"image/jxl":       true,
 	"image/png":       true,
 	"image/tiff":      true,
 	"image/webp":      true,
@@ -46,6 +49,14 @@ func extensionForFormat(format string) string {
 		return ".avif"
 	case "gif":
 		return ".gif"
+	case "heic":
+		return ".heic"
+	case "heif":
+		return ".heif"
+	case "jxl", "jpegxl":
+		return ".jxl"
+	case "tiff", "tif":
+		return ".tiff"
 	default:
 		return "." + format
 	}
@@ -64,6 +75,14 @@ func mimeForFormat(format string) string {
 		return "image/avif"
 	case "gif":
 		return "image/gif"
+	case "heic":
+		return "image/heic"
+	case "heif":
+		return "image/heif"
+	case "jxl", "jpegxl":
+		return "image/jxl"
+	case "tiff", "tif":
+		return "image/tiff"
 	default:
 		return "application/octet-stream"
 	}
@@ -100,6 +119,12 @@ func mimeTypeToFormat(mime string) string {
 		return "gif"
 	case "image/avif":
 		return "avif"
+	case "image/heic":
+		return "heic"
+	case "image/heif":
+		return "heif"
+	case "image/jxl":
+		return "jxl"
 	case "image/tiff":
 		return "tiff"
 	case "video/mp4":
@@ -163,7 +188,9 @@ func parseChainParams(chain string) (format string, quality int) {
 			case strings.HasPrefix(tok, "f_"):
 				format = tok[2:]
 			case strings.HasPrefix(tok, "q_"):
-				if q, err := strconv.Atoi(tok[2:]); err == nil {
+				if q, ok := autoQuality(tok[2:]); ok {
+					quality = q
+				} else if q, err := strconv.Atoi(tok[2:]); err == nil {
 					quality = q
 				}
 			}
@@ -191,7 +218,7 @@ const maxPixelArea int64 = 24_000_000
 // allowedOutputFormat reports whether fmt is an encoder the CDN serves.
 func allowedOutputFormat(format string) bool {
 	switch strings.ToLower(format) {
-	case "webp", "jpeg", "jpg", "png", "avif":
+	case "webp", "jpeg", "jpg", "png", "avif", "gif", "tiff", "tif":
 		return true
 	default:
 		return false
@@ -209,9 +236,25 @@ func allowedFitMode(fit string) bool {
 
 // Validate returns an error if parameters are out of acceptable range.
 func (p *Params) Validate() error {
+	if p.Width < 0 || p.Width > 8000 {
+		return fmt.Errorf("width must be between 0 and 8000")
+	}
+	if p.Height < 0 || p.Height > 8000 {
+		return fmt.Errorf("height must be between 0 and 8000")
+	}
+	if p.Width > 0 && p.Height > 0 && int64(p.Width)*int64(p.Height) > maxPixelArea {
+		return fmt.Errorf("requested dimensions exceed the %d pixel limit", maxPixelArea)
+	}
+
 	// Chain mode: geometry/effects live in the chain string; only the output
 	// format and quality are validated here (the engine validates the rest).
 	if p.Chain != "" {
+		if len(p.Chain) > 2048 {
+			return fmt.Errorf("transformation chain is too long")
+		}
+		if strings.ContainsAny(p.Chain, "\x00\r\n") {
+			return fmt.Errorf("transformation chain contains invalid characters")
+		}
 		if p.Quality < 1 || p.Quality > 100 {
 			return fmt.Errorf("quality must be between 1 and 100")
 		}
@@ -220,21 +263,12 @@ func (p *Params) Validate() error {
 		}
 		return nil
 	}
-	if p.Width < 0 || p.Width > 8000 {
-		return fmt.Errorf("width must be between 0 and 8000")
-	}
-	if p.Height < 0 || p.Height > 8000 {
-		return fmt.Errorf("height must be between 0 and 8000")
-	}
 	if p.Width == 0 && p.Height == 0 {
 		return fmt.Errorf("at least one of width or height must be specified")
 	}
 	// Cap the output area independently of the per-dimension limits: 8000x8000
 	// is within bounds but would allocate ~256 MB of pixels. 24 MP comfortably
 	// covers any real display while bounding memory.
-	if p.Width > 0 && p.Height > 0 && int64(p.Width)*int64(p.Height) > maxPixelArea {
-		return fmt.Errorf("requested dimensions exceed the %d pixel limit", maxPixelArea)
-	}
 	if p.Quality < 1 || p.Quality > 100 {
 		return fmt.Errorf("quality must be between 1 and 100")
 	}

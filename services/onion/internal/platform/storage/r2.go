@@ -262,6 +262,47 @@ func (c *Client) Exists(ctx context.Context, key string) (bool, error) {
 	return true, nil
 }
 
+// Delete removes one object from storage. Missing objects are treated as a
+// successful delete by S3, which is what CDN cache invalidation wants.
+func (c *Client) Delete(ctx context.Context, key string) error {
+	_, err := c.s3.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return fmt.Errorf("deleting object key=%s: %w", key, err)
+	}
+	return nil
+}
+
+// DeletePrefix removes every object under prefix. It is intentionally simple:
+// CDN purges are rare control-plane actions, so correctness and easy retrying
+// matter more than maximum delete throughput.
+func (c *Client) DeletePrefix(ctx context.Context, prefix string) (int, error) {
+	pager := s3.NewListObjectsV2Paginator(c.s3, &s3.ListObjectsV2Input{
+		Bucket: aws.String(c.bucket),
+		Prefix: aws.String(prefix),
+	})
+
+	deleted := 0
+	for pager.HasMorePages() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return deleted, fmt.Errorf("listing prefix=%s: %w", prefix, err)
+		}
+		for _, obj := range page.Contents {
+			if obj.Key == nil {
+				continue
+			}
+			if err := c.Delete(ctx, *obj.Key); err != nil {
+				return deleted, err
+			}
+			deleted++
+		}
+	}
+	return deleted, nil
+}
+
 // Bucket exposes the configured bucket name for callers that need to
 // log or report it. Not used for signing (the client already holds it).
 func (c *Client) Bucket() string {
