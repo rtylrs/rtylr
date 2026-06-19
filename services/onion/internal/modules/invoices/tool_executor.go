@@ -18,6 +18,7 @@ import (
 
 const (
 	listInvoicesToolName            = "finance.list_invoices"
+	getInvoiceToolName              = "finance.get_invoice"
 	createInvoiceToolName           = "finance.create_invoice"
 	recordPaymentToolName           = "finance.record_payment"
 	sendInvoiceToolName             = "finance.send_invoice"
@@ -38,6 +39,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	switch name {
 	case listInvoicesToolName:
 		output, err := m.executeListInvoicesTool(ctx, input)
+		return output, true, err
+	case getInvoiceToolName:
+		output, err := m.executeGetInvoiceTool(ctx, input)
 		return output, true, err
 	case createInvoiceToolName:
 		output, err := m.executeCreateInvoiceTool(ctx, input)
@@ -91,6 +95,32 @@ func (m *Module) executeListInvoicesTool(ctx context.Context, input map[string]a
 			"date_from": parsed.DateFrom,
 			"date_to":   parsed.DateTo,
 		},
+	}, nil
+}
+
+func (m *Module) executeGetInvoiceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
+	invoiceID, err := parseGetInvoiceToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	invoice, err := m.service.GetInvoice(ctx, businessID, invoiceID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"invoice": invoiceDetailToolPayload(*invoice),
 	}, nil
 }
 
@@ -271,6 +301,17 @@ func parseListInvoicesToolInput(input map[string]any) (listInvoicesToolInput, er
 		Page:     page,
 		PageSize: pageSize,
 	}, nil
+}
+
+func parseGetInvoiceToolInput(input map[string]any) (int64, error) {
+	invoiceID, err := invoiceToolInt64(firstInvoiceToolValue(input, "invoice_id", "invoice", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid invoice_id: %w", err)
+	}
+	if invoiceID <= 0 {
+		return 0, errors.New("invoice_id is required")
+	}
+	return invoiceID, nil
 }
 
 func parseCreateInvoiceToolInput(input map[string]any, now time.Time) (domain.InvoiceInput, error) {
@@ -735,6 +776,68 @@ func invoiceToolPayload(invoice domain.Invoice) map[string]any {
 		"amount_paid":    invoice.AmountPaid,
 		"amount_due":     invoice.AmountDue,
 		"created_at":     invoice.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+}
+
+func invoiceDetailToolPayload(invoice domain.Invoice) map[string]any {
+	items := make([]map[string]any, 0, len(invoice.Items))
+	for _, item := range invoice.Items {
+		items = append(items, map[string]any{
+			"id":           item.ID,
+			"invoice_id":   item.InvoiceID,
+			"description":  item.Description,
+			"quantity":     item.Quantity,
+			"unit":         item.Unit,
+			"unit_price":   item.UnitPrice,
+			"tax_rate":     item.TaxRate,
+			"discount_pct": item.DiscountPct,
+			"total":        item.Total,
+			"sort_order":   item.SortOrder,
+		})
+	}
+
+	payments := make([]map[string]any, 0, len(invoice.Payments))
+	for _, payment := range invoice.Payments {
+		payments = append(payments, map[string]any{
+			"id":           payment.ID,
+			"invoice_id":   payment.InvoiceID,
+			"amount":       payment.Amount,
+			"currency":     payment.Currency,
+			"payment_date": payment.PaymentDate.Format("2006-01-02"),
+			"method":       payment.Method,
+			"reference":    payment.Reference,
+			"notes":        payment.Notes,
+			"created_at":   payment.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+
+	return map[string]any{
+		"id":              invoice.ID,
+		"invoice_number":  invoice.InvoiceNumber,
+		"client_name":     invoice.ClientName,
+		"client_email":    invoice.ClientEmail,
+		"client_address":  invoice.ClientAddress,
+		"client_tax_id":   invoice.ClientTaxID,
+		"status":          invoice.Status,
+		"issue_date":      invoice.IssueDate.Format("2006-01-02"),
+		"due_date":        invoice.DueDate.Format("2006-01-02"),
+		"paid_date":       formatInvoiceToolOptionalDate(invoice.PaidDate),
+		"currency":        invoice.Currency,
+		"subtotal":        invoice.Subtotal,
+		"discount_type":   invoice.DiscountType,
+		"discount_value":  invoice.DiscountValue,
+		"discount_amount": invoice.DiscountAmount,
+		"tax_rate":        invoice.TaxRate,
+		"tax_amount":      invoice.TaxAmount,
+		"total":           invoice.Total,
+		"amount_paid":     invoice.AmountPaid,
+		"amount_due":      invoice.AmountDue,
+		"notes":           invoice.Notes,
+		"terms":           invoice.Terms,
+		"created_at":      invoice.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		"updated_at":      invoice.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		"items":           items,
+		"payments":        payments,
 	}
 }
 

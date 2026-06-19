@@ -123,6 +123,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"flow.get_team_workload [read]",
 		"flow.get_roadmap [read]",
 		"finance.list_invoices [read]",
+		"finance.get_invoice [read]",
 		"finance.get_balance_sheet [read]",
 		"finance.get_cash_flow_report [read]",
 		"finance.list_expenses [read]",

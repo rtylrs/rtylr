@@ -71,6 +71,29 @@ func TestParseListInvoicesToolInputRejectsInvalidDateRange(t *testing.T) {
 	}
 }
 
+func TestParseGetInvoiceToolInputAcceptsAliases(t *testing.T) {
+	for _, input := range []map[string]any{
+		{"invoice_id": "42"},
+		{"invoice": 42},
+		{"id": float64(42)},
+	} {
+		invoiceID, err := parseGetInvoiceToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetInvoiceToolInput(%v) returned error: %v", input, err)
+		}
+		if invoiceID != 42 {
+			t.Fatalf("invoiceID = %d, want 42", invoiceID)
+		}
+	}
+}
+
+func TestParseGetInvoiceToolInputRejectsMissingInvoice(t *testing.T) {
+	_, err := parseGetInvoiceToolInput(map[string]any{"client_name": "Maya Haddad"})
+	if err == nil || !strings.Contains(err.Error(), "invoice_id") {
+		t.Fatalf("error = %v, want invoice_id validation", err)
+	}
+}
+
 func TestInvoiceToolPayload(t *testing.T) {
 	paidDate := time.Date(2026, 6, 19, 9, 0, 0, 0, time.UTC)
 	payload := invoiceToolPayload(domain.Invoice{
@@ -95,6 +118,56 @@ func TestInvoiceToolPayload(t *testing.T) {
 	}
 	if payload["created_at"] != "2026-06-01T10:00:00Z" {
 		t.Fatalf("created_at = %v, want formatted timestamp", payload["created_at"])
+	}
+}
+
+func TestInvoiceDetailToolPayloadIncludesItemsAndPayments(t *testing.T) {
+	paidDate := time.Date(2026, 6, 19, 9, 0, 0, 0, time.UTC)
+	payload := invoiceDetailToolPayload(domain.Invoice{
+		ID:             42,
+		InvoiceNumber:  "INV-2026-0042",
+		ClientName:     "Maya Haddad",
+		ClientEmail:    "maya@example.com",
+		Status:         domain.StatusPartial,
+		IssueDate:      time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC),
+		DueDate:        time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC),
+		PaidDate:       &paidDate,
+		Currency:       "USD",
+		Subtotal:       200,
+		DiscountAmount: 10,
+		TaxAmount:      5,
+		Total:          195,
+		AmountPaid:     100,
+		AmountDue:      95,
+		Items: []domain.InvoiceItem{
+			{ID: 7, InvoiceID: 42, Description: "Monthly support", Quantity: 2, Unit: "hour", UnitPrice: 100, DiscountPct: 5, Total: 190},
+		},
+		Payments: []domain.Payment{
+			{ID: 9, InvoiceID: 42, Amount: 100, Currency: "USD", PaymentDate: paidDate, Method: domain.PaymentMethodCard, Reference: "TX-123", CreatedAt: paidDate},
+		},
+		CreatedAt: time.Date(2026, 6, 1, 10, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 6, 2, 11, 0, 0, 0, time.UTC),
+	})
+
+	if payload["client_email"] != "maya@example.com" {
+		t.Fatalf("client_email = %v", payload["client_email"])
+	}
+	if payload["amount_due"] != 95.0 {
+		t.Fatalf("amount_due = %v", payload["amount_due"])
+	}
+	items, ok := payload["items"].([]map[string]any)
+	if !ok {
+		t.Fatalf("items type = %T", payload["items"])
+	}
+	if len(items) != 1 || items[0]["description"] != "Monthly support" {
+		t.Fatalf("items = %#v", items)
+	}
+	payments, ok := payload["payments"].([]map[string]any)
+	if !ok {
+		t.Fatalf("payments type = %T", payload["payments"])
+	}
+	if len(payments) != 1 || payments[0]["reference"] != "TX-123" {
+		t.Fatalf("payments = %#v", payments)
 	}
 }
 
