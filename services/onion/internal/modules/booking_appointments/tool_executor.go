@@ -16,7 +16,16 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
-const appointmentCacheScope = "booking_appointments"
+const (
+	appointmentCacheScope     = "booking_appointments"
+	createAppointmentToolName = "booking.create_appointment"
+	listAppointmentsToolName  = "booking.list_appointments"
+)
+
+type listAppointmentsToolInput struct {
+	Status string
+	Today  bool
+}
 
 var validAppointmentStatuses = map[string]struct{}{
 	"pending":     {},
@@ -28,11 +37,55 @@ var validAppointmentStatuses = map[string]struct{}{
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != "booking.create_appointment" {
+	switch name {
+	case listAppointmentsToolName:
+		output, err := m.executeListAppointmentsTool(ctx, input)
+		return output, true, err
+	case createAppointmentToolName:
+		output, err := m.executeCreateAppointmentTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateAppointmentTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListAppointmentsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListAppointmentsToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	var appointments []domain.Appointment
+	if parsed.Today {
+		appointments, err = m.service.ListToday(ctx, authUser.UserID)
+	} else {
+		appointments, err = m.service.List(ctx, authUser.UserID)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(appointments))
+	for _, appointment := range appointments {
+		if parsed.Status != "" && appointment.Status != parsed.Status {
+			continue
+		}
+		payloads = append(payloads, appointmentToolPayload(appointment))
+	}
+
+	return map[string]any{
+		"appointments": payloads,
+		"returned":     len(payloads),
+		"filters": map[string]any{
+			"status": parsed.Status,
+			"today":  parsed.Today,
+		},
+	}, nil
 }
 
 func (m *Module) executeCreateAppointmentTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -139,6 +192,23 @@ func parseCreateAppointmentToolInput(input map[string]any) (domain.AppointmentIn
 	}, nil
 }
 
+func parseListAppointmentsToolInput(input map[string]any) (listAppointmentsToolInput, error) {
+	status := normalizeAppointmentStatusFilter(input["status"])
+	if strings.TrimSpace(appointmentToolString(input["status"])) != "" && status == "" {
+		return listAppointmentsToolInput{}, errors.New("status must be one of pending, confirmed, in_progress, completed, cancelled, or no_show")
+	}
+
+	today, err := appointmentToolBool(firstAppointmentToolValue(input, "today", "is_today"), false)
+	if err != nil {
+		return listAppointmentsToolInput{}, fmt.Errorf("invalid today: %w", err)
+	}
+
+	return listAppointmentsToolInput{
+		Status: status,
+		Today:  today,
+	}, nil
+}
+
 func appointmentToolEndTime(input map[string]any, startTime time.Time) (time.Time, error) {
 	endTime, err := appointmentToolTime(input["end_time"])
 	if err != nil {
@@ -162,6 +232,19 @@ func appointmentToolEndTime(input map[string]any, startTime time.Time) (time.Tim
 	return startTime.Add(time.Duration(durationMinutes * float64(time.Minute))), nil
 }
 
+func normalizeAppointmentStatusFilter(value any) string {
+	status := strings.ToLower(strings.TrimSpace(appointmentToolString(value)))
+	if status == "" {
+		return ""
+	}
+	status = strings.ReplaceAll(status, "-", "_")
+	status = strings.ReplaceAll(status, " ", "_")
+	if _, ok := validAppointmentStatuses[status]; ok {
+		return status
+	}
+	return ""
+}
+
 func normalizeAppointmentStatus(value any) string {
 	status := strings.ToLower(strings.TrimSpace(appointmentToolString(value)))
 	if status == "" {
@@ -173,6 +256,38 @@ func normalizeAppointmentStatus(value any) string {
 		return status
 	}
 	return ""
+}
+
+func appointmentToolPayload(appointment domain.Appointment) map[string]any {
+	return map[string]any{
+		"id":             appointment.ID,
+		"service_id":     appointment.ServiceID,
+		"resource_id":    appointment.ResourceID,
+		"staff_id":       appointment.StaffID,
+		"customer_name":  appointment.CustomerName,
+		"customer_email": appointment.CustomerEmail,
+		"customer_phone": appointment.CustomerPhone,
+		"start_time":     appointmentToolFormatTime(appointment.StartTime),
+		"end_time":       appointmentToolFormatTime(appointment.EndTime),
+		"status":         appointment.Status,
+		"notes":          appointment.Notes,
+		"created_at":     appointmentToolFormatTime(appointment.CreatedAt),
+		"updated_at":     appointmentToolFormatTime(appointment.UpdatedAt),
+	}
+}
+
+func firstAppointmentToolValue(input map[string]any, keys ...string) any {
+	for _, key := range keys {
+		value, ok := input[key]
+		if !ok || value == nil {
+			continue
+		}
+		if s, ok := value.(string); ok && strings.TrimSpace(s) == "" {
+			continue
+		}
+		return value
+	}
+	return nil
 }
 
 func appointmentToolTime(value any) (time.Time, error) {
@@ -195,6 +310,43 @@ func appointmentToolTime(value any) (time.Time, error) {
 		return time.Time{}, errors.New("must be RFC3339")
 	default:
 		return time.Time{}, fmt.Errorf("unsupported value %T", value)
+	}
+}
+
+func appointmentToolBool(value any, defaultValue bool) (bool, error) {
+	switch v := value.(type) {
+	case nil:
+		return defaultValue, nil
+	case bool:
+		return v, nil
+	case json.Number:
+		n, err := strconv.ParseInt(v.String(), 10, 64)
+		if err != nil {
+			return false, err
+		}
+		switch n {
+		case 0:
+			return false, nil
+		case 1:
+			return true, nil
+		default:
+			return false, errors.New("must be true or false")
+		}
+	case string:
+		raw := strings.ToLower(strings.TrimSpace(v))
+		if raw == "" {
+			return defaultValue, nil
+		}
+		switch raw {
+		case "true", "t", "yes", "y", "1", "today":
+			return true, nil
+		case "false", "f", "no", "n", "0":
+			return false, nil
+		default:
+			return false, errors.New("must be true or false")
+		}
+	default:
+		return false, fmt.Errorf("unsupported value %T", value)
 	}
 }
 
@@ -277,6 +429,13 @@ func appointmentToolString(value any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func appointmentToolFormatTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }
 
 func invalidateAppointmentToolCache(ctx context.Context, ownerID int64) {

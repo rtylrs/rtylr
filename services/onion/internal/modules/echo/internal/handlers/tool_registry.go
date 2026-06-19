@@ -51,10 +51,12 @@ var CoreTools = []ToolDef{
 	{Name: "finance.create_invoice", Description: "Create a customer invoice.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.record_payment", Description: "Record a customer payment against an invoice.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.send_invoice", Description: "Send a customer invoice and mark it sent.", Module: "finance", Scope: "write", RequiresApproval: true},
+	{Name: "booking.list_appointments", Description: "List booking appointments, optionally today's appointments.", Module: "booking", Scope: "read"},
 	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
 }
 
 var promptExecutableTools = map[string]struct{}{
+	"booking.list_appointments":       {},
 	"booking.create_appointment":      {},
 	"crm.list_customers":              {},
 	"crm.create_customer":             {},

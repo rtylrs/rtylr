@@ -3,6 +3,9 @@ package booking_appointments
 import (
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 )
 
 func TestParseCreateAppointmentToolInput(t *testing.T) {
@@ -114,5 +117,59 @@ func TestParseCreateAppointmentToolInputRejectsBadStatus(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "status") {
 		t.Fatalf("error = %v, want status validation", err)
+	}
+}
+
+func TestParseListAppointmentsToolInput(t *testing.T) {
+	parsed, err := parseListAppointmentsToolInput(map[string]any{
+		"status": "in progress",
+		"today":  "yes",
+	})
+	if err != nil {
+		t.Fatalf("parseListAppointmentsToolInput returned error: %v", err)
+	}
+	if parsed.Status != "in_progress" {
+		t.Fatalf("Status = %q, want in_progress", parsed.Status)
+	}
+	if !parsed.Today {
+		t.Fatal("Today = false, want true")
+	}
+}
+
+func TestParseListAppointmentsToolInputRejectsBadStatus(t *testing.T) {
+	_, err := parseListAppointmentsToolInput(map[string]any{"status": "ready"})
+	if err == nil || !strings.Contains(err.Error(), "status") {
+		t.Fatalf("error = %v, want status validation", err)
+	}
+}
+
+func TestAppointmentToolPayloadFormatsFields(t *testing.T) {
+	startTime := time.Date(2026, 7, 15, 10, 0, 0, 0, time.UTC)
+	endTime := time.Date(2026, 7, 15, 10, 45, 0, 0, time.UTC)
+	createdAt := time.Date(2026, 6, 18, 13, 30, 0, 0, time.FixedZone("EEST", 3*60*60))
+	payload := appointmentToolPayload(domain.Appointment{
+		ID:            11,
+		ServiceID:     42,
+		ResourceID:    7,
+		StaffID:       9,
+		CustomerName:  "Maya Haddad",
+		CustomerEmail: "maya@example.com",
+		StartTime:     startTime,
+		EndTime:       endTime,
+		Status:        "confirmed",
+		CreatedAt:     createdAt,
+	})
+
+	if payload["id"] != int64(11) {
+		t.Fatalf("id = %v", payload["id"])
+	}
+	if payload["customer_name"] != "Maya Haddad" {
+		t.Fatalf("customer_name = %v", payload["customer_name"])
+	}
+	if payload["start_time"] != "2026-07-15T10:00:00Z" {
+		t.Fatalf("start_time = %v", payload["start_time"])
+	}
+	if payload["created_at"] != "2026-06-18T10:30:00Z" {
+		t.Fatalf("created_at = %v", payload["created_at"])
 	}
 }

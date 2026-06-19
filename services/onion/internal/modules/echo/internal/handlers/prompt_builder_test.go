@@ -59,6 +59,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"finance.list_expenses [read]",
 		"finance.list_expense_categories [read]",
 		"finance.list_bills [read]",
+		"booking.list_appointments [read]",
 		"crm.create_customer [write, approval required]",
 		"Structured stream controls:",
 		`<tool>{"name":"tool.name","input":{}}</tool>`,
