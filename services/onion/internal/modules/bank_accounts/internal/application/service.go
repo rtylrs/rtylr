@@ -47,6 +47,19 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.BankAcco
 	)
 }
 
+func (s *Service) GetByID(ctx context.Context, businessID, bankAccountID int64) (domain.BankAccount, error) {
+	accounts, err := s.List(ctx, businessID)
+	if err != nil {
+		return domain.BankAccount{}, err
+	}
+	for _, account := range accounts {
+		if account.ID == bankAccountID {
+			return account, nil
+		}
+	}
+	return domain.BankAccount{}, domain.ErrBankAccountNotFound
+}
+
 func (s *Service) Create(ctx context.Context, businessID int64, input domain.BankAccountInput) (int64, error) {
 	id, err := s.repo.Create(ctx, businessID, input)
 	if err != nil {

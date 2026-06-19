@@ -105,6 +105,28 @@ func TestList_MultipleAccounts(t *testing.T) {
 	}
 }
 
+func TestGetByID_ReturnsMatchingAccount(t *testing.T) {
+	accounts := []domain.BankAccount{
+		{ID: 1, Name: "Operating"},
+		{ID: 2, Name: "Savings"},
+	}
+	s := &Service{repo: &mockRepo{listResult: accounts}}
+	got, err := s.GetByID(context.Background(), 1001, 2)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if got.Name != "Savings" {
+		t.Errorf("expected Savings, got %+v", got)
+	}
+}
+
+func TestGetByID_NotFound(t *testing.T) {
+	s := &Service{repo: &mockRepo{listResult: []domain.BankAccount{{ID: 1, Name: "Operating"}}}}
+	if _, err := s.GetByID(context.Background(), 1002, 99); !errors.Is(err, domain.ErrBankAccountNotFound) {
+		t.Errorf("expected not found, got %v", err)
+	}
+}
+
 func TestCreate_ReturnsCorrectID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 55}}
 	id, err := s.Create(context.Background(), 1, domain.BankAccountInput{Name: "Checking"})

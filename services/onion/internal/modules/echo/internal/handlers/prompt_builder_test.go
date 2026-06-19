@@ -137,6 +137,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"finance.get_expense [read]",
 		"finance.list_expense_categories [read]",
 		"finance.list_bank_accounts [read]",
+		"finance.get_bank_account [read]",
 		"finance.get_bank_summary [read]",
 		"finance.list_bank_feed_transactions [read]",
 		"finance.get_reconciliation_overview [read]",
