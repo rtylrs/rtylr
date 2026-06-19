@@ -134,6 +134,11 @@ var CoreTools = []ToolDef{
 	{Name: "finance.send_invoice", Description: "Send a customer invoice and mark it sent.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "booking.list_appointments", Description: "List booking appointments, optionally today's appointments.", Module: "booking", Scope: "read"},
 	{Name: "booking.get_dashboard", Description: "Get booking dashboard counts, cancellation rate, and revenue.", Module: "booking", Scope: "read"},
+	{Name: "booking.get_calendar", Description: "Get booking calendar appointments over a date range.", Module: "booking", Scope: "read"},
+	{Name: "booking.list_services", Description: "List bookable services with duration and price.", Module: "booking", Scope: "read"},
+	{Name: "booking.list_resources", Description: "List bookable resources, rooms, and capacity.", Module: "booking", Scope: "read"},
+	{Name: "booking.list_waitlist", Description: "List booking waitlist entries.", Module: "booking", Scope: "read"},
+	{Name: "booking.list_reminders", Description: "List booking reminders and delivery state.", Module: "booking", Scope: "read"},
 	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
 	{Name: "pos.get_day_summary", Description: "Get POS sales, tax, tips, refunds, orders, and payments for a day.", Module: "pos", Scope: "read"},
 }
@@ -260,6 +265,11 @@ var promptExecutableTools = map[string]struct{}{
 	"support.list_articles":             {},
 	"hr.create_employee":                {},
 	"booking.get_dashboard":             {},
+	"booking.get_calendar":              {},
+	"booking.list_services":             {},
+	"booking.list_resources":            {},
+	"booking.list_waitlist":             {},
+	"booking.list_reminders":            {},
 }
 
 // ToolByName returns a registered tool definition by stable tool name.

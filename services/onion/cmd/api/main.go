@@ -484,6 +484,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	quotesModule := quotes.NewModule(ctx, dbclient.Pool())
 	bookingDashboardModule := bookingdashboard.NewModule(ctx, dbclient.Pool())
 	bookingAppointmentsModule := bookingappointments.NewModule(ctx, dbclient.Pool())
+	bookingCalendarModule := bookingcalendar.NewModule(ctx, dbclient.Pool())
+	bookingRemindersModule := bookingreminders.NewModule(ctx, dbclient.Pool())
+	bookingResourcesModule := bookingresources.NewModule(ctx, dbclient.Pool())
+	bookingServicesModule := bookingservices.NewModule(ctx, dbclient.Pool())
+	bookingWaitlistModule := bookingwaitlist.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool())
 	flowInsightsModule := flowinsights.NewModule(ctx, dbclient.Pool())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
@@ -511,12 +516,12 @@ func initializeModules(ctx context.Context) *apiModules {
 		Subscriptions:         subscriptions.NewModule(ctx, dbclient.Pool()),
 		Bills:                 billsModule,
 		BookingAppointments:   bookingAppointmentsModule,
-		BookingCalendar:       bookingcalendar.NewModule(ctx, dbclient.Pool()),
+		BookingCalendar:       bookingCalendarModule,
 		BookingDashboard:      bookingDashboardModule,
-		BookingReminders:      bookingreminders.NewModule(ctx, dbclient.Pool()),
-		BookingResources:      bookingresources.NewModule(ctx, dbclient.Pool()),
-		BookingServices:       bookingservices.NewModule(ctx, dbclient.Pool()),
-		BookingWaitlist:       bookingwaitlist.NewModule(ctx, dbclient.Pool()),
+		BookingReminders:      bookingRemindersModule,
+		BookingResources:      bookingResourcesModule,
+		BookingServices:       bookingServicesModule,
+		BookingWaitlist:       bookingWaitlistModule,
 		Brands:                brandsModule,
 		Business:              business.NewModule(ctx, dbclient.Pool()),
 		Campaigns:             campaignsModule,
@@ -532,7 +537,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, bookingCalendarModule, bookingRemindersModule, bookingResourcesModule, bookingServicesModule, bookingWaitlistModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
