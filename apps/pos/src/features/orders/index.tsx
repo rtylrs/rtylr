@@ -85,7 +85,7 @@ const OrdersScreen: React.FC = () => {
 
   return (
     <ScreenLayout title="Orders">
-      <div className="p-5 max-w-5xl space-y-4">
+      <div className="w-full p-5 space-y-4">
         {reopenMode && (
           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
             Manager override approved - select a paid order below to reopen it.
