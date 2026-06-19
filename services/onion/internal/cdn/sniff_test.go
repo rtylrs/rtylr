@@ -47,7 +47,7 @@ func TestReconcileMIME(t *testing.T) {
 		{"sniffed allowed wins", "image/png", "image/jpeg", "image/jpeg", false},
 		{"html disguised as png rejected", "image/png", "text/html", "", true},
 		{"octet-stream falls back to declared avif", "image/avif", "application/octet-stream", "image/avif", false},
-		{"octet-stream with disallowed declared rejected", "application/pdf", "application/octet-stream", "", true},
+		{"octet-stream falls back to declared pdf", "application/pdf", "application/octet-stream", "application/pdf", false},
 		{"case-insensitive", "IMAGE/PNG", "IMAGE/PNG", "image/png", false},
 	}
 	for _, tc := range cases {

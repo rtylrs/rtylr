@@ -292,7 +292,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		FlociBucket:   os.Getenv("FLOCI_BUCKET"),
 
 		// CDN runmode (cmd/upload)
-		CDNBaseURL:         envOrDefault("CDN_BASE_URL", "https://cdn.voxire.dev"),
+		CDNBaseURL:         envOrDefault("CDN_BASE_URL", "https://cdn.voxire.com"),
 		CDNMaxUploadBytes:  int64(envIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),

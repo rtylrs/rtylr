@@ -90,12 +90,14 @@ func (c *CDN) CheckMediaEngine() error {
 // upload endpoint is wrapped in the API-key middleware. /health, /metrics and
 // CORS are provided by the shared web server, so they are not registered here.
 func (c *CDN) RegisterRoutes(r chi.Router) {
+	r.Get("/upload", c.serveUploadURL)
 	r.Get("/files/{id}", c.serveFile)
 	r.Get("/images/{id}", c.serveTransformed)
 	r.Get("/videos/info", c.videoInfo)
 
 	// HEAD reuses the GET handlers — net/http discards the body for HEAD, so
 	// callers get Content-Type/ETag/Cache-Control without transferring bytes.
+	r.Head("/upload", c.serveUploadURL)
 	r.Head("/files/{id}", c.serveFile)
 	r.Head("/images/{id}", c.serveTransformed)
 
