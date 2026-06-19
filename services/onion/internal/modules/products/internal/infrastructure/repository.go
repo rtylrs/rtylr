@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/go-sql-driver/mysql"
@@ -32,7 +33,7 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, bool, error) {
 	qb := squirrel.Select(
-		"p.id", "p.owner_id", "p.category_id", "p.supplier_id", "p.name", "p.sku",
+		"p.id", "p.owner_id", "p.business_id", "p.category_id", "p.supplier_id", "p.name", "p.sku",
 		"p.barcode", "p.description", "p.unit", "p.cost_price", "p.sale_price",
 		"p.stock_quantity", "p.low_stock_threshold", "p.reorder_quantity", "p.is_active",
 		"p.track_inventory", "COALESCE(img.url, '') AS image_url", "p.created_at", "p.updated_at",
@@ -41,12 +42,12 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		LeftJoin(`erp_product_images img ON img.id = (
 			SELECT i.id
 			FROM erp_product_images i
-			WHERE i.owner_id = p.owner_id
+			WHERE i.business_id = p.business_id
 			  AND i.product_id = p.id
 			ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
 			LIMIT 1
 		)`).
-		Where(squirrel.Eq{"p.owner_id": ownerID}).
+		Where(squirrel.Eq{"p.business_id": ownerID}).
 		Where("TRIM(COALESCE(p.name, '')) <> ''")
 
 	if search != "" {
@@ -104,8 +105,8 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 
 func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.Product, error) {
 	row, err := r.queries.GetProduct(ctx, sqlc.GetProductParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: ownerID,
+		ID:         id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -126,7 +127,7 @@ func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.
 // so a barcode collision across tenants won't leak data.
 func (r *Repository) GetProductByBarcode(ctx context.Context, ownerID int64, barcode string) (domain.Product, error) {
 	row, err := r.queries.GetProductByBarcode(ctx, sqlc.GetProductByBarcodeParams{
-		OwnerID: ownerID,
+		BusinessID: ownerID,
 		// Match the exact string (including empty) to preserve the
 		// original `barcode = ?` semantics; never coerce to NULL.
 		Barcode: sql.NullString{String: barcode, Valid: true},
@@ -152,6 +153,7 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 	qtx := r.queries.WithTx(tx)
 	result, err := qtx.CreateProduct(ctx, sqlc.CreateProductParams{
 		OwnerID:           ownerID,
+		BusinessID:        ownerID,
 		CategoryID:        nullInt64(input.CategoryID),
 		SupplierID:        nullInt64(input.SupplierID),
 		Name:              input.Name,
@@ -199,6 +201,10 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		if err := r.applyProductStockTotal(ctx, tx, ownerID, id, 0, input.StockQuantity, stock_core.EntryOpening, "product opening stock"); err != nil {
 			return 0, err
 		}
+	}
+
+	if err := r.replacePrimaryProductImage(ctx, tx, ownerID, id, input.Name, input.ImageURL); err != nil {
+		return 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -252,7 +258,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
 		TrackInventory:    sql.NullBool{Bool: input.TrackInventory, Valid: true},
-		OwnerID:           ownerID,
+		BusinessID:        ownerID,
 		ID:                id,
 	})
 	if err != nil {
@@ -267,6 +273,12 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		}
 	}
 
+	if strings.TrimSpace(input.ImageURL) != "" {
+		if err := r.replacePrimaryProductImage(ctx, tx, ownerID, id, input.Name, input.ImageURL); err != nil {
+			return err
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		return err
 	}
@@ -274,10 +286,29 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 	return nil
 }
 
+func (r *Repository) replacePrimaryProductImage(ctx context.Context, tx *sql.Tx, ownerID, productID int64, alt, imageURL string) error {
+	imageURL = strings.TrimSpace(imageURL)
+	if _, err := tx.ExecContext(ctx,
+		`DELETE FROM erp_product_images WHERE business_id = ? AND product_id = ? AND is_primary = TRUE`,
+		ownerID, productID,
+	); err != nil {
+		return err
+	}
+	if imageURL == "" {
+		return nil
+	}
+	_, err := tx.ExecContext(ctx,
+		`INSERT INTO erp_product_images (owner_id, business_id, product_id, url, alt, position, is_primary)
+		 VALUES (?, ?, ?, ?, ?, 0, TRUE)`,
+		ownerID, ownerID, productID, imageURL, nullString(alt),
+	)
+	return err
+}
+
 func (r *Repository) lockProductStock(ctx context.Context, tx *sql.Tx, ownerID, productID int64) (float64, error) {
 	var stock string
 	if err := tx.QueryRowContext(ctx,
-		`SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE`,
+		`SELECT stock_quantity FROM erp_products WHERE business_id = ? AND id = ? FOR UPDATE`,
 		ownerID, productID).Scan(&stock); err != nil {
 		return 0, err
 	}
@@ -318,8 +349,8 @@ func (r *Repository) applyProductStockTotal(
 
 func (r *Repository) DeleteProduct(ctx context.Context, ownerID, id int64) error {
 	err := r.queries.DeleteProduct(ctx, sqlc.DeleteProductParams{
-		OwnerID: ownerID,
-		ID:      id,
+		BusinessID: ownerID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete product", logger.Error(err))
@@ -335,7 +366,7 @@ func (r *Repository) DeleteProduct(ctx context.Context, ownerID, id int64) error
 func (r *Repository) CountProducts(ctx context.Context, ownerID int64, categoryID int) (int64, error) {
 	qb := squirrel.Select("COUNT(*)").
 		From("erp_products").
-		Where(squirrel.Eq{"owner_id": ownerID})
+		Where(squirrel.Eq{"business_id": ownerID})
 
 	if categoryID > 0 {
 		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
@@ -360,6 +391,7 @@ func productFromRow(row sqlc.GetProductRow) domain.Product {
 	var p domain.Product
 	p.ID = row.ID
 	p.OwnerID = row.OwnerID
+	p.BusinessID = row.BusinessID
 	p.Name = row.Name
 
 	if row.CategoryID.Valid {
@@ -442,6 +474,7 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 	var p domain.Product
 	p.ID = row.ID
 	p.OwnerID = row.OwnerID
+	p.BusinessID = row.BusinessID
 	p.Name = row.Name
 
 	if row.CategoryID.Valid {
@@ -523,8 +556,8 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 // ListProductAttributes returns the custom attributes for a product, ordered.
 func (r *Repository) ListProductAttributes(ctx context.Context, ownerID, productID int64) ([]domain.ProductAttribute, error) {
 	rows, err := r.queries.ListProductAttributes(ctx, sqlc.ListProductAttributesParams{
-		OwnerID:   ownerID,
-		ProductID: productID,
+		BusinessID: ownerID,
+		ProductID:  productID,
 	})
 	if err != nil {
 		return nil, err
@@ -545,8 +578,8 @@ func (r *Repository) ListProductAttributes(ctx context.Context, ownerID, product
 // the given set (delete-then-insert). Blank-named entries are skipped.
 func (r *Repository) ReplaceProductAttributes(ctx context.Context, ownerID, productID int64, attrs []domain.ProductAttributeInput) error {
 	if err := r.queries.DeleteProductAttributes(ctx, sqlc.DeleteProductAttributesParams{
-		OwnerID:   ownerID,
-		ProductID: productID,
+		BusinessID: ownerID,
+		ProductID:  productID,
 	}); err != nil {
 		return err
 	}
@@ -555,11 +588,12 @@ func (r *Repository) ReplaceProductAttributes(ctx context.Context, ownerID, prod
 			continue
 		}
 		if err := r.queries.InsertProductAttribute(ctx, sqlc.InsertProductAttributeParams{
-			OwnerID:   ownerID,
-			ProductID: productID,
-			Name:      a.Name,
-			Value:     a.Value,
-			Position:  int32(i),
+			OwnerID:    ownerID,
+			BusinessID: ownerID,
+			ProductID:  productID,
+			Name:       a.Name,
+			Value:      a.Value,
+			Position:   int32(i),
 		}); err != nil {
 			return err
 		}

@@ -5,7 +5,14 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"net/http"
+	"os"
 	"strings"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/voxire/onion/internal/platform/config"
+	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 )
 
 // apiKeyAuth guards write endpoints. It accepts either:
@@ -14,6 +21,8 @@ import (
 //     callers / build steps), or
 //  2. any user's personal API key that carries the "upload" scope — created
 //     and managed in Dash, stored hashed in hub_api_keys.
+//  3. a normal signed app JWT, so browser apps can upload directly to the
+//     upload runmode without proxying bytes through the API runmode.
 //
 // When no shared key is configured the middleware is a no-op (local dev only),
 // preserving the historical "auth disabled if unset" behaviour. The user-key
@@ -40,8 +49,53 @@ func (c *CDN) apiKeyAuth(next http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			}
+
+			if validAppJWT(r, token) {
+				next.ServeHTTP(w, r)
+				return
+			}
 		}
 
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 	})
+}
+
+type uploadJWTClaims struct {
+	UserID         int64  `json:"user_id"`
+	BusinessID     int64  `json:"business_id,omitempty"`
+	Role           string `json:"role,omitempty"`
+	Platform       string `json:"platform,omitempty"`
+	PlatformUserID int64  `json:"platform_user_id,omitempty"`
+	PlanID         int64  `json:"plan_id,omitempty"`
+	jwt.RegisteredClaims
+}
+
+func (c *uploadJWTClaims) SetIssuer(issuer string) {
+	c.Issuer = issuer
+}
+
+func (c *uploadJWTClaims) SetExpiration(exp time.Time) {
+	c.ExpiresAt = jwt.NewNumericDate(exp)
+}
+
+func uploadJWTSecret() string {
+	if config.GlobalConfig != nil && config.GlobalConfig.JWTSecret != "" {
+		return config.GlobalConfig.JWTSecret
+	}
+	return os.Getenv("JWT_SECRET")
+}
+
+func validAppJWT(r *http.Request, token string) bool {
+	secret := uploadJWTSecret()
+	if token == "" || secret == "" {
+		return false
+	}
+
+	var claims uploadJWTClaims
+	helper := jwtutils.NewJWTHelper(secret, "onion-platform")
+	if err := helper.ValidateToken(r.Context(), token, &claims); err != nil {
+		return false
+	}
+
+	return claims.UserID > 0
 }

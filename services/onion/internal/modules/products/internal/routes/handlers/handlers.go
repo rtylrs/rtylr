@@ -47,7 +47,10 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ListProductsResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	products, hasMore, err := h.Service.ListProducts(ctx, ownerID, req.Search, int64(req.CategoryID), req.Page, req.PageSize)
 	if err != nil {
 		return ListProductsResponse{}, &errorModels.ServerError{
@@ -103,6 +106,7 @@ type CreateProductRequest struct {
 	HSCode            string  `json:"hs_code"`
 	AllowBackorder    bool    `json:"allow_backorder"`
 	LeadTimeDays      int     `json:"lead_time_days"`
+	ImageURL          string  `json:"image_url"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          *bool   `json:"is_active"`
@@ -189,13 +193,17 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 		HSCode:            req.HSCode,
 		AllowBackorder:    req.AllowBackorder,
 		LeadTimeDays:      req.LeadTimeDays,
+		ImageURL:          req.ImageURL,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
 		IsActive:          productBoolDefault(req.IsActive, true),
 		TrackInventory:    productBoolDefault(req.TrackInventory, true),
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return CreateProductResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	id, err := h.Service.CreateProduct(ctx, ownerID, input)
 	if err != nil {
 		if errors.Is(err, domain.ErrProductAlreadyExists) {
@@ -257,6 +265,7 @@ type UpdateProductRequest struct {
 	HSCode            string   `json:"hs_code"`
 	AllowBackorder    bool     `json:"allow_backorder"`
 	LeadTimeDays      int      `json:"lead_time_days"`
+	ImageURL          string   `json:"image_url"`
 	LowStockThreshold float64  `json:"low_stock_threshold"`
 	ReorderQuantity   float64  `json:"reorder_quantity"`
 	IsActive          *bool    `json:"is_active"`
@@ -324,7 +333,10 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateProductResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	isActive, trackInventory, flagErr := productFlagsForUpdate(ctx, h.Service, ownerID, req.ID, req.IsActive, req.TrackInventory)
 	if flagErr != nil {
 		return UpdateProductResponse{}, &errorModels.ServerError{
@@ -358,6 +370,7 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		HSCode:            req.HSCode,
 		AllowBackorder:    req.AllowBackorder,
 		LeadTimeDays:      req.LeadTimeDays,
+		ImageURL:          req.ImageURL,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
 		IsActive:          isActive,
@@ -422,7 +435,10 @@ func (h *DeleteProductHandler) Serve(ctx context.Context, req *DeleteProductRequ
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return DeleteProductResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	if err := h.Service.DeleteProduct(ctx, ownerID, req.ID); err != nil {
 		return DeleteProductResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,

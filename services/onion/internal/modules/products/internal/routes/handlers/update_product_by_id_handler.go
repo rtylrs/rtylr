@@ -38,6 +38,7 @@ type UpdateProductByIDRequest struct {
 	Unit              string  `json:"unit"`
 	CostPrice         float64 `json:"cost_price"`
 	SalePrice         float64 `json:"sale_price"`
+	ImageURL          string  `json:"image_url"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          *bool   `json:"is_active"`
@@ -96,7 +97,10 @@ func (h *UpdateProductByIDHandler) Serve(ctx context.Context, req *UpdateProduct
 		}
 	}
 
-	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return UpdateProductByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
 	isActive, trackInventory, flagErr := productFlagsForUpdate(ctx, h.Service, ownerID, id, req.IsActive, req.TrackInventory)
 	if flagErr != nil {
 		return UpdateProductByIDResponse{}, &errorModels.ServerError{
@@ -116,6 +120,7 @@ func (h *UpdateProductByIDHandler) Serve(ctx context.Context, req *UpdateProduct
 		Unit:              req.Unit,
 		CostPrice:         req.CostPrice,
 		SalePrice:         req.SalePrice,
+		ImageURL:          req.ImageURL,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
 		IsActive:          isActive,

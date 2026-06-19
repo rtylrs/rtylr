@@ -11,15 +11,22 @@ import (
 // allowedUploadMIMETypes is the whitelist for the upload endpoint. Anything
 // outside this set is rejected so the bucket can't double as free file hosting.
 var allowedUploadMIMETypes = map[string]bool{
+	"application/msword":       true,
+	"application/pdf":          true,
+	"application/vnd.ms-excel": true,
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":       true,
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+	"image/avif":      true,
+	"image/gif":       true,
 	"image/jpeg":      true,
 	"image/png":       true,
-	"image/webp":      true,
-	"image/gif":       true,
-	"image/avif":      true,
 	"image/tiff":      true,
+	"image/webp":      true,
+	"text/csv":        true,
+	"text/plain":      true,
 	"video/mp4":       true,
-	"video/webm":      true,
 	"video/quicktime": true,
+	"video/webm":      true,
 }
 
 func isAllowedMIMEType(mime string) bool {
@@ -101,6 +108,20 @@ func mimeTypeToFormat(mime string) string {
 		return "webm"
 	case "video/quicktime":
 		return "mov"
+	case "application/pdf":
+		return "pdf"
+	case "application/msword":
+		return "doc"
+	case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+		return "docx"
+	case "application/vnd.ms-excel":
+		return "xls"
+	case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+		return "xlsx"
+	case "text/csv":
+		return "csv"
+	case "text/plain":
+		return "txt"
 	default:
 		return "bin"
 	}

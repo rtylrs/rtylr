@@ -14,6 +14,7 @@ var (
 type Product struct {
 	ID                int64     `json:"id"`
 	OwnerID           int64     `json:"owner_id"`
+	BusinessID        int64     `json:"business_id"`
 	CategoryID        int64     `json:"category_id"`
 	SupplierID        int64     `json:"supplier_id"`
 	Name              string    `json:"name"`
@@ -63,6 +64,7 @@ func (p *Product) FromRow(row *sql.Rows) error {
 	err := row.Scan(
 		&p.ID,
 		&p.OwnerID,
+		&p.BusinessID,
 		&categoryID,
 		&supplierID,
 		&p.Name,
@@ -154,6 +156,7 @@ type ProductInput struct {
 	HSCode            string  `json:"hs_code"`
 	AllowBackorder    bool    `json:"allow_backorder"`
 	LeadTimeDays      int     `json:"lead_time_days"`
+	ImageURL          string  `json:"image_url"`
 }
 
 // ProductAttribute is a per-business custom key/value field on a product.

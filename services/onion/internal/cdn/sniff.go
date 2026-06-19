@@ -39,10 +39,16 @@ func reconcileMIME(declared, sniffed string) (string, error) {
 	declared = strings.ToLower(strings.TrimSpace(declared))
 	sniffed = strings.ToLower(strings.TrimSpace(sniffed))
 
+	if sniffed == "text/plain" && declared == "text/csv" {
+		return declared, nil
+	}
 	if isAllowedMIMEType(sniffed) {
 		return sniffed, nil
 	}
 	if sniffed == "application/octet-stream" && isAllowedMIMEType(declared) {
+		return declared, nil
+	}
+	if sniffed == "application/zip" && isAllowedMIMEType(declared) && strings.Contains(declared, "officedocument") {
 		return declared, nil
 	}
 	return "", fmt.Errorf("content type %q is not an allowed media type", sniffed)
