@@ -448,6 +448,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	aiQuotaModule := aiquota.NewModule(ctx, dbclient.Pool())
 	aiQueryModule := aiquery.NewModule(ctx)
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
+	hrAttendanceModule := hrattendance.NewModule(ctx, dbclient.Pool())
+	hrLeaveModule := hrleave.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrOvertimeModule := hrovertime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrPayrollModule := hrpayroll.NewModule(ctx, dbclient.Pool(), hrCoreModule)
+	hrTimeModule := hrtime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	customersModule := customers.NewModule(ctx, dbclient.Pool())
 	campaignsModule := campaigns.NewModule(ctx, dbclient.Pool())
 	inventoryModule := inventory.NewModule(ctx, dbclient.Pool())
@@ -527,7 +532,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, insightsModule, financeReportsModule, flowInsightsModule, bookingDashboardModule, posDaySummaryModule, kpisModule, workspacesModule, customersModule, campaignsModule, segmentsModule, loyaltyModule, reviewsModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posLocationsModule, posTerminalsModule, posUsersModule, posFloorsModule, posTablesModule, posMenuModule, posModifiersModule, posSessionsModule, posCashMovementsModule, posStockMovementsModule, hrCoreModule, hrAttendanceModule, hrLeaveModule, hrOvertimeModule, hrPayrollModule, hrTimeModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule, storeOrdersModule, storeProductsModule, storeCategoriesModule, supportTicketsModule, supportInboxModule, supportCustomersModule, supportCannedModule, supportKnowledgeModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -535,20 +540,20 @@ func initializeModules(ctx context.Context) *apiModules {
 		FinanceReconciliation: financereconciliation.NewModule(ctx, dbclient.Pool()),
 		FinanceReports:        financeReportsModule,
 		FlowInsights:          flowInsightsModule,
-		HRAttendance:          hrattendance.NewModule(ctx, dbclient.Pool()),
+		HRAttendance:          hrAttendanceModule,
 		HRCore:                hrCoreModule,
 		HRDashboard:           hrdashboard.NewModule(ctx, dbclient.Pool()),
 		HRDocuments:           hrdocuments.NewModule(ctx, dbclient.Pool()),
 		HREquipment:           hrequipment.NewModule(ctx, dbclient.Pool(), hrCoreModule),
-		HRLeave:               hrleave.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		HRLeave:               hrLeaveModule,
 		HROnboarding:          hronboarding.NewModule(ctx, dbclient.Pool()),
-		HROvertime:            hrovertime.NewModule(ctx, dbclient.Pool(), hrCoreModule),
-		HRPayroll:             hrpayroll.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		HROvertime:            hrOvertimeModule,
+		HRPayroll:             hrPayrollModule,
 		HRPerformance:         hrperformance.NewModule(ctx, dbclient.Pool()),
 		HRReports:             hrreports.NewModule(ctx, dbclient.Pool()),
 		HRSetup:               hrsetup.NewModule(ctx, dbclient.Pool()),
 		HRShifts:              hrshifts.NewModule(ctx, dbclient.Pool()),
-		HRTime:                hrtime.NewModule(ctx, dbclient.Pool(), hrCoreModule),
+		HRTime:                hrTimeModule,
 		Insights:              insightsModule,
 		Integrations:          integrations.NewModule(ctx, dbclient.Pool()),
 		Inventory:             inventoryModule,
