@@ -48,6 +48,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"crm.list_customers [read]",
 		"pos.list_orders [read]",
 		"pos.list_sessions [read]",
+		"pos.list_cash_movements [read]",
 		"erp.list_products [read]",
 		"erp.list_categories [read]",
 		"erp.list_brands [read]",

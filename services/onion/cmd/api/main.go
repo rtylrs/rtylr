@@ -457,6 +457,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 	posSessionsModule := possessions.NewModule(ctx, dbclient.Pool())
+	posCashMovementsModule := poscashmovements.NewModule(ctx, dbclient.Pool())
 	suppliersModule := suppliers.NewModule(ctx, dbclient.Pool())
 	warehousesModule := warehouses.NewModule(ctx, dbclient.Pool())
 	purchaseOrdersModule := purchaseorders.NewModule(ctx, dbclient.Pool())
@@ -500,7 +501,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		AIQuota:               aiQuotaModule,
-		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posSessionsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule, aiQueryModule, workspacesModule, customersModule, inventoryModule, productsModule, categoriesModule, brandsModule, suppliersModule, warehousesModule, purchaseOrdersModule, stockTransfersModule, expensesModule, posOrdersModule, posSessionsModule, posCashMovementsModule, hrCoreModule, billsModule, quotesModule, bookingAppointmentsModule, invoicesModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expensesModule,
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
@@ -535,7 +536,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		OneOnOnes:             oneonones.NewModule(ctx, dbclient.Pool()),
 		Payroll:               payroll.NewModule(ctx, dbclient.Pool()),
 		PosAudit:              posaudit.NewModule(ctx, dbclient.Pool()),
-		PosCashMovements:      poscashmovements.NewModule(ctx, dbclient.Pool()),
+		PosCashMovements:      posCashMovementsModule,
 		PosCombos:             poscombos.NewModule(ctx, dbclient.Pool()),
 		PosCustomers:          poscustomers.NewModule(ctx, dbclient.Pool()),
 		PosDaySummary:         posdaysummary.NewModule(ctx, dbclient.Pool()),
