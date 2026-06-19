@@ -64,6 +64,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"loyalty.list_rewards [read]",
 		"loyalty.list_transactions [read]",
 		"pos.list_orders [read]",
+		"pos.get_order [read]",
 		"pos.list_locations [read]",
 		"pos.list_terminals [read]",
 		"pos.list_users [read]",

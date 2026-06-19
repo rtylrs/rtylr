@@ -17,6 +17,7 @@ import (
 
 const (
 	listOrdersToolName     = "pos.list_orders"
+	getOrderToolName       = "pos.get_order"
 	refundOrderToolName    = "pos.refund_order"
 	refundAmountTolerance  = 0.000001
 	defaultListOrdersLimit = int64(20)
@@ -44,6 +45,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	switch name {
 	case listOrdersToolName:
 		output, err := m.executeListOrdersTool(ctx, input)
+		return output, true, err
+	case getOrderToolName:
+		output, err := m.executeGetOrderTool(ctx, input)
 		return output, true, err
 	case refundOrderToolName:
 		output, err := m.executeRefundOrderTool(ctx, input)
@@ -100,6 +104,40 @@ func (m *Module) executeListOrdersTool(ctx context.Context, input map[string]any
 			"date_from":  parsed.DateFrom,
 			"date_to":    parsed.DateTo,
 		},
+	}, nil
+}
+
+func (m *Module) executeGetOrderTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	orderID, err := parseGetOrderToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("cannot determine business context")
+	}
+	order, err := m.service.GetOrder(ctx, businessID, orderID)
+	if err != nil {
+		return nil, err
+	}
+	if order == nil {
+		return nil, domain.ErrOrderNotFound
+	}
+
+	items := make([]map[string]any, 0, len(order.Items))
+	for _, item := range order.Items {
+		items = append(items, orderItemToolPayload(item))
+	}
+
+	return map[string]any{
+		"order": orderDetailToolPayload(*order),
+		"items": items,
 	}, nil
 }
 
@@ -207,6 +245,17 @@ func parseListOrdersToolInput(input map[string]any) (listOrdersToolInput, error)
 		Page:      page,
 		Limit:     limit,
 	}, nil
+}
+
+func parseGetOrderToolInput(input map[string]any) (int64, error) {
+	orderID, err := posOrderIDToolValue(firstPosToolValue(input, "order_id", "order", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid order_id: %w", err)
+	}
+	if orderID <= 0 {
+		return 0, errors.New("order_id is required")
+	}
+	return orderID, nil
 }
 
 func parseRefundOrderToolInput(input map[string]any) (refundOrderToolInput, error) {
@@ -318,6 +367,21 @@ func validateOrderToolDateRange(dateFrom, dateTo string) error {
 	return nil
 }
 
+func orderDetailToolPayload(order domain.Order) map[string]any {
+	payload := orderToolPayload(order)
+	payload["notes"] = order.Notes
+	payload["kitchen_notes"] = order.KitchenNotes
+	payload["updated_at"] = formatOrderToolTime(order.UpdatedAt)
+	payload["terminal_id"] = order.TerminalID
+	payload["branch_id"] = order.BranchID
+	payload["tip_amount"] = order.TipAmount
+	payload["void_reason"] = order.VoidReason
+	payload["voided_by"] = order.VoidedBy
+	payload["voided_at"] = formatOrderToolOptionalTime(order.VoidedAt)
+	payload["exchange_order_id"] = order.ExchangeOrderID
+	return payload
+}
+
 func orderToolPayload(order domain.Order) map[string]any {
 	return map[string]any{
 		"id":              order.ID,
@@ -341,6 +405,25 @@ func orderToolPayload(order domain.Order) map[string]any {
 		"item_count":      len(order.Items),
 		"created_at":      formatOrderToolTime(order.CreatedAt),
 		"paid_at":         formatOrderToolOptionalTime(order.PaidAt),
+	}
+}
+
+func orderItemToolPayload(item domain.OrderItem) map[string]any {
+	return map[string]any{
+		"id":              item.ID,
+		"order_id":        item.OrderID,
+		"menu_item_id":    item.MenuItemID,
+		"name":            item.Name,
+		"sku":             item.SKU,
+		"quantity":        item.Quantity,
+		"unit_price":      item.UnitPrice,
+		"discount_pct":    item.DiscountPct,
+		"discount_amount": item.DiscountAmount,
+		"tax_rate":        item.TaxRate,
+		"total":           item.Total,
+		"notes":           item.Notes,
+		"status":          string(item.Status),
+		"created_at":      formatOrderToolTime(item.CreatedAt),
 	}
 }
 
@@ -399,6 +482,23 @@ func firstPosToolValue(input map[string]any, keys ...string) any {
 		return value
 	}
 	return nil
+}
+
+func posOrderIDToolValue(value any) (int64, error) {
+	if raw, ok := value.(string); ok {
+		text := strings.TrimSpace(raw)
+		if text == "" {
+			return 0, nil
+		}
+		normalized := strings.ToLower(text)
+		normalized = strings.TrimPrefix(normalized, "#")
+		normalized = strings.TrimPrefix(normalized, "order-")
+		if normalized == "" {
+			return 0, nil
+		}
+		return strconv.ParseInt(normalized, 10, 64)
+	}
+	return posToolInt64(value)
 }
 
 func posToolInt64(value any) (int64, error) {

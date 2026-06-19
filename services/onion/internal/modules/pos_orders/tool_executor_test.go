@@ -70,6 +70,30 @@ func TestParseListOrdersToolInputRejectsInvalidDateRange(t *testing.T) {
 	}
 }
 
+func TestParseGetOrderToolInputAcceptsAliases(t *testing.T) {
+	for _, input := range []map[string]any{
+		{"order_id": "17"},
+		{"order": "#17"},
+		{"id": "order-17"},
+		{"order_id": 17},
+	} {
+		got, err := parseGetOrderToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetOrderToolInput(%v) returned error: %v", input, err)
+		}
+		if got != 17 {
+			t.Fatalf("parseGetOrderToolInput(%v) = %d, want 17", input, got)
+		}
+	}
+}
+
+func TestParseGetOrderToolInputRejectsMissingOrder(t *testing.T) {
+	_, err := parseGetOrderToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "order_id is required") {
+		t.Fatalf("error = %v, want missing order_id validation", err)
+	}
+}
+
 func TestOrderToolPayload(t *testing.T) {
 	paidAt := time.Date(2026, 6, 19, 12, 30, 0, 0, time.UTC)
 	payload := orderToolPayload(domain.Order{
@@ -106,6 +130,62 @@ func TestOrderToolPayload(t *testing.T) {
 	}
 	if payload["paid_at"] != "2026-06-19T12:30:00Z" {
 		t.Fatalf("paid_at = %v, want formatted timestamp", payload["paid_at"])
+	}
+}
+
+func TestOrderDetailAndItemToolPayload(t *testing.T) {
+	voidedAt := time.Date(2026, 6, 19, 13, 0, 0, 0, time.UTC)
+	order := domain.Order{
+		ID:              17,
+		OrderNumber:     "POS-17",
+		Status:          domain.OrderStatusVoided,
+		PaymentStatus:   domain.PaymentStatusPaid,
+		Notes:           "Customer changed order",
+		KitchenNotes:    "No onions",
+		TerminalID:      3,
+		BranchID:        8,
+		TipAmount:       4.25,
+		VoidReason:      "Mistake",
+		VoidedBy:        9,
+		VoidedAt:        &voidedAt,
+		ExchangeOrderID: 18,
+		CreatedAt:       time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:       time.Date(2026, 6, 19, 12, 45, 0, 0, time.UTC),
+		Items: []domain.OrderItem{{
+			ID:             5,
+			OrderID:        17,
+			MenuItemID:     44,
+			Name:           "Burger",
+			SKU:            "BRG",
+			Quantity:       2,
+			UnitPrice:      8.5,
+			DiscountPct:    10,
+			DiscountAmount: 1.7,
+			TaxRate:        11,
+			Total:          16.98,
+			Notes:          "Medium",
+			Status:         domain.ItemStatusServed,
+			CreatedAt:      time.Date(2026, 6, 19, 12, 1, 0, 0, time.UTC),
+		}},
+	}
+
+	detail := orderDetailToolPayload(order)
+	if detail["notes"] != "Customer changed order" || detail["kitchen_notes"] != "No onions" {
+		t.Fatalf("detail notes missing: %#v", detail)
+	}
+	if detail["voided_at"] != "2026-06-19T13:00:00Z" {
+		t.Fatalf("voided_at = %v, want formatted timestamp", detail["voided_at"])
+	}
+	if detail["exchange_order_id"] != int64(18) {
+		t.Fatalf("exchange_order_id = %v, want 18", detail["exchange_order_id"])
+	}
+
+	item := orderItemToolPayload(order.Items[0])
+	if item["name"] != "Burger" || item["status"] != "served" {
+		t.Fatalf("item payload missing display fields: %#v", item)
+	}
+	if item["created_at"] != "2026-06-19T12:01:00Z" {
+		t.Fatalf("item created_at = %v, want formatted timestamp", item["created_at"])
 	}
 }
 
