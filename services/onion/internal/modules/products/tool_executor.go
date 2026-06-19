@@ -14,15 +14,67 @@ import (
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
-const createProductToolName = "erp.create_product"
+const (
+	getProductToolName    = "erp.get_product"
+	createProductToolName = "erp.create_product"
+)
 const maxProductToolLeadTimeDays = int64(1<<31 - 1)
 
+type getProductToolInput struct {
+	ProductID int64
+	Barcode   string
+}
+
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != createProductToolName {
+	switch name {
+	case getProductToolName:
+		output, err := m.executeGetProductTool(ctx, input)
+		return output, true, err
+	case createProductToolName:
+		output, err := m.executeCreateProductTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateProductTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeGetProductTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseGetProductToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+
+	var product domain.Product
+	lookupBy := "id"
+	if parsed.ProductID > 0 {
+		product, err = m.service.GetProduct(ctx, ownerID, parsed.ProductID)
+	} else {
+		lookupBy = "barcode"
+		product, err = m.service.GetProductByBarcode(ctx, ownerID, parsed.Barcode)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	attrs, err := m.service.ListProductAttributes(ctx, ownerID, product.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"product":   productToolPayload(product, attrs),
+		"lookup_by": lookupBy,
+	}, nil
 }
 
 func (m *Module) executeCreateProductTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -46,29 +98,22 @@ func (m *Module) executeCreateProductTool(ctx context.Context, input map[string]
 	}
 
 	return map[string]any{
-		"product": map[string]any{
-			"id":                  id,
-			"name":                parsed.Name,
-			"sku":                 parsed.SKU,
-			"barcode":             parsed.Barcode,
-			"description":         parsed.Description,
-			"unit":                parsed.Unit,
-			"category_id":         parsed.CategoryID,
-			"supplier_id":         parsed.SupplierID,
-			"brand_id":            parsed.BrandID,
-			"cost_price":          parsed.CostPrice,
-			"sale_price":          parsed.SalePrice,
-			"compare_at_price":    parsed.CompareAtPrice,
-			"tax_rate":            parsed.TaxRate,
-			"currency":            parsed.Currency,
-			"stock_quantity":      parsed.StockQuantity,
-			"low_stock_threshold": parsed.LowStockThreshold,
-			"reorder_quantity":    parsed.ReorderQuantity,
-			"is_active":           parsed.IsActive,
-			"track_inventory":     parsed.TrackInventory,
-			"allow_backorder":     parsed.AllowBackorder,
-			"lead_time_days":      parsed.LeadTimeDays,
-		},
+		"product": productInputToolPayload(id, parsed),
+	}, nil
+}
+
+func parseGetProductToolInput(input map[string]any) (getProductToolInput, error) {
+	productID, err := productToolNonNegativeInt64(firstProductToolValue(input, "product_id", "id"))
+	if err != nil {
+		return getProductToolInput{}, fmt.Errorf("invalid product_id: %w", err)
+	}
+	barcode := strings.TrimSpace(productToolString(firstProductToolValue(input, "barcode", "bar_code")))
+	if productID == 0 && barcode == "" {
+		return getProductToolInput{}, errors.New("product_id or barcode is required")
+	}
+	return getProductToolInput{
+		ProductID: productID,
+		Barcode:   barcode,
 	}, nil
 }
 
@@ -356,6 +401,83 @@ func productToolString(value any) string {
 		return v.String()
 	default:
 		return fmt.Sprint(v)
+	}
+}
+
+func productInputToolPayload(id int64, product domain.ProductInput) map[string]any {
+	return map[string]any{
+		"id":                  id,
+		"name":                product.Name,
+		"sku":                 product.SKU,
+		"barcode":             product.Barcode,
+		"description":         product.Description,
+		"unit":                product.Unit,
+		"category_id":         product.CategoryID,
+		"supplier_id":         product.SupplierID,
+		"brand_id":            product.BrandID,
+		"cost_price":          product.CostPrice,
+		"sale_price":          product.SalePrice,
+		"compare_at_price":    product.CompareAtPrice,
+		"tax_rate":            product.TaxRate,
+		"currency":            product.Currency,
+		"stock_quantity":      product.StockQuantity,
+		"low_stock_threshold": product.LowStockThreshold,
+		"reorder_quantity":    product.ReorderQuantity,
+		"is_active":           product.IsActive,
+		"track_inventory":     product.TrackInventory,
+		"allow_backorder":     product.AllowBackorder,
+		"lead_time_days":      product.LeadTimeDays,
+	}
+}
+
+func productToolPayload(product domain.Product, attrs []domain.ProductAttribute) map[string]any {
+	attrPayload := make([]map[string]any, 0, len(attrs))
+	for _, attr := range attrs {
+		attrPayload = append(attrPayload, map[string]any{
+			"id":       attr.ID,
+			"name":     attr.Name,
+			"value":    attr.Value,
+			"position": attr.Position,
+		})
+	}
+
+	return map[string]any{
+		"id":                  product.ID,
+		"name":                product.Name,
+		"sku":                 product.SKU,
+		"barcode":             product.Barcode,
+		"description":         product.Description,
+		"unit":                product.Unit,
+		"category_id":         product.CategoryID,
+		"supplier_id":         product.SupplierID,
+		"brand_id":            product.BrandID,
+		"cost_price":          product.CostPrice,
+		"sale_price":          product.SalePrice,
+		"compare_at_price":    product.CompareAtPrice,
+		"gross_profit":        product.GrossProfit(),
+		"margin_percent":      product.Margin(),
+		"tax_rate":            product.TaxRate,
+		"currency":            product.Currency,
+		"stock_quantity":      product.StockQuantity,
+		"stock_value":         product.StockValue(),
+		"low_stock_threshold": product.LowStockThreshold,
+		"reorder_quantity":    product.ReorderQuantity,
+		"is_low_stock":        product.IsLowStock(),
+		"is_active":           product.IsActive,
+		"status":              string(product.Status()),
+		"track_inventory":     product.TrackInventory,
+		"allow_backorder":     product.AllowBackorder,
+		"lead_time_days":      product.LeadTimeDays,
+		"image_url":           product.ImageURL,
+		"weight":              product.Weight,
+		"weight_unit":         product.WeightUnit,
+		"length":              product.Length,
+		"width":               product.Width,
+		"height":              product.Height,
+		"dimension_unit":      product.DimensionUnit,
+		"country_of_origin":   product.CountryOfOrigin,
+		"hs_code":             product.HSCode,
+		"attributes":          attrPayload,
 	}
 }
 

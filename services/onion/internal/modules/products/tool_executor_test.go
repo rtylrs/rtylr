@@ -1,6 +1,81 @@
 package products
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/products/internal/domain"
+)
+
+func TestParseGetProductToolInputAcceptsID(t *testing.T) {
+	parsed, err := parseGetProductToolInput(map[string]any{"id": "42"})
+	if err != nil {
+		t.Fatalf("parseGetProductToolInput: %v", err)
+	}
+	if parsed.ProductID != 42 {
+		t.Fatalf("ProductID = %d", parsed.ProductID)
+	}
+	if parsed.Barcode != "" {
+		t.Fatalf("Barcode = %q", parsed.Barcode)
+	}
+}
+
+func TestParseGetProductToolInputAcceptsBarcode(t *testing.T) {
+	parsed, err := parseGetProductToolInput(map[string]any{"barcode": " 0123456789 "})
+	if err != nil {
+		t.Fatalf("parseGetProductToolInput: %v", err)
+	}
+	if parsed.ProductID != 0 {
+		t.Fatalf("ProductID = %d", parsed.ProductID)
+	}
+	if parsed.Barcode != "0123456789" {
+		t.Fatalf("Barcode = %q", parsed.Barcode)
+	}
+}
+
+func TestParseGetProductToolInputRequiresIdentifier(t *testing.T) {
+	_, err := parseGetProductToolInput(map[string]any{"name": "Protein Bar"})
+	if err == nil {
+		t.Fatal("expected missing identifier error")
+	}
+}
+
+func TestProductToolPayloadIncludesBusinessFields(t *testing.T) {
+	payload := productToolPayload(domain.Product{
+		ID:                7,
+		Name:              "Protein Bar",
+		SKU:               "BAR-001",
+		Barcode:           "0123456789",
+		CostPrice:         1.25,
+		SalePrice:         3.50,
+		StockQuantity:     4,
+		LowStockThreshold: 5,
+		ReorderQuantity:   24,
+		IsActive:          true,
+		TrackInventory:    true,
+	}, []domain.ProductAttribute{
+		{ID: 3, Name: "Flavor", Value: "Chocolate", Position: 1},
+	})
+
+	if payload["gross_profit"] != 2.25 {
+		t.Fatalf("gross_profit = %v", payload["gross_profit"])
+	}
+	if payload["stock_value"] != 5.0 {
+		t.Fatalf("stock_value = %v", payload["stock_value"])
+	}
+	if payload["is_low_stock"] != true {
+		t.Fatalf("is_low_stock = %v", payload["is_low_stock"])
+	}
+	if payload["status"] != "active" {
+		t.Fatalf("status = %v", payload["status"])
+	}
+	attrs, ok := payload["attributes"].([]map[string]any)
+	if !ok {
+		t.Fatalf("attributes type = %T", payload["attributes"])
+	}
+	if len(attrs) != 1 || attrs[0]["name"] != "Flavor" {
+		t.Fatalf("attributes = %#v", attrs)
+	}
+}
 
 func TestParseCreateProductToolInput(t *testing.T) {
 	parsed, err := parseCreateProductToolInput(map[string]any{
