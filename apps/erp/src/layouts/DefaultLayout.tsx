@@ -142,30 +142,23 @@ function applyTheme(theme: Theme) {
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
+  const isActive =
+    path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`);
 
   return (
     <Link
       to={path}
-      className="relative flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150"
+      className={cn(
+        'relative flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--hub-border)]',
+        !isActive && 'hover:bg-[var(--hub-hover)]'
+      )}
       style={{
         color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
         textDecoration: 'none',
       }}
-      onMouseEnter={(e) => {
-        if (!isActive) (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent';
-      }}
     >
       {isActive && (
-        <motion.span
-          layoutId="sidebar-active"
-          className="absolute inset-0 rounded-lg"
-          style={{ background: 'var(--hub-active)' }}
-          transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-        />
+        <span className="absolute inset-0 rounded-lg" style={{ background: 'var(--hub-active)' }} />
       )}
       <Icon size={14} className="relative shrink-0" />
       <span className="relative">{label}</span>
