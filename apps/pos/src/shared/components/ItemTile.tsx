@@ -1,36 +1,47 @@
-import React from 'react';
-import type { MenuItem } from '../types/pos';
-import { formatCurrency } from '../utils/format';
+import React from "react";
+import { cdnImageUrl } from "@voxire/config";
+import type { MenuItem } from "../types/pos";
+import { formatCurrency } from "../utils/format";
 
 interface ItemTileProps {
   item: MenuItem;
   onClick: (item: MenuItem) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   disabled?: boolean;
 }
 
-const ItemTile: React.FC<ItemTileProps> = ({ item, onClick, size = 'md', disabled }) => {
+const ItemTile: React.FC<ItemTileProps> = ({
+  item,
+  onClick,
+  size = "md",
+  disabled,
+}) => {
   const unavailable = disabled || item.available === false;
   const stock = item.stock;
-  const showStock = typeof stock === 'number' && Number.isFinite(stock);
+  const showStock = typeof stock === "number" && Number.isFinite(stock);
   const stockLabel =
     showStock &&
     (Number.isInteger(stock)
       ? String(stock)
-      : stock.toFixed(3).replace(/\.?0+$/, ''));
+      : stock.toFixed(3).replace(/\.?0+$/, ""));
   const padding =
-    size === 'lg' ? 'p-4 min-h-[7rem]' : size === 'sm' ? 'p-2 min-h-[4rem]' : 'p-3 min-h-[5.5rem]';
+    size === "lg"
+      ? "p-4 min-h-[7rem]"
+      : size === "sm"
+        ? "p-2 min-h-[4rem]"
+        : "p-3 min-h-[5.5rem]";
+  const imageUrl = cdnImageUrl(item.image);
   return (
     <button
       onClick={() => !unavailable && onClick(item)}
       disabled={unavailable}
       className={`text-left ${padding} rounded-xl bg-pos-card border border-pos-border hover:border-white/25 transition active:scale-[0.97] flex flex-col justify-between ${
-        unavailable ? 'opacity-50 cursor-not-allowed' : ''
+        unavailable ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
-      {item.image ? (
+      {imageUrl ? (
         <img
-          src={item.image}
+          src={imageUrl}
           alt={item.name}
           loading="lazy"
           className="w-full aspect-square object-contain rounded-lg bg-white p-2 mb-1.5"
@@ -49,13 +60,19 @@ const ItemTile: React.FC<ItemTileProps> = ({ item, onClick, size = 'md', disable
             {item.sku}
           </p>
         )}
-        <p className="text-xs text-pos-muted mt-1">{formatCurrency(item.price)}</p>
+        <p className="text-xs text-pos-muted mt-1">
+          {formatCurrency(item.price)}
+        </p>
         {showStock && (
-          <p className="mt-1 text-[10px] font-semibold text-pos-muted">{stockLabel} in stock</p>
+          <p className="mt-1 text-[10px] font-semibold text-pos-muted">
+            {stockLabel} in stock
+          </p>
         )}
       </div>
       {unavailable && (
-        <span className="text-[10px] text-destructive font-semibold mt-1">Out of stock</span>
+        <span className="text-[10px] text-destructive font-semibold mt-1">
+          Out of stock
+        </span>
       )}
     </button>
   );

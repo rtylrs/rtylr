@@ -23,7 +23,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost https://cdn.voxire.dev data: blob:; font-src 'self' data:; connect-src 'self' https://api.voxire.com https://auth.rtylr.com wss://api.voxire.com; frame-src 'none'; object-src 'none'; base-uri 'self'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost https://cdn.voxire.com https://cdn.voxire.dev data: blob:; font-src 'self' data:; connect-src 'self' https://api.voxire.com https://auth.rtylr.com wss://api.voxire.com; frame-src 'none'; object-src 'none'; base-uri 'self'"
     }
   },
   "bundle": {

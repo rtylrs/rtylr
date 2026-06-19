@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { toast } from 'sonner';
-import { useCartStore } from '../../../../shared/stores/cartStore';
-import { useSettingsStore } from '../../../../shared/stores/settingsStore';
-import { buildMenuItemCartProduct } from '../../../../shared/utils/cart/cartProduct';
-import { formatCurrency } from '../../../../shared/utils/format';
-import type { MenuItem } from '../../../../shared/types/pos';
+import React, { useState } from "react";
+import { cdnImageUrl } from "@voxire/config";
+import { motion } from "motion/react";
+import { toast } from "sonner";
+import { useCartStore } from "../../../../shared/stores/cartStore";
+import { useSettingsStore } from "../../../../shared/stores/settingsStore";
+import { buildMenuItemCartProduct } from "../../../../shared/utils/cart/cartProduct";
+import { formatCurrency } from "../../../../shared/utils/format";
+import type { MenuItem } from "../../../../shared/types/pos";
 
 type Product = MenuItem;
 interface ProductGridProps {
@@ -14,23 +15,25 @@ interface ProductGridProps {
 }
 
 const hasFiniteStock = (stock: unknown): stock is number =>
-  typeof stock === 'number' && Number.isFinite(stock);
+  typeof stock === "number" && Number.isFinite(stock);
 
 const formatStock = (stock: number) =>
-  Number.isInteger(stock) ? String(stock) : stock.toFixed(3).replace(/\.?0+$/, '');
+  Number.isInteger(stock)
+    ? String(stock)
+    : stock.toFixed(3).replace(/\.?0+$/, "");
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [search, setSearch] = useState("");
   const addItem = useCartStore((s) => s.addItem);
   const businessProfile = useSettingsStore((s) => s.businessProfile);
   const inventoryEnabled = useSettingsStore((s) => s.features.inventory);
   const currency = useSettingsStore((s) => s.currency);
 
-  const allCategories = ['All', ...categories];
-  const itemNoun = businessProfile === 'retail' ? 'products' : 'items';
+  const allCategories = ["All", ...categories];
+  const itemNoun = businessProfile === "retail" ? "products" : "items";
   const filtered = products.filter((p) => {
-    const matchCat = activeCategory === 'All' || p.category === activeCategory;
+    const matchCat = activeCategory === "All" || p.category === activeCategory;
     const searchTerm = search.trim().toLowerCase();
     const matchSearch =
       !searchTerm ||
@@ -47,7 +50,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
       addItem(buildMenuItemCartProduct(product));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : `Failed to add ${itemNoun.slice(0, -1)}`
+        error instanceof Error
+          ? error.message
+          : `Failed to add ${itemNoun.slice(0, -1)}`,
       );
     }
   };
@@ -69,8 +74,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
               key={cat}
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 activeCategory === cat
-                  ? 'bg-pos-text text-pos-bg'
-                  : 'bg-white/6 text-pos-muted hover:bg-white/10'
+                  ? "bg-pos-text text-pos-bg"
+                  : "bg-white/6 text-pos-muted hover:bg-white/10"
               }`}
               onClick={() => setActiveCategory(cat)}
             >
@@ -92,19 +97,20 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
               const unavailable = product.available === false;
               const stock = product.stock;
               const showStock = inventoryEnabled && hasFiniteStock(stock);
+              const imageUrl = cdnImageUrl(product.image);
               return (
                 <motion.button
                   key={product.id}
                   className={`flex min-h-[13rem] flex-col overflow-hidden rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${
-                    unavailable ? 'opacity-50 cursor-not-allowed' : ''
+                    unavailable ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={() => addProduct(product)}
                   whileTap={{ scale: 0.96 }}
                   disabled={unavailable}
                 >
-                  {product.image ? (
+                  {imageUrl ? (
                     <img
-                      src={product.image}
+                      src={imageUrl}
                       alt={product.name}
                       className="w-full aspect-[4/3] object-contain bg-white p-2"
                       loading="lazy"
