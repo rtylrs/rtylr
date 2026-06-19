@@ -153,7 +153,8 @@ export function AppGuard({
 
     setStatus('loading');
 
-    fetchUserRef.current()
+    fetchUserRef
+      .current()
       .then((data) => {
         const user: User = {
           id: String(data.id ?? data.user_id ?? data.userId ?? ''),
