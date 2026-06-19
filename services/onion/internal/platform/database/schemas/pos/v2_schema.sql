@@ -152,6 +152,9 @@ CREATE TABLE IF NOT EXISTS pos_store_credit_transactions (
     INDEX idx_credit_customer (customer_id)
 );
 
+-- POS stock is tracked through the ERP unified stock layer:
+-- stock_locations, stock_levels, and stock_ledger keyed by erp_products.id.
+
 -- ── Scheduled pricing ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pos_scheduled_prices (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -168,9 +171,9 @@ CREATE TABLE IF NOT EXISTS pos_scheduled_prices (
     INDEX idx_scheduled_product (product_id)
 );
 
--- ── Add fields to products for POS ───────────────────────────────
--- (Run these against the products table if it exists)
--- ALTER TABLE products
+-- ── ERP product fields used by POS ───────────────────────────────
+-- (Run these against erp_products when bootstrapping an older database)
+-- ALTER TABLE erp_products
 --   ADD COLUMN IF NOT EXISTS barcode VARCHAR(100) DEFAULT NULL,
 --   ADD COLUMN IF NOT EXISTS tax_class VARCHAR(50) DEFAULT 'standard',
 --   ADD COLUMN IF NOT EXISTS variant_of BIGINT DEFAULT NULL,
