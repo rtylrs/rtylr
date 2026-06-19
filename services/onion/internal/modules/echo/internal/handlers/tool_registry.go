@@ -19,6 +19,7 @@ var CoreTools = []ToolDef{
 	{Name: "crm.list_customers", Description: "List CRM customers.", Module: "crm", Scope: "read"},
 	{Name: "crm.create_customer", Description: "Create a CRM customer.", Module: "crm", Scope: "write", RequiresApproval: true},
 	{Name: "pos.list_orders", Description: "List recent POS orders.", Module: "pos", Scope: "read"},
+	{Name: "pos.list_sessions", Description: "List POS register sessions.", Module: "pos", Scope: "read"},
 	{Name: "pos.refund_order", Description: "Refund a POS order.", Module: "pos", Scope: "write", RequiresApproval: true},
 	{Name: "erp.list_products", Description: "List inventory products.", Module: "erp", Scope: "read"},
 	{Name: "erp.set_stock", Description: "Set product stock quantity.", Module: "erp", Scope: "write", RequiresApproval: true},
@@ -105,6 +106,7 @@ var promptExecutableTools = map[string]struct{}{
 	"finance.record_payment":          {},
 	"finance.send_invoice":            {},
 	"pos.list_orders":                 {},
+	"pos.list_sessions":               {},
 	"pos.refund_order":                {},
 	"hr.create_employee":              {},
 }

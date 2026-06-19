@@ -47,6 +47,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"Available business capability catalog:",
 		"crm.list_customers [read]",
 		"pos.list_orders [read]",
+		"pos.list_sessions [read]",
 		"erp.list_products [read]",
 		"erp.list_categories [read]",
 		"erp.list_brands [read]",
