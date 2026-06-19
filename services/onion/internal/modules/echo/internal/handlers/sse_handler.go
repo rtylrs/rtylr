@@ -43,11 +43,11 @@ const (
 	cachedReplayTinyResponseRunes = 12
 	cachedReplayMinChunkRunes     = 8
 	cachedReplayMinTailRunes      = 8
-	cachedReplaySoftChunkRunes    = 18
-	cachedReplayMaxChunkRunes     = 36
-	cachedReplayMinDelay          = 45 * time.Millisecond
-	cachedReplayMaxDelay          = 180 * time.Millisecond
-	cachedReplayTargetDuration    = 5200 * time.Millisecond
+	cachedReplaySoftChunkRunes    = 12
+	cachedReplayMaxChunkRunes     = 24
+	cachedReplayMinDelay          = 95 * time.Millisecond
+	cachedReplayMaxDelay          = 650 * time.Millisecond
+	cachedReplayTargetDuration    = 8500 * time.Millisecond
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
