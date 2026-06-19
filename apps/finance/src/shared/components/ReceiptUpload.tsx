@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { uploadAsset } from '@voxire/api';
 import { Upload, FileImage, X } from 'lucide-react';
 
 interface ReceiptUploadProps {
@@ -8,15 +9,23 @@ interface ReceiptUploadProps {
 
 const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file: File | undefined | null): void => {
+  const handleFile = async (file: File | undefined | null): Promise<void> => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      onChange(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    setUploading(true);
+    setError(null);
+    try {
+      const uploaded = await uploadAsset(file);
+      onChange(uploaded.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
   };
 
   return (
@@ -29,15 +38,17 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
       onDrop={(e) => {
         e.preventDefault();
         setDragging(false);
-        handleFile(e.dataTransfer.files?.[0]);
+        void handleFile(e.dataTransfer.files?.[0]);
       }}
-      onClick={() => fileRef.current?.click()}
+      onClick={() => {
+        if (!uploading) fileRef.current?.click();
+      }}
       style={{
         border: `2px dashed ${dragging ? 'var(--hub-accent, #10b981)' : 'var(--hub-border)'}`,
         borderRadius: 12,
         padding: 24,
         textAlign: 'center',
-        cursor: 'pointer',
+        cursor: uploading ? 'wait' : 'pointer',
         background: dragging ? 'rgba(16,185,129,0.08)' : 'var(--hub-hover)',
         transition: 'all 0.15s',
         position: 'relative',
@@ -49,9 +60,18 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
         type="file"
         accept="image/*"
         style={{ display: 'none' }}
-        onChange={(e) => handleFile(e.target.files?.[0])}
+        onChange={(e) => {
+          void handleFile(e.target.files?.[0]);
+        }}
       />
-      {value ? (
+      {uploading ? (
+        <>
+          <Upload size={28} style={{ color: 'var(--hub-accent, #10b981)', marginBottom: 10 }} />
+          <div style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 600 }}>
+            Uploading receipt...
+          </div>
+        </>
+      ) : value ? (
         <div style={{ position: 'relative' }}>
           <img
             src={value}
@@ -106,6 +126,11 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
           }}
         >
           <FileImage size={12} /> Click to replace
+        </div>
+      )}
+      {error && (
+        <div style={{ marginTop: 10, color: 'var(--hub-error, #ef4444)', fontSize: 11 }}>
+          {error}
         </div>
       )}
     </div>

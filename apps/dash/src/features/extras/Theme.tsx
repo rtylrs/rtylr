@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { uploadAsset } from '@voxire/api';
 import { Palette, Upload } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button, Input, Label } from '../../shared/components/ui';
@@ -21,6 +22,22 @@ const ThemeCustomizer: React.FC = () => {
   const [accent, setAccent] = useState('#4583C4');
   const [brandName, setBrandName] = useState('My Business');
   const [logoUrl, setLogoUrl] = useState('');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoUpload = async (file?: File | null): Promise<void> => {
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const uploaded = await uploadAsset(file);
+      setLogoUrl(uploaded.url);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
 
   return (
     <>
@@ -106,10 +123,23 @@ const ThemeCustomizer: React.FC = () => {
                   onChange={(e) => setLogoUrl(e.target.value)}
                   placeholder="https://..."
                 />
-                <Button variant="secondary" disabled title="Logo upload coming in a future update">
+                <Button
+                  variant="secondary"
+                  disabled={uploadingLogo}
+                  onClick={() => logoInputRef.current?.click()}
+                >
                   <Upload size={13} />
-                  Upload
+                  {uploadingLogo ? 'Uploading...' : 'Upload'}
                 </Button>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    void handleLogoUpload(e.target.files?.[0]);
+                  }}
+                />
               </div>
             </div>
           </div>

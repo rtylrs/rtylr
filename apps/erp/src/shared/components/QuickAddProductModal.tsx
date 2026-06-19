@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { X, PackagePlus, Plus } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, PackagePlus, Plus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { unwrap, uploadAsset } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { useCreateProduct, useUpdateProduct } from '../../features/products/useProducts';
 import { erpApi, type CreateProductInput, type Product } from '../services/erpApi';
@@ -50,6 +50,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [categoryId, setCategoryId] = useState('');
   const [supplierId, setSupplierId] = useState('');
   const [barcode, setBarcode] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [unit, setUnit] = useState('pcs');
   const [costPrice, setCostPrice] = useState('');
@@ -72,6 +73,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [leadTimeDays, setLeadTimeDays] = useState('');
   const [allowBackorder, setAllowBackorder] = useState(false);
   const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Prefill custom attributes when editing an existing product.
   const { data: attrData } = useQuery({
@@ -101,6 +104,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setSupplierId(p.supplierId ? String(p.supplierId) : '');
     setBrandId(p.brandId ? String(p.brandId) : '');
     setBarcode(p.barcode ?? '');
+    setImageUrl(p.imageUrl ?? editing?.imageUrl ?? '');
     setDescription(p.description ?? '');
     setUnit(p.unit || 'pcs');
     setCostPrice(p.costPrice ? String(p.costPrice) : '');
@@ -146,6 +150,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           : ''
       );
       setBarcode(editing.barcode ?? '');
+      setImageUrl(editing.imageUrl ?? '');
       setDescription(editing.description ?? '');
       setUnit(editing.unit ?? 'pcs');
       setCostPrice(String(editing.costPrice ?? ''));
@@ -158,7 +163,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
 
   if (!open) return null;
 
-  const pending = createProduct.isPending || updateProduct.isPending;
+  const pending = createProduct.isPending || updateProduct.isPending || uploadingImage;
   const cost = parseFloat(costPrice);
   const sale = parseFloat(salePrice);
   const margin =
@@ -171,6 +176,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setCategoryId('');
       setSupplierId('');
       setBarcode('');
+      setImageUrl('');
       setDescription('');
       setUnit('pcs');
       setCostPrice('');
@@ -203,6 +209,20 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const removeAttribute = (i: number): void =>
     setAttributes((a) => a.filter((_, idx) => idx !== i));
 
+  const handleImageUpload = async (file?: File | null): Promise<void> => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const uploaded = await uploadAsset(file);
+      setImageUrl(uploaded.url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = (): void => {
     if (!name || !sku || !categoryId || !barcode || !description || !unit) {
       toast.error(t('erp.products.validation.requiredFields'));
@@ -223,6 +243,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       categoryId: Number(categoryId),
       supplierId: supplierId ? Number(supplierId) : undefined,
       barcode,
+      imageUrl: imageUrl || undefined,
       description,
       unit,
       costPrice: isNaN(cost) ? 0 : cost,
@@ -367,6 +388,47 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             className={`${inputClass} resize-none`}
             style={inputStyle}
           />
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <input
+              aria-label="Product image URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="Product image URL"
+              className={inputClass}
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-2"
+              style={{
+                background: 'var(--hub-hover)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            >
+              <Upload size={14} />
+              {uploadingImage ? 'Uploading...' : 'Upload'}
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                void handleImageUpload(e.target.files?.[0]);
+              }}
+            />
+          </div>
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt=""
+              className="h-28 w-full rounded-lg object-contain"
+              style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
+            />
+          )}
 
           <SectionLabel>{t('erp.products.sections.pricing')}</SectionLabel>
           <div className="grid grid-cols-2 gap-3">

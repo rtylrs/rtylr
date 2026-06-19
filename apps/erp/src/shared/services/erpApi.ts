@@ -36,6 +36,7 @@ export interface CreateProductInput {
   categoryId: number;
   supplierId?: number;
   barcode: string;
+  imageUrl?: string;
   description: string;
   unit: string;
   costPrice: number;
@@ -99,6 +100,7 @@ export interface FullProduct {
   hsCode: string;
   allowBackorder: boolean;
   leadTimeDays: number;
+  imageUrl?: string;
 }
 
 export interface UpdateProductInput extends Partial<CreateProductInput> {

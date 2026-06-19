@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { uploadAsset } from '@voxire/api';
 import { Paperclip, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { Attachment } from '../stores/flowStore';
 
 interface AttachmentUploadProps {
   attachments: Attachment[];
-  onAdd?: (name: string, size: number, mime: string) => void;
+  onAdd?: (name: string, size: number, mime: string, url: string) => void;
   onRemove?: (id: string) => void;
 }
 
@@ -20,11 +21,23 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   onRemove,
 }) => {
   const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    onAdd?.(file.name, file.size, file.type);
+    setUploading(true);
+    setError(null);
+    try {
+      const uploaded = await uploadAsset(file);
+      onAdd?.(file.name, uploaded.size || file.size, uploaded.mime || file.type, uploaded.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -67,18 +80,34 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
         })}
       </div>
       <button
-        onClick={() => ref.current?.click()}
+        onClick={() => {
+          if (!uploading) ref.current?.click();
+        }}
+        disabled={uploading}
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] w-full transition-colors"
         style={{
           background: 'var(--flow-input-bg)',
           border: '1px dashed var(--flow-border)',
           color: 'var(--flow-text-muted)',
+          cursor: uploading ? 'wait' : 'pointer',
         }}
       >
         <Upload size={12} />
-        Add attachment
+        {uploading ? 'Uploading...' : 'Add attachment'}
       </button>
-      <input ref={ref} type="file" className="hidden" onChange={handleFile} />
+      {error && (
+        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-error, #ef4444)' }}>
+          {error}
+        </p>
+      )}
+      <input
+        ref={ref}
+        type="file"
+        className="hidden"
+        onChange={(event) => {
+          void handleFile(event);
+        }}
+      />
     </div>
   );
 };

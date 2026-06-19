@@ -56,10 +56,10 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
     complete.mutate({ itemId: item.id });
   };
 
-  const handleAttachmentUpload = (file: { name: string }): void => {
+  const handleAttachmentUpload = (file: { name: string; url: string }): void => {
     if (!attachmentItem) return;
     complete.mutate(
-      { itemId: attachmentItem.id, attachmentUrl: file.name },
+      { itemId: attachmentItem.id, attachmentUrl: file.url },
       { onSuccess: () => setAttachmentItem(null) }
     );
   };

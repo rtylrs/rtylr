@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { uploadAsset } from '@voxire/api';
 import {
   Plus,
   GripVertical,
@@ -15,6 +16,7 @@ import {
   HelpCircle,
   Star,
   MousePointerClick,
+  Upload,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
@@ -343,6 +345,8 @@ const SectionEditor: React.FC<{
   const [title, setTitle] = useState(section.title);
   const [body, setBody] = useState(section.body);
   const [mediaUrl, setMediaUrl] = useState(section.mediaUrl);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<unknown[]>(() => {
     if (!section.itemsJson) return [];
     try {
@@ -378,6 +382,20 @@ const SectionEditor: React.FC<{
     });
   }
 
+  async function uploadMedia(file: File | undefined | null) {
+    if (!file) return;
+    setUploadingMedia(true);
+    try {
+      const uploaded = await uploadAsset(file);
+      setMediaUrl(uploaded.url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingMedia(false);
+      if (mediaInputRef.current) mediaInputRef.current.value = '';
+    }
+  }
+
   return (
     <div className="space-y-4">
       <Field label="Section title">
@@ -407,13 +425,53 @@ const SectionEditor: React.FC<{
 
       {section.kind === 'culture' && (
         <Field label="Photo URL" hint="Optional - square or landscape">
-          <Input value={mediaUrl} onChange={setMediaUrl} type="url" />
+          <div className="flex gap-2">
+            <Input value={mediaUrl} onChange={setMediaUrl} type="url" />
+            <button
+              type="button"
+              onClick={() => mediaInputRef.current?.click()}
+              disabled={uploadingMedia}
+              className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white/80 hover:bg-white/5 disabled:opacity-60"
+            >
+              <Upload size={14} />
+              {uploadingMedia ? 'Uploading...' : 'Upload'}
+            </button>
+            <input
+              ref={mediaInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                void uploadMedia(e.target.files?.[0]);
+              }}
+            />
+          </div>
         </Field>
       )}
 
       {section.kind === 'video' && (
-        <Field label="Video embed URL" hint="YouTube / Vimeo / Loom">
-          <Input value={mediaUrl} onChange={setMediaUrl} type="url" />
+        <Field label="Video URL" hint="YouTube / Vimeo / Loom or uploaded video">
+          <div className="flex gap-2">
+            <Input value={mediaUrl} onChange={setMediaUrl} type="url" />
+            <button
+              type="button"
+              onClick={() => mediaInputRef.current?.click()}
+              disabled={uploadingMedia}
+              className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white/80 hover:bg-white/5 disabled:opacity-60"
+            >
+              <Upload size={14} />
+              {uploadingMedia ? 'Uploading...' : 'Upload'}
+            </button>
+            <input
+              ref={mediaInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => {
+                void uploadMedia(e.target.files?.[0]);
+              }}
+            />
+          </div>
         </Field>
       )}
 

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { uploadAsset } from '@voxire/api';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -52,6 +53,22 @@ const TABS: Tab[] = [
 
 const GeneralTab: React.FC = () => {
   const settings = useSettings();
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoUpload = async (file?: File | null): Promise<void> => {
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const uploaded = await uploadAsset(file);
+      settings.setSetting('logoUrl', uploaded.url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
 
   const handleReset = (): void => {
     settings.reset();
@@ -127,13 +144,21 @@ const GeneralTab: React.FC = () => {
               <button
                 type="button"
                 style={{ ...ghostBtn, padding: '8px 12px' }}
-                disabled
-                title="Logo upload coming in a future update"
-                onClick={undefined}
+                disabled={uploadingLogo}
+                onClick={() => logoInputRef.current?.click()}
                 aria-label="Upload logo"
               >
                 <ImageIcon size={13} />
               </button>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  void handleLogoUpload(e.target.files?.[0]);
+                }}
+              />
             </div>
           </Field>
         </Card>

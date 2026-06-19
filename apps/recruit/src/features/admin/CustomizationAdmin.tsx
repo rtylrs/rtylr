@@ -1,8 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
+import { uploadAsset } from '@voxire/api';
 import { APP_URLS } from '@voxire/config';
-import { ExternalLink, RotateCcw, Palette, Type, ImageIcon, Layout, Search } from 'lucide-react';
+import {
+  ExternalLink,
+  RotateCcw,
+  Palette,
+  Type,
+  ImageIcon,
+  Layout,
+  Search,
+  Upload,
+} from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
 import { useAdminCustomization, useUpsertCustomization } from '../../shared/hooks/queries/useAdmin';
@@ -107,6 +117,31 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     (existing?.template as TemplateId) ?? 'minimal'
   );
   const [headerHtml, setHeaderHtml] = useState(existing?.headerHtml ?? '');
+  const [uploadingField, setUploadingField] = useState<'logo' | 'hero' | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const heroInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadImage = async (
+    field: 'logo' | 'hero',
+    file: File | undefined | null
+  ): Promise<void> => {
+    if (!file) return;
+    setUploadingField(field);
+    try {
+      const uploaded = await uploadAsset(file);
+      if (field === 'logo') {
+        setLogoUrl(uploaded.url);
+      } else {
+        setHeroImageUrl(uploaded.url);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingField(null);
+      if (field === 'logo' && logoInputRef.current) logoInputRef.current.value = '';
+      if (field === 'hero' && heroInputRef.current) heroInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     if (!existing) return;
@@ -264,7 +299,27 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   <Textarea value={aboutBlurb} onChange={setAboutBlurb} rows={4} />
                 </Field>
                 <Field label="Logo URL">
-                  <Input value={logoUrl} onChange={setLogoUrl} type="url" />
+                  <div className="flex gap-2">
+                    <Input value={logoUrl} onChange={setLogoUrl} type="url" />
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={uploadingField === 'logo'}
+                      className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white/80 hover:bg-white/5 disabled:opacity-60"
+                    >
+                      <Upload size={14} />
+                      {uploadingField === 'logo' ? 'Uploading...' : 'Upload'}
+                    </button>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        void uploadImage('logo', e.target.files?.[0]);
+                      }}
+                    />
+                  </div>
                 </Field>
                 <Field
                   label="Custom header HTML"
@@ -479,7 +534,27 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   label="Hero image URL"
                   hint="Shown in the bold / editorial templates above the job list"
                 >
-                  <Input value={heroImageUrl} onChange={setHeroImageUrl} type="url" />
+                  <div className="flex gap-2">
+                    <Input value={heroImageUrl} onChange={setHeroImageUrl} type="url" />
+                    <button
+                      type="button"
+                      onClick={() => heroInputRef.current?.click()}
+                      disabled={uploadingField === 'hero'}
+                      className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 text-sm font-semibold text-white/80 hover:bg-white/5 disabled:opacity-60"
+                    >
+                      <Upload size={14} />
+                      {uploadingField === 'hero' ? 'Uploading...' : 'Upload'}
+                    </button>
+                    <input
+                      ref={heroInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        void uploadImage('hero', e.target.files?.[0]);
+                      }}
+                    />
+                  </div>
                   {heroImageUrl && (
                     <img
                       src={heroImageUrl}

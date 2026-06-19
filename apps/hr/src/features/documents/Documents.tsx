@@ -38,7 +38,7 @@ const Documents: React.FC = () => {
   const [type, setType] = useState<(typeof TYPES)[number]>('Other');
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const onFile = (f: { name: string; sizeKb: number }): void => {
+  const onFile = (f: { name: string; sizeKb: number; url: string }): void => {
     if (!staffId) {
       toast.error(t('documents.selectEmployeeFirst'));
       return;
@@ -46,7 +46,7 @@ const Documents: React.FC = () => {
     const who = staff.find((s) => s.id === staffId);
     if (!who) return;
     add.mutate(
-      { staffId: who.id, staffName: who.name, name: f.name, type, sizeKb: f.sizeKb },
+      { staffId: who.id, staffName: who.name, name: f.name, type, sizeKb: f.sizeKb, url: f.url },
       { onSuccess: () => toast.success(t('documents.uploaded')) }
     );
   };

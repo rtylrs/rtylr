@@ -515,8 +515,8 @@ const TaskDetail: React.FC = () => {
               </h3>
               <AttachmentUpload
                 attachments={taskAttachments}
-                onAdd={(name, size, mime) =>
-                  addAttachmentMut.mutate({ taskId: task.id, name, size, mime })
+                onAdd={(name, size, mime, url) =>
+                  addAttachmentMut.mutate({ taskId: task.id, name, size, mime, url })
                 }
                 onRemove={(attachmentId) =>
                   removeAttachmentMut.mutate({ taskId: task.id, attachmentId })

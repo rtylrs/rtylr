@@ -52,14 +52,14 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
     (d) => isExpiringSoon(d.expiryDate) || isExpired(d.expiryDate)
   );
 
-  const handleFile = (file: { name: string; sizeKb: number }): void => {
+  const handleFile = (file: { name: string; sizeKb: number; url: string }): void => {
     upload.mutate(
       {
         employeeId,
         documentType: docType,
         title: docName || file.name,
         storageMode: 'stored',
-        fileUrl: file.name,
+        fileUrl: file.url,
       },
       {
         onSuccess: () => {
