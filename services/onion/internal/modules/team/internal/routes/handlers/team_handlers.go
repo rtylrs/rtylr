@@ -553,14 +553,70 @@ func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequ
 		}
 	}
 
-	// Notify the business owner. Enqueue is a fast insert; the worker delivers.
 	requesterEmail, requesterName, _ := h.Service.GetUserInfo(ctx, device.User.UserID)
 	if requesterName == "" {
 		requesterName = requesterEmail
 	}
+	// In-app notification to all admins+owners so the bell lights up immediately.
+	h.Service.NotifyAdminsOfAccessRequest(ctx, device.User.BusinessID, requesterName, req.App)
+	// Email to primary owner (best-effort, background worker delivers).
 	if emailErr := h.Service.EnqueueAccessRequestEmail(ctx, device.User.BusinessID, requesterName, requesterEmail, req.App); emailErr != nil {
 		logger.Ctx(ctx).Warn("failed to enqueue access request email", logger.Error(emailErr))
 	}
 
 	return RequestAccessResponse{Message: "Access requested"}, nil
+}
+
+// ─── List Access Requests ──────────────────────────────────────────────────────
+
+func ListAccessRequestsRoutes() []string { return []string{"/team/access-requests"} }
+
+type ListAccessRequestsRequest struct{}
+
+type accessRequestPayload struct {
+	ID             int64  `json:"id"`
+	UserID         int64  `json:"user_id"`
+	App            string `json:"app"`
+	RequesterName  string `json:"requester_name"`
+	RequesterEmail string `json:"requester_email"`
+	CreatedAt      string `json:"created_at"`
+}
+
+type ListAccessRequestsResponse struct {
+	Requests []accessRequestPayload `json:"requests"`
+}
+
+type ListAccessRequestsHandler struct{ Service *application.Service }
+
+func (h *ListAccessRequestsHandler) Serve(ctx context.Context, _ *ListAccessRequestsRequest) (ListAccessRequestsResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListAccessRequestsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	reqs, err := h.Service.ListAccessRequests(ctx, device.User.UserID, device.User.BusinessID)
+	if err != nil {
+		if errors.Is(err, domain.ErrForbidden) {
+			return ListAccessRequestsResponse{}, errorModels.PermissionDeniedServerError()
+		}
+		return ListAccessRequestsResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to list access requests",
+		}
+	}
+
+	payloads := make([]accessRequestPayload, 0, len(reqs))
+	for _, r := range reqs {
+		payloads = append(payloads, accessRequestPayload{
+			ID:             r.ID,
+			UserID:         r.UserID,
+			App:            r.App,
+			RequesterName:  r.RequesterName,
+			RequesterEmail: r.RequesterEmail,
+			CreatedAt:      r.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+
+	return ListAccessRequestsResponse{Requests: payloads}, nil
 }

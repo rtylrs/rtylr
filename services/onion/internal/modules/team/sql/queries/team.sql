@@ -90,3 +90,16 @@ UPDATE users SET onboarded = TRUE WHERE id = ?;
 
 -- name: CountActiveMembers :one
 SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1;
+
+-- name: ListAccessRequestsByBusiness :many
+SELECT ar.id, ar.user_id, ar.app, ar.status, ar.created_at,
+       COALESCE(u.full_name,'') AS requester_name, COALESCE(u.email,'') AS requester_email
+FROM access_requests ar
+JOIN users u ON u.id = ar.user_id
+WHERE ar.business_id = ?
+  AND ar.status = 'pending'
+ORDER BY ar.created_at DESC;
+
+-- name: CreateHubNotification :exec
+INSERT INTO hub_notifications (owner_id, user_id, title, body, type, link)
+VALUES (?, ?, ?, ?, ?, ?);

@@ -182,18 +182,26 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 		apps = []string{}
 	}
 
-	businessName, businessOwnerID, isOwner := s.GetBusinessInfo(ctx, businessID, userID)
+	businessName, businessOwnerID, isPrimaryOwner := s.GetBusinessInfo(ctx, businessID, userID)
+	// A co-owner has role=owner in user_app_permissions but is not the primary owner.
+	isCoOwner := !isPrimaryOwner && role == domain.RoleOwner
+	isOwner := isPrimaryOwner || isCoOwner
 
 	var planSlug, subscriptionStatus string
 	if isOwner {
-		role = "owner"
-		ownerApps, appsErr := s.GetOwnerApps(ctx, userID)
+		role = domain.RoleOwner
+		// Always use the primary owner's subscription for entitlements.
+		billingID := businessOwnerID
+		if isPrimaryOwner {
+			billingID = userID
+		}
+		ownerApps, appsErr := s.GetOwnerApps(ctx, billingID)
 		if appsErr != nil || len(ownerApps) == 0 {
 			apps = append([]string(nil), defaultFreePlanApps...)
 		} else {
 			apps = ownerApps
 		}
-		if slug, status, subErr := s.GetOwnerSubscriptionInfo(ctx, userID); subErr == nil {
+		if slug, status, subErr := s.GetOwnerSubscriptionInfo(ctx, billingID); subErr == nil {
 			planSlug = slug
 			subscriptionStatus = status
 		} else {
@@ -397,6 +405,29 @@ func (s *Service) RequestAccess(ctx context.Context, businessID, userID int64, a
 	return s.repo.CreateAccessRequest(ctx, businessID, userID, app)
 }
 
+// NotifyAdminsOfAccessRequest writes an in-app notification to hub_notifications
+// for every admin and owner in the business so the bell icon lights up immediately.
+func (s *Service) NotifyAdminsOfAccessRequest(ctx context.Context, businessID int64, requesterName, app string) {
+	recipients, err := s.repo.GetAdminsAndOwnerUserIDs(ctx, businessID)
+	if err != nil || len(recipients) == 0 {
+		return
+	}
+	_, ownerID, _ := s.repo.GetBusinessByID(ctx, businessID)
+	title := requesterName + " wants access to " + strings.ToUpper(app)
+	body := "Go to Team to review and approve."
+	link := config.HubAppURL + "/team"
+	_ = s.repo.BulkCreateHubNotification(ctx, ownerID, recipients, title, body, "info", link)
+}
+
+// ListAccessRequests returns pending access requests for the given business.
+// Only admins and owners may call this.
+func (s *Service) ListAccessRequests(ctx context.Context, actorID, businessID int64) ([]domain.AccessRequest, error) {
+	if _, err := s.requireTeamManager(ctx, actorID, businessID); err != nil {
+		return nil, domain.ErrForbidden
+	}
+	return s.repo.ListAccessRequests(ctx, businessID)
+}
+
 // GetBusinessOwnerEmail returns the email of the business owner.
 func (s *Service) GetBusinessOwnerEmail(ctx context.Context, businessID int64) string {
 	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
@@ -571,7 +602,7 @@ func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID in
 	if err != nil {
 		return 0, domain.ErrForbidden
 	}
-	if perm != nil && perm.IsActive && perm.Role == domain.RoleAdmin {
+	if perm != nil && perm.IsActive && (perm.Role == domain.RoleAdmin || perm.Role == domain.RoleOwner) {
 		return ownerID, nil
 	}
 

@@ -164,3 +164,13 @@ type BulkInviteResult struct {
 	Status  string
 	Message string
 }
+
+type AccessRequest struct {
+	ID             int64
+	UserID         int64
+	App            string
+	Status         string
+	RequesterName  string
+	RequesterEmail string
+	CreatedAt      time.Time
+}

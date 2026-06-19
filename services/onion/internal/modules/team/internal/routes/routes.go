@@ -105,4 +105,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.BulkInviteRoutes(),
 		&handlers.BulkInviteHandler{Service: service},
 	)
+
+	serverHttp.RegisterGET[handlers.ListAccessRequestsRequest, handlers.ListAccessRequestsResponse](
+		ctx, router, handlers.ListAccessRequestsRoutes(),
+		&handlers.ListAccessRequestsHandler{Service: service},
+	)
 }

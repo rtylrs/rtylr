@@ -892,3 +892,80 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 
 	return tx.Commit()
 }
+
+// ─── Access Requests ──────────────────────────────────────────────────────────
+
+func (r *Repository) ListAccessRequests(ctx context.Context, businessID int64) ([]domain.AccessRequest, error) {
+	rows, err := r.queries.ListAccessRequestsByBusiness(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.AccessRequest, 0, len(rows))
+	for _, row := range rows {
+		status := "pending"
+		if row.Status.Valid {
+			status = string(row.Status.AccessRequestsStatus)
+		}
+		out = append(out, domain.AccessRequest{
+			ID:             row.ID,
+			UserID:         row.UserID,
+			App:            row.App,
+			Status:         status,
+			RequesterName:  row.RequesterName,
+			RequesterEmail: row.RequesterEmail,
+			CreatedAt:      row.CreatedAt.Time,
+		})
+	}
+	return out, nil
+}
+
+// GetAdminsAndOwnerUserIDs returns all user IDs that should receive management
+// notifications for a business: the primary owner plus any staff with
+// role in ('admin','owner') in user_app_permissions.
+func (r *Repository) GetAdminsAndOwnerUserIDs(ctx context.Context, businessID int64) ([]int64, error) {
+	// cross-schema read from hub — approved for business-wide admin notification fan-out
+	sqlRows, err := r.pool.QueryContext(ctx, `
+		SELECT b.owner_id
+		FROM businesses b
+		WHERE b.id = ?
+		UNION
+		SELECT p.user_id
+		FROM user_app_permissions p
+		WHERE p.business_id = ?
+		  AND p.role IN ('admin', 'owner')
+		  AND p.is_active = TRUE
+	`, businessID, businessID)
+	if err != nil {
+		return nil, err
+	}
+	defer sqlRows.Close()
+	var ids []int64
+	for sqlRows.Next() {
+		var id int64
+		if err := sqlRows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, sqlRows.Err()
+}
+
+// BulkCreateHubNotification writes an in-app notification to hub_notifications for
+// each recipient in userIDs. Best-effort: errors are logged, not propagated.
+func (r *Repository) BulkCreateHubNotification(ctx context.Context, ownerID int64, userIDs []int64, title, body, notifType, link string) error {
+	for _, uid := range userIDs {
+		// cross-schema write to hub_notifications — approved for cross-module access request alerts
+		if err := r.queries.CreateHubNotification(ctx, sqlc.CreateHubNotificationParams{
+			OwnerID: ownerID,
+			UserID:  uid,
+			Title:   title,
+			Body:    sql.NullString{String: body, Valid: body != ""},
+			Type:    notifType,
+			Link:    sql.NullString{String: link, Valid: link != ""},
+		}); err != nil {
+			logger.Ctx(ctx).Warn("failed to create hub notification",
+				logger.Int("user_id", int(uid)), logger.Error(err))
+		}
+	}
+	return nil
+}
