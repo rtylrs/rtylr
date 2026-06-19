@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
 func TestMarshalGroundingRowsKeepsValidJSONWhenTruncated(t *testing.T) {
@@ -104,6 +106,49 @@ func TestAnalystGroundingUsesBusinessSnapshotForOwnerOverview(t *testing.T) {
 	}
 	if !strings.Contains(got.SpecJSON, `"value_col":"low_stock_threshold"`) {
 		t.Fatalf("expected low-stock column comparison in spec bundle, got %s", got.SpecJSON)
+	}
+}
+
+func TestBusinessSnapshotToolExecutorRunsSnapshot(t *testing.T) {
+	service := &snapshotAnalystService{}
+	executor := NewBusinessSnapshotToolExecutor(service)
+	ctx := context.WithValue(context.Background(), authPkg.AuthUserKey, &authPkg.AuthUser{
+		BusinessID: 11,
+		UserID:     22,
+	})
+
+	output, executed, err := executor.ExecuteCaretTool(ctx, businessSnapshotToolName, map[string]any{
+		"question": "How are we doing today?",
+	})
+	if err != nil {
+		t.Fatalf("ExecuteCaretTool: %v", err)
+	}
+	if !executed {
+		t.Fatal("expected business snapshot tool to execute")
+	}
+	if output["section_count"] != len(buildBusinessSnapshotQueries(timeNowUTCForTest())) {
+		t.Fatalf("section_count = %#v", output["section_count"])
+	}
+	if output["truncated"] != false {
+		t.Fatalf("truncated = %#v", output["truncated"])
+	}
+	sections, ok := output["sections"].([]map[string]any)
+	if !ok || len(sections) == 0 {
+		t.Fatalf("sections = %#v", output["sections"])
+	}
+	if len(service.calls) != len(buildBusinessSnapshotQueries(timeNowUTCForTest())) {
+		t.Fatalf("expected all snapshot queries to run, got %d calls", len(service.calls))
+	}
+}
+
+func TestBusinessSnapshotToolExecutorIgnoresOtherTools(t *testing.T) {
+	executor := NewBusinessSnapshotToolExecutor(&snapshotAnalystService{})
+	output, executed, err := executor.ExecuteCaretTool(context.Background(), "crm.list_customers", nil)
+	if err != nil {
+		t.Fatalf("ExecuteCaretTool: %v", err)
+	}
+	if executed || output != nil {
+		t.Fatalf("expected other tool to be ignored, executed=%v output=%#v", executed, output)
 	}
 }
 

@@ -23,6 +23,9 @@ func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaS
 	if err != nil {
 		snipsService = nil
 	}
+	if analystService != nil {
+		toolExecutors = append([]handlers.ToolExecutor{handlers.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
+	}
 
 	return &Module{
 		snipsService:   snipsService,

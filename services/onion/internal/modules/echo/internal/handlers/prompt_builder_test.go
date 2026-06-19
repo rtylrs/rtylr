@@ -45,6 +45,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 
 	mustContain := []string{
 		"Available business capability catalog:",
+		"business.snapshot [read]",
 		"crm.list_customers [read]",
 		"crm.list_campaigns [read]",
 		"crm.get_campaign [read]",
@@ -110,7 +111,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 			t.Fatalf("agent prompt missing %q\nprompt:\n%s", want, got)
 		}
 	}
-	for _, forbidden := range []string{"business.snapshot [read]", "analytics.query [read]"} {
+	for _, forbidden := range []string{"analytics.query [read]"} {
 		if strings.Contains(got, forbidden) {
 			t.Fatalf("agent prompt should not advertise non-executable read tool %q\nprompt:\n%s", forbidden, got)
 		}

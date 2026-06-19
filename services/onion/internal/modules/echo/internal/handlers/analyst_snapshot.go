@@ -48,19 +48,24 @@ func shouldUseBusinessSnapshot(question string) bool {
 	return false
 }
 
+const businessSnapshotToolName = "business.snapshot"
+
 func (h *GenerateTextStreamHandler) businessSnapshotGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
-	if h.AnalystService == nil {
+	return buildBusinessSnapshotGrounding(ctx, h.AnalystService, question, businessID, userID, time.Now().UTC())
+}
+
+func buildBusinessSnapshotGrounding(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time) (*analystGroundingResult, bool) {
+	if analystService == nil {
 		return nil, false
 	}
 
 	started := time.Now()
-	now := started.UTC()
 	queries := buildBusinessSnapshotQueries(now)
 	sections := make([]map[string]any, 0, len(queries))
 	specItems := make([]businessSnapshotSpecItem, 0, len(queries))
 
 	for _, query := range queries {
-		rows, _, err := h.AnalystService.RunJSON(ctx, businessID, userID, query.Spec)
+		rows, _, err := analystService.RunJSON(ctx, businessID, userID, query.Spec)
 		if err != nil {
 			logger.Ctx(ctx).Warn("business snapshot query failed",
 				logger.String("metric", query.Metric),
@@ -89,7 +94,7 @@ func (h *GenerateTextStreamHandler) businessSnapshotGrounding(ctx context.Contex
 	rowsJSON, truncated := marshalGroundingRows(sections, maxGroundingChars)
 	specJSON := buildBusinessSnapshotSpecJSON(now.Format("2006-01-02"), specItems)
 	return &analystGroundingResult{
-		ToolName:   "business.snapshot",
+		ToolName:   businessSnapshotToolName,
 		Prompt:     buildBusinessSnapshotGroundingPromptFromJSON(rowsJSON, len(sections), truncated, specJSON),
 		Question:   question,
 		SpecJSON:   specJSON,

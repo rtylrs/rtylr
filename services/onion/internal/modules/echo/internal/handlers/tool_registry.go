@@ -95,6 +95,7 @@ var CoreTools = []ToolDef{
 }
 
 var promptExecutableTools = map[string]struct{}{
+	"business.snapshot":               {},
 	"booking.list_appointments":       {},
 	"booking.create_appointment":      {},
 	"crm.list_customers":              {},
