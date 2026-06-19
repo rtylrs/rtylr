@@ -16,13 +16,25 @@ import (
 )
 
 const (
-	createPurchaseOrderToolName  = "erp.create_purchase_order"
-	approvePurchaseOrderToolName = "erp.approve_purchase_order"
-	receivePurchaseOrderToolName = "erp.receive_purchase_order"
+	listPurchaseOrdersToolName            = "erp.list_purchase_orders"
+	createPurchaseOrderToolName           = "erp.create_purchase_order"
+	approvePurchaseOrderToolName          = "erp.approve_purchase_order"
+	receivePurchaseOrderToolName          = "erp.receive_purchase_order"
+	defaultListPurchaseOrdersToolPageSize = int64(20)
+	maxListPurchaseOrdersToolPageSize     = int64(50)
 )
+
+type listPurchaseOrdersToolInput struct {
+	Status   string
+	Page     int64
+	PageSize int64
+}
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
 	switch name {
+	case listPurchaseOrdersToolName:
+		output, err := m.executeListPurchaseOrdersTool(ctx, input)
+		return output, true, err
 	case createPurchaseOrderToolName:
 		output, err := m.executeCreatePurchaseOrderTool(ctx, input)
 		return output, true, err
@@ -35,6 +47,40 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeListPurchaseOrdersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	parsed, err := parseListPurchaseOrdersToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	orders, hasMore, err := m.service.ListPurchaseOrders(ctx, ownerID, parsed.Status, parsed.Page, parsed.PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(orders))
+	for _, order := range orders {
+		payloads = append(payloads, purchaseOrderToolPayload(order))
+	}
+
+	return map[string]any{
+		"purchase_orders": payloads,
+		"returned":        len(payloads),
+		"page":            parsed.Page,
+		"page_size":       parsed.PageSize,
+		"has_more":        hasMore,
+		"filters": map[string]any{
+			"status": parsed.Status,
+		},
+	}, nil
 }
 
 func (m *Module) executeCreatePurchaseOrderTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -119,6 +165,45 @@ func (m *Module) executeReceivePurchaseOrderTool(ctx context.Context, input map[
 			"status":   string(domain.POStatusReceived),
 			"received": true,
 		},
+	}, nil
+}
+
+func parseListPurchaseOrdersToolInput(input map[string]any) (listPurchaseOrdersToolInput, error) {
+	rawStatus := firstPurchaseOrderToolValue(input, "status")
+	status := normalizePurchaseOrderToolStatus(rawStatus)
+	if strings.TrimSpace(purchaseOrderToolString(rawStatus)) != "" && status == "" {
+		return listPurchaseOrdersToolInput{}, errors.New("status must be one of draft, sent, approved, partial, received, or cancelled")
+	}
+
+	page, err := purchaseOrderToolInt64(firstPurchaseOrderToolValue(input, "page"))
+	if err != nil {
+		return listPurchaseOrdersToolInput{}, fmt.Errorf("invalid page: %w", err)
+	}
+	if page < 0 {
+		return listPurchaseOrdersToolInput{}, errors.New("page must be non-negative")
+	}
+	if page == 0 {
+		page = 1
+	}
+
+	pageSize, err := purchaseOrderToolInt64(firstPurchaseOrderToolValue(input, "page_size", "limit"))
+	if err != nil {
+		return listPurchaseOrdersToolInput{}, fmt.Errorf("invalid page_size: %w", err)
+	}
+	if pageSize < 0 {
+		return listPurchaseOrdersToolInput{}, errors.New("page_size must be non-negative")
+	}
+	if pageSize == 0 {
+		pageSize = defaultListPurchaseOrdersToolPageSize
+	}
+	if pageSize > maxListPurchaseOrdersToolPageSize {
+		pageSize = maxListPurchaseOrdersToolPageSize
+	}
+
+	return listPurchaseOrdersToolInput{
+		Status:   status,
+		Page:     page,
+		PageSize: pageSize,
 	}, nil
 }
 
@@ -380,6 +465,26 @@ func purchaseOrderToolDateString(value any) (string, error) {
 	}
 }
 
+func normalizePurchaseOrderToolStatus(value any) string {
+	status := strings.ToLower(strings.TrimSpace(purchaseOrderToolString(value)))
+	if status == "" {
+		return ""
+	}
+	status = strings.ReplaceAll(status, "-", "_")
+	status = strings.ReplaceAll(status, " ", "_")
+	switch domain.PurchaseOrderStatus(status) {
+	case domain.POStatusDraft,
+		domain.POStatusSent,
+		domain.POStatusApproved,
+		domain.POStatusPartial,
+		domain.POStatusReceived,
+		domain.POStatusCancelled:
+		return status
+	default:
+		return ""
+	}
+}
+
 func purchaseOrderToolString(value any) string {
 	switch v := value.(type) {
 	case nil:
@@ -414,4 +519,61 @@ func purchaseOrderToolItemsOutput(items []domain.PurchaseOrderItemInput) []map[s
 		})
 	}
 	return out
+}
+
+func purchaseOrderToolPayload(po domain.PurchaseOrder) map[string]any {
+	return map[string]any{
+		"id":                po.ID,
+		"supplier_id":       po.SupplierID,
+		"po_number":         po.PONumber,
+		"status":            string(po.Status),
+		"subtotal":          po.Subtotal,
+		"tax_amount":        po.TaxAmount,
+		"total":             po.Total,
+		"expected_delivery": formatPurchaseOrderToolDate(po.ExpectedDelivery),
+		"received_at":       formatPurchaseOrderToolTime(po.ReceivedAt),
+		"notes":             po.Notes,
+		"created_by":        po.CreatedBy,
+		"created_at":        formatPurchaseOrderToolRequiredTime(po.CreatedAt),
+		"updated_at":        formatPurchaseOrderToolRequiredTime(po.UpdatedAt),
+		"item_count":        len(po.Items),
+		"items":             purchaseOrderDomainItemsOutput(po.Items),
+	}
+}
+
+func purchaseOrderDomainItemsOutput(items []domain.PurchaseOrderItem) []map[string]any {
+	out := make([]map[string]any, 0, len(items))
+	for _, item := range items {
+		out = append(out, map[string]any{
+			"id":                item.ID,
+			"purchase_order_id": item.PurchaseOrderID,
+			"product_id":        item.ProductID,
+			"quantity_ordered":  item.QuantityOrdered,
+			"quantity_received": item.QuantityReceived,
+			"unit_cost":         item.UnitCost,
+			"total_cost":        item.TotalCost,
+		})
+	}
+	return out
+}
+
+func formatPurchaseOrderToolDate(value *time.Time) string {
+	if value == nil || value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02")
+}
+
+func formatPurchaseOrderToolTime(value *time.Time) string {
+	if value == nil || value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02T15:04:05Z")
+}
+
+func formatPurchaseOrderToolRequiredTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02T15:04:05Z")
 }

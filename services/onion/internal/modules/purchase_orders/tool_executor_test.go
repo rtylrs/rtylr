@@ -1,6 +1,93 @@
 package purchase_orders
 
-import "testing"
+import (
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
+)
+
+func TestParseListPurchaseOrdersToolInput(t *testing.T) {
+	parsed, err := parseListPurchaseOrdersToolInput(map[string]any{
+		"status":    "approved",
+		"page":      "2",
+		"page_size": 100,
+	})
+	if err != nil {
+		t.Fatalf("parseListPurchaseOrdersToolInput: %v", err)
+	}
+	if parsed.Status != string(domain.POStatusApproved) {
+		t.Fatalf("Status = %q, want approved", parsed.Status)
+	}
+	if parsed.Page != 2 {
+		t.Fatalf("Page = %d, want 2", parsed.Page)
+	}
+	if parsed.PageSize != maxListPurchaseOrdersToolPageSize {
+		t.Fatalf("PageSize = %d, want cap %d", parsed.PageSize, maxListPurchaseOrdersToolPageSize)
+	}
+}
+
+func TestParseListPurchaseOrdersToolInputUsesDefaults(t *testing.T) {
+	parsed, err := parseListPurchaseOrdersToolInput(map[string]any{})
+	if err != nil {
+		t.Fatalf("parseListPurchaseOrdersToolInput: %v", err)
+	}
+	if parsed.Page != 1 {
+		t.Fatalf("Page = %d, want 1", parsed.Page)
+	}
+	if parsed.PageSize != defaultListPurchaseOrdersToolPageSize {
+		t.Fatalf("PageSize = %d, want %d", parsed.PageSize, defaultListPurchaseOrdersToolPageSize)
+	}
+}
+
+func TestParseListPurchaseOrdersToolInputRejectsInvalidStatus(t *testing.T) {
+	_, err := parseListPurchaseOrdersToolInput(map[string]any{"status": "stuck"})
+	if err == nil || !strings.Contains(err.Error(), "status") {
+		t.Fatalf("error = %v, want status validation", err)
+	}
+}
+
+func TestPurchaseOrderToolPayload(t *testing.T) {
+	expectedDelivery := time.Date(2026, 7, 1, 0, 0, 0, 0, time.UTC)
+	receivedAt := time.Date(2026, 7, 2, 9, 30, 0, 0, time.UTC)
+	payload := purchaseOrderToolPayload(domain.PurchaseOrder{
+		ID:               55,
+		SupplierID:       42,
+		PONumber:         "PO-1001",
+		Status:           domain.POStatusReceived,
+		Subtotal:         100,
+		TaxAmount:        11,
+		Total:            111,
+		ExpectedDelivery: &expectedDelivery,
+		ReceivedAt:       &receivedAt,
+		Notes:            "Restock",
+		CreatedBy:        7,
+		CreatedAt:        time.Date(2026, 6, 19, 10, 0, 0, 0, time.UTC),
+		UpdatedAt:        time.Date(2026, 6, 20, 10, 0, 0, 0, time.UTC),
+		Items: []domain.PurchaseOrderItem{{
+			ID:               1,
+			PurchaseOrderID:  55,
+			ProductID:        9,
+			QuantityOrdered:  5,
+			QuantityReceived: 5,
+			UnitCost:         20,
+			TotalCost:        100,
+		}},
+	})
+	if payload["po_number"] != "PO-1001" {
+		t.Fatalf("po_number = %v, want PO-1001", payload["po_number"])
+	}
+	if payload["expected_delivery"] != "2026-07-01" {
+		t.Fatalf("expected_delivery = %v, want 2026-07-01", payload["expected_delivery"])
+	}
+	if payload["received_at"] != "2026-07-02T09:30:00Z" {
+		t.Fatalf("received_at = %v, want formatted timestamp", payload["received_at"])
+	}
+	if payload["item_count"] != 1 {
+		t.Fatalf("item_count = %v, want 1", payload["item_count"])
+	}
+}
 
 func TestParseCreatePurchaseOrderToolInput(t *testing.T) {
 	parsed, err := parseCreatePurchaseOrderToolInput(map[string]any{
