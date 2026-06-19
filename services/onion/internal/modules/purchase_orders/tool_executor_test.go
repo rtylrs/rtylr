@@ -212,6 +212,26 @@ func TestParseApprovePurchaseOrderToolInput(t *testing.T) {
 	}
 }
 
+func TestParsePurchaseOrderIDToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"purchase_order_id": int64(55)},
+		{"purchase_order": "#55"},
+		{"po": "po-55"},
+		{"id": "purchase-order-55"},
+		{"id": "purchase_order_55"},
+	}
+
+	for _, input := range cases {
+		poID, err := parsePurchaseOrderIDToolInput(input)
+		if err != nil {
+			t.Fatalf("parsePurchaseOrderIDToolInput(%v) returned error: %v", input, err)
+		}
+		if poID != 55 {
+			t.Fatalf("poID = %d, want 55 for %v", poID, input)
+		}
+	}
+}
+
 func TestParseApprovePurchaseOrderToolInputRejectsMissingID(t *testing.T) {
 	_, err := parseApprovePurchaseOrderToolInput(map[string]any{})
 	if err == nil {

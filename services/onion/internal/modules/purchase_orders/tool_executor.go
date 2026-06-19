@@ -17,6 +17,7 @@ import (
 
 const (
 	listPurchaseOrdersToolName            = "erp.list_purchase_orders"
+	getPurchaseOrderToolName              = "erp.get_purchase_order"
 	createPurchaseOrderToolName           = "erp.create_purchase_order"
 	approvePurchaseOrderToolName          = "erp.approve_purchase_order"
 	receivePurchaseOrderToolName          = "erp.receive_purchase_order"
@@ -35,6 +36,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case listPurchaseOrdersToolName:
 		output, err := m.executeListPurchaseOrdersTool(ctx, input)
 		return output, true, err
+	case getPurchaseOrderToolName:
+		output, err := m.executeGetPurchaseOrderTool(ctx, input)
+		return output, true, err
 	case createPurchaseOrderToolName:
 		output, err := m.executeCreatePurchaseOrderTool(ctx, input)
 		return output, true, err
@@ -47,6 +51,31 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetPurchaseOrderTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	poID, err := parsePurchaseOrderIDToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	purchaseOrder, err := m.service.GetByID(ctx, businessID, poID)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"purchase_order": purchaseOrderToolPayload(purchaseOrder),
+	}, nil
 }
 
 func (m *Module) executeListPurchaseOrdersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -264,9 +293,12 @@ func parseApprovePurchaseOrderToolInput(input map[string]any) (int64, error) {
 }
 
 func parsePurchaseOrderIDToolInput(input map[string]any) (int64, error) {
-	poID, err := purchaseOrderToolPositiveInt64(firstPurchaseOrderToolValue(input, "purchase_order_id", "po_id", "id"))
+	poID, err := purchaseOrderIDToolValue(firstPurchaseOrderToolValue(input, "purchase_order_id", "po_id", "purchase_order", "po", "id"))
 	if err != nil {
 		return 0, fmt.Errorf("invalid purchase_order_id: %w", err)
+	}
+	if poID <= 0 {
+		return 0, errors.New("purchase_order_id is required")
 	}
 	return poID, nil
 }
@@ -345,6 +377,21 @@ func purchaseOrderToolItem(input map[string]any) (domain.PurchaseOrderItemInput,
 		return domain.PurchaseOrderItemInput{}, err
 	}
 	return parsed, nil
+}
+
+func purchaseOrderIDToolValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"purchase-order-", "purchase_order_", "purchaseorder-", "purchaseorder_", "po-", "po_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return purchaseOrderToolInt64(raw)
+	default:
+		return purchaseOrderToolInt64(value)
+	}
 }
 
 func purchaseOrderToolPositiveInt64(value any) (int64, error) {
