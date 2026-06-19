@@ -15,6 +15,7 @@ type ToolDef struct {
 // list from each module's MCP descriptor.
 var CoreTools = []ToolDef{
 	{Name: "business.snapshot", Description: "Build a tenant-scoped owner snapshot across sales, finance, inventory, CRM, HR, and Flow.", Module: "business", Scope: "read"},
+	{Name: "business.get_kpis", Description: "Get headline business KPIs across revenue, orders, staff, customers, stock, and apps.", Module: "business", Scope: "read"},
 	{Name: "analytics.query", Description: "Run a tenant-scoped, read-only analytics query over allowlisted business views.", Module: "analytics", Scope: "read"},
 	{Name: "insights.get_dashboard", Description: "Get cross-domain business dashboard headline KPIs.", Module: "insights", Scope: "read"},
 	{Name: "insights.get_revenue_series", Description: "Get daily revenue over a date range.", Module: "insights", Scope: "read"},
@@ -101,8 +102,13 @@ var CoreTools = []ToolDef{
 	{Name: "hr.list_reviews", Description: "List HR performance reviews.", Module: "hr", Scope: "read"},
 	{Name: "hr.create_employee", Description: "Create an HR employee record.", Module: "hr", Scope: "write", RequiresApproval: true},
 	{Name: "flow.list_tasks", Description: "List Flow tasks.", Module: "flow", Scope: "read"},
+	{Name: "flow.get_insights", Description: "Get Flow task velocity, completion, overdue, status, and priority metrics.", Module: "flow", Scope: "read"},
+	{Name: "flow.get_team_workload", Description: "Get Flow workload distribution by team member.", Module: "flow", Scope: "read"},
+	{Name: "flow.get_roadmap", Description: "Get Flow roadmap projects and milestone progress.", Module: "flow", Scope: "read"},
 	{Name: "flow.create_task", Description: "Create a Flow task.", Module: "flow", Scope: "write", RequiresApproval: true},
 	{Name: "finance.list_invoices", Description: "List finance invoices.", Module: "finance", Scope: "read"},
+	{Name: "finance.get_balance_sheet", Description: "Get a finance balance sheet summary.", Module: "finance", Scope: "read"},
+	{Name: "finance.get_cash_flow_report", Description: "Get a finance cash-flow report for month, quarter, or year.", Module: "finance", Scope: "read"},
 	{Name: "finance.list_expenses", Description: "List finance expenses.", Module: "finance", Scope: "read"},
 	{Name: "finance.list_expense_categories", Description: "List finance expense categories.", Module: "finance", Scope: "read"},
 	{Name: "finance.record_expense", Description: "Record a business expense.", Module: "finance", Scope: "write", RequiresApproval: true},
@@ -113,11 +119,14 @@ var CoreTools = []ToolDef{
 	{Name: "finance.record_payment", Description: "Record a customer payment against an invoice.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "finance.send_invoice", Description: "Send a customer invoice and mark it sent.", Module: "finance", Scope: "write", RequiresApproval: true},
 	{Name: "booking.list_appointments", Description: "List booking appointments, optionally today's appointments.", Module: "booking", Scope: "read"},
+	{Name: "booking.get_dashboard", Description: "Get booking dashboard counts, cancellation rate, and revenue.", Module: "booking", Scope: "read"},
 	{Name: "booking.create_appointment", Description: "Create a booking appointment.", Module: "booking", Scope: "write", RequiresApproval: true},
+	{Name: "pos.get_day_summary", Description: "Get POS sales, tax, tips, refunds, orders, and payments for a day.", Module: "pos", Scope: "read"},
 }
 
 var promptExecutableTools = map[string]struct{}{
 	"business.snapshot":                 {},
+	"business.get_kpis":                 {},
 	"insights.get_dashboard":            {},
 	"insights.get_revenue_series":       {},
 	"insights.get_revenue_comparison":   {},
@@ -178,8 +187,13 @@ var promptExecutableTools = map[string]struct{}{
 	"hr.get_config":                     {},
 	"hr.list_reviews":                   {},
 	"flow.list_tasks":                   {},
+	"flow.get_insights":                 {},
+	"flow.get_team_workload":            {},
+	"flow.get_roadmap":                  {},
 	"flow.create_task":                  {},
 	"finance.list_invoices":             {},
+	"finance.get_balance_sheet":         {},
+	"finance.get_cash_flow_report":      {},
 	"finance.list_expenses":             {},
 	"finance.list_expense_categories":   {},
 	"finance.record_expense":            {},
@@ -203,6 +217,7 @@ var promptExecutableTools = map[string]struct{}{
 	"pos.list_branch_inventory":         {},
 	"pos.list_low_stock_items":          {},
 	"pos.refund_order":                  {},
+	"pos.get_day_summary":               {},
 	"store.list_orders":                 {},
 	"store.get_order":                   {},
 	"store.list_products":               {},
@@ -216,6 +231,7 @@ var promptExecutableTools = map[string]struct{}{
 	"support.list_canned_responses":     {},
 	"support.list_articles":             {},
 	"hr.create_employee":                {},
+	"booking.get_dashboard":             {},
 }
 
 // ToolByName returns a registered tool definition by stable tool name.
