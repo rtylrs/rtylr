@@ -196,6 +196,18 @@ func TestCachedReplayChunksPreserveTextAndSplitNaturally(t *testing.T) {
 	}
 }
 
+func TestCachedReplayChunksSplitShortAnswers(t *testing.T) {
+	text := "You have 2 employees."
+
+	chunks := cachedReplayChunks(text)
+	if len(chunks) < 2 {
+		t.Fatalf("expected short cached answer to replay visibly, got %d chunk", len(chunks))
+	}
+	if strings.Join(chunks, "") != text {
+		t.Fatalf("cached replay chunks changed text: %#v", chunks)
+	}
+}
+
 func TestCachedReplayDelayIsBounded(t *testing.T) {
 	if got := cachedReplayDelay(1); got != 0 {
 		t.Fatalf("single chunk delay = %s, want 0", got)

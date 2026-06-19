@@ -40,11 +40,14 @@ const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
 const maxSessionTitleRunes = 80
 
 const (
-	cachedReplaySoftChunkRunes = 42
-	cachedReplayMaxChunkRunes  = 72
-	cachedReplayMinDelay       = 22 * time.Millisecond
-	cachedReplayMaxDelay       = 85 * time.Millisecond
-	cachedReplayTargetDuration = 2300 * time.Millisecond
+	cachedReplayTinyResponseRunes = 12
+	cachedReplayMinChunkRunes     = 8
+	cachedReplayMinTailRunes      = 8
+	cachedReplaySoftChunkRunes    = 18
+	cachedReplayMaxChunkRunes     = 36
+	cachedReplayMinDelay          = 45 * time.Millisecond
+	cachedReplayMaxDelay          = 180 * time.Millisecond
+	cachedReplayTargetDuration    = 5200 * time.Millisecond
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
@@ -557,7 +560,7 @@ func cachedReplayChunks(text string) []string {
 
 func cachedReplayChunkEnd(runes []rune, start int) int {
 	remaining := len(runes) - start
-	if remaining <= cachedReplaySoftChunkRunes {
+	if remaining <= cachedReplayTinyResponseRunes {
 		return len(runes)
 	}
 
@@ -566,16 +569,31 @@ func cachedReplayChunkEnd(runes []rune, start int) int {
 	if maxEnd > len(runes) {
 		maxEnd = len(runes)
 	}
+	if soft > maxEnd {
+		soft = maxEnd
+	}
+	if soft >= len(runes) {
+		return cachedReplayShortSplitEnd(runes, start)
+	}
 
 	for i := soft; i < maxEnd; i++ {
 		if cachedReplayBoundary(runes[i]) {
-			return consumeReplayBoundary(runes, i+1)
+			end := consumeReplayBoundary(runes, i+1)
+			if cachedReplayUsableEnd(runes, start, end) {
+				return end
+			}
 		}
 	}
 	for i := soft; i > start; i-- {
 		if cachedReplayBoundary(runes[i]) {
-			return consumeReplayBoundary(runes, i+1)
+			end := consumeReplayBoundary(runes, i+1)
+			if cachedReplayUsableEnd(runes, start, end) {
+				return end
+			}
 		}
+	}
+	if maxEnd >= len(runes) {
+		return cachedReplayShortSplitEnd(runes, start)
 	}
 	return maxEnd
 }
@@ -592,6 +610,46 @@ func consumeReplayBoundary(runes []rune, end int) int {
 		end++
 	}
 	return end
+}
+
+func cachedReplayUsableEnd(runes []rune, start, end int) bool {
+	return end < len(runes) &&
+		end-start >= cachedReplayMinChunkRunes &&
+		len(runes)-end >= cachedReplayMinTailRunes
+}
+
+func cachedReplayShortSplitEnd(runes []rune, start int) int {
+	remaining := len(runes) - start
+	if remaining <= cachedReplayTinyResponseRunes {
+		return len(runes)
+	}
+
+	end := start + remaining/2
+	if end-start < cachedReplayMinChunkRunes {
+		end = start + cachedReplayMinChunkRunes
+	}
+	if len(runes)-end < cachedReplayMinTailRunes {
+		return len(runes)
+	}
+
+	for i := end; i > start; i-- {
+		if cachedReplayBoundary(runes[i]) {
+			if candidate := consumeReplayBoundary(runes, i+1); cachedReplayUsableEnd(runes, start, candidate) {
+				return candidate
+			}
+		}
+	}
+	for i := end; i < len(runes); i++ {
+		if cachedReplayBoundary(runes[i]) {
+			if candidate := consumeReplayBoundary(runes, i+1); cachedReplayUsableEnd(runes, start, candidate) {
+				return candidate
+			}
+		}
+	}
+	if cachedReplayUsableEnd(runes, start, end) {
+		return end
+	}
+	return len(runes)
 }
 
 func cachedReplayDelay(chunkCount int) time.Duration {
