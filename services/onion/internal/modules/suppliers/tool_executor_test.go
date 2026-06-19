@@ -1,8 +1,12 @@
 package suppliers
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 )
 
 func TestParseCreateSupplierToolInput(t *testing.T) {
@@ -31,8 +35,8 @@ func TestParseCreateSupplierToolInput(t *testing.T) {
 
 func TestParseCreateSupplierToolInputAllowsInactive(t *testing.T) {
 	parsed, err := parseCreateSupplierToolInput(map[string]any{
-		"name":      "Old Supplier",
-		"is_active": "inactive",
+		"supplier_name": "Old Supplier",
+		"active":        "inactive",
 	})
 	if err != nil {
 		t.Fatalf("parseCreateSupplierToolInput returned error: %v", err)
@@ -56,5 +60,69 @@ func TestParseCreateSupplierToolInputRejectsBadEmail(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "email") {
 		t.Fatalf("error = %v, want email validation", err)
+	}
+}
+
+func TestParseListSuppliersToolInputDefaults(t *testing.T) {
+	parsed, err := parseListSuppliersToolInput(map[string]any{})
+	if err != nil {
+		t.Fatalf("parseListSuppliersToolInput returned error: %v", err)
+	}
+	if parsed.Page != 1 {
+		t.Fatalf("Page = %d, want 1", parsed.Page)
+	}
+	if parsed.PageSize != defaultListSuppliersToolPageSize {
+		t.Fatalf("PageSize = %d, want %d", parsed.PageSize, defaultListSuppliersToolPageSize)
+	}
+}
+
+func TestParseListSuppliersToolInputCapsPageSize(t *testing.T) {
+	parsed, err := parseListSuppliersToolInput(map[string]any{
+		"page":  json.Number("2"),
+		"limit": json.Number("500"),
+	})
+	if err != nil {
+		t.Fatalf("parseListSuppliersToolInput returned error: %v", err)
+	}
+	if parsed.Page != 2 {
+		t.Fatalf("Page = %d, want 2", parsed.Page)
+	}
+	if parsed.PageSize != maxListSuppliersToolPageSize {
+		t.Fatalf("PageSize = %d, want %d", parsed.PageSize, maxListSuppliersToolPageSize)
+	}
+}
+
+func TestParseListSuppliersToolInputRejectsNegativePage(t *testing.T) {
+	_, err := parseListSuppliersToolInput(map[string]any{"page": -1})
+	if err == nil || !strings.Contains(err.Error(), "page") {
+		t.Fatalf("error = %v, want page validation", err)
+	}
+}
+
+func TestSupplierToolPayloadFormatsFields(t *testing.T) {
+	createdAt := time.Date(2026, 6, 18, 10, 30, 0, 0, time.FixedZone("EEST", 3*60*60))
+	payload := supplierToolPayload(domain.Supplier{
+		ID:           7,
+		Name:         "Cedar Wholesale",
+		Email:        "orders@cedar.example",
+		Phone:        "+96170000000",
+		City:         "Beirut",
+		Country:      "Lebanon",
+		PaymentTerms: "Net 30",
+		IsActive:     true,
+		CreatedAt:    createdAt,
+	})
+
+	if payload["id"] != int64(7) {
+		t.Fatalf("id = %v", payload["id"])
+	}
+	if payload["name"] != "Cedar Wholesale" {
+		t.Fatalf("name = %v", payload["name"])
+	}
+	if payload["payment_terms"] != "Net 30" {
+		t.Fatalf("payment_terms = %v", payload["payment_terms"])
+	}
+	if payload["created_at"] != "2026-06-18T07:30:00Z" {
+		t.Fatalf("created_at = %v", payload["created_at"])
 	}
 }

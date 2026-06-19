@@ -3,6 +3,9 @@ package warehouses
 import (
 	"encoding/json"
 	"testing"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 )
 
 func TestParseCreateWarehouseToolInput(t *testing.T) {
@@ -94,5 +97,33 @@ func TestParseCreateWarehouseToolInputRejectsInvalidBool(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected invalid bool error")
+	}
+}
+
+func TestWarehouseToolPayloadFormatsFields(t *testing.T) {
+	updatedAt := time.Date(2026, 6, 18, 11, 45, 0, 0, time.FixedZone("EEST", 3*60*60))
+	payload := warehouseToolPayload(domain.Warehouse{
+		ID:          3,
+		Name:        "Main Warehouse",
+		City:        "Beirut",
+		Country:     "Lebanon",
+		ManagerName: "Maya",
+		Capacity:    250,
+		IsDefault:   true,
+		IsActive:    true,
+		UpdatedAt:   updatedAt,
+	})
+
+	if payload["id"] != int64(3) {
+		t.Fatalf("id = %v", payload["id"])
+	}
+	if payload["name"] != "Main Warehouse" {
+		t.Fatalf("name = %v", payload["name"])
+	}
+	if payload["is_default"] != true {
+		t.Fatalf("is_default = %v", payload["is_default"])
+	}
+	if payload["updated_at"] != "2026-06-18T08:45:00Z" {
+		t.Fatalf("updated_at = %v", payload["updated_at"])
 	}
 }

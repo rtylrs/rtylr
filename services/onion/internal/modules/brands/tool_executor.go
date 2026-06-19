@@ -6,20 +6,52 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
-const createBrandToolName = "erp.create_brand"
+const (
+	createBrandToolName = "erp.create_brand"
+	listBrandsToolName  = "erp.list_brands"
+)
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != createBrandToolName {
+	switch name {
+	case listBrandsToolName:
+		output, err := m.executeListBrandsTool(ctx)
+		return output, true, err
+	case createBrandToolName:
+		output, err := m.executeCreateBrandTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateBrandTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListBrandsTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	brands, err := m.service.ListBrands(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(brands))
+	for _, brand := range brands {
+		payloads = append(payloads, brandToolPayload(brand))
+	}
+
+	return map[string]any{
+		"brands":   payloads,
+		"returned": len(payloads),
+	}, nil
 }
 
 func (m *Module) executeCreateBrandTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -75,6 +107,18 @@ func firstBrandToolValue(input map[string]any, keys ...string) any {
 	return nil
 }
 
+func brandToolPayload(brand domain.Brand) map[string]any {
+	return map[string]any{
+		"id":            brand.ID,
+		"name":          brand.Name,
+		"logo_url":      brand.LogoURL,
+		"description":   brand.Description,
+		"product_count": brand.ProductCount,
+		"created_at":    brandToolTime(brand.CreatedAt),
+		"updated_at":    brandToolTime(brand.UpdatedAt),
+	}
+}
+
 func brandToolString(value any) string {
 	switch v := value.(type) {
 	case nil:
@@ -88,4 +132,11 @@ func brandToolString(value any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func brandToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }

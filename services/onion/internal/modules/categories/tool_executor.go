@@ -6,20 +6,52 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/categories/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
-const createCategoryToolName = "erp.create_category"
+const (
+	createCategoryToolName = "erp.create_category"
+	listCategoriesToolName = "erp.list_categories"
+)
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != createCategoryToolName {
+	switch name {
+	case listCategoriesToolName:
+		output, err := m.executeListCategoriesTool(ctx)
+		return output, true, err
+	case createCategoryToolName:
+		output, err := m.executeCreateCategoryTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateCategoryTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListCategoriesTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	categories, err := m.service.ListCategories(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(categories))
+	for _, category := range categories {
+		payloads = append(payloads, categoryToolPayload(category))
+	}
+
+	return map[string]any{
+		"categories": payloads,
+		"returned":   len(payloads),
+	}, nil
 }
 
 func (m *Module) executeCreateCategoryTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -73,6 +105,16 @@ func firstCategoryToolValue(input map[string]any, keys ...string) any {
 	return nil
 }
 
+func categoryToolPayload(category domain.Category) map[string]any {
+	return map[string]any{
+		"id":          category.ID,
+		"name":        category.Name,
+		"description": category.Description,
+		"created_at":  categoryToolTime(category.CreatedAt),
+		"updated_at":  categoryToolTime(category.UpdatedAt),
+	}
+}
+
 func categoryToolString(value any) string {
 	switch v := value.(type) {
 	case nil:
@@ -86,4 +128,11 @@ func categoryToolString(value any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func categoryToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }

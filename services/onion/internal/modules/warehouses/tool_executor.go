@@ -8,20 +8,52 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
-const createWarehouseToolName = "erp.create_warehouse"
+const (
+	createWarehouseToolName = "erp.create_warehouse"
+	listWarehousesToolName  = "erp.list_warehouses"
+)
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != createWarehouseToolName {
+	switch name {
+	case listWarehousesToolName:
+		output, err := m.executeListWarehousesTool(ctx)
+		return output, true, err
+	case createWarehouseToolName:
+		output, err := m.executeCreateWarehouseTool(ctx, input)
+		return output, true, err
+	default:
 		return nil, false, nil
 	}
-	output, err := m.executeCreateWarehouseTool(ctx, input)
-	return output, true, err
+}
+
+func (m *Module) executeListWarehousesTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	ownerID := tenant.ResolveOwnerID(ctx, authUser.BusinessID, authUser.UserID)
+	warehouses, err := m.service.ListWarehouses(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(warehouses))
+	for _, warehouse := range warehouses {
+		payloads = append(payloads, warehouseToolPayload(warehouse))
+	}
+
+	return map[string]any{
+		"warehouses": payloads,
+		"returned":   len(payloads),
+	}, nil
 }
 
 func (m *Module) executeCreateWarehouseTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -100,6 +132,22 @@ func firstWarehouseToolValue(input map[string]any, keys ...string) any {
 		return value
 	}
 	return nil
+}
+
+func warehouseToolPayload(warehouse domain.Warehouse) map[string]any {
+	return map[string]any{
+		"id":           warehouse.ID,
+		"name":         warehouse.Name,
+		"address":      warehouse.Address,
+		"city":         warehouse.City,
+		"country":      warehouse.Country,
+		"manager_name": warehouse.ManagerName,
+		"capacity":     warehouse.Capacity,
+		"is_default":   warehouse.IsDefault,
+		"is_active":    warehouse.IsActive,
+		"created_at":   warehouseToolTime(warehouse.CreatedAt),
+		"updated_at":   warehouseToolTime(warehouse.UpdatedAt),
+	}
 }
 
 func warehouseToolNonNegativeInt64(value any) (int64, error) {
@@ -194,4 +242,11 @@ func warehouseToolString(value any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func warehouseToolTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format(time.RFC3339)
 }
