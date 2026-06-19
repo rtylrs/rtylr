@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/platform/aicache"
@@ -37,6 +38,14 @@ type QuotaService interface {
 
 const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
 const maxSessionTitleRunes = 80
+
+const (
+	cachedReplaySoftChunkRunes = 42
+	cachedReplayMaxChunkRunes  = 72
+	cachedReplayMinDelay       = 22 * time.Millisecond
+	cachedReplayMaxDelay       = 85 * time.Millisecond
+	cachedReplayTargetDuration = 2300 * time.Millisecond
+)
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
 
@@ -487,12 +496,12 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 		return
 	}
 
-	runes := []rune(cached.Response)
 	var fullResponse strings.Builder
 	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse)
 
-	const chunkRunes = 360
-	for i := 0; i < len(runes); i += chunkRunes {
+	chunks := cachedReplayChunks(cached.Response)
+	replayDelay := cachedReplayDelay(len(chunks))
+	for i, chunk := range chunks {
 		select {
 		case <-clientGone:
 			return
@@ -501,11 +510,10 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 		default:
 		}
 
-		end := i + chunkRunes
-		if end > len(runes) {
-			end = len(runes)
+		if err := renderer.AppendText(chunk); err != nil {
+			return
 		}
-		if err := renderer.AppendText(string(runes[i:end])); err != nil {
+		if i < len(chunks)-1 && !waitCachedReplay(ctx, clientGone, replayDelay) {
 			return
 		}
 	}
@@ -530,6 +538,91 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 		EstimatedSavings: cached.TotalTokens(),
 		LatencyMs:        time.Since(started).Milliseconds(),
 	})
+}
+
+func cachedReplayChunks(text string) []string {
+	runes := []rune(text)
+	if len(runes) == 0 {
+		return nil
+	}
+
+	chunks := make([]string, 0, (len(runes)/cachedReplaySoftChunkRunes)+1)
+	for start := 0; start < len(runes); {
+		end := cachedReplayChunkEnd(runes, start)
+		chunks = append(chunks, string(runes[start:end]))
+		start = end
+	}
+	return chunks
+}
+
+func cachedReplayChunkEnd(runes []rune, start int) int {
+	remaining := len(runes) - start
+	if remaining <= cachedReplaySoftChunkRunes {
+		return len(runes)
+	}
+
+	soft := start + cachedReplaySoftChunkRunes
+	maxEnd := start + cachedReplayMaxChunkRunes
+	if maxEnd > len(runes) {
+		maxEnd = len(runes)
+	}
+
+	for i := soft; i < maxEnd; i++ {
+		if cachedReplayBoundary(runes[i]) {
+			return consumeReplayBoundary(runes, i+1)
+		}
+	}
+	for i := soft; i > start; i-- {
+		if cachedReplayBoundary(runes[i]) {
+			return consumeReplayBoundary(runes, i+1)
+		}
+	}
+	return maxEnd
+}
+
+func cachedReplayBoundary(r rune) bool {
+	if unicode.IsSpace(r) {
+		return true
+	}
+	return strings.ContainsRune(".,;:!?)]}", r)
+}
+
+func consumeReplayBoundary(runes []rune, end int) int {
+	for end < len(runes) && unicode.IsSpace(runes[end]) {
+		end++
+	}
+	return end
+}
+
+func cachedReplayDelay(chunkCount int) time.Duration {
+	if chunkCount <= 1 {
+		return 0
+	}
+	delay := cachedReplayTargetDuration / time.Duration(chunkCount)
+	if delay < cachedReplayMinDelay {
+		return cachedReplayMinDelay
+	}
+	if delay > cachedReplayMaxDelay {
+		return cachedReplayMaxDelay
+	}
+	return delay
+}
+
+func waitCachedReplay(ctx context.Context, clientGone chan bool, delay time.Duration) bool {
+	if delay <= 0 {
+		return true
+	}
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+
+	select {
+	case <-timer.C:
+		return true
+	case <-clientGone:
+		return false
+	case <-ctx.Done():
+		return false
+	}
 }
 
 func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult) {

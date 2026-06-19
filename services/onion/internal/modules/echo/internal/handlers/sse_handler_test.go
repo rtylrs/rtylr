@@ -179,6 +179,35 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 	}
 }
 
+func TestCachedReplayChunksPreserveTextAndSplitNaturally(t *testing.T) {
+	text := "Here is the first cached sentence. Here is the second cached sentence, with enough words to replay in more than one visible delta. Final."
+
+	chunks := cachedReplayChunks(text)
+	if len(chunks) < 2 {
+		t.Fatalf("expected cached replay to split text into visible chunks, got %d", len(chunks))
+	}
+	if strings.Join(chunks, "") != text {
+		t.Fatalf("cached replay chunks changed text: %#v", chunks)
+	}
+	for i, chunk := range chunks[:len(chunks)-1] {
+		if len([]rune(chunk)) > cachedReplayMaxChunkRunes {
+			t.Fatalf("chunk %d too large: %q", i, chunk)
+		}
+	}
+}
+
+func TestCachedReplayDelayIsBounded(t *testing.T) {
+	if got := cachedReplayDelay(1); got != 0 {
+		t.Fatalf("single chunk delay = %s, want 0", got)
+	}
+	if got := cachedReplayDelay(3); got != cachedReplayMaxDelay {
+		t.Fatalf("short replay delay = %s, want %s", got, cachedReplayMaxDelay)
+	}
+	if got := cachedReplayDelay(500); got != cachedReplayMinDelay {
+		t.Fatalf("long replay delay = %s, want %s", got, cachedReplayMinDelay)
+	}
+}
+
 func TestStreamRendererExtractsWriteToolProposal(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}
