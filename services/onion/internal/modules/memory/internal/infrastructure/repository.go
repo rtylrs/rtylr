@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	sqlc "github.com/voxire/onion/internal/modules/memory/internal/infrastructure/persistence/sqlc"
@@ -16,6 +17,8 @@ var (
 	ErrDatabasePoolNotAvailable = errors.New("database pool not available")
 	ErrChatSessionNotFound      = errors.New("chat session not found")
 )
+
+const maxDerivedChatTitleRunes = 80
 
 type Repository struct {
 	queries *sqlc.Queries
@@ -214,10 +217,58 @@ func (r *Repository) ListUserSessions(ctx context.Context, userID, limit, offset
 		if fromRowsErr := item.FromRows(row); fromRowsErr != nil {
 			return nil, fromRowsErr
 		}
+		if shouldDeriveChatTitle(item.Title) {
+			title, titleErr := r.firstUserMessageTitle(ctx, item.SessionID, userID)
+			if titleErr != nil {
+				logger.Ctx(ctx).Debug("Failed to derive chat title from first user message", logger.Error(titleErr))
+			} else if title != "" {
+				item.Title = title
+			}
+		}
 		results = append(results, item)
 	}
 
 	return results, nil
+}
+
+func shouldDeriveChatTitle(title string) bool {
+	switch strings.TrimSpace(title) {
+	case "", "Auto-generated session", "Untitled chat":
+		return true
+	default:
+		return false
+	}
+}
+
+func titleFromFirstUserMessage(content string) string {
+	title := strings.Join(strings.Fields(content), " ")
+	if title == "" {
+		return ""
+	}
+
+	runes := []rune(title)
+	if len(runes) <= maxDerivedChatTitleRunes {
+		return title
+	}
+	return string(runes[:maxDerivedChatTitleRunes]) + "..."
+}
+
+func (r *Repository) firstUserMessageTitle(ctx context.Context, sessionID string, userID int) (string, error) {
+	var content string
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT content
+		FROM conversation_messages
+		WHERE session_id = ? AND user_id = ? AND role = 'user'
+		ORDER BY created_at ASC, id ASC
+		LIMIT 1
+	`, sessionID, userID).Scan(&content)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return titleFromFirstUserMessage(content), nil
 }
 
 func (r *Repository) GetSessionMessages(ctx context.Context, sessionID string) ([]domain.ConversationMessage, error) {

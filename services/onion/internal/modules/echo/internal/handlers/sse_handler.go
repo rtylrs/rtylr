@@ -36,6 +36,7 @@ type QuotaService interface {
 }
 
 const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
+const maxSessionTitleRunes = 80
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
 
@@ -358,7 +359,7 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 	if req.SessionID == "" {
 		log.Info("Creating new session for user", logger.Int("user_id", int(req.UserID)))
 
-		sessionID, err := h.MemoryService.CreateSession(ctx, int(req.UserID), "Auto-generated session")
+		sessionID, err := h.MemoryService.CreateSession(ctx, int(req.UserID), sessionTitleFromPrompt(req.Prompt))
 		if err != nil {
 			log.Error("Failed to create session", logger.Error(err), logger.Int("user_id", int(req.UserID)))
 
@@ -388,6 +389,19 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 	log.Info("Message stored successfully")
 
 	return nil
+}
+
+func sessionTitleFromPrompt(prompt string) string {
+	title := strings.Join(strings.Fields(prompt), " ")
+	if title == "" {
+		return "New chat"
+	}
+
+	runes := []rune(title)
+	if len(runes) <= maxSessionTitleRunes {
+		return title
+	}
+	return string(runes[:maxSessionTitleRunes]) + "..."
 }
 
 func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest, mode CaretMode) (string, error) {
