@@ -2,13 +2,16 @@ package aicache
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -30,10 +33,14 @@ const (
 )
 
 const (
-	cacheNamespace    = "ai_response_exact"
-	defaultExactTTL   = 30 * time.Minute
-	maxRecentEvents   = 100
-	defaultModeReason = "exact cache is enabled for tenant-scoped replay"
+	cacheNamespace     = "ai_response_exact"
+	analyticsNamespace = "ai_response_analytics"
+	analyticsEventsID  = "events"
+	defaultExactTTL    = 30 * time.Minute
+	analyticsEventTTL  = 30 * 24 * time.Hour
+	maxAnalyticsEvents = 5000
+	maxRecentEvents    = 100
+	defaultModeReason  = "exact cache is enabled for tenant-scoped replay"
 )
 
 type ExactPolicy struct {
@@ -97,6 +104,11 @@ type Event struct {
 	LatencyMs        int64     `json:"latency_ms,omitempty"`
 }
 
+type analyticsEventRecord struct {
+	ID    string `json:"id"`
+	Event Event  `json:"event"`
+}
+
 type Totals struct {
 	Lookups        int64 `json:"lookups"`
 	Hits           int64 `json:"hits"`
@@ -139,7 +151,14 @@ type collectorState struct {
 	recent   []Event
 }
 
-var collector = newCollector()
+var (
+	collector                  = newCollector()
+	persistentAnalyticsEnabled atomic.Bool
+)
+
+func init() {
+	persistentAnalyticsEnabled.Store(true)
+}
 
 func newCollector() *collectorState {
 	return &collectorState{
@@ -254,54 +273,20 @@ func PutExact(ctx context.Context, key string, entry ExactResponse, ttl time.Dur
 }
 
 func Record(event Event) {
-	if event.At.IsZero() {
-		event.At = time.Now().UTC()
-	}
-	event.Mode = normalizeMode(event.Mode)
-	event.Outcome = strings.TrimSpace(event.Outcome)
-	if event.Outcome == "" {
-		event.Outcome = OutcomeError
-	}
+	event = normalizeEvent(event)
 
 	collector.mu.Lock()
-	defer collector.mu.Unlock()
+	collector.record(event)
+	collector.mu.Unlock()
 
-	collector.outcomes[event.Outcome]++
-	if event.Mode != "" {
-		collector.modes[event.Mode]++
-	}
-
-	switch event.Outcome {
-	case OutcomeHit:
-		collector.totals.Lookups++
-		collector.totals.Hits++
-		collector.totals.TokensSaved += int64(event.EstimatedSavings)
-	case OutcomeMiss:
-		collector.totals.Lookups++
-		collector.totals.Misses++
-	case OutcomeSkip:
-		collector.totals.Lookups++
-		collector.totals.Skips++
-	case OutcomeWrite:
-		collector.totals.Writes++
-		collector.totals.ProviderTokens += int64(event.ProviderTokens)
-		collector.totals.ResponseBytes += int64(event.ResponseChars)
-	case OutcomeError:
-		collector.totals.Errors++
-	}
-
-	if event.LatencyMs > 0 {
-		collector.totals.TotalLatencyMs += event.LatencyMs
-		collector.totals.LatencySamples++
-	}
-
-	collector.recent = append([]Event{event}, collector.recent...)
-	if len(collector.recent) > maxRecentEvents {
-		collector.recent = collector.recent[:maxRecentEvents]
-	}
+	persistAnalyticsEvent(event)
 }
 
 func Snapshot() AnalyticsSnapshot {
+	if snapshot, ok := persistentSnapshot(); ok {
+		return snapshot
+	}
+
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
 
@@ -339,10 +324,164 @@ func Snapshot() AnalyticsSnapshot {
 
 func ResetForTest() {
 	collector = newCollector()
+	persistentAnalyticsEnabled.Store(false)
+}
+
+func normalizeEvent(event Event) Event {
+	if event.At.IsZero() {
+		event.At = time.Now().UTC()
+	}
+	event.Mode = normalizeMode(event.Mode)
+	event.Outcome = strings.TrimSpace(event.Outcome)
+	if event.Outcome == "" {
+		event.Outcome = OutcomeError
+	}
+	return event
+}
+
+func (c *collectorState) record(event Event) {
+	c.outcomes[event.Outcome]++
+	if event.Mode != "" {
+		c.modes[event.Mode]++
+	}
+
+	switch event.Outcome {
+	case OutcomeHit:
+		c.totals.Lookups++
+		c.totals.Hits++
+		c.totals.TokensSaved += int64(event.EstimatedSavings)
+	case OutcomeMiss:
+		c.totals.Lookups++
+		c.totals.Misses++
+	case OutcomeSkip:
+		c.totals.Lookups++
+		c.totals.Skips++
+	case OutcomeWrite:
+		c.totals.Writes++
+		c.totals.ProviderTokens += int64(event.ProviderTokens)
+		c.totals.ResponseBytes += int64(event.ResponseChars)
+	case OutcomeError:
+		c.totals.Errors++
+	}
+
+	if event.LatencyMs > 0 {
+		c.totals.TotalLatencyMs += event.LatencyMs
+		c.totals.LatencySamples++
+	}
+
+	c.recent = append([]Event{event}, c.recent...)
+	if len(c.recent) > maxRecentEvents {
+		c.recent = c.recent[:maxRecentEvents]
+	}
+}
+
+func persistAnalyticsEvent(event Event) {
+	if !persistentAnalyticsEnabled.Load() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	store := analyticsEventsStore()
+	score := float64(event.At.UnixMilli())
+
+	store.SortedSetAdd(ctx, analyticsEventsID, analyticsEventRecord{
+		ID:    analyticsEventID(event),
+		Event: event,
+	}, score, cacher.WithExpiry(ctx, analyticsEventTTL))
+
+	cutoff := time.Now().UTC().Add(-analyticsEventTTL).UnixMilli()
+	store.SortedSetRemoveRangeUpToScore(ctx, analyticsEventsID, float64(cutoff))
+	store.SortedSetRemoveRangeByRank(ctx, analyticsEventsID, 0, -int64(maxAnalyticsEvents+1))
+}
+
+func persistentSnapshot() (AnalyticsSnapshot, bool) {
+	if !persistentAnalyticsEnabled.Load() {
+		return AnalyticsSnapshot{}, false
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	records := analyticsEventsStore().SortedSetGetAll(ctx, analyticsEventsID)
+	if len(records) == 0 {
+		return AnalyticsSnapshot{}, false
+	}
+
+	cutoff := time.Now().UTC().Add(-analyticsEventTTL)
+	events := make([]Event, 0, len(records))
+	for _, record := range records {
+		event := record.Event
+		if event.At.IsZero() || event.Outcome == "" {
+			continue
+		}
+		if event.At.Before(cutoff) {
+			continue
+		}
+		events = append(events, normalizeEvent(event))
+	}
+	if len(events) == 0 {
+		return AnalyticsSnapshot{}, false
+	}
+
+	return snapshotFromEvents(events), true
+}
+
+func snapshotFromEvents(events []Event) AnalyticsSnapshot {
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].At.After(events[j].At)
+	})
+
+	state := newCollector()
+	state.started = events[len(events)-1].At
+	for i := len(events) - 1; i >= 0; i-- {
+		state.record(normalizeEvent(events[i]))
+	}
+
+	recent := make([]Event, len(state.recent))
+	copy(recent, state.recent)
+
+	hitMiss := state.totals.Hits + state.totals.Misses
+	var hitRate float64
+	if hitMiss > 0 {
+		hitRate = float64(state.totals.Hits) / float64(hitMiss)
+	}
+
+	var avgLatency int64
+	if state.totals.LatencySamples > 0 {
+		avgLatency = state.totals.TotalLatencyMs / state.totals.LatencySamples
+	}
+
+	return AnalyticsSnapshot{
+		GeneratedAt:       time.Now().UTC(),
+		WindowStartedAt:   state.started,
+		CacheVersion:      CacheVersion,
+		ExactCacheEnabled: ExactCacheEnabled(),
+		HitRate:           hitRate,
+		AverageLatencyMs:  avgLatency,
+		Totals:            state.totals,
+		Outcomes:          breakdowns(state.outcomes),
+		Modes:             breakdowns(state.modes),
+		Policies:          PolicySnapshot(),
+		Recent:            recent,
+	}
+}
+
+func analyticsEventID(event Event) string {
+	var entropy [8]byte
+	if _, err := rand.Read(entropy[:]); err != nil {
+		return fmt.Sprintf("%020d-%s-%s", event.At.UnixNano(), event.Outcome, event.CacheKeyPreview)
+	}
+	return fmt.Sprintf("%020d-%s", event.At.UnixNano(), hex.EncodeToString(entropy[:]))
 }
 
 func exactStore() cacher.Cache[ExactResponse] {
 	return cacher.OfWithNamespace[ExactResponse](cacheNamespace)
+}
+
+func analyticsEventsStore() cacher.Cache[analyticsEventRecord] {
+	return cacher.OfWithNamespace[analyticsEventRecord](analyticsNamespace)
 }
 
 func normalizeMode(mode string) string {

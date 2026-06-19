@@ -3,6 +3,7 @@ package aicache
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestExactKeyIsStableAndRedactsPrompt(t *testing.T) {
@@ -142,5 +143,33 @@ func TestSnapshotAggregatesEvents(t *testing.T) {
 	}
 	if len(snap.Recent) != 4 {
 		t.Fatalf("recent events = %d, want 4", len(snap.Recent))
+	}
+}
+
+func TestSnapshotFromEventsAggregatesPersistedEvents(t *testing.T) {
+	now := time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC)
+	events := []Event{
+		{At: now.Add(-1 * time.Minute), Outcome: OutcomeHit, Mode: ModeAsk, EstimatedSavings: 42, LatencyMs: 5},
+		{At: now.Add(-3 * time.Minute), Outcome: OutcomeMiss, Mode: ModeAsk, LatencyMs: 15},
+		{At: now.Add(-2 * time.Minute), Outcome: OutcomeWrite, Mode: ModeAsk, ProviderTokens: 42, ResponseChars: 100, LatencyMs: 40},
+		{At: now.Add(-4 * time.Minute), Outcome: OutcomeSkip, Mode: ModeAgent, Reason: "agent mode"},
+	}
+
+	snap := snapshotFromEvents(events)
+
+	if !snap.WindowStartedAt.Equal(now.Add(-4 * time.Minute)) {
+		t.Fatalf("window start = %s, want %s", snap.WindowStartedAt, now.Add(-4*time.Minute))
+	}
+	if snap.Totals.Lookups != 3 || snap.Totals.Hits != 1 || snap.Totals.Misses != 1 || snap.Totals.Skips != 1 {
+		t.Fatalf("unexpected lookup totals: %+v", snap.Totals)
+	}
+	if snap.Totals.Writes != 1 || snap.Totals.ProviderTokens != 42 || snap.Totals.ResponseBytes != 100 {
+		t.Fatalf("unexpected write totals: %+v", snap.Totals)
+	}
+	if snap.Totals.TokensSaved != 42 || snap.HitRate != 0.5 || snap.AverageLatencyMs != 20 {
+		t.Fatalf("unexpected derived metrics: hit_rate=%f avg_latency=%d totals=%+v", snap.HitRate, snap.AverageLatencyMs, snap.Totals)
+	}
+	if len(snap.Recent) != 4 || snap.Recent[0].Outcome != OutcomeHit || snap.Recent[3].Outcome != OutcomeSkip {
+		t.Fatalf("recent events not sorted newest first: %+v", snap.Recent)
 	}
 }
