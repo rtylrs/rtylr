@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { uploadAsset } from '@voxire/api';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, cdnImageUrl } from '@voxire/config';
 import {
   ExternalLink,
   RotateCcw,
@@ -557,7 +557,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   </div>
                   {heroImageUrl && (
                     <img
-                      src={heroImageUrl}
+                      src={cdnImageUrl(heroImageUrl)}
                       alt="Hero preview"
                       className="mt-3 h-40 w-full rounded-md object-cover"
                       style={{ background: '#1f1f1f' }}
@@ -569,7 +569,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   <Input value={faviconUrl} onChange={setFaviconUrl} type="url" />
                   {faviconUrl && (
                     <img
-                      src={faviconUrl}
+                      src={cdnImageUrl(faviconUrl)}
                       alt="Favicon preview"
                       className="mt-3 h-10 w-10 rounded"
                       style={{ background: '#1f1f1f' }}

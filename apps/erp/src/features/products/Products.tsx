@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
+import { cdnImageUrl } from '@voxire/config';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
@@ -257,75 +258,82 @@ const Products: React.FC = () => {
             <span>Status</span>
           </div>
           <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
-            {products.map((p) => (
-              <div
-                key={p.id}
-                className="grid px-4 py-3 items-center transition-colors"
-                style={{
-                  gridTemplateColumns: '0.2fr 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.has(p.id)}
-                  onChange={() => toggle(p.id)}
-                  className="cursor-pointer"
-                />
-                <div className="flex min-w-0 items-center gap-3">
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg"
-                    style={{ background: 'var(--hub-hover)' }}
-                  >
-                    {p.imageUrl ? (
-                      <img
-                        src={p.imageUrl}
-                        alt={p.name}
-                        className="h-full w-full bg-white p-1 object-contain"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <Package size={16} style={{ color: 'var(--hub-text-dim)' }} />
-                    )}
-                  </div>
-                  <Link
-                    to="/products/$id"
-                    params={{ id: String(p.id) }}
-                    className="min-w-0 truncate text-sm font-medium hover:underline"
-                    style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
-                  >
-                    {p.name}
-                  </Link>
-                </div>
-                <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
-                  {p.sku}
-                </span>
-                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                  {p.category}
-                </span>
-                <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                  {p.brand || '-'}
-                </span>
-                <span
-                  className="text-sm font-semibold"
+            {products.map((p) => {
+              const imageUrl = cdnImageUrl(p.imageUrl);
+              return (
+                <div
+                  key={p.id}
+                  className="grid px-4 py-3 items-center transition-colors"
                   style={{
-                    color:
-                      p.stock === 0 ? '#f87171' : p.stock < p.lowStock ? AMBER : 'var(--hub-text)',
+                    gridTemplateColumns: '0.2fr 2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
                   }}
                 >
-                  {p.stock}
-                </span>
-                <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {formatCurrency(p.salePrice)}
-                </span>
-                <StockBadge stock={p.stock} lowStock={p.lowStock} />
-              </div>
-            ))}
+                  <input
+                    type="checkbox"
+                    checked={selected.has(p.id)}
+                    onChange={() => toggle(p.id)}
+                    className="cursor-pointer"
+                  />
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg"
+                      style={{ background: 'var(--hub-hover)' }}
+                    >
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={p.name}
+                          className="h-full w-full bg-white p-1 object-contain"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Package size={16} style={{ color: 'var(--hub-text-dim)' }} />
+                      )}
+                    </div>
+                    <Link
+                      to="/products/$id"
+                      params={{ id: String(p.id) }}
+                      className="min-w-0 truncate text-sm font-medium hover:underline"
+                      style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
+                    >
+                      {p.name}
+                    </Link>
+                  </div>
+                  <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
+                    {p.sku}
+                  </span>
+                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {p.category}
+                  </span>
+                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {p.brand || '-'}
+                  </span>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{
+                      color:
+                        p.stock === 0
+                          ? '#f87171'
+                          : p.stock < p.lowStock
+                            ? AMBER
+                            : 'var(--hub-text)',
+                    }}
+                  >
+                    {p.stock}
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {formatCurrency(p.salePrice)}
+                  </span>
+                  <StockBadge stock={p.stock} lowStock={p.lowStock} />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

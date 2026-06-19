@@ -1,4 +1,5 @@
 import React from 'react';
+import { cdnImageUrl } from '@voxire/config';
 import { ChevronDown } from 'lucide-react';
 
 import type { Section, PerkItem, FaqItem, ValueItem } from '../../shared/lib/types';
@@ -98,28 +99,29 @@ const PerksBlock: React.FC<{ section: Section }> = ({ section }) => {
   );
 };
 
-const CultureBlock: React.FC<{ section: Section }> = ({ section }) => (
-  <section className="grid gap-10 sm:grid-cols-2 sm:items-center">
-    {section.mediaUrl && (
-      <img src={section.mediaUrl} alt="" className="h-80 w-full rounded-lg object-cover" />
-    )}
-    <div className={section.mediaUrl ? '' : 'sm:col-span-2'}>
-      {section.title && (
-        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          {section.title}
-        </h2>
-      )}
-      {section.body && (
-        <p
-          className="mt-4 whitespace-pre-wrap text-base leading-relaxed"
-          style={{ color: 'var(--recruit-fg)' }}
-        >
-          {section.body}
-        </p>
-      )}
-    </div>
-  </section>
-);
+const CultureBlock: React.FC<{ section: Section }> = ({ section }) => {
+  const mediaUrl = cdnImageUrl(section.mediaUrl);
+  return (
+    <section className="grid gap-10 sm:grid-cols-2 sm:items-center">
+      {mediaUrl && <img src={mediaUrl} alt="" className="h-80 w-full rounded-lg object-cover" />}
+      <div className={mediaUrl ? '' : 'sm:col-span-2'}>
+        {section.title && (
+          <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            {section.title}
+          </h2>
+        )}
+        {section.body && (
+          <p
+            className="mt-4 whitespace-pre-wrap text-base leading-relaxed"
+            style={{ color: 'var(--recruit-fg)' }}
+          >
+            {section.body}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+};
 
 const TestimonialBlock: React.FC<{ section: Section }> = ({ section }) => (
   <section className="mx-auto max-w-2xl text-center">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Package } from 'lucide-react';
+import { cdnImageUrl } from '@voxire/config';
 
 interface ImageGalleryProps {
   images: string[];
@@ -9,6 +10,7 @@ interface ImageGalleryProps {
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' }) => {
   const [selected, setSelected] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const selectedImageUrl = cdnImageUrl(images[selected]);
 
   if (!images || images.length === 0) {
     return (
@@ -29,22 +31,27 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
           className="w-full h-64 rounded-xl overflow-hidden"
           style={{ border: '1px solid var(--hub-border)' }}
         >
-          <img src={images[selected]} alt={name} className="w-full h-full object-cover" />
+          {selectedImageUrl && (
+            <img src={selectedImageUrl} alt={name} className="w-full h-full object-cover" />
+          )}
         </button>
         {images.length > 1 && (
           <div className="flex gap-2">
-            {images.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setSelected(i)}
-                className="w-16 h-16 rounded-lg overflow-hidden shrink-0"
-                style={{
-                  border: selected === i ? '2px solid #f59e0b' : '1px solid var(--hub-border)',
-                }}
-              >
-                <img src={img} alt="" className="w-full h-full object-cover" />
-              </button>
-            ))}
+            {images.map((img, i) => {
+              const imageUrl = cdnImageUrl(img);
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelected(i)}
+                  className="w-16 h-16 rounded-lg overflow-hidden shrink-0"
+                  style={{
+                    border: selected === i ? '2px solid #f59e0b' : '1px solid var(--hub-border)',
+                  }}
+                >
+                  {imageUrl && <img src={imageUrl} alt="" className="w-full h-full object-cover" />}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -60,7 +67,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
           >
             <X size={16} />
           </button>
-          <img src={images[selected]} alt={name} className="max-w-full max-h-full rounded-xl" />
+          {selectedImageUrl && (
+            <img src={selectedImageUrl} alt={name} className="max-w-full max-h-full rounded-xl" />
+          )}
         </div>
       )}
     </>

@@ -41,7 +41,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
         price: i.salePrice,
         currency: menu.business.currency,
         description: undefined,
-        image: undefined,
+        image: i.imageUrl,
       }));
     return [{ id: 'all', name: 'Menu', items }];
   }, [menu]);

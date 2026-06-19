@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@voxire/ui';
+import { cdnImageUrl } from '@voxire/config';
 import type { Customization } from '../../shared/lib/types';
 
 interface HeaderProps {
@@ -12,6 +13,8 @@ interface HeaderProps {
 // the user-supplied header_html inject raw markup (e.g. a nav back to
 // the main site) without the template having to know about it.
 const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
+  const logoUrl = cdnImageUrl(customization.logoUrl);
+
   return (
     <header
       className="border-b"
@@ -35,12 +38,8 @@ const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
       <div
         className={cn('mx-auto flex max-w-5xl items-center gap-3 px-6', compact ? 'py-4' : 'py-6')}
       >
-        {customization.logoUrl ? (
-          <img
-            src={customization.logoUrl}
-            alt={`${customization.brandName} logo`}
-            className="h-8 w-auto"
-          />
+        {logoUrl ? (
+          <img src={logoUrl} alt={`${customization.brandName} logo`} className="h-8 w-auto" />
         ) : (
           <div
             className="flex h-8 w-8 items-center justify-center rounded-md text-sm font-semibold text-white"

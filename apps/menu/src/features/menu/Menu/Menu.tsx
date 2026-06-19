@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
+import { cdnImageUrl } from '@voxire/config';
 import {
   GridLayout,
   ListLayout,
@@ -50,7 +51,7 @@ function transformCategories(rawItems: RawCategory[]): MenuCategoryData[] {
         name: item.name ?? '',
         description: item.description,
         price: item.price ?? 0,
-        image: item.image,
+        image: cdnImageUrl(item.image),
         currency: 'USD',
         badges: item.badges ?? [],
         available: item.available !== false,
@@ -89,8 +90,8 @@ const Menu: React.FC = () => {
 
       setBusiness({
         name: details.business?.name ?? 'Menu',
-        logo: details.business?.logo,
-        coverImage: details.business?.coverImage,
+        logo: cdnImageUrl(details.business?.logo),
+        coverImage: cdnImageUrl(details.business?.coverImage),
         description: details.business?.description,
         address: details.business?.address,
         phone: details.business?.phone,

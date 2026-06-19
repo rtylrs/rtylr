@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { cdnImageUrl } from '@voxire/config';
 import api from '../lib/api';
 
 /**
@@ -27,6 +28,7 @@ export interface PublicMenuItem {
   name: string;
   sku: string;
   salePrice: number;
+  imageUrl?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -48,6 +50,8 @@ interface MenuApiResponse {
     name: string;
     sku: string;
     sale_price: number;
+    image?: string;
+    image_url?: string;
     is_active: boolean;
     created_at: string;
     updated_at: string;
@@ -61,7 +65,7 @@ async function fetchPublicBusiness(businessId: number): Promise<PublicBusiness> 
   return {
     id: res.data.id,
     name: res.data.name,
-    logoUrl: res.data.logo_url,
+    logoUrl: cdnImageUrl(res.data.logo_url) ?? '',
     currency: res.data.currency,
     timezone: res.data.timezone,
   };
@@ -81,6 +85,7 @@ async function fetchPublicMenu(
     name: i.name,
     sku: i.sku,
     salePrice: i.sale_price,
+    imageUrl: cdnImageUrl(i.image_url || i.image),
     isActive: i.is_active,
     createdAt: i.created_at,
     updatedAt: i.updated_at,
@@ -142,7 +147,7 @@ export function usePublicBusinessBySlug(slug: string | null): {
           id: res.data.business.id,
           name: res.data.business.name,
           slug: res.data.business.slug,
-          logoUrl: res.data.business.logo_url,
+          logoUrl: cdnImageUrl(res.data.business.logo_url) ?? '',
           currency: res.data.business.currency,
           timezone: res.data.business.timezone,
         },

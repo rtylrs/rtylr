@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Package } from 'lucide-react';
+import { cdnImageUrl } from '@voxire/config';
 import { Product } from '../services/erpApi';
 import { formatCurrency } from '../lib/format';
 import StockBadge from './StockBadge';
@@ -13,6 +14,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, compact }) => {
+  const imageUrl = cdnImageUrl(product.imageUrl);
   return (
     <div
       className="rounded-xl p-3 transition-colors"
@@ -34,9 +36,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
           className="flex items-center justify-center h-12 w-12 rounded-lg shrink-0"
           style={{ background: 'var(--hub-hover)' }}
         >
-          {product.imageUrl ? (
+          {imageUrl ? (
             <img
-              src={product.imageUrl}
+              src={imageUrl}
               alt={product.name}
               className="h-12 w-12 rounded-lg bg-white p-1 object-contain"
             />

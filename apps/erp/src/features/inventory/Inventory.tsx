@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
+import { cdnImageUrl } from '@voxire/config';
 import { Package, Search, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
@@ -174,6 +175,7 @@ const Inventory: React.FC = () => {
               ) : (
                 products.map((product) => {
                   const sc = statusConfig[product.status];
+                  const imageUrl = cdnImageUrl(product.imageUrl);
                   return (
                     <div
                       key={product.id}
@@ -191,9 +193,9 @@ const Inventory: React.FC = () => {
                           className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg"
                           style={{ background: 'var(--hub-hover)' }}
                         >
-                          {product.imageUrl ? (
+                          {imageUrl ? (
                             <img
-                              src={product.imageUrl}
+                              src={imageUrl}
                               alt={product.name}
                               className="h-full w-full bg-white p-1 object-contain"
                               loading="lazy"

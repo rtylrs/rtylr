@@ -45,7 +45,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         price: i.salePrice,
         currency: data.business.currency,
         description: undefined,
-        image: undefined,
+        image: i.imageUrl,
         badges: [],
         available: i.isActive,
       }));

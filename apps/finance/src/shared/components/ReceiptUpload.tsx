@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { uploadAsset } from '@voxire/api';
+import { cdnImageUrl } from '@voxire/config';
 import { Upload, FileImage, X } from 'lucide-react';
 
 interface ReceiptUploadProps {
@@ -74,7 +75,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
       ) : value ? (
         <div style={{ position: 'relative' }}>
           <img
-            src={value}
+            src={cdnImageUrl(value)}
             alt="Receipt"
             style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 8 }}
           />

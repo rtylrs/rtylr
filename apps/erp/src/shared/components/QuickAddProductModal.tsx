@@ -3,6 +3,7 @@ import { X, PackagePlus, Plus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap, uploadAsset } from '@voxire/api';
+import { cdnImageUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
 import { useCreateProduct, useUpdateProduct } from '../../features/products/useProducts';
 import { erpApi, type CreateProductInput, type Product } from '../services/erpApi';
@@ -423,7 +424,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           </div>
           {imageUrl && (
             <img
-              src={imageUrl}
+              src={cdnImageUrl(imageUrl)}
               alt=""
               className="h-28 w-full rounded-lg object-contain"
               style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}

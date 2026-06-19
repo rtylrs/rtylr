@@ -1,4 +1,5 @@
 import { Spinner, HelmetContainer } from '@voxire/components';
+import { cdnImageUrl } from '@voxire/config';
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useMenuStore } from '../../shared/stores/menuStore';
@@ -46,33 +47,36 @@ const Menu: React.FC<{}> = () => {
   }, [menuId]);
 
   const renderItems = (items: StoreItem[]) => {
-    return items.map((item) => (
-      <div
-        key={item._id}
-        className="flex items-center justify-between p-3 border border-black/10 rounded-lg bg-white"
-      >
-        <div className="flex items-center gap-3">
-          {item?.details?.image && (
-            <img
-              src={item.details.image}
-              alt={item.details.name}
-              className="w-12 h-12 rounded-lg object-cover"
-            />
-          )}
-          <div>
-            <p className="text-sm font-medium text-primary">{item?.details?.name}</p>
-            {item?.details?.description && (
-              <p className="text-xs text-muted line-clamp-1">{item.details.description}</p>
+    return items.map((item) => {
+      const imageUrl = cdnImageUrl(item?.details?.image);
+      return (
+        <div
+          key={item._id}
+          className="flex items-center justify-between p-3 border border-black/10 rounded-lg bg-white"
+        >
+          <div className="flex items-center gap-3">
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt={item?.details?.name ?? ''}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
             )}
+            <div>
+              <p className="text-sm font-medium text-primary">{item?.details?.name}</p>
+              {item?.details?.description && (
+                <p className="text-xs text-muted line-clamp-1">{item.details.description}</p>
+              )}
+            </div>
           </div>
+          {item?.details?.price !== undefined && (
+            <span className="text-sm font-semibold text-primary">
+              ${(item.details.price / 100).toFixed(2)}
+            </span>
+          )}
         </div>
-        {item?.details?.price !== undefined && (
-          <span className="text-sm font-semibold text-primary">
-            ${(item.details.price / 100).toFixed(2)}
-          </span>
-        )}
-      </div>
-    ));
+      );
+    });
   };
 
   const renderFlatItem = (item: StoreItem) => (
@@ -107,9 +111,9 @@ const Menu: React.FC<{}> = () => {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-primary">{category?.details?.name}</span>
-            {category?.details?.icon && (
+            {cdnImageUrl(category?.details?.icon) && (
               <img
-                src={category?.details?.icon}
+                src={cdnImageUrl(category?.details?.icon)}
                 alt={category?.details?.name}
                 className="w-5 h-5 object-cover"
               />
@@ -143,9 +147,9 @@ const Menu: React.FC<{}> = () => {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-primary">{parentCategory?.details?.name}</span>
-            {parentCategory?.details?.icon && (
+            {cdnImageUrl(parentCategory?.details?.icon) && (
               <img
-                src={parentCategory?.details?.icon}
+                src={cdnImageUrl(parentCategory?.details?.icon)}
                 alt={parentCategory?.details?.name}
                 className="w-5 h-5 object-cover"
               />
@@ -202,11 +206,13 @@ const Menu: React.FC<{}> = () => {
                 </button>
               </div>
             </div>
-            <img
-              style={{ width: '50%', height: '50%', objectFit: 'cover' }}
-              src={item?.details?.banner?.bannerImage}
-              alt={item?.details?.banner?.title}
-            />
+            {cdnImageUrl(item?.details?.banner?.bannerImage) && (
+              <img
+                style={{ width: '50%', height: '50%', objectFit: 'cover' }}
+                src={cdnImageUrl(item?.details?.banner?.bannerImage)}
+                alt={item?.details?.banner?.title}
+              />
+            )}
           </div>
         );
       } else if (item.type === 'category') {
