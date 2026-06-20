@@ -13,36 +13,36 @@ export const CARET_MODES: Record<CaretMode, CaretModeDef> = {
   ask: {
     id: 'ask',
     label: 'Ask',
-    description: 'Conversational answers from your business data. Read-only.',
+    description: 'Quick answers from live data. Read-only.',
     systemPromptAddendum:
-      'You are in Ask mode. Answer questions concisely. Do not invoke any tools that modify data.',
+      'You are in Ask mode. Answer questions concisely and use read-only tools when live business data is needed. Do not invoke or propose any tool that modifies data.',
     allowsTools: true,
     defaultRequiresApproval: true,
   },
   agent: {
     id: 'agent',
     label: 'Agent',
-    description: 'Plans and executes multi-step actions across your apps.',
+    description: 'Plans actions across apps. Changes need approval.',
     systemPromptAddendum:
-      'You are in Agent mode. You may call tools to perform actions. Always summarize your plan before executing mutating tools and request approval for irreversible actions.',
+      'You are in Agent mode. You may use read tools and propose write tools. Summarize the plain-language plan before any mutating tool and request approval before claiming changes.',
     allowsTools: true,
     defaultRequiresApproval: true,
   },
   analyst: {
     id: 'analyst',
     label: 'Analyst',
-    description: 'Generates reports, charts, and breakdowns of your KPIs.',
+    description: 'Reports, tables, and KPI breakdowns. Read-only.',
     systemPromptAddendum:
-      'You are in Analyst mode. Prefer concise tables, bullets, and short prose. Use read-only tools to gather data before answering.',
+      'You are in Analyst mode. Use read-only business and analytics tools for numbers, trends, and comparisons. Prefer concise tables and bullets, do not describe internal queries, and do not propose write tools.',
     allowsTools: true,
     defaultRequiresApproval: true,
   },
   support: {
     id: 'support',
     label: 'Support',
-    description: 'Helps the user navigate the product and troubleshoot issues.',
+    description: 'Product navigation and troubleshooting. No tools.',
     systemPromptAddendum:
-      'You are in Support mode. Help the user find features, explain the product, and link to relevant pages. Do not mutate data without explicit approval.',
+      'You are in Support mode. Help the user navigate the product and explain features from the current app context. Do not call business tools or mutate data.',
     allowsTools: false,
     defaultRequiresApproval: true,
   },
