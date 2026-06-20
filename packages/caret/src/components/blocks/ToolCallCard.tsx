@@ -46,6 +46,16 @@ const detailPreStyle: React.CSSProperties = {
   color: caretTokens.textMuted,
 };
 
+const summaryStyle: React.CSSProperties = {
+  padding: '7px 9px',
+  background: 'rgba(255,255,255,0.025)',
+  border: `1px solid ${caretTokens.border}`,
+  borderRadius: caretRadius.sm,
+  color: caretTokens.textMuted,
+  fontFamily: 'inherit',
+  lineHeight: 1.45,
+};
+
 function targetForTool(name: string): string {
   const normalized = name.trim().toLowerCase();
   const match = TOOL_TARGETS.find(([pattern]) => pattern.test(normalized));
@@ -147,6 +157,13 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             <div style={detailLabelStyle}>details</div>
             <pre style={detailPreStyle}>{formatValue(call.input ?? {})}</pre>
           </div>
+
+          {call.summary && (
+            <div style={{ marginBottom: 8 }}>
+              <div style={detailLabelStyle}>summary</div>
+              <div style={summaryStyle}>{call.summary}</div>
+            </div>
+          )}
 
           {call.output !== undefined && (
             <div style={{ marginBottom: 8 }}>

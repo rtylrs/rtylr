@@ -42,6 +42,7 @@ export type {
   CaretModel,
   CaretModelDef,
 } from './types';
+export type { CaretPageContext, CaretPageContextValue } from './types/context';
 export { CARET_MODES, DEFAULT_MODE, CARET_MODELS, DEFAULT_MODEL } from './types';
 
 // Hooks

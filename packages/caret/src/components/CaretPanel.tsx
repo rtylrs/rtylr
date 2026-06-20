@@ -13,6 +13,7 @@ import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
 import type { CaretChatSummary } from '../types/chat';
+import type { CaretPageContext } from '../types/context';
 import type { ToolCallBlock } from '../types/message';
 import HeaderBar from './header/HeaderBar';
 import MessageList from './MessageList';
@@ -24,6 +25,7 @@ import { ChatList } from './sidebar';
 export interface CaretPanelProps {
   appId: string;
   systemContext?: string;
+  pageContext?: CaretPageContext;
   userId: number;
   apiBaseUrl: string;
   /** 'inline' renders inside a flex column the parent controls. */
@@ -61,7 +63,13 @@ function normalizeToolDecisionStatus(status: string): ToolCallBlock['status'] {
   }
 }
 
-const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseUrl, variant }) => {
+const CaretPanel: React.FC<CaretPanelProps> = ({
+  systemContext,
+  pageContext,
+  userId,
+  apiBaseUrl,
+  variant,
+}) => {
   useShortcuts();
   const {
     isOpen,
@@ -83,6 +91,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
     userId,
     apiBaseUrl,
     systemContext,
+    pageContext,
   });
   const { sessions } = useCaretSessions({ userId, apiBaseUrl });
   const loadChat = useLoadCaretChat({ userId, apiBaseUrl });

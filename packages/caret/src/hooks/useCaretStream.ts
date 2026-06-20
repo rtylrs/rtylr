@@ -4,11 +4,13 @@ import { useCaretSettingsStore } from '../stores/settingsStore';
 import { consumeSse } from '../protocol/sse';
 import type { CaretStreamEvent } from '../protocol/events';
 import { readAuthToken } from '../lib/auth';
+import type { CaretPageContext } from '../types/context';
 
 export interface UseCaretStreamParams {
   userId: number;
   apiBaseUrl: string;
   systemContext?: string;
+  pageContext?: CaretPageContext;
 }
 
 export interface UseCaretStreamResult {
@@ -25,6 +27,7 @@ export function useCaretStream({
   userId,
   apiBaseUrl,
   systemContext,
+  pageContext,
 }: UseCaretStreamParams): UseCaretStreamResult {
   const store = useCaretStore();
   const settings = useCaretSettingsStore();
@@ -74,6 +77,7 @@ export function useCaretStream({
             session_id: store.sessionId ?? '',
             user_id: userId,
             system_context: systemContext ?? '',
+            page_context: pageContext,
             mode: settings.mode,
           }),
         });
@@ -103,7 +107,7 @@ export function useCaretStream({
         abortRef.current = null;
       }
     },
-    [apiBaseUrl, userId, systemContext, settings.mode, store]
+    [apiBaseUrl, userId, systemContext, pageContext, settings.mode, store]
   );
 
   /** Translate one server event into store mutations. */
@@ -156,6 +160,7 @@ export function useCaretStream({
       case 'tool_result':
         store.setToolStatus(event.blockId, event.status, {
           output: event.output,
+          summary: event.summary,
           error: event.error,
         });
         break;

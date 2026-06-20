@@ -26,6 +26,7 @@ export type CaretStreamEvent =
       blockId: string;
       status: 'success' | 'error';
       output?: unknown;
+      summary?: string;
       error?: string;
     }
   | { type: 'message_end'; messageId: string }

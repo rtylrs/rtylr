@@ -7,6 +7,7 @@ export type {
   ToolCallBlock,
 } from './message';
 export type { CaretChat, CaretChatSummary } from './chat';
+export type { CaretPageContext, CaretPageContextValue } from './context';
 export type { CaretMode, CaretModeDef } from './mode';
 export { CARET_MODES, DEFAULT_MODE } from './mode';
 export type { CaretModel, CaretModelDef } from './model';
