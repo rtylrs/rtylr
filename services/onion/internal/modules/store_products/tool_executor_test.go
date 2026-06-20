@@ -58,6 +58,36 @@ func TestParseListStoreProductsToolInputRejectsBadPublished(t *testing.T) {
 	}
 }
 
+func TestParseGetStoreProductToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"store_product_id": int64(7)},
+		{"storefront_product_id": json.Number("7")},
+		{"id": "#7"},
+		{"id": "store-product-7"},
+		{"id": "store_product_7"},
+		{"product_id": "product-7"},
+		{"slug": "whey-protein"},
+		{"title": "Whey Protein"},
+	}
+
+	for _, input := range cases {
+		parsed, err := parseGetStoreProductToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetStoreProductToolInput(%v) returned error: %v", input, err)
+		}
+		if parsed.StoreProductID == 0 && parsed.ProductID == 0 && parsed.Slug == "" && parsed.Title == "" {
+			t.Fatalf("parsed empty input for %v: %+v", input, parsed)
+		}
+	}
+}
+
+func TestParseGetStoreProductToolInputRejectsMissingLookup(t *testing.T) {
+	_, err := parseGetStoreProductToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "store_product_id") {
+		t.Fatalf("error = %v, want lookup validation", err)
+	}
+}
+
 func TestFilterStoreProductsForTool(t *testing.T) {
 	published := true
 	products := []domain.StoreProduct{
@@ -77,6 +107,41 @@ func TestFilterStoreProductsForTool(t *testing.T) {
 	}
 	if filtered[0].ID != 1 {
 		t.Fatalf("filtered[0].ID = %d", filtered[0].ID)
+	}
+}
+
+func TestFindStoreProductForTool(t *testing.T) {
+	products := []domain.StoreProduct{
+		{ID: 1, ProductID: 10, Title: "Whey Protein", Slug: "whey-protein"},
+		{ID: 2, ProductID: 11, Title: "Creatine", Slug: "creatine"},
+	}
+
+	cases := []struct {
+		name  string
+		input getStoreProductToolInput
+		want  int64
+	}{
+		{name: "store product id", input: getStoreProductToolInput{StoreProductID: 2}, want: 2},
+		{name: "inventory product id", input: getStoreProductToolInput{ProductID: 10}, want: 1},
+		{name: "slug", input: getStoreProductToolInput{Slug: "CREATINE"}, want: 2},
+		{name: "title", input: getStoreProductToolInput{Title: "whey protein"}, want: 1},
+	}
+
+	for _, tc := range cases {
+		got, err := findStoreProductForTool(products, tc.input)
+		if err != nil {
+			t.Fatalf("%s: findStoreProductForTool returned error: %v", tc.name, err)
+		}
+		if got.ID != tc.want {
+			t.Fatalf("%s: ID = %d, want %d", tc.name, got.ID, tc.want)
+		}
+	}
+}
+
+func TestFindStoreProductForToolNotFound(t *testing.T) {
+	_, err := findStoreProductForTool([]domain.StoreProduct{{ID: 1}}, getStoreProductToolInput{StoreProductID: 99})
+	if err == nil {
+		t.Fatal("expected not found error")
 	}
 }
 

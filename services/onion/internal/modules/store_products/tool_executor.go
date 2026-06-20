@@ -18,10 +18,18 @@ import (
 
 const (
 	listStoreProductsToolName         = "store.list_products"
+	getStoreProductToolName           = "store.get_product"
 	defaultListStoreProductsToolLimit = int64(20)
 	maxListStoreProductsToolLimit     = int64(50)
 	storeProductToolTimestampDate     = "2006-01-02T15:04:05Z"
 )
+
+type getStoreProductToolInput struct {
+	StoreProductID int64
+	ProductID      int64
+	Slug           string
+	Title          string
+}
 
 type listStoreProductsToolInput struct {
 	Query     string
@@ -36,9 +44,42 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case listStoreProductsToolName:
 		output, err := m.executeListStoreProductsTool(ctx, input)
 		return output, true, err
+	case getStoreProductToolName:
+		output, err := m.executeGetStoreProductTool(ctx, input)
+		return output, true, err
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetStoreProductTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errorModels.PermissionDeniedServerError()
+	}
+
+	parsed, err := parseGetStoreProductToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	products, err := m.service.List(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	product, err := findStoreProductForTool(products, parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"product": storeProductToolPayload(product),
+	}, nil
 }
 
 func (m *Module) executeListStoreProductsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -89,6 +130,29 @@ func (m *Module) executeListStoreProductsTool(ctx context.Context, input map[str
 			"product_id":   parsed.ProductID,
 			"is_published": storeProductToolOptionalBool(parsed.Published),
 		},
+	}, nil
+}
+
+func parseGetStoreProductToolInput(input map[string]any) (getStoreProductToolInput, error) {
+	storeProductID, err := storeProductToolIDValue(firstStoreProductToolValue(input, "store_product_id", "storefront_product_id", "store_product", "id"))
+	if err != nil {
+		return getStoreProductToolInput{}, fmt.Errorf("invalid store_product_id: %w", err)
+	}
+	productID, err := storeProductToolIDValue(firstStoreProductToolValue(input, "product_id", "inventory_product_id"))
+	if err != nil {
+		return getStoreProductToolInput{}, fmt.Errorf("invalid product_id: %w", err)
+	}
+	slug := strings.ToLower(strings.TrimSpace(storeProductToolString(firstStoreProductToolValue(input, "slug", "handle"))))
+	title := strings.ToLower(strings.TrimSpace(storeProductToolString(firstStoreProductToolValue(input, "title", "name"))))
+
+	if storeProductID <= 0 && productID <= 0 && slug == "" && title == "" {
+		return getStoreProductToolInput{}, errors.New("store_product_id, product_id, slug, or title is required")
+	}
+	return getStoreProductToolInput{
+		StoreProductID: storeProductID,
+		ProductID:      productID,
+		Slug:           slug,
+		Title:          title,
 	}, nil
 }
 
@@ -153,6 +217,24 @@ func filterStoreProductsForTool(products []domain.StoreProduct, input listStoreP
 		out = append(out, product)
 	}
 	return out
+}
+
+func findStoreProductForTool(products []domain.StoreProduct, input getStoreProductToolInput) (domain.StoreProduct, error) {
+	for _, product := range products {
+		if input.StoreProductID > 0 && product.ID == input.StoreProductID {
+			return product, nil
+		}
+		if input.ProductID > 0 && product.ProductID == input.ProductID {
+			return product, nil
+		}
+		if input.Slug != "" && strings.EqualFold(product.Slug, input.Slug) {
+			return product, nil
+		}
+		if input.Title != "" && strings.EqualFold(product.Title, input.Title) {
+			return product, nil
+		}
+	}
+	return domain.StoreProduct{}, domain.ErrStoreProductNotFound
 }
 
 func storeProductToolMatchesQuery(product domain.StoreProduct, query string) bool {
@@ -263,6 +345,21 @@ func storeProductToolNonNegativeInt64(value any) (int64, error) {
 		return 0, errors.New("must be non-negative")
 	}
 	return out, nil
+}
+
+func storeProductToolIDValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"store-product-", "store_product_", "storefront-product-", "storefront_product_", "product-", "product_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return storeProductToolInt64(raw)
+	default:
+		return storeProductToolInt64(value)
+	}
 }
 
 func storeProductToolInt64(value any) (int64, error) {

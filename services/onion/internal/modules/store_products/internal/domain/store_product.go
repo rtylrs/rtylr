@@ -8,6 +8,9 @@ import (
 // ErrInvalidPrice is returned when a price or compare-at price is negative.
 var ErrInvalidPrice = errors.New("invalid price: monetary values cannot be negative")
 
+// ErrStoreProductNotFound is returned when a storefront product lookup misses.
+var ErrStoreProductNotFound = errors.New("store product not found")
+
 type StoreProduct struct {
 	ID             int64     `json:"id"`
 	OwnerID        int64     `json:"owner_id"`

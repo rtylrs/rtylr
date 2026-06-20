@@ -80,6 +80,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		"store.list_orders [read]",
 		"store.get_order [read]",
 		"store.list_products [read]",
+		"store.get_product [read]",
 		"store.list_categories [read]",
 		"support.list_tickets [read]",
 		"support.get_ticket [read]",
