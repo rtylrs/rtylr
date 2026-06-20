@@ -63,3 +63,11 @@ jobs:
       project_name: 'rtylr-pos'
       runs_on: 'blacksmith-2vcpu-ubuntu-2404'
     secrets: inherit
+
+  notify:
+    needs: deploy
+    if: ${{ needs.deploy.result == 'success' }}
+    uses: voxire/pipelines/.github/workflows/notify-slack.yml@main
+    with:
+      message: ':rocket: *rtylr POS* — new version deployed to production'
+    secrets: inherit
