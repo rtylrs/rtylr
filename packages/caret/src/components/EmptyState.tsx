@@ -1,12 +1,13 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import type { CaretStarter } from '../lib/suggestions';
 import { caretTokens, caretRadius } from '../ui/tokens';
 
 export interface EmptyStateProps {
   title?: string;
   subtitle?: string;
-  suggestions?: string[];
-  onSuggestion?: (s: string) => void;
+  suggestions?: CaretStarter[];
+  onSuggestion?: (s: CaretStarter) => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -71,23 +72,24 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             maxWidth: 320,
           }}
         >
-          {suggestions.map((s) => (
+          {suggestions.map((s, index) => (
             <button
-              key={s}
+              key={s.prompt}
               type="button"
               onClick={() => onSuggestion?.(s)}
               style={{
-                padding: '8px 10px',
-                background: caretTokens.surface,
-                border: `1px solid ${caretTokens.border}`,
+                padding: index === 0 ? '10px 11px' : '8px 10px',
+                background: index === 0 ? caretTokens.accentSoft : caretTokens.surface,
+                border: `1px solid ${index === 0 ? caretTokens.accentBorder : caretTokens.border}`,
                 borderRadius: caretRadius.md,
                 color: caretTokens.text,
                 fontSize: 13,
+                fontWeight: index === 0 ? 600 : 500,
                 textAlign: 'left',
                 cursor: 'pointer',
               }}
             >
-              {s}
+              {s.label ?? s.prompt}
             </button>
           ))}
         </div>

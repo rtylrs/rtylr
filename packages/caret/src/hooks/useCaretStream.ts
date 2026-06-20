@@ -30,7 +30,6 @@ export function useCaretStream({
   pageContext,
 }: UseCaretStreamParams): UseCaretStreamResult {
   const store = useCaretStore();
-  const settings = useCaretSettingsStore();
   const abortRef = useRef<AbortController | null>(null);
 
   const stopStreaming = useCallback((): void => {
@@ -64,6 +63,7 @@ export function useCaretStream({
 
       try {
         const token = readAuthToken();
+        const mode = useCaretSettingsStore.getState().mode;
         const response = await fetch(url, {
           method: 'POST',
           credentials: 'include',
@@ -78,7 +78,7 @@ export function useCaretStream({
             user_id: userId,
             system_context: systemContext ?? '',
             page_context: pageContext,
-            mode: settings.mode,
+            mode,
           }),
         });
 
@@ -107,7 +107,7 @@ export function useCaretStream({
         abortRef.current = null;
       }
     },
-    [apiBaseUrl, userId, systemContext, pageContext, settings.mode, store]
+    [apiBaseUrl, userId, systemContext, pageContext, store]
   );
 
   /** Translate one server event into store mutations. */

@@ -1,9 +1,16 @@
 import type { CaretPageContext, CaretPageContextValue } from '../types/context';
+import type { CaretMode } from '../types/mode';
+
+export interface CaretStarter {
+  prompt: string;
+  label?: string;
+  mode?: CaretMode;
+}
 
 export interface CaretEmptyStateModel {
   title: string;
   subtitle: string;
-  suggestions: string[];
+  suggestions: CaretStarter[];
 }
 
 interface BuildCaretEmptyStateInput {
@@ -11,11 +18,19 @@ interface BuildCaretEmptyStateInput {
   pageContext?: CaretPageContext;
 }
 
-const GENERIC_STARTERS = [
-  'What should I handle first?',
-  'Summarize what matters right now',
-  'Find anything that looks off',
-  'What changed since yesterday?',
+type StarterInput = string | CaretStarter;
+
+const starter = (prompt: string, mode: CaretMode = 'ask', label?: string): CaretStarter => ({
+  prompt,
+  mode,
+  ...(label ? { label } : {}),
+});
+
+const GENERIC_STARTERS: CaretStarter[] = [
+  starter('Give me a 5-minute owner brief', 'analyst'),
+  starter('What should I handle first?', 'ask'),
+  starter('Find anything that looks off', 'analyst'),
+  starter('Turn this into an action plan', 'agent'),
 ];
 
 const APP_LABELS: Record<string, string> = {
@@ -29,82 +44,82 @@ const APP_LABELS: Record<string, string> = {
   pos: 'POS',
 };
 
-const APP_STARTERS: Record<string, string[]> = {
+const APP_STARTERS: Record<string, CaretStarter[]> = {
   crm: [
-    'Which customers need follow-up?',
-    'Show customers at risk',
-    'Who are my best customers this month?',
-    'What should sales do next?',
+    starter('Which customers need follow-up?', 'ask'),
+    starter('Show customers at risk', 'analyst'),
+    starter('Who are my best customers this month?', 'analyst'),
+    starter('What should sales do next?', 'agent'),
   ],
   dash: [
-    'What should I handle first today?',
-    'Which numbers need attention?',
-    'Summarize the business right now',
-    'What changed since yesterday?',
+    starter('What should I handle first today?', 'ask'),
+    starter('Which numbers need attention?', 'analyst'),
+    starter('Summarize the business right now', 'analyst'),
+    starter('What changed since yesterday?', 'analyst'),
   ],
   erp: [
-    'What needs attention in operations?',
-    'Which inventory items need action?',
-    'Summarize open operational issues',
-    'What should I reorder first?',
+    starter('What needs attention in operations?', 'ask'),
+    starter('Which inventory items need action?', 'analyst'),
+    starter('Summarize open operational issues', 'analyst'),
+    starter('What should I reorder first?', 'agent'),
   ],
   finance: [
-    'How much revenue today?',
-    'What changed in revenue this week?',
-    'Which expenses need review?',
-    'Summarize cash flow right now',
+    starter('How much revenue today?', 'analyst'),
+    starter('What changed in revenue this week?', 'analyst'),
+    starter('Which expenses need review?', 'analyst'),
+    starter('Summarize cash flow right now', 'analyst'),
   ],
   flow: [
-    'What work is blocked right now?',
-    'Summarize this workspace',
-    'What should the team handle next?',
-    'Find overdue tasks',
+    starter('What work is blocked right now?', 'ask'),
+    starter('Summarize this workspace', 'analyst'),
+    starter('What should the team handle next?', 'agent'),
+    starter('Find overdue tasks', 'analyst'),
   ],
   hr: [
-    'Who is working today?',
-    'Which staff issues need attention?',
-    'Find missing clock-outs',
-    'Summarize team activity',
+    starter('Who is working today?', 'ask'),
+    starter('Which staff issues need attention?', 'analyst'),
+    starter('Find missing clock-outs', 'analyst'),
+    starter('Summarize team activity', 'analyst'),
   ],
   insights: [
-    'What should I know from these numbers?',
-    'Find the biggest change',
-    'Turn this into a quick report',
-    'What should I watch next?',
+    starter('What should I know from these numbers?', 'analyst'),
+    starter('Find the biggest change', 'analyst'),
+    starter('Turn this into a quick report', 'analyst'),
+    starter('What should I watch next?', 'analyst'),
   ],
   pos: [
-    'What needs attention right now?',
-    "Show today's sales and open orders",
-    'Which products are low on stock?',
-    'Summarize the current shift',
+    starter('What needs attention right now?', 'ask'),
+    starter("Show today's sales and open orders", 'analyst'),
+    starter('Which products are low on stock?', 'analyst'),
+    starter('Summarize the current shift', 'analyst'),
   ],
 };
 
-const MODULE_STARTERS: Record<string, string[]> = {
+const MODULE_STARTERS: Record<string, CaretStarter[]> = {
   apps: [
-    'Which apps should I enable next?',
-    'What is included in my current setup?',
-    'Find anything missing from this workspace',
-    'What would help this business most?',
+    starter('Which apps should I enable next?', 'agent'),
+    starter('What is included in my current setup?', 'ask'),
+    starter('Find anything missing from this workspace', 'analyst'),
+    starter('What would help this business most?', 'agent'),
   ],
   caret: [
-    'What can you help me do here?',
-    'Show me what needs attention today',
-    'Create a short business brief',
-    'Remember an important business preference',
+    starter('What can you help me do here?', 'support'),
+    starter('Show me what needs attention today', 'ask'),
+    starter('Create a short business brief', 'analyst'),
+    starter('Remember an important business preference', 'agent'),
   ],
   dashboard: APP_STARTERS.dash,
   settings: [
-    'Check this setup for anything risky',
-    'What settings should I review?',
-    'Explain what matters on this page',
-    'Find anything incomplete',
+    starter('Check this setup for anything risky', 'ask'),
+    starter('What settings should I review?', 'support'),
+    starter('Explain what matters on this page', 'support'),
+    starter('Find anything incomplete', 'analyst'),
   ],
   storefront: [
-    'What should I fix in the storefront?',
-    'Which menu items need attention?',
-    'How can I improve online ordering?',
-    'Find anything incomplete for customers',
+    starter('What should I fix in the storefront?', 'agent'),
+    starter('Which menu items need attention?', 'analyst'),
+    starter('How can I improve online ordering?', 'agent'),
+    starter('Find anything incomplete for customers', 'analyst'),
   ],
   team: APP_STARTERS.hr,
 };
@@ -154,22 +169,30 @@ function firstSelectedLabel(selected: CaretPageContext['selected']): string | nu
   return SELECTED_LABELS[key] ?? humanize(key);
 }
 
-function hintStarter(hints: string[] | undefined): string | null {
+function hintStarter(hints: string[] | undefined): CaretStarter | null {
   const hint = cleanText(hints?.[0]);
-  return hint ? `What should I check for ${hint}?` : null;
+  return hint ? starter(`What should I check for ${hint}?`) : null;
 }
 
-function unique(values: Array<string | null | undefined>, limit: number): string[] {
+function normalizeStarter(value: StarterInput | null | undefined): CaretStarter | null {
+  if (!value) return null;
+  if (typeof value === 'string') return starter(value);
+  const prompt = cleanText(value.prompt);
+  if (!prompt) return null;
+  return { ...value, prompt };
+}
+
+function unique(values: Array<StarterInput | null | undefined>, limit: number): CaretStarter[] {
   const seen = new Set<string>();
-  const result: string[] = [];
+  const result: CaretStarter[] = [];
 
   for (const value of values) {
-    const text = cleanText(value);
-    if (!text) continue;
-    const key = text.toLowerCase();
+    const item = normalizeStarter(value);
+    if (!item) continue;
+    const key = item.prompt.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    result.push(text);
+    result.push(item);
     if (result.length >= limit) break;
   }
 
@@ -196,17 +219,19 @@ export function buildCaretEmptyState({
     GENERIC_STARTERS;
 
   const contextStarters = [
-    selectedLabel ? `Summarize this ${selectedLabel}` : null,
-    selectedLabel ? `What should I check before changing this ${selectedLabel}?` : null,
-    visibleRows > 0 ? 'Summarize the visible rows' : null,
-    visibleRows > 0 ? 'Find anything unusual in this list' : null,
-    hasFilters ? 'What stands out in these filtered results?' : null,
+    selectedLabel ? starter(`Summarize this ${selectedLabel}`, 'ask') : null,
+    selectedLabel
+      ? starter(`What should I check before changing this ${selectedLabel}?`, 'agent')
+      : null,
+    visibleRows > 0 ? starter(`Prioritize these ${visibleRows} visible rows`, 'analyst') : null,
+    visibleRows > 0 ? starter('Find anything unusual in this list', 'analyst') : null,
+    hasFilters ? starter('What stands out in these filtered results?', 'analyst') : null,
   ];
 
   return {
     title: isUsefulLabel(page) ? `Ask Caret about ${page}` : `Ask Caret in ${appName}`,
     subtitle: pageContext?.businessName
-      ? `Start with what matters for ${pageContext.businessName}.`
+      ? `Start with the most useful next move for ${pageContext.businessName}.`
       : 'Start with what matters right now.',
     suggestions: unique(
       [...contextStarters, ...baseStarters, hintStarter(pageContext?.hints), ...GENERIC_STARTERS],

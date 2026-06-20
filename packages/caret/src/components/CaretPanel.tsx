@@ -12,7 +12,7 @@ import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
-import { buildCaretEmptyState } from '../lib/suggestions';
+import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';
 import type { CaretChatSummary } from '../types/chat';
 import type { CaretPageContext } from '../types/context';
 import type { ToolCallBlock } from '../types/message';
@@ -113,6 +113,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const setView = useCaretUIStore((s) => s.setView);
   const queryClient = useQueryClient();
   const mode = useCaretSettingsStore((s) => s.mode);
+  const setMode = useCaretSettingsStore((s) => s.setMode);
 
   const { sendMessage, stopStreaming } = useCaretStream({
     userId,
@@ -290,6 +291,14 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     [sendToolDecision]
   );
 
+  const sendStarter = useCallback(
+    (starter: CaretStarter): void => {
+      if (starter.mode) setMode(starter.mode);
+      void sendMessage(starter.prompt);
+    },
+    [sendMessage, setMode]
+  );
+
   const rootStyle: React.CSSProperties =
     variant === 'inline'
       ? {
@@ -350,7 +359,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               title={emptyState.title}
               subtitle={emptyState.subtitle}
               suggestions={emptyState.suggestions}
-              onSuggestion={(s) => sendMessage(s)}
+              onSuggestion={sendStarter}
             />
           ) : (
             <MessageList
