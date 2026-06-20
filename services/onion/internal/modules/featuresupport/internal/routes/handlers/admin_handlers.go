@@ -14,12 +14,12 @@ import (
 // requireAdmin gates flag/target management to elevated roles. Feature flags
 // are global platform config, so only owner/admin may change them.
 func requireAdmin(ctx context.Context) *errorModels.ServerError {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user == nil {
 		return errorModels.PermissionDeniedServerError()
 	}
-	role := strings.ToLower(device.User.Role)
-	if role != "owner" && role != "admin" {
+	role := strings.ToLower(user.Role)
+	if role != "owner" && role != "admin" && role != "console_admin" {
 		return errorModels.PermissionDeniedServerError()
 	}
 	return nil

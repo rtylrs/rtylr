@@ -82,6 +82,9 @@ func (h *GetMyFeaturesHandler) Serve(ctx context.Context, req *GetMyFeaturesRequ
 	if u.Platform != "" {
 		attrs["platform"] = u.Platform
 	}
+	if email, err := h.Service.UserEmail(ctx, u.UserID); err == nil && email != "" {
+		attrs["email"] = email
+	}
 
 	features, variant, err := h.Service.Resolve(ctx, domain.EvalContext{
 		UserID:     u.UserID,

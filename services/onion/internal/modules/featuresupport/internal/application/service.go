@@ -25,6 +25,7 @@ type repository interface {
 	ListFlags(ctx context.Context) ([]domain.Flag, error)
 	UpsertFlag(ctx context.Context, f domain.Flag) error
 	DeleteFlag(ctx context.Context, key string) error
+	GetUserEmail(ctx context.Context, userID int64) (string, error)
 	ListTargetsByOwner(ctx context.Context, ownerID int64) ([]domain.Target, error)
 	ListTargetsByKey(ctx context.Context, key string) ([]domain.Target, error)
 	UpsertTarget(ctx context.Context, t domain.Target) error
@@ -256,6 +257,13 @@ func clampPercent(p int32) int32 {
 
 func (s *Service) ListFlags(ctx context.Context) ([]domain.Flag, error) {
 	return s.repo.ListFlags(ctx)
+}
+
+func (s *Service) UserEmail(ctx context.Context, userID int64) (string, error) {
+	if userID == 0 {
+		return "", nil
+	}
+	return s.repo.GetUserEmail(ctx, userID)
 }
 
 func (s *Service) UpsertFlag(ctx context.Context, f domain.Flag) error {

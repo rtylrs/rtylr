@@ -87,6 +87,19 @@ func (r *Repository) DeleteFlag(ctx context.Context, key string) error {
 	return err
 }
 
+func (r *Repository) GetUserEmail(ctx context.Context, userID int64) (string, error) {
+	var email string
+	err := r.pool.QueryRowContext(ctx, "SELECT email FROM users WHERE id = ?", userID).Scan(&email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		logger.Ctx(ctx).Error("Failed to get feature subject email", logger.Error(err))
+		return "", err
+	}
+	return email, nil
+}
+
 func (r *Repository) ListTargetsByOwner(ctx context.Context, ownerID int64) ([]domain.Target, error) {
 	rows, err := r.queries.ListFeatureTargetsByOwner(ctx, ownerID)
 	if err != nil {
