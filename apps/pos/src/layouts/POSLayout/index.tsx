@@ -7,39 +7,176 @@ import {
   useCaretStore,
 } from '@voxire/caret';
 import { Moon, Power, Sun } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useUserStore, businessDisplayName } from '../../shared/stores/userStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
+import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import { useCartStore } from '../../shared/stores/cartStore';
+import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
+import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
 
 interface POSLayoutProps {
   children: React.ReactNode;
 }
 
+const POS_ROUTE_LABELS: Record<string, string> = {
+  '/': 'Terminal',
+  '/menu': 'Menu',
+  '/modifiers': 'Modifiers',
+  '/combos': 'Combos',
+  '/split-bill': 'Split Bill',
+  '/payment': 'Payment',
+  '/refund': 'Refund',
+  '/discount': 'Discount',
+  '/gift-cards': 'Gift Cards',
+  '/kds': 'Kitchen Display',
+  '/customer-lookup': 'Customer Lookup',
+  '/receipts': 'Receipts',
+  '/receipt': 'Receipt',
+  '/day-summary': 'Day Summary',
+  '/override': 'Manager Override',
+  '/products/quick': 'Quick Product Edit',
+  '/orders': 'Orders',
+  '/tables': 'Tables',
+  '/close-session': 'Close Session',
+  '/settings': 'Settings',
+  '/held-orders': 'Held Orders',
+  '/cash-drop': 'Cash Drop',
+  '/inventory': 'Inventory',
+  '/staff': 'Staff',
+};
+
+const POS_ROUTE_MODULES: Record<string, string> = {
+  '/': 'terminal',
+  '/menu': 'menu',
+  '/modifiers': 'menu',
+  '/combos': 'menu',
+  '/split-bill': 'orders',
+  '/payment': 'checkout',
+  '/refund': 'orders',
+  '/discount': 'orders',
+  '/gift-cards': 'customers',
+  '/kds': 'kitchen',
+  '/customer-lookup': 'customers',
+  '/receipts': 'receipts',
+  '/receipt': 'receipts',
+  '/day-summary': 'reporting',
+  '/override': 'security',
+  '/products/quick': 'inventory',
+  '/orders': 'orders',
+  '/tables': 'tables',
+  '/close-session': 'cash',
+  '/settings': 'settings',
+  '/held-orders': 'orders',
+  '/cash-drop': 'cash',
+  '/inventory': 'inventory',
+  '/staff': 'staff',
+};
+
+function selectedOrderId(pathname: string): string | null {
+  const match = pathname.match(/^\/(?:payment|refund|discount|split-bill)\/([^/?#]+)/);
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
 const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
+  const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
   const endSession = useEmployeeSessionStore((s) => s.endSession);
+  const employee = useEmployeeSessionStore((s) => s.employee);
+  const employeeSessionActive = useEmployeeSessionStore((s) => s.isActive);
   const businessProfile = useUserStore((s) => s.businessProfile);
   const userIdValue = useUserStore((s) => s.userId);
   const configuredBusinessName = useSettingsStore((s) => s.business.name.trim());
+  const locationId = useTerminalContextStore((s) => s.locationId);
+  const terminalId = useTerminalContextStore((s) => s.terminalId);
+  const cartItems = useCartStore((s) => s.items);
+  const cartOrderType = useCartStore((s) => s.orderType);
+  const cartTableId = useCartStore((s) => s.tableId);
+  const cartCustomerId = useCartStore((s) => s.customerId);
+  const cartCustomerName = useCartStore((s) => s.customerName);
+  const cartHeld = useCartStore((s) => s.isHeld);
+  const cartTotal = useCartStore((s) => s.total());
+  const cartAmountDue = useCartStore((s) => s.amountDue());
+  const offlineQueue = useOfflineQueueStore((s) => s.queue);
+  const online = useOfflineQueueStore((s) => s.online);
+  const cashMovementQueue = useCashMovementQueueStore((s) => s.queue);
   const businessName = configuredBusinessName || businessDisplayName(businessProfile);
   const caretOpen = useCaretStore((s) => s.isOpen);
   const caretWidth = useCaretSettingsStore((s) => s.panelWidth);
   const userId = Number(userIdValue ?? 0);
   const canUseCaret = Number.isFinite(userId) && userId > 0;
+  const orderId = selectedOrderId(location.pathname);
+  const pendingOfflineOrders = offlineQueue.filter((item) => item.status === 'pending').length;
+  const failedOfflineOrders = offlineQueue.filter((item) => item.status === 'failed').length;
+  const pendingCashMovements = cashMovementQueue.filter((item) => item.status === 'pending').length;
   const caretPageContext = React.useMemo(
     () =>
       buildCaretRouteContext({
         appId: 'pos',
         appName: 'POS',
-        pathname: typeof window === 'undefined' ? '/' : window.location.pathname,
-        page: 'Terminal',
-        module: 'terminal',
+        pathname: location.pathname,
+        routeLabels: POS_ROUTE_LABELS,
+        routeModules: POS_ROUTE_MODULES,
         businessName,
-        hints: ['current shift, open orders, tables, receipts, stock, and customers'],
+        role: employee?.role,
+        selected: {
+          ...(orderId ? { order_id: orderId } : {}),
+          ...(!orderId && location.pathname.startsWith('/tables') && cartTableId
+            ? { table_id: cartTableId }
+            : {}),
+        },
+        filters: {
+          ...(locationId ? { location_id: locationId } : {}),
+          ...(terminalId ? { terminal_id: terminalId } : {}),
+          ...(employee?.id ? { employee_id: employee.id } : {}),
+          ...(employeeSessionActive ? { employee_session: 'active' } : {}),
+        },
+        cacheContext: {
+          cart_items: cartItems.length,
+          cart_total: Number(cartTotal.toFixed(2)),
+          cart_amount_due: Number(cartAmountDue.toFixed(2)),
+          order_type: cartOrderType,
+          cart_held: cartHeld,
+          ...(cartCustomerId ? { customer_id: cartCustomerId } : {}),
+          ...(cartCustomerName ? { customer_name: cartCustomerName } : {}),
+          pending_offline_orders: pendingOfflineOrders,
+          failed_offline_orders: failedOfflineOrders,
+          pending_cash_movements: pendingCashMovements,
+          online,
+        },
+        dataFreshness: online ? 'online' : 'offline',
+        hints: [
+          'current shift, open orders, tables, receipts, stock, and customers',
+          pendingOfflineOrders > 0 ? `${pendingOfflineOrders} offline order sync pending` : '',
+          failedOfflineOrders > 0 ? `${failedOfflineOrders} offline order sync failed` : '',
+          pendingCashMovements > 0 ? `${pendingCashMovements} cash movement sync pending` : '',
+        ].filter(Boolean),
       }),
-    [businessName],
+    [
+      businessName,
+      cartAmountDue,
+      cartCustomerId,
+      cartCustomerName,
+      cartHeld,
+      cartItems.length,
+      cartOrderType,
+      cartTableId,
+      cartTotal,
+      employee?.id,
+      employee?.role,
+      employeeSessionActive,
+      failedOfflineOrders,
+      location.pathname,
+      locationId,
+      online,
+      orderId,
+      pendingCashMovements,
+      pendingOfflineOrders,
+      terminalId,
+    ],
   );
 
   return (
