@@ -267,3 +267,25 @@ jobs:
       artifact_name: dist-${{ github.sha }}
       runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
+
+  # ── Slack notification ─────────────────────────────────────────────
+  # Fires once after all deploys settle, only when at least one app
+  # actually shipped (a CI-config-only commit deploys nothing → no ping).
+  notify:
+    needs:
+      - deploy-auth
+      - deploy-dash
+      - deploy-erp
+      - deploy-crm
+      - deploy-hr
+      - deploy-finance
+      - deploy-flow
+      - deploy-insights
+      - deploy-menu
+      - deploy-docs
+      - deploy-recruit
+    if: ${{ always() && contains(needs.*.result, 'success') }}
+    uses: voxire/pipelines/.github/workflows/notify-slack.yml@main
+    with:
+      message: ':rocket: *rtylr* — new version deployed to production'
+    secrets: inherit
