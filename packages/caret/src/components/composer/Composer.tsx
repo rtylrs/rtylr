@@ -32,10 +32,7 @@ export const Composer: React.FC<ComposerProps> = ({
   const taRef = useRef<HTMLTextAreaElement>(null);
   const mode = useCaretSettingsStore((s) => s.mode);
   useAutosize(taRef, value);
-  const inferredMode = useMemo(
-    () => inferCaretModeForPrompt(value, mode),
-    [mode, value]
-  );
+  const inferredMode = useMemo(() => inferCaretModeForPrompt(value, mode), [mode, value]);
   const showModeHint = value.trim().length > 0 && inferredMode !== mode && !isStreaming;
 
   const focusComposer = useCallback((): void => {
