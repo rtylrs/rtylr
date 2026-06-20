@@ -93,6 +93,64 @@ function selectedFromPath(pathname: string): Record<string, string> | undefined 
   return Object.keys(selected).length > 0 ? selected : undefined;
 }
 
+function browserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Beirut';
+  } catch {
+    return 'Asia/Beirut';
+  }
+}
+
+function browserLocale(): string {
+  try {
+    return navigator.language || 'en-US';
+  } catch {
+    return 'en-US';
+  }
+}
+
+function cacheDomainsForModule(module: string): string[] {
+  switch (module) {
+    case 'storefront':
+      return ['storefront', 'catalog', 'orders'];
+    case 'team':
+      return ['hr', 'team'];
+    case 'settings':
+      return ['settings', 'billing', 'addons'];
+    case 'apps':
+      return ['apps', 'billing'];
+    case 'caret':
+      return ['analytics', 'crm', 'erp', 'finance', 'hr', 'pos', 'storefront'];
+    case 'dashboard':
+      return ['analytics', 'orders', 'finance', 'inventory', 'crm'];
+    default:
+      return [module || 'dash'];
+  }
+}
+
+function buildBusinessMemory(): NonNullable<CaretPageContext['businessMemory']> {
+  return {
+    timezone: browserTimezone(),
+    locale: browserLocale(),
+    currency: 'USD',
+    answerStyle: 'lead with the answer, then show the useful numbers',
+    tablePreference: 'compact tables for comparisons',
+  };
+}
+
+function buildCacheContext(
+  info: PageInfo,
+  pathname: string,
+  selected: Record<string, string> | undefined
+): NonNullable<CaretPageContext['cacheContext']> {
+  return {
+    domains: cacheDomainsForModule(info.module),
+    day: new Date().toISOString().slice(0, 10),
+    route: pathname,
+    selected: selected ?? {},
+  };
+}
+
 export function buildDashSystemContext({ pathname, businessName }: DashSystemContextInput): string {
   const ctx = buildDashPageContext({ pathname, businessName });
   const lines = [
@@ -113,6 +171,8 @@ export function buildDashPageContext({
   apps,
 }: DashSystemContextInput): CaretPageContext {
   const info = pageInfo(pathname);
+  const selected = selectedFromPath(pathname);
+  const cacheContext = buildCacheContext(info, pathname, selected);
   return {
     app: 'dash',
     appName: 'Dash business command center',
@@ -121,8 +181,11 @@ export function buildDashPageContext({
     page: info.page,
     businessName,
     role,
-    selected: selectedFromPath(pathname),
+    selected,
     filters: {},
+    businessMemory: buildBusinessMemory(),
+    cacheContext,
+    dataFreshness: cacheContext,
     hints: [info.hint],
     enabledApps: apps?.slice(0, 20),
   };

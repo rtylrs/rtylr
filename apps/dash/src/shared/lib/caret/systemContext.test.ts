@@ -42,5 +42,8 @@ describe('buildDashSystemContext', () => {
     expect(ctx.role).toBe('owner');
     expect(ctx.selected).toEqual({ employee_id: '42' });
     expect(ctx.enabledApps).toEqual(['pos', 'finance']);
+    expect(ctx.businessMemory?.currency).toBe('USD');
+    expect(ctx.cacheContext?.domains).toEqual(['hr', 'team']);
+    expect(ctx.dataFreshness).toEqual(ctx.cacheContext);
   });
 });
