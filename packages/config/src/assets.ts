@@ -4,22 +4,22 @@ export const ASSETS = {
   // single near-white mark; consumers tint it per background (see the auth
   // Logo component).
   logos: {
-    dark: "/logo.png",
-    light: "/logo.png",
+    dark: '/logo.png',
+    light: '/logo.png',
   },
   /** Per-app logos - will be populated when individual logos are designed.
    *  Falls back to the main rtylr logo for now. */
   appLogos: {
-    hub: { dark: "", light: "" },
-    pos: { dark: "", light: "" },
-    erp: { dark: "", light: "" },
-    hr: { dark: "", light: "" },
-    crm: { dark: "", light: "" },
-    finance: { dark: "", light: "" },
-    flow: { dark: "", light: "" },
-    insights: { dark: "", light: "" },
-    menu: { dark: "", light: "" },
-    auth: { dark: "", light: "" },
+    hub: { dark: '', light: '' },
+    pos: { dark: '', light: '' },
+    erp: { dark: '', light: '' },
+    hr: { dark: '', light: '' },
+    crm: { dark: '', light: '' },
+    finance: { dark: '', light: '' },
+    flow: { dark: '', light: '' },
+    insights: { dark: '', light: '' },
+    menu: { dark: '', light: '' },
+    auth: { dark: '', light: '' },
   } as Record<string, { dark: string; light: string }>,
 };
 
@@ -27,24 +27,23 @@ export interface CdnImageUrlOptions {
   cdnBaseUrl?: string;
 }
 
-export const DEFAULT_CDN_BASE_URL = "https://cdn.voxire.com";
+export const DEFAULT_CDN_BASE_URL = 'https://cdn.voxire.com';
 
-const CDN_READ_PATHS = ["/files/", "/images/"];
+const CDN_READ_PATHS = ['/files/', '/images/'];
 const LOCAL_IMAGE_SCHEMES = /^(?:asset|blob|data):/i;
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:/i;
-const CDN_FILE_ID =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const VOXIRE_CDN_HOSTS = new Set(["cdn.voxire.com", "cdn.voxire.dev"]);
+const CDN_FILE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const VOXIRE_CDN_HOSTS = new Set(['cdn.voxire.com', 'cdn.voxire.dev']);
 
 export function getCdnBaseUrl(override?: string): string {
-  return (override || DEFAULT_CDN_BASE_URL).replace(/\/+$/, "");
+  return (override || DEFAULT_CDN_BASE_URL).replace(/\/+$/, '');
 }
 
 export function cdnImageUrl(
   value: string | null | undefined,
-  options: CdnImageUrlOptions = {},
+  options: CdnImageUrlOptions = {}
 ): string | undefined {
-  const raw = typeof value === "string" ? value.trim() : "";
+  const raw = typeof value === 'string' ? value.trim() : '';
   if (!raw) return undefined;
   if (LOCAL_IMAGE_SCHEMES.test(raw)) return raw;
 
@@ -52,11 +51,11 @@ export function cdnImageUrl(
   if (CDN_FILE_ID.test(raw)) {
     return `${base}/upload?id=${encodeURIComponent(raw)}`;
   }
-  if (raw.startsWith("files/") || raw.startsWith("images/")) {
+  if (raw.startsWith('files/') || raw.startsWith('images/')) {
     return `${base}/${raw}`;
   }
   const canonicalPath = CDN_READ_PATHS.some((prefix) => raw.startsWith(prefix));
-  if (canonicalPath || raw === "/upload" || raw.startsWith("/upload?")) {
+  if (canonicalPath || raw === '/upload' || raw.startsWith('/upload?')) {
     return `${base}${raw}`;
   }
 
@@ -67,7 +66,7 @@ export function cdnImageUrl(
       const isVoxireCDN = VOXIRE_CDN_HOSTS.has(host);
       const isCanonicalCDNPath =
         CDN_READ_PATHS.some((prefix) => parsed.pathname.startsWith(prefix)) ||
-        parsed.pathname === "/upload";
+        parsed.pathname === '/upload';
       if (isVoxireCDN && isCanonicalCDNPath) {
         return `${base}${parsed.pathname}${parsed.search}`;
       }
@@ -80,10 +79,7 @@ export function cdnImageUrl(
 }
 
 /** Returns the logo URL for the current theme. Falls back to main rtylr logo. */
-export function getLogoUrl(
-  appId?: string,
-  theme: "dark" | "light" = "light",
-): string {
+export function getLogoUrl(appId?: string, theme: 'dark' | 'light' = 'light'): string {
   if (appId && ASSETS.appLogos[appId]) {
     const appLogo = ASSETS.appLogos[appId][theme];
     if (appLogo) return appLogo;
@@ -91,7 +87,7 @@ export function getLogoUrl(
   return ASSETS.logos[theme];
 }
 
-export const AVATAR_STYLES = ["thumbs", "bottts-neutral", "fun-emoji"] as const;
+export const AVATAR_STYLES = ['thumbs', 'bottts-neutral', 'fun-emoji'] as const;
 export type AvatarStyle = (typeof AVATAR_STYLES)[number];
 
 function hashSeed(s: string): number {
@@ -101,15 +97,12 @@ function hashSeed(s: string): number {
 }
 
 export function pickAvatarStyle(seed?: string | null): AvatarStyle {
-  const key = (seed || "user").trim().toLowerCase();
+  const key = (seed || 'user').trim().toLowerCase();
   return AVATAR_STYLES[hashSeed(key) % AVATAR_STYLES.length];
 }
 
-export function getAvatarUrl(
-  seed?: string | null,
-  style?: AvatarStyle,
-): string {
-  const raw = (seed || "user").trim().toLowerCase();
+export function getAvatarUrl(seed?: string | null, style?: AvatarStyle): string {
+  const raw = (seed || 'user').trim().toLowerCase();
   // The seed is usually a user's email/name. Hashing it keeps the raw PII
   // *string* out of the third-party avatar URL (so an email isn't sitting in
   // dicebear's request logs / the Referer header). This is obfuscation, not

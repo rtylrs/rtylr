@@ -1,25 +1,25 @@
-import React from "react";
-import classNames from "classnames";
-import { cdnImageUrl } from "@voxire/config";
-import { BusinessInfo, HeaderConfig, NavConfig, PageConfig } from "../../types";
-import styles from "./MenuHeader.module.scss";
+import React from 'react';
+import classNames from 'classnames';
+import { cdnImageUrl } from '@voxire/config';
+import { BusinessInfo, HeaderConfig, NavConfig, PageConfig } from '../../types';
+import styles from './MenuHeader.module.scss';
 
 // Re-export for backward compat
-export type { BusinessInfo } from "../../types";
+export type { BusinessInfo } from '../../types';
 
 const PAGE_DEFS = [
-  { id: "menu", label: "Menu" },
-  { id: "about", label: "About" },
-  { id: "gallery", label: "Gallery" },
-  { id: "reviews", label: "Reviews" },
-  { id: "offers", label: "Offers" },
+  { id: 'menu', label: 'Menu' },
+  { id: 'about', label: 'About' },
+  { id: 'gallery', label: 'Gallery' },
+  { id: 'reviews', label: 'Reviews' },
+  { id: 'offers', label: 'Offers' },
 ] as const;
 
 const COVER_HEIGHT: Record<string, string> = {
-  none: "0px",
-  sm: "110px",
-  md: "160px",
-  lg: "220px",
+  none: '0px',
+  sm: '110px',
+  md: '160px',
+  lg: '220px',
 };
 
 interface MenuHeaderProps {
@@ -50,12 +50,11 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
   const enabledPages = PAGE_DEFS.filter(
     (p) =>
       pages[p.id as keyof PageConfig] !== false &&
-      (p.id === "menu" || pages[p.id as keyof PageConfig] === true),
+      (p.id === 'menu' || pages[p.id as keyof PageConfig] === true)
   );
   const showPageNav = enabledPages.length > 1;
-  const showCategoryNav =
-    activePage === "menu" && categories && categories.length > 0;
-  const coverH = COVER_HEIGHT[headerConfig.coverHeight] ?? "160px";
+  const showCategoryNav = activePage === 'menu' && categories && categories.length > 0;
+  const coverH = COVER_HEIGHT[headerConfig.coverHeight] ?? '160px';
   const coverImageUrl = cdnImageUrl(business.coverImage);
   const logoUrl = cdnImageUrl(business.logo);
 
@@ -64,19 +63,19 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
       styles.header__navItem,
       styles[`header__navItem--${navConfig.style}`],
       styles[`header__navItem--${navConfig.size}`],
-      { [styles["header__navItem--active"]]: active },
+      { [styles['header__navItem--active']]: active }
     );
 
   return (
     <header
       className={classNames(
         styles.header,
-        { [styles["header--sticky"]]: headerConfig.sticky },
-        className,
+        { [styles['header--sticky']]: headerConfig.sticky },
+        className
       )}
     >
       {/* Cover image */}
-      {headerConfig.coverHeight !== "none" && coverImageUrl && (
+      {headerConfig.coverHeight !== 'none' && coverImageUrl && (
         <div className={styles.header__cover} style={{ height: coverH }}>
           <img src={coverImageUrl} alt="" />
           <div className={styles.header__coverOverlay} />
@@ -98,20 +97,14 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
           {headerConfig.showMeta && (
             <div className={styles.header__meta}>
               {business.address && (
-                <span className={styles.header__metaItem}>
-                  {business.address}
-                </span>
+                <span className={styles.header__metaItem}>{business.address}</span>
               )}
               {business.phone && (
                 <span className={styles.header__metaItem}>
                   <a href={`tel:${business.phone}`}>{business.phone}</a>
                 </span>
               )}
-              {business.hours && (
-                <span className={styles.header__metaItem}>
-                  {business.hours}
-                </span>
-              )}
+              {business.hours && <span className={styles.header__metaItem}>{business.hours}</span>}
             </div>
           )}
         </div>
@@ -119,12 +112,7 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
 
       {/* Page nav */}
       {showPageNav && (
-        <nav
-          className={classNames(
-            styles.header__nav,
-            styles["header__nav--pages"],
-          )}
-        >
+        <nav className={classNames(styles.header__nav, styles['header__nav--pages'])}>
           {enabledPages.map((p) => (
             <button
               key={p.id}
@@ -140,26 +128,21 @@ const MenuHeader: React.FC<MenuHeaderProps> = ({
       {/* Category nav (menu page only) */}
       {showCategoryNav && (
         <nav
-          className={classNames(
-            styles.header__nav,
-            styles["header__nav--categories"],
-            {
-              [styles["header__nav--sub"]]: showPageNav,
-            },
-          )}
+          className={classNames(styles.header__nav, styles['header__nav--categories'], {
+            [styles['header__nav--sub']]: showPageNav,
+          })}
         >
           {categories!.map((cat) => (
             <button
               key={cat.id}
               className={classNames(
                 styles.header__navItem,
-                styles["header__navItem--underline"],
+                styles['header__navItem--underline'],
                 styles[`header__navItem--${navConfig.size}`],
-                styles["header__navItem--category"],
+                styles['header__navItem--category'],
                 {
-                  [styles["header__navItem--active"]]:
-                    activeCategoryId === cat.id,
-                },
+                  [styles['header__navItem--active']]: activeCategoryId === cat.id,
+                }
               )}
               onClick={() => onCategorySelect?.(cat.id)}
             >

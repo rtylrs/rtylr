@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { cdnImageUrl } from "@voxire/config";
-import styles from "./GalleryPage.module.scss";
+import React, { useState } from 'react';
+import { cdnImageUrl } from '@voxire/config';
+import styles from './GalleryPage.module.scss';
 
 interface GalleryPageProps {
   photos: string[];
@@ -32,11 +32,7 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ photos, businessName }) => {
               aria-label={`View photo ${i + 1}`}
             >
               {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt={`${businessName} photo ${i + 1}`}
-                  loading="lazy"
-                />
+                <img src={imageUrl} alt={`${businessName} photo ${i + 1}`} loading="lazy" />
               )}
             </button>
           );
@@ -45,14 +41,8 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ photos, businessName }) => {
 
       {/* Lightbox */}
       {lightbox && (
-        <div
-          className={styles.gallery__lightbox}
-          onClick={() => setLightbox(null)}
-        >
-          <button
-            className={styles.gallery__lightboxClose}
-            onClick={() => setLightbox(null)}
-          >
+        <div className={styles.gallery__lightbox} onClick={() => setLightbox(null)}>
+          <button className={styles.gallery__lightboxClose} onClick={() => setLightbox(null)}>
             ✕
           </button>
           <img
