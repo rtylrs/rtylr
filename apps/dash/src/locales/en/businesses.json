@@ -2,6 +2,8 @@
   "switchBusiness": "Switch Business",
   "addBusiness": "Add Business",
   "myBusinesses": "My Businesses",
+  "searchPlaceholder": "Search businesses...",
+  "noResults": "No businesses found",
   "createSubBusiness": "Create Business",
   "businessName": "Business name",
   "creating": "Creating...",

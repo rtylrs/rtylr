@@ -2,6 +2,8 @@
   "switchBusiness": "تبديل النشاط التجاري",
   "addBusiness": "إضافة نشاط تجاري",
   "myBusinesses": "أنشطتي التجارية",
+  "searchPlaceholder": "البحث عن نشاط تجاري...",
+  "noResults": "لم يتم العثور على أنشطة تجارية",
   "createSubBusiness": "إنشاء نشاط تجاري",
   "businessName": "اسم النشاط التجاري",
   "creating": "جارٍ الإنشاء...",

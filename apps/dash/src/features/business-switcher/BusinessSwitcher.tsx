@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Building2, Check, ChevronRight, Plus, Loader2 } from 'lucide-react';
+import { Building2, Check, ChevronRight, Plus, Loader2, Search } from 'lucide-react';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import {
   Dialog,
@@ -36,8 +36,15 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
+  const [search, setSearch] = useState('');
 
   const currentBusiness = businesses.find((b) => b.id === currentBusinessId);
+
+  // Only surface the search field once the list is long enough to warrant it.
+  const showSearch = businesses.length > 5;
+  const filteredBusinesses = search.trim()
+    ? businesses.filter((b) => b.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : businesses;
 
   const handleSwitch = (business: OwnedBusiness): void => {
     if (business.id === currentBusinessId) return;
@@ -117,19 +124,51 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
             >
               {t('businesses.myBusinesses')}
             </div>
-            {businesses.map((b) => (
-              <DropdownMenuItem key={b.id} onClick={() => handleSwitch(b)}>
-                <span className="flex-1 truncate">{b.name}</span>
-                {b.id === currentBusinessId && <Check size={13} style={{ color: '#4583C4' }} />}
-                {switchMutation.isPending && b.id !== currentBusinessId && (
-                  <Loader2
-                    size={11}
-                    className="animate-spin"
+            {showSearch && (
+              <div className="px-2 pb-1.5">
+                <div className="relative">
+                  <Search
+                    size={12}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2"
                     style={{ color: 'var(--dash-text-dim)' }}
                   />
-                )}
-              </DropdownMenuItem>
-            ))}
+                  <input
+                    autoFocus
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={t('businesses.searchPlaceholder')}
+                    aria-label={t('businesses.searchPlaceholder')}
+                    className="w-full rounded-lg py-1.5 pl-7 pr-2 text-xs outline-none"
+                    style={{
+                      fontSize: '16px',
+                      background: 'var(--dash-hover)',
+                      color: 'var(--dash-text)',
+                      border: '1px solid var(--dash-border)',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="max-h-60 overflow-y-auto">
+              {filteredBusinesses.map((b) => (
+                <DropdownMenuItem key={b.id} onClick={() => handleSwitch(b)}>
+                  <span className="flex-1 truncate">{b.name}</span>
+                  {b.id === currentBusinessId && <Check size={13} style={{ color: '#4583C4' }} />}
+                  {switchMutation.isPending && b.id !== currentBusinessId && (
+                    <Loader2
+                      size={11}
+                      className="animate-spin"
+                      style={{ color: 'var(--dash-text-dim)' }}
+                    />
+                  )}
+                </DropdownMenuItem>
+              ))}
+              {filteredBusinesses.length === 0 && (
+                <div className="px-3 py-2 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                  {t('businesses.noResults')}
+                </div>
+              )}
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setModalOpen(true)}>
               <Plus size={13} />

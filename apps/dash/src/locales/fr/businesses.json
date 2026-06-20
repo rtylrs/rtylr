@@ -2,6 +2,8 @@
   "switchBusiness": "Changer d'entreprise",
   "addBusiness": "Ajouter une entreprise",
   "myBusinesses": "Mes entreprises",
+  "searchPlaceholder": "Rechercher une entreprise...",
+  "noResults": "Aucune entreprise trouvée",
   "createSubBusiness": "Créer une entreprise",
   "businessName": "Nom de l'entreprise",
   "creating": "Création en cours...",
