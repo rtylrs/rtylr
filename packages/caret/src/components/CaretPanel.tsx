@@ -64,6 +64,35 @@ function normalizeToolDecisionStatus(status: string): ToolCallBlock['status'] {
   }
 }
 
+function outputMessage(output: unknown): string | null {
+  if (!output || typeof output !== 'object') return null;
+  const message = (output as { message?: unknown }).message;
+  return typeof message === 'string' && message.trim() ? message.trim() : null;
+}
+
+function cleanDecisionMessage(message: string | null | undefined): string {
+  const text = (message ?? '').trim();
+  if (!text || text === 'Tool executed successfully.') return 'the action is complete.';
+  return text.replace(/\.$/, '') + '.';
+}
+
+function decisionFollowUp(
+  decision: ToolDecision,
+  status: ToolCallBlock['status'],
+  result?: ToolDecisionResponse
+): string | null {
+  if (decision === 'deny' || status === 'denied') {
+    return "Okay, I didn't make any changes.";
+  }
+  if (status === 'success' && result?.executed) {
+    return `Done. ${cleanDecisionMessage(outputMessage(result.output) ?? result.message)}`;
+  }
+  if (status === 'error') {
+    return "I couldn't finish that. No confirmed changes were made.";
+  }
+  return null;
+}
+
 const CaretPanel: React.FC<CaretPanelProps> = ({
   systemContext,
   pageContext,
@@ -78,6 +107,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     messages,
     isStreaming,
     setToolStatus,
+    appendBlockToLastAssistant,
     setSessionId,
     setMessages,
     reset,
@@ -225,12 +255,25 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                 preview: result.preview,
               };
         setToolStatus(id, status, extras);
+        const followUp = decisionFollowUp(decision, status, result);
+        if (followUp) {
+          appendBlockToLastAssistant({
+            id: `tool-followup-${id}-${Date.now()}`,
+            type: 'text',
+            content: followUp,
+          });
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool decision failed.';
         setToolStatus(id, 'error', { error: message });
+        appendBlockToLastAssistant({
+          id: `tool-followup-${id}-${Date.now()}`,
+          type: 'text',
+          content: "I couldn't finish that. No confirmed changes were made.",
+        });
       }
     },
-    [apiBaseUrl, findToolCall, setToolStatus]
+    [apiBaseUrl, appendBlockToLastAssistant, findToolCall, setToolStatus]
   );
 
   const onApprove = useCallback(

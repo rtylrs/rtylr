@@ -110,7 +110,14 @@ export const useCaretStore = create<CaretStore>()(
             lastIndex = messages.length - 1;
           }
           const last = messages[lastIndex];
-          messages[lastIndex] = { ...last, blocks: [...last.blocks, block] };
+          messages[lastIndex] = {
+            ...last,
+            blocks: [...last.blocks, block],
+            content:
+              block.type === 'text'
+                ? [last.content ?? '', block.content].filter(Boolean).join('\n')
+                : last.content,
+          };
           return { messages };
         }),
 
