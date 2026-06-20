@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import '../styles/index.css';
 import { caretTokens } from '../ui/tokens';
@@ -12,6 +12,7 @@ import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
+import { buildCaretEmptyState } from '../lib/suggestions';
 import type { CaretChatSummary } from '../types/chat';
 import type { CaretPageContext } from '../types/context';
 import type { ToolCallBlock } from '../types/message';
@@ -31,13 +32,6 @@ export interface CaretPanelProps {
   /** 'inline' renders inside a flex column the parent controls. */
   variant?: 'inline';
 }
-
-const DEFAULT_SUGGESTIONS = [
-  'How much revenue today?',
-  'Which products are low on stock?',
-  'Show my top 5 customers',
-  'How many staff are clocked in?',
-];
 
 type ToolDecision = 'approve' | 'deny';
 
@@ -94,6 +88,7 @@ function decisionFollowUp(
 }
 
 const CaretPanel: React.FC<CaretPanelProps> = ({
+  appId,
   systemContext,
   pageContext,
   userId,
@@ -129,6 +124,10 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const setRecent = useChatsStore((s) => s.setRecent);
   const removeRecent = useChatsStore((s) => s.removeRecent);
   const { onMouseDown } = usePanelResize();
+  const emptyState = useMemo(
+    () => buildCaretEmptyState({ appId, pageContext }),
+    [appId, pageContext]
+  );
 
   useEffect(() => {
     if (sessions.length > 0) setRecent(sessions);
@@ -345,7 +344,12 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
       {view === 'chat' && (
         <>
           {messages.length === 0 ? (
-            <EmptyState suggestions={DEFAULT_SUGGESTIONS} onSuggestion={(s) => sendMessage(s)} />
+            <EmptyState
+              title={emptyState.title}
+              subtitle={emptyState.subtitle}
+              suggestions={emptyState.suggestions}
+              onSuggestion={(s) => sendMessage(s)}
+            />
           ) : (
             <MessageList
               messages={messages}
