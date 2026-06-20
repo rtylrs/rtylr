@@ -25,8 +25,8 @@ func renderPageContext(pageContext map[string]any) string {
 	if len(pageContext) == 0 {
 		return ""
 	}
-	normalized := normalizePageContext(pageContext, 0)
-	if len(normalized) == 0 {
+	normalized, ok := normalizePageContext(pageContext, 0).(map[string]any)
+	if !ok || len(normalized) == 0 {
 		return ""
 	}
 	payload, err := json.MarshalIndent(normalized, "", "  ")
