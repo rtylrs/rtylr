@@ -39,11 +39,12 @@ type streamEventRenderer struct {
 type streamRendererOption func(*streamEventRenderer)
 
 type streamToolExecution struct {
-	Name   string         `json:"name"`
-	Input  map[string]any `json:"input,omitempty"`
-	Status string         `json:"status"`
-	Output map[string]any `json:"output,omitempty"`
-	Error  string         `json:"error,omitempty"`
+	Name    string         `json:"name"`
+	Input   map[string]any `json:"input,omitempty"`
+	Status  string         `json:"status"`
+	Summary string         `json:"summary,omitempty"`
+	Output  map[string]any `json:"output,omitempty"`
+	Error   string         `json:"error,omitempty"`
 }
 
 func withStreamToolExecution(ctx context.Context, executors []ToolExecutor) streamRendererOption {
@@ -268,48 +269,57 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		output, executed, err := executor.ExecuteCaretTool(ctx, call.Name, call.Input)
 		if err != nil {
 			userError := userFacingToolError(err)
+			summary := summarizeToolResult(call.Name, call.Input, nil, "error", userError)
 			r.toolResults = append(r.toolResults, streamToolExecution{
-				Name:   call.Name,
-				Input:  call.Input,
-				Status: "error",
-				Error:  userError,
+				Name:    call.Name,
+				Input:   call.Input,
+				Status:  "error",
+				Summary: summary,
+				Error:   userError,
 			})
 			return WriteEvent(r.w, r.flush, StreamEvent{
 				Type:      EventToolResult,
 				MessageID: r.messageID,
 				BlockID:   blockID,
 				Status:    "error",
+				Summary:   summary,
 				Error:     userError,
 			})
 		}
 		if executed {
+			summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
 			r.toolResults = append(r.toolResults, streamToolExecution{
-				Name:   call.Name,
-				Input:  call.Input,
-				Status: "success",
-				Output: output,
+				Name:    call.Name,
+				Input:   call.Input,
+				Status:  "success",
+				Summary: summary,
+				Output:  output,
 			})
 			return WriteEvent(r.w, r.flush, StreamEvent{
 				Type:      EventToolResult,
 				MessageID: r.messageID,
 				BlockID:   blockID,
 				Status:    "success",
+				Summary:   summary,
 				Output:    output,
 			})
 		}
 	}
 
+	summary := summarizeToolResult(call.Name, call.Input, nil, "error", "This tool is registered, but execution is not available in this stream yet.")
 	r.toolResults = append(r.toolResults, streamToolExecution{
-		Name:   call.Name,
-		Input:  call.Input,
-		Status: "error",
-		Error:  "This tool is registered, but execution is not available in this stream yet.",
+		Name:    call.Name,
+		Input:   call.Input,
+		Status:  "error",
+		Summary: summary,
+		Error:   "This tool is registered, but execution is not available in this stream yet.",
 	})
 	return WriteEvent(r.w, r.flush, StreamEvent{
 		Type:      EventToolResult,
 		MessageID: r.messageID,
 		BlockID:   blockID,
 		Status:    "error",
+		Summary:   summary,
 		Error:     "This tool is registered, but execution is not available in this stream yet.",
 	})
 }

@@ -66,8 +66,17 @@ func buildCaretPrompt(in caretPromptInput) string {
 	b.WriteString(mode.SystemPromptAddendum())
 	b.WriteString("\n\n")
 
+	clarificationHint := ClarificationHintForRequest(in.CurrentRequest, in.SystemContext)
+	if clarificationHint != "" {
+		b.WriteString("Clarification guard:\n")
+		b.WriteString("- ")
+		b.WriteString(clarificationHint)
+		b.WriteString("\n")
+		b.WriteString("- Ask exactly one short clarifying question now. Do not emit tool markers until the user answers.\n\n")
+	}
+
 	tools := PromptToolsForRequest(mode, in.CurrentRequest, in.SystemContext)
-	if len(tools) > 0 {
+	if len(tools) > 0 && clarificationHint == "" {
 		b.WriteString("Available business capability catalog:\n")
 		b.WriteString("This catalog is shortlisted for the current request; use these tools before reaching for unrelated capabilities.\n")
 		for _, tool := range tools {

@@ -225,17 +225,20 @@ func TestBuildToolResultContinuationPromptCarriesResultsAndPriorAnswer(t *testin
 		"base prompt",
 		"I found the customer list.",
 		[]streamToolExecution{{
-			Name:   "crm.list_customers",
-			Status: "success",
-			Output: map[string]any{"total": 2},
+			Name:    "crm.list_customers",
+			Status:  "success",
+			Summary: "Found 2 customers.",
+			Output:  map[string]any{"total": 2},
 		}},
 	)
 
 	for _, want := range []string{
 		"base prompt",
 		"Tool results are now available",
+		"Prefer each result summary",
 		"I found the customer list.",
 		"crm.list_customers",
+		"Found 2 customers.",
 		`"total":2`,
 		"Continue now with the final user-facing answer.",
 	} {
@@ -374,6 +377,9 @@ func TestStreamRendererExecutesReadToolMarkerWithExecutor(t *testing.T) {
 	if toolResult == nil || toolResult.Status != "success" {
 		t.Fatalf("expected successful tool result, got %#v", events)
 	}
+	if toolResult.Summary != "No customers found." {
+		t.Fatalf("expected business summary, got %#v", toolResult.Summary)
+	}
 	output, ok := toolResult.Output.(map[string]any)
 	if !ok || output["total"] != float64(0) {
 		t.Fatalf("expected output total, got %#v", toolResult.Output)
@@ -390,6 +396,9 @@ func TestStreamRendererExecutesReadToolMarkerWithExecutor(t *testing.T) {
 	}
 	if results[0].Name != "crm.list_customers" || results[0].Status != "success" {
 		t.Fatalf("unexpected collected tool result: %#v", results[0])
+	}
+	if results[0].Summary != "No customers found." {
+		t.Fatalf("expected collected summary, got %#v", results[0].Summary)
 	}
 	if results[0].Output["total"] != 0 {
 		t.Fatalf("expected collected output total, got %#v", results[0].Output)

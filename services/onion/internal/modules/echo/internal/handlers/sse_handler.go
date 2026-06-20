@@ -82,14 +82,16 @@ type GenerateTextStreamRequest struct {
 	Prompt string `json:"prompt"`
 	// snake_case to match the frontend payload and onion's JSON convention.
 	// camelCase aliases are accepted too so older clients keep working.
-	SessionID     string `json:"session_id"`
-	UserID        int64  `json:"user_id"`
-	SystemContext string `json:"system_context"` // optional — app context injected as system message
-	Mode          string `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
+	SessionID     string         `json:"session_id"`
+	UserID        int64          `json:"user_id"`
+	SystemContext string         `json:"system_context"` // optional — app context injected as system message
+	Mode          string         `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
+	PageContext   map[string]any `json:"page_context,omitempty"`
 
 	// Accepted aliases (older camelCase clients).
-	SessionIDAlt string `json:"sessionId"`
-	UserIDAlt    int64  `json:"userId"`
+	SessionIDAlt   string         `json:"sessionId"`
+	UserIDAlt      int64          `json:"userId"`
+	PageContextAlt map[string]any `json:"pageContext,omitempty"`
 }
 
 type GenerateTextStreamResponse struct {
@@ -153,7 +155,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	// Neutralize control markers and bound length before the input is stored or
 	// folded into the prompt (prompt-injection defense).
 	req.Prompt = sanitizeUserInput(req.Prompt, maxUserPromptLen)
-	req.SystemContext = sanitizeUserInput(req.SystemContext, maxSystemContextLen)
+	req.SystemContext = buildRequestSystemContext(req.SystemContext, req.PageContext)
 
 	if !h.AiService.IsAvailable() {
 		log.Warn("AI service not available")
@@ -349,6 +351,9 @@ func (h *GenerateTextStreamHandler) parseAndValidateRequest(w http.ResponseWrite
 	}
 	if req.UserID == 0 {
 		req.UserID = req.UserIDAlt
+	}
+	if req.PageContext == nil {
+		req.PageContext = req.PageContextAlt
 	}
 
 	return &req, nil
@@ -811,7 +816,7 @@ func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, result
 	var b strings.Builder
 	b.WriteString(basePrompt)
 	b.WriteString("\n\nTool results are now available for the same user request.\n")
-	b.WriteString("Continue the same assistant answer using these results as evidence. Do not repeat text already sent. Do not mention JSON, tool internals, rows, tenant, or implementation details unless the user asks.\n")
+	b.WriteString("Continue the same assistant answer using these results as evidence. Prefer each result summary for business language, then use raw output only for exact values. Do not repeat text already sent. Do not mention JSON, tool internals, rows, tenant, or implementation details unless the user asks.\n")
 	if trimmed := strings.TrimSpace(assistantSoFar); trimmed != "" {
 		b.WriteString("\nAssistant text already sent:\n")
 		b.WriteString(trimmed)

@@ -98,6 +98,46 @@ func TestPromptToolsForRequestShortlistsRelevantTools(t *testing.T) {
 	}
 }
 
+func TestBuildCaretPromptClarifiesAmbiguousEntityBeforeTools(t *testing.T) {
+	got := buildCaretPrompt(caretPromptInput{
+		Mode:               ModeAgent,
+		ConversationPrompt: "Current request: update this product",
+		CurrentRequest:     "update this product",
+		SystemContext:      "Structured page context:\n{\"app\":\"dash\",\"route\":\"/menus\"}",
+		Now:                time.Date(2026, 6, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	for _, want := range []string{
+		"Clarification guard:",
+		"The product is not identified",
+		"Ask exactly one short clarifying question",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("prompt missing clarification guard %q\nprompt:\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "Available business capability catalog:") {
+		t.Fatalf("ambiguous prompt should not advertise tool calls:\n%s", got)
+	}
+}
+
+func TestBuildCaretPromptAllowsToolsWithSelectedEntityContext(t *testing.T) {
+	got := buildCaretPrompt(caretPromptInput{
+		Mode:               ModeAgent,
+		ConversationPrompt: "Current request: update this product",
+		CurrentRequest:     "update this product",
+		SystemContext:      "Structured page context:\n{\"selected\":{\"product_id\":\"prod_123\"}}",
+		Now:                time.Date(2026, 6, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	if strings.Contains(got, "Clarification guard:") {
+		t.Fatalf("selected entity context should avoid clarification guard:\n%s", got)
+	}
+	if !strings.Contains(got, "Available business capability catalog:") {
+		t.Fatalf("selected entity context should keep relevant tools available:\n%s", got)
+	}
+}
+
 func TestBuildCaretPromptSupportModeOmitsToolCatalog(t *testing.T) {
 	got := buildCaretPrompt(caretPromptInput{
 		Mode:               ModeSupport,

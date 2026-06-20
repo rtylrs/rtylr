@@ -35,6 +35,7 @@ type StreamEvent struct {
 	Input            any             `json:"input,omitempty"`
 	Status           string          `json:"status,omitempty"`
 	Output           any             `json:"output,omitempty"`
+	Summary          string          `json:"summary,omitempty"`
 	Error            string          `json:"error,omitempty"`
 	Recoverable      bool            `json:"recoverable,omitempty"`
 	DurationMs       int64           `json:"durationMs,omitempty"`
