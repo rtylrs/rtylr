@@ -293,6 +293,42 @@ func (s *Service) SearchMemories(ctx context.Context, userID int, query string) 
 	return s.repository.SearchUserMemory(ctx, userID, query)
 }
 
+func (s *Service) StoreUserMemory(ctx context.Context, userID int, memoryType, key, value, sourceSession string, confidence float64) (*domain.UserMemory, error) {
+	if userID <= 0 {
+		return nil, errors.New("user id is required")
+	}
+	memoryType = strings.TrimSpace(memoryType)
+	key = strings.TrimSpace(key)
+	value = strings.TrimSpace(value)
+	if memoryType == "" {
+		return nil, errors.New("memory type is required")
+	}
+	if key == "" {
+		return nil, errors.New("memory key is required")
+	}
+	if value == "" {
+		return nil, errors.New("memory value is required")
+	}
+	if confidence <= 0 {
+		confidence = 1
+	}
+	if confidence > 1 {
+		confidence = 1
+	}
+
+	defer invalidateMemoryScope(ctx, userID)
+	return s.repository.StoreUserMemory(ctx, &domain.UserMemory{
+		UserID:        userID,
+		MemoryType:    memoryType,
+		Key:           key,
+		Value:         value,
+		Confidence:    confidence,
+		SourceSession: strings.TrimSpace(sourceSession),
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+	})
+}
+
 func (s *Service) RenameSession(ctx context.Context, sessionID string, userID int, title string) (*domain.ChatSession, error) {
 	session, err := s.repository.GetChatSession(ctx, sessionID, userID)
 	if err != nil {

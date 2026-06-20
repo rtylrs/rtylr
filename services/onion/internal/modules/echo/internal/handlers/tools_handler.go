@@ -139,10 +139,14 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}
 		if executed {
 			h.logDecision(ctx, req, tool, "executed", true)
+			message := "Tool executed successfully."
+			if outputMessage, ok := stringValue(output["message"]); ok && outputMessage != "" {
+				message = outputMessage
+			}
 			return ToolDecisionResponse{
 				ToolCallID: req.ToolCallID,
 				Status:     "success",
-				Message:    "Tool executed successfully.",
+				Message:    message,
 				Executed:   true,
 				Tool:       tool,
 				Preview:    buildToolActionPreview(tool, req.Input),

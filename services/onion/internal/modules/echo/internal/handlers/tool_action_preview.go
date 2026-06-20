@@ -23,6 +23,8 @@ func buildToolActionPreview(tool ToolDef, input map[string]any) string {
 
 func friendlyToolAction(tool ToolDef) string {
 	switch tool.Name {
+	case "memory.remember":
+		return "remember this for future Caret conversations"
 	case "crm.create_customer":
 		return "create a customer"
 	case "pos.refund_order":

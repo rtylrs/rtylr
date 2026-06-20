@@ -57,6 +57,7 @@ func buildCaretPrompt(in caretPromptInput) string {
 	b.WriteString("- Preserve tenant and user privacy; do not suggest cross-tenant access or expose hidden implementation details.\n")
 	b.WriteString("- For destructive or mutating actions, explain the plan and ask for explicit approval before claiming anything changed.\n")
 	b.WriteString("- For scheduled or recurring work, propose the schedule and ask for approval; never say it is scheduled unless the platform returns success.\n")
+	b.WriteString("- When the user asks you to remember a business fact, default, preference, or operating rule, propose memory.remember in Agent mode with a short, durable value.\n")
 	b.WriteString("- Treat business memory/defaults in the current context as user preferences unless the user overrides them.\n")
 	b.WriteString("- Prefer tables for comparisons, bullets for action lists, and short prose for explanations.\n\n")
 	b.WriteString(caretHumanVoiceContract)

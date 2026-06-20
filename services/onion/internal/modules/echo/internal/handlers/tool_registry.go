@@ -16,6 +16,7 @@ type ToolDef struct {
 var CoreTools = []ToolDef{
 	{Name: "business.snapshot", Description: "Build a tenant-scoped owner snapshot across sales, finance, inventory, CRM, HR, and Flow.", Module: "business", Scope: "read"},
 	{Name: "business.get_kpis", Description: "Get headline business KPIs across revenue, orders, staff, customers, stock, and apps.", Module: "business", Scope: "read"},
+	{Name: "memory.remember", Description: "Remember a user-approved business fact, preference, reporting default, or operating rule for future Caret answers.", Module: "memory", Scope: "write", RequiresApproval: true},
 	{Name: "analytics.query", Description: "Run a tenant-scoped, read-only analytics query over allowlisted business views.", Module: "analytics", Scope: "read"},
 	{Name: "insights.get_dashboard", Description: "Get cross-domain business dashboard headline KPIs.", Module: "insights", Scope: "read"},
 	{Name: "insights.get_revenue_series", Description: "Get daily revenue over a date range.", Module: "insights", Scope: "read"},
@@ -169,6 +170,7 @@ var CoreTools = []ToolDef{
 var promptExecutableTools = map[string]struct{}{
 	"business.snapshot":                   {},
 	"business.get_kpis":                   {},
+	"memory.remember":                     {},
 	"insights.get_dashboard":              {},
 	"insights.get_revenue_series":         {},
 	"insights.get_revenue_comparison":     {},

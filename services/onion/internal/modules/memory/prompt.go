@@ -49,18 +49,23 @@ func (m *Module) BuildEnhancedPrompt(ctx context.Context, sessionID string, user
 	}
 
 	if len(cc.Memories) > 0 {
-		b.WriteString("Relevant facts about the user:\n")
+		b.WriteString("Saved Caret business memory:\n")
 		limit := len(cc.Memories)
 		if limit > MaxMemoriesInPrompt {
 			limit = MaxMemoriesInPrompt
 		}
 		for i := 0; i < limit; i++ {
-			key := strings.TrimSpace(cc.Memories[i].Key)
-			value := strings.TrimSpace(cc.Memories[i].Value)
+			memoryType := promptSafeMemoryText(cc.Memories[i].MemoryType)
+			key := promptSafeMemoryText(cc.Memories[i].Key)
+			value := promptSafeMemoryText(cc.Memories[i].Value)
 			if key == "" || value == "" {
 				continue
 			}
 			b.WriteString("- ")
+			if memoryType != "" {
+				b.WriteString(memoryType)
+				b.WriteString(": ")
+			}
 			b.WriteString(key)
 			b.WriteString(": ")
 			b.WriteString(value)
@@ -95,4 +100,14 @@ func (m *Module) BuildEnhancedPrompt(ctx context.Context, sessionID string, user
 	b.WriteString("Current request: ")
 	b.WriteString(currentRequest)
 	return b.String()
+}
+
+func promptSafeMemoryText(value string) string {
+	value = strings.NewReplacer(
+		"<tool>", "[tool]",
+		"</tool>", "[/tool]",
+		"<thinking>", "[thinking]",
+		"</thinking>", "[/thinking]",
+	).Replace(value)
+	return strings.Join(strings.Fields(value), " ")
 }

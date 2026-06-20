@@ -101,6 +101,19 @@ func TestPromptToolsForRequestShortlistsRelevantTools(t *testing.T) {
 	}
 }
 
+func TestPromptToolsForRequestShortlistsMemoryRemember(t *testing.T) {
+	tools := PromptToolsForRequest(ModeAgent, "remember that brunch gets busy after 11am on weekends", "/dashboard")
+	names := make([]string, 0, len(tools))
+	for _, tool := range tools {
+		names = append(names, tool.Name)
+	}
+
+	joined := strings.Join(names, ",")
+	if !strings.Contains(joined, "memory.remember") {
+		t.Fatalf("shortlist missing memory.remember: %v", names)
+	}
+}
+
 func TestPromptToolsForModeSeparatesReadAndWriteModes(t *testing.T) {
 	for _, mode := range []CaretMode{ModeAsk, ModeAnalyst} {
 		tools := PromptToolsForRequest(mode, "create a customer and list customers", "/crm")
