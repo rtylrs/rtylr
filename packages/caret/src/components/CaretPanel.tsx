@@ -46,6 +46,7 @@ interface ToolDecisionResponse {
   status: string;
   message: string;
   executed: boolean;
+  preview?: string;
   output?: unknown;
 }
 
@@ -218,8 +219,11 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         const status = normalizeToolDecisionStatus(result.status);
         const extras: Partial<ToolCallBlock> =
           status === 'error'
-            ? { error: result.message || 'Tool decision failed.' }
-            : { output: result.output ?? { message: result.message, executed: result.executed } };
+            ? { error: result.message || 'Tool decision failed.', preview: result.preview }
+            : {
+                output: result.output ?? { message: result.message, executed: result.executed },
+                preview: result.preview,
+              };
         setToolStatus(id, status, extras);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool decision failed.';

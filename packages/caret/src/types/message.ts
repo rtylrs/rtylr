@@ -20,6 +20,7 @@ export interface ToolCallBlock {
   input: Record<string, unknown>;
   status: 'pending' | 'approved' | 'denied' | 'running' | 'success' | 'error';
   output?: unknown;
+  preview?: string;
   summary?: string;
   error?: string;
   requiresApproval?: boolean;

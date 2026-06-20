@@ -17,6 +17,9 @@ export interface CaretPageContext {
   selected?: Record<string, CaretPageContextValue>;
   filters?: Record<string, CaretPageContextValue>;
   visibleRows?: CaretPageContextValue[];
+  businessMemory?: Record<string, CaretPageContextValue>;
+  cacheContext?: Record<string, CaretPageContextValue>;
+  dataFreshness?: CaretPageContextValue;
   hints?: string[];
   [key: string]: CaretPageContextValue | undefined;
 }

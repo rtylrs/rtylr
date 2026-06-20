@@ -18,6 +18,7 @@ export type CaretStreamEvent =
       blockId: string;
       name: string;
       input: Record<string, unknown>;
+      preview?: string;
       requiresApproval?: boolean;
     }
   | {

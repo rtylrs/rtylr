@@ -153,6 +153,7 @@ export function useCaretStream({
           name: event.name,
           input: event.input,
           status: event.requiresApproval ? 'pending' : 'running',
+          preview: event.preview,
           requiresApproval: event.requiresApproval,
         });
         break;

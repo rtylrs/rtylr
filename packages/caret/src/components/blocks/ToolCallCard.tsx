@@ -70,7 +70,7 @@ function targetForTool(name: string): string {
 function statusText(status: ToolCallBlock['status'], target: string): string {
   switch (status) {
     case 'pending':
-      return `Needs permission to check ${target}`;
+      return `Needs confirmation for ${target}`;
     case 'approved':
     case 'running':
       return `Checking ${target}`;
@@ -158,6 +158,13 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             <pre style={detailPreStyle}>{formatValue(call.input ?? {})}</pre>
           </div>
 
+          {call.preview && (
+            <div style={{ marginBottom: 8 }}>
+              <div style={detailLabelStyle}>preview</div>
+              <div style={summaryStyle}>{call.preview}</div>
+            </div>
+          )}
+
           {call.summary && (
             <div style={{ marginBottom: 8 }}>
               <div style={detailLabelStyle}>summary</div>
@@ -210,7 +217,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                     cursor: 'pointer',
                   }}
                 >
-                  <Check size={12} /> Allow
+                  <Check size={12} /> Confirm
                 </button>
               )}
               {onDeny && (
