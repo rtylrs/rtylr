@@ -1,5 +1,11 @@
 import React from 'react';
-import { CaretButton, CaretPanel, useCaretSettingsStore, useCaretStore } from '@voxire/caret';
+import {
+  buildCaretRouteContext,
+  CaretButton,
+  CaretPanel,
+  useCaretSettingsStore,
+  useCaretStore,
+} from '@voxire/caret';
 import { Moon, Power, Sun } from 'lucide-react';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
@@ -22,6 +28,19 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
   const caretWidth = useCaretSettingsStore((s) => s.panelWidth);
   const userId = Number(userIdValue ?? 0);
   const canUseCaret = Number.isFinite(userId) && userId > 0;
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'pos',
+        appName: 'POS',
+        pathname: typeof window === 'undefined' ? '/' : window.location.pathname,
+        page: 'Terminal',
+        module: 'terminal',
+        businessName,
+        hints: ['current shift, open orders, tables, receipts, stock, and customers'],
+      }),
+    [businessName],
+  );
 
   return (
     <div className="flex flex-col h-screen bg-pos-bg text-pos-text" data-theme={theme}>
@@ -70,6 +89,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the POS app (terminal, orders, tables, receipts, inventory, customers, and staff workflows)."
+              pageContext={caretPageContext}
             />
           </div>
         )}
