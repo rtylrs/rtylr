@@ -1,40 +1,31 @@
 // Panel + button - primary consumer entrypoints
-export { default as CaretPanel } from "./components/CaretPanel";
-export type { CaretPanelProps } from "./components/CaretPanel";
-export { default as CaretButton } from "./components/CaretButton";
-export { default as CaretMessage } from "./components/CaretMessage";
+export { default as CaretPanel } from './components/CaretPanel';
+export type { CaretPanelProps } from './components/CaretPanel';
+export { default as CaretButton } from './components/CaretButton';
+export { default as CaretMessage } from './components/CaretMessage';
 
 // Composition pieces (advanced consumers can build their own layouts)
-export { default as HeaderBar } from "./components/header/HeaderBar";
-export { default as MessageList } from "./components/MessageList";
-export { default as MessageBubble } from "./components/MessageBubble";
-export { default as MessageBlocks } from "./components/MessageBlocks";
-export { default as MessageActions } from "./components/MessageActions";
-export { default as EmptyState } from "./components/EmptyState";
-export { default as SettingsPanel } from "./components/SettingsPanel";
-export { default as ApprovalDialog } from "./components/ApprovalDialog";
+export { default as HeaderBar } from './components/header/HeaderBar';
+export { default as MessageList } from './components/MessageList';
+export { default as MessageBubble } from './components/MessageBubble';
+export { default as MessageBlocks } from './components/MessageBlocks';
+export { default as MessageActions } from './components/MessageActions';
+export { default as EmptyState } from './components/EmptyState';
+export { default as SettingsPanel } from './components/SettingsPanel';
+export { default as ApprovalDialog } from './components/ApprovalDialog';
 
-export {
-  Markdown,
-  CodeBlock,
-  ToolCallCard,
-  StreamingDot,
-} from "./components/blocks";
-export type {
-  MarkdownProps,
-  CodeBlockProps,
-  ToolCallCardProps,
-} from "./components/blocks";
+export { Markdown, CodeBlock, ToolCallCard, StreamingDot } from './components/blocks';
+export type { MarkdownProps, CodeBlockProps, ToolCallCardProps } from './components/blocks';
 // Note: ThinkingBlock is re-exported only as a value (the message block type
 // of the same name lives in ./types).
-export { ThinkingBlock as ThinkingBlockView } from "./components/blocks";
-export type { ThinkingBlockProps } from "./components/blocks";
+export { ThinkingBlock as ThinkingBlockView } from './components/blocks';
+export type { ThinkingBlockProps } from './components/blocks';
 
-export * from "./components/composer";
-export * from "./components/sidebar";
+export * from './components/composer';
+export * from './components/sidebar';
 
 // Stores
-export * from "./stores";
+export * from './stores';
 
 // Types - re-export with friendlier aliases for legacy consumers.
 export type {
@@ -50,24 +41,19 @@ export type {
   CaretModeDef,
   CaretModel,
   CaretModelDef,
-} from "./types";
-export type { CaretPageContext, CaretPageContextValue } from "./types/context";
-export {
-  CARET_MODES,
-  DEFAULT_MODE,
-  CARET_MODELS,
-  DEFAULT_MODEL,
-} from "./types";
+} from './types';
+export type { CaretPageContext, CaretPageContextValue } from './types/context';
+export { CARET_MODES, DEFAULT_MODE, CARET_MODELS, DEFAULT_MODEL } from './types';
 
 // Hooks
-export * from "./hooks";
+export * from './hooks';
 
 // Protocol
-export * from "./protocol";
+export * from './protocol';
 
 // Markdown (escape-hatch for embedding renderer elsewhere)
-export { renderMarkdown, renderInlineMarkdown } from "./markdown";
+export { renderMarkdown, renderInlineMarkdown } from './markdown';
 
 // Context helpers
-export { buildCaretRouteContext } from "./lib/routeContext";
-export type { BuildCaretRouteContextInput } from "./lib/routeContext";
+export { buildCaretRouteContext } from './lib/routeContext';
+export type { BuildCaretRouteContextInput } from './lib/routeContext';

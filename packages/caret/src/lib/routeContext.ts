@@ -1,4 +1,4 @@
-import type { CaretPageContext, CaretPageContextValue } from "../types/context";
+import type { CaretPageContext, CaretPageContextValue } from '../types/context';
 
 export interface BuildCaretRouteContextInput {
   appId: string;
@@ -20,42 +20,39 @@ export interface BuildCaretRouteContextInput {
 }
 
 function clean(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
 function normalizePath(pathname: string | undefined): string {
-  const value = clean(pathname) ?? "/";
-  const pathOnly = value.split("?")[0]?.split("#")[0] ?? "/";
-  return pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
+  const value = clean(pathname) ?? '/';
+  const pathOnly = value.split('?')[0]?.split('#')[0] ?? '/';
+  return pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
 }
 
 function bestRouteMatch<T>(
   pathname: string,
-  entries: Record<string, T> | undefined,
+  entries: Record<string, T> | undefined
 ): T | undefined {
   if (!entries) return undefined;
   if (entries[pathname]) return entries[pathname];
 
   const sorted = Object.keys(entries)
-    .filter(
-      (path) =>
-        path !== "/" && (pathname === path || pathname.startsWith(`${path}/`)),
-    )
+    .filter((path) => path !== '/' && (pathname === path || pathname.startsWith(`${path}/`)))
     .sort((a, b) => b.length - a.length);
 
-  return sorted.length > 0 ? entries[sorted[0]] : entries["/"];
+  return sorted.length > 0 ? entries[sorted[0]] : entries['/'];
 }
 
 function firstRouteSegment(pathname: string): string | undefined {
-  return clean(pathname.split("/").filter(Boolean)[0]);
+  return clean(pathname.split('/').filter(Boolean)[0]);
 }
 
 function humanize(value: string | undefined): string | undefined {
   const text = clean(value);
   if (!text) return undefined;
   return text
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
@@ -76,9 +73,7 @@ function uniqueHints(values: Array<string | undefined>): string[] | undefined {
   return out.length > 0 ? out.slice(0, 5) : undefined;
 }
 
-export function buildCaretRouteContext(
-  input: BuildCaretRouteContextInput,
-): CaretPageContext {
+export function buildCaretRouteContext(input: BuildCaretRouteContextInput): CaretPageContext {
   const pathname = normalizePath(input.pathname);
   const page =
     clean(input.page) ??
