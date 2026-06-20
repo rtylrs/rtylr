@@ -17,9 +17,11 @@ export interface CaretContextSignal {
 export interface CaretEmptyStateModel {
   title: string;
   subtitle: string;
+  briefItems: string[];
   contextSignals: CaretContextSignal[];
   primaryAction: CaretStarter;
   suggestions: CaretStarter[];
+  composerPlaceholder: string;
 }
 
 interface BuildCaretEmptyStateInput {
@@ -210,6 +212,123 @@ function formatContextValue(value: CaretPageContextValue | undefined): string | 
 
 function includesAny(value: string, terms: string[]): boolean {
   return terms.some((term) => value.includes(term));
+}
+
+function describeDomain(contextKey: string, appKey: string): string[] {
+  if (includesAny(contextKey, ['customer', 'loyalty', 'campaign', 'segment', 'feedback'])) {
+    return ['Customer follow-ups', 'loyalty changes', 'sales opportunities'];
+  }
+  if (
+    includesAny(contextKey, [
+      'inventory',
+      'product',
+      'stock',
+      'supplier',
+      'reorder',
+      'warehouse',
+      'barcode',
+      'category',
+      'brand',
+      'valuation',
+      'expiry',
+    ])
+  ) {
+    return ['stock risks', 'reorder work', 'supplier gaps'];
+  }
+  if (
+    includesAny(contextKey, [
+      'invoice',
+      'quote',
+      'expense',
+      'bill',
+      'bank',
+      'cash',
+      'tax',
+      'profit',
+      'loss',
+      'revenue',
+      'financial',
+      'journal',
+      'account',
+    ])
+  ) {
+    return ['cash movement', 'margin risk', 'overdue money'];
+  }
+  if (
+    includesAny(contextKey, [
+      'staff',
+      'employee',
+      'shift',
+      'payroll',
+      'attendance',
+      'time',
+      'leave',
+      'overtime',
+      'review',
+      'onboarding',
+      'training',
+      'benefit',
+    ])
+  ) {
+    return ['staffing gaps', 'attendance issues', 'payroll checks'];
+  }
+  if (
+    includesAny(contextKey, [
+      'project',
+      'task',
+      'workspace',
+      'inbox',
+      'milestone',
+      'calendar',
+      'timer',
+      'flow',
+    ])
+  ) {
+    return ['blocked work', 'due items', 'workload pressure'];
+  }
+  if (includesAny(contextKey, ['report', 'insight', 'analytics', 'dashboard', 'operation'])) {
+    return ['changes', 'outliers', 'next questions'];
+  }
+  if (includesAny(contextKey, ['setting', 'setup', 'config', 'apps'])) {
+    return ['missing setup', 'risky settings', 'next safe steps'];
+  }
+  if (appKey === 'pos') return ['shift status', 'open orders', 'stock and customers'];
+  return ['important numbers', 'risks', 'next moves'];
+}
+
+function buildReadyBrief({
+  appKey,
+  contextKey,
+  page,
+  selectedLabel,
+  visibleRows,
+  firstHint,
+}: {
+  appKey: string;
+  contextKey: string;
+  page: string | null;
+  selectedLabel: string | null;
+  visibleRows: number;
+  firstHint: string | null;
+}): string[] {
+  const domain = describeDomain(contextKey, appKey);
+  const items = [
+    selectedLabel
+      ? `Focused on this ${selectedLabel}.`
+      : isUsefulLabel(page)
+        ? `Focused on ${page}.`
+        : null,
+    `Ready to look at ${domain.join(', ')}.`,
+    visibleRows > 0 ? `Using ${pluralize(visibleRows, 'visible row')} from this screen.` : null,
+    firstHint ? `Watching ${truncate(firstHint, 56)}.` : null,
+  ];
+
+  return items.filter((item): item is string => Boolean(item)).slice(0, 4);
+}
+
+function buildComposerPlaceholder(page: string | null, appName: string): string {
+  if (isUsefulLabel(page)) return `Ask Caret about ${truncate(page, 34)}...`;
+  return `Ask Caret about ${appName}...`;
 }
 
 function firstSelectedLabel(selected: CaretPageContext['selected']): string | null {
@@ -485,6 +604,8 @@ export function buildCaretEmptyState({
   const selectedLabel = firstSelectedLabel(pageContext?.selected);
   const visibleRows = Array.isArray(pageContext?.visibleRows) ? pageContext.visibleRows.length : 0;
   const hasFilters = hasEntries(pageContext?.filters);
+  const firstHint = cleanText(pageContext?.hints?.[0]);
+  const contextKey = normalizeKey(`${pageContext?.page ?? ''} ${moduleKey}`);
   const primaryAction = buildPrimaryAction({
     appKey,
     moduleKey,
@@ -552,8 +673,16 @@ export function buildCaretEmptyState({
   return {
     title: isUsefulLabel(page) ? `Caret is ready on ${page}` : `Caret is ready in ${appName}`,
     subtitle: pageContext?.businessName
-      ? `Start with the most useful next move for ${pageContext.businessName}.`
-      : 'Start with what matters right now.',
+      ? `Already looking at this screen for ${pageContext.businessName}.`
+      : 'Already looking at this screen.',
+    briefItems: buildReadyBrief({
+      appKey,
+      contextKey,
+      page,
+      selectedLabel,
+      visibleRows,
+      firstHint,
+    }),
     contextSignals: buildContextSignals({
       pageContext,
       page,
@@ -563,5 +692,6 @@ export function buildCaretEmptyState({
     }),
     primaryAction,
     suggestions,
+    composerPlaceholder: buildComposerPlaceholder(page, appName),
   };
 }

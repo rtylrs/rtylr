@@ -6,6 +6,7 @@ import { caretTokens, caretRadius } from '../ui/tokens';
 export interface EmptyStateProps {
   title?: string;
   subtitle?: string;
+  briefItems?: string[];
   contextSignals?: CaretContextSignal[];
   primaryAction?: CaretStarter;
   suggestions?: CaretStarter[];
@@ -37,6 +38,7 @@ function signalTone(signal: CaretContextSignal): React.CSSProperties {
 export const EmptyState: React.FC<EmptyStateProps> = ({
   title = 'Ask Caret anything',
   subtitle = 'Your AI assistant with access to all your business data.',
+  briefItems = [],
   contextSignals = [],
   primaryAction,
   suggestions = [],
@@ -100,6 +102,49 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         >
           {subtitle}
         </p>
+
+        {briefItems.length > 0 && (
+          <div
+            style={{
+              width: '100%',
+              marginBottom: 14,
+              padding: '10px 11px',
+              border: `1px solid ${caretTokens.border}`,
+              borderRadius: caretRadius.md,
+              background: caretTokens.surface,
+              display: 'grid',
+              gap: 7,
+            }}
+          >
+            {briefItems.map((item) => (
+              <div
+                key={item}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '6px 1fr',
+                  gap: 8,
+                  alignItems: 'start',
+                  color: caretTokens.textMuted,
+                  fontSize: 12,
+                  lineHeight: 1.35,
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: 999,
+                    background: caretTokens.accent,
+                    marginTop: 6,
+                    opacity: 0.75,
+                  }}
+                />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {contextSignals.length > 0 && (
           <div

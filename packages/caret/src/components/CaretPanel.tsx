@@ -378,6 +378,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             <EmptyState
               title={emptyState.title}
               subtitle={emptyState.subtitle}
+              briefItems={emptyState.briefItems}
               contextSignals={emptyState.contextSignals}
               primaryAction={emptyState.primaryAction}
               suggestions={emptyState.suggestions}
@@ -398,6 +399,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             isStreaming={isStreaming}
             onSubmit={(t) => sendPromptWithIntent(t)}
             onStop={stopStreaming}
+            placeholder={emptyState.composerPlaceholder}
           />
         </>
       )}
