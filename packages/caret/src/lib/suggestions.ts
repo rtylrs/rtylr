@@ -4,12 +4,21 @@ import type { CaretMode } from '../types/mode';
 export interface CaretStarter {
   prompt: string;
   label?: string;
+  description?: string;
   mode?: CaretMode;
+}
+
+export interface CaretContextSignal {
+  label: string;
+  value: string;
+  tone?: 'neutral' | 'accent' | 'warn';
 }
 
 export interface CaretEmptyStateModel {
   title: string;
   subtitle: string;
+  contextSignals: CaretContextSignal[];
+  primaryAction: CaretStarter;
   suggestions: CaretStarter[];
 }
 
@@ -20,17 +29,28 @@ interface BuildCaretEmptyStateInput {
 
 type StarterInput = string | CaretStarter;
 
-const starter = (prompt: string, mode: CaretMode = 'ask', label?: string): CaretStarter => ({
+const starter = (
+  prompt: string,
+  mode: CaretMode = 'ask',
+  label?: string,
+  description?: string,
+): CaretStarter => ({
   prompt,
   mode,
   ...(label ? { label } : {}),
+  ...(description ? { description } : {}),
 });
 
 const GENERIC_STARTERS: CaretStarter[] = [
-  starter('Give me a 5-minute owner brief', 'analyst'),
-  starter('What should I handle first?', 'ask'),
-  starter('Find anything that looks off', 'analyst'),
-  starter('Turn this into an action plan', 'agent'),
+  starter(
+    'Give me a 5-minute owner brief',
+    'analyst',
+    'Owner brief',
+    'The numbers, risks, and next moves.',
+  ),
+  starter('What should I handle first?', 'ask', 'Handle first', 'A plain priority list.'),
+  starter('Find anything that looks off', 'analyst', 'Check risks', 'Spot unusual changes.'),
+  starter('Turn this into an action plan', 'agent', 'Action plan', 'Draft the next steps.'),
 ];
 
 const APP_LABELS: Record<string, string> = {
@@ -159,7 +179,31 @@ function humanize(value: string): string {
 }
 
 function hasEntries(value: Record<string, CaretPageContextValue> | undefined): boolean {
-  return Boolean(value && Object.keys(value).length > 0);
+  return entryCount(value) > 0;
+}
+
+function entryCount(value: Record<string, CaretPageContextValue> | undefined): number {
+  return value ? Object.keys(value).filter((key) => value[key] !== undefined).length : 0;
+}
+
+function pluralize(value: number, singular: string, plural = `${singular}s`): string {
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+
+function truncate(value: string, limit = 42): string {
+  return value.length > limit ? `${value.slice(0, limit - 1).trim()}...` : value;
+}
+
+function formatContextValue(value: CaretPageContextValue | undefined): string | null {
+  if (typeof value === 'string') return truncate(value.trim());
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : null;
+  if (typeof value === 'boolean') return value ? 'yes' : 'no';
+  if (Array.isArray(value)) return pluralize(value.length, 'item');
+  if (value && typeof value === 'object') {
+    const keys = Object.keys(value).filter((key) => value[key] !== undefined);
+    return keys.length > 0 ? pluralize(keys.length, 'field') : null;
+  }
+  return null;
 }
 
 function firstSelectedLabel(selected: CaretPageContext['selected']): string | null {
@@ -199,6 +243,110 @@ function unique(values: Array<StarterInput | null | undefined>, limit: number): 
   return result;
 }
 
+function buildContextSignals({
+  pageContext,
+  page,
+  selectedLabel,
+  visibleRows,
+  hasFilters,
+}: {
+  pageContext?: CaretPageContext;
+  page: string | null;
+  selectedLabel: string | null;
+  visibleRows: number;
+  hasFilters: boolean;
+}): CaretContextSignal[] {
+  const signals: CaretContextSignal[] = [];
+  const role = cleanText(pageContext?.role);
+  const freshness = formatContextValue(pageContext?.dataFreshness);
+  const firstHint = cleanText(pageContext?.hints?.[0]);
+  const filterCount = entryCount(pageContext?.filters);
+  const memoryCount = entryCount(pageContext?.businessMemory);
+
+  if (isUsefulLabel(page)) signals.push({ label: 'Screen', value: page });
+  if (selectedLabel) signals.push({ label: 'Focus', value: selectedLabel, tone: 'accent' });
+  if (visibleRows > 0) signals.push({ label: 'Visible', value: pluralize(visibleRows, 'row') });
+  if (hasFilters) signals.push({ label: 'Filter', value: `${filterCount || 1} active` });
+  if (freshness) signals.push({ label: 'Data', value: freshness });
+  if (role) signals.push({ label: 'Role', value: truncate(role, 24) });
+  if (memoryCount > 0)
+    signals.push({
+      label: 'Notes',
+      value: pluralize(memoryCount, 'saved item'),
+    });
+  if (firstHint) signals.push({ label: 'Watch', value: truncate(firstHint), tone: 'warn' });
+
+  return signals.slice(0, 6);
+}
+
+function buildPrimaryAction({
+  appKey,
+  moduleKey,
+  selectedLabel,
+  visibleRows,
+  pageContext,
+}: {
+  appKey: string;
+  moduleKey: string;
+  selectedLabel: string | null;
+  visibleRows: number;
+  pageContext?: CaretPageContext;
+}): CaretStarter {
+  const firstHint = cleanText(pageContext?.hints?.[0]);
+
+  if (selectedLabel) {
+    return starter(
+      `Review this ${selectedLabel} and tell me the next best action`,
+      'ask',
+      `Review this ${selectedLabel}`,
+      'Summary, risk check, and next move.',
+    );
+  }
+
+  if (firstHint) {
+    return starter(
+      `Check ${firstHint} and tell me what needs action`,
+      'ask',
+      `Check ${truncate(firstHint, 28)}`,
+      'Focus on the thing most likely to matter.',
+    );
+  }
+
+  if (visibleRows > 0) {
+    return starter(
+      `Prioritize these ${visibleRows} visible rows and tell me what I should do first`,
+      'analyst',
+      'Prioritize this list',
+      'Rank what matters and explain why.',
+    );
+  }
+
+  if (moduleKey === 'storefront') {
+    return starter(
+      'Audit my storefront and tell me what to fix first',
+      'agent',
+      'Audit storefront',
+      'Customer-facing issues and next actions.',
+    );
+  }
+
+  if (appKey === 'pos') {
+    return starter(
+      'Summarize the current shift and tell me what needs attention',
+      'analyst',
+      'Current shift brief',
+      'Sales, orders, stock, and watchouts.',
+    );
+  }
+
+  return starter(
+    'Give me a 5-minute owner brief and tell me what to handle first',
+    'analyst',
+    'Start with a brief',
+    'Important numbers, risks, and next moves.',
+  );
+}
+
 export function buildCaretEmptyState({
   appId,
   pageContext,
@@ -211,6 +359,13 @@ export function buildCaretEmptyState({
   const selectedLabel = firstSelectedLabel(pageContext?.selected);
   const visibleRows = Array.isArray(pageContext?.visibleRows) ? pageContext.visibleRows.length : 0;
   const hasFilters = hasEntries(pageContext?.filters);
+  const primaryAction = buildPrimaryAction({
+    appKey,
+    moduleKey,
+    selectedLabel,
+    visibleRows,
+    pageContext,
+  });
 
   const baseStarters =
     MODULE_STARTERS[moduleKey] ??
@@ -219,23 +374,68 @@ export function buildCaretEmptyState({
     GENERIC_STARTERS;
 
   const contextStarters = [
-    selectedLabel ? starter(`Summarize this ${selectedLabel}`, 'ask') : null,
     selectedLabel
-      ? starter(`What should I check before changing this ${selectedLabel}?`, 'agent')
+      ? starter(
+          `Summarize this ${selectedLabel}`,
+          'ask',
+          `Summarize ${selectedLabel}`,
+          'What matters and why.',
+        )
       : null,
-    visibleRows > 0 ? starter(`Prioritize these ${visibleRows} visible rows`, 'analyst') : null,
-    visibleRows > 0 ? starter('Find anything unusual in this list', 'analyst') : null,
-    hasFilters ? starter('What stands out in these filtered results?', 'analyst') : null,
+    selectedLabel
+      ? starter(
+          `What should I check before changing this ${selectedLabel}?`,
+          'agent',
+          'Before changing it',
+          'Risks and approval context.',
+        )
+      : null,
+    visibleRows > 0
+      ? starter(
+          `Prioritize these ${visibleRows} visible rows`,
+          'analyst',
+          'Prioritize visible rows',
+          'Rank what needs attention.',
+        )
+      : null,
+    visibleRows > 0
+      ? starter(
+          'Find anything unusual in this list',
+          'analyst',
+          'Find unusual items',
+          'Look for gaps or surprises.',
+        )
+      : null,
+    hasFilters
+      ? starter(
+          'What stands out in these filtered results?',
+          'analyst',
+          'Filtered results',
+          'Explain what changed in this view.',
+        )
+      : null,
   ];
 
+  const suggestions = unique(
+    [...contextStarters, ...baseStarters, hintStarter(pageContext?.hints), ...GENERIC_STARTERS],
+    6,
+  )
+    .filter((item) => item.prompt.toLowerCase() !== primaryAction.prompt.toLowerCase())
+    .slice(0, 4);
+
   return {
-    title: isUsefulLabel(page) ? `Ask Caret about ${page}` : `Ask Caret in ${appName}`,
+    title: isUsefulLabel(page) ? `Caret is ready on ${page}` : `Caret is ready in ${appName}`,
     subtitle: pageContext?.businessName
       ? `Start with the most useful next move for ${pageContext.businessName}.`
       : 'Start with what matters right now.',
-    suggestions: unique(
-      [...contextStarters, ...baseStarters, hintStarter(pageContext?.hints), ...GENERIC_STARTERS],
-      4
-    ),
+    contextSignals: buildContextSignals({
+      pageContext,
+      page,
+      selectedLabel,
+      visibleRows,
+      hasFilters,
+    }),
+    primaryAction,
+    suggestions,
   };
 }

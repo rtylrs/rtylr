@@ -372,6 +372,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             <EmptyState
               title={emptyState.title}
               subtitle={emptyState.subtitle}
+              contextSignals={emptyState.contextSignals}
+              primaryAction={emptyState.primaryAction}
               suggestions={emptyState.suggestions}
               onSuggestion={sendStarter}
             />
