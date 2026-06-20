@@ -39,7 +39,7 @@ var CoreTools = []ToolDef{
 	{Name: "insights.get_time_off", Description: "Get pending and approved time-off counters.", Module: "insights", Scope: "read"},
 	{Name: "insights.get_utilization", Description: "Get scheduled-vs-available staff utilization.", Module: "insights", Scope: "read"},
 	{Name: "insights.get_settings", Description: "Get insights currency, fiscal-year, and timezone settings.", Module: "insights", Scope: "read"},
-	{Name: "insights.schedule_report", Description: "Schedule a recurring business insight or report.", Module: "insights", Scope: "write", RequiresApproval: true},
+	{Name: "insights.schedule_report", Description: "Schedule a recurring business insight or report. Requires template_id, cadence, channel, and recipient.", Module: "insights", Scope: "write", RequiresApproval: true},
 	{Name: "crm.list_customers", Description: "List CRM customers.", Module: "crm", Scope: "read"},
 	{Name: "crm.get_customer", Description: "Get a CRM customer profile by ID, including contact, loyalty, spend, visit, tag, and note details.", Module: "crm", Scope: "read"},
 	{Name: "crm.create_customer", Description: "Create a CRM customer.", Module: "crm", Scope: "write", RequiresApproval: true},

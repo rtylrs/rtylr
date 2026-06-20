@@ -10,9 +10,9 @@ import (
 	"github.com/voxire/onion/internal/modules/insights/internal/routes"
 )
 
-// Module is the read-only cross-domain aggregation layer that powers the
-// /insights/* namespace. It reads (never writes) across Finance, CRM, POS,
-// ERP and HR schemas from the infrastructure layer only.
+// Module is the cross-domain aggregation layer that powers the /insights/*
+// namespace. Most endpoints read across Finance, CRM, POS, ERP and HR schemas;
+// settings endpoints also persist insights preferences such as scheduled reports.
 type Module struct {
 	service *application.Service
 }
