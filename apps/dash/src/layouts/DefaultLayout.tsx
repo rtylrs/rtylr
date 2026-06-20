@@ -48,6 +48,7 @@ import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
+import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/caret';
 
 interface NavItem {
   label: string;
@@ -314,6 +315,26 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const userName = user?.fullName || 'User';
   const businessName = user?.businessName || 'My Business';
   const isConsoleAdmin = user?.isConsoleAdmin === true || user?.is_console_admin === true;
+  const caretSystemContext = React.useMemo(
+    () =>
+      buildDashSystemContext({
+        pathname,
+        businessName: user?.businessName,
+        role: user?.role,
+        apps: user?.apps,
+      }),
+    [pathname, user?.apps, user?.businessName, user?.role]
+  );
+  const caretPageContext = React.useMemo(
+    () =>
+      buildDashPageContext({
+        pathname,
+        businessName: user?.businessName,
+        role: user?.role,
+        apps: user?.apps,
+      }),
+    [pathname, user?.apps, user?.businessName, user?.role]
+  );
 
   const handleLogout = (): void => {
     useBusinessStore.getState().reset();
@@ -584,7 +605,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               appId="dash"
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
-              systemContext="User is in the Dash app (business command center - KPIs, orders, staff overview)"
+              systemContext={caretSystemContext}
+              pageContext={caretPageContext}
             />
           </div>
         </div>

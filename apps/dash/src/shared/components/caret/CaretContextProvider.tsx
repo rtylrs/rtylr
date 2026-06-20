@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import { useRouterState } from '@tanstack/react-router';
+import type { CaretPageContext } from '@voxire/caret';
 import { useUserStore } from '../../stores/userStore';
-import { buildDashSystemContext, suggestionsFor } from '../../lib/caret';
+import { buildDashPageContext, buildDashSystemContext, suggestionsFor } from '../../lib/caret';
 
 interface CaretContextValue {
   systemContext: string;
+  pageContext: CaretPageContext;
   suggestions: string[];
   userId: number;
   businessName: string | undefined;
@@ -22,12 +24,20 @@ export const CaretContextProvider: React.FC<React.PropsWithChildren> = ({ childr
       systemContext: buildDashSystemContext({
         pathname: pathname,
         businessName,
+        role: user?.role,
+        apps: user?.apps,
+      }),
+      pageContext: buildDashPageContext({
+        pathname: pathname,
+        businessName,
+        role: user?.role,
+        apps: user?.apps,
       }),
       suggestions: suggestionsFor(pathname),
       userId: Number(user?.id) || 0,
       businessName,
     };
-  }, [pathname, user?.businessName, user?.id]);
+  }, [pathname, user?.apps, user?.businessName, user?.id, user?.role]);
 
   return <CaretContext.Provider value={value}>{children}</CaretContext.Provider>;
 };

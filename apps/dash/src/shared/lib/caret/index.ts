@@ -1,4 +1,4 @@
-export { buildDashSystemContext } from './systemContext';
+export { buildDashPageContext, buildDashSystemContext } from './systemContext';
 export type { DashSystemContextInput } from './systemContext';
 export { suggestionsFor } from './suggestions';
 export { transcriptToText, transcriptToMarkdown } from './transcripts';

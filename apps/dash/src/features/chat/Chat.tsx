@@ -13,6 +13,7 @@ import {
   type ContentBlock,
 } from '@voxire/caret';
 import { useUserStore } from '../../shared/stores/userStore';
+import { buildDashPageContext, buildDashSystemContext } from '../../shared/lib/caret';
 
 const SUGGESTIONS = [
   'How much revenue did we make today?',
@@ -42,11 +43,29 @@ const Chat: React.FC = () => {
   const { user } = useUserStore();
   const userId = Number(user?.id) || 0;
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/';
-  const systemContext =
-    'User is in the Dash app (business command center - KPIs, orders, staff overview)';
+  const systemContext = React.useMemo(
+    () =>
+      buildDashSystemContext({
+        pathname: '/chat',
+        businessName: user?.businessName,
+        role: user?.role,
+        apps: user?.apps,
+      }),
+    [user?.apps, user?.businessName, user?.role]
+  );
+  const pageContext = React.useMemo(
+    () =>
+      buildDashPageContext({
+        pathname: '/chat',
+        businessName: user?.businessName,
+        role: user?.role,
+        apps: user?.apps,
+      }),
+    [user?.apps, user?.businessName, user?.role]
+  );
 
   const { messages, isStreaming } = useCaretStore();
-  const { sendMessage } = useCaretStream({ userId, apiBaseUrl, systemContext });
+  const { sendMessage } = useCaretStream({ userId, apiBaseUrl, systemContext, pageContext });
 
   const [input, setInput] = React.useState('');
   const bottomRef = useRef<HTMLDivElement>(null);

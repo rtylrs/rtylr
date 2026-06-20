@@ -1,32 +1,129 @@
-/**
- * Build the Caret `systemContext` string for the dash app. The backend
- * splices this into the model's system prompt so Caret knows where the
- * user currently is in the product.
- */
+import type { CaretPageContext } from '@voxire/caret';
+
 export interface DashSystemContextInput {
   pathname: string;
   businessName?: string;
+  role?: string;
+  apps?: string[];
 }
 
-const PAGE_HINTS: Record<string, string> = {
-  '/': 'on the dashboard home (KPIs and quick overview)',
-  '/team': 'on the Team management page',
-  '/apps': 'on the Apps marketplace',
-  '/menus': 'managing menus',
-  '/orders': 'reviewing orders',
-  '/qr-codes': 'generating QR codes',
-  '/design': 'editing storefront design',
-  '/settings': 'configuring settings',
+interface PageInfo {
+  module: string;
+  page: string;
+  hint: string;
+}
+
+const PAGE_HINTS: Record<string, PageInfo> = {
+  '/': {
+    module: 'dashboard',
+    page: 'Dashboard home',
+    hint: 'KPIs and quick overview',
+  },
+  '/team': {
+    module: 'team',
+    page: 'Team management',
+    hint: 'members, invites, roles, and permissions',
+  },
+  '/apps': {
+    module: 'apps',
+    page: 'Apps marketplace',
+    hint: 'enabled apps and available add-ons',
+  },
+  '/menus': {
+    module: 'storefront',
+    page: 'Menus',
+    hint: 'menu items and storefront catalog setup',
+  },
+  '/orders': {
+    module: 'storefront',
+    page: 'Orders',
+    hint: 'storefront order review',
+  },
+  '/qr-codes': {
+    module: 'storefront',
+    page: 'QR Codes',
+    hint: 'QR code generation',
+  },
+  '/design': {
+    module: 'storefront',
+    page: 'Design',
+    hint: 'storefront design and branding',
+  },
+  '/settings': {
+    module: 'settings',
+    page: 'Settings',
+    hint: 'business settings',
+  },
+  '/chat': {
+    module: 'caret',
+    page: 'Caret chat',
+    hint: 'full-page AI assistant',
+  },
 };
 
-function pageHint(pathname: string): string {
+function pageInfo(pathname: string): PageInfo {
   if (PAGE_HINTS[pathname]) return PAGE_HINTS[pathname];
   const match = Object.keys(PAGE_HINTS).find((p) => pathname.startsWith(p) && p !== '/');
-  return match ? PAGE_HINTS[match] : 'navigating the dash app';
+  return match
+    ? PAGE_HINTS[match]
+    : {
+        module: 'dash',
+        page: 'Unknown Dash page',
+        hint: 'navigating the dash app',
+      };
+}
+
+function selectedFromPath(pathname: string): Record<string, string> | undefined {
+  const selected: Record<string, string> = {};
+  const routes: Array<[RegExp, string]> = [
+    [/^\/orders\/([^/]+)/, 'order_id'],
+    [/^\/menus\/([^/]+)/, 'menu_id'],
+    [/^\/team\/([^/]+)/, 'employee_id'],
+    [/^\/customers\/([^/]+)/, 'customer_id'],
+    [/^\/products\/([^/]+)/, 'product_id'],
+    [/^\/items\/([^/]+)/, 'product_id'],
+    [/^\/settings\/locations\/([^/]+)/, 'location_id'],
+  ];
+
+  for (const [pattern, key] of routes) {
+    const match = pathname.match(pattern);
+    if (match?.[1]) selected[key] = decodeURIComponent(match[1]);
+  }
+
+  return Object.keys(selected).length > 0 ? selected : undefined;
 }
 
 export function buildDashSystemContext({ pathname, businessName }: DashSystemContextInput): string {
-  const where = pageHint(pathname);
-  const biz = businessName ? `Business: ${businessName}. ` : '';
-  return `${biz}User is in the Dash app (business command center) and is currently ${where}.`;
+  const ctx = buildDashPageContext({ pathname, businessName });
+  const lines = [
+    'App: Dash business command center.',
+    businessName ? `Business: ${businessName}.` : '',
+    `Route: ${pathname}.`,
+    `Current module: ${ctx.module ?? 'dash'}.`,
+    `Current page: ${ctx.page ?? 'Dash'}.`,
+    ctx.hints?.length ? `Page hint: ${ctx.hints.join('; ')}.` : '',
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+
+export function buildDashPageContext({
+  pathname,
+  businessName,
+  role,
+  apps,
+}: DashSystemContextInput): CaretPageContext {
+  const info = pageInfo(pathname);
+  return {
+    app: 'dash',
+    appName: 'Dash business command center',
+    route: pathname,
+    module: info.module,
+    page: info.page,
+    businessName,
+    role,
+    selected: selectedFromPath(pathname),
+    filters: {},
+    hints: [info.hint],
+    enabledApps: apps?.slice(0, 20),
+  };
 }
