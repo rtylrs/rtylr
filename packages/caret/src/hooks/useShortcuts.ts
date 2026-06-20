@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useCaretStore } from '../stores/caretStore';
 import { useCaretUIStore } from '../stores/uiStore';
+import { requestCaretComposerFocus } from '../lib/focusComposer';
 
 /**
  * Wire global keyboard shortcuts:
@@ -32,6 +33,7 @@ export function useShortcuts(): void {
         e.preventDefault();
         setView('chat');
         if (!isOpen) toggle();
+        requestCaretComposerFocus();
         return;
       }
 
