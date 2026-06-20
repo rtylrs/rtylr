@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { safe } from '../shared/lib/api';
 import { useForesightLinks } from '@voxire/utils';
@@ -186,6 +186,17 @@ const DefaultLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const pageTitle = getPageTitle(pathname);
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'finance',
+        appName: 'Finance',
+        pathname,
+        page: pageTitle,
+        routeLabels,
+      }),
+    [pathname, pageTitle]
+  );
   const [theme, setThemeState] = useState<Theme>(
     () => (localStorage.getItem('finance-theme') as Theme) || 'dark'
   );
@@ -571,6 +582,7 @@ const DefaultLayout: React.FC = () => {
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the Finance app (invoices, expenses, bills, P&L, tax)"
+              pageContext={caretPageContext}
             />
           </div>
         </div>

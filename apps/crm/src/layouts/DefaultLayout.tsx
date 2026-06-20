@@ -5,7 +5,7 @@ import { useLocation, useNavigate, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
@@ -220,6 +220,17 @@ const DefaultLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pageTitle = getPageTitle(location.pathname);
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'crm',
+        appName: 'CRM',
+        pathname: location.pathname,
+        page: pageTitle,
+        routeLabels,
+      }),
+    [location.pathname, pageTitle]
+  );
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -661,6 +672,7 @@ const DefaultLayout: React.FC = () => {
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the CRM app (customers, loyalty, campaigns, segments)"
+              pageContext={caretPageContext}
             />
           </div>
         </div>

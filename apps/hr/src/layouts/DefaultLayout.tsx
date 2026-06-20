@@ -6,7 +6,7 @@ import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
-import { CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
+import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
   Users,
@@ -559,6 +559,16 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     return t('layout.hr');
   };
   const pageTitle = getPageTitle(pathname);
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'hr',
+        appName: 'HR',
+        pathname,
+        page: pageTitle,
+      }),
+    [pathname, pageTitle]
+  );
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -904,6 +914,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           userId={userId}
           apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
           systemContext="User is in the HR app (staff, shifts, payroll, attendance, leave)"
+          pageContext={caretPageContext}
         />
       </div>
     </div>

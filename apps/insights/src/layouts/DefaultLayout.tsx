@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { safe } from '../shared/lib/api';
 import {
   LayoutDashboard,
@@ -141,6 +141,17 @@ const DefaultLayout: React.FC = () => {
 
   const { isOpen: caretOpen } = useCaretStore();
   const pageTitle = getPageTitle(location.pathname);
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'insights',
+        appName: 'Insights',
+        pathname: location.pathname,
+        page: pageTitle,
+        routeLabels,
+      }),
+    [location.pathname, pageTitle]
+  );
   const sidebarRef = useRef<HTMLElement | null>(null);
 
   useForesightLinks(sidebarRef, {
@@ -426,6 +437,7 @@ const DefaultLayout: React.FC = () => {
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the Insights app (analytics and reporting)"
+              pageContext={caretPageContext}
             />
           </div>
         </div>

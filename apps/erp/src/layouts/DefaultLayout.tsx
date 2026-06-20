@@ -8,7 +8,7 @@ import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
 import { safe } from '../shared/lib/api';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
   Package,
@@ -222,6 +222,17 @@ const DefaultLayout: React.FC = () => {
   const userId = Number(erpUser?.id) || 0;
   const { isOpen: caretOpen } = useCaretStore();
   const pageTitle = getPageTitle(pathname);
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'erp',
+        appName: 'ERP',
+        pathname,
+        page: pageTitle,
+        routeLabels,
+      }),
+    [pathname, pageTitle]
+  );
 
   useEffect(() => {
     applyTheme(theme);
@@ -602,6 +613,7 @@ const DefaultLayout: React.FC = () => {
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the ERP app (inventory, products, suppliers, purchasing)"
+              pageContext={caretPageContext}
             />
           </div>
         </div>

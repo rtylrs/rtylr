@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { APP_URLS, useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
@@ -451,6 +451,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       !(p.name === 'My Tasks' && p.icon === '✅') &&
       !(p.name === 'Inbox' && p.icon === '📥')
   );
+  const activeProject = workspaceProjects.find((project) => project.id === projectId);
 
   const myIssuesCount = tasks.filter(
     (t) =>
@@ -466,6 +467,62 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       (t.focusPin === true || isDueToday(t.dueDate))
   ).length;
   const inQuietHours = isQuietNow(lifePrefs.quietStart, lifePrefs.quietEnd);
+  const flowPageTitle = activeProject
+    ? activeProject.name
+    : location.pathname.startsWith('/inbox')
+      ? 'Inbox'
+      : location.pathname.startsWith('/my-issues')
+        ? 'My tasks'
+        : location.pathname.startsWith('/today')
+          ? 'Today'
+          : location.pathname.startsWith('/triage')
+            ? 'Triage'
+            : location.pathname.startsWith('/calendar')
+              ? 'Calendar'
+              : location.pathname.startsWith('/cycles')
+                ? 'Cycles'
+                : location.pathname.startsWith('/milestones')
+                  ? 'Milestones'
+                  : location.pathname.startsWith('/settings')
+                    ? 'Settings'
+                    : 'Workspace';
+  const caretPageContext = useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'flow',
+        appName: 'Flow',
+        pathname: location.pathname,
+        page: flowPageTitle,
+        businessName: activeWorkspace.name,
+        selected: {
+          workspace_id: currentWorkspaceId,
+          ...(activeProject
+            ? { project_id: activeProject.id, project_name: activeProject.name }
+            : {}),
+        },
+        visibleRows: workspaceProjects.slice(0, 12).map((project) => ({
+          id: project.id,
+          name: project.name,
+          open_tasks: Math.max(0, project.taskCount - project.completedCount),
+        })),
+        hints: [
+          `${myIssuesCount} assigned open tasks`,
+          `${todayFocusCount} due or pinned focus items`,
+          inQuietHours ? 'quiet hours are active' : undefined,
+        ].filter((hint): hint is string => Boolean(hint)),
+      }),
+    [
+      activeProject,
+      activeWorkspace.name,
+      currentWorkspaceId,
+      flowPageTitle,
+      inQuietHours,
+      location.pathname,
+      myIssuesCount,
+      todayFocusCount,
+      workspaceProjects,
+    ]
+  );
 
   const userEmail = displayUserEmail(user);
   const userName = displayUserName(user);
@@ -1204,6 +1261,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               userId={caretUserId}
               apiBaseUrl={import.meta.env.VITE_API_URL || 'https://api.voxire.com/'}
               systemContext="User is in the Flow app (projects, tasks, team workspaces)"
+              pageContext={caretPageContext}
             />
           </div>
         </div>
