@@ -7,6 +7,7 @@ import { APP_URLS } from '@voxire/config';
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, checkEmailExists } from '../../shared/hooks/useAuth';
+import { useFeatureGate } from '../../shared/hooks/useFeatureGate';
 import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
@@ -16,6 +17,7 @@ import PasswordStrengthMeter, {
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';
+const AUTH_SOCIAL_LOGIN_FLAG = 'auth.social_login_enabled';
 
 type KnownAppId = keyof typeof APP_URLS;
 
@@ -38,6 +40,7 @@ const Register: React.FC = (): React.JSX.Element => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
+  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, true);
   const emailError = getEmailError(email);
   const matchError = getPasswordMatchError(password, confirmPassword);
 
@@ -286,61 +289,62 @@ const Register: React.FC = (): React.JSX.Element => {
             Create account
           </Button>
 
-          {/* Social sign up */}
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('google')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaGoogle className="text-[#444]" />
-                Google
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('github')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaGithub className="text-[#444]" />
-                GitHub
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('microsoft')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaMicrosoft className="text-[#444]" />
-                Microsoft
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('apple')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaApple className="text-[#444]" />
-                Apple
-              </span>
-            </Button>
-          </div>
+          {showSocialLogin && (
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('google')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaGoogle className="text-[#444]" />
+                  Google
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('github')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaGithub className="text-[#444]" />
+                  GitHub
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('microsoft')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaMicrosoft className="text-[#444]" />
+                  Microsoft
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('apple')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaApple className="text-[#444]" />
+                  Apple
+                </span>
+              </Button>
+            </div>
+          )}
         </form>
       </AuthShell>
     </>

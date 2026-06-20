@@ -7,6 +7,7 @@ import { APP_URLS } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin } from '../../shared/hooks/useAuth';
+import { useFeatureGate } from '../../shared/hooks/useFeatureGate';
 import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
 import { unwrap } from '@voxire/api';
@@ -18,6 +19,8 @@ import { getEmailError } from '../../shared/lib/validation';
 
 type KnownAppId = keyof typeof APP_URLS;
 
+const AUTH_SOCIAL_LOGIN_FLAG = 'auth.social_login_enabled';
+
 const Login: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -27,6 +30,7 @@ const Login: React.FC = (): React.JSX.Element => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, true);
   const emailError = getEmailError(email);
 
   const redirectParam = useMemo((): string | null => {
@@ -202,61 +206,62 @@ const Login: React.FC = (): React.JSX.Element => {
             {t('auth.login.submit')}
           </Button>
 
-          {/* Social sign in */}
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('google')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaGoogle className="text-[#444]" />
-                {t('auth.common.google')}
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('github')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaGithub className="text-[#444]" />
-                {t('auth.common.github')}
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('microsoft')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaMicrosoft className="text-[#444]" />
-                {t('auth.common.microsoft')}
-              </span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="auth-provider-button"
-              fullWidth
-              height={40}
-              onClick={() => handleSocial('apple')}
-            >
-              <span className="inline-flex items-center gap-2">
-                <FaApple className="text-[#444]" />
-                {t('auth.common.apple')}
-              </span>
-            </Button>
-          </div>
+          {showSocialLogin && (
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('google')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaGoogle className="text-[#444]" />
+                  {t('auth.common.google')}
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('github')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaGithub className="text-[#444]" />
+                  {t('auth.common.github')}
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('microsoft')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaMicrosoft className="text-[#444]" />
+                  {t('auth.common.microsoft')}
+                </span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-provider-button"
+                fullWidth
+                height={40}
+                onClick={() => handleSocial('apple')}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FaApple className="text-[#444]" />
+                  {t('auth.common.apple')}
+                </span>
+              </Button>
+            </div>
+          )}
         </form>
       </AuthShell>
     </>
