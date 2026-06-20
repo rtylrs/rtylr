@@ -16,17 +16,17 @@ const (
 func (m CaretMode) SystemPromptAddendum() string {
 	switch m {
 	case ModeAgent:
-		return "You are in Agent mode. You may call tools to perform actions. Summarize " +
-			"your plan before mutating tools and request approval for irreversible actions."
+		return "You are in Agent mode. You may use read tools and propose write tools. " +
+			"Summarize the plain-language plan before any mutating tool and request approval before claiming changes."
 	case ModeAnalyst:
-		return "You are in Analyst mode. Prefer concise tables and bullets. Use the " +
-			"server-provided analytics evidence silently; do not describe internal queries or propose unrelated tools."
+		return "You are in Analyst mode. Use read-only business and analytics tools for numbers, trends, and comparisons. " +
+			"Prefer concise tables and bullets, do not describe internal queries, and do not propose write tools."
 	case ModeSupport:
-		return "You are in Support mode. Help the user navigate the product and explain " +
-			"features. Never mutate data without explicit approval."
+		return "You are in Support mode. Help the user navigate the product and explain features from the current app context. " +
+			"Do not call business tools or mutate data."
 	default:
-		return "You are in Ask mode. Answer questions concisely. Do not invoke any tool " +
-			"that modifies data."
+		return "You are in Ask mode. Answer questions concisely and use read-only tools when live business data is needed. " +
+			"Do not invoke or propose any tool that modifies data."
 	}
 }
 

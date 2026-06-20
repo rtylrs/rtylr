@@ -10,6 +10,7 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 	got := buildCaretPrompt(caretPromptInput{
 		Mode:               ModeAnalyst,
 		ConversationPrompt: "Current request: revenue today",
+		CurrentRequest:     "revenue today",
 		SystemContext:      "Route: /finance/dashboard\nVisible module: finance",
 		Now:                time.Date(2026, 6, 18, 12, 0, 0, 0, time.UTC),
 	})
@@ -23,7 +24,9 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 		"Lead with the answer, not the process",
 		"Never start an answer with \"Based on the provided analytics query\"",
 		"Mode:\nanalyst",
-		"server-provided analytics evidence silently",
+		"Use read-only business and analytics tools",
+		"Available business capability catalog:",
+		"insights.get_revenue_series [read]",
 		"Current application context:",
 		"Route: /finance/dashboard",
 		"Conversation, memory, and current request:",
@@ -34,8 +37,8 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 			t.Fatalf("prompt missing %q\nprompt:\n%s", want, got)
 		}
 	}
-	if strings.Contains(got, "Available business capability catalog:") {
-		t.Fatalf("analyst prompt should not invite model-emitted tool calls:\n%s", got)
+	if strings.Contains(got, "write, approval required") {
+		t.Fatalf("analyst prompt should not advertise write tools:\n%s", got)
 	}
 }
 
@@ -95,6 +98,36 @@ func TestPromptToolsForRequestShortlistsRelevantTools(t *testing.T) {
 	}
 	if len(tools) > promptToolShortlistLimit {
 		t.Fatalf("shortlist length = %d, want <= %d", len(tools), promptToolShortlistLimit)
+	}
+}
+
+func TestPromptToolsForModeSeparatesReadAndWriteModes(t *testing.T) {
+	for _, mode := range []CaretMode{ModeAsk, ModeAnalyst} {
+		tools := PromptToolsForRequest(mode, "create a customer and list customers", "/crm")
+		if len(tools) == 0 {
+			t.Fatalf("%s mode should expose read-only prompt tools", mode)
+		}
+		for _, tool := range tools {
+			if tool.Scope != "read" {
+				t.Fatalf("%s mode exposed write tool %s", mode, tool.Name)
+			}
+		}
+	}
+
+	agentTools := PromptToolsForRequest(ModeAgent, "create a customer", "/crm")
+	foundWrite := false
+	for _, tool := range agentTools {
+		if tool.Name == "crm.create_customer" && tool.Scope == "write" {
+			foundWrite = true
+			break
+		}
+	}
+	if !foundWrite {
+		t.Fatalf("agent mode should expose relevant write proposal tools: %v", agentTools)
+	}
+
+	if tools := PromptToolsForRequest(ModeSupport, "list customers", "/crm"); len(tools) != 0 {
+		t.Fatalf("support mode should not expose prompt tools: %v", tools)
 	}
 }
 

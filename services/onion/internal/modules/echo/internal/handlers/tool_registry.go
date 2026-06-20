@@ -330,35 +330,41 @@ func ToolByName(name string) (ToolDef, bool) {
 
 // ToolsForMode filters CoreTools by mode capability.
 func ToolsForMode(m CaretMode) []ToolDef {
-	if !m.AllowsTools() {
-		return nil
-	}
-	if m == ModeAsk {
-		out := make([]ToolDef, 0, len(CoreTools))
-		for _, t := range CoreTools {
-			if t.Scope == "read" {
-				out = append(out, t)
-			}
+	out := make([]ToolDef, 0, len(CoreTools))
+	for _, t := range CoreTools {
+		if toolAllowedForMode(m, t) {
+			out = append(out, t)
 		}
-		return out
 	}
-	return CoreTools
+	return out
 }
 
 // PromptToolsForMode returns only the tools the model may explicitly emit in an
 // answer stream. A tool stays hidden until the stream or approval path has a
 // server executor for it.
 func PromptToolsForMode(m CaretMode) []ToolDef {
-	if m != ModeAgent {
-		return nil
-	}
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
-		if promptToolCanExecute(t.Name) {
+		if toolAllowedForMode(m, t) && promptToolCanExecute(t.Name) {
 			out = append(out, t)
 		}
 	}
 	return out
+}
+
+func toolAllowedForMode(m CaretMode, tool ToolDef) bool {
+	if !m.AllowsTools() {
+		return false
+	}
+
+	switch m {
+	case ModeAgent:
+		return true
+	case ModeAsk, ModeAnalyst:
+		return tool.Scope == "read"
+	default:
+		return false
+	}
 }
 
 func promptToolCanExecute(name string) bool {

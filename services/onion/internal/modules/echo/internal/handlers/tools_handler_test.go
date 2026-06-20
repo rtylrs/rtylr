@@ -8,6 +8,48 @@ import (
 	"testing"
 )
 
+func TestListToolsHandlerHonorsModeCapability(t *testing.T) {
+	handler := &ListToolsHandler{}
+
+	for _, mode := range []string{string(ModeAsk), string(ModeAnalyst)} {
+		got, err := handler.Serve(context.Background(), &ListToolsRequest{Mode: mode})
+		if err != nil {
+			t.Fatalf("Serve returned error: %#v", err)
+		}
+		if len(got.Tools) == 0 {
+			t.Fatalf("%s mode should include read-only tools", mode)
+		}
+		for _, tool := range got.Tools {
+			if tool.Scope != "read" {
+				t.Fatalf("%s mode exposed write tool %s", mode, tool.Name)
+			}
+		}
+	}
+
+	agent, err := handler.Serve(context.Background(), &ListToolsRequest{Mode: string(ModeAgent)})
+	if err != nil {
+		t.Fatalf("Serve returned error: %#v", err)
+	}
+	foundWrite := false
+	for _, tool := range agent.Tools {
+		if tool.Scope == "write" {
+			foundWrite = true
+			break
+		}
+	}
+	if !foundWrite {
+		t.Fatalf("agent mode should include write-capable tools")
+	}
+
+	support, err := handler.Serve(context.Background(), &ListToolsRequest{Mode: string(ModeSupport)})
+	if err != nil {
+		t.Fatalf("Serve returned error: %#v", err)
+	}
+	if len(support.Tools) != 0 {
+		t.Fatalf("support mode should not include tools: %#v", support.Tools)
+	}
+}
+
 func TestToolDecisionValidateRequiresKnownDecision(t *testing.T) {
 	handler := &ToolDecisionHandler{}
 
