@@ -21,6 +21,7 @@ import type { ToolCallBlock } from '../types/message';
 import HeaderBar from './header/HeaderBar';
 import MessageList from './MessageList';
 import { Composer } from './composer';
+import ContextDock from './ContextDock';
 import EmptyState from './EmptyState';
 import SettingsPanel from './SettingsPanel';
 import { ChatList } from './sidebar';
@@ -385,15 +386,22 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               onSuggestion={sendStarter}
             />
           ) : (
-            <MessageList
-              messages={messages}
-              isStreaming={isStreaming}
-              showThinking={showThinking}
-              onApproveTool={onApprove}
-              onDenyTool={onDeny}
-              followUps={followUps}
-              onFollowUp={sendStarter}
-            />
+            <>
+              <MessageList
+                messages={messages}
+                isStreaming={isStreaming}
+                showThinking={showThinking}
+                onApproveTool={onApprove}
+                onDenyTool={onDeny}
+                followUps={followUps}
+                onFollowUp={sendStarter}
+              />
+              <ContextDock
+                signals={emptyState.contextSignals}
+                action={isStreaming ? undefined : emptyState.primaryAction}
+                onAction={sendStarter}
+              />
+            </>
           )}
           <Composer
             isStreaming={isStreaming}
