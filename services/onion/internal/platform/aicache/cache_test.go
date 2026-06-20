@@ -70,6 +70,26 @@ func TestExactKeyIncludesStableRequestContext(t *testing.T) {
 	}
 }
 
+func TestExactKeyIncludesDataFreshness(t *testing.T) {
+	base := ExactKeyParts{
+		BusinessID:    1,
+		UserID:        2,
+		Mode:          "ask",
+		Provider:      "deepseek",
+		RequestDate:   "2026-06-20",
+		SystemContext: "User is in inventory.",
+		DataFreshness: `{"module":"erp","version":"products:1"}`,
+		Prompt:        "which products are low?",
+	}
+
+	other := base
+	other.DataFreshness = `{"module":"erp","version":"products:2"}`
+
+	if ExactKey(base) == ExactKey(other) {
+		t.Fatal("expected data freshness change to produce a different exact key")
+	}
+}
+
 func TestExactKeyNormalizesWhitespace(t *testing.T) {
 	base := ExactKeyParts{
 		BusinessID:    1,

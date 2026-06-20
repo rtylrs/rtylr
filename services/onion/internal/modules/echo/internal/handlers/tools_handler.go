@@ -53,6 +53,7 @@ type ToolDecisionResponse struct {
 	Message    string         `json:"message"`
 	Executed   bool           `json:"executed"`
 	Tool       ToolDef        `json:"tool"`
+	Preview    string         `json:"preview,omitempty"`
 	Output     map[string]any `json:"output,omitempty"`
 }
 
@@ -104,6 +105,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 			Message:    "Tool request denied. No changes were made.",
 			Executed:   false,
 			Tool:       tool,
+			Preview:    buildToolActionPreview(tool, req.Input),
 		}, nil
 	}
 
@@ -115,6 +117,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 			Message:    "Approved, but read-only tool execution from approval decisions is not available yet. Ask Caret to rerun the question so the server can ground it safely.",
 			Executed:   false,
 			Tool:       tool,
+			Preview:    buildToolActionPreview(tool, req.Input),
 		}, nil
 	}
 
@@ -128,6 +131,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 				Message:    "Tool execution failed. No confirmed changes were made.",
 				Executed:   false,
 				Tool:       tool,
+				Preview:    buildToolActionPreview(tool, req.Input),
 				Output: map[string]any{
 					"error": userFacingToolError(err),
 				},
@@ -141,6 +145,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 				Message:    "Tool executed successfully.",
 				Executed:   true,
 				Tool:       tool,
+				Preview:    buildToolActionPreview(tool, req.Input),
 				Output:     output,
 			}, nil
 		}
@@ -153,6 +158,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		Message:    "Approved, but this write tool does not have a server executor yet. No changes were made.",
 		Executed:   false,
 		Tool:       tool,
+		Preview:    buildToolActionPreview(tool, req.Input),
 	}, nil
 }
 

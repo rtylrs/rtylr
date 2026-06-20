@@ -14,7 +14,7 @@ const (
 	thinkingCloseTag = "</thinking>"
 	toolOpenTag      = "<tool>"
 	toolCloseTag     = "</tool>"
-	markerHoldBytes  = len(thinkingOpenTag) - 1
+	markerHoldBytes  = answerQualityHoldBytes
 )
 
 type markerKind int
@@ -213,6 +213,10 @@ func (r *streamEventRenderer) emitText(text string) error {
 	if text == "" {
 		return nil
 	}
+	text = polishCaretAnswerText(text)
+	if text == "" {
+		return nil
+	}
 	if err := WriteEvent(r.w, r.flush, StreamEvent{
 		Type:      EventTextDelta,
 		MessageID: r.messageID,
@@ -241,6 +245,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	if !requiresApproval && len(r.executors) == 0 {
 		return nil
 	}
+	preview := buildToolActionPreview(def, call.Input)
 
 	blockID := fmt.Sprintf("tool-%d", time.Now().UnixNano())
 	if err := WriteEvent(r.w, r.flush, StreamEvent{
@@ -249,6 +254,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		BlockID:          blockID,
 		Name:             call.Name,
 		Input:            call.Input,
+		Preview:          preview,
 		RequiresApproval: requiresApproval,
 	}); err != nil {
 		return err

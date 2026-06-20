@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -45,6 +46,9 @@ func TestToolDecisionDenyReturnsDeniedWithoutExecution(t *testing.T) {
 	}
 	if got.Tool.Name != "crm.create_customer" {
 		t.Fatalf("expected registered tool metadata, got %#v", got.Tool)
+	}
+	if got.Preview == "" || !strings.Contains(got.Preview, "create a customer") {
+		t.Fatalf("expected friendly action preview, got %#v", got)
 	}
 }
 

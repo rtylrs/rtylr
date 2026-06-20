@@ -494,6 +494,7 @@ func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode 
 			Provider:      provider,
 			RequestDate:   now.UTC().Format("2006-01-02"),
 			SystemContext: req.SystemContext,
+			DataFreshness: buildCacheFreshness(req.PageContext),
 			Prompt:        req.Prompt,
 		})
 	}
@@ -893,6 +894,7 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		"rows":        grounding.Rows,
 		"duration_ms": grounding.DurationMs,
 	}
+	summary := summarizeToolResult(toolName, input, output, "success", "")
 	if err := WriteEvent(w, flushResponse(w), StreamEvent{
 		Type:             EventToolCall,
 		MessageID:        messageID,
@@ -908,6 +910,7 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		MessageID:  messageID,
 		BlockID:    blockID,
 		Status:     "success",
+		Summary:    summary,
 		Output:     output,
 		DurationMs: grounding.DurationMs,
 	})

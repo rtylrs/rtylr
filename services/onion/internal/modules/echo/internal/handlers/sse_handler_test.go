@@ -179,6 +179,31 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 	}
 }
 
+func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	now := time.Date(2026, 6, 20, 11, 0, 0, 0, time.UTC)
+	req := &GenerateTextStreamRequest{
+		Prompt:        "Which products are low?",
+		SystemContext: "User is in inventory.",
+		Mode:          string(ModeAsk),
+		PageContext: map[string]any{
+			"module":        "erp",
+			"dataFreshness": "products:1",
+		},
+	}
+
+	first := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "Current request: Which products are low?", 11, 22, now)
+	req.PageContext["dataFreshness"] = "products:2"
+	second := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "Current request: Which products are low?", 11, 22, now)
+
+	if first.Key == "" || second.Key == "" {
+		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
+	}
+	if first.Key == second.Key {
+		t.Fatal("expected data freshness changes to separate exact cache keys")
+	}
+}
+
 func TestCachedReplayChunksPreserveTextAndSplitNaturally(t *testing.T) {
 	text := "Here is the first cached sentence. Here is the second cached sentence, with enough words to replay in more than one visible delta. Final."
 

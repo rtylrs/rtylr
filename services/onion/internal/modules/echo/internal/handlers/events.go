@@ -33,6 +33,7 @@ type StreamEvent struct {
 	Delta            string          `json:"delta,omitempty"`
 	Name             string          `json:"name,omitempty"`
 	Input            any             `json:"input,omitempty"`
+	Preview          string          `json:"preview,omitempty"`
 	Status           string          `json:"status,omitempty"`
 	Output           any             `json:"output,omitempty"`
 	Summary          string          `json:"summary,omitempty"`

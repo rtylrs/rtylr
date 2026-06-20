@@ -21,7 +21,7 @@ var promptToolModuleKeywords = map[string][]string{
 	"flow":    []string{"task", "project", "roadmap", "workload", "flow", "milestone"},
 	"hr":      []string{"employee", "staff", "hr", "payroll", "leave", "overtime", "attendance", "timesheet", "shift", "department", "role"},
 	"insights": []string{"insight", "dashboard", "kpi", "metric", "trend", "sales", "revenue", "churn", "margin", "bestseller",
-		"slow mover", "headcount", "utilization"},
+		"slow mover", "headcount", "utilization", "schedule", "scheduled", "recurring", "daily", "weekly", "report", "watch", "alert"},
 	"loyalty": []string{"loyalty", "points", "reward", "member", "tier"},
 	"pos":     []string{"pos", "order", "terminal", "register", "floor", "table", "menu", "modifier", "session", "cash", "branch", "refund", "sale"},
 	"store":   []string{"store", "storefront", "ecommerce", "online", "website", "catalog", "slug"},
@@ -29,10 +29,12 @@ var promptToolModuleKeywords = map[string][]string{
 }
 
 var promptToolActionKeywords = map[string][]string{
-	"create":  []string{"create", "add", "new", "record", "make", "draft"},
-	"get":     []string{"get", "show", "open", "view", "detail", "details", "find", "lookup", "load"},
-	"list":    []string{"list", "all", "recent", "top", "show me", "which"},
-	"mutate":  []string{"approve", "receive", "send", "refund", "set", "update", "change", "move", "transfer"},
+	"create": []string{"create", "add", "new", "record", "make", "draft"},
+	"get":    []string{"get", "show", "open", "view", "detail", "details", "find", "lookup", "load"},
+	"list":   []string{"list", "all", "recent", "top", "show me", "which"},
+	"mutate": []string{"approve", "receive", "send", "refund", "set", "update", "change", "move", "transfer"},
+	"schedule": []string{"schedule", "scheduled", "recurring", "repeat", "daily", "weekly", "monthly", "every day", "every monday",
+		"alert", "notify", "remind", "watch", "send me"},
 	"summary": []string{"summary", "summarize", "overview", "status", "how are", "how is"},
 }
 
@@ -128,6 +130,9 @@ func promptToolScoreForText(tool ToolDef, text string) int {
 	}
 	if tool.Scope == "write" && promptToolTextContainsAny(text, promptToolActionKeywords["mutate"]) {
 		score += 80
+	}
+	if strings.Contains(tool.Name, "schedule") && promptToolTextContainsAny(text, promptToolActionKeywords["schedule"]) {
+		score += 140
 	}
 	if promptToolTextContainsAny(text, promptToolActionKeywords["summary"]) &&
 		(strings.Contains(tool.Name, "summary") || strings.Contains(tool.Name, "dashboard") || strings.Contains(tool.Name, "kpis")) {

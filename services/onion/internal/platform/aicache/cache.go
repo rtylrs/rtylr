@@ -66,6 +66,7 @@ type ExactKeyParts struct {
 	Model         string
 	RequestDate   string
 	SystemContext string
+	DataFreshness string
 	Prompt        string
 }
 
@@ -232,6 +233,7 @@ func ExactKey(parts ExactKeyParts) string {
 		Model         string `json:"model"`
 		RequestDate   string `json:"request_date"`
 		SystemContext string `json:"system_context"`
+		DataFreshness string `json:"data_freshness"`
 		Prompt        string `json:"prompt"`
 	}{
 		Version:       CacheVersion,
@@ -242,6 +244,7 @@ func ExactKey(parts ExactKeyParts) string {
 		Model:         normalizeText(parts.Model),
 		RequestDate:   normalizeText(parts.RequestDate),
 		SystemContext: normalizeText(parts.SystemContext),
+		DataFreshness: normalizeText(parts.DataFreshness),
 		Prompt:        normalizeText(parts.Prompt),
 	}
 
