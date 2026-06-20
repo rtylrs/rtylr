@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -15,6 +16,8 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
@@ -40,6 +43,9 @@ const (
 	analyticsEventTTL  = 30 * 24 * time.Hour
 	maxAnalyticsEvents = 5000
 	maxRecentEvents    = 100
+	analyticsSourceDB  = "mysql"
+	analyticsSourceKV  = "shared_cache"
+	analyticsSourceMem = "process"
 	defaultModeReason  = "exact cache is enabled for tenant-scoped replay"
 )
 
@@ -134,6 +140,8 @@ type AnalyticsSnapshot struct {
 	WindowStartedAt   time.Time      `json:"window_started_at"`
 	CacheVersion      string         `json:"cache_version"`
 	ExactCacheEnabled bool           `json:"exact_cache_enabled"`
+	AnalyticsSource   string         `json:"analytics_source"`
+	AnalyticsDurable  bool           `json:"analytics_durable"`
 	HitRate           float64        `json:"hit_rate"`
 	AverageLatencyMs  int64          `json:"average_latency_ms"`
 	Totals            Totals         `json:"totals"`
@@ -315,6 +323,8 @@ func Snapshot() AnalyticsSnapshot {
 		WindowStartedAt:   collector.started,
 		CacheVersion:      CacheVersion,
 		ExactCacheEnabled: ExactCacheEnabled(),
+		AnalyticsSource:   analyticsSourceMem,
+		AnalyticsDurable:  false,
 		HitRate:           hitRate,
 		AverageLatencyMs:  avgLatency,
 		Totals:            totals,
@@ -383,25 +393,72 @@ func persistAnalyticsEvent(event Event) {
 		return
 	}
 
+	record := analyticsEventRecord{
+		ID:    analyticsEventID(event),
+		Event: event,
+	}
+	persistAnalyticsEventToDB(record)
+	persistAnalyticsEventToSharedCache(record)
+}
+
+func persistAnalyticsEventToSharedCache(record analyticsEventRecord) {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
 	store := analyticsEventsStore()
-	score := float64(event.At.UnixMilli())
-
-	store.SortedSetAdd(ctx, analyticsEventsID, analyticsEventRecord{
-		ID:    analyticsEventID(event),
-		Event: event,
-	}, score, cacher.WithExpiry(ctx, analyticsEventTTL))
-
+	score := float64(record.Event.At.UnixMilli())
+	store.SortedSetAdd(ctx, analyticsEventsID, record, score, cacher.WithExpiry(ctx, analyticsEventTTL))
 	cutoff := time.Now().UTC().Add(-analyticsEventTTL).UnixMilli()
 	store.SortedSetRemoveRangeUpToScore(ctx, analyticsEventsID, float64(cutoff))
 	store.SortedSetRemoveRangeByRank(ctx, analyticsEventsID, 0, -int64(maxAnalyticsEvents+1))
 }
 
+func persistAnalyticsEventToDB(record analyticsEventRecord) {
+	db := dbclient.Pool()
+	if db == nil {
+		return
+	}
+
+	event := normalizeEvent(record.Event)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	_, err := db.ExecContext(ctx, `
+		INSERT INTO ai_cache_events (
+			event_id, occurred_at, outcome, mode, provider, reason, cache_key_preview,
+			business_id, user_id, prompt_chars, response_chars, provider_tokens,
+			estimated_savings_tokens, latency_ms
+		)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE event_id = event_id
+	`,
+		record.ID,
+		event.At.UTC(),
+		event.Outcome,
+		event.Mode,
+		nullableString(event.Provider),
+		nullableString(event.Reason),
+		nullableString(event.CacheKeyPreview),
+		nullableInt64(event.BusinessID),
+		nullableInt64(event.UserID),
+		nullableInt(event.PromptChars),
+		nullableInt(event.ResponseChars),
+		nullableInt(event.ProviderTokens),
+		nullableInt(event.EstimatedSavings),
+		nullableInt64(event.LatencyMs),
+	)
+	if err != nil {
+		logger.Global().Debug("could not persist AI cache analytics event", logger.Error(err))
+	}
+}
+
 func persistentSnapshot() (AnalyticsSnapshot, bool) {
 	if !persistentAnalyticsEnabled.Load() {
 		return AnalyticsSnapshot{}, false
+	}
+
+	if snapshot, ok := persistentDatabaseSnapshot(); ok {
+		return snapshot, true
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
@@ -428,7 +485,98 @@ func persistentSnapshot() (AnalyticsSnapshot, bool) {
 		return AnalyticsSnapshot{}, false
 	}
 
-	return snapshotFromEvents(events), true
+	return withAnalyticsSource(snapshotFromEvents(events), analyticsSourceKV, true), true
+}
+
+func persistentDatabaseSnapshot() (AnalyticsSnapshot, bool) {
+	db := dbclient.Pool()
+	if db == nil {
+		return AnalyticsSnapshot{}, false
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
+	defer cancel()
+
+	rows, err := db.QueryContext(ctx, `
+		SELECT
+			occurred_at, outcome, mode, provider, reason, cache_key_preview,
+			business_id, user_id, prompt_chars, response_chars, provider_tokens,
+			estimated_savings_tokens, latency_ms
+		FROM ai_cache_events
+		WHERE occurred_at >= ?
+		ORDER BY occurred_at DESC
+		LIMIT ?
+	`, time.Now().UTC().Add(-analyticsEventTTL), maxAnalyticsEvents)
+	if err != nil {
+		logger.Global().Debug("could not load AI cache analytics events", logger.Error(err))
+		return AnalyticsSnapshot{}, false
+	}
+	defer rows.Close()
+
+	events := make([]Event, 0, maxAnalyticsEvents)
+	for rows.Next() {
+		event, scanErr := scanAnalyticsEvent(rows)
+		if scanErr != nil {
+			logger.Global().Debug("could not scan AI cache analytics event", logger.Error(scanErr))
+			continue
+		}
+		events = append(events, normalizeEvent(event))
+	}
+	if err := rows.Err(); err != nil {
+		logger.Global().Debug("could not iterate AI cache analytics events", logger.Error(err))
+		return AnalyticsSnapshot{}, false
+	}
+	if len(events) == 0 {
+		return AnalyticsSnapshot{}, false
+	}
+
+	return withAnalyticsSource(snapshotFromEvents(events), analyticsSourceDB, true), true
+}
+
+func scanAnalyticsEvent(rows *sql.Rows) (Event, error) {
+	var (
+		event            Event
+		provider         sql.NullString
+		reason           sql.NullString
+		cacheKeyPreview  sql.NullString
+		businessID       sql.NullInt64
+		userID           sql.NullInt64
+		promptChars      sql.NullInt64
+		responseChars    sql.NullInt64
+		providerTokens   sql.NullInt64
+		estimatedSavings sql.NullInt64
+		latencyMs        sql.NullInt64
+	)
+	err := rows.Scan(
+		&event.At,
+		&event.Outcome,
+		&event.Mode,
+		&provider,
+		&reason,
+		&cacheKeyPreview,
+		&businessID,
+		&userID,
+		&promptChars,
+		&responseChars,
+		&providerTokens,
+		&estimatedSavings,
+		&latencyMs,
+	)
+	if err != nil {
+		return Event{}, err
+	}
+
+	event.Provider = provider.String
+	event.Reason = reason.String
+	event.CacheKeyPreview = cacheKeyPreview.String
+	event.BusinessID = businessID.Int64
+	event.UserID = userID.Int64
+	event.PromptChars = int(promptChars.Int64)
+	event.ResponseChars = int(responseChars.Int64)
+	event.ProviderTokens = int(providerTokens.Int64)
+	event.EstimatedSavings = int(estimatedSavings.Int64)
+	event.LatencyMs = latencyMs.Int64
+	return event, nil
 }
 
 func snapshotFromEvents(events []Event) AnalyticsSnapshot {
@@ -461,6 +609,8 @@ func snapshotFromEvents(events []Event) AnalyticsSnapshot {
 		WindowStartedAt:   state.started,
 		CacheVersion:      CacheVersion,
 		ExactCacheEnabled: ExactCacheEnabled(),
+		AnalyticsSource:   analyticsSourceMem,
+		AnalyticsDurable:  false,
 		HitRate:           hitRate,
 		AverageLatencyMs:  avgLatency,
 		Totals:            state.totals,
@@ -469,6 +619,33 @@ func snapshotFromEvents(events []Event) AnalyticsSnapshot {
 		Policies:          PolicySnapshot(),
 		Recent:            recent,
 	}
+}
+
+func withAnalyticsSource(snapshot AnalyticsSnapshot, source string, durable bool) AnalyticsSnapshot {
+	snapshot.AnalyticsSource = source
+	snapshot.AnalyticsDurable = durable
+	return snapshot
+}
+
+func nullableString(value string) any {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	return value
+}
+
+func nullableInt(value int) any {
+	if value == 0 {
+		return nil
+	}
+	return value
+}
+
+func nullableInt64(value int64) any {
+	if value == 0 {
+		return nil
+	}
+	return value
 }
 
 func analyticsEventID(event Event) string {
