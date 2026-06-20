@@ -17,3 +17,16 @@ func TestPolishCaretAnswerTextRemovesInternalPhrases(t *testing.T) {
 		t.Fatalf("expected tenant language to become business language, got %q", got)
 	}
 }
+
+func TestPolishCaretAnswerTextSoftensProcessNarration(t *testing.T) {
+	got := polishCaretAnswerText("To answer your question, I ran a server-validated, read-only analytics query scoped to your tenant. The query results are:\n| Customers |\n| --- |\n| 2 |")
+
+	for _, banned := range []string{"ran a", "server-validated", "read-only analytics query", "tenant", "The query results are"} {
+		if strings.Contains(got, banned) {
+			t.Fatalf("polished answer still contains %q: %q", banned, got)
+		}
+	}
+	if !strings.Contains(got, "I checked your business data.") {
+		t.Fatalf("expected softer business phrasing, got %q", got)
+	}
+}
