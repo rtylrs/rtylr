@@ -386,6 +386,41 @@ func TestStreamRendererSilentlyDropsReadToolMarker(t *testing.T) {
 	}
 }
 
+func TestStreamRendererSilentlyDropsUnhandledReadToolMarker(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(
+		rec,
+		nil,
+		"assistant-1",
+		full,
+		withStreamToolExecution(context.Background(), []ToolExecutor{
+			fakeToolExecutor{executed: false},
+		}),
+	)
+
+	err := renderer.AppendText(`Done. <tool>{"name":"crm.list_customers","input":{}}</tool>`)
+	if err != nil {
+		t.Fatalf("append tool chunk: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	for _, event := range events {
+		if event.Type == EventToolCall || event.Type == EventToolResult || event.Type == EventError {
+			t.Fatalf("unhandled read tool marker should be silent, got %#v", events)
+		}
+	}
+	if full.String() != "Done. " {
+		t.Fatalf("expected text before read marker to remain, got %q", full.String())
+	}
+	if renderer.ToolResultCount() != 0 {
+		t.Fatalf("unhandled read marker should not be collected as a tool result")
+	}
+}
+
 func TestStreamRendererExecutesReadToolMarkerWithExecutor(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}

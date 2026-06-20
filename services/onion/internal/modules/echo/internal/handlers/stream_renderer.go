@@ -262,6 +262,10 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	preview := buildToolActionPreview(def, call.Input)
 
 	blockID := fmt.Sprintf("tool-%d", time.Now().UnixNano())
+	if !requiresApproval {
+		return r.emitReadToolMarker(blockID, call, preview)
+	}
+
 	if err := WriteEvent(r.w, r.flush, StreamEvent{
 		Type:             EventToolCall,
 		MessageID:        r.messageID,
@@ -275,10 +279,10 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		return err
 	}
 
-	if requiresApproval {
-		return nil
-	}
+	return nil
+}
 
+func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMarker, preview string) error {
 	ctx := r.ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -291,6 +295,18 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		if err != nil {
 			userError := userFacingToolError(err)
 			summary := summarizeToolResult(call.Name, call.Input, nil, "error", userError)
+			if err := WriteEvent(r.w, r.flush, StreamEvent{
+				Type:             EventToolCall,
+				MessageID:        r.messageID,
+				BlockID:          blockID,
+				Name:             call.Name,
+				Mode:             string(r.mode),
+				Input:            call.Input,
+				Preview:          preview,
+				RequiresApproval: false,
+			}); err != nil {
+				return err
+			}
 			r.toolResults = append(r.toolResults, streamToolExecution{
 				Name:    call.Name,
 				Input:   call.Input,
@@ -309,6 +325,18 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		}
 		if executed {
 			summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
+			if err := WriteEvent(r.w, r.flush, StreamEvent{
+				Type:             EventToolCall,
+				MessageID:        r.messageID,
+				BlockID:          blockID,
+				Name:             call.Name,
+				Mode:             string(r.mode),
+				Input:            call.Input,
+				Preview:          preview,
+				RequiresApproval: false,
+			}); err != nil {
+				return err
+			}
 			r.toolResults = append(r.toolResults, streamToolExecution{
 				Name:    call.Name,
 				Input:   call.Input,
@@ -327,22 +355,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		}
 	}
 
-	summary := summarizeToolResult(call.Name, call.Input, nil, "error", "This tool is registered, but execution is not available in this stream yet.")
-	r.toolResults = append(r.toolResults, streamToolExecution{
-		Name:    call.Name,
-		Input:   call.Input,
-		Status:  "error",
-		Summary: summary,
-		Error:   "This tool is registered, but execution is not available in this stream yet.",
-	})
-	return WriteEvent(r.w, r.flush, StreamEvent{
-		Type:      EventToolResult,
-		MessageID: r.messageID,
-		BlockID:   blockID,
-		Status:    "error",
-		Summary:   summary,
-		Error:     "This tool is registered, but execution is not available in this stream yet.",
-	})
+	return nil
 }
 
 func firstMarker(s string) (int, markerKind) {
