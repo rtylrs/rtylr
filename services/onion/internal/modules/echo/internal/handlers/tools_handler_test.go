@@ -102,6 +102,7 @@ func TestToolDecisionApproveUnimplementedWriteToolReturnsExplicitError(t *testin
 		Name:       "crm.create_customer",
 		Input:      map[string]any{"name": "Ada"},
 		Decision:   "approve",
+		Mode:       string(ModeAgent),
 	})
 
 	if err != nil {
@@ -118,6 +119,32 @@ func TestToolDecisionApproveUnimplementedWriteToolReturnsExplicitError(t *testin
 	}
 }
 
+func TestToolDecisionApproveWriteToolRequiresAgentMode(t *testing.T) {
+	handler := &ToolDecisionHandler{
+		Executor: fakeToolExecutor{
+			output: map[string]any{"customer": map[string]any{"id": int64(42), "first_name": "Ada"}},
+		},
+	}
+
+	got, err := handler.Serve(context.Background(), &ToolDecisionRequest{
+		ToolCallID: "tool-1",
+		Name:       "crm.create_customer",
+		Input:      map[string]any{"first_name": "Ada"},
+		Decision:   "approve",
+		Mode:       string(ModeAsk),
+	})
+
+	if err != nil {
+		t.Fatalf("Serve returned error: %#v", err)
+	}
+	if got.Status != "error" || got.Executed {
+		t.Fatalf("expected mode rejection without execution, got %#v", got)
+	}
+	if !strings.Contains(got.Message, "Agent mode") {
+		t.Fatalf("expected mode guidance, got %#v", got.Message)
+	}
+}
+
 func TestToolDecisionApproveExecutableWriteToolReturnsSuccess(t *testing.T) {
 	handler := &ToolDecisionHandler{
 		Executor: fakeToolExecutor{
@@ -130,6 +157,7 @@ func TestToolDecisionApproveExecutableWriteToolReturnsSuccess(t *testing.T) {
 		Name:       "flow.create_task",
 		Input:      map[string]any{"title": "Follow up"},
 		Decision:   "approve",
+		Mode:       string(ModeAgent),
 	})
 
 	if err != nil {
@@ -161,6 +189,7 @@ func TestToolDecisionApproveTriesMultipleExecutors(t *testing.T) {
 		Name:       "crm.create_customer",
 		Input:      map[string]any{"first_name": "Ada"},
 		Decision:   "approve",
+		Mode:       string(ModeAgent),
 	})
 
 	if err != nil {
@@ -183,6 +212,7 @@ func TestToolDecisionApproveExecutableWriteToolFailureReturnsError(t *testing.T)
 		ToolCallID: "tool-1",
 		Name:       "flow.create_task",
 		Decision:   "approve",
+		Mode:       string(ModeAgent),
 	})
 
 	if err != nil {

@@ -276,7 +276,7 @@ func TestBuildToolResultContinuationPromptCarriesResultsAndPriorAnswer(t *testin
 func TestStreamRendererExtractsWriteToolProposal(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}
-	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full, withStreamMode(ModeAgent))
 
 	err := renderer.AppendText(`I can do that. <tool>{"name":"crm.create_customer","input":{"name":"Ada"}}</tool> Waiting for approval.`)
 	if err != nil {
@@ -300,8 +300,35 @@ func TestStreamRendererExtractsWriteToolProposal(t *testing.T) {
 	if toolCall.Name != "crm.create_customer" || !toolCall.RequiresApproval {
 		t.Fatalf("expected approval-backed create customer proposal, got %#v", *toolCall)
 	}
+	if toolCall.Mode != string(ModeAgent) {
+		t.Fatalf("expected tool call to carry originating mode, got %#v", *toolCall)
+	}
 	if strings.Contains(full.String(), "<tool>") || strings.Contains(full.String(), "crm.create_customer") {
 		t.Fatalf("public response should not include raw tool marker, got %q", full.String())
+	}
+}
+
+func TestStreamRendererDropsWriteToolProposalOutsideAgentMode(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full, withStreamMode(ModeAsk))
+
+	err := renderer.AppendText(`I can do that. <tool>{"name":"crm.create_customer","input":{"name":"Ada"}}</tool>`)
+	if err != nil {
+		t.Fatalf("append tool chunk: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	for _, event := range events {
+		if event.Type == EventToolCall || event.Type == EventToolResult || event.Type == EventError {
+			t.Fatalf("ask mode must not surface write tool markers, got %#v", events)
+		}
+	}
+	if full.String() != "I can do that. " {
+		t.Fatalf("expected visible text before marker to remain, got %q", full.String())
 	}
 }
 

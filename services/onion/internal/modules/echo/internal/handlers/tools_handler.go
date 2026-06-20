@@ -45,6 +45,7 @@ type ToolDecisionRequest struct {
 	Name       string         `json:"name"`
 	Input      map[string]any `json:"input"`
 	Decision   string         `json:"decision"`
+	Mode       string         `json:"mode"`
 }
 
 type ToolDecisionResponse struct {
@@ -103,6 +104,19 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 			ToolCallID: req.ToolCallID,
 			Status:     "denied",
 			Message:    "Tool request denied. No changes were made.",
+			Executed:   false,
+			Tool:       tool,
+			Preview:    buildToolActionPreview(tool, req.Input),
+		}, nil
+	}
+
+	mode := ParseMode(req.Mode)
+	if !toolAllowedForMode(mode, tool) {
+		h.logDecision(ctx, req, tool, "mode_rejected", false)
+		return ToolDecisionResponse{
+			ToolCallID: req.ToolCallID,
+			Status:     "error",
+			Message:    "This mode cannot run that action. Switch to Agent mode for changes.",
 			Executed:   false,
 			Tool:       tool,
 			Preview:    buildToolActionPreview(tool, req.Input),

@@ -34,6 +34,7 @@ type streamEventRenderer struct {
 	ctx          context.Context
 	executors    []ToolExecutor
 	toolResults  []streamToolExecution
+	mode         CaretMode
 }
 
 type streamRendererOption func(*streamEventRenderer)
@@ -54,15 +55,25 @@ func withStreamToolExecution(ctx context.Context, executors []ToolExecutor) stre
 	}
 }
 
+func withStreamMode(mode CaretMode) streamRendererOption {
+	return func(r *streamEventRenderer) {
+		r.mode = mode
+	}
+}
+
 func newStreamEventRenderer(w io.Writer, flush func(), messageID string, fullResponse *strings.Builder, opts ...streamRendererOption) *streamEventRenderer {
 	r := &streamEventRenderer{
 		w:            w,
 		flush:        flush,
 		messageID:    messageID,
 		fullResponse: fullResponse,
+		mode:         ModeAsk,
 	}
 	for _, opt := range opts {
 		opt(r)
+	}
+	if r.mode == "" {
+		r.mode = ModeAsk
 	}
 	return r
 }
@@ -240,6 +251,9 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	if !ok {
 		return nil
 	}
+	if !toolAllowedForMode(r.mode, def) {
+		return nil
+	}
 
 	requiresApproval := def.RequiresApproval || def.Scope == "write"
 	if !requiresApproval && len(r.executors) == 0 {
@@ -253,6 +267,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		MessageID:        r.messageID,
 		BlockID:          blockID,
 		Name:             call.Name,
+		Mode:             string(r.mode),
 		Input:            call.Input,
 		Preview:          preview,
 		RequiresApproval: requiresApproval,

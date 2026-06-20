@@ -32,6 +32,7 @@ type StreamEvent struct {
 	BlockID          string          `json:"blockId,omitempty"`
 	Delta            string          `json:"delta,omitempty"`
 	Name             string          `json:"name,omitempty"`
+	Mode             string          `json:"mode,omitempty"`
 	Input            any             `json:"input,omitempty"`
 	Preview          string          `json:"preview,omitempty"`
 	Status           string          `json:"status,omitempty"`

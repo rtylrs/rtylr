@@ -509,7 +509,7 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 	}
 
 	var fullResponse strings.Builder
-	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse)
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamMode(ParseMode(plan.Mode)))
 
 	chunks := cachedReplayChunks(cached.Response)
 	replayDelay := cachedReplayDelay(len(chunks))
@@ -698,7 +698,14 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
 		return
 	}
-	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamToolExecution(ctx, h.ToolExecutors))
+	renderer := newStreamEventRenderer(
+		w,
+		flushResponse(w),
+		messageID,
+		&fullResponse,
+		withStreamMode(ParseMode(cachePlan.Mode)),
+		withStreamToolExecution(ctx, h.ToolExecutors),
+	)
 	if grounding != nil {
 		if err := h.writeAnalystToolEvents(w, messageID, grounding); err != nil {
 			return
