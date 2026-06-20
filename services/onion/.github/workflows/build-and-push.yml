@@ -133,3 +133,12 @@ jobs:
             --region $AWS_REGION \
             --query 'service.deployments[0].{status:status,desiredCount:desiredCount}' \
             --output table
+
+  notify:
+    name: Notify Slack
+    needs: [version, build-push-deploy]
+    if: ${{ always() && needs.build-push-deploy.result == 'success' }}
+    uses: voxire/pipelines/.github/workflows/notify-slack.yml@main
+    with:
+      message: ':rocket: *onion (API)* — v${{ needs.version.outputs.new_version }} deployed to production'
+    secrets: inherit
