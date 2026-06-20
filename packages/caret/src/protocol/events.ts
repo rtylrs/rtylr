@@ -5,6 +5,8 @@
  * metadata without breaking older clients.
  */
 
+import type { CaretMode } from '../types/mode';
+
 export type CaretStreamEvent =
   | { type: 'session'; sessionId: string }
   | { type: 'message_start'; messageId: string; role: 'assistant' }
@@ -17,6 +19,7 @@ export type CaretStreamEvent =
       messageId: string;
       blockId: string;
       name: string;
+      mode?: CaretMode;
       input: Record<string, unknown>;
       preview?: string;
       requiresApproval?: boolean;

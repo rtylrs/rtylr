@@ -151,6 +151,7 @@ export function useCaretStream({
           id: event.blockId,
           type: 'tool_call',
           name: event.name,
+          mode: event.mode,
           input: event.input,
           status: event.requiresApproval ? 'pending' : 'running',
           preview: event.preview,

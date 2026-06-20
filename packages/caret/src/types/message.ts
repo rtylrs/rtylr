@@ -1,3 +1,5 @@
+import type { CaretMode } from './mode';
+
 export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
 export interface ThinkingBlock {
@@ -17,6 +19,7 @@ export interface ToolCallBlock {
   id: string;
   type: 'tool_call';
   name: string;
+  mode?: CaretMode;
   input: Record<string, unknown>;
   status: 'pending' | 'approved' | 'denied' | 'running' | 'success' | 'error';
   output?: unknown;

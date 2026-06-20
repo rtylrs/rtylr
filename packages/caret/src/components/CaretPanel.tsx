@@ -112,6 +112,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const view = useCaretUIStore((s) => s.view);
   const setView = useCaretUIStore((s) => s.setView);
   const queryClient = useQueryClient();
+  const mode = useCaretSettingsStore((s) => s.mode);
 
   const { sendMessage, stopStreaming } = useCaretStream({
     userId,
@@ -237,6 +238,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
             name: call.name,
             input: call.input ?? {},
             decision,
+            mode: call.mode ?? mode,
           }),
         });
 
@@ -272,7 +274,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         });
       }
     },
-    [apiBaseUrl, appendBlockToLastAssistant, findToolCall, setToolStatus]
+    [apiBaseUrl, appendBlockToLastAssistant, findToolCall, mode, setToolStatus]
   );
 
   const onApprove = useCallback(
