@@ -33,9 +33,18 @@ type streamEventRenderer struct {
 	pending      string
 	ctx          context.Context
 	executors    []ToolExecutor
+	toolResults  []streamToolExecution
 }
 
 type streamRendererOption func(*streamEventRenderer)
+
+type streamToolExecution struct {
+	Name   string         `json:"name"`
+	Input  map[string]any `json:"input,omitempty"`
+	Status string         `json:"status"`
+	Output map[string]any `json:"output,omitempty"`
+	Error  string         `json:"error,omitempty"`
+}
 
 func withStreamToolExecution(ctx context.Context, executors []ToolExecutor) streamRendererOption {
 	return func(r *streamEventRenderer) {
@@ -73,6 +82,26 @@ func (r *streamEventRenderer) Finish() error {
 		return err
 	}
 	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventDone})
+}
+
+func (r *streamEventRenderer) FlushPending() error {
+	return r.drain(true)
+}
+
+func (r *streamEventRenderer) ToolResultCount() int {
+	return len(r.toolResults)
+}
+
+func (r *streamEventRenderer) ToolResultsSince(index int) []streamToolExecution {
+	if index < 0 {
+		index = 0
+	}
+	if index >= len(r.toolResults) {
+		return nil
+	}
+	out := make([]streamToolExecution, len(r.toolResults[index:]))
+	copy(out, r.toolResults[index:])
+	return out
 }
 
 func (r *streamEventRenderer) drain(final bool) error {
@@ -238,15 +267,28 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		}
 		output, executed, err := executor.ExecuteCaretTool(ctx, call.Name, call.Input)
 		if err != nil {
+			userError := userFacingToolError(err)
+			r.toolResults = append(r.toolResults, streamToolExecution{
+				Name:   call.Name,
+				Input:  call.Input,
+				Status: "error",
+				Error:  userError,
+			})
 			return WriteEvent(r.w, r.flush, StreamEvent{
 				Type:      EventToolResult,
 				MessageID: r.messageID,
 				BlockID:   blockID,
 				Status:    "error",
-				Error:     userFacingToolError(err),
+				Error:     userError,
 			})
 		}
 		if executed {
+			r.toolResults = append(r.toolResults, streamToolExecution{
+				Name:   call.Name,
+				Input:  call.Input,
+				Status: "success",
+				Output: output,
+			})
 			return WriteEvent(r.w, r.flush, StreamEvent{
 				Type:      EventToolResult,
 				MessageID: r.messageID,
@@ -257,6 +299,12 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		}
 	}
 
+	r.toolResults = append(r.toolResults, streamToolExecution{
+		Name:   call.Name,
+		Input:  call.Input,
+		Status: "error",
+		Error:  "This tool is registered, but execution is not available in this stream yet.",
+	})
 	return WriteEvent(r.w, r.flush, StreamEvent{
 		Type:      EventToolResult,
 		MessageID: r.messageID,

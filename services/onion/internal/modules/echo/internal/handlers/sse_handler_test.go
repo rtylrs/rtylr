@@ -220,6 +220,31 @@ func TestCachedReplayDelayIsBounded(t *testing.T) {
 	}
 }
 
+func TestBuildToolResultContinuationPromptCarriesResultsAndPriorAnswer(t *testing.T) {
+	got := buildToolResultContinuationPrompt(
+		"base prompt",
+		"I found the customer list.",
+		[]streamToolExecution{{
+			Name:   "crm.list_customers",
+			Status: "success",
+			Output: map[string]any{"total": 2},
+		}},
+	)
+
+	for _, want := range []string{
+		"base prompt",
+		"Tool results are now available",
+		"I found the customer list.",
+		"crm.list_customers",
+		`"total":2`,
+		"Continue now with the final user-facing answer.",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("continuation prompt missing %q\nprompt:\n%s", want, got)
+		}
+	}
+}
+
 func TestStreamRendererExtractsWriteToolProposal(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}
@@ -355,6 +380,19 @@ func TestStreamRendererExecutesReadToolMarkerWithExecutor(t *testing.T) {
 	}
 	if full.String() != "Done. " {
 		t.Fatalf("expected visible text before marker to remain, got %q", full.String())
+	}
+	if renderer.ToolResultCount() != 1 {
+		t.Fatalf("expected one collected tool result, got %d", renderer.ToolResultCount())
+	}
+	results := renderer.ToolResultsSince(0)
+	if len(results) != 1 {
+		t.Fatalf("expected one result since 0, got %#v", results)
+	}
+	if results[0].Name != "crm.list_customers" || results[0].Status != "success" {
+		t.Fatalf("unexpected collected tool result: %#v", results[0])
+	}
+	if results[0].Output["total"] != 0 {
+		t.Fatalf("expected collected output total, got %#v", results[0].Output)
 	}
 }
 

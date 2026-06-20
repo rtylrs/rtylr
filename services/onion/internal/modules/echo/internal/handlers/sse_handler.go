@@ -48,6 +48,8 @@ const (
 	cachedReplayMinDelay          = 95 * time.Millisecond
 	cachedReplayMaxDelay          = 650 * time.Millisecond
 	cachedReplayTargetDuration    = 8500 * time.Millisecond
+	maxToolResultContinuations    = 2
+	maxToolResultPromptBytes      = 12000
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
@@ -278,7 +280,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding)
+	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding, enhancedPrompt)
 }
 
 // writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
@@ -421,6 +423,7 @@ func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.C
 	return buildCaretPrompt(caretPromptInput{
 		Mode:               mode,
 		ConversationPrompt: conversationPrompt,
+		CurrentRequest:     req.Prompt,
 		SystemContext:      req.SystemContext,
 		Now:                now,
 	}), nil
@@ -683,7 +686,7 @@ func waitCachedReplay(ctx context.Context, clientGone chan bool, delay time.Dura
 	}
 }
 
-func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult) {
+func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult, basePrompt string) {
 	var fullResponse strings.Builder
 	messageID := newAssistantMessageID()
 	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
@@ -696,11 +699,57 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		}
 	}
 
+	currentPrompt := basePrompt
+	currentPromptChars := cachePlan.PromptChars
+	totalTokens := 0
+	finalToken := snips.StreamToken{}
+	for round := 0; ; round++ {
+		beforeToolResults := renderer.ToolResultCount()
+		beforeResponseChars := fullResponse.Len()
+		token, ok := h.drainProviderStream(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, currentPromptChars)
+		if !ok {
+			return
+		}
+		finalToken = token
+		totalTokens += streamUsageTokens(token, currentPromptChars, fullResponse.Len()-beforeResponseChars)
+
+		newToolResults := renderer.ToolResultsSince(beforeToolResults)
+		if len(newToolResults) == 0 || round >= maxToolResultContinuations {
+			if err := renderer.Finish(); err != nil {
+				return
+			}
+			if fullResponse.Len() > 0 {
+				go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
+			}
+			h.recordUsage(ctx, businessID, userID, totalTokens)
+			h.writeExactCacheEntry(ctx, finalToken, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
+			return
+		}
+
+		currentPrompt = buildToolResultContinuationPrompt(basePrompt, fullResponse.String(), newToolResults)
+		currentPromptChars = len(currentPrompt)
+		nextTokenChan, err := h.AiService.GenerateTextStream(ctx, currentPrompt)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to generate tool-result continuation", logger.Error(err))
+			if err := renderer.Finish(); err != nil {
+				return
+			}
+			if fullResponse.Len() > 0 {
+				go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
+			}
+			h.recordUsage(ctx, businessID, userID, totalTokens)
+			return
+		}
+		tokenChan = nextTokenChan
+	}
+}
+
+func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int) (snips.StreamToken, bool) {
 	for {
 		select {
 		case token, ok := <-tokenChan:
 			if !ok {
-				return
+				return snips.StreamToken{}, false
 			}
 
 			if token.Error != "" {
@@ -713,46 +762,65 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 					CacheKeyPreview: aicache.KeyPreview(cachePlan.Key),
 					BusinessID:      businessID,
 					UserID:          userID,
-					PromptChars:     cachePlan.PromptChars,
+					PromptChars:     promptChars,
 					LatencyMs:       time.Since(cachePlan.StartedAt).Milliseconds(),
 				})
 
-				return
+				return token, false
 			}
 
 			if token.Text != "" {
 				if err := renderer.AppendText(token.Text); err != nil {
-					return
+					return token, false
 				}
 			}
 
 			if token.Done {
-				if err := renderer.Finish(); err != nil {
-					return
+				if err := renderer.FlushPending(); err != nil {
+					return token, false
 				}
-				if fullResponse.Len() > 0 {
-					go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
-				}
-
-				// Meter usage against the quota. Prefer the provider's reported
-				// token counts; fall back to a char/4 estimate when absent.
-				tokens := token.PromptTokens + token.CompletionTokens
-				if tokens == 0 {
-					tokens = estimateTokens(cachePlan.PromptChars) + estimateTokens(fullResponse.Len())
-				}
-				h.recordUsage(ctx, businessID, userID, tokens)
-				h.writeExactCacheEntry(ctx, token, fullResponse.String(), tokens, cachePlan, businessID, userID)
-
-				return
+				return token, true
 			}
 
 		case <-clientGone:
-			return
+			return snips.StreamToken{}, false
 
 		case <-ctx.Done():
-			return
+			return snips.StreamToken{}, false
 		}
 	}
+}
+
+func streamUsageTokens(token snips.StreamToken, promptChars, responseChars int) int {
+	tokens := token.PromptTokens + token.CompletionTokens
+	if tokens > 0 {
+		return tokens
+	}
+	return estimateTokens(promptChars) + estimateTokens(responseChars)
+}
+
+func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, results []streamToolExecution) string {
+	resultsJSON, err := json.Marshal(results)
+	if err != nil {
+		resultsJSON = []byte("[]")
+	}
+	if len(resultsJSON) > maxToolResultPromptBytes {
+		resultsJSON = append(resultsJSON[:maxToolResultPromptBytes], []byte(`...truncated`)...)
+	}
+
+	var b strings.Builder
+	b.WriteString(basePrompt)
+	b.WriteString("\n\nTool results are now available for the same user request.\n")
+	b.WriteString("Continue the same assistant answer using these results as evidence. Do not repeat text already sent. Do not mention JSON, tool internals, rows, tenant, or implementation details unless the user asks.\n")
+	if trimmed := strings.TrimSpace(assistantSoFar); trimmed != "" {
+		b.WriteString("\nAssistant text already sent:\n")
+		b.WriteString(trimmed)
+		b.WriteString("\n")
+	}
+	b.WriteString("\nTool results:\n")
+	b.Write(resultsJSON)
+	b.WriteString("\n\nContinue now with the final user-facing answer.")
+	return b.String()
 }
 
 func (h *GenerateTextStreamHandler) writeExactCacheEntry(ctx context.Context, token snips.StreamToken, response string, tokens int, plan cacheWritePlan, businessID, userID int64) {

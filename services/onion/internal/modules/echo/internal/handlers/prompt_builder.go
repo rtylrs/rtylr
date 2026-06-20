@@ -22,6 +22,7 @@ const caretHumanVoiceContract = `Voice and answer style:
 type caretPromptInput struct {
 	Mode               CaretMode
 	ConversationPrompt string
+	CurrentRequest     string
 	SystemContext      string
 	Now                time.Time
 }
@@ -65,9 +66,10 @@ func buildCaretPrompt(in caretPromptInput) string {
 	b.WriteString(mode.SystemPromptAddendum())
 	b.WriteString("\n\n")
 
-	tools := PromptToolsForMode(mode)
+	tools := PromptToolsForRequest(mode, in.CurrentRequest, in.SystemContext)
 	if len(tools) > 0 {
 		b.WriteString("Available business capability catalog:\n")
+		b.WriteString("This catalog is shortlisted for the current request; use these tools before reaching for unrelated capabilities.\n")
 		for _, tool := range tools {
 			b.WriteString("- ")
 			b.WriteString(tool.Name)
