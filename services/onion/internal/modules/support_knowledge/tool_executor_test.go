@@ -2,6 +2,7 @@ package supportknowledge
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,6 +34,47 @@ func TestParseListSupportArticlesToolInputDefaultsAndCapsLimit(t *testing.T) {
 	}
 	if parsed.Limit != maxListSupportArticlesToolLimit {
 		t.Fatalf("Limit = %d", parsed.Limit)
+	}
+}
+
+func TestParseGetSupportArticleToolInputAcceptsAliases(t *testing.T) {
+	cases := []map[string]any{
+		{"article_id": int64(7)},
+		{"support_article_id": json.Number("7")},
+		{"knowledge_article_id": float64(7)},
+		{"article": "#7"},
+		{"id": "support-article-7"},
+		{"id": "knowledge_article_7"},
+		{"id": "kb-7"},
+		{"slug": " Refund-Policy "},
+		{"title": "Refund Policy"},
+	}
+
+	for _, input := range cases {
+		parsed, err := parseGetSupportArticleToolInput(input)
+		if err != nil {
+			t.Fatalf("parseGetSupportArticleToolInput(%v) returned error: %v", input, err)
+		}
+		if parsed.ArticleID == 0 && parsed.Slug == "" && parsed.Title == "" {
+			t.Fatalf("parsed empty input for %v: %+v", input, parsed)
+		}
+	}
+}
+
+func TestParseGetSupportArticleToolInputNormalizesSlug(t *testing.T) {
+	parsed, err := parseGetSupportArticleToolInput(map[string]any{"slug": " Refund-Policy "})
+	if err != nil {
+		t.Fatalf("parseGetSupportArticleToolInput: %v", err)
+	}
+	if parsed.Slug != "refund-policy" {
+		t.Fatalf("Slug = %q", parsed.Slug)
+	}
+}
+
+func TestParseGetSupportArticleToolInputRejectsMissingLookup(t *testing.T) {
+	_, err := parseGetSupportArticleToolInput(map[string]any{})
+	if err == nil || !strings.Contains(err.Error(), "article_id") {
+		t.Fatalf("error = %v, want lookup validation", err)
 	}
 }
 

@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrArticleNotFound = errors.New("support article not found")
 
 type Article struct {
 	ID          int64     `json:"id"`

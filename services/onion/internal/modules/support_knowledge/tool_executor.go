@@ -16,10 +16,17 @@ import (
 
 const (
 	listSupportArticlesToolName         = "support.list_articles"
+	getSupportArticleToolName           = "support.get_article"
 	defaultListSupportArticlesToolLimit = int64(20)
 	maxListSupportArticlesToolLimit     = int64(50)
 	supportArticleToolTimestampDate     = "2006-01-02T15:04:05Z"
 )
+
+type getSupportArticleToolInput struct {
+	ArticleID int64
+	Slug      string
+	Title     string
+}
 
 type listSupportArticlesToolInput struct {
 	Page  int64
@@ -31,9 +38,33 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case listSupportArticlesToolName:
 		output, err := m.executeListSupportArticlesTool(ctx, input)
 		return output, true, err
+	case getSupportArticleToolName:
+		output, err := m.executeGetSupportArticleTool(ctx, input)
+		return output, true, err
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeGetSupportArticleTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	businessID, err := supportArticleToolBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	parsed, err := parseGetSupportArticleToolInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	article, err := m.service.Get(ctx, businessID, parsed.ArticleID, parsed.Slug, parsed.Title)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"article": supportArticleToolPayload(article),
+	}, nil
 }
 
 func (m *Module) executeListSupportArticlesTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -65,6 +96,20 @@ func (m *Module) executeListSupportArticlesTool(ctx context.Context, input map[s
 		"page_size": parsed.Limit,
 		"has_more":  parsed.Page*parsed.Limit < int64(total),
 	}, nil
+}
+
+func parseGetSupportArticleToolInput(input map[string]any) (getSupportArticleToolInput, error) {
+	articleID, err := supportArticleIDToolValue(firstSupportArticleToolValue(input, "article_id", "support_article_id", "knowledge_article_id", "article", "id"))
+	if err != nil {
+		return getSupportArticleToolInput{}, fmt.Errorf("invalid article_id: %w", err)
+	}
+	slug := supportArticleToolSlug(firstSupportArticleToolValue(input, "slug", "handle"))
+	title := strings.TrimSpace(supportArticleToolString(firstSupportArticleToolValue(input, "title", "name")))
+
+	if articleID <= 0 && slug == "" && title == "" {
+		return getSupportArticleToolInput{}, errors.New("article_id, slug, or title is required")
+	}
+	return getSupportArticleToolInput{ArticleID: articleID, Slug: slug, Title: title}, nil
 }
 
 func parseListSupportArticlesToolInput(input map[string]any) (listSupportArticlesToolInput, error) {
@@ -142,6 +187,21 @@ func supportArticleToolNonNegativeInt64(value any) (int64, error) {
 	return out, nil
 }
 
+func supportArticleIDToolValue(value any) (int64, error) {
+	switch v := value.(type) {
+	case string:
+		raw := strings.TrimSpace(v)
+		raw = strings.TrimPrefix(raw, "#")
+		raw = strings.ToLower(raw)
+		for _, prefix := range []string{"support-article-", "support_article_", "knowledge-article-", "knowledge_article_", "article-", "article_", "kb-", "kb_"} {
+			raw = strings.TrimPrefix(raw, prefix)
+		}
+		return supportArticleToolInt64(raw)
+	default:
+		return supportArticleToolInt64(value)
+	}
+}
+
 func supportArticleToolInt64(value any) (int64, error) {
 	switch v := value.(type) {
 	case nil:
@@ -168,6 +228,25 @@ func supportArticleToolInt64(value any) (int64, error) {
 	default:
 		return 0, fmt.Errorf("unsupported value %T", value)
 	}
+}
+
+func supportArticleToolString(value any) string {
+	switch v := value.(type) {
+	case nil:
+		return ""
+	case string:
+		return v
+	case json.Number:
+		return v.String()
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprint(v)
+	}
+}
+
+func supportArticleToolSlug(value any) string {
+	return strings.ToLower(strings.TrimSpace(supportArticleToolString(value)))
 }
 
 func formatSupportArticleToolTime(value time.Time) any {

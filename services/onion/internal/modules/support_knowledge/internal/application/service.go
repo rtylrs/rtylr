@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/domain"
@@ -48,6 +49,18 @@ func (s *Service) List(ctx context.Context, businessID int64, page, pageSize int
 		cacher.WithExpiry(ctx, supportKnowledgeTTL),
 	)
 	return res.Items, res.Total, err
+}
+
+func (s *Service) Get(ctx context.Context, businessID, articleID int64, slug, title string) (domain.Article, error) {
+	slug = strings.TrimSpace(slug)
+	title = strings.TrimSpace(title)
+	key := cacheKeys.Scoped(supportKnowledgeScope, businessID, fmt.Sprintf("get|id=%d|slug=%s|title=%s", articleID, slug, title))
+	return cacher.Of[domain.Article]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.Article, error) {
+			return s.repo.Get(ctx, businessID, articleID, slug, title)
+		},
+		cacher.WithExpiry(ctx, supportKnowledgeTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.ArticleInput) (int64, error) {

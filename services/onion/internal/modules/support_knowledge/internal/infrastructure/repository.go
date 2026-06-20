@@ -3,6 +3,8 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/infrastructure/persistence/sqlc"
@@ -49,6 +51,23 @@ func (r *Repository) List(ctx context.Context, businessID int64, page, pageSize 
 		items = append(items, articleFromRow(row))
 	}
 	return items, int(total), nil
+}
+
+func (r *Repository) Get(ctx context.Context, businessID, articleID int64, slug, title string) (domain.Article, error) {
+	row, err := r.queries.GetArticle(ctx, sqlc.GetArticleParams{
+		BusinessID: businessID,
+		ArticleID:  articleID,
+		Slug:       strings.TrimSpace(slug),
+		Title:      strings.TrimSpace(title),
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Article{}, domain.ErrArticleNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get support article", logger.Error(err))
+		return domain.Article{}, err
+	}
+	return articleFromRow(row), nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.ArticleInput) (int64, error) {
