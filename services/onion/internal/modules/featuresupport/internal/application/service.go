@@ -2,14 +2,20 @@ package application
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"hash/fnv"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
 // LandingFlagKey is the flag whose resolved variant the landing page + the
@@ -19,6 +25,11 @@ const LandingFlagKey = "landing"
 // DefaultVariant is what callers get when a flag is missing or the backend
 // errors — the control / "variant a".
 const DefaultVariant = "a"
+
+const (
+	featureSupportCacheScope = "feature_support"
+	featureSupportResolveTTL = 5 * time.Minute
+)
 
 type repository interface {
 	GetFlag(ctx context.Context, key string) (domain.Flag, error)
@@ -42,8 +53,50 @@ type Service struct {
 	repo repository
 }
 
+type resolveResult struct {
+	Features map[string]domain.Resolution `json:"features"`
+	Variant  string                       `json:"variant"`
+}
+
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
+}
+
+func resolveCacheKey(ec domain.EvalContext) string {
+	var b strings.Builder
+	if ec.UserID != 0 {
+		b.WriteString("user:")
+		b.WriteString(strconv.FormatInt(ec.UserID, 10))
+	} else {
+		b.WriteString("anon:")
+		b.WriteString(ec.AnonymousID)
+	}
+
+	attrKeys := make([]string, 0, len(ec.Attributes))
+	for key := range ec.Attributes {
+		attrKeys = append(attrKeys, key)
+	}
+	sort.Strings(attrKeys)
+	for _, key := range attrKeys {
+		value := ec.Attributes[key]
+		b.WriteString("|")
+		b.WriteString(strconv.Itoa(len(key)))
+		b.WriteString(":")
+		b.WriteString(key)
+		b.WriteString("=")
+		b.WriteString(strconv.Itoa(len(value)))
+		b.WriteString(":")
+		b.WriteString(value)
+	}
+
+	sum := sha256.Sum256([]byte(b.String()))
+	return cacheKeys.Scoped(featureSupportCacheScope, 0, "resolve:"+hex.EncodeToString(sum[:16]))
+}
+
+func invalidateFeatureSupportCache(ctx context.Context) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, 0))
+	}
 }
 
 // bucketOf maps (salt, subject) to a stable bucket in [0,100). The salt mixes
@@ -200,6 +253,21 @@ func (s *Service) resolveOne(f domain.Flag, rules []domain.Rule, attrs map[strin
 // the landing variant as a convenience for the worker. Precedence per flag:
 // explicit per-user target -> matching rule -> flag-level percentage rollout.
 func (s *Service) Resolve(ctx context.Context, ec domain.EvalContext) (map[string]domain.Resolution, string, error) {
+	result, err := cacher.Of[resolveResult]().GetOrComputeSingle(ctx, resolveCacheKey(ec),
+		func(ctx context.Context) (resolveResult, error) {
+			features, variant, err := s.resolveUncached(ctx, ec)
+			return resolveResult{Features: features, Variant: variant}, err
+		},
+		cacher.RemoteOnly(),
+		cacher.WithExpiry(ctx, featureSupportResolveTTL),
+	)
+	if err != nil {
+		return nil, DefaultVariant, err
+	}
+	return result.Features, result.Variant, nil
+}
+
+func (s *Service) resolveUncached(ctx context.Context, ec domain.EvalContext) (map[string]domain.Resolution, string, error) {
 	flags, err := s.repo.ListFlags(ctx)
 	if err != nil {
 		return nil, DefaultVariant, err
@@ -270,11 +338,19 @@ func (s *Service) UpsertFlag(ctx context.Context, f domain.Flag) error {
 	f.RolloutPercentage = clampPercent(f.RolloutPercentage)
 	f.VariantOn = pick(f.VariantOn, "b")
 	f.VariantOff = pick(f.VariantOff, DefaultVariant)
-	return s.repo.UpsertFlag(ctx, f)
+	if err := s.repo.UpsertFlag(ctx, f); err != nil {
+		return err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return nil
 }
 
 func (s *Service) DeleteFlag(ctx context.Context, key string) error {
-	return s.repo.DeleteFlag(ctx, key)
+	if err := s.repo.DeleteFlag(ctx, key); err != nil {
+		return err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return nil
 }
 
 func (s *Service) ListTargets(ctx context.Context, key string) ([]domain.Target, error) {
@@ -282,11 +358,19 @@ func (s *Service) ListTargets(ctx context.Context, key string) ([]domain.Target,
 }
 
 func (s *Service) UpsertTarget(ctx context.Context, t domain.Target) error {
-	return s.repo.UpsertTarget(ctx, t)
+	if err := s.repo.UpsertTarget(ctx, t); err != nil {
+		return err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return nil
 }
 
 func (s *Service) DeleteTarget(ctx context.Context, key string, ownerID int64) error {
-	return s.repo.DeleteTarget(ctx, key, ownerID)
+	if err := s.repo.DeleteTarget(ctx, key, ownerID); err != nil {
+		return err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return nil
 }
 
 func (s *Service) ListRules(ctx context.Context, key string) ([]domain.Rule, error) {
@@ -296,7 +380,12 @@ func (s *Service) ListRules(ctx context.Context, key string) ([]domain.Rule, err
 func (s *Service) CreateRule(ctx context.Context, rule domain.Rule) (int64, error) {
 	rule.RolloutPercentage = clampPercent(rule.RolloutPercentage)
 	rule.Variant = pick(rule.Variant, "b")
-	return s.repo.CreateRule(ctx, rule)
+	id, err := s.repo.CreateRule(ctx, rule)
+	if err != nil {
+		return 0, err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return id, nil
 }
 
 func (s *Service) UpdateRule(ctx context.Context, rule domain.Rule) error {
@@ -306,9 +395,18 @@ func (s *Service) UpdateRule(ctx context.Context, rule domain.Rule) error {
 		return err
 	}
 	// conditions are replaced wholesale when provided
-	return s.repo.ReplaceRuleConditions(ctx, rule.ID, rule.Conditions)
+	if err := s.repo.ReplaceRuleConditions(ctx, rule.ID, rule.Conditions); err != nil {
+		invalidateFeatureSupportCache(ctx)
+		return err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return nil
 }
 
 func (s *Service) DeleteRule(ctx context.Context, id int64) error {
-	return s.repo.DeleteRule(ctx, id)
+	if err := s.repo.DeleteRule(ctx, id); err != nil {
+		return err
+	}
+	invalidateFeatureSupportCache(ctx)
+	return nil
 }
