@@ -40,7 +40,7 @@ const Register: React.FC = (): React.JSX.Element => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
-  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, true);
+  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, false);
   const emailError = getEmailError(email);
   const matchError = getPasswordMatchError(password, confirmPassword);
 

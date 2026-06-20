@@ -24,6 +24,10 @@ function getOrCreateFeatureSubject(): string {
   return subject;
 }
 
+function responseKeyFor(key: string): string {
+  return key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+}
+
 export function useFeatureGate(key: string, defaultEnabled = true): boolean {
   const [enabled, setEnabled] = useState(defaultEnabled);
 
@@ -35,7 +39,8 @@ export function useFeatureGate(key: string, defaultEnabled = true): boolean {
         const res = await unwrap(
           safe.post<FeaturesResponse>('/features', { subject, attributes: { app: 'auth' } })
         );
-        const next = res.features?.[key]?.enabled;
+        const features = res.features ?? {};
+        const next = features[key]?.enabled ?? features[responseKeyFor(key)]?.enabled;
         if (mounted && typeof next === 'boolean') {
           setEnabled(next);
         }

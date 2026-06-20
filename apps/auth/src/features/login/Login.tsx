@@ -30,7 +30,7 @@ const Login: React.FC = (): React.JSX.Element => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, true);
+  const showSocialLogin = useFeatureGate(AUTH_SOCIAL_LOGIN_FLAG, false);
   const emailError = getEmailError(email);
 
   const redirectParam = useMemo((): string | null => {
