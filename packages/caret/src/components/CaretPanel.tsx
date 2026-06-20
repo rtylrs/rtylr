@@ -12,6 +12,7 @@ import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
+import { buildCaretFollowUps } from '../lib/followUps';
 import { inferCaretModeForPrompt } from '../lib/modeIntent';
 import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';
 import type { CaretChatSummary } from '../types/chat';
@@ -130,6 +131,10 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const emptyState = useMemo(
     () => buildCaretEmptyState({ appId, pageContext }),
     [appId, pageContext]
+  );
+  const followUps = useMemo(
+    () => buildCaretFollowUps({ appId, pageContext, messages }),
+    [appId, pageContext, messages]
   );
 
   useEffect(() => {
@@ -377,6 +382,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               showThinking={showThinking}
               onApproveTool={onApprove}
               onDenyTool={onDeny}
+              followUps={followUps}
+              onFollowUp={sendStarter}
             />
           )}
           <Composer

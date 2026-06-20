@@ -2,7 +2,9 @@ import React from 'react';
 import { caretTokens, caretRadius } from '../ui/tokens';
 import MessageBlocks from './MessageBlocks';
 import MessageActions from './MessageActions';
+import FollowUpChips from './FollowUpChips';
 import StreamingDot from './blocks/StreamingDot';
+import type { CaretStarter } from '../lib/suggestions';
 import type { CaretMessage, ContentBlock } from '../types/message';
 
 export interface MessageBubbleProps {
@@ -12,6 +14,8 @@ export interface MessageBubbleProps {
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
   onRetry?: () => void;
+  followUps?: CaretStarter[];
+  onFollowUp?: (item: CaretStarter) => void;
 }
 
 /** Flatten content blocks to plain text for copy. */
@@ -33,6 +37,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onApproveTool,
   onDenyTool,
   onRetry,
+  followUps = [],
+  onFollowUp,
 }) => {
   const isUser = message.role === 'user';
   const blocks: ContentBlock[] =
@@ -94,6 +100,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       {!isStreaming && blocks.some((b) => b.type === 'text') && (
         <MessageActions text={text} onRetry={onRetry} />
       )}
+      {!isStreaming && <FollowUpChips items={followUps} onSelect={onFollowUp} />}
     </div>
   );
 };
