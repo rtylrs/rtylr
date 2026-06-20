@@ -5,6 +5,7 @@ import { consumeSse } from '../protocol/sse';
 import type { CaretStreamEvent } from '../protocol/events';
 import { readAuthToken } from '../lib/auth';
 import type { CaretPageContext } from '../types/context';
+import type { CaretMode } from '../types/mode';
 
 export interface UseCaretStreamParams {
   userId: number;
@@ -14,7 +15,7 @@ export interface UseCaretStreamParams {
 }
 
 export interface UseCaretStreamResult {
-  sendMessage: (prompt: string) => Promise<void>;
+  sendMessage: (prompt: string, modeOverride?: CaretMode) => Promise<void>;
   stopStreaming: () => void;
 }
 
@@ -39,7 +40,7 @@ export function useCaretStream({
   }, [store]);
 
   const sendMessage = useCallback(
-    async (prompt: string): Promise<void> => {
+    async (prompt: string, modeOverride?: CaretMode): Promise<void> => {
       if (!prompt.trim() || store.isStreaming) return;
 
       const userMessageId = `user-${Date.now()}`;
@@ -63,7 +64,7 @@ export function useCaretStream({
 
       try {
         const token = readAuthToken();
-        const mode = useCaretSettingsStore.getState().mode;
+        const mode = modeOverride ?? useCaretSettingsStore.getState().mode;
         const response = await fetch(url, {
           method: 'POST',
           credentials: 'include',

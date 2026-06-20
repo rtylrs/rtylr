@@ -12,6 +12,7 @@ import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
+import { inferCaretModeForPrompt } from '../lib/modeIntent';
 import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';
 import type { CaretChatSummary } from '../types/chat';
 import type { CaretPageContext } from '../types/context';
@@ -291,12 +292,20 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     [sendToolDecision]
   );
 
+  const sendPromptWithIntent = useCallback(
+    (prompt: string, explicitMode?: CaretStarter['mode']): void => {
+      const nextMode = explicitMode ?? inferCaretModeForPrompt(prompt, mode);
+      if (nextMode !== mode) setMode(nextMode);
+      void sendMessage(prompt, nextMode);
+    },
+    [mode, sendMessage, setMode]
+  );
+
   const sendStarter = useCallback(
     (starter: CaretStarter): void => {
-      if (starter.mode) setMode(starter.mode);
-      void sendMessage(starter.prompt);
+      sendPromptWithIntent(starter.prompt, starter.mode);
     },
-    [sendMessage, setMode]
+    [sendPromptWithIntent]
   );
 
   const rootStyle: React.CSSProperties =
@@ -372,7 +381,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           )}
           <Composer
             isStreaming={isStreaming}
-            onSubmit={(t) => sendMessage(t)}
+            onSubmit={(t) => sendPromptWithIntent(t)}
             onStop={stopStreaming}
           />
         </>
