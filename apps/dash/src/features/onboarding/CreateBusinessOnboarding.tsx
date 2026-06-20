@@ -98,7 +98,11 @@ const CreateBusinessOnboarding: React.FC = (): React.JSX.Element => {
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2" aria-hidden>
               {isFetching && longEnough && (
-                <Loader2 size={15} className="animate-spin" style={{ color: 'var(--dash-text-dim)' }} />
+                <Loader2
+                  size={15}
+                  className="animate-spin"
+                  style={{ color: 'var(--dash-text-dim)' }}
+                />
               )}
               {available && <Check size={15} style={{ color: '#16a34a' }} />}
               {taken && <X size={15} style={{ color: 'var(--dash-error, #ef4444)' }} />}
