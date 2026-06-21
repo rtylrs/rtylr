@@ -59,6 +59,7 @@ const (
 )
 
 type AppConfig struct {
+	RunMode             string
 	DatabaseURL         string
 	DBHost              string
 	DBPort              string
@@ -70,6 +71,7 @@ type AppConfig struct {
 	ResendKey           string
 	AppEnv              string
 	AppRelease          string
+	DeploymentMode      string
 	Port                string
 	Hostname            string
 	AuthAppURL          string
@@ -147,6 +149,13 @@ type AppConfig struct {
 	CDNMediaEnginePath string // path to the C++ media-engine binary
 	CDNAPIKey          string // bearer key for write endpoints; empty disables auth
 
+	// License runmode / self-hosting controls.
+	LicenseKey         string
+	LicenseFile        string
+	LicensePublicKey   string
+	LicenseIssuer      string
+	LicenseGracePeriod time.Duration
+
 	// Internal Auth
 	InternalToken string
 
@@ -211,6 +220,7 @@ func LoadAndValidate() (*AppConfig, error) {
 	}
 
 	cfg := &AppConfig{
+		RunMode:             envOrDefault("RUN_MODE", "api"),
 		DatabaseURL:         os.Getenv("DATABASE_URL"),
 		DBHost:              os.Getenv("DB_HOST"),
 		DBPort:              os.Getenv("DB_PORT"),
@@ -222,6 +232,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		ResendKey:           os.Getenv("RESEND_API_KEY"),
 		AppEnv:              os.Getenv("APP_ENV"),
 		AppRelease:          os.Getenv("APP_RELEASE"),
+		DeploymentMode:      envOrDefault("DEPLOYMENT_MODE", "hosted"),
 		Port:                os.Getenv("PORT"),
 		Hostname:            os.Getenv("HOSTNAME"),
 		AuthAppURL:          os.Getenv("AUTH_APP_URL"),
@@ -297,6 +308,13 @@ func LoadAndValidate() (*AppConfig, error) {
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
 
+		// License runmode / self-hosting controls
+		LicenseKey:         os.Getenv("LICENSE_KEY"),
+		LicenseFile:        os.Getenv("LICENSE_FILE"),
+		LicensePublicKey:   os.Getenv("LICENSE_PUBLIC_KEY"),
+		LicenseIssuer:      envOrDefault("LICENSE_ISSUER", "voxire"),
+		LicenseGracePeriod: envDurationOrDefault("LICENSE_GRACE_PERIOD", 14*24*time.Hour),
+
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),
 
@@ -315,12 +333,15 @@ func LoadAndValidate() (*AppConfig, error) {
 
 	var missing []string
 
-	// Validate critical environment variables
-	if cfg.DatabaseURL == "" && (cfg.DBHost == "" || cfg.DBName == "" || cfg.DBUser == "") {
-		missing = append(missing, "DATABASE_URL (or DB_HOST, DB_NAME, DB_USER)")
-	}
-	if cfg.JWTSecret == "" {
-		missing = append(missing, "JWT_SECRET")
+	// Validate critical environment variables. The license runmode is the
+	// only DB-less Onion service; every business-data runmode stays strict.
+	if cfg.RunMode != "license" {
+		if cfg.DatabaseURL == "" && (cfg.DBHost == "" || cfg.DBName == "" || cfg.DBUser == "") {
+			missing = append(missing, "DATABASE_URL (or DB_HOST, DB_NAME, DB_USER)")
+		}
+		if cfg.JWTSecret == "" {
+			missing = append(missing, "JWT_SECRET")
+		}
 	}
 
 	if len(missing) > 0 {
@@ -351,6 +372,18 @@ func envIntOrDefault(key string, fallback int) int {
 		return fallback
 	}
 	return n
+}
+
+func envDurationOrDefault(key string, fallback time.Duration) time.Duration {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		return fallback
+	}
+	return d
 }
 
 func GetOpenAIAPIKey() string {

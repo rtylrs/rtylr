@@ -84,6 +84,11 @@ jobs:
             repository: voxire/onion-upload
             cluster: voxire-prod
             service: upload
+          - name: license
+            dockerfile: Dockerfile.license
+            repository: voxire/onion-license
+            cluster: voxire-prod
+            service: license
     steps:
       - uses: actions/checkout@v6
         with:

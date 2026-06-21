@@ -9,3 +9,7 @@ import (
 type ChiRunMode interface {
 	Setup(ctx context.Context, r *chi.Mux)
 }
+
+type DatabaseHealthMode interface {
+	UsesDatabaseHealthCheck() bool
+}

@@ -52,12 +52,14 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		pingCtx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
-		defer cancel()
-		if db := dbclient.Pool(); db == nil || db.PingContext(pingCtx) != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			_, _ = w.Write([]byte(`{"status":"unhealthy"}`))
-			return
+		if usesDatabaseHealthCheck(runMode) {
+			pingCtx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+			defer cancel()
+			if db := dbclient.Pool(); db == nil || db.PingContext(pingCtx) != nil {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				_, _ = w.Write([]byte(`{"status":"unhealthy"}`))
+				return
+			}
 		}
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
@@ -120,4 +122,12 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	}
 
 	return nil
+}
+
+func usesDatabaseHealthCheck(runMode ChiRunMode) bool {
+	mode, ok := runMode.(DatabaseHealthMode)
+	if !ok {
+		return true
+	}
+	return mode.UsesDatabaseHealthCheck()
 }
