@@ -671,10 +671,10 @@ export function buildCaretEmptyState({
     .slice(0, 4);
 
   return {
-    title: isUsefulLabel(page) ? `Caret is ready on ${page}` : `Caret is ready in ${appName}`,
-    subtitle: pageContext?.businessName
-      ? `Already looking at this screen for ${pageContext.businessName}.`
-      : 'Already looking at this screen.',
+    title: 'Ask Caret',
+    subtitle: selectedLabel
+      ? `It already knows this ${selectedLabel}.`
+      : 'It already knows this screen.',
     briefItems: buildReadyBrief({
       appKey,
       contextKey,
