@@ -231,12 +231,18 @@ const PinLogin: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div
+              className={
+                roster.length === 1 ? 'flex justify-center' : 'grid grid-cols-2 gap-3'
+              }
+            >
               {roster.map((m) => (
                 <button
                   key={m.userId}
                   onClick={() => pickMember(m)}
-                  className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-pos-card border border-pos-border hover:border-blue-500/50 transition-colors"
+                  className={`flex w-full flex-col items-center gap-2 rounded-2xl border border-pos-border bg-pos-card p-5 transition-colors hover:border-blue-500/50 ${
+                    roster.length === 1 ? 'max-w-72' : ''
+                  }`}
                 >
                   <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center text-lg font-bold text-blue-400">
                     {m.name.charAt(0).toUpperCase()}
