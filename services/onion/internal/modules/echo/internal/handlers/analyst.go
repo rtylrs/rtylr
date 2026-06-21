@@ -126,6 +126,9 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 	if h.AnalystService == nil {
 		return nil, false
 	}
+	if grounding, ok := buildDeferredAnalyticsGrounding(question); ok {
+		return grounding, true
+	}
 	if shouldUseBusinessSnapshot(question) {
 		if grounding, ok := h.businessSnapshotGrounding(ctx, question, businessID, userID); ok {
 			return grounding, true

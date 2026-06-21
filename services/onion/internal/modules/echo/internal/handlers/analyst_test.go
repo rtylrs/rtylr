@@ -111,6 +111,48 @@ func TestAnalystGroundingUsesBusinessSnapshotForOwnerOverview(t *testing.T) {
 	}
 }
 
+func TestAnalystGroundingDefersHeavyRawExports(t *testing.T) {
+	service := &snapshotAnalystService{}
+	handler := &GenerateTextStreamHandler{AnalystService: service}
+
+	got, ok := handler.analystGrounding(context.Background(), "Export every order from the last year as CSV", 11, 22)
+	if !ok {
+		t.Fatal("expected deferred analytics grounding")
+	}
+	if got.ToolName != deferredAnalyticsToolName {
+		t.Fatalf("expected deferred analytics tool, got %#v", got)
+	}
+	if len(service.calls) != 0 {
+		t.Fatalf("heavy export should not run analytics queries, got %d calls", len(service.calls))
+	}
+	for _, want := range []string{
+		"Internal heavy-data guard for Caret only:",
+		"Do not run live analytics",
+		"background analytics job",
+		"Do not say a job was created",
+		"summarize the data",
+	} {
+		if !strings.Contains(got.Prompt, want) {
+			t.Fatalf("deferred analytics prompt missing %q\nprompt:\n%s", want, got.Prompt)
+		}
+	}
+	if !strings.Contains(got.SpecJSON, `"kind":"deferred_analytics"`) {
+		t.Fatalf("expected deferred analytics spec, got %s", got.SpecJSON)
+	}
+}
+
+func TestHeavyDataRequestReasonIgnoresSummaries(t *testing.T) {
+	if _, ok := heavyDataRequestReason("Summarize sales from last year by month"); ok {
+		t.Fatal("summaries should stay eligible for live summarized analytics")
+	}
+	if _, ok := heavyDataRequestReason("Show my top 5 customers"); ok {
+		t.Fatal("bounded top-list requests should stay eligible for live analytics")
+	}
+	if _, ok := heavyDataRequestReason("Show the full customer profile for this customer"); ok {
+		t.Fatal("selected-record detail requests should stay eligible for live analytics")
+	}
+}
+
 func TestBusinessSnapshotToolExecutorRunsSnapshot(t *testing.T) {
 	service := &snapshotAnalystService{}
 	executor := NewBusinessSnapshotToolExecutor(service)
