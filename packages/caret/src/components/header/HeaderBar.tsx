@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings, X, Plus } from 'lucide-react';
-import { caretTokens, caretRadius } from '../../ui/tokens';
+import { caretTokens } from '../../ui/tokens';
 import IconButton from '../../ui/IconButton';
 import Tooltip from '../../ui/Tooltip';
 import { useCaretStore } from '../../stores/caretStore';
@@ -41,14 +41,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
       >
         <span
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: caretRadius.md,
-            background: caretTokens.accentSoft,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            overflow: 'hidden',
           }}
         >
           <CaretLogo variant="teal" size={20} />
@@ -59,7 +54,13 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
       <span style={{ flex: 1 }} />
 
       <Tooltip label="Chat">
-        <IconButton size="md" label="Chat" active={view === 'chat'} onClick={() => setView('chat')}>
+        <IconButton
+          size="md"
+          label="Chat"
+          active={view === 'chat'}
+          onClick={() => setView('chat')}
+          style={{ background: 'transparent' }}
+        >
           <CaretLogo variant="teal" size={16} />
         </IconButton>
       </Tooltip>

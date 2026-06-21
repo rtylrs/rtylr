@@ -64,10 +64,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       >
         <div
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: caretRadius.xl,
-            background: caretTokens.accentSoft,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
