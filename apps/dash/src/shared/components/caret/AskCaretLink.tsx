@@ -32,7 +32,7 @@ export const AskCaretLink: React.FC<AskCaretLinkProps> = ({ prompt, children }) 
         textDecorationStyle: 'dotted',
       }}
     >
-      <CaretLogo variant="teal" size={12} scale={1.8} />
+      <CaretLogo variant="teal" size={13} />
       {children ?? 'Ask Caret'}
     </button>
   );

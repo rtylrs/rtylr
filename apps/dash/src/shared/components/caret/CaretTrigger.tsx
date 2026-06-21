@@ -25,7 +25,7 @@ export const CaretTrigger: React.FC<{ label?: string }> = ({ label = 'Ask Caret'
         cursor: 'pointer',
       }}
     >
-      <CaretLogo variant="teal" size={13} scale={1.8} />
+      <CaretLogo variant="teal" size={15} />
       {label}
     </button>
   );

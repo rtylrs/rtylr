@@ -20,7 +20,7 @@ export const PageHeader: React.FC<{ title: string; subtitle?: string }> = ({ tit
         flexShrink: 0,
       }}
     >
-      <CaretLogo variant="teal" size={24} scale={1.75} />
+      <CaretLogo variant="teal" size={26} />
     </span>
     <div>
       <h1 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{title}</h1>
