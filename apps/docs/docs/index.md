@@ -4,7 +4,7 @@ layout: home
 hero:
   name: rtylr Docs
   text: The all-in-one business operating system
-  tagline: POS, ERP, HR, CRM, Finance, Flow, Store, Book and more — one platform, one data model, no integrations to maintain.
+  tagline: POS, ERP, HR, CRM, Finance, Flow, Store and more — one platform, one data model, no integrations to maintain.
   image:
     src: /logo.png
     alt: rtylr
@@ -24,7 +24,7 @@ features:
     details: Learn what rtylr is, spin up your organization, and understand the multi-tenant model behind it.
     link: /getting-started/introduction
   - title: Apps
-    details: Hub, POS, ERP, HR, CRM, Finance, Flow, Insights, Book, Store, and Support — explore every module.
+    details: Hub, POS, ERP, HR, CRM, Finance, Flow, Insights, Store, and Support — explore every module.
     link: /apps/hub
   - title: API
     details: Programmatic access to your organization's data and operations via a RESTful API.

@@ -12,7 +12,7 @@ A business can have one or more branches (physical locations). Each branch has i
 
 ## Floors
 
-Within a branch, floors represent physical areas (e.g., Main Floor, Patio, Rooftop). Floors are used in POS for table mapping and in Book for resource assignment. Each floor can have its own layout with tables, stations, or rooms.
+Within a branch, floors represent physical areas (e.g., Main Floor, Patio, Rooftop). Floors are used in POS for table mapping. Each floor can have its own layout with tables, stations, or rooms.
 
 ## Terminals
 
@@ -24,7 +24,7 @@ rtylr has a layered role system. Organization-level roles control access to apps
 
 - **Owner** — Full access to everything, including billing and destructive actions. Cannot be removed.
 - **Admin** — Full access to all apps and settings except billing and ownership transfer.
-- **Operator** — Access to day-to-day operational apps (POS, ERP, Book) with limited settings access.
+- **Operator** — Access to day-to-day operational apps (POS, ERP) with limited settings access.
 - **Staff** — Basic access to assigned apps. Cannot modify settings or view financial data.
 - **Viewer** — Read-only access to assigned apps. Cannot create, update, or delete anything.
 

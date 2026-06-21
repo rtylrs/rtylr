@@ -3,12 +3,15 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'rtylr Docs',
   description:
-    'Documentation for rtylr — the all-in-one business operating system. POS, ERP, HR, CRM, Finance, Flow, Store, Book and more.',
+    'Documentation for rtylr — the all-in-one business operating system. POS, ERP, HR, CRM, Finance, Flow, Store and more.',
   lang: 'en-US',
   cleanUrls: true,
   lastUpdated: true,
 
-  head: [['link', { rel: 'icon', href: '/logo.png', type: 'image/png' }]],
+  head: [
+    ['link', { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+  ],
 
   themeConfig: {
     logo: '/logo.png',
@@ -47,7 +50,6 @@ export default defineConfig({
           { text: 'Finance', link: '/apps/finance' },
           { text: 'Flow (Project Management)', link: '/apps/flow' },
           { text: 'Insights (Analytics)', link: '/apps/insights' },
-          { text: 'Book (Scheduling)', link: '/apps/book' },
           { text: 'Store (E-Commerce)', link: '/apps/store' },
           { text: 'Support (Help Desk)', link: '/apps/support' },
         ],

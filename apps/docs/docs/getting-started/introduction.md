@@ -1,6 +1,6 @@
 # Introduction to rtylr
 
-rtylr is the all-in-one business operating system designed for modern businesses. It brings together POS, ERP, HR, CRM, Finance, Flow, Store, and Book into a single, unified platform.
+rtylr is the all-in-one business operating system designed for modern businesses. It brings together POS, ERP, HR, CRM, Finance, Flow, and Store into a single, unified platform.
 
 ## What is rtylr?
 
@@ -16,7 +16,6 @@ rtylr replaces the patchwork of disconnected tools most businesses rely on. Inst
 - **Finance** — Accounting and financial reporting
 - **Flow** — Workflow automation and task management
 - **Store** — Online storefront builder
-- **Book** — Appointment and booking system
 
 ## Why rtylr?
 
