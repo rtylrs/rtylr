@@ -46,7 +46,7 @@ const CaretButton = ({ className, 'data-tour': dataTour }: CaretButtonProps): Re
           : 'rgba(100, 197, 185, 0.22)';
       }}
     >
-      <CaretLogo variant="teal" size={15} />
+      <CaretLogo variant="teal" size={21} scale={1.18} />
       Caret AI
     </button>
   );
