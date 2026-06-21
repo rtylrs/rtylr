@@ -156,6 +156,11 @@ type AppConfig struct {
 	LicenseSigningPrivateKey string
 	LicenseIssuer            string
 	LicenseGracePeriod       time.Duration
+	// LicenseAuthorityURL is the hosted license authority a self-host backend
+	// validates RTYLR_LICENSE_KEY against. Defaults to the Voxire authority and
+	// is intentionally NOT a documented customer knob (override only for our own
+	// testing via LICENSE_AUTHORITY_URL).
+	LicenseAuthorityURL string
 
 	// Internal Auth
 	InternalToken string
@@ -315,7 +320,8 @@ func LoadAndValidate() (*AppConfig, error) {
 		LicensePublicKey:         os.Getenv("LICENSE_PUBLIC_KEY"),
 		LicenseSigningPrivateKey: os.Getenv("LICENSE_SIGNING_PRIVATE_KEY"),
 		LicenseIssuer:            envOrDefault("LICENSE_ISSUER", "voxire"),
-		LicenseGracePeriod:       envDurationOrDefault("LICENSE_GRACE_PERIOD", 14*24*time.Hour),
+		LicenseGracePeriod:       envDurationOrDefault("LICENSE_GRACE_PERIOD", 7*24*time.Hour),
+		LicenseAuthorityURL:      envOrDefault("LICENSE_AUTHORITY_URL", DefaultLicenseAuthorityURL),
 
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),

@@ -16,3 +16,8 @@ const (
 	InsightsAppURL = "https://insights.rtylr.com"
 	LandingURL     = "https://rtylr.com"
 )
+
+// DefaultLicenseAuthorityURL is the hosted license authority that self-host
+// backends validate their RTYLR_LICENSE_KEY against. It is a product constant,
+// not a customer-configurable value.
+const DefaultLicenseAuthorityURL = "https://license.voxire.com"

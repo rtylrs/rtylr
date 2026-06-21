@@ -148,6 +148,7 @@ import (
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
+	"github.com/voxire/onion/internal/platform/license"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -697,6 +698,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	accessPolicy := http.NewRouteAccessPolicy()
 	accessPolicy.RegisterAnonymousRoutes("/health")
 	accessPolicy.RegisterAnonymousRoutes("/version")
+	accessPolicy.RegisterAnonymousRoutes("/license/state")
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
@@ -735,6 +737,16 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	http.RegisterCacheRoutes(ctx, r)
 	http.RegisterStatusRoutes(ctx, r)
 	http.RegisterVersionRoutes(r)
+
+	// Self-host license status. The validator is a no-op in hosted mode
+	// (always valid, no network); in self-host mode it validates the key
+	// against the license authority with a grace window. /license/state lets
+	// frontends render an admin-only notice. Prime the cache in the background.
+	licenseValidator := license.NewCachedValidator(platformConfig.GlobalConfig)
+	http.RegisterLicenseStateRoutes(r, licenseValidator)
+	if license.IsSelfHosted(platformConfig.GlobalConfig) {
+		go licenseValidator.Refresh(ctx)
+	}
 
 	http.AutoRegisterRoutes(ctx, modules, r)
 }

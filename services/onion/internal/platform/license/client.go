@@ -1,0 +1,178 @@
+package license
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+	"sync"
+	"time"
+
+	platformconfig "github.com/voxire/onion/internal/platform/config"
+)
+
+// StatusUnreachable means the license authority could not be reached and no
+// cached-valid result remains within the grace window.
+const StatusUnreachable = "unreachable"
+
+// refreshInterval is how often a healthy self-host backend re-checks the
+// authority. Between checks the last result is served from cache.
+const refreshInterval = time.Hour
+
+// Client talks to the hosted license authority (license.voxire.com).
+type Client struct {
+	authorityURL string
+	httpClient   *http.Client
+}
+
+func NewClient(authorityURL string) *Client {
+	authorityURL = strings.TrimRight(strings.TrimSpace(authorityURL), "/")
+	if authorityURL == "" {
+		authorityURL = platformconfig.DefaultLicenseAuthorityURL
+	}
+	return &Client{
+		authorityURL: authorityURL,
+		httpClient:   &http.Client{Timeout: 10 * time.Second},
+	}
+}
+
+// Verify POSTs the license key to {authority}/license/verify and returns the
+// authority's StatusReport. A non-nil error means the authority was unreachable
+// or returned an unusable response — callers apply grace logic on error.
+func (c *Client) Verify(ctx context.Context, key string) (StatusReport, error) {
+	body, _ := json.Marshal(map[string]string{"license_key": strings.TrimSpace(key)})
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.authorityURL+"/license/verify", bytes.NewReader(body))
+	if err != nil {
+		return StatusReport{}, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return StatusReport{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 500 {
+		return StatusReport{}, fmt.Errorf("license authority returned %d", resp.StatusCode)
+	}
+
+	var report StatusReport
+	if err := json.NewDecoder(resp.Body).Decode(&report); err != nil {
+		return StatusReport{}, fmt.Errorf("decode authority response: %w", err)
+	}
+	return report, nil
+}
+
+// CachedValidator resolves the effective license status for a self-host backend.
+// It periodically re-checks the authority and, when the authority is briefly
+// unreachable, keeps serving the last valid result for the configured grace
+// window. In hosted mode it is a no-op that always reports valid/hosted.
+type CachedValidator struct {
+	cfg    *platformconfig.AppConfig
+	client *Client
+	key    string
+	grace  time.Duration
+
+	mu          sync.Mutex
+	last        StatusReport
+	lastSuccess time.Time // last time the authority answered
+	lastCheck   time.Time
+	haveResult  bool
+}
+
+func NewCachedValidator(cfg *platformconfig.AppConfig) *CachedValidator {
+	grace := gracePeriod(cfg)
+	if grace <= 0 {
+		grace = 7 * 24 * time.Hour
+	}
+	key, _ := configuredKey(cfg)
+	authority := platformconfig.DefaultLicenseAuthorityURL
+	if cfg != nil && cfg.LicenseAuthorityURL != "" {
+		authority = cfg.LicenseAuthorityURL
+	}
+	return &CachedValidator{
+		cfg:    cfg,
+		client: NewClient(authority),
+		key:    strings.TrimSpace(key),
+		grace:  grace,
+	}
+}
+
+// Current returns the effective license status, refreshing from the authority
+// at most once per refreshInterval. Hosted mode always returns a valid report.
+func (v *CachedValidator) Current(ctx context.Context) StatusReport {
+	now := time.Now().UTC()
+	if !IsSelfHosted(v.cfg) {
+		return hostedReport(v.cfg, now)
+	}
+
+	v.mu.Lock()
+	defer v.mu.Unlock()
+
+	if v.haveResult && now.Sub(v.lastCheck) < refreshInterval {
+		return v.effectiveLocked(now)
+	}
+	return v.refreshLocked(ctx, now)
+}
+
+// Refresh forces an authority re-check (e.g. at boot or on a schedule).
+func (v *CachedValidator) Refresh(ctx context.Context) StatusReport {
+	now := time.Now().UTC()
+	if !IsSelfHosted(v.cfg) {
+		return hostedReport(v.cfg, now)
+	}
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	return v.refreshLocked(ctx, now)
+}
+
+func (v *CachedValidator) refreshLocked(ctx context.Context, now time.Time) StatusReport {
+	mode := deploymentMode(v.cfg)
+	if v.key == "" {
+		v.last = StatusReport{Mode: mode, Valid: false, Status: StatusMissing, Reason: ErrMissingLicense.Error(), CheckedAt: now}
+		v.lastCheck = now
+		v.haveResult = true
+		return v.last
+	}
+
+	report, err := v.client.Verify(ctx, v.key)
+	v.lastCheck = now
+	if err == nil {
+		report.Mode = mode
+		report.CheckedAt = now
+		v.last = report
+		v.haveResult = true
+		if report.Valid {
+			v.lastSuccess = now
+		}
+		return report
+	}
+
+	// Authority unreachable — serve the last valid result within grace.
+	v.haveResult = true
+	return v.effectiveLocked(now)
+}
+
+// effectiveLocked applies grace when the authority is unreachable. Caller holds v.mu.
+func (v *CachedValidator) effectiveLocked(now time.Time) StatusReport {
+	mode := deploymentMode(v.cfg)
+	if v.last.Valid && !v.lastSuccess.IsZero() && now.Before(v.lastSuccess.Add(v.grace)) {
+		degraded := v.last
+		degraded.Mode = mode
+		degraded.CheckedAt = now
+		if degraded.Reason == "" {
+			degraded.Reason = "license authority unreachable; within grace window"
+		}
+		return degraded
+	}
+	return StatusReport{
+		Mode:      mode,
+		Valid:     false,
+		Status:    StatusUnreachable,
+		Reason:    "license authority unreachable and grace window elapsed",
+		CheckedAt: now,
+	}
+}
