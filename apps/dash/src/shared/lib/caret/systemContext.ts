@@ -1,7 +1,8 @@
-import type { CaretPageContext } from '@voxire/caret';
+import { buildCaretRouteContext, type CaretPageContext } from '@voxire/caret';
 
 export interface DashSystemContextInput {
   pathname: string;
+  search?: string;
   businessName?: string;
   role?: string;
   apps?: string[];
@@ -60,6 +61,14 @@ const PAGE_HINTS: Record<string, PageInfo> = {
     hint: 'full-page AI assistant',
   },
 };
+
+const ROUTE_LABELS = Object.fromEntries(
+  Object.entries(PAGE_HINTS).map(([path, info]) => [path, info.page])
+);
+
+const ROUTE_MODULES = Object.fromEntries(
+  Object.entries(PAGE_HINTS).map(([path, info]) => [path, info.module])
+);
 
 function pageInfo(pathname: string): PageInfo {
   if (PAGE_HINTS[pathname]) return PAGE_HINTS[pathname];
@@ -151,8 +160,14 @@ function buildCacheContext(
   };
 }
 
-export function buildDashSystemContext({ pathname, businessName }: DashSystemContextInput): string {
-  const ctx = buildDashPageContext({ pathname, businessName });
+export function buildDashSystemContext({
+  pathname,
+  search,
+  businessName,
+  role,
+  apps,
+}: DashSystemContextInput): string {
+  const ctx = buildDashPageContext({ pathname, search, businessName, role, apps });
   const lines = [
     'App: Dash business command center.',
     businessName ? `Business: ${businessName}.` : '',
@@ -166,6 +181,7 @@ export function buildDashSystemContext({ pathname, businessName }: DashSystemCon
 
 export function buildDashPageContext({
   pathname,
+  search,
   businessName,
   role,
   apps,
@@ -173,20 +189,24 @@ export function buildDashPageContext({
   const info = pageInfo(pathname);
   const selected = selectedFromPath(pathname);
   const cacheContext = buildCacheContext(info, pathname, selected);
-  return {
-    app: 'dash',
+  const context = buildCaretRouteContext({
+    appId: 'dash',
     appName: 'Dash business command center',
-    route: pathname,
-    module: info.module,
-    page: info.page,
+    pathname,
+    search,
+    routeLabels: ROUTE_LABELS,
+    routeModules: ROUTE_MODULES,
     businessName,
     role,
     selected,
-    filters: {},
     businessMemory: buildBusinessMemory(),
     cacheContext,
     dataFreshness: cacheContext,
     hints: [info.hint],
+  });
+
+  return {
+    ...context,
     enabledApps: apps?.slice(0, 20),
   };
 }

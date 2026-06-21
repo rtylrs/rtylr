@@ -268,6 +268,7 @@ interface DefaultLayoutProps {
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
@@ -319,21 +320,23 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     () =>
       buildDashSystemContext({
         pathname,
+        search,
         businessName: user?.businessName,
         role: user?.role,
         apps: user?.apps,
       }),
-    [pathname, user?.apps, user?.businessName, user?.role]
+    [pathname, search, user?.apps, user?.businessName, user?.role]
   );
   const caretPageContext = React.useMemo(
     () =>
       buildDashPageContext({
         pathname,
+        search,
         businessName: user?.businessName,
         role: user?.role,
         apps: user?.apps,
       }),
-    [pathname, user?.apps, user?.businessName, user?.role]
+    [pathname, search, user?.apps, user?.businessName, user?.role]
   );
 
   const handleLogout = (): void => {

@@ -16,6 +16,7 @@ const CaretContext = React.createContext<CaretContextValue | null>(null);
 
 export const CaretContextProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const { user } = useUserStore();
 
   const value = useMemo<CaretContextValue>(() => {
@@ -23,12 +24,14 @@ export const CaretContextProvider: React.FC<React.PropsWithChildren> = ({ childr
     return {
       systemContext: buildDashSystemContext({
         pathname: pathname,
+        search,
         businessName,
         role: user?.role,
         apps: user?.apps,
       }),
       pageContext: buildDashPageContext({
         pathname: pathname,
+        search,
         businessName,
         role: user?.role,
         apps: user?.apps,
@@ -37,7 +40,7 @@ export const CaretContextProvider: React.FC<React.PropsWithChildren> = ({ childr
       userId: Number(user?.id) || 0,
       businessName,
     };
-  }, [pathname, user?.apps, user?.businessName, user?.id, user?.role]);
+  }, [pathname, search, user?.apps, user?.businessName, user?.id, user?.role]);
 
   return <CaretContext.Provider value={value}>{children}</CaretContext.Provider>;
 };
