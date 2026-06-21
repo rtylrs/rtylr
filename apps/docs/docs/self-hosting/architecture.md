@@ -18,11 +18,9 @@ api / worker / upload
   |-- MySQL                 (bundled local OR bring-your-own)
   |-- Redis                 (bundled local OR bring-your-own)
   |-- floci object storage  (bundled local OR bring-your-own S3-compatible)
-  |
-  +--> https://license.voxire.com   (ONLY external dependency)
 ```
 
-The upload service is intentionally separate from the API service. Uploads route to the upload service (the self-host analog of `cdn.voxire.com`, reached via the configurable `UPLOAD_URL`); the API only stores and reads media metadata.
+The upload service is intentionally separate from the API service. It serves media and uploads, reached via the configurable `UPLOAD_URL`; the API only stores and reads media metadata.
 
 ## Self-Sustaining Stack
 
@@ -31,11 +29,9 @@ The stack is self-contained by default. A customer may bring their own MySQL, Re
 - **Compose**: local infra is gated behind the `local-infra` profile.
 - **Helm**: local infra is gated behind `localInfra.{mysql,redis,floci}.enabled`.
 
-The only thing the stack ever reaches on the public internet is the hosted license authority `https://license.voxire.com`.
-
 ## License Flow
 
-Self-hosted customers receive a license key from Voxire sales and set it as `RTYLR_LICENSE_KEY`. The backend `api` validates that key against the hosted authority `https://license.voxire.com`. That authority URL is hardcoded in the backend and is **not** customer-configurable. There is **no local license service** in the self-host stack. See [License Flow](/self-hosting/license) for details.
+Voxire provides you with a license key. Set it as `RTYLR_LICENSE_KEY` in the backend environment. The platform validates your license automatically; ensure the backend is allowed to make outbound HTTPS requests. No separate license service is required in your deployment. See [License Flow](/self-hosting/license) for details.
 
 ## Configuration
 

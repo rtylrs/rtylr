@@ -12,11 +12,11 @@ A single `RTYLR_VERSION` pins ALL images (backend and frontends) to the same tag
 
 ## Backend images (Onion runmodes)
 
-| Image          | Port | Notes                                                      |
-| -------------- | ---- | ---------------------------------------------------------- |
-| `rtylr/api`    | 9999 | Validates `RTYLR_LICENSE_KEY` against the hosted authority |
-| `rtylr/worker` | —    | Background worker; no HTTP                                  |
-| `rtylr/upload` | 8080 | Media/CDN service; self-host analog of cdn.voxire.com      |
+| Image          | Port | Notes                                                  |
+| -------------- | ---- | ------------------------------------------------------ |
+| `rtylr/api`    | 9999 | Backend API; reads `RTYLR_LICENSE_KEY`                 |
+| `rtylr/worker` | —    | Background worker; no HTTP                             |
+| `rtylr/upload` | 8080 | Serves media and uploads, via the configured `UPLOAD_URL` |
 
 ## Frontend images (static nginx on :8080)
 
@@ -26,7 +26,7 @@ Each frontend serves the compiled application on port `8080` and reads runtime c
 
 ## Not part of the self-host image set
 
-- There is **no `rtylr/license` image**. Customers do not run a license runmode. The backend `api` validates `RTYLR_LICENSE_KEY` against the hosted authority `https://license.voxire.com`. See [License Flow](/self-hosting/license).
+- There is **no `rtylr/license` image** to run. Licensing is handled by the backend automatically from `RTYLR_LICENSE_KEY`. See [License Flow](/self-hosting/license).
 - There is **no `rtylr/docs` image**. The documentation site is hosted by Voxire and not shipped for self-host.
 - The marketing `landing` site is **not** shipped for self-host.
 - The shared `packages` are build-time dependencies only, consumed by the app image build pipelines — never mounted into this runtime.

@@ -1,26 +1,21 @@
 # License Flow
 
-Self-hosted rtylr requires a license key issued by Voxire sales.
+Self-hosted rtylr requires a license key provided by Voxire.
 
 ## How it works
 
-1. You receive a license key from Voxire sales.
+1. You receive a license key from Voxire.
 2. You set it as `RTYLR_LICENSE_KEY` (in `.env` for Compose, or `license.key` / `license.existingSecret` for Helm).
-3. The backend `api` service validates the key against the hosted authority `https://license.voxire.com`.
-
-```
-api  --(validate RTYLR_LICENSE_KEY)-->  https://license.voxire.com
-```
+3. The platform validates your license automatically.
 
 ## Important
 
-- The authority URL `https://license.voxire.com` is **hardcoded in the backend** and is **not** customer-configurable. Do not look for a `LICENSE_AUTHORITY_URL` setting — it does not exist.
-- There is **no local license service** and **no `rtylr/license` image**. Customers do not run a license runmode.
-- `https://license.voxire.com` is the **only** external dependency of the entire self-host stack. Everything else (MySQL, Redis, object storage) can run locally or on your own infrastructure.
+- There is **no separate license service** and **no `rtylr/license` image** to run. Licensing is handled by the backend automatically.
+- MySQL, Redis, and object storage can run locally or on your own infrastructure.
 
 ## Network requirements
 
-The host running the `api` service must be able to reach `https://license.voxire.com` over HTTPS (port 443). If your environment uses an egress proxy or firewall, allowlist that host.
+Ensure the backend is allowed to make outbound HTTPS requests (port 443). If your environment uses an egress proxy or firewall, allow outbound HTTPS from the backend.
 
 ## Setting the key
 

@@ -4,13 +4,13 @@ These variables configure the backend services (`api`, `worker`, `upload`). Comp
 
 ## License & mode
 
-| Variable            | Default       | Notes                                                            |
-| ------------------- | ------------- | ---------------------------------------------------------------- |
-| `RTYLR_LICENSE_KEY` | —             | Sales-issued key, validated against `https://license.voxire.com` |
-| `DEPLOYMENT_MODE`   | `self_hosted` |                                                                  |
-| `APP_ENV`           | `production`  |                                                                  |
+| Variable            | Default       | Notes                          |
+| ------------------- | ------------- | ------------------------------ |
+| `RTYLR_LICENSE_KEY` | —             | Required; your Voxire-issued license key |
+| `DEPLOYMENT_MODE`   | `self_hosted` |                                |
+| `APP_ENV`           | `production`  |                                |
 
-There is no `LICENSE_AUTHORITY_URL` / `LICENSE_PUBLIC_KEY` / `LICENSE_KEY` — the authority is hardcoded. See [License Flow](/self-hosting/license).
+See [License Flow](/self-hosting/license).
 
 ## Configurable URLs
 
