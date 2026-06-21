@@ -8,9 +8,11 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
 
-  head: [['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]],
+  head: [['link', { rel: 'icon', href: '/logo.png', type: 'image/png' }]],
 
   themeConfig: {
+    logo: '/logo.png',
+
     search: {
       provider: 'local',
     },

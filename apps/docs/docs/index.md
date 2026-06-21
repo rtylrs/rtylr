@@ -5,6 +5,9 @@ hero:
   name: rtylr Docs
   text: The all-in-one business operating system
   tagline: POS, ERP, HR, CRM, Finance, Flow, Store, Book and more — one platform, one data model, no integrations to maintain.
+  image:
+    src: /logo.png
+    alt: rtylr
   actions:
     - theme: brand
       text: Get Started
