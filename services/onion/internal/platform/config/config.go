@@ -150,11 +150,12 @@ type AppConfig struct {
 	CDNAPIKey          string // bearer key for write endpoints; empty disables auth
 
 	// License runmode / self-hosting controls.
-	LicenseKey         string
-	LicenseFile        string
-	LicensePublicKey   string
-	LicenseIssuer      string
-	LicenseGracePeriod time.Duration
+	LicenseKey               string
+	LicenseFile              string
+	LicensePublicKey         string
+	LicenseSigningPrivateKey string
+	LicenseIssuer            string
+	LicenseGracePeriod       time.Duration
 
 	// Internal Auth
 	InternalToken string
@@ -309,11 +310,12 @@ func LoadAndValidate() (*AppConfig, error) {
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
 
 		// License runmode / self-hosting controls
-		LicenseKey:         os.Getenv("LICENSE_KEY"),
-		LicenseFile:        os.Getenv("LICENSE_FILE"),
-		LicensePublicKey:   os.Getenv("LICENSE_PUBLIC_KEY"),
-		LicenseIssuer:      envOrDefault("LICENSE_ISSUER", "voxire"),
-		LicenseGracePeriod: envDurationOrDefault("LICENSE_GRACE_PERIOD", 14*24*time.Hour),
+		LicenseKey:               os.Getenv("LICENSE_KEY"),
+		LicenseFile:              os.Getenv("LICENSE_FILE"),
+		LicensePublicKey:         os.Getenv("LICENSE_PUBLIC_KEY"),
+		LicenseSigningPrivateKey: os.Getenv("LICENSE_SIGNING_PRIVATE_KEY"),
+		LicenseIssuer:            envOrDefault("LICENSE_ISSUER", "voxire"),
+		LicenseGracePeriod:       envDurationOrDefault("LICENSE_GRACE_PERIOD", 14*24*time.Hour),
 
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),

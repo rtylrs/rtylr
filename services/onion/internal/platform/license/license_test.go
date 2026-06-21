@@ -70,6 +70,43 @@ func TestSignedLicenseVerifies(t *testing.T) {
 	}
 }
 
+func TestGenerateSignedLicenseFromSeedVerifies(t *testing.T) {
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatalf("generate key: %v", err)
+	}
+	seed := priv.Seed()
+
+	token, err := GenerateSignedKey(base64.RawURLEncoding.EncodeToString(seed), Entitlement{
+		LicenseID:  "lic_seed",
+		OwnerEmail: "owner@example.com",
+		Product:    "rtylr",
+		Plan:       "self_hosted",
+		Issuer:     "voxire",
+		Features:   []string{"pos"},
+		SelfHosted: true,
+	})
+	if err != nil {
+		t.Fatalf("generate signed key: %v", err)
+	}
+
+	report := VerifyKey(&platformconfig.AppConfig{
+		DeploymentMode:   ModeSelfHosted,
+		LicensePublicKey: base64.RawURLEncoding.EncodeToString(pub),
+		LicenseIssuer:    "voxire",
+	}, token)
+
+	if !report.Valid {
+		t.Fatalf("expected valid generated license, got %#v", report)
+	}
+	if report.OwnerEmail != "owner@example.com" {
+		t.Fatalf("expected owner email in report, got %q", report.OwnerEmail)
+	}
+	if got := HashKey(token); len(got) != 64 {
+		t.Fatalf("expected sha256 hash, got %q", got)
+	}
+}
+
 func TestExpiredLicenseAfterGraceIsInvalid(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {

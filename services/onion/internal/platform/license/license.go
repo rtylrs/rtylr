@@ -2,6 +2,7 @@ package license
 
 import (
 	"crypto/ed25519"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -27,15 +28,17 @@ const (
 )
 
 var (
-	ErrMissingLicense   = errors.New("license key is missing")
-	ErrMissingPublicKey = errors.New("license public key is missing")
-	ErrInvalidFormat    = errors.New("license key has an invalid format")
-	ErrInvalidSignature = errors.New("license signature is invalid")
-	ErrExpired          = errors.New("license is expired")
+	ErrMissingLicense    = errors.New("license key is missing")
+	ErrMissingPublicKey  = errors.New("license public key is missing")
+	ErrMissingPrivateKey = errors.New("license signing private key is missing")
+	ErrInvalidFormat     = errors.New("license key has an invalid format")
+	ErrInvalidSignature  = errors.New("license signature is invalid")
+	ErrExpired           = errors.New("license is expired")
 )
 
 type Entitlement struct {
 	LicenseID  string            `json:"license_id"`
+	OwnerEmail string            `json:"owner_email,omitempty"`
 	CustomerID string            `json:"customer_id,omitempty"`
 	Product    string            `json:"product"`
 	Plan       string            `json:"plan,omitempty"`
@@ -55,6 +58,7 @@ type StatusReport struct {
 	Status     string     `json:"status"`
 	Reason     string     `json:"reason,omitempty"`
 	LicenseID  string     `json:"license_id,omitempty"`
+	OwnerEmail string     `json:"owner_email,omitempty"`
 	CustomerID string     `json:"customer_id,omitempty"`
 	Product    string     `json:"product,omitempty"`
 	Plan       string     `json:"plan,omitempty"`
@@ -101,6 +105,7 @@ func VerifyKey(cfg *platformconfig.AppConfig, rawKey string) StatusReport {
 		Valid:      true,
 		Status:     StatusValid,
 		LicenseID:  entitlement.LicenseID,
+		OwnerEmail: entitlement.OwnerEmail,
 		CustomerID: entitlement.CustomerID,
 		Product:    entitlement.Product,
 		Plan:       entitlement.Plan,
@@ -119,6 +124,46 @@ func VerifyKey(cfg *platformconfig.AppConfig, rawKey string) StatusReport {
 		report.GraceUntil = &entitlement.GraceUntil
 	}
 	return report
+}
+
+func GenerateSignedKey(rawPrivateKey string, entitlement Entitlement) (string, error) {
+	priv, err := decodePrivateKey(rawPrivateKey)
+	if err != nil {
+		return "", err
+	}
+	if entitlement.IssuedAt.IsZero() {
+		entitlement.IssuedAt = time.Now().UTC()
+	}
+	if entitlement.Product == "" {
+		entitlement.Product = "rtylr"
+	}
+
+	payload, err := json.Marshal(entitlement)
+	if err != nil {
+		return "", err
+	}
+	encodedPayload := base64.RawURLEncoding.EncodeToString(payload)
+	message := tokenPrefix + "." + encodedPayload
+	signature := ed25519.Sign(priv, []byte(message))
+
+	return message + "." + base64.RawURLEncoding.EncodeToString(signature), nil
+}
+
+func PublicKeyFromPrivateKey(rawPrivateKey string) (string, error) {
+	priv, err := decodePrivateKey(rawPrivateKey)
+	if err != nil {
+		return "", err
+	}
+	pub, ok := priv.Public().(ed25519.PublicKey)
+	if !ok || len(pub) != ed25519.PublicKeySize {
+		return "", ErrInvalidFormat
+	}
+	return base64.RawURLEncoding.EncodeToString(pub), nil
+}
+
+func HashKey(rawKey string) string {
+	sum := sha256.Sum256([]byte(strings.TrimSpace(rawKey)))
+	return fmt.Sprintf("%x", sum[:])
 }
 
 func ParseAndVerify(rawKey, rawPublicKey, expectedIssuer string, now time.Time) (*Entitlement, error) {
@@ -232,6 +277,25 @@ func decodePublicKey(raw string) (ed25519.PublicKey, error) {
 		return nil, ErrMissingPublicKey
 	}
 	return ed25519.PublicKey(decoded), nil
+}
+
+func decodePrivateKey(raw string) (ed25519.PrivateKey, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, ErrMissingPrivateKey
+	}
+	decoded, err := decodeBase64(raw)
+	if err != nil {
+		return nil, fmt.Errorf("%w: private key", ErrInvalidFormat)
+	}
+	switch len(decoded) {
+	case ed25519.PrivateKeySize:
+		return ed25519.PrivateKey(decoded), nil
+	case ed25519.SeedSize:
+		return ed25519.NewKeyFromSeed(decoded), nil
+	default:
+		return nil, fmt.Errorf("%w: private key", ErrInvalidFormat)
+	}
 }
 
 func decodeBase64(raw string) ([]byte, error) {

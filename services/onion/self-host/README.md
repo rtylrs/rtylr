@@ -17,7 +17,8 @@ docker compose --env-file self-host/.env -f self-host/docker-compose.yml up --bu
 ```
 
 Before exposing a self-host install, replace `JWT_SECRET`, `CDN_API_KEY`, and
-the license values in `self-host/.env`.
+the license values in `self-host/.env`. Self-host keys are issued by the
+Voxire sales/admin team and are not generated inside a customer install.
 
 ## Ports
 
