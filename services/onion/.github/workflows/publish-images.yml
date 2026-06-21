@@ -23,9 +23,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: api, dockerfile: Dockerfile, public_repo: rtylr/api }
-          - { name: worker, dockerfile: Dockerfile.worker, public_repo: rtylr/worker }
-          - { name: upload, dockerfile: Dockerfile.upload, public_repo: rtylr/upload }
+          - { name: api, dockerfile: Dockerfile, public_repo: rtylr/api, platforms: "linux/amd64,linux/arm64" }
+          - { name: worker, dockerfile: Dockerfile.worker, public_repo: rtylr/worker, platforms: "linux/amd64,linux/arm64" }
+          # upload bundles a native C++ media-engine that can't cross-compile yet,
+          # so it stays amd64-only until the arm64 media-engine build is sorted.
+          - { name: upload, dockerfile: Dockerfile.upload, public_repo: rtylr/upload, platforms: "linux/amd64" }
     steps:
       - uses: actions/checkout@v6
         with:
@@ -61,11 +63,12 @@ jobs:
           PUBLIC_REPO: ${{ matrix.public_repo }}
           DOCKERFILE: ${{ matrix.dockerfile }}
           SCOPE: ${{ matrix.name }}
+          PLATFORMS: ${{ matrix.platforms }}
           VERSION: ${{ steps.v.outputs.version }}
         run: |
           PUB="docker.io/${PUBLIC_REPO}"
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
+            --platform "$PLATFORMS" \
             --cache-from type=gha,scope=${SCOPE} \
             --cache-to   type=gha,scope=${SCOPE},mode=max \
             -f "${DOCKERFILE}" \
