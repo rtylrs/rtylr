@@ -3,8 +3,8 @@
  *  surface churn. Update the values together when the package's
  *  `ui/tokens` constants change. */
 export const caretTokens = {
-  accent: '#8b5cf6',
-  accentSoft: 'rgba(139, 92, 246, 0.14)',
+  accent: '#64c5b9',
+  accentSoft: 'rgba(100, 197, 185, 0.14)',
   bg: '#141414',
   surface: '#1c1c1c',
   border: '#2a2a2a',

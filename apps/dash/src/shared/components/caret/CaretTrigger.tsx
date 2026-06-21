@@ -1,6 +1,5 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
-import { useCaretStore } from '@voxire/caret';
+import { CaretLogo, useCaretStore } from '@voxire/caret';
 
 /**
  * Tiny "Ask Caret" trigger you can drop anywhere on the dash. Opens the
@@ -18,15 +17,15 @@ export const CaretTrigger: React.FC<{ label?: string }> = ({ label = 'Ask Caret'
         gap: 6,
         padding: '4px 10px',
         borderRadius: 8,
-        background: 'rgba(139,92,246,0.14)',
-        color: '#8b5cf6',
-        border: '1px solid rgba(139,92,246,0.4)',
+        background: 'rgba(100,197,185,0.14)',
+        color: '#64c5b9',
+        border: '1px solid rgba(100,197,185,0.4)',
         fontSize: 12,
         fontWeight: 500,
         cursor: 'pointer',
       }}
     >
-      <Sparkles size={12} />
+      <CaretLogo variant="teal" size={13} scale={1.8} />
       {label}
     </button>
   );

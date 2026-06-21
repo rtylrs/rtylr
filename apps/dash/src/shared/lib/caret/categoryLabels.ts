@@ -11,7 +11,7 @@ export interface CategoryInfo {
 }
 
 export const CATEGORY_INFO: Record<CategoryInfo['id'], CategoryInfo> = {
-  kpi: { id: 'kpi', label: 'KPIs', icon: Building2, color: '#8b5cf6' },
+  kpi: { id: 'kpi', label: 'KPIs', icon: Building2, color: '#64c5b9' },
   crm: { id: 'crm', label: 'Customers', icon: Users, color: '#a855f7' },
   inventory: { id: 'inventory', label: 'Inventory', icon: Package, color: '#10b981' },
   team: { id: 'team', label: 'Team', icon: ListChecks, color: '#0ea5e9' },

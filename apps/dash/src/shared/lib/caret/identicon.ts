@@ -5,7 +5,7 @@ function hash(s: string): number {
   return Math.abs(h);
 }
 
-export function identicon(seed: string, size = 24, color = '#8b5cf6'): string {
+export function identicon(seed: string, size = 24, color = '#64c5b9'): string {
   const bits = hash(seed).toString(2).padStart(16, '0').slice(-16);
   const rects: string[] = [];
   for (let i = 0; i < 16; i++) {

@@ -8,7 +8,7 @@ export interface TileProps {
 }
 
 /** Small metric tile used in the Caret overview/dashboard. */
-export const Tile: React.FC<TileProps> = ({ title, value, hint, accent = '#8b5cf6' }) => (
+export const Tile: React.FC<TileProps> = ({ title, value, hint, accent = '#64c5b9' }) => (
   <div
     style={{
       background: 'var(--dash-surface)',

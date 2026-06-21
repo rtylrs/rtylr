@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { CaretLogo } from '@voxire/caret';
 
 /**
  * Hero header used at the top of dedicated Caret pages (history, settings).
@@ -13,14 +13,14 @@ export const PageHeader: React.FC<{ title: string; subtitle?: string }> = ({ tit
         width: 32,
         height: 32,
         borderRadius: 10,
-        background: 'rgba(139,92,246,0.16)',
+        background: 'rgba(100,197,185,0.16)',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
       }}
     >
-      <Sparkles size={15} style={{ color: '#a78bfa' }} />
+      <CaretLogo variant="teal" size={24} scale={1.75} />
     </span>
     <div>
       <h1 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{title}</h1>

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
-import { useCaretStore } from '@voxire/caret';
+import { CaretLogo, useCaretStore } from '@voxire/caret';
 
 /** Hyperlink-styled "Ask Caret about this" entry point. Submits the prompt
  *  to Caret immediately when the user clicks. */
@@ -26,14 +25,14 @@ export const AskCaretLink: React.FC<AskCaretLinkProps> = ({ prompt, children }) 
         background: 'transparent',
         border: 'none',
         padding: 0,
-        color: '#8b5cf6',
+        color: '#64c5b9',
         fontSize: 12.5,
         cursor: 'pointer',
         textDecoration: 'underline',
         textDecorationStyle: 'dotted',
       }}
     >
-      <Sparkles size={11} />
+      <CaretLogo variant="teal" size={12} scale={1.8} />
       {children ?? 'Ask Caret'}
     </button>
   );

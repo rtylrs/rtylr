@@ -10,7 +10,7 @@ function hashString(input: string): number {
 /** Pick an HSL color in a fixed palette based on a stable hash of `seed`. */
 export function paletteColor(seed: string): { bg: string; fg: string } {
   const palette: Array<{ bg: string; fg: string }> = [
-    { bg: 'rgba(139,92,246,0.16)', fg: '#a78bfa' },
+    { bg: 'rgba(100,197,185,0.16)', fg: '#64c5b9' },
     { bg: 'rgba(14,165,233,0.16)', fg: '#38bdf8' },
     { bg: 'rgba(16,185,129,0.16)', fg: '#34d399' },
     { bg: 'rgba(245,158,11,0.16)', fg: '#fbbf24' },
