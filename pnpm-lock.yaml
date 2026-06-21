@@ -1578,12 +1578,30 @@ importers:
 
   packages/components:
     dependencies:
+      '@tanstack/react-query':
+        specifier: ^5.99.2
+        version: 5.99.2(react@19.2.5)
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../api
+      '@voxire/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@voxire/config':
         specifier: workspace:*
         version: link:../config
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@voxire/ui':
+        specifier: workspace:*
+        version: link:../ui
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
+      lucide-react:
+        specifier: ^1.8.0
+        version: 1.8.0(react@19.2.5)
       motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -1597,6 +1615,9 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(react@19.2.5)
     devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
