@@ -481,6 +481,7 @@ interface DefaultLayoutProps {
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const [theme, setTheme] = useTheme();
   const hrUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
@@ -565,9 +566,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         appId: 'hr',
         appName: 'HR',
         pathname,
+        search,
         page: pageTitle,
       }),
-    [pathname, pageTitle]
+    [pathname, search, pageTitle]
   );
 
   useEffect(() => {

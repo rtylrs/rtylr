@@ -226,10 +226,11 @@ const DefaultLayout: React.FC = () => {
         appId: 'crm',
         appName: 'CRM',
         pathname: location.pathname,
+        search: location.search,
         page: pageTitle,
         routeLabels,
       }),
-    [location.pathname, pageTitle]
+    [location.pathname, location.search, pageTitle]
   );
 
   useEffect(() => {

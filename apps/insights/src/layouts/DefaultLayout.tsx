@@ -147,10 +147,11 @@ const DefaultLayout: React.FC = () => {
         appId: 'insights',
         appName: 'Insights',
         pathname: location.pathname,
+        search: location.search,
         page: pageTitle,
         routeLabels,
       }),
-    [location.pathname, pageTitle]
+    [location.pathname, location.search, pageTitle]
   );
   const sidebarRef = useRef<HTMLElement | null>(null);
 

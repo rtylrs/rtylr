@@ -174,6 +174,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 
 const DefaultLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
   const [theme, setThemeState] = useState<Theme>(() => {
     return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'dark';
@@ -228,10 +229,11 @@ const DefaultLayout: React.FC = () => {
         appId: 'erp',
         appName: 'ERP',
         pathname,
+        search,
         page: pageTitle,
         routeLabels,
       }),
-    [pathname, pageTitle]
+    [pathname, search, pageTitle]
   );
 
   useEffect(() => {

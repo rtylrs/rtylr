@@ -184,6 +184,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 
 const DefaultLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
   const pageTitle = getPageTitle(pathname);
   const caretPageContext = React.useMemo(
@@ -192,10 +193,11 @@ const DefaultLayout: React.FC = () => {
         appId: 'finance',
         appName: 'Finance',
         pathname,
+        search,
         page: pageTitle,
         routeLabels,
       }),
-    [pathname, pageTitle]
+    [pathname, search, pageTitle]
   );
   const [theme, setThemeState] = useState<Theme>(
     () => (localStorage.getItem('finance-theme') as Theme) || 'dark'

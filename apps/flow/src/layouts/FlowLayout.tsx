@@ -492,6 +492,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         appId: 'flow',
         appName: 'Flow',
         pathname: location.pathname,
+        search: location.search,
         page: flowPageTitle,
         businessName: activeWorkspace.name,
         selected: {
@@ -518,6 +519,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       flowPageTitle,
       inQuietHours,
       location.pathname,
+      location.search,
       myIssuesCount,
       todayFocusCount,
       workspaceProjects,
