@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
+import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { safe } from '../shared/lib/api';
 import {
@@ -409,6 +410,7 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
+            <LicenseBanner safe={safe} />
             <AnimatePresence mode="wait">
               <motion.main
                 key={location.pathname}

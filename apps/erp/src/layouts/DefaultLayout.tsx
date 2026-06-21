@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
+import { LicenseBanner } from '@voxire/components';
 import { safe } from '../shared/lib/api';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
@@ -585,6 +586,7 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
+            <LicenseBanner safe={safe} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

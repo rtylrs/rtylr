@@ -32,6 +32,7 @@ import { useShortcuts } from '../shared/components/ShortcutsProvider';
 import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
 import { unwrap } from '@voxire/api';
+import { LicenseBanner } from '@voxire/components';
 
 const ACCENT = '#3b82f6';
 
@@ -639,6 +640,7 @@ const DefaultLayout: React.FC = () => {
             </header>
 
             {/* Content */}
+            <LicenseBanner safe={safe} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

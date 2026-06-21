@@ -6,6 +6,7 @@ import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
+import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -887,6 +888,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
+        <LicenseBanner safe={safe} />
         <AnimatePresence mode="wait">
           <motion.main
             key={pathname}

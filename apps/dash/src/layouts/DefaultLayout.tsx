@@ -28,6 +28,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
+import { LicenseBanner } from '@voxire/components';
 import { useUserStore } from '../shared/stores/userStore';
 import { useBusinessStore } from '../shared/stores/businessStore';
 import { useConfigStore } from '../shared/stores/configStore';
@@ -510,6 +511,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         {/* Main content + Caret AI inline column */}
         <div className="flex flex-1 overflow-hidden">
           <div className="flex flex-col flex-1 overflow-hidden">
+            <LicenseBanner safe={safe} />
             {/* Topbar */}
             <header
               className="h-11 flex items-center justify-between px-6 shrink-0"

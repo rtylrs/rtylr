@@ -61,6 +61,8 @@ import { useLifePreferences } from '../shared/lib/lifePreferences';
 import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
+import { LicenseBanner } from '@voxire/components';
+import { safe } from '../shared/lib/api';
 import { useRealtime } from '../shared/lib/realtime';
 import { useQueryClient } from '@tanstack/react-query';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
@@ -1234,6 +1236,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 rhythm.
               </div>
             )}
+            <LicenseBanner safe={safe} />
             <AnimatePresence mode="wait">
               <motion.main
                 key={location.pathname}

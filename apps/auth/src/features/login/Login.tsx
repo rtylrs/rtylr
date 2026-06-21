@@ -12,7 +12,7 @@ import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
-import { Button, HelmetContainer } from '@voxire/components';
+import { Button, HelmetContainer, LicenseBanner } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
 import { getEmailError } from '../../shared/lib/validation';
@@ -97,6 +97,7 @@ const Login: React.FC = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title="Sign in · rtylr" />
+      <LicenseBanner safe={safe} />
       <AuthShell
         title={title}
         subtitle={subtitle}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
+import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { safe } from '../shared/lib/api';
@@ -554,6 +555,7 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
+            <LicenseBanner safe={safe} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main
