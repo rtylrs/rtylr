@@ -69,6 +69,7 @@ const PinLogin: React.FC = () => {
   }, []);
 
   const resetToRoster = (): void => {
+    if (busy) return;
     setStep('roster');
     setMember(null);
     setPin('');
@@ -164,21 +165,23 @@ const PinLogin: React.FC = () => {
 
   const pushDigit = useCallback(
     (d: string) => {
+      if (busy) return;
       clearError();
       setActive((p) => (p.length < PIN_LENGTH ? p + d : p));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clearError, step, pin]
+    [busy, clearError, step, pin]
   );
 
   const deleteDigit = useCallback(() => {
+    if (busy) return;
     clearError();
     setActive((p) => p.slice(0, -1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearError, step, pin]);
+  }, [busy, clearError, step, pin]);
 
   useEffect(() => {
-    if (step === 'roster') return;
+    if (step === 'roster' || busy) return;
     const onKey = (e: KeyboardEvent): void => {
       if (e.key >= '0' && e.key <= '9') pushDigit(e.key);
       if (e.key === 'Backspace') deleteDigit();
@@ -187,9 +190,10 @@ const PinLogin: React.FC = () => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, pushDigit, deleteDigit]);
+  }, [step, busy, pushDigit, deleteDigit]);
 
   const handleKey = (key: string): void => {
+    if (busy) return;
     if (key === '⌫') deleteDigit();
     else if (key !== '') pushDigit(key);
   };
@@ -266,66 +270,82 @@ const PinLogin: React.FC = () => {
       ? 'Re-enter to confirm'
       : `Pick a ${PIN_LENGTH}-digit PIN for this location`
     : 'Enter your PIN';
+  const busyTitle = settingPin ? 'Setting up PIN' : 'Verifying PIN';
+  const busySubtitle = settingPin ? 'Saving this PIN and signing you in' : 'Checking your PIN';
+  const displayTitle = busy ? busyTitle : title;
+  const displaySubtitle = busy ? busySubtitle : subtitle;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-pos-bg">
       <div className="w-full max-w-xs bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
         <button
           onClick={resetToRoster}
-          className="self-start flex items-center gap-1 text-xs text-pos-muted hover:text-pos-text transition-colors"
+          disabled={busy}
+          className="self-start flex items-center gap-1 text-xs text-pos-muted hover:text-pos-text transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="w-3.5 h-3.5" /> Back
         </button>
 
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-lg font-bold text-pos-text">{title}</h1>
-          <p className="text-xs text-pos-muted">{subtitle}</p>
+          <h1 className="text-lg font-bold text-pos-text">{displayTitle}</h1>
+          <p className="text-xs text-pos-muted">{displaySubtitle}</p>
         </div>
 
-        <div className={`flex gap-2 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
-          {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-            <span
-              key={i}
-              className={`w-11 h-12 rounded-xl border flex items-center justify-center text-lg font-bold tabular-nums transition-colors ${
-                error
-                  ? 'border-destructive bg-destructive/15 text-destructive'
-                  : i < activeValue.length
-                    ? 'border-pos-text/70 bg-white/8 text-pos-text'
-                    : 'border-pos-border bg-transparent text-pos-muted'
-              }`}
-            >
-              {i < activeValue.length ? (isSetup && revealPin ? activeValue[i] : '•') : ''}
-            </span>
-          ))}
-        </div>
-
-        {error && <p className="text-xs text-destructive text-center">{error}</p>}
-
-        <div className="flex flex-col gap-2 w-full">
-          {KEYS.map((row, ri) => (
-            <div key={ri} className="flex gap-2 justify-center">
-              {row.map((key, ki) => (
-                <button
-                  key={ki}
-                  className={`w-16 h-14 rounded-xl text-base font-semibold transition-colors ${
-                    key === ''
-                      ? 'invisible'
-                      : key === '⌫'
-                        ? 'bg-transparent text-pos-muted hover:bg-white/8'
-                        : 'bg-white/8 text-pos-text hover:bg-white/14 active:scale-95'
+        {busy ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex h-64 w-full flex-col items-center justify-center gap-4"
+          >
+            <Loader2 className="h-9 w-9 animate-spin text-pos-muted" />
+            <span className="sr-only">{busyTitle}</span>
+          </div>
+        ) : (
+          <>
+            <div className={`flex gap-2 ${shake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+              {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-11 h-12 rounded-xl border flex items-center justify-center text-lg font-bold tabular-nums transition-colors ${
+                    error
+                      ? 'border-destructive bg-destructive/15 text-destructive'
+                      : i < activeValue.length
+                        ? 'border-pos-text/70 bg-white/8 text-pos-text'
+                        : 'border-pos-border bg-transparent text-pos-muted'
                   }`}
-                  onClick={() => handleKey(key)}
-                  disabled={busy || key === ''}
-                  aria-label={key === '⌫' ? 'Delete' : key}
                 >
-                  {key}
-                </button>
+                  {i < activeValue.length ? (isSetup && revealPin ? activeValue[i] : '•') : ''}
+                </span>
               ))}
             </div>
-          ))}
-        </div>
 
-        {busy && <p className="text-xs text-pos-muted">Please wait…</p>}
+            {error && <p className="text-xs text-destructive text-center">{error}</p>}
+
+            <div className="flex flex-col gap-2 w-full">
+              {KEYS.map((row, ri) => (
+                <div key={ri} className="flex gap-2 justify-center">
+                  {row.map((key, ki) => (
+                    <button
+                      key={ki}
+                      className={`w-16 h-14 rounded-xl text-base font-semibold transition-colors ${
+                        key === ''
+                          ? 'invisible'
+                          : key === '⌫'
+                            ? 'bg-transparent text-pos-muted hover:bg-white/8'
+                            : 'bg-white/8 text-pos-text hover:bg-white/14 active:scale-95'
+                      }`}
+                      onClick={() => handleKey(key)}
+                      disabled={key === ''}
+                      aria-label={key === '⌫' ? 'Delete' : key}
+                    >
+                      {key}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
