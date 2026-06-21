@@ -1,10 +1,11 @@
 import React from 'react';
-import { Sparkles, Settings, X, Plus } from 'lucide-react';
-import { caretTokens } from '../../ui/tokens';
+import { Settings, X, Plus } from 'lucide-react';
+import { caretTokens, caretRadius } from '../../ui/tokens';
 import IconButton from '../../ui/IconButton';
 import Tooltip from '../../ui/Tooltip';
 import { useCaretStore } from '../../stores/caretStore';
 import { useCaretUIStore } from '../../stores/uiStore';
+import CaretLogo from '../CaretLogo';
 import HistoryHover from './HistoryHover';
 
 export interface HeaderBarProps {
@@ -38,7 +39,20 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
           padding: '0 4px',
         }}
       >
-        <Sparkles size={14} style={{ color: caretTokens.accent }} />
+        <span
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: caretRadius.md,
+            background: caretTokens.accentSoft,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+          }}
+        >
+          <CaretLogo variant="teal" size={18} scale={1.8} />
+        </span>
         <span style={{ color: caretTokens.text, fontSize: 13, fontWeight: 600 }}>Caret</span>
       </div>
 
@@ -46,7 +60,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
 
       <Tooltip label="Chat">
         <IconButton size="md" label="Chat" active={view === 'chat'} onClick={() => setView('chat')}>
-          <Sparkles size={13} />
+          <CaretLogo variant="teal" size={15} scale={1.85} />
         </IconButton>
       </Tooltip>
 

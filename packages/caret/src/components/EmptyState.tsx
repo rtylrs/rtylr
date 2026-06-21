@@ -1,7 +1,7 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
 import type { CaretContextSignal, CaretStarter } from '../lib/suggestions';
 import { caretTokens, caretRadius } from '../ui/tokens';
+import CaretLogo from './CaretLogo';
 
 export interface EmptyStateProps {
   title?: string;
@@ -74,7 +74,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             marginBottom: 12,
           }}
         >
-          <Sparkles size={18} style={{ color: caretTokens.accent }} />
+          <CaretLogo variant="teal" size={26} scale={1.75} />
         </div>
         <p
           style={{

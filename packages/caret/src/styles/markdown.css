@@ -97,7 +97,7 @@
   border-bottom: 0;
 }
 .caret-md a.caret-link {
-  color: var(--caret-accent, #8b5cf6);
+  color: var(--caret-accent, #64c5b9);
   text-decoration: none;
 }
 .caret-md a.caret-link:hover {

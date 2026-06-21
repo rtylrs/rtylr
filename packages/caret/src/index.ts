@@ -2,6 +2,7 @@
 export { default as CaretPanel } from './components/CaretPanel';
 export type { CaretPanelProps } from './components/CaretPanel';
 export { default as CaretButton } from './components/CaretButton';
+export { default as CaretLogo } from './components/CaretLogo';
 export { default as CaretMessage } from './components/CaretMessage';
 
 // Composition pieces (advanced consumers can build their own layouts)

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
 import { useCaretStore } from '../stores/caretStore';
+import CaretLogo from './CaretLogo';
+import { caretTokens } from '../ui/tokens';
 
 interface CaretButtonProps {
   className?: string;
@@ -23,24 +24,23 @@ const CaretButton = ({ className, 'data-tour': dataTour }: CaretButtonProps): Re
         height: '28px',
         padding: '0 12px',
         borderRadius: '8px',
-        background: isOpen ? 'rgba(139,92,246,0.18)' : 'rgba(139,92,246,0.1)',
-        border: `1px solid ${isOpen ? 'rgba(139,92,246,0.4)' : 'rgba(139,92,246,0.2)'}`,
-        color: '#8b5cf6',
+        background: caretTokens.accent,
+        border: `1px solid ${caretTokens.accentBorder}`,
+        color: '#ffffff',
         cursor: 'pointer',
         fontSize: '11px',
         fontWeight: 600,
-        transition: 'background 0.15s, border-color 0.15s',
+        boxShadow: isOpen ? `0 0 0 3px ${caretTokens.accentSoft}` : 'none',
+        transition: 'filter 0.15s, box-shadow 0.15s',
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(139,92,246,0.18)';
+        (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = isOpen
-          ? 'rgba(139,92,246,0.18)'
-          : 'rgba(139,92,246,0.1)';
+        (e.currentTarget as HTMLButtonElement).style.filter = 'none';
       }}
     >
-      <Sparkles size={13} aria-hidden="true" />
+      <CaretLogo variant="white" size={15} scale={1.85} />
       Caret AI
     </button>
   );

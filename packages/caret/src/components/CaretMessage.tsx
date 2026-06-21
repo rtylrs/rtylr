@@ -44,7 +44,7 @@ const CaretMessage = ({ message, isStreaming = false }: CaretMessageProps): Reac
           maxWidth: '80%',
           padding: '10px 14px',
           borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-          background: isUser ? 'var(--caret-accent, #8b5cf6)' : 'var(--caret-card, #1e1e1e)',
+          background: isUser ? 'var(--caret-accent, #64c5b9)' : 'var(--caret-card, #1e1e1e)',
           color: '#ffffff',
           border: isUser ? 'none' : '1px solid var(--caret-border, #2a2a2a)',
           fontSize: '14px',

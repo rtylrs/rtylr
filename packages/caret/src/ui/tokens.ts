@@ -4,9 +4,9 @@
  */
 
 export const caretTokens = {
-  accent: '#8b5cf6',
-  accentSoft: 'rgba(139, 92, 246, 0.14)',
-  accentBorder: 'rgba(139, 92, 246, 0.4)',
+  accent: '#64c5b9',
+  accentSoft: 'rgba(100, 197, 185, 0.14)',
+  accentBorder: 'rgba(100, 197, 185, 0.4)',
   bg: '#141414',
   surface: '#1c1c1c',
   surfaceHigh: '#222',
@@ -19,7 +19,7 @@ export const caretTokens = {
   danger: '#ef4444',
   warn: '#f59e0b',
   success: '#10b981',
-  thinking: '#6366f1',
+  thinking: '#64c5b9',
 };
 
 export const caretRadius = {
