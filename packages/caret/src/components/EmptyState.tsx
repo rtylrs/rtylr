@@ -34,7 +34,7 @@ function compactStarters(
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   title = 'Ask Caret',
-  subtitle = 'It already knows this screen.',
+  subtitle,
   primaryAction,
   suggestions = [],
   onSuggestion,
@@ -81,24 +81,26 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             color: caretTokens.text,
             fontSize: 15.5,
             fontWeight: 700,
-            margin: '0 0 4px',
+            margin: subtitle || visibleSuggestions.length > 0 ? '0 0 10px' : 0,
             textAlign: 'center',
           }}
         >
           {title}
         </p>
-        <p
-          style={{
-            color: caretTokens.textMuted,
-            fontSize: 12.5,
-            lineHeight: 1.45,
-            textAlign: 'center',
-            margin: visibleSuggestions.length > 0 ? '0 0 14px' : 0,
-            maxWidth: 250,
-          }}
-        >
-          {subtitle}
-        </p>
+        {subtitle ? (
+          <p
+            style={{
+              color: caretTokens.textMuted,
+              fontSize: 12.5,
+              lineHeight: 1.45,
+              textAlign: 'center',
+              margin: visibleSuggestions.length > 0 ? '0 0 14px' : 0,
+              maxWidth: 250,
+            }}
+          >
+            {subtitle}
+          </p>
+        ) : null}
 
         {visibleSuggestions.length > 0 && (
           <div

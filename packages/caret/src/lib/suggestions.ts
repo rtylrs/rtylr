@@ -16,7 +16,7 @@ export interface CaretContextSignal {
 
 export interface CaretEmptyStateModel {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   briefItems: string[];
   contextSignals: CaretContextSignal[];
   primaryAction: CaretStarter;
@@ -672,9 +672,6 @@ export function buildCaretEmptyState({
 
   return {
     title: 'Ask Caret',
-    subtitle: selectedLabel
-      ? `It already knows this ${selectedLabel}.`
-      : 'It already knows this screen.',
     briefItems: buildReadyBrief({
       appKey,
       contextKey,
