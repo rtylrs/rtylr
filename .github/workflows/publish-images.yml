@@ -99,6 +99,9 @@ jobs:
           APP: ${{ matrix.app }}
         run: aws s3 sync "s3://voxire-ci-artifacts/${{ github.sha }}/dist/${APP}/" "dist/${APP}/" --no-progress
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -115,6 +118,7 @@ jobs:
         run: |
           PUB="docker.io/rtylr/${APP}"
           docker buildx build \
+            --platform linux/amd64,linux/arm64 \
             -f docker/frontend.Dockerfile \
             --build-arg APP="$APP" \
             -t "$PUB:$VERSION" \
