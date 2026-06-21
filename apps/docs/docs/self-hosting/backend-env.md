@@ -6,11 +6,9 @@ These variables configure the backend services (`api`, `worker`, `upload`). Comp
 
 | Variable            | Default       | Notes                          |
 | ------------------- | ------------- | ------------------------------ |
-| `RTYLR_LICENSE_KEY` | —             | Required; your Voxire-issued license key |
+| `RTYLR_LICENSE_KEY` | —             | Your rtylr license key (provided by Voxire) |
 | `DEPLOYMENT_MODE`   | `self_hosted` |                                |
 | `APP_ENV`           | `production`  |                                |
-
-See [License Flow](/self-hosting/license).
 
 ## Configurable URLs
 

@@ -7,7 +7,7 @@ The Helm chart lives at `helm/rtylr/`. It deploys the backend (`api`, `worker`, 
 - A Kubernetes cluster and `kubectl` context
 - Helm 3.8+ (or Helm 4)
 - An ingress controller (e.g. ingress-nginx) and DNS per [DNS Setup](/self-hosting/dns)
-- A license key from Voxire sales
+- A license key from Voxire
 
 ## Minimal install (bring your own datastores)
 
@@ -46,7 +46,7 @@ The bundled datastores are single-replica and intended for evaluation. Use a man
 | Value                                                 | Purpose                                          |
 | ----------------------------------------------------- | ------------------------------------------------ |
 | `image.registry` / `image.namespace` / `image.tag`   | Image source + global version                    |
-| `license.key` / `license.existingSecret`              | License key (see [License Flow](/self-hosting/license)) |
+| `license.key` / `license.existingSecret`              | Your rtylr license key (provided by Voxire) |
 | `deploymentMode`                                      | `self_hosted`                                    |
 | `urls.*`                                              | Configurable app URLs                            |
 | `secrets.jwtSecret` / `secrets.existingSecret`        | JWT secret (required)                            |

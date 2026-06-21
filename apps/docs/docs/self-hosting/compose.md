@@ -5,7 +5,7 @@ Docker Compose is a supported install path (the Helm chart is the primary one). 
 ## Prerequisites
 
 - Docker Engine / Docker Desktop with Compose v2
-- A license key from Voxire sales
+- A license key from Voxire
 
 ## Setup
 

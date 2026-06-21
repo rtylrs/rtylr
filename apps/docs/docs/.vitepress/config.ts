@@ -68,7 +68,6 @@ export default defineConfig({
         items: [
           { text: 'Architecture', link: '/self-hosting/architecture' },
           { text: 'Image Contract', link: '/self-hosting/images' },
-          { text: 'License Flow', link: '/self-hosting/license' },
           { text: 'Helm Install', link: '/self-hosting/helm' },
           { text: 'Docker Compose', link: '/self-hosting/compose' },
           { text: 'DNS Setup', link: '/self-hosting/dns' },

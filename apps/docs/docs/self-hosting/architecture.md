@@ -29,9 +29,9 @@ The stack is self-contained by default. A customer may bring their own MySQL, Re
 - **Compose**: local infra is gated behind the `local-infra` profile.
 - **Helm**: local infra is gated behind `localInfra.{mysql,redis,floci}.enabled`.
 
-## License Flow
+## License
 
-Voxire provides you with a license key. Set it as `RTYLR_LICENSE_KEY` in the backend environment. The platform validates your license automatically; ensure the backend is allowed to make outbound HTTPS requests. No separate license service is required in your deployment. See [License Flow](/self-hosting/license) for details.
+Set `RTYLR_LICENSE_KEY` in the backend environment to the license key Voxire provided. See the [Backend Environment](/self-hosting/backend-env) reference.
 
 ## Configuration
 
@@ -39,7 +39,6 @@ Every app URL is configurable (`AUTH_URL`, `DASH_URL`, `POS_URL`, `ERP_URL`, `HR
 
 ## Further Reading
 
-- [License Flow](/self-hosting/license) — license validation flow
 - [DNS Setup](/self-hosting/dns) — DNS records to create
 - [Helm Install](/self-hosting/helm) — Helm install
 - [Docker Compose](/self-hosting/compose) — Compose reference

@@ -26,7 +26,6 @@ Each frontend serves the compiled application on port `8080` and reads runtime c
 
 ## Not part of the self-host image set
 
-- There is **no `rtylr/license` image** to run. Licensing is handled by the backend automatically from `RTYLR_LICENSE_KEY`. See [License Flow](/self-hosting/license).
 - There is **no `rtylr/docs` image**. The documentation site is hosted by Voxire and not shipped for self-host.
 - The marketing `landing` site is **not** shipped for self-host.
 - The shared `packages` are build-time dependencies only, consumed by the app image build pipelines — never mounted into this runtime.
