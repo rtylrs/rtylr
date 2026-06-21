@@ -44,6 +44,7 @@ const detailPreStyle: React.CSSProperties = {
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
   color: caretTokens.textMuted,
+  fontFamily: 'SFMono-Regular, Menlo, Consolas, monospace',
 };
 
 const summaryStyle: React.CSSProperties = {
@@ -99,12 +100,13 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
   const label = statusText(call.status, target);
   const isPending = call.status === 'pending';
   const isRunning = call.status === 'running' || call.status === 'approved';
+  const quiet = !isPending && call.status !== 'error';
   const ActivityIcon = call.status === 'error' ? AlertCircle : Search;
 
   return (
     <div
       style={{
-        margin: isPending ? '8px 0 10px' : '8px 0',
+        margin: isPending ? '8px 0 10px' : '4px 0',
         color: caretTokens.textDim,
       }}
     >
@@ -115,23 +117,23 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 9,
+          gap: quiet ? 7 : 9,
           maxWidth: '100%',
-          padding: '2px 0',
+          padding: quiet ? '1px 0' : '2px 0',
           background: 'transparent',
           border: 'none',
           color: isPending ? caretTokens.textMuted : caretTokens.textDim,
-          fontSize: 13,
+          fontSize: quiet ? 12 : 13,
           lineHeight: 1.4,
           cursor: 'pointer',
-          opacity: isPending ? 0.95 : 0.76,
+          opacity: isPending ? 0.95 : quiet ? 0.54 : 0.72,
         }}
       >
-        {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+        {open ? <ChevronDown size={quiet ? 12 : 13} /> : <ChevronRight size={quiet ? 12 : 13} />}
         {isRunning ? (
-          <Spinner size={12} />
+          <Spinner size={quiet ? 10 : 12} />
         ) : (
-          <ActivityIcon size={14} style={{ flex: '0 0 auto' }} />
+          <ActivityIcon size={quiet ? 12 : 14} style={{ flex: '0 0 auto' }} />
         )}
         <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
       </button>
@@ -139,22 +141,23 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
       {open && (
         <div
           style={{
-            marginTop: 6,
-            marginLeft: 21,
-            padding: '4px 0 2px 12px',
-            borderLeft: `1px solid ${caretTokens.border}`,
-            fontFamily: 'SFMono-Regular, Menlo, Consolas, monospace',
+            marginTop: quiet ? 4 : 6,
+            marginLeft: quiet ? 18 : 21,
+            padding: quiet ? '3px 0 1px 10px' : '4px 0 2px 12px',
+            borderLeft: `1px solid ${quiet ? 'rgba(255,255,255,0.08)' : caretTokens.border}`,
+            fontFamily: 'inherit',
             fontSize: 11,
             color: caretTokens.textMuted,
+            opacity: quiet ? 0.88 : 1,
           }}
         >
           <div style={{ marginBottom: 8 }}>
-            <div style={detailLabelStyle}>source</div>
+            <div style={detailLabelStyle}>technical name</div>
             <pre style={detailPreStyle}>{call.name}</pre>
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <div style={detailLabelStyle}>details</div>
+            <div style={detailLabelStyle}>request details</div>
             <pre style={detailPreStyle}>{formatValue(call.input ?? {})}</pre>
           </div>
 
@@ -217,7 +220,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                     cursor: 'pointer',
                   }}
                 >
-                  <Check size={12} /> Confirm
+                  <Check size={12} /> Allow
                 </button>
               )}
               {onDeny && (
