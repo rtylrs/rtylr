@@ -86,7 +86,6 @@ jobs:
       flow: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.flow }}
       insights: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.insights }}
       menu: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.menu }}
-      docs: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.docs }}
       recruit: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.recruit }}
     steps:
       - name: Checkout
@@ -123,9 +122,6 @@ jobs:
               - 'packages/**'
             menu:
               - 'apps/menu/**'
-              - 'packages/**'
-            docs:
-              - 'apps/docs/**'
               - 'packages/**'
             recruit:
               - 'apps/recruit/**'
@@ -244,18 +240,6 @@ jobs:
       runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
-  deploy-docs:
-    needs: [check, changes]
-    if: needs.changes.outputs.docs == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
-    with:
-      app_filter: '@rtylr/docs'
-      dist_dir: dist/docs
-      project_name: rtylr-docs
-      artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
-    secrets: inherit
-
   deploy-recruit:
     needs: [check, changes]
     if: needs.changes.outputs.recruit == 'true'
@@ -283,7 +267,6 @@ jobs:
       - deploy-flow
       - deploy-insights
       - deploy-menu
-      - deploy-docs
       - deploy-recruit
     # Gate on the changes job's outputs (a normal job → reliable results).
     # Skipped reusable-workflow deploy jobs can falsely report success to
@@ -301,7 +284,6 @@ jobs:
         || needs.changes.outputs.flow == 'true'
         || needs.changes.outputs.insights == 'true'
         || needs.changes.outputs.menu == 'true'
-        || needs.changes.outputs.docs == 'true'
         || needs.changes.outputs.recruit == 'true' ) }}
     uses: voxire/pipelines/.github/workflows/notify-slack.yml@main
     with:
