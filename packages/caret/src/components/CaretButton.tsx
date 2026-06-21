@@ -24,23 +24,29 @@ const CaretButton = ({ className, 'data-tour': dataTour }: CaretButtonProps): Re
         height: '28px',
         padding: '0 12px',
         borderRadius: '8px',
-        background: caretTokens.accent,
-        border: `1px solid ${caretTokens.accentBorder}`,
-        color: '#ffffff',
+        background: isOpen ? caretTokens.accentSoft : 'rgba(100, 197, 185, 0.1)',
+        border: `1px solid ${isOpen ? caretTokens.accentBorder : 'rgba(100, 197, 185, 0.22)'}`,
+        color: caretTokens.accent,
         cursor: 'pointer',
         fontSize: '11px',
         fontWeight: 600,
-        boxShadow: isOpen ? `0 0 0 3px ${caretTokens.accentSoft}` : 'none',
-        transition: 'filter 0.15s, box-shadow 0.15s',
+        boxShadow: isOpen ? `0 0 0 2px rgba(100, 197, 185, 0.1)` : 'none',
+        transition: 'background 0.15s, border-color 0.15s, box-shadow 0.15s',
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
+        (e.currentTarget as HTMLButtonElement).style.background = caretTokens.accentSoft;
+        (e.currentTarget as HTMLButtonElement).style.borderColor = caretTokens.accentBorder;
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.filter = 'none';
+        (e.currentTarget as HTMLButtonElement).style.background = isOpen
+          ? caretTokens.accentSoft
+          : 'rgba(100, 197, 185, 0.1)';
+        (e.currentTarget as HTMLButtonElement).style.borderColor = isOpen
+          ? caretTokens.accentBorder
+          : 'rgba(100, 197, 185, 0.22)';
       }}
     >
-      <CaretLogo variant="white" size={15} scale={1.85} />
+      <CaretLogo variant="teal" size={15} />
       Caret AI
     </button>
   );

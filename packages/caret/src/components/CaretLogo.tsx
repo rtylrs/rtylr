@@ -13,7 +13,7 @@ export interface CaretLogoProps {
 export const CaretLogo: React.FC<CaretLogoProps> = ({
   variant = 'teal',
   size = 18,
-  scale = 1.65,
+  scale = 1,
   label,
   style,
 }) => {
@@ -45,7 +45,7 @@ export const CaretLogo: React.FC<CaretLogoProps> = ({
           display: 'block',
           objectFit: 'contain',
           pointerEvents: 'none',
-          transform: `scale(${scale})`,
+          transform: scale === 1 ? undefined : `scale(${scale})`,
         }}
       />
     </span>

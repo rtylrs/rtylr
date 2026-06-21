@@ -41,8 +41,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
       >
         <span
           style={{
-            width: 22,
-            height: 22,
+            width: 24,
+            height: 24,
             borderRadius: caretRadius.md,
             background: caretTokens.accentSoft,
             display: 'inline-flex',
@@ -51,7 +51,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
             overflow: 'hidden',
           }}
         >
-          <CaretLogo variant="teal" size={18} scale={1.8} />
+          <CaretLogo variant="teal" size={20} />
         </span>
         <span style={{ color: caretTokens.text, fontSize: 13, fontWeight: 600 }}>Caret</span>
       </div>
@@ -60,7 +60,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
 
       <Tooltip label="Chat">
         <IconButton size="md" label="Chat" active={view === 'chat'} onClick={() => setView('chat')}>
-          <CaretLogo variant="teal" size={15} scale={1.85} />
+          <CaretLogo variant="teal" size={16} />
         </IconButton>
       </Tooltip>
 

@@ -74,7 +74,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             marginBottom: 12,
           }}
         >
-          <CaretLogo variant="teal" size={26} scale={1.75} />
+          <CaretLogo variant="teal" size={30} />
         </div>
         <p
           style={{
