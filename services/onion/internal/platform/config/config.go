@@ -136,12 +136,17 @@ type AppConfig struct {
 	GoogleSheetsCredentials string
 
 	// AWS S3 & Floci Storage
-	S3BucketName  string
-	S3Region      string
-	FlociEnabled  bool
-	FlociEndpoint string
-	FlociRegion   string
-	FlociBucket   string
+	S3BucketName string
+	S3Region     string
+	// S3Endpoint is a custom S3-compatible endpoint (MinIO, LocalStack, floci,
+	// a customer's own object store). Empty = real AWS S3. S3ForcePathStyle
+	// turns on path-style addressing, which most non-AWS S3 services require.
+	S3Endpoint       string
+	S3ForcePathStyle bool
+	FlociEnabled     bool
+	FlociEndpoint    string
+	FlociRegion      string
+	FlociBucket      string
 
 	// CDN runmode (cmd/upload) — media/CDN service settings.
 	CDNBaseURL         string // public base for generated file URLs
@@ -241,7 +246,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		DeploymentMode:      envOrDefault("DEPLOYMENT_MODE", "hosted"),
 		Port:                os.Getenv("PORT"),
 		Hostname:            os.Getenv("HOSTNAME"),
-		AuthAppURL:          os.Getenv("AUTH_APP_URL"),
+		AuthAppURL:          envFirst("AUTH_URL", "AUTH_APP_URL"),
 		GoogleOAuthClientID: os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
 
 		// WorkOS
@@ -301,21 +306,26 @@ func LoadAndValidate() (*AppConfig, error) {
 		GoogleSheetsCredentials: os.Getenv("GOOGLE_SHEETS_CREDENTIALS"),
 
 		// AWS S3 & Floci Storage
-		S3BucketName:  os.Getenv("S3_BUCKET_NAME"),
-		S3Region:      os.Getenv("S3_REGION"),
-		FlociEnabled:  strings.ToLower(strings.TrimSpace(os.Getenv("FLOCI_ENABLED"))) == "true",
-		FlociEndpoint: os.Getenv("FLOCI_ENDPOINT"),
-		FlociRegion:   os.Getenv("FLOCI_REGION"),
-		FlociBucket:   os.Getenv("FLOCI_BUCKET"),
+		S3BucketName:     os.Getenv("S3_BUCKET_NAME"),
+		S3Region:         os.Getenv("S3_REGION"),
+		S3Endpoint:       os.Getenv("S3_ENDPOINT"),
+		S3ForcePathStyle: strings.EqualFold(strings.TrimSpace(os.Getenv("S3_FORCE_PATH_STYLE")), "true"),
+		FlociEnabled:     strings.ToLower(strings.TrimSpace(os.Getenv("FLOCI_ENABLED"))) == "true",
+		FlociEndpoint:    os.Getenv("FLOCI_ENDPOINT"),
+		FlociRegion:      os.Getenv("FLOCI_REGION"),
+		FlociBucket:      os.Getenv("FLOCI_BUCKET"),
 
-		// CDN runmode (cmd/upload)
-		CDNBaseURL:         envOrDefault("CDN_BASE_URL", "https://cdn.voxire.com"),
+		// CDN runmode (cmd/upload). In self-host the public media base is the
+		// upload service (UPLOAD_URL); hosted falls back to CDN_BASE_URL / the
+		// cdn.voxire.com default (applied below).
+		CDNBaseURL:         envFirst("UPLOAD_URL", "CDN_BASE_URL"),
 		CDNMaxUploadBytes:  int64(envIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
 
-		// License runmode / self-hosting controls
-		LicenseKey:               os.Getenv("LICENSE_KEY"),
+		// License runmode / self-hosting controls. Self-host customers set the
+		// documented RTYLR_LICENSE_KEY; LICENSE_KEY stays as an internal alias.
+		LicenseKey:               envFirst("RTYLR_LICENSE_KEY", "LICENSE_KEY"),
 		LicenseFile:              os.Getenv("LICENSE_FILE"),
 		LicensePublicKey:         os.Getenv("LICENSE_PUBLIC_KEY"),
 		LicenseSigningPrivateKey: os.Getenv("LICENSE_SIGNING_PRIVATE_KEY"),
@@ -337,6 +347,10 @@ func LoadAndValidate() (*AppConfig, error) {
 
 	if cfg.AuthAppURL == "" {
 		cfg.AuthAppURL = AuthAppURL
+	}
+
+	if cfg.CDNBaseURL == "" {
+		cfg.CDNBaseURL = "https://cdn.voxire.com"
 	}
 
 	var missing []string
@@ -366,6 +380,18 @@ func envOrDefault(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// envFirst returns the value of the first set/non-empty env var in keys, or "".
+// Used to accept a customer-facing name and an internal alias (e.g. the
+// documented RTYLR_LICENSE_KEY plus the legacy LICENSE_KEY).
+func envFirst(keys ...string) string {
+	for _, k := range keys {
+		if v := strings.TrimSpace(os.Getenv(k)); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // envIntOrDefault parses an int env var, returning fallback when unset or

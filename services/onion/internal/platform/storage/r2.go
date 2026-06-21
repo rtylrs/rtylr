@@ -79,7 +79,7 @@ func Default() (*Client, error) {
 			// Custom endpoint for Floci (local dev). Not set for real S3.
 			s3Opts = append(s3Opts, func(o *s3.Options) {
 				o.BaseEndpoint = aws.String(settings.endpoint)
-				o.UsePathStyle = true
+				o.UsePathStyle = settings.forcePathStyle
 			})
 		}
 
@@ -89,10 +89,12 @@ func Default() (*Client, error) {
 }
 
 type storageSettings struct {
-	// endpoint is only set for Floci (local dev). Empty means real AWS S3.
-	endpoint string
-	region   string
-	bucket   string
+	// endpoint is set for any S3-compatible store (Floci/local dev or a
+	// self-host customer's own). Empty means real AWS S3.
+	endpoint       string
+	region         string
+	bucket         string
+	forcePathStyle bool
 }
 
 func resolveSettingsFromEnv() (storageSettings, error) {
@@ -122,9 +124,10 @@ func resolveSettingsFromEnv() (storageSettings, error) {
 			}
 		}
 		return storageSettings{
-			endpoint: endpoint,
-			region:   region,
-			bucket:   bucket,
+			endpoint:       endpoint,
+			region:         region,
+			bucket:         bucket,
+			forcePathStyle: true,
 		}, nil
 	}
 
@@ -152,9 +155,25 @@ func resolveS3SettingsFromEnv() (storageSettings, error) {
 		region = "eu-west-1"
 	}
 
+	var endpoint string
+	var forcePathStyle bool
+	if config.GlobalConfig != nil {
+		endpoint = config.GlobalConfig.S3Endpoint
+		forcePathStyle = config.GlobalConfig.S3ForcePathStyle
+	} else {
+		endpoint = os.Getenv("S3_ENDPOINT")
+		forcePathStyle = strings.EqualFold(strings.TrimSpace(os.Getenv("S3_FORCE_PATH_STYLE")), "true")
+	}
+	// A custom S3-compatible endpoint almost always needs path-style addressing.
+	if endpoint != "" {
+		forcePathStyle = true
+	}
+
 	return storageSettings{
-		region: region,
-		bucket: bucket,
+		endpoint:       endpoint,
+		region:         region,
+		bucket:         bucket,
+		forcePathStyle: forcePathStyle,
 	}, nil
 }
 
