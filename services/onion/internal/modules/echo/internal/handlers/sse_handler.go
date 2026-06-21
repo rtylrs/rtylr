@@ -212,7 +212,19 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	cachePlan := h.buildCacheWritePlan(ctx, mode, req, enhancedPrompt, businessID, authUserID, requestNow)
+	var liveGrounding *analystGroundingResult
+	groundBeforeCache := shouldGroundBeforeExactCache(mode, req.Prompt, req.PageContext)
+	if groundBeforeCache {
+		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
+			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
+			liveGrounding = grounding
+		}
+	}
+
+	cachePlan := h.buildCacheWritePlan(ctx, mode, req, enhancedPrompt, businessID, authUserID, requestNow, liveGrounding)
+	if groundBeforeCache && liveGrounding == nil {
+		cachePlan = disableExactCachePlan(cachePlan, "live business request needs fresh grounding")
+	}
 
 	h.setupSSEHeaders(w)
 	clientGone := h.monitorClientDisconnect(r)
@@ -248,14 +260,16 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		})
 	}
 
-	// Analyst grounding may call an internal model and the read replica. Keep it
-	// behind exact-cache lookup so repeated identical business questions can
-	// replay without paying those costs again.
-	var liveGrounding *analystGroundingResult
-	if mode != ModeSupport {
+	// Analyst grounding may call an internal model and the read replica. For
+	// obvious live business questions we do it before the exact cache lookup so
+	// the key includes a fingerprint of the rows. If a question only resolves
+	// as live data after the lookup, keep the answer uncached rather than risk a
+	// stale replay on the next request.
+	if !groundBeforeCache && mode != ModeSupport {
 		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
 			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
 			liveGrounding = grounding
+			cachePlan = disableExactCachePlan(cachePlan, "live business grounding resolved after exact cache lookup")
 			cachePlan.PromptChars = len(enhancedPrompt)
 		}
 	}
@@ -472,11 +486,15 @@ func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, er
 	}
 }
 
-func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, req *GenerateTextStreamRequest, enhancedPrompt string, businessID, userID int64, now time.Time) cacheWritePlan {
+func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, req *GenerateTextStreamRequest, enhancedPrompt string, businessID, userID int64, now time.Time, groundings ...*analystGroundingResult) cacheWritePlan {
 	policy := aicache.ExactPolicyForMode(string(mode))
 	provider := ""
 	if h.AiService != nil {
 		provider = h.AiService.GetPrimaryProvider()
+	}
+	dataFreshness := buildCacheFreshness(req.PageContext)
+	if len(groundings) > 0 {
+		dataFreshness = combineCacheFreshness(dataFreshness, buildGroundingCacheFreshness(groundings[0]))
 	}
 	plan := cacheWritePlan{
 		Enabled:     policy.Enabled,
@@ -494,10 +512,18 @@ func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode 
 			Provider:      provider,
 			RequestDate:   now.UTC().Format("2006-01-02"),
 			SystemContext: req.SystemContext,
-			DataFreshness: buildCacheFreshness(req.PageContext),
+			DataFreshness: dataFreshness,
 			Prompt:        req.Prompt,
 		})
 	}
+	return plan
+}
+
+func disableExactCachePlan(plan cacheWritePlan, reason string) cacheWritePlan {
+	plan.Enabled = false
+	plan.Key = ""
+	plan.Policy.Enabled = false
+	plan.Policy.Reason = reason
 	return plan
 }
 
@@ -886,10 +912,7 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		return nil
 	}
 
-	toolName := strings.TrimSpace(grounding.ToolName)
-	if toolName == "" {
-		toolName = "analytics.query"
-	}
+	toolName := grounding.toolName()
 	blockID := fmt.Sprintf("tool-%s-%d", strings.ReplaceAll(toolName, ".", "-"), time.Now().UnixNano())
 	input := map[string]any{
 		"question": grounding.Question,

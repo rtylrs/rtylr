@@ -204,6 +204,61 @@ func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
 	}
 }
 
+func TestBuildCacheWritePlanIncludesGroundingFreshness(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	now := time.Date(2026, 6, 20, 11, 0, 0, 0, time.UTC)
+	req := &GenerateTextStreamRequest{
+		Prompt:        "How much revenue today?",
+		SystemContext: "User is in dashboard.",
+		Mode:          string(ModeAsk),
+	}
+
+	firstGrounding := &analystGroundingResult{
+		ToolName: "analytics.query",
+		SpecJSON: `{"view":"ai_pos_orders","aggregations":[{"func":"sum","col":"total","as":"revenue"}]}`,
+		RowsJSON: `[{"revenue":100}]`,
+		RowCount: 1,
+	}
+	secondGrounding := &analystGroundingResult{
+		ToolName: "analytics.query",
+		SpecJSON: firstGrounding.SpecJSON,
+		RowsJSON: `[{"revenue":120}]`,
+		RowCount: 1,
+	}
+
+	first := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "grounded prompt", 11, 22, now, firstGrounding)
+	second := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "grounded prompt", 11, 22, now, secondGrounding)
+
+	if first.Key == "" || second.Key == "" {
+		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
+	}
+	if first.Key == second.Key {
+		t.Fatal("expected changed grounding rows to separate exact cache keys")
+	}
+}
+
+func TestShouldGroundBeforeExactCacheForLiveBusinessQuestions(t *testing.T) {
+	cases := []string{
+		"How much revenue today?",
+		"top 5 customers",
+		"show my top customers",
+		"How many employees do I have?",
+		"Which products are low on stock?",
+	}
+	for _, prompt := range cases {
+		if !shouldGroundBeforeExactCache(ModeAsk, prompt, nil) {
+			t.Fatalf("expected %q to ground before cache", prompt)
+		}
+	}
+
+	if shouldGroundBeforeExactCache(ModeSupport, "How much revenue today?", nil) {
+		t.Fatal("support mode should not use business grounding")
+	}
+	if shouldGroundBeforeExactCache(ModeAsk, "How do I use Caret?", nil) {
+		t.Fatal("product help should not force live business grounding")
+	}
+}
+
 func TestCachedReplayChunksPreserveTextAndSplitNaturally(t *testing.T) {
 	text := "Here is the first cached sentence. Here is the second cached sentence, with enough words to replay in more than one visible delta. Final."
 
