@@ -31,8 +31,11 @@ RUN bash scripts/generate_contracts.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
+# TARGETARCH is provided by buildx; defaults to the build arch for plain builds
+# so the hosted (amd64) path is unchanged while multi-arch publishes work.
+ARG TARGETARCH
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     go build \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
