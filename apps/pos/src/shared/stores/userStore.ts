@@ -121,7 +121,9 @@ export function businessDisplayName(profile: BusinessProfile | null | undefined)
   return text(profile?.name) ?? text(profile?.siteName) ?? text(profile?.site_name) ?? null;
 }
 
-export function businessContactPhone(profile: BusinessProfile | null | undefined): string | undefined {
+export function businessContactPhone(
+  profile: BusinessProfile | null | undefined
+): string | undefined {
   return text(profile?.contactPhone) ?? text(profile?.contact_phone);
 }
 
@@ -163,7 +165,7 @@ export const useUserStore = create<UserState & UserActions>()(
           const profile = normalizeBusinessProfile(data.business ?? data.profile ?? data);
           set({
             role: user.role ?? state.role,
-            userId: idText(data.userId ?? data.user_id) ?? state.userId,
+            userId: idText(data.userId ?? data.user_id ?? user.id) ?? state.userId,
             token: text(data.token) ?? state.token,
             user,
             businessProfile: profile ?? state.businessProfile,

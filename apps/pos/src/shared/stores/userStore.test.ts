@@ -135,6 +135,24 @@ describe('userStore', () => {
     expect(getState().visits).toHaveLength(1);
   });
 
+  it('uses nested user id when business profile omits top-level user id', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        token: 'tok123',
+        user: {
+          id: 42,
+          name: 'Alice',
+          role: 'admin',
+        },
+      },
+    });
+
+    await getState().getUserInfo();
+
+    expect(getState().userId).toBe('42');
+    expect(getState().isAuthenticated).toBe(true);
+  });
+
   it('sets error on getUserInfo failure', async () => {
     vi.mocked(api.get).mockRejectedValueOnce({
       response: { data: { message: 'Unauthorized' } },

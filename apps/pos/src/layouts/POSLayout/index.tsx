@@ -107,7 +107,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
   const caretOpen = useCaretStore((s) => s.isOpen);
   const caretWidth = useCaretSettingsStore((s) => s.panelWidth);
   const userId = Number(userIdValue ?? 0);
-  const canUseCaret = Number.isFinite(userId) && userId > 0;
+  const caretUserId = Number.isFinite(userId) && userId > 0 ? userId : 0;
   const orderId = selectedOrderId(location.pathname);
   const pendingOfflineOrders = offlineQueue.filter((item) => item.status === 'pending').length;
   const failedOfflineOrders = offlineQueue.filter((item) => item.status === 'failed').length;
@@ -176,7 +176,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
       pendingCashMovements,
       pendingOfflineOrders,
       terminalId,
-    ],
+    ]
   );
 
   return (
@@ -187,7 +187,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
         </div>
         <div className="flex items-center gap-1">
           {businessName && <span className="text-xs text-pos-muted mr-2">{businessName}</span>}
-          {canUseCaret && <CaretButton />}
+          <CaretButton />
           <button
             className="w-8 h-8 flex items-center justify-center rounded-lg text-pos-muted hover:bg-white/8 transition-colors"
             onClick={toggleTheme}
@@ -211,25 +211,23 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
       </header>
       <main className="flex flex-1 min-h-0 overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">{children}</div>
-        {canUseCaret && (
-          <div
-            style={{
-              width: caretOpen ? `${caretWidth}px` : '0px',
-              flexShrink: 0,
-              overflow: 'hidden',
-              transition: caretOpen ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-          >
-            <CaretPanel
-              variant="inline"
-              appId="pos"
-              userId={userId}
-              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
-              systemContext="User is in the POS app (terminal, orders, tables, receipts, inventory, customers, and staff workflows)."
-              pageContext={caretPageContext}
-            />
-          </div>
-        )}
+        <div
+          style={{
+            width: caretOpen ? `${caretWidth}px` : '0px',
+            flexShrink: 0,
+            overflow: 'hidden',
+            transition: caretOpen ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+        >
+          <CaretPanel
+            variant="inline"
+            appId="pos"
+            userId={caretUserId}
+            apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
+            systemContext="User is in the POS app (terminal, orders, tables, receipts, inventory, customers, and staff workflows)."
+            pageContext={caretPageContext}
+          />
+        </div>
       </main>
     </div>
   );
