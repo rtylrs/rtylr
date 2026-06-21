@@ -163,6 +163,8 @@ export function AppGuard({
           role: (data.role as User['role']) ?? undefined,
           apps: (data.apps as AppId[]) ?? [],
           planType: (data.planSlug as string) ?? (data.plan_slug as string) ?? undefined,
+          isConsoleAdmin:
+            data.isConsoleAdmin === true || data.is_console_admin === true || undefined,
         };
         login(user);
 
