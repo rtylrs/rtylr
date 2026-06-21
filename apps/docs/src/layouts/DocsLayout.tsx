@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from '@tanstack/react-router';
-import { Search, Book, Layers, Users, Code, FileText, ChevronRight } from 'lucide-react';
+import { Search, Book, Layers, Users, Code, FileText, Server, ChevronRight } from 'lucide-react';
 import { content } from '../shared/content';
 
 interface NavItem {
@@ -61,6 +61,19 @@ const rawSections: NavSection[] = [
     ],
   },
   {
+    title: 'Self-Hosting',
+    items: [
+      { label: 'Overview', href: '/docs/self-hosting' },
+      { label: 'License Flow', href: '/docs/self-hosting-license' },
+      { label: 'Image Contract', href: '/docs/self-hosting-images' },
+      { label: 'Helm Install', href: '/docs/self-hosting-helm' },
+      { label: 'Docker Compose', href: '/docs/self-hosting-compose' },
+      { label: 'DNS Setup', href: '/docs/self-hosting-dns' },
+      { label: 'Backend Env', href: '/docs/self-hosting-env' },
+      { label: 'Upgrade Flow', href: '/docs/self-hosting-upgrade' },
+    ],
+  },
+  {
     title: 'API',
     items: [
       { label: 'Overview', href: '/api' },
@@ -87,6 +100,7 @@ const sectionIcons: Record<string, React.ReactNode> = {
   'Getting Started': <Book size={14} />,
   Apps: <Layers size={14} />,
   Platform: <Users size={14} />,
+  'Self-Hosting': <Server size={14} />,
   API: <Code size={14} />,
   Resources: <FileText size={14} />,
 };

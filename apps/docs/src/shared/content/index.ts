@@ -15,6 +15,16 @@ import { hub } from './hub';
 import { addons } from './addons';
 import { multiTenant } from './multi-tenant';
 import { faq } from './faq';
+import {
+  selfHostingOverview,
+  selfHostingLicense,
+  selfHostingImages,
+  selfHostingHelm,
+  selfHostingCompose,
+  selfHostingDns,
+  selfHostingEnv,
+  selfHostingUpgrade,
+} from './self-hosting';
 
 export interface DocContent {
   title: string;
@@ -39,6 +49,14 @@ export const content: Record<string, DocContent> = {
   addons,
   'multi-tenant': multiTenant,
   faq,
+  'self-hosting': selfHostingOverview,
+  'self-hosting-license': selfHostingLicense,
+  'self-hosting-images': selfHostingImages,
+  'self-hosting-helm': selfHostingHelm,
+  'self-hosting-compose': selfHostingCompose,
+  'self-hosting-dns': selfHostingDns,
+  'self-hosting-env': selfHostingEnv,
+  'self-hosting-upgrade': selfHostingUpgrade,
 };
 
 export {
@@ -59,4 +77,12 @@ export {
   addons,
   multiTenant,
   faq,
+  selfHostingOverview,
+  selfHostingLicense,
+  selfHostingImages,
+  selfHostingHelm,
+  selfHostingCompose,
+  selfHostingDns,
+  selfHostingEnv,
+  selfHostingUpgrade,
 };
