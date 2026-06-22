@@ -65,6 +65,7 @@ const Inventory: React.FC = () => {
     pageSize,
   });
   const products = productResult?.products ?? [];
+  const totalProducts = productResult?.total ?? products.length;
   const hasMore = productResult?.hasMore ?? false;
 
   const changePage = (nextPage: number): void => {
@@ -266,6 +267,8 @@ const Inventory: React.FC = () => {
         page={page}
         hasMore={hasMore}
         itemCount={products.length}
+        pageSize={pageSize}
+        total={totalProducts}
         onPageChange={changePage}
       />
       <QuickAddProductModal open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />

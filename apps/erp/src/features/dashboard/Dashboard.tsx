@@ -154,7 +154,8 @@ const Dashboard: React.FC = () => {
 
       <motion.div
         variants={containerVariants as any}
-        className="grid auto-rows-[168px] grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        style={{ gridAutoRows: '168px' }}
       >
         {stats.map((stat) => {
           const Icon = stat.icon;

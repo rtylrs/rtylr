@@ -32,6 +32,7 @@ export interface ProductFilters {
 
 export interface ProductListResult {
   products: Product[];
+  total: number;
   hasMore: boolean;
   page: number;
   pageSize: number;
@@ -122,6 +123,23 @@ function applyFilters(list: ProductWithCategoryId[], f?: ProductFilters): Produc
   return out;
 }
 
+function responseNumber(res: unknown, ...keys: string[]): number | undefined {
+  if (!res || typeof res !== 'object') return undefined;
+  const record = res as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    const numeric = Number(value);
+    if (Number.isFinite(numeric) && numeric >= 0) return numeric;
+  }
+  return undefined;
+}
+
+function responseBool(res: unknown, ...keys: string[]): boolean {
+  if (!res || typeof res !== 'object') return false;
+  const record = res as Record<string, unknown>;
+  return keys.some((key) => record[key] === true);
+}
+
 export function useProducts(filters?: ProductFilters) {
   const page = filters?.page ?? 1;
   const pageSize = filters?.pageSize ?? 50;
@@ -147,9 +165,13 @@ export function useProducts(filters?: ProductFilters) {
         };
       });
       const products = applyFilters(parsed, filters);
-      // @voxire/api converts has_more -> hasMore on the way in.
-      const hasMore = (res as unknown as Record<string, unknown>)?.hasMore === true;
-      return { products, hasMore, page, pageSize };
+      const serverTotal =
+        responseNumber(res, 'total', 'totalCount', 'total_count') ?? products.length;
+      const hasClientOnlyFilters = Boolean(filters?.brand || filters?.status);
+      const total = hasClientOnlyFilters ? products.length : serverTotal;
+      const hasMore =
+        responseBool(res, 'hasMore', 'has_more') || page * pageSize < Math.max(total, 0);
+      return { products, total, hasMore, page, pageSize };
     },
   });
 }

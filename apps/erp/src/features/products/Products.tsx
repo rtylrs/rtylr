@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { cdnImageUrl } from '@voxire/config';
@@ -41,10 +41,24 @@ const Products: React.FC = () => {
   const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch, page, pageSize };
   const { data: productResult, isLoading } = useProducts(mergedFilters);
   const products = productResult?.products ?? [];
+  const totalProducts = productResult?.total ?? products.length;
   const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();
   const deleteMut = useDeleteProduct();
+  const categoryNameById = useMemo(() => {
+    const map = new Map<number, string>();
+    categories.forEach((category) => map.set(category.id, category.name));
+    return map;
+  }, [categories]);
+
+  const categoryNameFor = useCallback(
+    (product: Product): string => {
+      const categoryId = (product as Product & { categoryId?: number }).categoryId;
+      return product.category || (categoryId ? categoryNameById.get(categoryId) : '') || '-';
+    },
+    [categoryNameById]
+  );
 
   const changePage = (nextPage: number): void => {
     setSelected(new Set());
@@ -81,14 +95,14 @@ const Products: React.FC = () => {
         id: p.id,
         name: p.name,
         sku: p.sku,
-        category: p.category,
+        category: categoryNameFor(p),
         brand: p.brand || '',
         stock: p.stock,
         costPrice: p.costPrice,
         salePrice: p.salePrice,
         status: p.status,
       })),
-    [products]
+    [products, categoryNameFor]
   );
 
   return (
@@ -100,7 +114,7 @@ const Products: React.FC = () => {
       <HelmetContainer title="Products · rtylr" />
       <PageHeader
         title={t('erp.products.title')}
-        description={`Page ${page} · ${products.length} product${products.length === 1 ? '' : 's'} shown`}
+        description={`${totalProducts} product${totalProducts === 1 ? '' : 's'} in your catalog`}
         actions={
           <>
             <ImportCSV
@@ -232,7 +246,12 @@ const Products: React.FC = () => {
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} selected={selected.has(p.id)} onToggle={toggle} />
+            <ProductCard
+              key={p.id}
+              product={{ ...p, category: categoryNameFor(p) }}
+              selected={selected.has(p.id)}
+              onToggle={toggle}
+            />
           ))}
         </div>
       ) : (
@@ -308,8 +327,8 @@ const Products: React.FC = () => {
                   <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
                     {p.sku}
                   </span>
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {p.category}
+                  <span className="truncate text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {categoryNameFor(p)}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                     {p.brand || '-'}
@@ -342,6 +361,8 @@ const Products: React.FC = () => {
         page={page}
         hasMore={hasMore}
         itemCount={products.length}
+        pageSize={pageSize}
+        total={totalProducts}
         onPageChange={changePage}
       />
 
