@@ -12,6 +12,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
+import { allFeaturesEnabled } from '@voxire/config';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import {
@@ -36,7 +37,7 @@ const addonSettingsItems: Array<NavItem & { addonId: string }> = [
   { label: 'Email', path: '/settings/email', icon: Mail, addonId: 'email_marketing' },
 ];
 
-function getNavGroups(isOwner: boolean, addons: AddonData[]): NavGroup[] {
+function getNavGroups(isOwner: boolean, addons: AddonData[], selfHosted: boolean): NavGroup[] {
   const groups: NavGroup[] = [
     {
       label: 'Account',
@@ -65,13 +66,22 @@ function getNavGroups(isOwner: boolean, addons: AddonData[]): NavGroup[] {
       });
     }
 
+    // Self-host ships every feature enabled with no hosted billing/addon
+    // upsell, so the Billing + Addons entries are hidden. Integrations stays
+    // (it isn't a billing/subscription surface). Hosted is unchanged.
+    const plansItems: NavItem[] = [
+      ...(selfHosted
+        ? []
+        : [
+            { label: 'Billing', path: '/settings/billing', icon: CreditCard },
+            { label: 'Addons', path: '/settings/addons', icon: Puzzle },
+          ]),
+      { label: 'Integrations', path: '/settings/integrations', icon: Layers },
+    ];
+
     groups.push({
-      label: 'Plans & Addons',
-      items: [
-        { label: 'Billing', path: '/settings/billing', icon: CreditCard },
-        { label: 'Addons', path: '/settings/addons', icon: Puzzle },
-        { label: 'Integrations', path: '/settings/integrations', icon: Layers },
-      ],
+      label: selfHosted ? 'Integrations' : 'Plans & Addons',
+      items: plansItems,
     });
   }
 
@@ -84,7 +94,7 @@ const SettingsLayout: React.FC = () => {
   const { user } = useUserStore();
   const { data: addons = [] } = useAddons();
   const isOwner = user?.isOwner !== false;
-  const navGroups = getNavGroups(isOwner, addons);
+  const navGroups = getNavGroups(isOwner, addons, allFeaturesEnabled());
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--dash-bg)' }}>

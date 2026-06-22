@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../shared/lib/api';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { APP_URLS, getAvatarUrl, resolveAppUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
@@ -241,7 +241,7 @@ const AppsSection: React.FC = () => {
           return (
             <a
               key={a.key}
-              href={APP_URLS[a.key as keyof typeof APP_URLS]}
+              href={resolveAppUrl(a.key as Parameters<typeof resolveAppUrl>[0])}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
