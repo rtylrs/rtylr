@@ -11,7 +11,33 @@ import (
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const PatternInvalidationChannel = "cache-pattern-invalidation"
+
+type PatternInvalidationConsumer struct {
+	Patterns []string `json:"patterns"`
+}
+
+func (c PatternInvalidationConsumer) Execute(ctx context.Context) error {
+	cache := cacher.GetRedisCache()
+	if cache == nil {
+		return nil
+	}
+
+	deleted := 0
+	for _, pattern := range c.Patterns {
+		deleted += cache.DeleteByPattern(ctx, pattern)
+	}
+	if len(c.Patterns) > 0 {
+		logger.Ctx(ctx).Info("processed async cache invalidation",
+			logger.Any("patterns", c.Patterns),
+			logger.Int("deleted", deleted),
+		)
+	}
+	return nil
+}
 
 // Result reports what an invalidation request affected — useful for the
 // endpoint's response body and for log/telemetry breadcrumbs.
@@ -37,6 +63,23 @@ func Invalidate(ctx context.Context, t keys.InvalidationType, id string) Result 
 		res.Deleted += cache.DeleteByPattern(ctx, p)
 	}
 	return res
+}
+
+func InvalidateAsync(_ context.Context, t keys.InvalidationType, id string) Result {
+	patterns := patternsFor(t, id)
+	res := Result{Type: t, ID: id, Patterns: patterns}
+	if len(patterns) == 0 {
+		return res
+	}
+
+	cacher.NewPubSub[PatternInvalidationConsumer]().Publish(PatternInvalidationChannel, PatternInvalidationConsumer{
+		Patterns: patterns,
+	})
+	return res
+}
+
+func SubscribeAsyncInvalidations(ctx context.Context) {
+	cacher.NewPubSub[PatternInvalidationConsumer]().SubscribeContext(ctx, PatternInvalidationChannel)
 }
 
 // patternsFor lists every wildcard pattern the type owns. We keep this

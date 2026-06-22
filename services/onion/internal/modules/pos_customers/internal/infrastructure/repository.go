@@ -3,10 +3,12 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 type Repository struct {
@@ -23,14 +25,17 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) Search(ctx context.Context, businessID int64, query string) ([]domain.Customer, error) {
-	searchTerm := "%" + query + "%"
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return []domain.Customer{}, nil
+	}
+	searchTerm := searchutil.BooleanPrefixQuery(query)
 
 	rows, err := r.queries.SearchPOSCustomers(ctx, sqlc.SearchPOSCustomersParams{
 		BusinessID: businessID,
-		Phone:      sql.NullString{String: searchTerm, Valid: true},
-		Email:      sql.NullString{String: searchTerm, Valid: true},
-		FirstName:  searchTerm,
-		LastName:   sql.NullString{String: searchTerm, Valid: true},
+		Phone:      sql.NullString{String: query, Valid: true},
+		Email:      sql.NullString{String: query, Valid: true},
+		Search:     searchTerm,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search POS customers", logger.Error(err))

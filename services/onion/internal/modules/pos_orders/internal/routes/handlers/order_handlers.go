@@ -127,10 +127,17 @@ type ListOrdersRequest struct {
 	Status    string `json:"status"`
 	DateFrom  string `json:"date_from"`
 	DateTo    string `json:"date_to"`
+	Search    string `json:"search"`
+	Page      int64  `json:"page"`
+	PageSize  int64  `json:"page_size"`
 }
 
 type ListOrdersResponse struct {
-	Orders []OrderPayload `json:"orders"`
+	Orders   []OrderPayload `json:"orders"`
+	Total    int64          `json:"total"`
+	HasMore  bool           `json:"has_more"`
+	Page     int64          `json:"page"`
+	PageSize int64          `json:"page_size"`
 }
 
 func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) *errorModels.ServerError {
@@ -167,7 +174,19 @@ func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (
 		return ListOrdersResponse{}, bizErr
 	}
 
-	orders, err := h.Service.ListOrders(ctx, businessID, req.SessionID, req.Status, req.DateFrom, req.DateTo)
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+
+	orders, total, hasMore, err := h.Service.ListOrdersPage(ctx, businessID, req.SessionID, req.Status, req.DateFrom, req.DateTo, req.Search, page, pageSize)
 	if err != nil {
 		return ListOrdersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -181,7 +200,7 @@ func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (
 		payloads = append(payloads, newOrderPayload(o))
 	}
 
-	return ListOrdersResponse{Orders: payloads}, nil
+	return ListOrdersResponse{Orders: payloads, Total: total, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // ─── Create Order ─────────────────────────────────────────────────────────────

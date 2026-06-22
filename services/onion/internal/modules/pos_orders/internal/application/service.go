@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
 	"github.com/voxire/onion/internal/modules/pos_settings"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/paddle"
@@ -27,9 +28,7 @@ func ownerTopic(ownerID int64) string {
 }
 
 func invalidateOrderScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.OrderPrefix(ownerID))
-	}
+	cacheInvalidate.InvalidateAsync(ctx, cacheKeys.InvalidateOrder, strconv.FormatInt(ownerID, 10))
 }
 
 // PaddlePaymentResult mirrors paddle.POSPaymentResult for the service surface.
@@ -193,14 +192,41 @@ func (s *Service) CloseSession(ctx context.Context, ownerID int64, input domain.
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
 func (s *Service) ListOrders(ctx context.Context, ownerID, sessionID int64, status, dateFrom, dateTo string) ([]domain.Order, error) {
-	key := fmt.Sprintf("%s|sess=%d|st=%s|f=%s|t=%s",
-		cacheKeys.OrdersList(ownerID), sessionID, status, dateFrom, dateTo)
-	return cacher.Of[[]domain.Order]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.Order, error) {
-			return s.repo.ListOrders(ctx, ownerID, sessionID, status, dateFrom, dateTo)
+	orders, _, _, err := s.ListOrdersPage(ctx, ownerID, sessionID, status, dateFrom, dateTo, "", 1, 500)
+	return orders, err
+}
+
+func paginateOrders(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
+}
+
+func (s *Service) ListOrdersPage(ctx context.Context, ownerID, sessionID int64, status, dateFrom, dateTo, search string, page, pageSize int64) ([]domain.Order, int64, bool, error) {
+	limit, offset := paginateOrders(page, pageSize)
+	key := fmt.Sprintf("%s|sess=%d|st=%s|f=%s|t=%s|q=%s|p=%d|ps=%d",
+		cacheKeys.OrdersList(ownerID), sessionID, status, dateFrom, dateTo, search, page, pageSize)
+	result, err := cacher.Of[ordersListResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (ordersListResult, error) {
+			orders, total, hasMore, err := s.repo.ListOrders(ctx, ownerID, sessionID, status, dateFrom, dateTo, search, limit, offset)
+			return ordersListResult{Orders: orders, Total: total, HasMore: hasMore}, err
 		},
 		cacher.WithExpiry(ctx, ordersCacheTTL),
 	)
+	return result.Orders, result.Total, result.HasMore, err
+}
+
+type ordersListResult struct {
+	Orders  []domain.Order
+	Total   int64
+	HasMore bool
 }
 
 func (s *Service) GetOrder(ctx context.Context, ownerID, orderID int64) (*domain.Order, error) {

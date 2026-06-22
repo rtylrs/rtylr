@@ -14,12 +14,15 @@ func TestListProducts_ReturnsAllFixtureProducts(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1000, 0)
+	products, total, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1000, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(products) == 0 {
 		t.Fatal("expected fixture rows, got none")
+	}
+	if total < int64(len(products)) {
+		t.Fatalf("expected total >= listed products, got total=%d len=%d", total, len(products))
 	}
 
 	names := make(map[string]bool, len(products))
@@ -39,7 +42,7 @@ func TestListProducts_SaladHasLowStock(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1000, 0)
+	products, _, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1000, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -62,7 +65,7 @@ func TestListProducts_FilterByCategoryReturnsMains(t *testing.T) {
 	ctx := context.Background()
 
 	// category_id=5002 is 'Mains'; Burger (id=5201) should be in Mains
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 5002, 10, 0)
+	products, _, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 5002, 10, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -82,7 +85,7 @@ func TestListProducts_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, 0, "", 0, 10, 0)
+	products, _, _, err := repo.ListProducts(ctx, 0, "", 0, 10, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -96,7 +99,7 @@ func TestListProducts_SearchBurger_FindsProduct(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "Burger", 0, 10, 0)
+	products, _, _, err := repo.ListProducts(ctx, testutil.OwnerID, "Burger", 0, 10, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -120,7 +123,7 @@ func TestListProducts_SearchNonExistent_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "xyzNoSuchProduct999", 0, 10, 0)
+	products, _, _, err := repo.ListProducts(ctx, testutil.OwnerID, "xyzNoSuchProduct999", 0, 10, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -134,7 +137,7 @@ func TestListProducts_ByCategoryID5002_ReturnsMains(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 5002, 10, 0)
+	products, _, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 5002, 10, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -150,7 +153,7 @@ func TestListProducts_PaginationLimit1_ReturnsOne(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1, 0)
+	products, _, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

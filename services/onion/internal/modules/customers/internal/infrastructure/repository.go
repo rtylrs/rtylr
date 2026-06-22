@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -78,12 +80,16 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.CustomerListFilter, offset int) ([]domain.Customer, int, error) {
 	conds := sq.And{sq.Eq{"business_id": filter.BusinessID}}
 
-	if filter.Search != "" {
-		like := "%" + filter.Search + "%"
-		conds = append(conds, sq.Expr(
-			"(first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone LIKE ?)",
-			like, like, like, like,
-		))
+	if search := strings.TrimSpace(filter.Search); search != "" {
+		booleanQuery := searchutil.BooleanPrefixQuery(search)
+		if booleanQuery != "" {
+			conds = append(conds, sq.Expr(
+				"(email = ? OR phone = ? OR MATCH(first_name, last_name, email, phone) AGAINST (? IN BOOLEAN MODE))",
+				search, search, booleanQuery,
+			))
+		} else {
+			conds = append(conds, sq.Or{sq.Eq{"email": search}, sq.Eq{"phone": search}})
+		}
 	}
 
 	if filter.Tier != "" {

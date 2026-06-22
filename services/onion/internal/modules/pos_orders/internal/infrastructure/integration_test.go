@@ -62,7 +62,7 @@ func TestListOrders_ReturnsBothFixtureOrders(t *testing.T) {
 	ctx := context.Background()
 
 	// sessionID=3201 has 2 orders in fixtures
-	orders, err := repo.ListOrders(ctx, testutil.OwnerID, 3201, "", "", "")
+	orders, _, _, err := repo.ListOrders(ctx, testutil.OwnerID, 3201, "", "", "", "", 500, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -538,7 +538,7 @@ func TestCreateOrder_AppearsInList(t *testing.T) {
 		_, _ = db.ExecContext(ctx, `DELETE FROM pos_orders WHERE id = ?`, id)
 	})
 
-	orders, err := repo.ListOrders(ctx, testutil.OwnerID, 3201, "", "", "")
+	orders, _, _, err := repo.ListOrders(ctx, testutil.OwnerID, 3201, "", "", "", "", 500, 0)
 	if err != nil {
 		t.Fatalf("ListOrders: %v", err)
 	}
@@ -604,7 +604,7 @@ func TestListOrders_FilterByStatus(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	orders, err := repo.ListOrders(ctx, testutil.OwnerID, 0, "paid", "", "")
+	orders, _, _, err := repo.ListOrders(ctx, testutil.OwnerID, 0, "paid", "", "", "", 500, 0)
 	if err != nil {
 		t.Fatalf("ListOrders: %v", err)
 	}

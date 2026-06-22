@@ -103,25 +103,17 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 }
 
 func isOwnerOrAdmin(u *authPkg.AuthUser) bool {
-	return u.Role == "owner" || u.Role == "admin"
+	return u.Role == "owner" || u.Role == "admin" || u.Role == "console_admin"
 }
 
-func hasBusinessWidePOSAccess(ctx context.Context, u *authPkg.AuthUser) bool {
+func hasBusinessWidePOSAccess(_ context.Context, u *authPkg.AuthUser) bool {
 	if u == nil {
 		return false
 	}
 	if isOwnerOrAdmin(u) {
 		return true
 	}
-	if u.BusinessID <= 0 || u.UserID <= 0 {
-		return false
-	}
-	// Business-wide access is also granted to the business owner (the user whose
-	// id is the business's owner_id). This is an authorization check, NOT tenant
-	// scoping — it must stay on ResolveOwnerID. Do not flip to ResolveBusinessID:
-	// that would return a positive id for any authenticated member (priv-esc).
-	ownerID := tenant.ResolveOwnerID(ctx, u.BusinessID, u.UserID)
-	return ownerID > 0 && ownerID == u.UserID
+	return false
 }
 
 func MemberLocationsRoutes() []string { return []string{"/pos/access/member-locations"} }

@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	sqlc "github.com/voxire/onion/internal/modules/memory/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 var (
@@ -394,11 +395,16 @@ func (r *Repository) StoreUserMemory(ctx context.Context, memory *domain.UserMem
 }
 
 func (r *Repository) SearchUserMemory(ctx context.Context, userID int, query string) ([]domain.UserMemory, error) {
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return []domain.UserMemory{}, nil
+	}
+
 	arg := sqlc.SearchUserMemoryParams{
-		UserID:   int32(userID),
-		CONCAT:   query,
-		CONCAT_2: query,
-		CONCAT_3: query,
+		UserID:     int32(userID),
+		MemoryType: query,
+		Key:        query,
+		Search:     searchutil.BooleanPrefixQuery(query),
 	}
 
 	rows, err := r.queries.SearchUserMemory(ctx, arg)

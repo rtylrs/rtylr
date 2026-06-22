@@ -49,18 +49,18 @@ func paginateProducts(page, pageSize int64) (int, int) {
 	return int(pageSize), int((page - 1) * pageSize)
 }
 
-func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, page, pageSize int64) ([]domain.Product, bool, error) {
+func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, page, pageSize int64) ([]domain.Product, int64, bool, error) {
 	search = strings.TrimSpace(search)
 	limit, offset := paginateProducts(page, pageSize)
 
-	items, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
+	items, total, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
 	if err != nil {
-		return nil, false, err
+		return nil, 0, false, err
 	}
 	if items == nil {
 		items = []domain.Product{}
 	}
-	return items, hasMore, nil
+	return items, total, hasMore, nil
 }
 
 func (s *Service) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {

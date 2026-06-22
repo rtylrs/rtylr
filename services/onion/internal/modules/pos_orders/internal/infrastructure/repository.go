@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -15,6 +16,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -387,49 +389,35 @@ func (r *Repository) UpdateSessionRefundTotals(ctx context.Context, sessionID in
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
-func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo string) ([]domain.Order, error) {
-	// Dynamic WHERE clause for optional filters (session/status/date range).
+func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string, limit, offset int) ([]domain.Order, int64, bool, error) {
 	builder := sq.
 		Select(
-			"id", "owner_id", "COALESCE(session_id,0)", "COALESCE(table_id,0)", "COALESCE(location_id,0)",
-			"order_number", "type", "status", "COALESCE(customer_id,0)", "COALESCE(customer_name,'')",
-			"COALESCE(staff_id,0)", "subtotal", "discount_amount", "tax_amount", "total",
-			"COALESCE(payment_method,'')", "COALESCE(payment_status,'')", "COALESCE(amount_paid,0)", "COALESCE(change_due,0)",
-			"COALESCE(notes,'')", "COALESCE(kitchen_notes,'')", "created_at", "updated_at", "paid_at",
+			"o.id", "o.owner_id", "COALESCE(o.session_id,0)", "COALESCE(o.table_id,0)", "COALESCE(o.location_id,0)",
+			"o.order_number", "o.type", "o.status", "COALESCE(o.customer_id,0)", "COALESCE(o.customer_name,'')",
+			"COALESCE(o.staff_id,0)", "o.subtotal", "o.discount_amount", "o.tax_amount", "o.total",
+			"COALESCE(o.payment_method,'')", "COALESCE(o.payment_status,'')", "COALESCE(o.amount_paid,0)", "COALESCE(o.change_due,0)",
+			"COALESCE(o.notes,'')", "COALESCE(o.kitchen_notes,'')", "o.created_at", "o.updated_at", "o.paid_at",
 		).
-		From("pos_orders").
-		Where(sq.Eq{"business_id": businessID})
+		From("pos_orders o").
+		Where(sq.Eq{"o.business_id": businessID})
 
-	if sessionID > 0 {
-		builder = builder.Where(sq.Eq{"session_id": sessionID})
-	}
-
-	if status != "" {
-		builder = builder.Where(sq.Eq{"status": status})
-	}
-
-	if dateFrom != "" {
-		builder = builder.Where(sq.GtOrEq{"created_at": dateFrom})
-	}
-
-	if dateTo != "" {
-		builder = builder.Where(sq.LtOrEq{"created_at": dateTo})
-	}
+	builder = applyPOSOrderListFilters(builder, sessionID, status, dateFrom, dateTo, search)
 
 	query, args, err := builder.
-		OrderBy("created_at DESC").
-		Limit(500).
+		OrderBy("o.created_at DESC").
+		Limit(uint64(limit + 1)).
+		Offset(uint64(offset)).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to build list pos orders query", logger.Error(err))
-		return nil, err
+		return nil, 0, false, err
 	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list pos orders", logger.Error(err))
-		return nil, err
+		return nil, 0, false, err
 	}
 
 	defer rows.Close()
@@ -440,12 +428,80 @@ func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64
 		o, scanErr := scanOrderRow(rows)
 		if scanErr != nil {
 			logger.Ctx(ctx).Error("Failed to scan order row", logger.Error(scanErr))
-			return nil, scanErr
+			return nil, 0, false, scanErr
 		}
 		orders = append(orders, o)
 	}
 
-	return orders, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, 0, false, err
+	}
+
+	hasMore := len(orders) > limit
+	if hasMore {
+		orders = orders[:limit]
+	}
+
+	total, err := r.countOrders(ctx, businessID, sessionID, status, dateFrom, dateTo, search)
+	if err != nil {
+		return nil, 0, false, err
+	}
+
+	return orders, total, hasMore, nil
+}
+
+func (r *Repository) countOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string) (int64, error) {
+	builder := sq.Select("COUNT(*)").
+		From("pos_orders o").
+		Where(sq.Eq{"o.business_id": businessID})
+	builder = applyPOSOrderListFilters(builder, sessionID, status, dateFrom, dateTo, search)
+
+	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build count pos orders query", logger.Error(err))
+		return 0, err
+	}
+
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to count pos orders", logger.Error(err))
+		return 0, err
+	}
+	return total, nil
+}
+
+func applyPOSOrderListFilters(builder sq.SelectBuilder, sessionID int64, status, dateFrom, dateTo, search string) sq.SelectBuilder {
+	if sessionID > 0 {
+		builder = builder.Where(sq.Eq{"o.session_id": sessionID})
+	}
+
+	if status != "" {
+		builder = builder.Where(sq.Eq{"o.status": status})
+	}
+
+	if dateFrom != "" {
+		builder = builder.Where(sq.GtOrEq{"o.created_at": dateFrom})
+	}
+
+	if dateTo != "" {
+		builder = builder.Where("o.created_at < DATE_ADD(?, INTERVAL 1 DAY)", dateTo)
+	}
+
+	search = strings.TrimSpace(search)
+	if search != "" {
+		booleanQuery := searchutil.BooleanPrefixQuery(search)
+		if booleanQuery != "" {
+			builder = builder.Where(
+				"(o.order_number = ? OR MATCH(o.order_number, o.customer_name, o.customer_phone) AGAINST (? IN BOOLEAN MODE))",
+				search,
+				booleanQuery,
+			)
+		} else {
+			builder = builder.Where(sq.Eq{"o.order_number": search})
+		}
+	}
+
+	return builder
 }
 
 func (r *Repository) GetOrder(ctx context.Context, businessID, orderID int64) (*domain.Order, error) {
@@ -1265,7 +1321,8 @@ func (r *Repository) HoldOrder(ctx context.Context, businessID, orderID int64, r
 }
 
 func (r *Repository) ListHeldOrders(ctx context.Context, businessID int64) ([]domain.Order, error) {
-	return r.ListOrders(ctx, businessID, 0, "held", "", "")
+	orders, _, _, err := r.ListOrders(ctx, businessID, 0, "held", "", "", "", 200, 0)
+	return orders, err
 }
 
 func (r *Repository) GenerateOrderNumber(ctx context.Context, businessID int64) (string, error) {

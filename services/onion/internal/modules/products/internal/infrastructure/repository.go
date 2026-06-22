@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -31,7 +32,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, bool, error) {
+func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, int64, bool, error) {
 	qb := squirrel.Select(
 		"p.id", "p.owner_id", "p.business_id", "p.category_id", "p.supplier_id", "p.name", "p.sku",
 		"p.barcode", "p.description", "p.unit", "p.cost_price", "p.sale_price",
@@ -47,34 +48,21 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 			ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
 			LIMIT 1
 		)`).
-		Where(squirrel.Eq{"p.business_id": ownerID}).
-		Where("TRIM(COALESCE(p.name, '')) <> ''")
+		Where(squirrel.Eq{"p.business_id": ownerID})
 
-	if search != "" {
-		like := "%" + search + "%"
-		qb = qb.Where(squirrel.Or{
-			squirrel.Like{"p.name": like},
-			squirrel.Like{"p.sku": like},
-			squirrel.Like{"p.barcode": like},
-		})
-	}
-
-	if categoryID > 0 {
-		qb = qb.Where(squirrel.Eq{"p.category_id": categoryID})
-	}
-
+	qb = applyProductListFilters(qb, search, categoryID)
 	qb = qb.OrderBy("p.name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset))
 
 	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to build list products query", logger.Error(err))
-		return nil, false, err
+		return nil, 0, false, err
 	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list products", logger.Error(err))
-		return nil, false, err
+		return nil, 0, false, err
 	}
 
 	defer rows.Close()
@@ -85,14 +73,14 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		var p domain.Product
 		if err := p.FromRow(rows); err != nil {
 			logger.Ctx(ctx).Error("Failed to scan product row", logger.Error(err))
-			return nil, false, err
+			return nil, 0, false, err
 		}
 
 		products = append(products, p)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, false, err
+		return nil, 0, false, err
 	}
 
 	hasMore := len(products) > limit
@@ -100,7 +88,57 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		products = products[:limit]
 	}
 
-	return products, hasMore, nil
+	total, err := r.countProducts(ctx, ownerID, search, categoryID)
+	if err != nil {
+		return nil, 0, false, err
+	}
+
+	return products, total, hasMore, nil
+}
+
+func (r *Repository) countProducts(ctx context.Context, ownerID int64, search string, categoryID int) (int64, error) {
+	qb := squirrel.Select("COUNT(*)").
+		From("erp_products p").
+		Where(squirrel.Eq{"p.business_id": ownerID})
+	qb = applyProductListFilters(qb, search, categoryID)
+
+	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build count products query", logger.Error(err))
+		return 0, err
+	}
+
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to count products", logger.Error(err))
+		return 0, err
+	}
+
+	return total, nil
+}
+
+func applyProductListFilters(qb squirrel.SelectBuilder, search string, categoryID int) squirrel.SelectBuilder {
+	qb = qb.Where("TRIM(COALESCE(p.name, '')) <> ''")
+
+	if search != "" {
+		booleanQuery := searchutil.BooleanPrefixQuery(search)
+		if booleanQuery != "" {
+			qb = qb.Where(
+				"(p.sku = ? OR p.barcode = ? OR MATCH(p.name, p.sku, p.barcode) AGAINST (? IN BOOLEAN MODE))",
+				search,
+				search,
+				booleanQuery,
+			)
+		} else {
+			qb = qb.Where("(p.sku = ? OR p.barcode = ?)", search, search)
+		}
+	}
+
+	if categoryID > 0 {
+		qb = qb.Where(squirrel.Eq{"p.category_id": categoryID})
+	}
+
+	return qb
 }
 
 func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.Product, error) {

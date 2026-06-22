@@ -8,6 +8,8 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+
+	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 var ErrSelfHostLicenseNotFound = errors.New("self-host license not found")
@@ -101,9 +103,20 @@ func (r *Repository) ListSelfHostLicenses(ctx context.Context, limit, offset int
 	countQ := sq.Select("COUNT(*)").From("self_host_licenses")
 
 	if email = strings.TrimSpace(strings.ToLower(email)); email != "" {
-		filter := "%" + email + "%"
-		listQ = listQ.Where("LOWER(owner_email) LIKE ?", filter)
-		countQ = countQ.Where("LOWER(owner_email) LIKE ?", filter)
+		booleanQuery := searchutil.BooleanPrefixQuery(email)
+		if booleanQuery != "" {
+			filter := sq.Expr(
+				"(owner_email = ? OR MATCH(owner_email, customer_name) AGAINST (? IN BOOLEAN MODE))",
+				email,
+				booleanQuery,
+			)
+			listQ = listQ.Where(filter)
+			countQ = countQ.Where(filter)
+		} else {
+			filter := sq.Eq{"owner_email": email}
+			listQ = listQ.Where(filter)
+			countQ = countQ.Where(filter)
+		}
 	}
 
 	query, args, err := listQ.ToSql()

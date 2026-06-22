@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 type Repository struct {
@@ -648,10 +650,10 @@ func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit 
 
 func (r *Repository) CreateAttachment(ctx context.Context, input domain.TaskAttachmentInput) (int64, error) {
 	res, err := r.queries.CreateAttachment(ctx, sqlc.CreateAttachmentParams{
-		TaskID:      input.TaskID,
-		OwnerID:     input.OwnerID,
-		BusinessID:  input.BusinessID,
-		Name:        input.Name,
+		TaskID:     input.TaskID,
+		OwnerID:    input.OwnerID,
+		BusinessID: input.BusinessID,
+		Name:       input.Name,
 		Url:        input.URL,
 		Size:       sql.NullInt64{Int64: input.Size, Valid: true},
 		UploadedBy: input.UploadedBy,
@@ -1622,18 +1624,25 @@ func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspac
 // ─────────────────────────────────────────────
 
 func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q string) ([]domain.Task, error) {
-	like := "%" + q + "%"
+	q = strings.TrimSpace(q)
+	if q == "" {
+		return []domain.Task{}, nil
+	}
+	searchQuery := searchutil.BooleanPrefixQuery(q)
+	if searchQuery == "" {
+		return []domain.Task{}, nil
+	}
 	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
 	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
 	          FROM flow_tasks
 	          WHERE workspace_id = ?
 	            AND archived = FALSE
-	            AND (title LIKE ? OR description LIKE ?)
+	            AND MATCH(title, description) AGAINST (? IN BOOLEAN MODE)
 	          ORDER BY updated_at DESC
 	          LIMIT 50`
 
-	rows, err := r.pool.QueryContext(ctx, query, workspaceID, like, like)
+	rows, err := r.pool.QueryContext(ctx, query, workspaceID, searchQuery)
 	if err != nil {
 		logger.Ctx(ctx).Error("SearchTasks failed", logger.Error(err))
 		return nil, err

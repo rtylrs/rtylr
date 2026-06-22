@@ -114,9 +114,9 @@ SELECT
 FROM user_memory
 WHERE user_id = ?
 AND (
-    `key` LIKE CONCAT('%', ?, '%') OR
-    value LIKE CONCAT('%', ?, '%') OR
-    memory_type LIKE CONCAT('%', ?, '%')
+    memory_type = ? OR
+    `key` = ? OR
+    MATCH(`key`, value, memory_type) AGAINST (? IN BOOLEAN MODE)
 )
 ORDER BY confidence DESC;
 

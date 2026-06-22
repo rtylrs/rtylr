@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
@@ -32,10 +33,11 @@ func main() {
 	}
 	defer dbclient.Close()
 
-	logger.Global().Info("email worker starting")
+	logger.Global().Info("worker starting")
 
+	go cacheInvalidate.SubscribeAsyncInvalidations(ctx)
 	pool := emailqueue.NewPool(dbclient.Pool())
 	pool.Run(ctx)
 
-	logger.Global().Info("email worker stopped")
+	logger.Global().Info("worker stopped")
 }

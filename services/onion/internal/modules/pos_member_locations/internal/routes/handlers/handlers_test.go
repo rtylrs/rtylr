@@ -144,17 +144,23 @@ func TestIsOwnerOrAdmin_UsesRoleNotIDCollision(t *testing.T) {
 	if !isOwnerOrAdmin(&authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "admin"}) {
 		t.Fatal("admin should be privileged")
 	}
+	if !isOwnerOrAdmin(&authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "console_admin"}) {
+		t.Fatal("console admin should be privileged")
+	}
 	if !isOwnerOrAdmin(&authPkg.AuthUser{UserID: 1, BusinessID: 1, Role: "owner"}) {
 		t.Fatal("owner should be privileged")
 	}
 }
 
-func TestHasBusinessWidePOSAccess_RoleAndFallbackRules(t *testing.T) {
+func TestHasBusinessWidePOSAccess_RoleRules(t *testing.T) {
 	if !hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "owner"}) {
 		t.Fatal("owner role should be privileged")
 	}
 	if !hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "admin"}) {
 		t.Fatal("admin role should be privileged")
+	}
+	if !hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "console_admin"}) {
+		t.Fatal("console admin role should be privileged")
 	}
 	if hasBusinessWidePOSAccess(context.Background(), &authPkg.AuthUser{UserID: 2, BusinessID: 1, Role: "store_manager"}) {
 		t.Fatal("store manager should not be privileged without matching business owner row")

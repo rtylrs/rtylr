@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -14,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 type Repository struct {
@@ -49,12 +51,18 @@ func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status,
 		qb = qb.Where(squirrel.Eq{"status": status})
 	}
 
-	if search != "" {
-		like := "%" + search + "%"
-		qb = qb.Where(squirrel.Or{
-			squirrel.Like{"client_name": like},
-			squirrel.Like{"invoice_number": like},
-		})
+	if search = strings.TrimSpace(search); search != "" {
+		booleanQuery := searchutil.BooleanPrefixQuery(search)
+		if booleanQuery != "" {
+			qb = qb.Where(
+				"(invoice_number = ? OR client_email = ? OR MATCH(invoice_number, client_name, client_email) AGAINST (? IN BOOLEAN MODE))",
+				search,
+				search,
+				booleanQuery,
+			)
+		} else {
+			qb = qb.Where(squirrel.Or{squirrel.Eq{"invoice_number": search}, squirrel.Eq{"client_email": search}})
+		}
 	}
 
 	if dateFrom != "" {
@@ -444,12 +452,17 @@ func (r *Repository) ListExpenses(ctx context.Context, businessID, categoryID in
 		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
 	}
 
-	if search != "" {
-		like := "%" + search + "%"
-		qb = qb.Where(squirrel.Or{
-			squirrel.Like{"description": like},
-			squirrel.Like{"vendor": like},
-		})
+	if search = strings.TrimSpace(search); search != "" {
+		booleanQuery := searchutil.BooleanPrefixQuery(search)
+		if booleanQuery != "" {
+			qb = qb.Where(
+				"(vendor = ? OR MATCH(description, vendor) AGAINST (? IN BOOLEAN MODE))",
+				search,
+				booleanQuery,
+			)
+		} else {
+			qb = qb.Where(squirrel.Eq{"vendor": search})
+		}
 	}
 
 	if dateFrom != "" {

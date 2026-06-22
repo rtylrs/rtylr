@@ -32,6 +32,7 @@ type ListProductsRequest struct {
 
 type ListProductsResponse struct {
 	Products []domain.Product `json:"products"`
+	Total    int64            `json:"total"`
 	HasMore  bool             `json:"has_more"`
 	Page     int64            `json:"page"`
 	PageSize int64            `json:"page_size"`
@@ -51,15 +52,6 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 	if bizErr != nil {
 		return ListProductsResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	products, hasMore, err := h.Service.ListProducts(ctx, ownerID, req.Search, int64(req.CategoryID), req.Page, req.PageSize)
-	if err != nil {
-		return ListProductsResponse{}, &errorModels.ServerError{
-			Code:     http.StatusInternalServerError,
-			HTTPCode: http.StatusInternalServerError,
-			Message:  "Failed to list products",
-		}
-	}
-
 	page := req.Page
 	if page < 1 {
 		page = 1
@@ -68,7 +60,20 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 	if pageSize < 1 {
 		pageSize = 50
 	}
-	return ListProductsResponse{Products: products, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
+	if pageSize > 500 {
+		pageSize = 500
+	}
+
+	products, total, hasMore, err := h.Service.ListProducts(ctx, ownerID, req.Search, int64(req.CategoryID), page, pageSize)
+	if err != nil {
+		return ListProductsResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to list products",
+		}
+	}
+
+	return ListProductsResponse{Products: products, Total: total, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // ─── Create Product ───────────────────────────────────────────────────────────
