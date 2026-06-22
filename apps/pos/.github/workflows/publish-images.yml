@@ -1,7 +1,7 @@
 name: Publish public image
 
 # Builds the PUBLIC self-host image docker.io/rtylr/pos. Triggered by a version
-# bump in voxire/rtylr-version (repository_dispatch "rtylr-release") or manually
+# bump in tryrtylr/rtylr-version (repository_dispatch "rtylr-release") or manually
 # with a version. NOT on normal pushes — day-to-day CI deploys to Cloudflare
 # Pages and never publishes an image. Only the web app is built here (no
 # native/Tauri build).
@@ -18,7 +18,7 @@ on:
 jobs:
   publish:
     name: Publish rtylr/pos
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
