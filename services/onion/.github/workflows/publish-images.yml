@@ -1,7 +1,7 @@
 name: Publish public images
 
 # Builds the PUBLIC self-host images docker.io/rtylr/{api,worker,upload}.
-# Triggered by a version bump in voxire/rtylr-version (repository_dispatch
+# Triggered by a version bump in tryrtylr/rtylr-version (repository_dispatch
 # "rtylr-release") or manually with a version. NOT on normal pushes — day-to-day
 # CI only builds/deploys the internal ECR images. The license image is internal
 # only and is never published here.
@@ -18,7 +18,7 @@ on:
 jobs:
   publish:
     name: Publish rtylr/${{ matrix.name }}
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
