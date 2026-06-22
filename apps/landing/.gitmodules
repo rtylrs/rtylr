@@ -1,3 +1,3 @@
 [submodule "packages"]
 	path = packages
-	url = git@github.com:voxire/packages.git
+	url = git@github.com:tryrtylr/packages.git
