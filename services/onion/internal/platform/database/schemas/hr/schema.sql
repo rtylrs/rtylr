@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FULLTEXT INDEX idx_hr_staff_search (first_name, last_name, email, role),
     INDEX idx_hr_staff_employee (owner_id, employee_id)
 );
 
