@@ -726,12 +726,21 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		},
 	)
 
+	// Self-host license validator. A no-op in hosted mode (always valid, no
+	// network); in self-host mode it validates the key against the license
+	// authority with a grace window. Built once and shared by /license/state,
+	// /runtime-config, and the enforcement middleware below.
+	licenseValidator := license.NewCachedValidator(platformConfig.GlobalConfig)
+
 	middlewares := []http.MiddlewareFunc{
 		http.SecurityMiddleware(),
 		jwtutils.JWTMiddleware(),
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver),
 		authPkg.DeviceMiddleware(),
+		// AFTER auth: gate protected API routes when a self-host license is
+		// invalid. Strict no-op in hosted mode (never consults the validator).
+		http.LicenseEnforcementMiddleware(licenseValidator, accessPolicy),
 	}
 
 	http.ApplyMiddlewares(r, middlewares)
@@ -740,11 +749,9 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	http.RegisterStatusRoutes(ctx, r)
 	http.RegisterVersionRoutes(r)
 
-	// Self-host license status. The validator is a no-op in hosted mode
-	// (always valid, no network); in self-host mode it validates the key
-	// against the license authority with a grace window. /license/state lets
-	// frontends render an admin-only notice. Prime the cache in the background.
-	licenseValidator := license.NewCachedValidator(platformConfig.GlobalConfig)
+	// /license/state lets frontends render an admin-only notice. Prime the
+	// cache in the background so the first protected request isn't blocked on
+	// the authority round-trip.
 	http.RegisterLicenseStateRoutes(r, licenseValidator)
 	http.RegisterRuntimeConfigRoutes(r, licenseValidator)
 	if license.IsSelfHosted(platformConfig.GlobalConfig) {
