@@ -14,3 +14,4 @@ export { useEmployeeSessionStore } from './employeeSessionStore';
 export { useFullscreenStore } from './fullscreenStore';
 export { useSessionCloseQueueStore } from './sessionCloseQueueStore';
 export { useTerminalContextStore } from './terminalContextStore';
+export { useServerStore } from './serverStore';
