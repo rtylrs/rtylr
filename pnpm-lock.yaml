@@ -1445,6 +1445,12 @@ importers:
 
   packages/api:
     dependencies:
+      '@voxire/config':
+        specifier: workspace:*
+        version: link:../config
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../types
       axios:
         specifier: ^1.15.2
         version: 1.15.2
@@ -1467,6 +1473,9 @@ importers:
       '@tanstack/react-query':
         specifier: '>=5.0.0'
         version: 5.99.0(react@19.2.5)
+      '@voxire/config':
+        specifier: workspace:*
+        version: link:../config
       axios:
         specifier: ^1.15.2
         version: 1.15.2
