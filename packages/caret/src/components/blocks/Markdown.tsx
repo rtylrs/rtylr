@@ -7,11 +7,13 @@ export interface MarkdownProps {
   source: string;
 }
 
-const safeUrlTransform: UrlTransform = (url) => {
+function sanitizeMarkdownUrl(url: string): string {
   const trimmed = url.trim();
   if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/')) return trimmed;
   return '';
-};
+}
+
+const safeUrlTransform: UrlTransform = (url) => sanitizeMarkdownUrl(url);
 
 const markdownComponents: Components = {
   h1: ({ node: _node, ...props }) => <h1 className="caret-h" {...props} />,
@@ -35,7 +37,7 @@ const markdownComponents: Components = {
     </div>
   ),
   a: ({ node: _node, href, ...props }) => {
-    const safeHref = href ? safeUrlTransform(href) : '';
+    const safeHref = href ? sanitizeMarkdownUrl(href) : '';
     if (!safeHref) return <span>{props.children}</span>;
 
     const isExternal = /^https?:\/\//i.test(safeHref);
