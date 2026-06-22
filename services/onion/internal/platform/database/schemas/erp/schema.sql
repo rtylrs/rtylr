@@ -60,7 +60,11 @@ CREATE TABLE IF NOT EXISTS erp_products (
     allow_backorder BOOLEAN NOT NULL DEFAULT FALSE,
     lead_time_days INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_erp_products_business_name (business_id, name),
+    INDEX idx_erp_products_business_category_name (business_id, category_id, name),
+    INDEX idx_erp_products_business_active (business_id, is_active, track_inventory),
+    FULLTEXT INDEX idx_erp_products_search (name, sku, barcode)
 );
 
 CREATE TABLE IF NOT EXISTS erp_inventory_transactions (

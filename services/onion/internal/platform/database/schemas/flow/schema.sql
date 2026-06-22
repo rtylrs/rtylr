@@ -76,9 +76,12 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     actual_hours DECIMAL(6,2),
     section_id BIGINT DEFAULT NULL,
     sort_order INT DEFAULT 0,
+    archived BOOLEAN DEFAULT FALSE,
     labels JSON COMMENT 'Array of label IDs',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flow_tasks_workspace_updated (workspace_id, archived, updated_at),
+    FULLTEXT INDEX idx_flow_tasks_search (title, description)
 );
 
 CREATE TABLE IF NOT EXISTS flow_task_comments (

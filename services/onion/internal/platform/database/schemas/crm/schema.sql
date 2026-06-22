@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS crm_customers (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY idx_crm_customers_business (business_id)
+    KEY idx_crm_customers_business (business_id),
+    KEY idx_crm_customers_business_created (business_id, created_at),
+    KEY idx_crm_customers_business_tier (business_id, loyalty_tier),
+    FULLTEXT KEY idx_crm_customers_search (first_name, last_name, email, phone)
 );
 
 CREATE TABLE IF NOT EXISTS crm_loyalty_transactions (

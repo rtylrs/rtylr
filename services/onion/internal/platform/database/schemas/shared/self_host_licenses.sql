@@ -19,5 +19,6 @@ CREATE TABLE IF NOT EXISTS self_host_licenses (
     UNIQUE KEY uq_self_host_licenses_owner_email (owner_email),
     UNIQUE KEY uq_self_host_licenses_key_hash (key_hash),
     INDEX idx_self_host_licenses_status (status),
-    INDEX idx_self_host_licenses_created_at (created_at)
+    INDEX idx_self_host_licenses_created_at (created_at),
+    FULLTEXT INDEX idx_self_host_licenses_search (owner_email, customer_name)
 );

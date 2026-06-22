@@ -40,7 +40,10 @@ CREATE TABLE IF NOT EXISTS finance_invoices (
     notes TEXT,
     terms TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_finance_invoices_business_created (business_id, created_at),
+    INDEX idx_finance_invoices_business_status_created (business_id, status, created_at),
+    FULLTEXT INDEX idx_finance_invoices_search (invoice_number, client_name, client_email)
 );
 
 CREATE TABLE IF NOT EXISTS finance_invoice_items (
@@ -97,7 +100,10 @@ CREATE TABLE IF NOT EXISTS finance_expenses (
     notes TEXT,
     status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_finance_expenses_business_date (business_id, expense_date),
+    INDEX idx_finance_expenses_business_category_date (business_id, category_id, expense_date),
+    FULLTEXT INDEX idx_finance_expenses_search (description, vendor)
 );
 
 CREATE TABLE IF NOT EXISTS finance_tax_config (
