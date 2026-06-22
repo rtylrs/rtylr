@@ -116,10 +116,21 @@ func Connect(ctx context.Context) error {
 		}
 	}
 
+	// Report the host/db actually connected to. Prod sets only DATABASE_URL (no
+	// DB_HOST/DB_NAME), so the env-default fallback would otherwise mislabel a
+	// real connection as localhost/onion_dev. Parse the resolved DSN first; fall
+	// back to env only when it can't be parsed (or for the local-dev DSN).
+	logHost := hostFromDSN(mainDSN)
+	if logHost == "" {
+		logHost = getEnvOrDefault("DB_HOST", DefaultDBHost) + ":" + getEnvOrDefault("DB_PORT", DefaultDBPort)
+	}
+	logDB := dbNameFromDSN(mainDSN)
+	if logDB == "" {
+		logDB = getEnvOrDefault("DB_NAME", DefaultDBName)
+	}
 	logger.Ctx(ctx).Info("Connected to MySQL database",
-		logger.String("host", getEnvOrDefault("DB_HOST", DefaultDBHost)),
-		logger.String("port", getEnvOrDefault("DB_PORT", DefaultDBPort)),
-		logger.String("database", getEnvOrDefault("DB_NAME", DefaultDBName)),
+		logger.String("host", logHost),
+		logger.String("database", logDB),
 	)
 
 	return nil
@@ -207,6 +218,36 @@ func replicaDBName() string {
 		return n
 	}
 	return DefaultDBName
+}
+
+// hostFromDSN extracts host[:port] from a go-sql-driver DSN
+// (user:pass@tcp(host:port)/dbname?params) or a URL DSN
+// (scheme://user:pass@host:port/dbname?params). Returns "" if it can't parse,
+// so callers can fall back to the DB_HOST env. Used only for log output — it
+// never carries credentials.
+func hostFromDSN(dsn string) string {
+	if i := strings.IndexByte(dsn, '?'); i >= 0 {
+		dsn = dsn[:i]
+	}
+	// native form: ...@tcp(host:port)/...
+	if i := strings.Index(dsn, "tcp("); i >= 0 {
+		rest := dsn[i+len("tcp("):]
+		if j := strings.IndexByte(rest, ')'); j >= 0 {
+			return rest[:j]
+		}
+	}
+	// URL form: scheme://[user:pass@]host:port/db
+	if i := strings.Index(dsn, "://"); i >= 0 {
+		rest := dsn[i+len("://"):]
+		if s := strings.IndexByte(rest, '/'); s >= 0 {
+			rest = rest[:s]
+		}
+		if at := strings.LastIndexByte(rest, '@'); at >= 0 {
+			rest = rest[at+1:]
+		}
+		return rest
+	}
+	return ""
 }
 
 // dbNameFromDSN extracts the database name from a go-sql-driver DSN
