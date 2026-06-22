@@ -23,6 +23,7 @@ const (
 	StatusMissing = "missing"
 	StatusExpired = "expired"
 	StatusInvalid = "invalid"
+	StatusRevoked = "revoked"
 
 	tokenPrefix = "rtylr_license_v1"
 )

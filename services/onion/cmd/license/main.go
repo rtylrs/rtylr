@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"io"
@@ -14,10 +15,12 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
 	platformconfig "github.com/voxire/onion/internal/platform/config"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/license"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
@@ -26,6 +29,9 @@ import (
 
 type licenseRunMode struct {
 	cfg *platformconfig.AppConfig
+	// db is the optional self_host_licenses lookup pool. When nil (DB not
+	// configured/reachable) verification falls back to signature/expiry only.
+	db *sql.DB
 }
 
 type verifyRequest struct {
@@ -60,7 +66,10 @@ func loadDotEnv() {
 }
 
 func (m licenseRunMode) UsesDatabaseHealthCheck() bool {
-	return false
+	// The DB is an optional enhancement (revocation/expiry overlay) — verify
+	// still works on signature/expiry alone if it's down. Only assert a DB
+	// health dependency when a pool was actually established.
+	return m.db != nil
 }
 
 func (m licenseRunMode) Setup(_ context.Context, r *chi.Mux) {
@@ -89,7 +98,31 @@ func (m licenseRunMode) verify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, license.VerifyKey(m.cfg, req.LicenseKey))
+	report := license.VerifyKey(m.cfg, req.LicenseKey)
+	report = m.applyDBRevocation(r.Context(), req.LicenseKey, report)
+	writeJSON(w, http.StatusOK, report)
+}
+
+// applyDBRevocation overlays self_host_licenses revocation/expiry onto a
+// signature-valid report so revoking a key in voxtooling takes effect. It is
+// resilient: a signature-invalid report, an absent DB, an unknown key, or a DB
+// error all leave the signature-based result untouched.
+func (m licenseRunMode) applyDBRevocation(ctx context.Context, rawKey string, report license.StatusReport) license.StatusReport {
+	if !report.Valid || m.db == nil {
+		return report
+	}
+
+	record, err := license.LookupByKeyHash(ctx, m.db, license.HashKey(rawKey))
+	if err != nil {
+		if !errors.Is(err, license.ErrLicenseNotFound) {
+			logger.Ctx(ctx).Warn("license DB lookup failed; falling back to signature result",
+				logger.Error(err),
+			)
+		}
+		return report
+	}
+
+	return license.ApplyRevocation(report, record, time.Now().UTC())
 }
 
 func decodeVerifyRequest(w http.ResponseWriter, r *http.Request) (verifyRequest, bool) {
@@ -105,6 +138,16 @@ func decodeVerifyRequest(w http.ResponseWriter, r *http.Request) (verifyRequest,
 		return verifyRequest{}, false
 	}
 	return req, true
+}
+
+// dbConfigured reports whether enough DB connection info is present to attempt
+// a connection. Mirrors dbclient's DATABASE_URL-or-DB_* resolution.
+func dbConfigured(cfg *platformconfig.AppConfig) bool {
+	if cfg != nil {
+		return cfg.DatabaseURL != "" || (cfg.DBHost != "" && cfg.DBName != "" && cfg.DBUser != "")
+	}
+	return os.Getenv("DATABASE_URL") != "" ||
+		(os.Getenv("DB_HOST") != "" && os.Getenv("DB_NAME") != "" && os.Getenv("DB_USER") != "")
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload interface{}) {
@@ -146,7 +189,21 @@ func main() {
 		logger.String("port", port),
 	)
 
-	if err := serverhttp.Start(ctx, licenseRunMode{cfg: cfg}, port); err != nil {
+	// Connect the self_host_licenses pool so verification can honor revocation
+	// and DB-side expiry. Optional and fail-soft: if the DB isn't configured or
+	// is unreachable, verification falls back to signature/expiry only.
+	var db *sql.DB
+	if dbConfigured(cfg) {
+		if connErr := dbclient.Connect(ctx); connErr != nil {
+			logger.Ctx(ctx).Warn("license DB unavailable; revocation checks disabled",
+				logger.Error(connErr),
+			)
+		} else {
+			db = dbclient.Pool()
+		}
+	}
+
+	if err := serverhttp.Start(ctx, licenseRunMode{cfg: cfg, db: db}, port); err != nil {
 		logger.Global().Fatal("license server failed", logger.Error(err))
 	}
 }
