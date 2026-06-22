@@ -699,6 +699,8 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	accessPolicy.RegisterAnonymousRoutes("/health")
 	accessPolicy.RegisterAnonymousRoutes("/version")
 	accessPolicy.RegisterAnonymousRoutes("/license/state")
+	accessPolicy.RegisterAnonymousRoutes("/runtime-config")
+	accessPolicy.RegisterAnonymousRoutes("/.well-known/rtylr.json")
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
@@ -744,6 +746,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	// frontends render an admin-only notice. Prime the cache in the background.
 	licenseValidator := license.NewCachedValidator(platformConfig.GlobalConfig)
 	http.RegisterLicenseStateRoutes(r, licenseValidator)
+	http.RegisterRuntimeConfigRoutes(r, licenseValidator)
 	if license.IsSelfHosted(platformConfig.GlobalConfig) {
 		go licenseValidator.Refresh(ctx)
 	}
