@@ -86,6 +86,14 @@ func (c *CDN) CheckMediaEngine() error {
 	return nil
 }
 
+// PURGE is a non-standard HTTP method (used here for cache/derivative
+// invalidation). chi panics if you route a method it doesn't know about, so it
+// must be registered once at package load — before any RegisterRoutes call —
+// otherwise the upload runmode crash-loops on boot.
+func init() {
+	chi.RegisterMethod("PURGE")
+}
+
 // RegisterRoutes mounts the CDN endpoints. Read endpoints are public; the
 // upload endpoint is wrapped in the API-key middleware. /health, /metrics and
 // CORS are provided by the shared web server, so they are not registered here.
