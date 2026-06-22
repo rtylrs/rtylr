@@ -1,7 +1,7 @@
 name: Publish public images
 
 # Builds the PUBLIC self-host frontend images docker.io/rtylr/<app> for the 10
-# rtylr apps. Triggered by a version bump in voxire/rtylr-version
+# rtylr apps. Triggered by a version bump in tryrtylr/rtylr-version
 # (repository_dispatch "rtylr-release") or manually with a version. NOT on normal
 # pushes — day-to-day CI deploys to Cloudflare Pages and never publishes images.
 on:
@@ -17,7 +17,7 @@ on:
 jobs:
   build:
     name: Build all apps
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
@@ -78,7 +78,7 @@ jobs:
   publish:
     name: Publish rtylr/${{ matrix.app }}
     needs: build
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

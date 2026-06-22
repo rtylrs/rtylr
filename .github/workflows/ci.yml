@@ -17,7 +17,7 @@ jobs:
   # ── Build & upload ─────────────────────────────────────────────────
   check:
     name: Build
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -74,7 +74,7 @@ jobs:
 
   changes:
     name: Detect changed apps
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     outputs:
       auth: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.auth }}
@@ -128,128 +128,128 @@ jobs:
               - 'packages/**'
 
   # ── Deploy jobs ────────────────────────────────────────────────────
-  # Each job is a thin call into voxire/pipelines. All app-identical
+  # Each job is a thin call into tryrtylr/pipelines. All app-identical
   # build + upload logic lives there; here we only declare the per-app
   # knobs (pnpm filter, dist dir, Cloudflare project name).
 
   deploy-auth:
     needs: [check, changes]
     if: needs.changes.outputs.auth == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/auth'
       dist_dir: dist/auth
       project_name: rtylr-auth
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-dash:
     needs: [check, changes]
     if: needs.changes.outputs.dash == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: dash
       dist_dir: dist/dash
       project_name: rtylr-hub
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-erp:
     needs: [check, changes]
     if: needs.changes.outputs.erp == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/erp'
       dist_dir: dist/erp
       project_name: rtylr-erp
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-crm:
     needs: [check, changes]
     if: needs.changes.outputs.crm == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/crm'
       dist_dir: dist/crm
       project_name: rtylr-crm
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-hr:
     needs: [check, changes]
     if: needs.changes.outputs.hr == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/hr'
       dist_dir: dist/hr
       project_name: rtylr-hr
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-finance:
     needs: [check, changes]
     if: needs.changes.outputs.finance == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/finance'
       dist_dir: dist/finance
       project_name: rtylr-finance
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-flow:
     needs: [check, changes]
     if: needs.changes.outputs.flow == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/flow'
       dist_dir: dist/flow
       project_name: rtylr-flow
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-insights:
     needs: [check, changes]
     if: needs.changes.outputs.insights == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/insights'
       dist_dir: dist/insights
       project_name: rtylr-insights
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-menu:
     needs: [check, changes]
     if: needs.changes.outputs.menu == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/menu'
       dist_dir: dist/menu
       project_name: rtylr-menu
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   deploy-recruit:
     needs: [check, changes]
     if: needs.changes.outputs.recruit == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
     with:
       app_filter: '@rtylr/recruit'
       dist_dir: dist/recruit
       project_name: rtylr-recruit
       artifact_name: dist-${{ github.sha }}
-      runs_on: blacksmith-2vcpu-ubuntu-2404
+      runs_on: ubuntu-latest
     secrets: inherit
 
   # ── Slack notification ─────────────────────────────────────────────
@@ -285,7 +285,7 @@ jobs:
         || needs.changes.outputs.insights == 'true'
         || needs.changes.outputs.menu == 'true'
         || needs.changes.outputs.recruit == 'true' ) }}
-    uses: voxire/pipelines/.github/workflows/notify-slack.yml@main
+    uses: tryrtylr/pipelines/.github/workflows/notify-slack.yml@main
     with:
       message: ':rocket: *rtylr* — new version deployed to production'
     secrets: inherit
