@@ -42,8 +42,10 @@ const MultiPaymentScreen: React.FC = () => {
       }
       try {
         const res = await unwrap(posService.getOrder(id));
-        const o = ((res as { order?: Record<string, unknown> })?.order ??
-          res) as Record<string, unknown>;
+        const o = ((res as { order?: Record<string, unknown> })?.order ?? res) as Record<
+          string,
+          unknown
+        >;
         if (active) {
           setOrder({
             subtotal: Number(o.subtotal ?? 0),
@@ -133,7 +135,7 @@ const MultiPaymentScreen: React.FC = () => {
 
   return (
     <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? ''}`}>
-      <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-6xl">
+      <div className="w-full p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="space-y-5">
           <div className="rounded-xl bg-pos-card border border-pos-border p-4">
             <div className="flex justify-between text-sm text-pos-muted">

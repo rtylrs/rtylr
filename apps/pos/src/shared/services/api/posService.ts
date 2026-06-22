@@ -252,6 +252,9 @@ export interface MenuItemUpdatePayload {
 
 export interface OrderFilterParams {
   status?: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
   date?: string;
   tableId?: number;
   [key: string]: unknown;
@@ -429,7 +432,9 @@ export const posService = {
 
   // ── POS Users (cashiers/staff - PIN login) ────────────────────
   getPOSUsers: (locationId?: number) =>
-    safe.get('/pos/users', { params: locationId ? { location_id: locationId } : {} }),
+    safe.get('/pos/users', {
+      params: locationId ? { location_id: locationId } : {},
+    }),
   createPOSUser: (data: POSUserPayload) => safe.post('/pos/users', data),
   updatePOSUser: (data: Partial<POSUserPayload> & { id: number }) =>
     safe.patch('/pos/users/update', data),
@@ -437,7 +442,11 @@ export const posService = {
   // Verify a roster operator's PIN at a location. Returns the linked team
   // user id + role-derived capability flags.
   verifyPIN: (locationId: number, userId: number, pin: string) =>
-    safe.post('/pos/users/verify-pin', { location_id: locationId, user_id: userId, pin }),
+    safe.post('/pos/users/verify-pin', {
+      location_id: locationId,
+      user_id: userId,
+      pin,
+    }),
   // First-time PIN onboarding for a rostered operator (self or manager-provisioned).
   setPIN: (data: { userId: number; locationId: number; name: string; pin: string }) =>
     safe.post('/pos/users/set-pin', {
@@ -451,7 +460,9 @@ export const posService = {
   getMyLocations: () => safe.get('/pos/access/my-locations'),
   // The sign-in roster for a location: assigned members + has_pin + role.
   getLocationRoster: (locationId: number) =>
-    safe.get('/pos/access/location-roster', { params: { location_id: locationId } }),
+    safe.get('/pos/access/location-roster', {
+      params: { location_id: locationId },
+    }),
   assignMemberToLocation: (data: MemberLocationPayload) =>
     safe.post('/pos/access/assign', {
       user_id: data.user_id ?? data.userId,

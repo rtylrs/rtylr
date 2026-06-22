@@ -1,8 +1,9 @@
 import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ReceiptText } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, ReceiptText } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useDebounce } from '@voxire/utils';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
@@ -16,13 +17,34 @@ import { normalizeOrdersResponse } from './ordersWorkflow';
 
 const FILTERS = ['all', 'pending', 'preparing', 'ready', 'paid', 'voided', 'refunded'] as const;
 type OrderFilter = (typeof FILTERS)[number];
+const PAGE_SIZE = 25;
+
+function responseNumber(res: unknown, ...keys: string[]): number | undefined {
+  if (!res || typeof res !== 'object') return undefined;
+  const record = res as Record<string, unknown>;
+  for (const key of keys) {
+    const numeric = Number(record[key]);
+    if (Number.isFinite(numeric) && numeric >= 0) return numeric;
+  }
+  return undefined;
+}
+
+function responseBool(res: unknown, ...keys: string[]): boolean {
+  if (!res || typeof res !== 'object') return false;
+  const record = res as Record<string, unknown>;
+  return keys.some((key) => record[key] === true);
+}
 
 const OrdersScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 250);
   const [filter, setFilter] = useState<OrderFilter>('all');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [reopening, setReopening] = useState<string | null>(null);
   const [voiding, setVoiding] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -32,17 +54,33 @@ const OrdersScreen: React.FC = () => {
   useEffect(() => {
     (async () => {
       setLoading(true);
+      setError(null);
       try {
-        const res = await unwrap(posService.getOrders());
-        setOrders(normalizeOrdersResponse(res));
+        const res = await unwrap(
+          posService.getOrders({
+            page,
+            page_size: PAGE_SIZE,
+            ...(filter !== 'all' ? { status: filter } : {}),
+            ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),
+          })
+        );
+        const nextOrders = normalizeOrdersResponse(res);
+        setOrders(nextOrders);
+        const nextTotal =
+          responseNumber(res, 'total', 'totalCount', 'total_count') ?? nextOrders.length;
+        setTotal(nextTotal);
+        setHasMore(responseBool(res, 'hasMore', 'has_more') || page * PAGE_SIZE < nextTotal);
       } catch (e) {
-        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        const err = e as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
         setError(err?.response?.data?.message ?? 'Failed to load orders');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [debouncedSearch, filter, page]);
 
   const handleReopen = async (e: React.MouseEvent, order: Order) => {
     e.stopPropagation();
@@ -52,7 +90,10 @@ const OrdersScreen: React.FC = () => {
       setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'pending' } : o)));
       toast.success(`Order #${order.number ?? order.id} reopened`);
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      const e = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       toast.error(e?.response?.data?.message ?? 'Failed to reopen order');
     } finally {
       setReopening(null);
@@ -65,23 +106,21 @@ const OrdersScreen: React.FC = () => {
     setVoiding(String(order.id));
     try {
       await unwrap(posService.voidOrder(Number(order.id), { reason: 'Manager void' }));
-      setOrders((prev) =>
-        prev.map((o) => (o.id === order.id ? { ...o, status: 'voided' } : o)),
-      );
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'voided' } : o)));
       toast.success(`Order #${order.number ?? order.id} voided`);
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      const e = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       toast.error(e?.response?.data?.message ?? 'Failed to void order');
     } finally {
       setVoiding(null);
     }
   };
 
-  const filtered = orders.filter((o) => {
-    if (filter !== 'all' && o.status !== filter) return false;
-    if (search && !(o.number ?? o.id).toString().includes(search)) return false;
-    return true;
-  });
+  const pageStart = orders.length > 0 ? (page - 1) * PAGE_SIZE + 1 : 0;
+  const pageEnd = orders.length > 0 ? pageStart + orders.length - 1 : 0;
 
   return (
     <ScreenLayout title="Orders">
@@ -91,12 +130,22 @@ const OrdersScreen: React.FC = () => {
             Manager override approved - select a paid order below to reopen it.
           </div>
         )}
-        <SearchBar value={search} onChange={setSearch} placeholder="Search orders..." />
+        <SearchBar
+          value={search}
+          onChange={(value) => {
+            setPage(1);
+            setSearch(value);
+          }}
+          placeholder="Search orders..."
+        />
         <div className="flex gap-2">
           {FILTERS.map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => {
+                setPage(1);
+                setFilter(f);
+              }}
               className={`h-10 px-4 rounded-lg text-xs font-semibold uppercase ${
                 filter === f ? 'bg-pos-text text-pos-bg' : 'bg-white/8 text-pos-text'
               }`}
@@ -109,52 +158,82 @@ const OrdersScreen: React.FC = () => {
           <Skeleton rows={8} />
         ) : error ? (
           <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
-        ) : filtered.length === 0 ? (
+        ) : orders.length === 0 ? (
           <EmptyState icon={ReceiptText} title="No orders" />
         ) : (
-          <ul className="space-y-2">
-            {filtered.map((o) => (
-              <li
-                key={o.id}
-                className="p-4 rounded-xl bg-pos-card border border-pos-border hover:border-white/20 cursor-pointer transition"
-                onClick={() => !reopenMode && navigate(`/payment/${o.id}`)}
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-pos-text">#{o.number ?? o.id}</span>
-                    <OrderStatusBadge status={o.status} />
-                    {o.tableNumber && (
-                      <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
-                    )}
+          <>
+            <ul className="space-y-2">
+              {orders.map((o) => (
+                <li
+                  key={o.id}
+                  className="p-4 rounded-xl bg-pos-card border border-pos-border hover:border-white/20 cursor-pointer transition"
+                  onClick={() => !reopenMode && navigate(`/payment/${o.id}`)}
+                >
+                  <div className="flex justify-between items-center gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="font-bold text-pos-text truncate">#{o.number ?? o.id}</span>
+                      <OrderStatusBadge status={o.status} />
+                      {o.tableNumber && (
+                        <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-sm font-bold text-pos-text">
+                        {formatCurrency(o.total)}
+                      </span>
+                      {reopenMode && o.status === 'paid' && (
+                        <button
+                          type="button"
+                          disabled={reopening === String(o.id)}
+                          onClick={(e) => void handleReopen(e, o)}
+                          className="h-8 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 disabled:opacity-50 transition-colors"
+                        >
+                          {reopening === String(o.id) ? '...' : 'Reopen'}
+                        </button>
+                      )}
+                      {!reopenMode && isVoidable(o.status) && (
+                        <button
+                          type="button"
+                          disabled={voiding === String(o.id)}
+                          onClick={(e) => void handleVoid(e, o)}
+                          className="h-8 px-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/25 disabled:opacity-50 transition-colors"
+                        >
+                          {voiding === String(o.id) ? '...' : 'Void'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-pos-text">{formatCurrency(o.total)}</span>
-                    {reopenMode && o.status === 'paid' && (
-                      <button
-                        type="button"
-                        disabled={reopening === String(o.id)}
-                        onClick={(e) => void handleReopen(e, o)}
-                        className="h-8 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 disabled:opacity-50 transition-colors"
-                      >
-                        {reopening === String(o.id) ? '...' : 'Reopen'}
-                      </button>
-                    )}
-                    {!reopenMode && isVoidable(o.status) && (
-                      <button
-                        type="button"
-                        disabled={voiding === String(o.id)}
-                        onClick={(e) => void handleVoid(e, o)}
-                        className="h-8 px-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/25 disabled:opacity-50 transition-colors"
-                      >
-                        {voiding === String(o.id) ? '...' : 'Void'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="text-[11px] text-pos-muted mt-1">{formatDate(o.createdAt)}</div>
-              </li>
-            ))}
-          </ul>
+                  <div className="text-[11px] text-pos-muted mt-1">{formatDate(o.createdAt)}</div>
+                </li>
+              ))}
+            </ul>
+            <div className="flex items-center justify-between gap-3 pt-2 text-xs text-pos-muted">
+              <span>
+                Page {page}
+                {total > 0 ? ` · ${pageStart}-${pageEnd} of ${total}` : ''}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() => setPage((value) => Math.max(1, value - 1))}
+                  className="h-9 px-3 rounded-lg bg-white/8 text-pos-text disabled:opacity-40 inline-flex items-center gap-1.5"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  disabled={!hasMore}
+                  onClick={() => setPage((value) => value + 1)}
+                  className="h-9 px-3 rounded-lg bg-white/8 text-pos-text disabled:opacity-40 inline-flex items-center gap-1.5"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </ScreenLayout>

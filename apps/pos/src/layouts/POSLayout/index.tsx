@@ -113,6 +113,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
   const pendingOfflineOrders = offlineQueue.filter((item) => item.status === 'pending').length;
   const failedOfflineOrders = offlineQueue.filter((item) => item.status === 'failed').length;
   const pendingCashMovements = cashMovementQueue.filter((item) => item.status === 'pending').length;
+  const caretApiBaseUrl = resolveApiBaseUrl() ?? '';
   const caretPageContext = React.useMemo(
     () =>
       buildCaretRouteContext({
@@ -121,7 +122,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
         pathname: location.pathname,
         routeLabels: POS_ROUTE_LABELS,
         routeModules: POS_ROUTE_MODULES,
-        businessName,
+        businessName: businessName ?? undefined,
         role: employee?.role,
         selected: {
           ...(orderId ? { order_id: orderId } : {}),
@@ -224,7 +225,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
             variant="inline"
             appId="pos"
             userId={caretUserId}
-            apiBaseUrl={resolveApiBaseUrl()}
+            apiBaseUrl={caretApiBaseUrl}
             systemContext="User is in the POS app (terminal, orders, tables, receipts, inventory, customers, and staff workflows)."
             pageContext={caretPageContext}
           />
