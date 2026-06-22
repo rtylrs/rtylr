@@ -103,7 +103,7 @@ const navGroups: NavGroup[] = [
 
 const routeLabels: Record<string, string> = {
   '/': 'Dashboard',
-  '/products': 'Products',
+  '/products': 'Inventory',
   '/inventory': 'Inventory',
   '/purchasing': 'Purchase Orders',
   '/suppliers': 'Suppliers',

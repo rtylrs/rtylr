@@ -20,7 +20,6 @@ interface Result {
 
 const NAV_ITEMS: Result[] = [
   { type: 'nav', label: 'Dashboard', to: '/', icon: LayoutDashboard },
-  { type: 'nav', label: 'Products', to: '/products', icon: Package },
   { type: 'nav', label: 'Inventory', to: '/inventory', icon: Package },
   { type: 'nav', label: 'Categories', to: '/categories', icon: Package },
   { type: 'nav', label: 'Brands', to: '/brands', icon: Package },

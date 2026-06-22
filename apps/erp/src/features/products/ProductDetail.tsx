@@ -75,7 +75,7 @@ const ProductDetail: React.FC = () => {
       onSuccess: () => {
         toast.success(t('erp.products.toast.deleted'));
         setConfirmDelete(false);
-        navigate({ to: '/products' });
+        navigate({ to: '/inventory' });
       },
       onError: () => {
         toast.error(t('erp.products.toast.deleteFailed'));
@@ -99,11 +99,11 @@ const ProductDetail: React.FC = () => {
         description={t('erp.products.detail.notFoundDescription')}
         action={
           <Link
-            to="/products"
+            to="/inventory"
             className="px-3 py-2 rounded-lg text-xs font-semibold"
             style={{ background: AMBER, color: '#000', textDecoration: 'none' }}
           >
-            {t('erp.products.detail.backToProducts')}
+            {t('erp.products.detail.backToInventory')}
           </Link>
         }
       />
@@ -117,12 +117,12 @@ const ProductDetail: React.FC = () => {
       className="w-full min-w-0 space-y-5"
     >
       <HelmetContainer title="Product detail · rtylr" />
-      <Breadcrumbs items={[{ label: 'Products', to: '/products' }, { label: product.name }]} />
+      <Breadcrumbs items={[{ label: 'Inventory', to: '/inventory' }, { label: product.name }]} />
 
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <Link
-            to="/products"
+            to="/inventory"
             className="h-8 w-8 rounded-lg flex items-center justify-center"
             style={{
               background: 'var(--hub-hover)',
