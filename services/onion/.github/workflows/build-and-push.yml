@@ -145,5 +145,5 @@ jobs:
     if: ${{ always() && needs.build-push-deploy.result == 'success' }}
     uses: tryrtylr/pipelines/.github/workflows/notify-slack.yml@main
     with:
-      message: ':rocket: *onion (API)* — v${{ needs.version.outputs.new_version }} deployed to production'
+      message: ':rocket: *onion (API)* — deployed to production'
     secrets: inherit
