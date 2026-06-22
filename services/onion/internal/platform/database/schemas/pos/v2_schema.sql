@@ -32,20 +32,8 @@ CREATE TABLE IF NOT EXISTS pos_terminals (
     INDEX idx_terminals_branch (branch_id)
 );
 
--- ── Add terminal_id to sessions ──────────────────────────────────
-ALTER TABLE pos_sessions
-  ADD COLUMN terminal_id BIGINT DEFAULT NULL,
-  ADD COLUMN business_id BIGINT NOT NULL DEFAULT 0;
-
--- ── Add terminal_id, tip, void fields to orders ──────────────────
-ALTER TABLE pos_orders
-  ADD COLUMN terminal_id BIGINT DEFAULT NULL,
-  ADD COLUMN branch_id BIGINT DEFAULT NULL,
-  ADD COLUMN tip_amount DECIMAL(10,2) DEFAULT 0,
-  ADD COLUMN void_reason TEXT DEFAULT NULL,
-  ADD COLUMN voided_by BIGINT DEFAULT NULL,
-  ADD COLUMN voided_at TIMESTAMP NULL,
-  ADD COLUMN exchange_order_id BIGINT DEFAULT NULL;
+-- Runtime session/order columns are defined in the consolidated base schema.
+-- Keeping them there avoids duplicate-column errors in schema generation.
 
 -- Update order status enum to include voided and held
 ALTER TABLE pos_orders MODIFY COLUMN status

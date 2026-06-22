@@ -2,9 +2,8 @@
 -- POS V3 Schema: Paddle billing integration for POS orders
 -- ═══════════════════════════════════════════════════════════════════
 
--- Store the Paddle transaction ID returned when a pay intent is created.
-ALTER TABLE pos_orders
-  ADD COLUMN paddle_transaction_id VARCHAR(64) DEFAULT NULL;
+-- paddle_transaction_id is defined in the consolidated base schema.
+-- Keeping it there avoids duplicate-column errors in schema generation.
 
 -- Track processed Paddle webhook events to enforce idempotent delivery.
 CREATE TABLE IF NOT EXISTS pos_paddle_events_processed (
