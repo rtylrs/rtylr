@@ -17,6 +17,7 @@ import { useCartStore } from '../../shared/stores/cartStore';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
+import { resolveApiBaseUrl } from '../../shared/services/server/serverConfig';
 
 interface POSLayoutProps {
   children: React.ReactNode;
@@ -223,7 +224,7 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
             variant="inline"
             appId="pos"
             userId={caretUserId}
-            apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
+            apiBaseUrl={resolveApiBaseUrl()}
             systemContext="User is in the POS app (terminal, orders, tables, receipts, inventory, customers, and staff workflows)."
             pageContext={caretPageContext}
           />
