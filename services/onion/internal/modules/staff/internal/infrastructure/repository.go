@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
 	"github.com/voxire/onion/internal/modules/staff/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 type Repository struct {
@@ -106,13 +108,13 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
 		Where(sq.Eq{"s.business_id": businessID})
 
+	search = strings.TrimSpace(search)
 	if search != "" {
-		like := "%" + search + "%"
+		searchTerm := searchutil.BooleanPrefixQuery(search)
 		builder = builder.Where(sq.Or{
-			sq.Like{"s.first_name": like},
-			sq.Like{"s.last_name": like},
-			sq.Like{"s.email": like},
-			sq.Like{"s.role": like},
+			sq.Eq{"s.email": search},
+			sq.Eq{"s.phone": search},
+			sq.Expr("(? <> '' AND MATCH(s.first_name, s.last_name, s.email, s.role) AGAINST (? IN BOOLEAN MODE))", searchTerm, searchTerm),
 		})
 	}
 	if departmentID != "" {
