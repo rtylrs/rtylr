@@ -25,9 +25,9 @@ jobs:
         include:
           - { name: api, dockerfile: Dockerfile, public_repo: rtylr/api, platforms: "linux/amd64,linux/arm64" }
           - { name: worker, dockerfile: Dockerfile.worker, public_repo: rtylr/worker, platforms: "linux/amd64,linux/arm64" }
-          # upload bundles a native C++ media-engine that can't cross-compile yet,
-          # so it stays amd64-only until the arm64 media-engine build is sorted.
-          - { name: upload, dockerfile: Dockerfile.upload, public_repo: rtylr/upload, platforms: "linux/amd64" }
+          # upload: Go binary cross-compiles; the C++ media-engine builds for arm64
+          # under emulation (slower) — so the published image is multi-arch.
+          - { name: upload, dockerfile: Dockerfile.upload, public_repo: rtylr/upload, platforms: "linux/amd64,linux/arm64" }
           # migrate is a client+scripts+sql image (no compilation) for self-host
           # DB bootstrap, so it builds multi-arch trivially.
           - { name: migrate, dockerfile: Dockerfile.migrate, public_repo: rtylr/migrate, platforms: "linux/amd64,linux/arm64" }

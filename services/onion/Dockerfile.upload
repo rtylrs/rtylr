@@ -17,7 +17,10 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --parallel "$(nproc)"
 
 # ── Stage 2: Go binary ──────────────────────────────────────────────────────
-FROM golang:1.26-alpine AS go-builder
+# Build on the native runner arch and cross-compile to TARGETARCH so the
+# contract codegen (buf) runs natively instead of under arm64 emulation. The
+# media-engine stage above still builds for the target arch (emulated for arm64).
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS go-builder
 WORKDIR /app
 RUN apk add --no-cache ca-certificates bash
 RUN go install github.com/bufbuild/buf/cmd/buf@v1.65.0 && \
@@ -35,7 +38,8 @@ RUN chmod +x scripts/*.sh && bash scripts/generate_contracts.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
-RUN CGO_ENABLED=0 GOOS=linux go build \
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
       -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
