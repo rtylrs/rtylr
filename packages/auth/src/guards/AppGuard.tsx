@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { APP_URLS } from '@voxire/config';
+import { resolveAppUrl, resolveAuthUrl } from '@voxire/config';
 import { getCookie } from '../cookies';
 import { signOut } from '../signOut';
 import { useUserStore } from '../store';
@@ -58,7 +58,7 @@ function DefaultDenied({ appId }: { appId: AppId }): React.JSX.Element {
     >
       <p style={{ fontWeight: 600 }}>You don't have access to this app.</p>
       <p style={{ color: '#999', fontSize: '13px' }}>Contact your admin to get access.</p>
-      <a href={APP_URLS.dash} style={{ color: '#4583C4', fontSize: '13px' }}>
+      <a href={resolveAppUrl('dash')} style={{ color: '#4583C4', fontSize: '13px' }}>
         Go to Dash
       </a>
       <button
@@ -147,7 +147,7 @@ export function AppGuard({
   const verifySession = useCallback((): void => {
     const token = getCookie('token');
     if (!token) {
-      window.location.href = `${APP_URLS.auth}?redirect=${appId}`;
+      window.location.href = `${resolveAuthUrl()}?redirect=${appId}`;
       return;
     }
 

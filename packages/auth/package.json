@@ -6,6 +6,9 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "@voxire/config": "workspace:*"
+  },
   "peerDependencies": {
     "@tanstack/react-query": ">=5.0.0",
     "axios": "^1.15.2",
