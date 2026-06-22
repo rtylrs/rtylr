@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -146,17 +147,19 @@ func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) htt
 	}
 }
 
+// getClientKey returns a per-client identifier for rate limiting. It must NOT
+// trust client-controllable headers, or an attacker rotates them to mint
+// unlimited buckets and bypass every limiter (global + per-route brute-force).
+//
+// onion runs behind Cloudflare, which sets CF-Connecting-IP to the true client
+// IP — a value a client cannot forge through Cloudflare. We trust only that,
+// then fall back to the connection's RemoteAddr. X-Forwarded-For / X-Real-IP are
+// deliberately NOT honored (they're attacker-settable on a direct connection).
 func getClientKey(r *http.Request) string {
-	ip := r.RemoteAddr
-	if forwardedFor := r.Header.Get("X-Forwarded-For"); forwardedFor != "" {
-		ip = forwardedFor
+	if cfIP := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); cfIP != "" {
+		return cfIP
 	}
-
-	if realIP := r.Header.Get("X-Real-IP"); realIP != "" {
-		ip = realIP
-	}
-
-	return ip
+	return r.RemoteAddr
 }
 
 // PerRouteRateLimit returns middleware that applies a tighter limit

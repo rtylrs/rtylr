@@ -84,21 +84,25 @@ func TestRateLimitMiddleware_Returns429(t *testing.T) {
 	}
 }
 
-func TestGetClientKey_PrefersHeaders(t *testing.T) {
+func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 	r.RemoteAddr = "10.0.0.1:1234"
 	if got := getClientKey(r); got != "10.0.0.1:1234" {
 		t.Errorf("default to RemoteAddr, got %q", got)
 	}
 
-	r.Header.Set("X-Forwarded-For", "client.example, proxy.example")
-	if got := getClientKey(r); got != "client.example, proxy.example" {
-		t.Errorf("X-Forwarded-For preferred, got %q", got)
+	// Attacker-settable headers must NOT change the bucket (else they can rotate
+	// them to mint unlimited buckets and bypass the limiters).
+	r.Header.Set("X-Forwarded-For", "spoofed.example, proxy.example")
+	r.Header.Set("X-Real-IP", "9.9.9.9")
+	if got := getClientKey(r); got != "10.0.0.1:1234" {
+		t.Errorf("X-Forwarded-For/X-Real-IP must be ignored, got %q", got)
 	}
 
-	r.Header.Set("X-Real-IP", "8.8.8.8")
+	// CF-Connecting-IP (set by Cloudflare, unspoofable through it) is trusted.
+	r.Header.Set("CF-Connecting-IP", "8.8.8.8")
 	if got := getClientKey(r); got != "8.8.8.8" {
-		t.Errorf("X-Real-IP wins over X-Forwarded-For, got %q", got)
+		t.Errorf("CF-Connecting-IP should win, got %q", got)
 	}
 }
 
