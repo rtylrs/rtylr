@@ -399,29 +399,53 @@ func (r *Repository) SearchUserMemory(ctx context.Context, userID int, query str
 	if query == "" {
 		return []domain.UserMemory{}, nil
 	}
+	search := searchutil.BooleanPrefixQuery(query)
 
-	arg := sqlc.SearchUserMemoryParams{
-		UserID:     int32(userID),
-		MemoryType: query,
-		Key:        query,
-		Search:     searchutil.BooleanPrefixQuery(query),
-	}
-
-	rows, err := r.queries.SearchUserMemory(ctx, arg)
+	rows, err := r.pool.QueryContext(ctx, `
+SELECT
+    id, user_id, memory_type, `+"`key`"+`, value, confidence,
+    source_session, created_at, updated_at
+FROM user_memory
+WHERE user_id = ?
+AND (
+    memory_type = ? OR
+    `+"`key`"+` = ? OR
+    MATCH(`+"`key`"+`, value, memory_type) AGAINST (? IN BOOLEAN MODE)
+)
+ORDER BY confidence DESC`, int32(userID), query, query, search)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search user memory", logger.Error(err))
 
 		return nil, fmt.Errorf("failed to search user memory: %w", err)
 	}
+	defer rows.Close()
 
-	results := make([]domain.UserMemory, 0, len(rows))
-	for _, row := range rows {
+	results := make([]domain.UserMemory, 0)
+	for rows.Next() {
+		var row sqlc.UserMemory
+		if scanErr := rows.Scan(
+			&row.ID,
+			&row.UserID,
+			&row.MemoryType,
+			&row.Key,
+			&row.Value,
+			&row.Confidence,
+			&row.SourceSession,
+			&row.CreatedAt,
+			&row.UpdatedAt,
+		); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan user memory search result: %w", scanErr)
+		}
+
 		var item domain.UserMemory
 		if fromRowsErr := item.FromRows(row); fromRowsErr != nil {
 			return nil, fromRowsErr
 		}
 
 		results = append(results, item)
+	}
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, fmt.Errorf("failed to iterate user memory search results: %w", rowsErr)
 	}
 
 	return results, nil

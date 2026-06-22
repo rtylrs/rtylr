@@ -31,19 +31,43 @@ func (r *Repository) Search(ctx context.Context, businessID int64, query string)
 	}
 	searchTerm := searchutil.BooleanPrefixQuery(query)
 
-	rows, err := r.queries.SearchPOSCustomers(ctx, sqlc.SearchPOSCustomersParams{
-		BusinessID: businessID,
-		Phone:      sql.NullString{String: query, Valid: true},
-		Email:      sql.NullString{String: query, Valid: true},
-		Search:     searchTerm,
-	})
+	rows, err := r.pool.QueryContext(ctx, `
+SELECT id, business_id, first_name, last_name, email, phone
+FROM crm_customers
+WHERE business_id = ?
+  AND (
+    phone = ?
+    OR email = ?
+    OR (? <> '' AND MATCH(first_name, last_name, email, phone) AGAINST (? IN BOOLEAN MODE))
+  )
+ORDER BY first_name LIMIT 20`, businessID, query, query, searchTerm, searchTerm)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search POS customers", logger.Error(err))
 		return nil, err
 	}
+	defer rows.Close()
 
-	customers := make([]domain.Customer, 0, len(rows))
-	for _, row := range rows {
+	customers := make([]domain.Customer, 0)
+	for rows.Next() {
+		var row struct {
+			ID         int64
+			BusinessID int64
+			FirstName  string
+			LastName   sql.NullString
+			Email      sql.NullString
+			Phone      sql.NullString
+		}
+		if scanErr := rows.Scan(
+			&row.ID,
+			&row.BusinessID,
+			&row.FirstName,
+			&row.LastName,
+			&row.Email,
+			&row.Phone,
+		); scanErr != nil {
+			return nil, scanErr
+		}
+
 		customers = append(customers, domain.Customer{
 			ID:        row.ID,
 			FirstName: row.FirstName,
@@ -52,5 +76,9 @@ func (r *Repository) Search(ctx context.Context, businessID int64, query string)
 			Phone:     row.Phone.String,
 		})
 	}
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
+	}
+
 	return customers, nil
 }

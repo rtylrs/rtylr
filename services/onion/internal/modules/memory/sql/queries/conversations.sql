@@ -115,8 +115,7 @@ FROM user_memory
 WHERE user_id = ?
 AND (
     memory_type = ? OR
-    `key` = ? OR
-    MATCH(`key`, value, memory_type) AGAINST (? IN BOOLEAN MODE)
+    `key` = ?
 )
 ORDER BY confidence DESC;
 
