@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { useDesktopStore } from '../../stores/useDesktopStore';
+import {
+  featureFlagEnabled,
+  IS_DESKTOP_MODE_DEFAULT_FEATURE,
+  resolveLandingFeatures,
+} from '../../lib/featureVariant';
 import { Desktop } from './index';
 import { OsModeBar } from './OsModeBar';
 import { BootScreen } from './BootScreen';
@@ -11,17 +16,33 @@ interface DesktopOrWebsiteProps {
 
 export const DesktopOrWebsite: React.FC<DesktopOrWebsiteProps> = ({ websiteContent }) => {
   const experience = useDesktopStore((s) => s.experience);
-  const setExperience = useDesktopStore((s) => s.setExperience);
+  const setDefaultExperience = useDesktopStore((s) => s.setDefaultExperience);
   const [isMobile, setIsMobile] = useState(false);
   const [ready, setReady] = useState(false);
   const [booting, setBooting] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const mobile = window.innerWidth < 768;
     setIsMobile(mobile);
-    if (mobile) setExperience('website');
     setReady(true);
-  }, [setExperience]);
+
+    if (!mobile) {
+      void resolveLandingFeatures().then((response) => {
+        if (cancelled) return;
+        const desktopDefault = featureFlagEnabled(
+          response.features,
+          IS_DESKTOP_MODE_DEFAULT_FEATURE,
+          false
+        );
+        setDefaultExperience(desktopDefault ? 'os' : 'website');
+      });
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [setDefaultExperience]);
 
   // Keep boot screen up briefly after desktop mounts so the fade-out is visible
   useEffect(() => {

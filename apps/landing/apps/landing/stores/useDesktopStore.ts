@@ -39,6 +39,7 @@ interface DesktopState {
   windows: WindowState[];
   globalZ: number;
   experience: Experience;
+  hasExplicitExperience: boolean;
   colorMode: ColorMode;
   wallpaper: Wallpaper;
   animationsEnabled: boolean;
@@ -54,6 +55,7 @@ interface DesktopState {
   updateWindowSize: (id: string, width: number, height: number) => void;
   closeAllWindows: () => void;
   setExperience: (exp: Experience) => void;
+  setDefaultExperience: (exp: Experience) => void;
   setColorMode: (mode: ColorMode) => void;
   setWallpaper: (wallpaper: Wallpaper) => void;
   setAnimationsEnabled: (enabled: boolean) => void;
@@ -85,7 +87,8 @@ export const useDesktopStore = create<DesktopState>()(
     (set, get) => ({
       windows: [],
       globalZ: 600,
-      experience: 'os',
+      experience: 'website',
+      hasExplicitExperience: false,
       colorMode: 'system',
       wallpaper: 'slate',
       animationsEnabled: true,
@@ -177,7 +180,10 @@ export const useDesktopStore = create<DesktopState>()(
 
       closeAllWindows: () => set({ windows: [] }),
 
-      setExperience: (experience) => set({ experience }),
+      setExperience: (experience) => set({ experience, hasExplicitExperience: true }),
+      setDefaultExperience: (experience) => {
+        if (!get().hasExplicitExperience) set({ experience });
+      },
       setColorMode: (colorMode) => set({ colorMode }),
       setWallpaper: (wallpaper) => set({ wallpaper }),
       setAnimationsEnabled: (animationsEnabled) => set({ animationsEnabled }),
@@ -185,10 +191,26 @@ export const useDesktopStore = create<DesktopState>()(
     }),
     {
       name: 'rtylr-desktop',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState, version) => {
+        const state = persistedState as Partial<DesktopState>;
+        if (version < 3) {
+          return {
+            ...state,
+            experience: 'website',
+            hasExplicitExperience: false,
+          };
+        }
+        return {
+          ...state,
+          experience: state.experience || 'website',
+          hasExplicitExperience: state.hasExplicitExperience || false,
+        };
+      },
       partialize: (s) => ({
         experience: s.experience,
+        hasExplicitExperience: s.hasExplicitExperience,
         colorMode: s.colorMode,
         wallpaper: s.wallpaper,
         animationsEnabled: s.animationsEnabled,

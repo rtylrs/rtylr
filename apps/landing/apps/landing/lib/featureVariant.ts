@@ -7,20 +7,23 @@ const VARIANT_COOKIE = 'rtylr_variant';
 const ANON_COOKIE = 'rtylr_aid';
 
 export const DEFAULT_VARIANT = 'a';
+export const IS_DESKTOP_MODE_DEFAULT_FEATURE = 'is_desktop_mode_default';
 
 const ANON_ID_DAYS = 365;
 const VARIANT_DAYS = 30;
 
-interface FeatureResolution {
+export interface FeatureResolution {
   key: string;
   enabled: boolean;
   variant: string;
 }
 
-interface FeaturesResponse {
+export interface FeaturesResponse {
   variant?: string;
   features?: Record<string, FeatureResolution>;
 }
+
+let landingFeaturesPromise: Promise<FeaturesResponse> | null = null;
 
 function getOrCreateAnonId(): string {
   const existing = getCookie(ANON_COOKIE);
@@ -37,6 +40,43 @@ function writeVariant(variant: string): void {
   setCookie(VARIANT_COOKIE, variant, { days: VARIANT_DAYS, domain: getDefaultCookieDomain() });
 }
 
+function fallbackFeatures(): FeaturesResponse {
+  return { variant: DEFAULT_VARIANT, features: {} };
+}
+
+export async function resolveLandingFeatures(): Promise<FeaturesResponse> {
+  if (!landingFeaturesPromise) {
+    landingFeaturesPromise = (async () => {
+      try {
+        const subject = getOrCreateAnonId();
+        const { data } = await api.post<FeaturesResponse>('/features', { subject });
+        return {
+          variant: data?.variant || DEFAULT_VARIANT,
+          features: data?.features || {},
+        };
+      } catch {
+        return fallbackFeatures();
+      }
+    })();
+  }
+
+  return landingFeaturesPromise;
+}
+
+export function featureFlagEnabled(
+  features: FeaturesResponse['features'] | undefined,
+  key: string,
+  fallback = false
+): boolean {
+  const feature = features?.[key];
+  if (!feature) return fallback;
+
+  const variant = feature.variant.toLowerCase();
+  if (['true', 'on', '1', 'yes'].includes(variant)) return true;
+  if (['false', 'off', '0', 'no'].includes(variant)) return false;
+  return feature.enabled;
+}
+
 /**
  * Resolves the landing variant from the backend feature-support service and
  * writes it to the `rtylr_variant` cookie on `.rtylr.com`, so the Cloudflare
@@ -50,16 +90,8 @@ function writeVariant(variant: string): void {
  * landing never breaks.
  */
 export async function initFeatureVariant(): Promise<string> {
-  let variant = DEFAULT_VARIANT;
-  try {
-    const subject = getOrCreateAnonId();
-    const { data } = await api.post<FeaturesResponse>('/features', { subject });
-    if (data && typeof data.variant === 'string' && data.variant.length > 0) {
-      variant = data.variant;
-    }
-  } catch {
-    variant = DEFAULT_VARIANT;
-  }
+  const features = await resolveLandingFeatures();
+  const variant = features.variant || DEFAULT_VARIANT;
   writeVariant(variant);
   return variant;
 }
