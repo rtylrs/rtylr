@@ -1,0 +1,25 @@
+# Dockerfile.migrate — self-host DB bootstrap image (docker.io/rtylr/migrate).
+#
+# A tiny image that applies the SQL schema directories idempotently against a
+# MySQL/MariaDB database. No Go compilation — just a client + bash + scripts +
+# sql, so it builds trivially for any architecture.
+#
+# Required env at run time (consumed by scripts/migrate.sh):
+#   DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME
+FROM alpine:3.20
+
+# mariadb-client provides the `mysql` CLI used by migrate.sh; bash is required
+# because the script uses bash-only syntax.
+RUN apk add --no-cache bash mariadb-client ca-certificates
+
+WORKDIR /app
+
+# migrate.sh resolves its schema dir relative to its own location:
+#   SCRIPT_DIR/../internal/platform/database/schemas
+# so preserve that layout under /app.
+COPY scripts/migrate.sh /app/scripts/migrate.sh
+COPY internal/platform/database/schemas /app/internal/platform/database/schemas
+
+RUN chmod +x /app/scripts/migrate.sh
+
+ENTRYPOINT ["/app/scripts/migrate.sh"]

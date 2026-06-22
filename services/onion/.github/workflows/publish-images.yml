@@ -1,6 +1,6 @@
 name: Publish public images
 
-# Builds the PUBLIC self-host images docker.io/rtylr/{api,worker,upload}.
+# Builds the PUBLIC self-host images docker.io/rtylr/{api,worker,upload,migrate}.
 # Triggered by a version bump in tryrtylr/rtylr-version (repository_dispatch
 # "rtylr-release") or manually with a version. NOT on normal pushes — day-to-day
 # CI only builds/deploys the internal ECR images. The license image is internal
@@ -28,6 +28,9 @@ jobs:
           # upload bundles a native C++ media-engine that can't cross-compile yet,
           # so it stays amd64-only until the arm64 media-engine build is sorted.
           - { name: upload, dockerfile: Dockerfile.upload, public_repo: rtylr/upload, platforms: "linux/amd64" }
+          # migrate is a client+scripts+sql image (no compilation) for self-host
+          # DB bootstrap, so it builds multi-arch trivially.
+          - { name: migrate, dockerfile: Dockerfile.migrate, public_repo: rtylr/migrate, platforms: "linux/amd64,linux/arm64" }
     steps:
       - uses: actions/checkout@v6
         with:
