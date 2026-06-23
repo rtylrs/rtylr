@@ -40,14 +40,22 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		"p.track_inventory", "COALESCE(img.url, '') AS image_url", "p.created_at", "p.updated_at",
 	).
 		From("erp_products p").
-		LeftJoin(`erp_product_images img ON img.id = (
-			SELECT i.id
-			FROM erp_product_images i
-			WHERE i.business_id = p.business_id
-			  AND i.product_id = p.id
-			ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
-			LIMIT 1
-		)`).
+		LeftJoin(`(
+			SELECT business_id, product_id, url
+			FROM (
+				SELECT
+					business_id,
+					product_id,
+					url,
+					ROW_NUMBER() OVER (
+						PARTITION BY business_id, product_id
+						ORDER BY is_primary DESC, position ASC, id ASC
+					) AS image_rank
+				FROM erp_product_images
+				WHERE business_id = ?
+			) ranked_product_images
+			WHERE image_rank = 1
+		) img ON img.business_id = p.business_id AND img.product_id = p.id`, ownerID).
 		Where(squirrel.Eq{"p.business_id": ownerID})
 
 	qb = applyProductListFilters(qb, search, categoryID)

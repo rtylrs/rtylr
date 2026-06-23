@@ -75,5 +75,8 @@ func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain
 }
 
 func (s *Service) GetThemeByOwnerID(ctx context.Context, id string) (domain.Theme, error) {
-	return s.repo.GetThemeByOwnerID(ctx, id)
+	idN, _ := strconv.ParseInt(id, 10, 64)
+	return cacher.Of[domain.Theme]().GetOrComputeSingle(ctx, cacheKeys.BusinessTheme(idN), func(ctx context.Context) (domain.Theme, error) {
+		return s.repo.GetThemeByOwnerID(ctx, id)
+	}, cacher.WithExpiry(ctx, ConfigCacheTTL))
 }

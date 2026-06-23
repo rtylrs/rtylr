@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -21,6 +22,12 @@ type Service struct {
 	repo *infrastructure.Repository
 }
 
+type productListPage struct {
+	Items   []domain.Product `json:"items"`
+	Total   int64            `json:"total"`
+	HasMore bool             `json:"has_more"`
+}
+
 func NewService(_ context.Context, db *sql.DB) *Service {
 	repo := infrastructure.NewRepository(db)
 
@@ -36,7 +43,7 @@ func invalidateProductScope(ctx context.Context, ownerID int64) {
 	}
 }
 
-func paginateProducts(page, pageSize int64) (int, int) {
+func normalizeProductPagination(page, pageSize int64) (int64, int64, int, int) {
 	if page < 1 {
 		page = 1
 	}
@@ -46,21 +53,50 @@ func paginateProducts(page, pageSize int64) (int, int) {
 	if pageSize > 500 {
 		pageSize = 500
 	}
-	return int(pageSize), int((page - 1) * pageSize)
+	return page, pageSize, int(pageSize), int((page - 1) * pageSize)
+}
+
+func paginateProducts(page, pageSize int64) (int, int) {
+	_, _, limit, offset := normalizeProductPagination(page, pageSize)
+	return limit, offset
+}
+
+func productListCacheKey(ownerID int64, search string, categoryID, page, pageSize int64) string {
+	normalizedSearch := strings.ToLower(strings.TrimSpace(search))
+	return fmt.Sprintf("%s|search=%s|category=%d|page=%d|page_size=%d",
+		cacheKeys.ProductsList(ownerID),
+		url.QueryEscape(normalizedSearch),
+		categoryID,
+		page,
+		pageSize,
+	)
 }
 
 func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, page, pageSize int64) ([]domain.Product, int64, bool, error) {
 	search = strings.TrimSpace(search)
-	limit, offset := paginateProducts(page, pageSize)
+	page, pageSize, limit, offset := normalizeProductPagination(page, pageSize)
 
-	items, total, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
+	result, err := cacher.Of[productListPage]().GetOrComputeSingle(ctx,
+		productListCacheKey(ownerID, search, categoryID, page, pageSize),
+		func(ctx context.Context) (productListPage, error) {
+			items, total, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
+			if err != nil {
+				return productListPage{}, err
+			}
+			if items == nil {
+				items = []domain.Product{}
+			}
+			return productListPage{Items: items, Total: total, HasMore: hasMore}, nil
+		},
+		cacher.WithExpiry(ctx, productsCacheTTL),
+	)
 	if err != nil {
 		return nil, 0, false, err
 	}
-	if items == nil {
-		items = []domain.Product{}
+	if result.Items == nil {
+		result.Items = []domain.Product{}
 	}
-	return items, total, hasMore, nil
+	return result.Items, result.Total, result.HasMore, nil
 }
 
 func (s *Service) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {

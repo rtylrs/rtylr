@@ -86,6 +86,10 @@ func BusinessConfig(businessID int64) string {
 	return fmt.Sprintf("%sbusiness:%d:config", Namespace, businessID)
 }
 
+func BusinessTheme(businessID int64) string {
+	return fmt.Sprintf("%sbusiness:%d:theme", Namespace, businessID)
+}
+
 func BusinessKPIs(businessID int64) string {
 	return fmt.Sprintf("%sbusiness:%d:kpis", Namespace, businessID)
 }

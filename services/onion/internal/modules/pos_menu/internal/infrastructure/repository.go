@@ -49,19 +49,28 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 		LEFT JOIN product_stock_total pst
 		  ON pst.business_id = p.business_id
 		 AND pst.product_id = p.id
-		LEFT JOIN erp_product_images img
-		  ON img.id = (
-				SELECT i.id
-				FROM erp_product_images i
-				WHERE i.business_id = p.business_id
-				  AND i.product_id = p.id
-				ORDER BY i.is_primary DESC, i.position ASC, i.id ASC
-				LIMIT 1
-		  )
+		LEFT JOIN (
+			SELECT business_id, product_id, url
+			FROM (
+				SELECT
+					business_id,
+					product_id,
+					url,
+					ROW_NUMBER() OVER (
+						PARTITION BY business_id, product_id
+						ORDER BY is_primary DESC, position ASC, id ASC
+					) AS image_rank
+				FROM erp_product_images
+				WHERE business_id = ?
+			) ranked_product_images
+			WHERE image_rank = 1
+		) img
+		  ON img.business_id = p.business_id
+		 AND img.product_id = p.id
 		WHERE p.business_id = ?
 		  AND p.is_active = TRUE
 		ORDER BY c.name, p.name
-	`, businessID)
+	`, businessID, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list menu items", logger.Error(err))
 		return nil, err
