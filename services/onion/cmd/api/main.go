@@ -148,7 +148,6 @@ import (
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
-	"github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/license"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
@@ -674,11 +673,6 @@ func initializeModules(ctx context.Context) *apiModules {
 
 func setupRoutes(ctx context.Context, r *chi.Mux) {
 	modules := initializeModules(ctx)
-	modules.HRLeave.RegisterScheduledJobs(ctx)
-	modules.HROvertime.RegisterScheduledJobs(ctx)
-	modules.HRPayroll.RegisterScheduledJobs(ctx)
-	jobs.AutoRegister(ctx, modules)
-	logger.Ctx(ctx).Info("scheduled jobs registered", logger.Any("jobs", jobs.Names()))
 
 	// Start the websocket bus with topic-level authorization backed by
 	// workspace/project membership checks. The rules:

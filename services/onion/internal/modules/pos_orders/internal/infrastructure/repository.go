@@ -390,6 +390,20 @@ func (r *Repository) UpdateSessionRefundTotals(ctx context.Context, sessionID in
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string, limit, offset int) ([]domain.Order, int64, bool, error) {
+	orders, hasMore, err := r.listOrdersRows(ctx, businessID, sessionID, status, dateFrom, dateTo, search, limit, offset)
+	if err != nil {
+		return nil, 0, false, err
+	}
+
+	total, err := r.countOrders(ctx, businessID, sessionID, status, dateFrom, dateTo, search)
+	if err != nil {
+		return nil, 0, false, err
+	}
+
+	return orders, total, hasMore, nil
+}
+
+func (r *Repository) listOrdersRows(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string, limit, offset int) ([]domain.Order, bool, error) {
 	builder := sq.
 		Select(
 			"o.id", "o.owner_id", "COALESCE(o.session_id,0)", "COALESCE(o.table_id,0)", "COALESCE(o.location_id,0)",
@@ -411,13 +425,13 @@ func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to build list pos orders query", logger.Error(err))
-		return nil, 0, false, err
+		return nil, false, err
 	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list pos orders", logger.Error(err))
-		return nil, 0, false, err
+		return nil, false, err
 	}
 
 	defer rows.Close()
@@ -428,13 +442,13 @@ func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64
 		o, scanErr := scanOrderRow(rows)
 		if scanErr != nil {
 			logger.Ctx(ctx).Error("Failed to scan order row", logger.Error(scanErr))
-			return nil, 0, false, scanErr
+			return nil, false, scanErr
 		}
 		orders = append(orders, o)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, 0, false, err
+		return nil, false, err
 	}
 
 	hasMore := len(orders) > limit
@@ -442,12 +456,7 @@ func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64
 		orders = orders[:limit]
 	}
 
-	total, err := r.countOrders(ctx, businessID, sessionID, status, dateFrom, dateTo, search)
-	if err != nil {
-		return nil, 0, false, err
-	}
-
-	return orders, total, hasMore, nil
+	return orders, hasMore, nil
 }
 
 func (r *Repository) countOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string) (int64, error) {
@@ -1321,7 +1330,7 @@ func (r *Repository) HoldOrder(ctx context.Context, businessID, orderID int64, r
 }
 
 func (r *Repository) ListHeldOrders(ctx context.Context, businessID int64) ([]domain.Order, error) {
-	orders, _, _, err := r.ListOrders(ctx, businessID, 0, "held", "", "", "", 200, 0)
+	orders, _, err := r.listOrdersRows(ctx, businessID, 0, "held", "", "", "", 200, 0)
 	return orders, err
 }
 

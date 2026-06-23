@@ -24,6 +24,11 @@ type Service struct {
 	repo repository
 }
 
+type stockTransfersPageResult struct {
+	items   []domain.StockTransfer
+	hasMore bool
+}
+
 func NewService(_ context.Context, db *sql.DB) *Service {
 	repo := infrastructure.NewRepository(db)
 
@@ -49,14 +54,9 @@ func (s *Service) ListStockTransfers(ctx context.Context, businessID, page, page
 	limit, offset := paginateStockTransfers(page, pageSize)
 	cacheKey := fmt.Sprintf("stock_transfers:%d|p=%d|ps=%d", businessID, page, pageSize)
 
-	type pageResult struct {
-		items   []domain.StockTransfer
-		hasMore bool
-	}
-
-	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
+	res, err := cacher.Of[stockTransfersPageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (stockTransfersPageResult, error) {
 		items, hasMore, err := s.repo.ListStockTransfers(ctx, businessID, limit, offset)
-		return pageResult{items: items, hasMore: hasMore}, err
+		return stockTransfersPageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, stockTransfersCacheTTL))
 	if err != nil {
 		return nil, false, err
@@ -91,8 +91,5 @@ func (s *Service) UpdateStockTransferStatus(ctx context.Context, businessID, id 
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	prefix := fmt.Sprintf("stock_transfers:%d", businessID)
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, prefix)
-	}
+	cacher.Of[stockTransfersPageResult]().DeleteByPattern(ctx, []string{fmt.Sprintf("stock_transfers:%d*", businessID)})
 }

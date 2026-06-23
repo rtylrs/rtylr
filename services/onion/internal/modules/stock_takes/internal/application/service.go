@@ -23,6 +23,11 @@ type Service struct {
 	repo repository
 }
 
+type stockTakesPageResult struct {
+	items   []domain.StockTake
+	hasMore bool
+}
+
 func NewService(_ context.Context, db *sql.DB) *Service {
 	repo := infrastructure.NewRepository(db)
 
@@ -48,14 +53,9 @@ func (s *Service) ListStockTakes(ctx context.Context, businessID, page, pageSize
 	limit, offset := paginateStockTakes(page, pageSize)
 	cacheKey := fmt.Sprintf("stock_takes:%d|p=%d|ps=%d", businessID, page, pageSize)
 
-	type pageResult struct {
-		items   []domain.StockTake
-		hasMore bool
-	}
-
-	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
+	res, err := cacher.Of[stockTakesPageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (stockTakesPageResult, error) {
 		items, hasMore, err := s.repo.ListStockTakes(ctx, businessID, limit, offset)
-		return pageResult{items: items, hasMore: hasMore}, err
+		return stockTakesPageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, stockTakesCacheTTL))
 	if err != nil {
 		return nil, false, err
@@ -86,8 +86,5 @@ func (s *Service) UpdateStockTake(ctx context.Context, businessID int64, input d
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	prefix := fmt.Sprintf("stock_takes:%d", businessID)
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, prefix)
-	}
+	cacher.Of[stockTakesPageResult]().DeleteByPattern(ctx, []string{fmt.Sprintf("stock_takes:%d*", businessID)})
 }

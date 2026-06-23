@@ -91,3 +91,12 @@ func TestRemoteOnlyBypassesLocalCache(t *testing.T) {
 		t.Fatalf("RemoteOnly Get hit local cache: %q", got)
 	}
 }
+
+func TestPatternKeysUseModelNamespace(t *testing.T) {
+	cache := OfWithNamespace[string]("test-wildcard")
+
+	got := cache.transformListKeys([]string{"purchase_orders:1:*"})
+	if len(got) != 1 || got[0] != "test-wildcard-purchase_orders:1:*" {
+		t.Fatalf("pattern key = %#v, want namespaced wildcard", got)
+	}
+}

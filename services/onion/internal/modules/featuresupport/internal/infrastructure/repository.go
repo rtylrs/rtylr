@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -206,20 +208,57 @@ func (r *Repository) ListRulesByKey(ctx context.Context, key string) ([]domain.R
 		logger.Ctx(ctx).Error("Failed to list feature rules by key", logger.Error(err))
 		return nil, err
 	}
+	ruleIDs := make([]int64, 0, len(ruleRows))
+	for _, row := range ruleRows {
+		ruleIDs = append(ruleIDs, row.ID)
+	}
+	condByRule, err := r.listConditionsByRuleIDs(ctx, ruleIDs)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list feature rule conditions by rule IDs", logger.Error(err))
+		return nil, err
+	}
+
 	rules := make([]domain.Rule, 0, len(ruleRows))
 	for _, row := range ruleRows {
 		rule := ruleFromRow(row)
-		condRows, cerr := r.queries.ListConditionsByRule(ctx, row.ID)
-		if cerr != nil {
-			logger.Ctx(ctx).Error("Failed to list conditions for rule", logger.Error(cerr))
-			return nil, cerr
-		}
-		for _, c := range condRows {
-			rule.Conditions = append(rule.Conditions, conditionFromRow(c))
-		}
+		rule.Conditions = condByRule[row.ID]
 		rules = append(rules, rule)
 	}
 	return rules, nil
+}
+
+func (r *Repository) listConditionsByRuleIDs(ctx context.Context, ruleIDs []int64) (map[int64][]domain.Condition, error) {
+	condByRule := make(map[int64][]domain.Condition, len(ruleIDs))
+	if len(ruleIDs) == 0 {
+		return condByRule, nil
+	}
+
+	query, args, err := sq.
+		Select("id", "rule_id", "attribute", "operator", "value").
+		From("feature_rule_conditions").
+		Where(sq.Eq{"rule_id": ruleIDs}).
+		OrderBy("rule_id ASC", "id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var c domain.Condition
+		if scanErr := rows.Scan(&c.ID, &c.RuleID, &c.Attribute, &c.Operator, &c.Value); scanErr != nil {
+			return nil, scanErr
+		}
+		condByRule[c.RuleID] = append(condByRule[c.RuleID], c)
+	}
+
+	return condByRule, rows.Err()
 }
 
 func (r *Repository) CreateRule(ctx context.Context, rule domain.Rule) (int64, error) {

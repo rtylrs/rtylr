@@ -386,6 +386,18 @@ func (c Cache[M]) Invalidate(ctx context.Context, ids []string) {
 		})
 }
 
+func (c Cache[M]) DeleteByPattern(ctx context.Context, patterns []string) int {
+	if len(patterns) == 0 {
+		return 0
+	}
+
+	deleted := 0
+	for _, pattern := range c.transformListKeys(patterns) {
+		deleted += getRedisCache().DeleteByPattern(ctx, pattern)
+	}
+	return deleted
+}
+
 // HashPut sets or updates a key-value pair in a Redis hash.
 func (c Cache[M]) HashPut(ctx context.Context, id, hashKey string, val M, options ...ClientOption) {
 	configuration := getConfiguration(options...)
