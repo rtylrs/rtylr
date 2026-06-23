@@ -20,5 +20,7 @@ CREATE TABLE IF NOT EXISTS config (
     business_slug VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_by INT NULL
+    updated_by INT NULL,
+    INDEX idx_config_business (business_id),
+    INDEX idx_config_owner (owner_id)
 );

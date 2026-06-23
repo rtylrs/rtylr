@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS erp_categories (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_erp_categories_business_name (business_id, name)
 );
 
 CREATE TABLE IF NOT EXISTS erp_suppliers (
@@ -23,7 +24,8 @@ CREATE TABLE IF NOT EXISTS erp_suppliers (
     notes TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_erp_suppliers_business_active_name (business_id, is_active, name)
 );
 
 CREATE TABLE IF NOT EXISTS erp_products (
@@ -64,6 +66,10 @@ CREATE TABLE IF NOT EXISTS erp_products (
     INDEX idx_erp_products_business_name (business_id, name),
     INDEX idx_erp_products_business_category_name (business_id, category_id, name),
     INDEX idx_erp_products_business_active (business_id, is_active, track_inventory),
+    INDEX idx_erp_products_business_sku (business_id, sku),
+    INDEX idx_erp_products_business_barcode (business_id, barcode),
+    INDEX idx_erp_products_business_inventory_name (business_id, is_active, track_inventory, name),
+    INDEX idx_erp_products_business_inventory_stock (business_id, is_active, track_inventory, stock_quantity),
     FULLTEXT INDEX idx_erp_products_search (name, sku, barcode)
 );
 
@@ -80,7 +86,9 @@ CREATE TABLE IF NOT EXISTS erp_inventory_transactions (
     reference_type VARCHAR(50),
     notes TEXT,
     created_by BIGINT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_erp_inventory_tx_business_product_created (business_id, product_id, created_at),
+    INDEX idx_erp_inventory_tx_business_reference (business_id, reference_type, reference_id)
 );
 
 CREATE TABLE IF NOT EXISTS erp_purchase_orders (
@@ -98,7 +106,9 @@ CREATE TABLE IF NOT EXISTS erp_purchase_orders (
     notes TEXT,
     created_by BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_erp_purchase_orders_business_created (business_id, created_at),
+    INDEX idx_erp_purchase_orders_business_status_created (business_id, status, created_at)
 );
 
 CREATE TABLE IF NOT EXISTS erp_purchase_order_items (
@@ -108,5 +118,7 @@ CREATE TABLE IF NOT EXISTS erp_purchase_order_items (
     quantity_ordered DECIMAL(10,3) NOT NULL,
     quantity_received DECIMAL(10,3) DEFAULT 0,
     unit_cost DECIMAL(10,2) NOT NULL,
-    total_cost DECIMAL(10,2) NOT NULL
+    total_cost DECIMAL(10,2) NOT NULL,
+    INDEX idx_erp_po_items_order (purchase_order_id),
+    INDEX idx_erp_po_items_product (product_id)
 );

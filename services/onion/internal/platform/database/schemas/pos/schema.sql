@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS pos_locations (
     receipt_footer TEXT,
     business_id BIGINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_pos_locations_owner (owner_id)
+    INDEX idx_pos_locations_owner (owner_id),
+    INDEX idx_pos_locations_business_active_name (business_id, is_active, name)
 );
 
 CREATE TABLE IF NOT EXISTS pos_tables (
@@ -28,7 +29,8 @@ CREATE TABLE IF NOT EXISTS pos_tables (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_pos_tables_owner (owner_id),
-    INDEX idx_pos_tables_owner_location (owner_id, location_id)
+    INDEX idx_pos_tables_owner_location (owner_id, location_id),
+    INDEX idx_pos_tables_business_location_status_name (business_id, location_id, status, name)
 );
 
 CREATE TABLE IF NOT EXISTS pos_sessions (
@@ -54,7 +56,9 @@ CREATE TABLE IF NOT EXISTS pos_sessions (
     notes TEXT,
     INDEX idx_pos_sessions_owner_status (owner_id, status),
     INDEX idx_pos_sessions_owner_location (owner_id, location_id),
-    INDEX idx_pos_sessions_staff (staff_id)
+    INDEX idx_pos_sessions_staff (staff_id),
+    INDEX idx_pos_sessions_business_staff_status (business_id, staff_id, status),
+    INDEX idx_pos_sessions_business_location_opened (business_id, location_id, opened_at)
 );
 
 CREATE TABLE IF NOT EXISTS pos_orders (
@@ -100,6 +104,9 @@ CREATE TABLE IF NOT EXISTS pos_orders (
     INDEX idx_pos_orders_business_status_created (business_id, status, created_at),
     INDEX idx_pos_orders_business_session_created (business_id, session_id, created_at),
     INDEX idx_pos_orders_business_created (business_id, created_at),
+    INDEX idx_pos_orders_business_order_number (business_id, order_number),
+    INDEX idx_pos_orders_business_paid_at (business_id, payment_status, paid_at),
+    INDEX idx_pos_orders_session_payment (session_id, payment_status),
     FULLTEXT INDEX idx_pos_orders_search (order_number, customer_name, customer_phone),
     INDEX idx_pos_orders_paddle_transaction (paddle_transaction_id),
     INDEX idx_pos_orders_customer (customer_id),
@@ -219,7 +226,10 @@ CREATE TABLE IF NOT EXISTS pos_users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_pos_user_location (user_id, location_id),
     INDEX idx_pos_users_owner (owner_id),
-    INDEX idx_pos_users_location (location_id)
+    INDEX idx_pos_users_location (location_id),
+    INDEX idx_pos_users_business_name (business_id, name),
+    INDEX idx_pos_users_business_location_active_name (business_id, location_id, is_active, name),
+    INDEX idx_pos_users_business_location_user_active (business_id, location_id, user_id, is_active)
 );
 
 CREATE TABLE IF NOT EXISTS pos_member_locations (
@@ -232,7 +242,9 @@ CREATE TABLE IF NOT EXISTS pos_member_locations (
     can_view_reports BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_member_location (user_id, location_id),
-    INDEX idx_member_loc_business (business_id)
+    INDEX idx_member_loc_business (business_id),
+    INDEX idx_member_loc_business_user_location (business_id, user_id, location_id),
+    INDEX idx_member_loc_business_location_user (business_id, location_id, user_id)
 );
 
 -- POS-local customer directory (loyalty/store-credit/visit tracking).
