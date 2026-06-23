@@ -8,7 +8,7 @@ type CacheGroupInvalidationConsumer struct {
 }
 
 func (c CacheGroupInvalidationConsumer) Execute(ctx context.Context) error {
-	if len(c.IDs) > 0 && c.CacheType != "" {
+	if c.CacheType != "" {
 		deleteCacheGroup(ctx, c.CacheType, c.IDs, true)
 	}
 

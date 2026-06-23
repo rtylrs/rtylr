@@ -9,7 +9,9 @@ import (
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
+	internaljobs "github.com/voxire/onion/internal/modules/hr_leave/internal/jobs"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/routes"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -61,6 +63,10 @@ func (m *Module) GetAnonymousRoutes() []string {
 
 func (m *Module) RegisterScheduledJobs(ctx context.Context) {
 	logger.Ctx(ctx).Info("hr_leave: scheduled jobs registered (monthly accrual: 1st of each month at midnight)")
+}
+
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	internaljobs.Register(ctx, registry, m.service)
 }
 
 func (m *Module) RunMonthlyAccrual(ctx context.Context) error {

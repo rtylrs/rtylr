@@ -25,6 +25,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
 	serverhttp "github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/server/probe"
+	"github.com/voxire/onion/internal/platform/server/profiling"
 )
 
 type licenseRunMode struct {
@@ -200,7 +202,26 @@ func main() {
 			)
 		} else {
 			db = dbclient.Pool()
+			defer dbclient.Close()
 		}
+	}
+	if err := probe.Start(ctx, probe.Config{
+		ServiceName: "license",
+		Port:        probe.PortFromEnv("8888"),
+		Stop:        cancel,
+		ReadyChecks: []probe.Check{
+			func(ctx context.Context) error {
+				if db == nil {
+					return nil
+				}
+				return db.PingContext(ctx)
+			},
+		},
+	}); err != nil {
+		logger.Global().Warn("probe server failed to start", logger.Error(err))
+	}
+	if err := profiling.Start(ctx, profiling.PortFromEnv("6060")); err != nil {
+		logger.Global().Warn("pprof server failed to start", logger.Error(err))
 	}
 
 	if err := serverhttp.Start(ctx, licenseRunMode{cfg: cfg, db: db}, port); err != nil {

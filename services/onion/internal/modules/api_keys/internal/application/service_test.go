@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/api_keys/internal/domain"
 )
 
-func TestGenerateAPIKey_ProducesUniqueHex(t *testing.T) {
+func TestGenerateAPIKey_ProducesUniquePrefixedKeys(t *testing.T) {
 	a, err := generateAPIKey()
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -20,10 +20,10 @@ func TestGenerateAPIKey_ProducesUniqueHex(t *testing.T) {
 	if a == b {
 		t.Fatal("expected two generated keys to differ")
 	}
-	if len(a) != 64 {
-		t.Errorf("expected 64-char hex (32 bytes), got %d", len(a))
+	if !strings.HasPrefix(a, apiKeyPrefix) {
+		t.Errorf("expected API key prefix %q, got %q", apiKeyPrefix, a)
 	}
-	for _, c := range a {
+	for _, c := range strings.TrimPrefix(a, apiKeyPrefix) {
 		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
 			t.Errorf("non-hex character %q in key %q", c, a)
 			break
@@ -135,14 +135,14 @@ func TestCreate_HappyPathHashesAndStores(t *testing.T) {
 	if id != 99 {
 		t.Errorf("expected id 99, got %d", id)
 	}
-	if len(raw) != 64 {
-		t.Errorf("raw key should be 64-char hex, got %d", len(raw))
+	if !strings.HasPrefix(raw, apiKeyPrefix) {
+		t.Errorf("raw key should include API prefix %q, got %q", apiKeyPrefix, raw)
 	}
 	if m.createGot.ownerID != 7 || m.createGot.name != "test key" {
 		t.Errorf("repo args unexpected: %+v", m.createGot)
 	}
-	if m.createGot.prefix != raw[:8] {
-		t.Errorf("prefix should be first 8 of raw key")
+	if m.createGot.prefix != raw[:16] {
+		t.Errorf("prefix should be first 16 of raw key")
 	}
 	if m.createGot.hash == raw {
 		t.Error("hash should not equal raw key (was supposed to be sha256-hex)")

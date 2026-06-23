@@ -2,10 +2,7 @@ package application
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/sha256"
 	"database/sql"
-	"encoding/hex"
 	"errors"
 	"time"
 
@@ -13,11 +10,13 @@ import (
 	"github.com/voxire/onion/internal/modules/api_keys/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/securekey"
 )
 
 const (
 	apiKeysScope = "api_keys"
 	apiKeysTTL   = 5 * time.Minute
+	apiKeyPrefix = "rtylr_api_k1_"
 )
 
 type repository interface {
@@ -56,22 +55,23 @@ func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input d
 	if input.Name == "" {
 		return 0, "", errors.New("name is required")
 	}
-	rawKey, err := generateAPIKey()
+	secret, err := securekey.Generate(securekey.Options{
+		Prefix:           apiKeyPrefix,
+		DisplayPrefixLen: 16,
+	})
 	if err != nil {
 		return 0, "", err
 	}
-	prefix := rawKey[:8]
-	hash := hashKey(rawKey)
 	scopes := input.Scopes
 	if scopes == nil {
 		scopes = []string{}
 	}
-	id, err := s.repo.Create(ctx, ownerID, businessID, input.Name, hash, prefix, scopes)
+	id, err := s.repo.Create(ctx, ownerID, businessID, input.Name, secret.Hash, secret.DisplayPrefix, scopes)
 	if err != nil {
 		return 0, "", err
 	}
 	invalidateAPIKeysScope(ctx, businessID)
-	return id, rawKey, nil
+	return id, secret.Plaintext, nil
 }
 
 func (s *Service) Revoke(ctx context.Context, businessID, keyID int64) error {
@@ -86,16 +86,18 @@ func (s *Service) Revoke(ctx context.Context, businessID, keyID int64) error {
 }
 
 func generateAPIKey() (string, error) {
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
+	secret, err := securekey.Generate(securekey.Options{
+		Prefix:           apiKeyPrefix,
+		DisplayPrefixLen: 16,
+	})
+	if err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(b), nil
+	return secret.Plaintext, nil
 }
 
 func hashKey(key string) string {
-	h := sha256.Sum256([]byte(key))
-	return hex.EncodeToString(h[:])
+	return securekey.Hash(key)
 }
 
 func CreateAPIKeyInputFromRequest(name string, scopes []string) domain.CreateAPIKeyInput {

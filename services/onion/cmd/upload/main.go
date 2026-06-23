@@ -8,6 +8,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -20,6 +21,8 @@ import (
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/server/probe"
+	"github.com/voxire/onion/internal/platform/server/profiling"
 	"github.com/voxire/onion/internal/platform/storage"
 )
 
@@ -79,6 +82,25 @@ func main() {
 		logger.Global().Fatal("database connection failed", logger.Error(err))
 	}
 	defer dbclient.Close()
+	if err := probe.Start(ctx, probe.Config{
+		ServiceName: "upload",
+		Port:        probe.PortFromEnv("8888"),
+		Stop:        stop,
+		ReadyChecks: []probe.Check{
+			func(ctx context.Context) error {
+				db := dbclient.Pool()
+				if db == nil {
+					return fmt.Errorf("database pool is not initialized")
+				}
+				return db.PingContext(ctx)
+			},
+		},
+	}); err != nil {
+		logger.Global().Warn("probe server failed to start", logger.Error(err))
+	}
+	if err := profiling.Start(ctx, profiling.PortFromEnv("6060")); err != nil {
+		logger.Global().Warn("pprof server failed to start", logger.Error(err))
+	}
 
 	store, err := storage.Default()
 	if err != nil {

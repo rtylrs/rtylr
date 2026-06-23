@@ -2,11 +2,11 @@ package invalidation
 
 import (
 	"context"
-	"slices"
+	"sort"
+	"sync"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/utils/sliceutils"
 )
 
 const (
@@ -17,51 +17,83 @@ const (
 	CacheGroupInvalidationChannel = "invalidate-cache-group"
 )
 
-var availableGroups = []string{
-	UserCacheGroup,
-}
-
 type InvalidateFunc func(ctx context.Context, ids []string, options ...cacher.ClientOption)
 
-var invalidationMap map[string]InvalidateFunc
+var (
+	mu              sync.RWMutex
+	invalidationMap map[string]InvalidateFunc
+)
 
 func Initialize() {
+	mu.Lock()
+	defer mu.Unlock()
 	invalidationMap = map[string]InvalidateFunc{}
 }
 
 func RegisterInvalidation(invMap map[string]InvalidateFunc) {
+	RegisterGroups(invMap)
+}
+
+func RegisterGroups(invMap map[string]InvalidateFunc) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if invalidationMap == nil {
+		invalidationMap = map[string]InvalidateFunc{}
+	}
 	for route, handler := range invMap {
+		if route == "" || handler == nil {
+			continue
+		}
 		invalidationMap[route] = handler
 	}
 }
 
-func InvalidateCacheGroup(ctx context.Context, cacheType string, ids []string) {
-	if !sliceutils.Contains(availableGroups, cacheType) {
-		return
-	}
+func AvailableGroups() []string {
+	mu.RLock()
+	defer mu.RUnlock()
 
-	deleteCacheGroup(ctx, cacheType, ids, false)
+	groups := make([]string, 0, len(invalidationMap))
+	for group := range invalidationMap {
+		groups = append(groups, group)
+	}
+	sort.Strings(groups)
+	return groups
+}
+
+func InvalidateCacheGroup(ctx context.Context, cacheType string, ids []string) bool {
+	if !deleteCacheGroup(ctx, cacheType, ids, false) {
+		return false
+	}
 
 	cacher.NewPubSub[CacheGroupInvalidationConsumer]().Publish(CacheGroupInvalidationChannel,
 		CacheGroupInvalidationConsumer{
 			CacheType: cacheType,
 			IDs:       ids,
 		})
+	return true
 }
 
-func deleteCacheGroup(ctx context.Context, cacheType string, ids []string, localOnly bool) {
+func deleteCacheGroup(ctx context.Context, cacheType string, ids []string, localOnly bool) bool {
 	var clientOptions []cacher.ClientOption
 	if localOnly {
 		clientOptions = append(clientOptions, cacher.MemoryOnly())
 	}
 
-	// Look up the invalidation function based on the cache type
-	if invalidateFunc, found := invalidationMap[cacheType]; found {
-		invalidateFunc(ctx, ids, clientOptions...)
-	} else {
-		logger.Ctx(ctx).Error("Failed to get invalidation method for cache group",
+	mu.RLock()
+	invalidateFunc, found := invalidationMap[cacheType]
+	mu.RUnlock()
+	if !found {
+		logger.Ctx(ctx).Warn("unknown cache invalidation group",
 			logger.String("cache_group", cacheType),
-			logger.Bool("is_available_group", slices.Contains(availableGroups, cacheType)),
 		)
+		return false
 	}
+
+	invalidateFunc(ctx, ids, clientOptions...)
+	return true
+}
+
+func SubscribeCacheGroupInvalidations(ctx context.Context) {
+	cacher.NewPubSub[CacheGroupInvalidationConsumer]().SubscribeContext(ctx, CacheGroupInvalidationChannel)
 }

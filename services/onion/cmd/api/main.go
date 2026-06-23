@@ -148,10 +148,13 @@ import (
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
+	"github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/license"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/server/probe"
+	"github.com/voxire/onion/internal/platform/server/profiling"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/wsbus"
@@ -201,6 +204,25 @@ func main() {
 
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if err := probe.Start(shutdownCtx, probe.Config{
+		ServiceName: "api",
+		Port:        probe.PortFromEnv("8888"),
+		Stop:        stop,
+		ReadyChecks: []probe.Check{
+			func(ctx context.Context) error {
+				db := dbclient.Pool()
+				if db == nil {
+					return fmt.Errorf("database pool is not initialized")
+				}
+				return db.PingContext(ctx)
+			},
+		},
+	}); err != nil {
+		logger.Global().Warn("probe server failed to start", logger.Error(err))
+	}
+	if err := profiling.Start(shutdownCtx, profiling.PortFromEnv("6060")); err != nil {
+		logger.Global().Warn("pprof server failed to start", logger.Error(err))
+	}
 
 	// Initialise Sentry as early as possible so even boot-time
 	// panics get captured. `flush` ships any queued events before
@@ -655,6 +677,8 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	modules.HRLeave.RegisterScheduledJobs(ctx)
 	modules.HROvertime.RegisterScheduledJobs(ctx)
 	modules.HRPayroll.RegisterScheduledJobs(ctx)
+	jobs.AutoRegister(ctx, modules)
+	logger.Ctx(ctx).Info("scheduled jobs registered", logger.Any("jobs", jobs.Names()))
 
 	// Start the websocket bus with topic-level authorization backed by
 	// workspace/project membership checks. The rules:

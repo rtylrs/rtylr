@@ -9,12 +9,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
+	cacheInvalidate.RegisterDefaultGroups()
+
 	r.Post("/invalidate-cache", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if !hasValidInternalToken(r) {

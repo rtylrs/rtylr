@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -30,6 +31,7 @@ func Initialize(ctx context.Context) error {
 
 	// Initialize cache invalidation system
 	invalidation.Initialize()
+	cacheInvalidate.RegisterDefaultGroups()
 
 	// Test local cache (BigCache)
 	if err := testLocalCache(ctx); err != nil {
