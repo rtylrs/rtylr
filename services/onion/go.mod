@@ -31,6 +31,7 @@ require (
 	github.com/fogleman/gg v1.3.0
 	github.com/getsentry/sentry-go v0.45.1
 	github.com/go-playground/validator/v10 v10.30.2
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/testcontainers/testcontainers-go v0.43.0
 	github.com/voxire/voxie v0.0.0-00010101000000-000000000000
 	github.com/workos/workos-go/v4 v4.46.1

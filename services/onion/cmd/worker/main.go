@@ -7,12 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 
+	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
+	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
+	hrpayroll "github.com/voxire/onion/internal/modules/hr_payroll"
+	platformcache "github.com/voxire/onion/internal/platform/cache"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/emailqueue"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/probe"
 	"github.com/voxire/onion/internal/platform/server/profiling"
@@ -36,6 +42,10 @@ func main() {
 		os.Exit(1)
 	}
 	defer dbclient.Close()
+	if err := platformcache.Initialize(ctx); err != nil {
+		logger.Global().Error("failed to initialize cache", logger.Error(err))
+		os.Exit(1)
+	}
 	if err := probe.Start(ctx, probe.Config{
 		ServiceName: "worker",
 		Port:        probe.PortFromEnv("8888"),
@@ -58,10 +68,59 @@ func main() {
 
 	logger.Global().Info("worker starting")
 
+	modules := initializeJobModules(ctx)
+	platformjobs.AutoRegister(ctx, modules)
+	logger.Ctx(ctx).Info("worker jobs registered", logger.Any("jobs", platformjobs.Names()))
+
+	scheduler := platformjobs.NewScheduler(
+		platformjobs.DefaultRegistry(),
+		platformjobs.WithDefaultTimeout(platformjobs.DurationFromEnv(platformjobs.EnvJobTimeout, platformjobs.DefaultJobTimeout)),
+		platformjobs.WithLocker(platformjobs.NewMySQLLocker(dbclient.Pool())),
+	)
+	if runJob := platformjobs.RunJobFromEnv(); runJob != "" {
+		result, err := scheduler.Run(ctx, runJob)
+		if err != nil {
+			logger.Ctx(ctx).Error("one-shot job failed", logger.String("job_name", runJob), logger.Error(err))
+			os.Exit(1)
+		}
+		logger.Ctx(ctx).Info("one-shot job completed",
+			logger.String("job_name", runJob),
+			logger.Any("duration", result.Duration.String()),
+		)
+		return
+	}
+
+	if platformjobs.SchedulerEnabledFromEnv() {
+		if err := scheduler.Start(ctx); err != nil {
+			logger.Ctx(ctx).Error("scheduler failed to start", logger.Error(err))
+			os.Exit(1)
+		}
+	} else {
+		logger.Ctx(ctx).Info("scheduler disabled by environment")
+	}
+
 	go cacheInvalidate.SubscribeAsyncInvalidations(ctx)
 	go invalidation.SubscribeCacheGroupInvalidations(ctx)
 	pool := emailqueue.NewPool(dbclient.Pool())
 	pool.Run(ctx)
 
 	logger.Global().Info("worker stopped")
+}
+
+type jobModules struct {
+	HRCore     *hrcore.Module
+	HRLeave    *hrleave.Module
+	HROvertime *hrovertime.Module
+	HRPayroll  *hrpayroll.Module
+}
+
+func initializeJobModules(ctx context.Context) *jobModules {
+	db := dbclient.Pool()
+	hrCoreModule := hrcore.NewModule(ctx, db)
+	return &jobModules{
+		HRCore:     hrCoreModule,
+		HRLeave:    hrleave.NewModule(ctx, db, hrCoreModule),
+		HROvertime: hrovertime.NewModule(ctx, db, hrCoreModule),
+		HRPayroll:  hrpayroll.NewModule(ctx, db, hrCoreModule),
+	}
 }

@@ -16,6 +16,8 @@ type Handler func(context.Context) error
 type Job struct {
 	Name        string
 	Description string
+	Schedule    string
+	Timeout     time.Duration
 	Handler     Handler
 }
 
@@ -43,6 +45,14 @@ func Register(job Job) error {
 
 func Names() []string {
 	return defaultRegistry.Names()
+}
+
+func Jobs() []Job {
+	return defaultRegistry.Jobs()
+}
+
+func DefaultRegistry() *Registry {
+	return defaultRegistry
 }
 
 func Run(ctx context.Context, name string) (Result, error) {
@@ -79,6 +89,34 @@ func (r *Registry) Names() []string {
 	}
 	sort.Strings(names)
 	return names
+}
+
+func (r *Registry) Jobs() []Job {
+	if r == nil {
+		return nil
+	}
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	items := make([]Job, 0, len(r.jobs))
+	for _, job := range r.jobs {
+		items = append(items, job)
+	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
+	return items
+}
+
+func (r *Registry) Get(name string) (Job, bool) {
+	if r == nil {
+		return Job{}, false
+	}
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	job, ok := r.jobs[name]
+	return job, ok
 }
 
 func (r *Registry) Run(ctx context.Context, name string) (result Result, err error) {

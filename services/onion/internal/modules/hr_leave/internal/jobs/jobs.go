@@ -17,6 +17,7 @@ func Register(_ context.Context, registry *jobs.Registry, service leaveAccrualSe
 	_ = registry.Register(jobs.Job{
 		Name:        "hr_leave.monthly_accrual",
 		Description: "Run monthly HR leave accruals.",
+		Schedule:    jobs.ScheduleFromEnv("HR_LEAVE_MONTHLY_ACCRUAL_SCHEDULE", "0 0 1 * *"),
 		Handler:     service.RunMonthlyAccrual,
 	})
 }

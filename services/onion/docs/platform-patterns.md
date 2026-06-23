@@ -23,8 +23,28 @@ The module exposes:
 func (m *Module) RegisterJobs(ctx context.Context, registry *jobs.Registry)
 ```
 
-API boot calls `jobs.AutoRegister(ctx, modules)`, so a new job stays local to
-its module instead of adding another giant switch.
+API boot calls `jobs.AutoRegister(ctx, modules)` for discovery/logging. Worker
+boot registers the job-owning modules and starts the scheduler.
+
+Jobs can declare a cron schedule directly in their module package:
+
+```go
+jobs.Job{
+    Name: "billing.sync",
+    Schedule: jobs.ScheduleFromEnv("BILLING_SYNC_SCHEDULE", "0 * * * *"),
+    Handler: service.Sync,
+}
+```
+
+Worker knobs:
+
+- `RUN_JOB=<job.name>` runs one job and exits.
+- `JOB_TIMEOUT=30m` sets the default per-job timeout.
+- `SCHEDULER_ENABLED=false` disables cron execution.
+- `SCHEDULER_DISABLED=true` hard-disables cron execution.
+
+Scheduled execution uses a local in-process duplicate guard plus a MySQL named
+lock, so two worker replicas do not run the same job at the same time.
 
 ## Cache Invalidation
 

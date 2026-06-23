@@ -17,6 +17,7 @@ func Register(_ context.Context, registry *jobs.Registry, service overtimeDetect
 	_ = registry.Register(jobs.Job{
 		Name:        "hr_overtime.daily_detection",
 		Description: "Run daily HR overtime detection.",
+		Schedule:    jobs.ScheduleFromEnv("HR_OVERTIME_DAILY_DETECTION_SCHEDULE", "0 0 * * *"),
 		Handler:     service.RunDailyDetection,
 	})
 }
