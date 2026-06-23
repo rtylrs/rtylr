@@ -11,6 +11,7 @@ import (
 	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
 	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
 	hrpayroll "github.com/voxire/onion/internal/modules/hr_payroll"
+	hrtime "github.com/voxire/onion/internal/modules/hr_time"
 	platformcache "github.com/voxire/onion/internal/platform/cache"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
@@ -112,6 +113,7 @@ type jobModules struct {
 	HRLeave    *hrleave.Module
 	HROvertime *hrovertime.Module
 	HRPayroll  *hrpayroll.Module
+	HRTime     *hrtime.Module
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
@@ -122,5 +124,6 @@ func initializeJobModules(ctx context.Context) *jobModules {
 		HRLeave:    hrleave.NewModule(ctx, db, hrCoreModule),
 		HROvertime: hrovertime.NewModule(ctx, db, hrCoreModule),
 		HRPayroll:  hrpayroll.NewModule(ctx, db, hrCoreModule),
+		HRTime:     hrtime.NewModule(ctx, db, hrCoreModule),
 	}
 }

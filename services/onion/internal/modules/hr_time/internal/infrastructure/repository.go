@@ -460,6 +460,34 @@ func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID,
 	})
 }
 
+func (r *Repository) ListTimesheetBusinessIDs(ctx context.Context) ([]int64, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT DISTINCT business_id
+		FROM hr_time_entries
+		UNION
+		SELECT DISTINCT business_id
+		FROM hr_timesheets
+	`)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list timesheet business IDs", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	businessIDs := make([]int64, 0)
+	for rows.Next() {
+		var businessID sql.NullInt64
+		if scanErr := rows.Scan(&businessID); scanErr != nil {
+			return nil, scanErr
+		}
+		if businessID.Valid {
+			businessIDs = append(businessIDs, businessID.Int64)
+		}
+	}
+
+	return businessIDs, rows.Err()
+}
+
 func (r *Repository) ListUnsubmittedEmployees(ctx context.Context, businessID int64, periodStart, periodEnd string) ([]int64, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {

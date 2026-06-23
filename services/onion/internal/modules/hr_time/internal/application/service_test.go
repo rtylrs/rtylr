@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 )
@@ -31,5 +32,16 @@ func TestUpdateTimeEntry_RejectsNonPositiveDuration(t *testing.T) {
 		if !errors.Is(err, domain.ErrInvalidDuration) {
 			t.Errorf("expected ErrInvalidDuration for %d, got %v", dur, err)
 		}
+	}
+}
+
+func TestPreviousWeekRange(t *testing.T) {
+	start, end := previousWeekRange(time.Date(2026, time.June, 23, 10, 15, 0, 0, time.UTC))
+
+	if start != "2026-06-15" {
+		t.Fatalf("expected start 2026-06-15, got %s", start)
+	}
+	if end != "2026-06-21" {
+		t.Fatalf("expected end 2026-06-21, got %s", end)
 	}
 }

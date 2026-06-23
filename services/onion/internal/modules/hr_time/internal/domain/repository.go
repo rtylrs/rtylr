@@ -21,6 +21,7 @@ type Repository interface {
 
 	CreateApprovalAction(ctx context.Context, businessID int64, action ApprovalActionRecord) error
 
+	ListTimesheetBusinessIDs(ctx context.Context) ([]int64, error)
 	ListUnsubmittedEmployees(ctx context.Context, businessID int64, periodStart, periodEnd string) ([]int64, error)
 
 	GetTimeEntryBySourceAndTask(ctx context.Context, businessID, employeeID int64, source string, taskID int64) (*TimeEntryRecord, error)

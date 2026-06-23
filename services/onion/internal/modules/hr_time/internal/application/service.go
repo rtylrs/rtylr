@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -326,13 +325,59 @@ func (s *Service) ExportBillableEntries(ctx context.Context, businessID int64) (
 
 // --- Background Job ---
 
-func (s *Service) CheckUnsubmittedTimesheets(ctx context.Context) error {
-	logger.Ctx(ctx).Info("running unsubmitted timesheet check")
+func (s *Service) RunUnsubmittedTimesheetReminder(ctx context.Context) error {
+	periodStart, periodEnd := previousWeekRange(time.Now().UTC())
 
-	// This is a placeholder - in production this would iterate all active owners
-	// and check for unsubmitted timesheets for the previous period.
-	// The actual owner iteration requires a cross-module query to list active businesses.
-	_ = errors.New("not implemented")
+	businessIDs, err := s.repo.ListTimesheetBusinessIDs(ctx)
+	if err != nil {
+		logger.Ctx(ctx).Error("timesheet reminders: failed to list business IDs", logger.Error(err))
+		return err
+	}
+
+	var candidateCount int
+	for _, businessID := range businessIDs {
+		employeeIDs, scanErr := s.repo.ListUnsubmittedEmployees(ctx, businessID, periodStart, periodEnd)
+		if scanErr != nil {
+			logger.Ctx(ctx).Error("timesheet reminders: failed to list unsubmitted employees",
+				logger.Any("business_id", businessID),
+				logger.Any("period_start", periodStart),
+				logger.Any("period_end", periodEnd),
+				logger.Error(scanErr),
+			)
+			continue
+		}
+		if len(employeeIDs) == 0 {
+			continue
+		}
+
+		candidateCount += len(employeeIDs)
+		logger.Ctx(ctx).Info("timesheet reminders: unsubmitted employee candidates",
+			logger.Any("business_id", businessID),
+			logger.Any("period_start", periodStart),
+			logger.Any("period_end", periodEnd),
+			logger.Any("employee_ids", employeeIDs),
+			logger.Int("employee_count", len(employeeIDs)),
+		)
+	}
+
+	logger.Ctx(ctx).Info("timesheet reminders: scan completed",
+		logger.Int("business_count", len(businessIDs)),
+		logger.Int("candidate_count", candidateCount),
+		logger.Any("period_start", periodStart),
+		logger.Any("period_end", periodEnd),
+	)
 
 	return nil
+}
+
+func previousWeekRange(now time.Time) (string, string) {
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	weekday := int(today.Weekday())
+	if weekday == 0 {
+		weekday = 7
+	}
+	thisMonday := today.AddDate(0, 0, 1-weekday)
+	previousMonday := thisMonday.AddDate(0, 0, -7)
+	previousSunday := previousMonday.AddDate(0, 0, 6)
+	return previousMonday.Format("2006-01-02"), previousSunday.Format("2006-01-02")
 }
