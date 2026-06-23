@@ -147,7 +147,10 @@ SELECT
     COUNT(*) AS order_count,
     COALESCE(AVG(total), 0) AS avg_order
 FROM pos_orders
-WHERE business_id = ? AND payment_status = 'paid' AND DATE(paid_at) = CURDATE();
+WHERE business_id = ?
+  AND payment_status = 'paid'
+  AND paid_at >= CURDATE()
+  AND paid_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY);
 
 -- name: GetTableTurnover :one
 SELECT COUNT(*) AS table_count,
@@ -158,7 +161,10 @@ FROM pos_tables WHERE business_id = ?;
 SELECT session_id FROM pos_orders WHERE id = ?;
 
 -- name: CountTodaysOrders :one
-SELECT COUNT(*) AS cnt FROM pos_orders WHERE business_id = ? AND DATE(created_at) = CURDATE();
+SELECT COUNT(*) AS cnt FROM pos_orders
+WHERE business_id = ?
+  AND created_at >= CURDATE()
+  AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY);
 
 -- name: MoveOrderItems :exec
 UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?;

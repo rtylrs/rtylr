@@ -78,6 +78,9 @@ make sql-check
 
 # Optionally load tables from schema directories (dev tooling)
 make load-tables
+
+# Seed synthetic POS/ERP volume and inspect EXPLAIN plans before launch
+make db-prelaunch-check
 ```
 
 ## 🔧 Development
