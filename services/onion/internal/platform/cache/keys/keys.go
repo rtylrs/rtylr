@@ -76,6 +76,10 @@ func UserApps(userID int64) string {
 	return fmt.Sprintf("%suser:%d:apps:v2", Namespace, userID)
 }
 
+func UserBusinesses(userID int64) string {
+	return fmt.Sprintf("%suser:%d:businesses", Namespace, userID)
+}
+
 func UserPrefix(userID int64) string {
 	return fmt.Sprintf("%suser:%d:*", Namespace, userID)
 }
@@ -84,6 +88,10 @@ func UserPrefix(userID int64) string {
 
 func BusinessConfig(businessID int64) string {
 	return fmt.Sprintf("%sbusiness:%d:config", Namespace, businessID)
+}
+
+func BusinessProfile(businessID int64) string {
+	return fmt.Sprintf("%sbusiness:%d:profile", Namespace, businessID)
 }
 
 func BusinessTheme(businessID int64) string {

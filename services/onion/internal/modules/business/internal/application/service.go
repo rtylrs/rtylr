@@ -13,7 +13,10 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
-const businessProfileCacheTTL = 10 * time.Minute
+const (
+	businessProfileCacheTTL = 10 * time.Minute
+	userBusinessesCacheTTL  = time.Minute
+)
 
 type repository interface {
 	GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error)
@@ -38,7 +41,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 func (s *Service) GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error) {
 	return cacher.Of[domain.BusinessProfile]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.BusinessConfig(ownerID),
+		cacheKeys.BusinessProfile(ownerID),
 		func(ctx context.Context) (domain.BusinessProfile, error) {
 			return s.repo.GetProfile(ctx, ownerID)
 		},
@@ -58,14 +61,19 @@ func (s *Service) UpdateSlug(ctx context.Context, businessID int64, slug string)
 	if err := s.repo.UpdateSlug(ctx, businessID, slug); err != nil {
 		return err
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.Delete(ctx, []string{cacheKeys.BusinessConfig(businessID)})
-	}
+	cacher.Of[domain.BusinessProfile]().Delete(ctx, []string{cacheKeys.BusinessProfile(businessID)})
 	return nil
 }
 
 func (s *Service) ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error) {
-	return s.repo.ListUserBusinesses(ctx, userID)
+	return cacher.Of[[]domain.OwnedBusiness]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.UserBusinesses(userID),
+		func(ctx context.Context) ([]domain.OwnedBusiness, error) {
+			return s.repo.ListUserBusinesses(ctx, userID)
+		},
+		cacher.WithExpiry(ctx, userBusinessesCacheTTL),
+	)
 }
 
 var ErrSubBusinessNotOwned = errors.New("parent business not found or not owned by user")
@@ -83,5 +91,10 @@ func (s *Service) CreateSubBusiness(ctx context.Context, name string, ownerUserI
 	if !ok {
 		return 0, ErrSubBusinessNotOwned
 	}
-	return s.repo.CreateSubBusiness(ctx, name, ownerUserID, parentBusinessID)
+	id, err := s.repo.CreateSubBusiness(ctx, name, ownerUserID, parentBusinessID)
+	if err != nil {
+		return 0, err
+	}
+	cacher.Of[[]domain.OwnedBusiness]().Delete(ctx, []string{cacheKeys.UserBusinesses(ownerUserID)})
+	return id, nil
 }
