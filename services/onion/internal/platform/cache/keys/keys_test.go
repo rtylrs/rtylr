@@ -29,3 +29,12 @@ func TestUserBusinessesIsUserScoped(t *testing.T) {
 		t.Fatalf("UserBusinesses = %q, want %q", got, want)
 	}
 }
+
+func TestUserBusinessMetadataKeysAreUserScoped(t *testing.T) {
+	if got, want := UserBusinessID(42), "cache:user:42:business_id"; got != want {
+		t.Fatalf("UserBusinessID = %q, want %q", got, want)
+	}
+	if got, want := UserBusinessRole(42, 7), "cache:user:42:business:7:role"; got != want {
+		t.Fatalf("UserBusinessRole = %q, want %q", got, want)
+	}
+}

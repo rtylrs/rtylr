@@ -80,6 +80,14 @@ func UserBusinesses(userID int64) string {
 	return fmt.Sprintf("%suser:%d:businesses", Namespace, userID)
 }
 
+func UserBusinessID(userID int64) string {
+	return fmt.Sprintf("%suser:%d:business_id", Namespace, userID)
+}
+
+func UserBusinessRole(userID, businessID int64) string {
+	return fmt.Sprintf("%suser:%d:business:%d:role", Namespace, userID, businessID)
+}
+
 func UserPrefix(userID int64) string {
 	return fmt.Sprintf("%suser:%d:*", Namespace, userID)
 }

@@ -32,10 +32,10 @@ func invalidateUserScope(ctx context.Context, userID int64) {
 }
 
 var (
-	ErrInvalidCredentials  = infrastructure.ErrInvalidCredentials
-	ErrUserAlreadyExists   = infrastructure.ErrUserAlreadyExists
-	ErrWeakPassword        = infrastructure.ErrWeakPassword
-	ErrInvalidEmail        = infrastructure.ErrInvalidEmail
+	ErrInvalidCredentials   = infrastructure.ErrInvalidCredentials
+	ErrUserAlreadyExists    = infrastructure.ErrUserAlreadyExists
+	ErrWeakPassword         = infrastructure.ErrWeakPassword
+	ErrInvalidEmail         = infrastructure.ErrInvalidEmail
 	ErrBusinessAccessDenied = errors.New("business access denied")
 	ErrBusinessNameRequired = errors.New("business name is required")
 	ErrBusinessNameTaken    = errors.New("business name already taken")
@@ -183,6 +183,8 @@ func (s *Service) Authenticate(ctx context.Context, email, password string) (int
 
 // CreateBusinessForUser creates a new business and assigns the user as owner.
 func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, businessName string) error {
+	defer invalidateUserScope(ctx, userID)
+
 	businessID, err := s.repo.CreateBusiness(ctx, businessName, userID)
 	if err != nil {
 		return err
@@ -237,13 +239,13 @@ func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTo
 	}
 
 	if claims.BusinessID <= 0 {
-		if businessID, err := s.repo.GetUserBusinessID(ctx, claims.UserID); err == nil && businessID > 0 {
+		if businessID, err := s.getUserBusinessID(ctx, claims.UserID); err == nil && businessID > 0 {
 			claims.BusinessID = businessID
 		}
 	}
 
 	if claims.BusinessID > 0 && claims.Role == "" {
-		if role, err := s.repo.GetUserRole(ctx, claims.BusinessID, claims.UserID); err == nil {
+		if role, err := s.getUserBusinessRole(ctx, claims.BusinessID, claims.UserID); err == nil {
 			claims.Role = role
 		}
 	}
@@ -390,6 +392,26 @@ func (s *Service) GetUserByID(ctx context.Context, id int64) (*domain.User, erro
 		cacheKeys.Scoped("user", id, "profile"),
 		func(ctx context.Context) (*domain.User, error) {
 			return s.repo.GetUserByID(ctx, id)
+		},
+		cacher.WithExpiry(ctx, userProfileTTL),
+	)
+}
+
+func (s *Service) getUserBusinessID(ctx context.Context, userID int64) (int64, error) {
+	return cacher.Of[int64]().GetOrComputeSingle(ctx,
+		cacheKeys.UserBusinessID(userID),
+		func(ctx context.Context) (int64, error) {
+			return s.repo.GetUserBusinessID(ctx, userID)
+		},
+		cacher.WithExpiry(ctx, userProfileTTL),
+	)
+}
+
+func (s *Service) getUserBusinessRole(ctx context.Context, businessID, userID int64) (string, error) {
+	return cacher.Of[string]().GetOrComputeSingle(ctx,
+		cacheKeys.UserBusinessRole(userID, businessID),
+		func(ctx context.Context) (string, error) {
+			return s.repo.GetUserRole(ctx, businessID, userID)
 		},
 		cacher.WithExpiry(ctx, userProfileTTL),
 	)
