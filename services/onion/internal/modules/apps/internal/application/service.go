@@ -3,10 +3,15 @@ package application
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/apps/internal/domain"
 	"github.com/voxire/onion/internal/modules/apps/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
+
+const appsCacheTTL = 5 * time.Minute
 
 type repository interface {
 	GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool
@@ -29,11 +34,34 @@ func (s *Service) ListApps() []domain.App {
 }
 
 func (s *Service) GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool {
-	return s.repo.GetEnabledAddons(ctx, businessID)
+	enabled, err := cacher.Of[map[string]bool]().GetOrComputeSingle(ctx,
+		cacheKeys.BusinessEnabledAddons(businessID),
+		func(ctx context.Context) (map[string]bool, error) {
+			return s.repo.GetEnabledAddons(ctx, businessID), nil
+		},
+		cacher.WithExpiry(ctx, appsCacheTTL),
+	)
+	if err != nil {
+		return map[string]bool{}
+	}
+	if enabled == nil {
+		return map[string]bool{}
+	}
+	return enabled
 }
 
 func (s *Service) GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string {
-	return s.repo.GetUserAllowedApps(ctx, businessID, userID)
+	apps, err := cacher.Of[[]string]().GetOrComputeSingle(ctx,
+		cacheKeys.UserAllowedApps(userID, businessID),
+		func(ctx context.Context) ([]string, error) {
+			return s.repo.GetUserAllowedApps(ctx, businessID, userID), nil
+		},
+		cacher.WithExpiry(ctx, appsCacheTTL),
+	)
+	if err != nil || apps == nil {
+		return []string{}
+	}
+	return apps
 }
 
 func (s *Service) GetVisibleAppsForUser(ctx context.Context, businessID, userID int64, role string) ([]domain.App, error) {
@@ -52,7 +80,13 @@ func (s *Service) resolveBusinessID(ctx context.Context, businessID, userID int6
 	if businessID > 0 {
 		return businessID, nil
 	}
-	return s.repo.GetUserBusinessID(ctx, userID)
+	return cacher.Of[int64]().GetOrComputeSingle(ctx,
+		cacheKeys.UserBusinessID(userID),
+		func(ctx context.Context) (int64, error) {
+			return s.repo.GetUserBusinessID(ctx, userID)
+		},
+		cacher.WithExpiry(ctx, appsCacheTTL),
+	)
 }
 
 // GetVisibleApps returns the app catalogue projected for a specific user:

@@ -88,6 +88,10 @@ func UserBusinessRole(userID, businessID int64) string {
 	return fmt.Sprintf("%suser:%d:business:%d:role", Namespace, userID, businessID)
 }
 
+func UserAllowedApps(userID, businessID int64) string {
+	return fmt.Sprintf("%suser:%d:business:%d:apps", Namespace, userID, businessID)
+}
+
 func UserPrefix(userID int64) string {
 	return fmt.Sprintf("%suser:%d:*", Namespace, userID)
 }
@@ -112,6 +116,10 @@ func BusinessKPIs(businessID int64) string {
 
 func BusinessDashboardStats(businessID int64) string {
 	return fmt.Sprintf("%sbusiness:%d:dashboard_stats", Namespace, businessID)
+}
+
+func BusinessEnabledAddons(businessID int64) string {
+	return fmt.Sprintf("%sbusiness:%d:enabled_addons", Namespace, businessID)
 }
 
 func BusinessTeam(businessID int64) string {

@@ -37,4 +37,15 @@ func TestUserBusinessMetadataKeysAreUserScoped(t *testing.T) {
 	if got, want := UserBusinessRole(42, 7), "cache:user:42:business:7:role"; got != want {
 		t.Fatalf("UserBusinessRole = %q, want %q", got, want)
 	}
+	if got, want := UserAllowedApps(42, 7), "cache:user:42:business:7:apps"; got != want {
+		t.Fatalf("UserAllowedApps = %q, want %q", got, want)
+	}
+}
+
+func TestBusinessEnabledAddonsIsBusinessScoped(t *testing.T) {
+	got := BusinessEnabledAddons(7)
+	want := "cache:business:7:enabled_addons"
+	if got != want {
+		t.Fatalf("BusinessEnabledAddons = %q, want %q", got, want)
+	}
 }

@@ -447,6 +447,10 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, domain.Role(existing.Role)); err != nil {
 		return err
 	}
+	invalidateUserScope(ctx, targetUserID)
+	if businessID != 0 {
+		invalidateBusinessTeamScope(ctx, businessID)
+	}
 	return s.repo.ResolveAccessRequest(ctx, requestID, businessID, "approved")
 }
 
