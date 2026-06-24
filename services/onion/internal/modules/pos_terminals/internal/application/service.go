@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
@@ -12,8 +13,9 @@ import (
 )
 
 const (
-	posTerminalsScope = "pos_terminals"
-	posTerminalsTTL   = 1 * time.Minute
+	posTerminalsScope       = "pos_terminals"
+	posTerminalsTTL         = 1 * time.Minute
+	posHeartbeatWriteWindow = 30 * time.Second
 )
 
 type repository interface {
@@ -74,5 +76,16 @@ func (s *Service) Update(ctx context.Context, input domain.TerminalUpdateInput) 
 // intentionally do NOT invalidate the list cache on heartbeat (the TTL ages it
 // out fast enough and the field that changes is last_seen, not membership).
 func (s *Service) Heartbeat(ctx context.Context, terminalID, businessID int64) error {
-	return s.repo.Heartbeat(ctx, terminalID, businessID)
+	key := cacheKeys.Scoped(posTerminalsScope, businessID, fmt.Sprintf("heartbeat:%d", terminalID))
+	heartbeatCache := cacher.Of[bool]()
+	if _, found := heartbeatCache.Get(ctx, key, cacher.RemoteOnly()); found {
+		return nil
+	}
+
+	if err := s.repo.Heartbeat(ctx, terminalID, businessID); err != nil {
+		return err
+	}
+
+	heartbeatCache.Put(ctx, key, true, cacher.RemoteOnly(), cacher.WithExpiry(ctx, posHeartbeatWriteWindow))
+	return nil
 }

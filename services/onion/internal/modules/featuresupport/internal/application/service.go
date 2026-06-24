@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"fmt"
 	"hash/fnv"
 	"regexp"
 	"sort"
@@ -91,6 +92,13 @@ func resolveCacheKey(ec domain.EvalContext) string {
 
 	sum := sha256.Sum256([]byte(b.String()))
 	return cacheKeys.Scoped(featureSupportCacheScope, 0, "resolve:"+hex.EncodeToString(sum[:16]))
+}
+
+func featureSupportCacheOptions(ctx context.Context) []cacher.ClientOption {
+	return []cacher.ClientOption{
+		cacher.RemoteOnly(),
+		cacher.WithExpiry(ctx, featureSupportResolveTTL),
+	}
 }
 
 func invalidateFeatureSupportCache(ctx context.Context) {
@@ -268,14 +276,14 @@ func (s *Service) Resolve(ctx context.Context, ec domain.EvalContext) (map[strin
 }
 
 func (s *Service) resolveUncached(ctx context.Context, ec domain.EvalContext) (map[string]domain.Resolution, string, error) {
-	flags, err := s.repo.ListFlags(ctx)
+	flags, err := s.ListFlags(ctx)
 	if err != nil {
 		return nil, DefaultVariant, err
 	}
 
 	targets := map[string]domain.Target{}
 	if ec.UserID != 0 {
-		if ts, terr := s.repo.ListTargetsByOwner(ctx, ec.UserID); terr == nil {
+		if ts, terr := s.listTargetsByOwner(ctx, ec.UserID); terr == nil {
 			for _, t := range ts {
 				targets[t.FeatureKey] = t
 			}
@@ -283,7 +291,7 @@ func (s *Service) resolveUncached(ctx context.Context, ec domain.EvalContext) (m
 	}
 
 	rulesByFlag := map[string][]domain.Rule{}
-	if allRules, rerr := s.repo.ListEnabledRules(ctx); rerr == nil {
+	if allRules, rerr := s.listEnabledRules(ctx); rerr == nil {
 		for _, r := range allRules {
 			rulesByFlag[r.FeatureKey] = append(rulesByFlag[r.FeatureKey], r)
 		}
@@ -324,14 +332,26 @@ func clampPercent(p int32) int32 {
 }
 
 func (s *Service) ListFlags(ctx context.Context) ([]domain.Flag, error) {
-	return s.repo.ListFlags(ctx)
+	return cacher.Of[[]domain.Flag]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(featureSupportCacheScope, 0, "flags"),
+		func(ctx context.Context) ([]domain.Flag, error) {
+			return s.repo.ListFlags(ctx)
+		},
+		featureSupportCacheOptions(ctx)...,
+	)
 }
 
 func (s *Service) UserEmail(ctx context.Context, userID int64) (string, error) {
 	if userID == 0 {
 		return "", nil
 	}
-	return s.repo.GetUserEmail(ctx, userID)
+	return cacher.Of[string]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(featureSupportCacheScope, 0, fmt.Sprintf("user_email:%d", userID)),
+		func(ctx context.Context) (string, error) {
+			return s.repo.GetUserEmail(ctx, userID)
+		},
+		featureSupportCacheOptions(ctx)...,
+	)
 }
 
 func (s *Service) UpsertFlag(ctx context.Context, f domain.Flag) error {
@@ -354,7 +374,14 @@ func (s *Service) DeleteFlag(ctx context.Context, key string) error {
 }
 
 func (s *Service) ListTargets(ctx context.Context, key string) ([]domain.Target, error) {
-	return s.repo.ListTargetsByKey(ctx, key)
+	key = strings.TrimSpace(key)
+	return cacher.Of[[]domain.Target]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(featureSupportCacheScope, 0, "targets:key:"+key),
+		func(ctx context.Context) ([]domain.Target, error) {
+			return s.repo.ListTargetsByKey(ctx, key)
+		},
+		featureSupportCacheOptions(ctx)...,
+	)
 }
 
 func (s *Service) UpsertTarget(ctx context.Context, t domain.Target) error {
@@ -374,7 +401,37 @@ func (s *Service) DeleteTarget(ctx context.Context, key string, ownerID int64) e
 }
 
 func (s *Service) ListRules(ctx context.Context, key string) ([]domain.Rule, error) {
-	return s.repo.ListRulesByKey(ctx, key)
+	key = strings.TrimSpace(key)
+	return cacher.Of[[]domain.Rule]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(featureSupportCacheScope, 0, "rules:key:"+key),
+		func(ctx context.Context) ([]domain.Rule, error) {
+			return s.repo.ListRulesByKey(ctx, key)
+		},
+		featureSupportCacheOptions(ctx)...,
+	)
+}
+
+func (s *Service) listTargetsByOwner(ctx context.Context, ownerID int64) ([]domain.Target, error) {
+	if ownerID == 0 {
+		return nil, nil
+	}
+	return cacher.Of[[]domain.Target]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(featureSupportCacheScope, 0, fmt.Sprintf("targets:owner:%d", ownerID)),
+		func(ctx context.Context) ([]domain.Target, error) {
+			return s.repo.ListTargetsByOwner(ctx, ownerID)
+		},
+		featureSupportCacheOptions(ctx)...,
+	)
+}
+
+func (s *Service) listEnabledRules(ctx context.Context) ([]domain.Rule, error) {
+	return cacher.Of[[]domain.Rule]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(featureSupportCacheScope, 0, "rules:enabled"),
+		func(ctx context.Context) ([]domain.Rule, error) {
+			return s.repo.ListEnabledRules(ctx)
+		},
+		featureSupportCacheOptions(ctx)...,
+	)
 }
 
 func (s *Service) CreateRule(ctx context.Context, rule domain.Rule) (int64, error) {

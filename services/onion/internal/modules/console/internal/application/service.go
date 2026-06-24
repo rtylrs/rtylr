@@ -288,6 +288,8 @@ func (s *Service) GetUser(ctx context.Context, id int64) (*UserDTO, error) {
 }
 
 func (s *Service) CreateUser(ctx context.Context, email, password, fullName string, isConsoleAdmin bool) (*UserDTO, error) {
+	defer invalidateConsoleScope(ctx)
+
 	hash, err := passwordutils.HashPassword(password)
 	if err != nil {
 		return nil, err
@@ -971,20 +973,26 @@ type StatsDTO struct {
 }
 
 func (s *Service) GetStats(ctx context.Context) (*StatsDTO, error) {
-	row, err := s.repo.GetStats(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &StatsDTO{
-		TotalUsers:          row.TotalUsers,
-		BannedUsers:         row.BannedUsers,
-		TotalBusinesses:     row.TotalBusinesses,
-		ActiveSubs:          row.ActiveSubs,
-		ActiveSubscriptions: row.ActiveSubs,
-		TrialSubs:           row.TrialSubs,
-		ManualGrants:        row.ManualGrants,
-		ManualAddonGrants:   row.ManualAddonGrants,
-		TotalGrants:         row.ManualGrants,
-		ConsoleAdmins:       row.ConsoleAdmins,
-	}, nil
+	return cacher.Of[*StatsDTO]().GetOrComputeSingle(ctx, consoleKey("stats"),
+		func(ctx context.Context) (*StatsDTO, error) {
+			row, err := s.repo.GetStats(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return &StatsDTO{
+				TotalUsers:          row.TotalUsers,
+				BannedUsers:         row.BannedUsers,
+				TotalBusinesses:     row.TotalBusinesses,
+				ActiveSubs:          row.ActiveSubs,
+				ActiveSubscriptions: row.ActiveSubs,
+				TrialSubs:           row.TrialSubs,
+				ManualGrants:        row.ManualGrants,
+				ManualAddonGrants:   row.ManualAddonGrants,
+				TotalGrants:         row.ManualGrants,
+				ConsoleAdmins:       row.ConsoleAdmins,
+			}, nil
+		},
+		cacher.RemoteOnly(),
+		cacher.WithExpiry(ctx, consoleTTL),
+	)
 }
