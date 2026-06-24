@@ -134,7 +134,7 @@ jobs:
           echo "Pushed $IMAGE_URI:$VERSION"
 
       - name: Deploy to ECS
-        timeout-minutes: 15
+        timeout-minutes: 30
         run: |
           set -euo pipefail
 
@@ -162,16 +162,24 @@ jobs:
             --region $AWS_REGION
 
           if [ "${{ matrix.name }}" = "api" ]; then
-            for attempt in $(seq 1 60); do
-              if curl -fsS --max-time 8 https://api.voxire.com/health | grep -q '"status":"ok"'; then
+            HEALTH_ATTEMPTS=180
+
+            for attempt in $(seq 1 "$HEALTH_ATTEMPTS"); do
+              HEALTH_BODY="$(mktemp)"
+              HTTP_CODE="$(curl -sS --max-time 8 -o "$HEALTH_BODY" -w "%{http_code}" https://api.voxire.com/health || true)"
+              BODY="$(cat "$HEALTH_BODY" || true)"
+              rm -f "$HEALTH_BODY"
+
+              if [ "$HTTP_CODE" = "200" ] && printf '%s' "$BODY" | grep -q '"status":"ok"'; then
                 echo "Public API health check passed"
                 exit 0
               fi
-              echo "Public API health check failed, retrying ($attempt/60)"
+
+              echo "Public API health check failed (http=$HTTP_CODE body=$BODY), retrying ($attempt/$HEALTH_ATTEMPTS)"
               sleep 5
             done
 
-            echo "Public API health check failed after ECS became stable"
+            echo "Public API health check failed after ECS became stable and the public grace window elapsed"
             aws ecs describe-services \
               --cluster ${{ matrix.cluster }} \
               --services ${{ matrix.service }} \
