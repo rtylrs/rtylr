@@ -74,21 +74,25 @@ jobs:
             repository: voxire/onion
             cluster: voxire-prod
             service: api
+            desired_count: 1
           - name: worker
             dockerfile: Dockerfile.worker
             repository: voxire/onion-worker
             cluster: voxire-prod
             service: worker
+            desired_count: 1
           - name: upload
             dockerfile: Dockerfile.upload
             repository: voxire/onion-upload
             cluster: voxire-prod
             service: upload
+            desired_count: 1
           - name: license
             dockerfile: Dockerfile.license
             repository: voxire/onion-license
             cluster: voxire-prod
             service: license
+            desired_count: 1
     steps:
       - uses: actions/checkout@v6
         with:
@@ -134,13 +138,22 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "Service before deploy"
+          aws ecs describe-services \
+            --cluster ${{ matrix.cluster }} \
+            --services ${{ matrix.service }} \
+            --region $AWS_REGION \
+            --query 'services[0].{desired:desiredCount,running:runningCount,pending:pendingCount,taskDefinition:taskDefinition,deployments:deployments[].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,rolloutState:rolloutState,reason:rolloutStateReason}}' \
+            --output table
+
           aws ecs update-service \
             --cluster ${{ matrix.cluster }} \
             --service ${{ matrix.service }} \
+            --desired-count ${{ matrix.desired_count }} \
             --force-new-deployment \
             --deployment-configuration "deploymentCircuitBreaker={enable=true,rollback=true},maximumPercent=200,minimumHealthyPercent=100" \
             --region $AWS_REGION \
-            --query 'service.deployments[0].{status:status,desiredCount:desiredCount}' \
+            --query 'service.{desired:desiredCount,running:runningCount,pending:pendingCount,deployments:deployments[].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,rolloutState:rolloutState,reason:rolloutStateReason}}' \
             --output table
 
           aws ecs wait services-stable \
@@ -149,16 +162,22 @@ jobs:
             --region $AWS_REGION
 
           if [ "${{ matrix.name }}" = "api" ]; then
-            for attempt in $(seq 1 30); do
+            for attempt in $(seq 1 60); do
               if curl -fsS --max-time 8 https://api.voxire.com/health | grep -q '"status":"ok"'; then
                 echo "Public API health check passed"
                 exit 0
               fi
-              echo "Public API health check failed, retrying ($attempt/30)"
+              echo "Public API health check failed, retrying ($attempt/60)"
               sleep 5
             done
 
             echo "Public API health check failed after ECS became stable"
+            aws ecs describe-services \
+              --cluster ${{ matrix.cluster }} \
+              --services ${{ matrix.service }} \
+              --region $AWS_REGION \
+              --query 'services[0].{desired:desiredCount,running:runningCount,pending:pendingCount,events:events[0:5].message,deployments:deployments[].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,rolloutState:rolloutState,reason:rolloutStateReason}}' \
+              --output table
             exit 1
           fi
 
