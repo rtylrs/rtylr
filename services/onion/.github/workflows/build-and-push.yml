@@ -130,14 +130,37 @@ jobs:
           echo "Pushed $IMAGE_URI:$VERSION"
 
       - name: Deploy to ECS
+        timeout-minutes: 15
         run: |
+          set -euo pipefail
+
           aws ecs update-service \
             --cluster ${{ matrix.cluster }} \
             --service ${{ matrix.service }} \
             --force-new-deployment \
+            --deployment-configuration "deploymentCircuitBreaker={enable=true,rollback=true},maximumPercent=200,minimumHealthyPercent=100" \
             --region $AWS_REGION \
             --query 'service.deployments[0].{status:status,desiredCount:desiredCount}' \
             --output table
+
+          aws ecs wait services-stable \
+            --cluster ${{ matrix.cluster }} \
+            --services ${{ matrix.service }} \
+            --region $AWS_REGION
+
+          if [ "${{ matrix.name }}" = "api" ]; then
+            for attempt in $(seq 1 30); do
+              if curl -fsS --max-time 8 https://api.voxire.com/health | grep -q '"status":"ok"'; then
+                echo "Public API health check passed"
+                exit 0
+              fi
+              echo "Public API health check failed, retrying ($attempt/30)"
+              sleep 5
+            done
+
+            echo "Public API health check failed after ECS became stable"
+            exit 1
+          fi
 
   notify:
     name: Notify Slack
