@@ -642,14 +642,9 @@ func (r *redisCache) DeleteByPattern(ctx context.Context, pattern string) int {
 	}
 
 	const batch = 200
-	deleted := 0
+	deleted := GetInMemoryCache(ctx).DeleteByPattern(ctx, pattern)
 
-	patterns := []string{pattern}
-	if strings.HasPrefix(pattern, "cache:") {
-		patterns = append(patterns, "*"+pattern)
-	}
-
-	for _, currentPattern := range patterns {
+	for _, currentPattern := range cachePatternVariants(pattern) {
 		iter := r.redisCacheCluster.Scan(ctx, 0, currentPattern, batch).Iterator()
 		keys := make([]string, 0, batch)
 

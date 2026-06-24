@@ -747,6 +747,17 @@ func (c Cache[M]) deleteIdentifierPrefix(s string) string {
 	return strings.ReplaceAll(s, c.getModelIdentifier()+"-", "")
 }
 
+func cachePatternVariants(pattern string) []string {
+	if pattern == "" {
+		return nil
+	}
+	patterns := []string{pattern}
+	if strings.HasPrefix(pattern, "cache:") {
+		patterns = append(patterns, "*"+pattern)
+	}
+	return patterns
+}
+
 func shouldForceOriginFetch(probability float32) bool {
 	if probability <= 0 {
 		return false

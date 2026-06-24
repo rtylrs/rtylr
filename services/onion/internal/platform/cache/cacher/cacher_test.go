@@ -100,3 +100,41 @@ func TestPatternKeysUseModelNamespace(t *testing.T) {
 		t.Fatalf("pattern key = %#v, want namespaced wildcard", got)
 	}
 }
+
+func TestDeleteByPatternClearsLocalCache(t *testing.T) {
+	ctx := initTestCache(t)
+	cache := OfWithNamespace[string]("test-local-pattern")
+	key := "cache:user:42:profile"
+
+	cache.Put(ctx, key, "cached", MemoryOnly(), WithExpiry(ctx, time.Minute))
+	if _, ok := cache.Get(ctx, key, MemoryOnly()); !ok {
+		t.Fatal("expected local cache entry before delete")
+	}
+
+	deleted := cache.DeleteByPattern(ctx, []string{"cache:user:42:*"})
+	if deleted == 0 {
+		t.Fatal("expected pattern delete to remove at least one local entry")
+	}
+	if got, ok := cache.Get(ctx, key, MemoryOnly()); ok {
+		t.Fatalf("expected local cache miss after pattern delete, got %q", got)
+	}
+}
+
+func TestRawDeleteByPatternClearsTypedLocalCache(t *testing.T) {
+	ctx := initTestCache(t)
+	cache := OfWithNamespace[string]("test-raw-local-pattern")
+	key := "cache:business:9:config"
+
+	cache.Put(ctx, key, "cached", MemoryOnly(), WithExpiry(ctx, time.Minute))
+	if _, ok := cache.Get(ctx, key, MemoryOnly()); !ok {
+		t.Fatal("expected local cache entry before delete")
+	}
+
+	deleted := GetRedisCache().DeleteByPattern(ctx, "cache:business:9:*")
+	if deleted == 0 {
+		t.Fatal("expected raw pattern delete to remove at least one typed local entry")
+	}
+	if got, ok := cache.Get(ctx, key, MemoryOnly()); ok {
+		t.Fatalf("expected local cache miss after raw pattern delete, got %q", got)
+	}
+}

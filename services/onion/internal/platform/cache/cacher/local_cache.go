@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
+	"path"
 	"strings"
 	"time"
 
@@ -118,6 +119,54 @@ func (c *LocalCache) Delete(ctx context.Context, keys []string) {
 			)
 		}
 	}
+}
+
+func (c *LocalCache) DeleteByPattern(ctx context.Context, pattern string) int {
+	if c.cache == nil || pattern == "" {
+		return 0
+	}
+
+	patterns := cachePatternVariants(pattern)
+	deleted := 0
+	seen := make(map[string]struct{})
+	iter := c.cache.Iterator()
+
+	for iter.SetNext() {
+		entry, err := iter.Value()
+		if err != nil {
+			logger.Ctx(ctx).Warn("Error while iterating memory cache",
+				logger.Error(err),
+				logger.String("pattern", pattern),
+			)
+			continue
+		}
+
+		key := entry.Key()
+		if _, ok := seen[key]; ok {
+			continue
+		}
+
+		for _, currentPattern := range patterns {
+			matched, matchErr := path.Match(currentPattern, key)
+			if matchErr != nil {
+				logger.Ctx(ctx).Warn("Invalid memory cache delete pattern",
+					logger.Error(matchErr),
+					logger.String("pattern", currentPattern),
+				)
+				break
+			}
+			if !matched {
+				continue
+			}
+
+			c.Delete(ctx, []string{key})
+			seen[key] = struct{}{}
+			deleted++
+			break
+		}
+	}
+
+	return deleted
 }
 
 var localCacheInstance *LocalCache

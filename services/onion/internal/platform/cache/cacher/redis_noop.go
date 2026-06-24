@@ -16,8 +16,10 @@ func (n *noopRedisCache) PutMulti(_ context.Context, _ map[string][]byte, _ time
 func (n *noopRedisCache) GetMulti(_ context.Context, keys []string) (map[string][]byte, []string) {
 	return make(map[string][]byte), keys
 }
-func (n *noopRedisCache) Delete(_ context.Context, _ []string)                           {}
-func (n *noopRedisCache) DeleteByPattern(_ context.Context, _ string) int                { return 0 }
+func (n *noopRedisCache) Delete(_ context.Context, _ []string) {}
+func (n *noopRedisCache) DeleteByPattern(ctx context.Context, pattern string) int {
+	return GetInMemoryCache(ctx).DeleteByPattern(ctx, pattern)
+}
 func (n *noopRedisCache) HSet(_ context.Context, _, _ string, _ []byte, _ time.Duration) {}
 func (n *noopRedisCache) HFieldExpire(_ context.Context, _, _ string, _ time.Duration)   {}
 func (n *noopRedisCache) HSetWithFieldExpiry(_ context.Context, _, _ string, _ []byte, _, _ time.Duration) {
