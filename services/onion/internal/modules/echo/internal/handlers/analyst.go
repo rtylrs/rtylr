@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 // AnalystService is the safe NL-to-SQL engine (implemented by the aiquery
@@ -140,7 +141,7 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 
 	started := time.Now()
 	today := time.Now().UTC().Format("2006-01-02")
-	raw, err := h.AiService.CompleteText(ctx, buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today))
+	raw, err := h.AiService.CompleteTextWithOptions(ctx, buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today), snips.DeterministicJSONCompletionOptions())
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst spec generation failed", logger.Error(err))
 		return nil, false

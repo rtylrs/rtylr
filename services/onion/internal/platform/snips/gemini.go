@@ -50,11 +50,16 @@ func (c *GeminiProvider) IsAvailable() bool {
 
 // CompleteText implements the Provider interface.
 func (c *GeminiProvider) CompleteText(ctx context.Context, prompt string) (string, error) {
+	return c.CompleteTextWithOptions(ctx, prompt, CompletionOptions{})
+}
+
+func (c *GeminiProvider) CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error) {
 	var lastErr error
 
 	for _, modelName := range c.models {
 		logger.Ctx(ctx).Info("Trying Gemini model", logger.String("model", modelName))
 		model := c.client.GenerativeModel(modelName)
+		applyGeminiCompletionOptions(model, opts)
 
 		resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 		if err != nil {
@@ -93,6 +98,25 @@ func (c *GeminiProvider) CompleteText(ctx context.Context, prompt string) (strin
 	}
 
 	return "", ErrGeminiAllModelsFailed
+}
+
+func applyGeminiCompletionOptions(model *genai.GenerativeModel, opts CompletionOptions) {
+	if opts.Temperature == nil && !opts.JSONResponse {
+		return
+	}
+
+	maxTokens := int32(config.AIMaxOutputTokens)
+	cfg := genai.GenerationConfig{
+		MaxOutputTokens: &maxTokens,
+	}
+	if opts.Temperature != nil {
+		temperature := float32(*opts.Temperature)
+		cfg.Temperature = &temperature
+	}
+	if opts.JSONResponse {
+		cfg.ResponseMIMEType = "application/json"
+	}
+	model.GenerationConfig = cfg
 }
 
 // CompleteTextStream implements the Provider interface.

@@ -121,6 +121,23 @@ func TestBuildSQL_InFilterRendersIn(t *testing.T) {
 	}
 }
 
+func TestBuildSQL_LikeFilterRendersBoundLike(t *testing.T) {
+	sql, args, err := BuildSQL(QuerySpec{
+		View:    "ai_products",
+		Columns: []string{"name", "sku"},
+		Where:   []Filter{{Col: "name", Op: "like", Value: "%whey%"}},
+	}, 5)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if !strings.Contains(sql, "name LIKE ?") {
+		t.Errorf("expected LIKE rendering: %s", sql)
+	}
+	if len(args) != 2 || args[0] != int64(5) || args[1] != "%whey%" {
+		t.Errorf("expected owner_id + bound like value, got %v", args)
+	}
+}
+
 func TestBuildSQL_AllowsSafeColumnComparisonFilters(t *testing.T) {
 	sql, args, err := BuildSQL(QuerySpec{
 		View: "ai_products",

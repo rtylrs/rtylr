@@ -2,6 +2,21 @@ package snips
 
 import "context"
 
+// CompletionOptions configures non-streaming provider calls used for internal
+// planning steps. Streaming user-facing chat keeps the default provider style.
+type CompletionOptions struct {
+	Temperature  *float64
+	JSONResponse bool
+}
+
+func DeterministicJSONCompletionOptions() CompletionOptions {
+	temperature := 0.0
+	return CompletionOptions{
+		Temperature:  &temperature,
+		JSONResponse: true,
+	}
+}
+
 // Provider represents any AI provider (LLM, database, custom models, etc.)
 type Provider interface {
 	Name() string

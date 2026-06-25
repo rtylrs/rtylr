@@ -45,7 +45,7 @@ var allowedViews = map[string]map[string]struct{}{
 
 var (
 	allowedAggregates = set("sum", "count", "avg", "min", "max")
-	allowedOperators  = set("=", "!=", "<", "<=", ">", ">=", "in")
+	allowedOperators  = set("=", "!=", "<", "<=", ">", ">=", "like", "in")
 	aliasRe           = regexp.MustCompile(`[^a-zA-Z0-9_]`)
 )
 
@@ -212,7 +212,7 @@ func filterPredicate(f Filter, cols map[string]struct{}) (sq.Sqlizer, error) {
 		if !allowed(cols, valueCol) {
 			return nil, fmt.Errorf("%w: value column %q", ErrUnknownColumn, valueCol)
 		}
-		if op == "in" {
+		if op == "in" || op == "like" {
 			return nil, fmt.Errorf("%w: column comparison with %q", ErrBadOperator, f.Op)
 		}
 		return sq.Expr(fmt.Sprintf("%s %s %s", strings.TrimSpace(f.Col), op, valueCol)), nil
@@ -231,6 +231,8 @@ func filterPredicate(f Filter, cols map[string]struct{}) (sq.Sqlizer, error) {
 		return sq.Gt{f.Col: f.Value}, nil
 	case ">=":
 		return sq.GtOrEq{f.Col: f.Value}, nil
+	case "like":
+		return sq.Like{f.Col: f.Value}, nil
 	case "in":
 		return sq.Eq{f.Col: f.Value}, nil // squirrel renders a slice value as IN (...)
 	}

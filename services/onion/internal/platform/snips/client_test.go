@@ -2,6 +2,7 @@ package snips
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -69,4 +70,92 @@ func waitUntilBuffered(t *testing.T, ch <-chan StreamToken, want int) {
 	}
 
 	t.Fatalf("channel buffered %d tokens, want %d", len(ch), want)
+}
+
+func TestCompleteTextWithOptionsPassesOptionsToProvider(t *testing.T) {
+	temperature := 0.0
+	provider := &recordingCompletionProvider{
+		plainCompletionProvider: plainCompletionProvider{result: "ok"},
+	}
+	client := &Client{providers: []Provider{provider}}
+
+	got, err := client.CompleteTextWithOptions(context.Background(), "prompt", CompletionOptions{
+		Temperature:  &temperature,
+		JSONResponse: true,
+	})
+	if err != nil {
+		t.Fatalf("CompleteTextWithOptions: %v", err)
+	}
+	if got != "ok" {
+		t.Fatalf("got %q, want ok", got)
+	}
+	if provider.optionCalls != 1 {
+		t.Fatalf("optionCalls = %d, want 1", provider.optionCalls)
+	}
+	if provider.plainCalls != 0 {
+		t.Fatalf("plainCalls = %d, want 0", provider.plainCalls)
+	}
+	if provider.lastOptions.Temperature == nil || *provider.lastOptions.Temperature != 0 {
+		t.Fatalf("Temperature = %#v, want 0", provider.lastOptions.Temperature)
+	}
+	if !provider.lastOptions.JSONResponse {
+		t.Fatal("JSONResponse option was not forwarded")
+	}
+}
+
+func TestCompleteTextWithOptionsFallsBackToPlainProvider(t *testing.T) {
+	provider := &plainCompletionProvider{result: "plain-ok"}
+	client := &Client{providers: []Provider{provider}}
+
+	got, err := client.CompleteTextWithOptions(context.Background(), "prompt", DeterministicJSONCompletionOptions())
+	if err != nil {
+		t.Fatalf("CompleteTextWithOptions: %v", err)
+	}
+	if got != "plain-ok" {
+		t.Fatalf("got %q, want plain-ok", got)
+	}
+	if provider.plainCalls != 1 {
+		t.Fatalf("plainCalls = %d, want 1", provider.plainCalls)
+	}
+}
+
+type plainCompletionProvider struct {
+	result     string
+	err        error
+	plainCalls int
+}
+
+func (p *plainCompletionProvider) Name() string      { return "plain" }
+func (p *plainCompletionProvider) IsAvailable() bool { return true }
+func (p *plainCompletionProvider) CompleteText(_ context.Context, _ string) (string, error) {
+	p.plainCalls++
+	if p.err != nil {
+		return "", p.err
+	}
+	if p.result == "" {
+		return "", errors.New("empty test result")
+	}
+	return p.result, nil
+}
+func (p *plainCompletionProvider) CompleteTextStream(_ context.Context, _ string) (<-chan StreamToken, error) {
+	return nil, errors.New("not implemented")
+}
+func (p *plainCompletionProvider) Close() error { return nil }
+
+type recordingCompletionProvider struct {
+	plainCompletionProvider
+	optionCalls int
+	lastOptions CompletionOptions
+}
+
+func (p *recordingCompletionProvider) CompleteTextWithOptions(_ context.Context, _ string, opts CompletionOptions) (string, error) {
+	p.optionCalls++
+	p.lastOptions = opts
+	if p.err != nil {
+		return "", p.err
+	}
+	if p.result == "" {
+		return "", errors.New("empty test result")
+	}
+	return p.result, nil
 }

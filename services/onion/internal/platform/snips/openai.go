@@ -8,6 +8,7 @@ import (
 
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
+	"github.com/openai/openai-go/v2/shared"
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -92,13 +93,22 @@ func NewNvidiaNIMProvider() (*OpenAIProvider, error) {
 func (c *OpenAIProvider) Name() string      { return c.name }
 func (c *OpenAIProvider) IsAvailable() bool { return c.available }
 
-func (c *OpenAIProvider) chatParams(prompt string, stream bool) openai.ChatCompletionNewParams {
+func (c *OpenAIProvider) chatParams(prompt string, stream bool, opts CompletionOptions) openai.ChatCompletionNewParams {
 	req := openai.ChatCompletionNewParams{
 		Model:     c.model,
 		MaxTokens: openai.Int(int64(config.AIMaxOutputTokens)),
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage(prompt),
 		},
+	}
+	if opts.Temperature != nil {
+		req.Temperature = openai.Float(*opts.Temperature)
+	}
+	if opts.JSONResponse {
+		jsonFormat := shared.NewResponseFormatJSONObjectParam()
+		req.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+			OfJSONObject: &jsonFormat,
+		}
 	}
 	if stream {
 		// Ask the provider to include token usage in the final stream chunk so we
@@ -111,6 +121,10 @@ func (c *OpenAIProvider) chatParams(prompt string, stream bool) openai.ChatCompl
 // CompleteText implements the Provider interface with a bounded timeout and
 // retry-with-backoff on transient failures.
 func (c *OpenAIProvider) CompleteText(ctx context.Context, prompt string) (string, error) {
+	return c.CompleteTextWithOptions(ctx, prompt, CompletionOptions{})
+}
+
+func (c *OpenAIProvider) CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error) {
 	var lastErr error
 	for attempt := 0; attempt <= config.AIMaxRetries; attempt++ {
 		if attempt > 0 {
@@ -121,9 +135,12 @@ func (c *OpenAIProvider) CompleteText(ctx context.Context, prompt string) (strin
 			}
 		}
 
-		callCtx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
-		resp, err := c.client.Chat.Completions.New(callCtx, c.chatParams(prompt, false))
-		cancel()
+		resp, err := c.completeTextOnce(ctx, prompt, opts)
+		if err != nil && opts.JSONResponse {
+			fallbackOpts := opts
+			fallbackOpts.JSONResponse = false
+			resp, err = c.completeTextOnce(ctx, prompt, fallbackOpts)
+		}
 		if err != nil {
 			lastErr = fmt.Errorf("failed to create chat completion: %w", err)
 			continue
@@ -135,6 +152,12 @@ func (c *OpenAIProvider) CompleteText(ctx context.Context, prompt string) (strin
 	}
 
 	return "", lastErr
+}
+
+func (c *OpenAIProvider) completeTextOnce(ctx context.Context, prompt string, opts CompletionOptions) (*openai.ChatCompletion, error) {
+	callCtx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
+	defer cancel()
+	return c.client.Chat.Completions.New(callCtx, c.chatParams(prompt, false, opts))
 }
 
 // CompleteTextStream implements the Provider interface.
@@ -166,7 +189,7 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 	ctx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
 	defer cancel()
 
-	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true))
+	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true, CompletionOptions{}))
 	if stream == nil {
 		c.sendErrorToken(tokenChan, "failed to create streaming response")
 		return

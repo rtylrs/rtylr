@@ -28,6 +28,10 @@ type Client struct {
 	primaryProvider Provider
 }
 
+type completionOptionsProvider interface {
+	CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error)
+}
+
 type StreamToken struct {
 	Text     string `json:"text"`
 	Done     bool   `json:"done"`
@@ -103,9 +107,21 @@ func NewClient(ctx context.Context) (*Client, error) {
 }
 
 func (c *Client) CompleteText(ctx context.Context, prompt string) (string, error) {
+	return c.CompleteTextWithOptions(ctx, prompt, CompletionOptions{})
+}
+
+func (c *Client) CompleteTextWithOptions(ctx context.Context, prompt string, opts CompletionOptions) (string, error) {
 	// Try each provider in order until one succeeds
 	for _, provider := range c.providers {
 		if !provider.IsAvailable() {
+			continue
+		}
+
+		if withOptions, ok := provider.(completionOptionsProvider); ok {
+			result, err := withOptions.CompleteTextWithOptions(ctx, prompt, opts)
+			if err == nil {
+				return result, nil
+			}
 			continue
 		}
 

@@ -45,6 +45,14 @@ func (s *Service) CompleteText(ctx context.Context, prompt string) (string, erro
 	return s.aiClient.CompleteText(ctx, prompt)
 }
 
+func (s *Service) CompleteTextWithOptions(ctx context.Context, prompt string, opts snips.CompletionOptions) (string, error) {
+	if s.aiClient == nil {
+		return "", ErrClientNotInitialized
+	}
+
+	return s.aiClient.CompleteTextWithOptions(ctx, prompt, opts)
+}
+
 func (s *Service) IsAvailable() bool {
 	return s.aiClient != nil
 }
