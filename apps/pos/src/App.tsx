@@ -27,6 +27,7 @@ import { reportReactError } from './shared/services/observability/appErrors';
 import { useTerminalHeartbeat } from './shared/services/terminal/useTerminalHeartbeat';
 import { buildCartContext } from './shared/services/terminal/cartContext';
 import { posService, type POSBusinessSettingsResponse } from './shared/services/api/posService';
+import { runDesktopAutoUpdater } from './shared/services/desktop/autoUpdater';
 import {
   businessAddress,
   businessContactPhone,
@@ -89,6 +90,10 @@ const AppShell = (): React.JSX.Element => {
   const serverConfigured = useServerStore((s) => s.configured);
   const hasRestoredSession = useRef(false);
   const hasLoadedPOSSettings = useRef(false);
+
+  useEffect(() => {
+    runDesktopAutoUpdater();
+  }, []);
 
   // Check auth — only after the backend has been chosen, so the very first
   // redirect targets the correct (hosted or self-host) auth host.

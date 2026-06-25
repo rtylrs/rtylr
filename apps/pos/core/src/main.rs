@@ -11,6 +11,8 @@ use commands::{discovery, drawer, health, kds, printer, receipt};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             // Legacy Windows-spooler drawer kick (kept for backward compat)
             printer::open_cash_drawer,

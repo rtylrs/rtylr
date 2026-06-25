@@ -22,6 +22,18 @@ pnpm tauri:build
 
 `pnpm tauri:build` produces the native app bundle under `core/target/release/bundle/`.
 
+## Desktop Releases
+
+Pushing a tag named `pos-v<version>` or running the `Desktop Release` workflow manually builds downloadable macOS, Windows, and Linux installers from the private `tryrtylr/pos` source repo and attaches them to a public GitHub release in `tryrtylr/pos-releases`.
+
+The workflow also generates the Tauri updater `latest.json` release asset. The desktop app checks that file on startup and installs any newer signed release. CI needs these secrets:
+
+- `TAURI_SIGNING_PRIVATE_KEY`
+- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (optional; leave empty for the current generated key)
+- `PAT_TOKEN` with release write access to `tryrtylr/pos-releases`
+
+The public updater key is stored in `core/tauri.conf.json`; keep the private key only in GitHub Secrets.
+
 ## Production Gates
 
 Before cutting a release:
