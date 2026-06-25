@@ -79,6 +79,43 @@ describe('useReceipts', () => {
     expect(result.current.receipts).toHaveLength(1);
   });
 
+  it('normalizes backend snake_case receipts', async () => {
+    mockPosService.getReceipts.mockResolvedValue({
+      receipts: [
+        {
+          id: 42,
+          order_number: 'ORD-42',
+          customer_name: 'Sam',
+          total: '30.50',
+          payment_method: 'card',
+          paid_at: '2026-01-02T12:00:00Z',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useReceipts());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.receipts).toEqual([
+      {
+        id: '42',
+        orderId: 'ORD-42',
+        customerName: 'Sam',
+        total: 30.5,
+        printedAt: '2026-01-02T12:00:00Z',
+        items: [],
+        payments: [
+          {
+            id: 'payment-42',
+            method: 'card',
+            amount: 30.5,
+            createdAt: '2026-01-02T12:00:00Z',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('handles error state', async () => {
     mockPosService.getReceipts.mockRejectedValue(new Error('Failed'));
 
