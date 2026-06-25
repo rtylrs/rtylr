@@ -76,6 +76,9 @@ export interface OrderLineItem {
   name: string;
   price: number;
   quantity: number;
+  sku?: string;
+  total?: number;
+  status?: string;
   modifiers?: Modifier[];
   notes?: string;
   course?: 'appetizer' | 'main' | 'dessert' | 'drink' | 'other';

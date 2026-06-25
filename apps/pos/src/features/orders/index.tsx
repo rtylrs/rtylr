@@ -19,6 +19,18 @@ const FILTERS = ['all', 'pending', 'preparing', 'ready', 'paid', 'voided', 'refu
 type OrderFilter = (typeof FILTERS)[number];
 const PAGE_SIZE = 25;
 
+function orderItemsPreview(order: Order): string | null {
+  if (order.items.length === 0) return null;
+
+  const preview = order.items
+    .slice(0, 3)
+    .map((item) => `${item.quantity}x ${item.name}`)
+    .join(', ');
+  const remaining = order.items.length - 3;
+
+  return remaining > 0 ? `${preview}, +${remaining} more` : preview;
+}
+
 function responseNumber(res: unknown, ...keys: string[]): number | undefined {
   if (!res || typeof res !== 'object') return undefined;
   const record = res as Record<string, unknown>;
@@ -163,49 +175,58 @@ const OrdersScreen: React.FC = () => {
         ) : (
           <>
             <ul className="space-y-2">
-              {orders.map((o) => (
-                <li
-                  key={o.id}
-                  className="p-4 rounded-xl bg-pos-card border border-pos-border hover:border-white/20 cursor-pointer transition"
-                  onClick={() => !reopenMode && navigate(`/payment/${o.id}`)}
-                >
-                  <div className="flex justify-between items-center gap-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="font-bold text-pos-text truncate">#{o.number ?? o.id}</span>
-                      <OrderStatusBadge status={o.status} />
-                      {o.tableNumber && (
-                        <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
-                      )}
+              {orders.map((o) => {
+                const preview = orderItemsPreview(o);
+
+                return (
+                  <li
+                    key={o.id}
+                    className="p-4 rounded-xl bg-pos-card border border-pos-border hover:border-white/20 cursor-pointer transition"
+                    onClick={() => !reopenMode && navigate(`/payment/${o.id}`)}
+                  >
+                    <div className="flex justify-between items-center gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="font-bold text-pos-text truncate">
+                          #{o.number ?? o.id}
+                        </span>
+                        <OrderStatusBadge status={o.status} />
+                        {o.tableNumber && (
+                          <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-bold text-pos-text">
+                          {formatCurrency(o.total)}
+                        </span>
+                        {reopenMode && o.status === 'paid' && (
+                          <button
+                            type="button"
+                            disabled={reopening === String(o.id)}
+                            onClick={(e) => void handleReopen(e, o)}
+                            className="h-8 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 disabled:opacity-50 transition-colors"
+                          >
+                            {reopening === String(o.id) ? '...' : 'Reopen'}
+                          </button>
+                        )}
+                        {!reopenMode && isVoidable(o.status) && (
+                          <button
+                            type="button"
+                            disabled={voiding === String(o.id)}
+                            onClick={(e) => void handleVoid(e, o)}
+                            className="h-8 px-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/25 disabled:opacity-50 transition-colors"
+                          >
+                            {voiding === String(o.id) ? '...' : 'Void'}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-sm font-bold text-pos-text">
-                        {formatCurrency(o.total)}
-                      </span>
-                      {reopenMode && o.status === 'paid' && (
-                        <button
-                          type="button"
-                          disabled={reopening === String(o.id)}
-                          onClick={(e) => void handleReopen(e, o)}
-                          className="h-8 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 disabled:opacity-50 transition-colors"
-                        >
-                          {reopening === String(o.id) ? '...' : 'Reopen'}
-                        </button>
-                      )}
-                      {!reopenMode && isVoidable(o.status) && (
-                        <button
-                          type="button"
-                          disabled={voiding === String(o.id)}
-                          onClick={(e) => void handleVoid(e, o)}
-                          className="h-8 px-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/25 disabled:opacity-50 transition-colors"
-                        >
-                          {voiding === String(o.id) ? '...' : 'Void'}
-                        </button>
-                      )}
+                    <div className="mt-1 space-y-1">
+                      <div className="text-[11px] text-pos-muted">{formatDate(o.createdAt)}</div>
+                      {preview && <div className="text-xs text-pos-muted truncate">{preview}</div>}
                     </div>
-                  </div>
-                  <div className="text-[11px] text-pos-muted mt-1">{formatDate(o.createdAt)}</div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
             <div className="flex items-center justify-between gap-3 pt-2 text-xs text-pos-muted">
               <span>

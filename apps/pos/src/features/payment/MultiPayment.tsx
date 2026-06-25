@@ -7,15 +7,14 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import PaymentMethodTile from '../../shared/components/PaymentMethodTile';
 import TipSelector from '../../shared/components/TipSelector';
 import { formatCurrency } from '../../shared/utils/format';
-import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
+import type { Order, OrderLineItem, PaymentEntry, PaymentMethod } from '../../shared/types/pos';
 import { posService } from '../../shared/services/api/posService';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
+import { normalizeOrderResponse } from '../orders/ordersWorkflow';
 
-interface OrderTotals {
-  subtotal: number;
-  tax: number;
-  total: number;
+function lineTotal(item: OrderLineItem): number {
+  return item.total ?? item.price * item.quantity;
 }
 
 const MultiPaymentScreen: React.FC = () => {
@@ -23,7 +22,7 @@ const MultiPaymentScreen: React.FC = () => {
   const navigate = useNavigate();
   // MultiPayment pays a PERSISTED order (route /payment/:orderId), so totals
   // come from that order — never the live cart, which is unrelated.
-  const [order, setOrder] = useState<OrderTotals | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [loadingOrder, setLoadingOrder] = useState(true);
   const [tip, setTip] = useState(0);
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
@@ -42,16 +41,9 @@ const MultiPaymentScreen: React.FC = () => {
       }
       try {
         const res = await unwrap(posService.getOrder(id));
-        const o = ((res as { order?: Record<string, unknown> })?.order ?? res) as Record<
-          string,
-          unknown
-        >;
+        const normalized = normalizeOrderResponse(res);
         if (active) {
-          setOrder({
-            subtotal: Number(o.subtotal ?? 0),
-            tax: Number(o.taxAmount ?? o.tax ?? 0),
-            total: Number(o.total ?? 0),
-          });
+          setOrder(normalized);
         }
       } catch {
         if (active) toast.error('Could not load the order to charge');
@@ -137,6 +129,52 @@ const MultiPaymentScreen: React.FC = () => {
     <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? ''}`}>
       <div className="w-full p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="space-y-5">
+          <div className="rounded-xl bg-pos-card border border-pos-border p-4">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <p className="text-sm font-bold text-pos-text">Items purchased</p>
+                <p className="text-[11px] text-pos-muted">
+                  {order.items.length} line{order.items.length === 1 ? '' : 's'}
+                </p>
+              </div>
+              <span className="text-xs text-pos-muted">#{order.number ?? order.id}</span>
+            </div>
+            {order.items.length > 0 ? (
+              <ul className="space-y-2">
+                {order.items.map((item) => (
+                  <li
+                    key={item.id || `${item.name}-${item.quantity}-${item.price}`}
+                    className="rounded-lg bg-white/6 border border-pos-border p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-pos-text truncate">
+                          {item.quantity}x {item.name}
+                        </p>
+                        <p className="text-[11px] text-pos-muted">
+                          {formatCurrency(item.price)} each
+                          {item.sku ? ` · ${item.sku}` : ''}
+                        </p>
+                        {item.notes && (
+                          <p className="text-[11px] italic text-pos-muted mt-1">
+                            Note: {item.notes}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-sm font-bold text-pos-text shrink-0">
+                        {formatCurrency(lineTotal(item))}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="rounded-lg bg-white/6 border border-pos-border p-3 text-sm text-pos-muted">
+                No items were returned for this order.
+              </p>
+            )}
+          </div>
+
           <div className="rounded-xl bg-pos-card border border-pos-border p-4">
             <div className="flex justify-between text-sm text-pos-muted">
               <span>Subtotal</span>

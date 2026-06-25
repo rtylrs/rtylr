@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapRemoteOrders, normalizeOrdersResponse } from './ordersWorkflow';
+import { mapRemoteOrders, normalizeOrderResponse, normalizeOrdersResponse } from './ordersWorkflow';
 
 describe('mapRemoteOrders', () => {
   it('maps remote orders with normalized amounts and text', () => {
@@ -85,5 +85,59 @@ describe('mapRemoteOrders', () => {
   it('returns an empty list for non-array order responses', () => {
     expect(normalizeOrdersResponse({ data: { orders: 'bad' } })).toEqual([]);
     expect(normalizeOrdersResponse(null)).toEqual([]);
+  });
+
+  it('normalizes backend order detail responses with purchased items', () => {
+    expect(
+      normalizeOrderResponse({
+        order: {
+          id: 77,
+          order_number: 'ORD-77',
+          status: 'paid',
+          subtotal: 40,
+          tax_amount: 4,
+          discount_amount: 2,
+          tip_amount: 3,
+          total: 45,
+          created_at: '2026-06-25T10:00:00Z',
+          paid_at: '2026-06-25T10:05:00Z',
+          items: [
+            {
+              id: 9,
+              name: 'Creatine',
+              sku: 'SUP-CRE',
+              quantity: 2,
+              unit_price: 20,
+              total: 40,
+              status: 'paid',
+              notes: 'Demo item',
+            },
+          ],
+        },
+      })
+    ).toEqual({
+      id: '77',
+      number: 'ORD-77',
+      status: 'paid',
+      items: [
+        {
+          id: '9',
+          name: 'Creatine',
+          price: 20,
+          quantity: 2,
+          sku: 'SUP-CRE',
+          total: 40,
+          status: 'paid',
+          notes: 'Demo item',
+        },
+      ],
+      subtotal: 40,
+      tax: 4,
+      tip: 3,
+      discount: 2,
+      total: 45,
+      createdAt: '2026-06-25T10:00:00Z',
+      paidAt: '2026-06-25T10:05:00Z',
+    });
   });
 });
