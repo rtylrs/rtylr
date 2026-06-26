@@ -40,5 +40,8 @@ func (m *Module) GetAnonymousRoutes() []string {
 	anon := []string{}
 	anon = append(anon, handlers.ContactRoutes()...)
 	anon = append(anon, handlers.ApplicationsRoutes()...)
+	// Recruitment service: public careers apply + the recruiter-admin
+	// surface (self-guarded by the admin JWT, see AdminAuthMiddleware).
+	anon = append(anon, handlers.RecruitAnonymousRoutes()...)
 	return anon
 }

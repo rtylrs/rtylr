@@ -29,4 +29,27 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		router.With(serverHttp.PerRouteRateLimit(5, time.Minute)).
 			Post(path, handlers.ApplicationsHandler(service))
 	}
+
+	// ── Recruitment service: public careers apply + recruiter admin ──
+	// Public application against a specific opening (multipart + CV).
+	router.With(serverHttp.PerRouteRateLimit(5, time.Minute)).
+		Post(handlers.CareerApplyRoute(), handlers.CareerApplyHandler(service))
+
+	// Admin login — anonymous, tighter limit (login spam target).
+	router.With(serverHttp.PerRouteRateLimit(10, time.Minute)).
+		Post(handlers.AdminLoginRoute(), handlers.AdminLoginHandler(service))
+
+	// Admin panel — self-guarded by the admin JWT middleware.
+	router.Group(func(gr chi.Router) {
+		gr.Use(handlers.AdminAuthMiddleware(service))
+
+		gr.Get(handlers.AdminMeRoute(), handlers.AdminMeHandler(service))
+		gr.Get(handlers.AdminAdminsRoute(), handlers.ListAdminsHandler(service))
+		gr.Post(handlers.AdminAdminsRoute(), handlers.CreateAdminHandler(service))
+		gr.Get(handlers.AdminOpeningsRoute(), handlers.ListOpeningsHandler(service))
+		gr.Get(handlers.AdminLeadsRoute(), handlers.ListLeadsHandler(service))
+		gr.Get(handlers.AdminApplicationsRoute(), handlers.ListApplicationsHandler(service))
+		gr.Put(handlers.AdminAppStatusRoute(), handlers.UpdateApplicationStatusHandler(service))
+		gr.Get(handlers.AdminAppCVRoute(), handlers.ApplicationCVHandler(service))
+	})
 }

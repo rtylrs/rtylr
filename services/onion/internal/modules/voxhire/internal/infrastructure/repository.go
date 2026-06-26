@@ -74,6 +74,19 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 	`); err != nil {
 		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_talent_applications", logger.Error(err))
 	}
+
+	if _, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS voxhire_admins (
+			id            BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			email         VARCHAR(255) NOT NULL,
+			password_hash VARCHAR(255) NOT NULL,
+			name          VARCHAR(255),
+			created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE KEY uk_voxhire_admins_email (email)
+		)
+	`); err != nil {
+		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_admins", logger.Error(err))
+	}
 }
 
 // CreateCompanyLead inserts a hiring inquiry and returns its ID.

@@ -23,6 +23,36 @@ func (m *mockRepo) CreateTalentApplication(_ context.Context, _ domain.TalentApp
 	return m.talentID, m.talentErr
 }
 
+func (m *mockRepo) CreateAdmin(_ context.Context, _, _, _ string) (int64, error) { return 0, nil }
+
+func (m *mockRepo) GetAdminByEmail(_ context.Context, _ string) (*domain.Admin, error) {
+	return nil, domain.ErrAdminNotFound
+}
+
+func (m *mockRepo) GetAdminByID(_ context.Context, _ int64) (*domain.Admin, error) {
+	return nil, domain.ErrAdminNotFound
+}
+
+func (m *mockRepo) ListAdmins(_ context.Context) ([]domain.Admin, error) { return nil, nil }
+
+func (m *mockRepo) CountAdmins(_ context.Context) (int64, error) { return 0, nil }
+
+func (m *mockRepo) ListCompanyLeads(_ context.Context) ([]domain.Lead, error) { return nil, nil }
+
+func (m *mockRepo) ListOpenings(_ context.Context) ([]domain.Opening, error) { return nil, nil }
+
+func (m *mockRepo) ListApplications(_ context.Context, _ domain.ApplicationFilter) ([]domain.Application, int64, error) {
+	return nil, 0, nil
+}
+
+func (m *mockRepo) UpdateApplicationStatus(_ context.Context, _ int64, _ string) error { return nil }
+
+func (m *mockRepo) GetApplicationCVKey(_ context.Context, _ int64) (string, error) { return "", nil }
+
+func (m *mockRepo) CreateCareerApplication(_ context.Context, _ domain.CareerApplicationInput) (int64, error) {
+	return 0, nil
+}
+
 func TestSubmitCompanyLead_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{companyID: 42}}
 	id, err := s.SubmitCompanyLead(context.Background(), domain.CompanyLeadInput{

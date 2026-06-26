@@ -19,6 +19,19 @@ var notifyEmails = []string{"hire@voxire.com", "info@voxire.com", "amounehabed@g
 type repository interface {
 	CreateCompanyLead(ctx context.Context, input domain.CompanyLeadInput) (int64, error)
 	CreateTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error)
+
+	// Recruiter-admin surface.
+	CreateAdmin(ctx context.Context, email, passwordHash, name string) (int64, error)
+	GetAdminByEmail(ctx context.Context, email string) (*domain.Admin, error)
+	GetAdminByID(ctx context.Context, id int64) (*domain.Admin, error)
+	ListAdmins(ctx context.Context) ([]domain.Admin, error)
+	CountAdmins(ctx context.Context) (int64, error)
+	ListCompanyLeads(ctx context.Context) ([]domain.Lead, error)
+	ListOpenings(ctx context.Context) ([]domain.Opening, error)
+	ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error)
+	UpdateApplicationStatus(ctx context.Context, id int64, status string) error
+	GetApplicationCVKey(ctx context.Context, id int64) (string, error)
+	CreateCareerApplication(ctx context.Context, in domain.CareerApplicationInput) (int64, error)
 }
 
 type Service struct {
