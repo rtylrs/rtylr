@@ -1,9 +1,10 @@
-import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const inputDir = process.argv[2] ?? 'desktop-downloads';
 const outputDir = process.argv[3] ?? 'desktop-public';
 const baseUrl = (process.env.DOWNLOADS_BASE_URL ?? 'https://pos-downloads.rtylr.com').replace(/\/$/, '');
+const assetsBaseUrl = (process.env.DOWNLOADS_ASSETS_BASE_URL ?? baseUrl).replace(/\/$/, '');
 
 const installerPattern = /\.(dmg|exe|msi|deb|rpm|appimage|app\.tar\.gz)$/i;
 
@@ -21,7 +22,7 @@ const rewriteLatestJson = async () => {
 
   for (const platform of Object.values(latest.platforms ?? {})) {
     if (!platform || typeof platform !== 'object' || typeof platform.url !== 'string') continue;
-    platform.url = `${baseUrl}/${fileNameFromUrl(platform.url)}`;
+    platform.url = `${assetsBaseUrl}/${fileNameFromUrl(platform.url)}`;
   }
 
   await writeFile(path.join(outputDir, 'latest.json'), `${JSON.stringify(latest, null, 2)}\n`);
@@ -30,7 +31,7 @@ const rewriteLatestJson = async () => {
 const renderIndex = async (files) => {
   const installers = files.filter((file) => installerPattern.test(file));
   const rows = installers
-    .map((file) => `<li><a href="/${encodeURIComponent(file)}">${file}</a></li>`)
+    .map((file) => `<li><a href="${assetsBaseUrl}/${encodeURIComponent(file)}">${file}</a></li>`)
     .join('\n');
 
   await writeFile(
@@ -70,10 +71,6 @@ ${rows}
 await mkdir(outputDir, { recursive: true });
 
 const files = await readdir(inputDir);
-for (const file of files) {
-  if (file === 'latest.json') continue;
-  await copyFile(path.join(inputDir, file), path.join(outputDir, file));
-}
 
 await rewriteLatestJson();
 await renderIndex(files);

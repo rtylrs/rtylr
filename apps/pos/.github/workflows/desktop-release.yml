@@ -121,16 +121,47 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release download "${{ steps.release.outputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir desktop-downloads --clobber
 
+      - name: Upload desktop assets to R2
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          for file in desktop-downloads/*; do
+            [ -f "$file" ] || continue
+            name=$(basename "$file")
+            [ "$name" = "latest.json" ] && continue
+
+            case "$name" in
+              *.dmg) content_type="application/x-apple-diskimage" ;;
+              *.exe) content_type="application/vnd.microsoft.portable-executable" ;;
+              *.msi) content_type="application/x-msi" ;;
+              *.deb) content_type="application/vnd.debian.binary-package" ;;
+              *.rpm) content_type="application/x-rpm" ;;
+              *.AppImage) content_type="application/octet-stream" ;;
+              *.app.tar.gz) content_type="application/gzip" ;;
+              *.sig) content_type="text/plain" ;;
+              *) content_type="application/octet-stream" ;;
+            esac
+
+            pnpm dlx wrangler@latest r2 object put "rtylr-pos-downloads/${name}" \
+              --file "$file" \
+              --remote \
+              --force \
+              --content-type "$content_type" \
+              --cache-control "public, max-age=31536000, immutable"
+          done
+
       - name: Prepare public download site
         env:
           DOWNLOADS_BASE_URL: https://pos-downloads.rtylr.com
+          DOWNLOADS_ASSETS_BASE_URL: https://pos-download-assets.rtylr.com
         run: node scripts/prepare-desktop-downloads.mjs desktop-downloads desktop-public
 
       - name: Deploy downloads to Cloudflare Pages
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: pnpm dlx wrangler@latest pages deploy desktop-public --project-name rtylr-pos-downloads --branch main
+        run: pnpm dlx wrangler@latest pages deploy desktop-public --project-name rtylr-pos-downloads --branch main --commit-dirty=true
 
       - name: Delete private staging release
         if: always()
