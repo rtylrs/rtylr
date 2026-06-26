@@ -112,7 +112,9 @@ jobs:
 
       - name: Resolve release tag
         id: release
-        run: echo "tag=pos-v$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "tag=pos-v${version}" >> "$GITHUB_OUTPUT"
 
       - name: Download signed desktop assets
         env:
