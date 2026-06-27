@@ -9,12 +9,15 @@ import (
 )
 
 type mockRepo struct {
-	companyID  int64
-	companyErr error
-	talentID   int64
-	talentErr  error
-	career     *domain.Opening
-	careerErr  error
+	companyID   int64
+	companyErr  error
+	talentID    int64
+	talentErr   error
+	career      *domain.Opening
+	careerErr   error
+	cvTargets   []domain.CVProcessingTarget
+	cvResults   []domain.CVProcessingResult
+	cvUpdateErr error
 }
 
 func (m *mockRepo) CreateCompanyLead(_ context.Context, _ domain.CompanyLeadInput) (int64, error) {
@@ -70,11 +73,12 @@ func (m *mockRepo) CreateCareerApplication(_ context.Context, _ domain.CareerApp
 }
 
 func (m *mockRepo) ListPendingCVProcessingTargets(_ context.Context, _ int) ([]domain.CVProcessingTarget, error) {
-	return nil, nil
+	return m.cvTargets, nil
 }
 
-func (m *mockRepo) UpdateCVProcessingResult(_ context.Context, _ domain.CVProcessingResult) error {
-	return nil
+func (m *mockRepo) UpdateCVProcessingResult(_ context.Context, result domain.CVProcessingResult) error {
+	m.cvResults = append(m.cvResults, result)
+	return m.cvUpdateErr
 }
 
 func TestSubmitCompanyLead_ReturnsID(t *testing.T) {

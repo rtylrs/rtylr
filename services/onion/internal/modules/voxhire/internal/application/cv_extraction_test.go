@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -42,6 +43,58 @@ func TestProcessCVTargetExtractsDOCXText(t *testing.T) {
 	}
 	if !strings.Contains(result.Summary, "payroll") {
 		t.Fatalf("summary = %q", result.Summary)
+	}
+}
+
+func TestProcessPendingCVsMarksTargetsErroredWhenStorageUnavailable(t *testing.T) {
+	t.Setenv("FLOCI_ENABLED", "")
+	t.Setenv("S3_BUCKET_NAME", "")
+
+	repo := &mockRepo{
+		cvTargets: []domain.CVProcessingTarget{
+			{Source: "talent", ID: 7, CVKey: "voxhire/applications/ops/resume.pdf"},
+			{Source: "career", ID: 11, CVKey: "voxire/applications/42/resume.pdf"},
+		},
+	}
+	svc := &Service{repo: repo}
+
+	err := svc.ProcessPendingCVs(context.Background())
+	if err == nil || !strings.Contains(err.Error(), "cv storage unavailable") {
+		t.Fatalf("expected storage setup error, got %v", err)
+	}
+	if len(repo.cvResults) != len(repo.cvTargets) {
+		t.Fatalf("stored %d CV results, want %d", len(repo.cvResults), len(repo.cvTargets))
+	}
+	for i, result := range repo.cvResults {
+		if result.Source != repo.cvTargets[i].Source || result.ID != repo.cvTargets[i].ID {
+			t.Fatalf("result[%d] = source %q id %d, want source %q id %d", i, result.Source, result.ID, repo.cvTargets[i].Source, repo.cvTargets[i].ID)
+		}
+		if result.Status != "error" {
+			t.Fatalf("result[%d] status = %q, want error", i, result.Status)
+		}
+		if !strings.Contains(result.Error, "s3 storage is not configured") {
+			t.Fatalf("result[%d] error = %q", i, result.Error)
+		}
+	}
+}
+
+func TestExtractCVTextFromPDF(t *testing.T) {
+	path := os.Getenv("VOXHIRE_TEST_RESUME_PDF")
+	if path == "" {
+		t.Skip("set VOXHIRE_TEST_RESUME_PDF to run against a real resume PDF")
+	}
+
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	text, err := extractCVText("resume.pdf", raw)
+	if err != nil {
+		t.Fatalf("extractCVText: %v", err)
+	}
+	text = normalizeCVText(text)
+	if text == "" {
+		t.Fatal("expected extracted PDF text")
 	}
 }
 

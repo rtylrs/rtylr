@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -44,7 +45,11 @@ func (s *Service) ProcessPendingCVs(ctx context.Context) error {
 
 	client, err := storage.Default()
 	if err != nil {
-		return fmt.Errorf("cv storage unavailable: %w", err)
+		storageErr := fmt.Errorf("cv storage unavailable: %w", err)
+		if updateErr := s.markCVTargetsErrored(ctx, targets, storageErr.Error()); updateErr != nil {
+			return errors.Join(storageErr, updateErr)
+		}
+		return storageErr
 	}
 
 	for _, target := range targets {
@@ -54,6 +59,22 @@ func (s *Service) ProcessPendingCVs(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (s *Service) markCVTargetsErrored(ctx context.Context, targets []domain.CVProcessingTarget, message string) error {
+	var updateErr error
+	for _, target := range targets {
+		err := s.repo.UpdateCVProcessingResult(ctx, domain.CVProcessingResult{
+			Source: target.Source,
+			ID:     target.ID,
+			Status: "error",
+			Error:  message,
+		})
+		if err != nil {
+			updateErr = errors.Join(updateErr, err)
+		}
+	}
+	return updateErr
 }
 
 func (s *Service) processCVTarget(ctx context.Context, store cvStorage, target domain.CVProcessingTarget) domain.CVProcessingResult {
