@@ -43,6 +43,8 @@ func (m *mockRepo) ListCompanyLeads(_ context.Context) ([]domain.Lead, error) { 
 
 func (m *mockRepo) ListOpenings(_ context.Context) ([]domain.Opening, error) { return nil, nil }
 
+func (m *mockRepo) GetAnalytics(_ context.Context) (*domain.Analytics, error) { return nil, nil }
+
 func (m *mockRepo) CreateCareer(_ context.Context, _ domain.CareerInput) (*domain.Opening, error) {
 	return m.career, m.careerErr
 }

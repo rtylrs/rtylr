@@ -127,6 +127,11 @@ func (s *Service) ListOpenings(ctx context.Context) ([]domain.Opening, error) {
 	return s.repo.ListOpenings(ctx)
 }
 
+// GetAnalytics returns aggregate funnel metrics for the admin overview.
+func (s *Service) GetAnalytics(ctx context.Context) (*domain.Analytics, error) {
+	return s.repo.GetAnalytics(ctx)
+}
+
 // CreateCareer creates a public VoxHire job posting.
 func (s *Service) CreateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error) {
 	in = normalizeCareerInput(in)

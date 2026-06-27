@@ -24,6 +24,7 @@ const adminIDCtxKey adminCtxKey = "voxhire_admin_id"
 func AdminLoginRoute() string        { return "/voxhire/admin/login" }
 func AdminAdminsRoute() string       { return "/voxhire/admin/admins" }
 func AdminMeRoute() string           { return "/voxhire/admin/me" }
+func AdminAnalyticsRoute() string    { return "/voxhire/admin/analytics" }
 func AdminOpeningsRoute() string     { return "/voxhire/admin/openings" }
 func AdminCareersRoute() string      { return "/voxhire/admin/careers" }
 func AdminCareerRoute() string       { return "/voxhire/admin/careers/{id}" }
@@ -41,6 +42,7 @@ func RecruitAnonymousRoutes() []string {
 		AdminLoginRoute(),
 		AdminAdminsRoute(),
 		AdminMeRoute(),
+		AdminAnalyticsRoute(),
 		AdminOpeningsRoute(),
 		AdminCareersRoute(),
 		AdminCareerRoute(),
@@ -182,6 +184,18 @@ func ListOpeningsHandler(svc *application.Service) http.HandlerFunc {
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"openings": openings})
+	}
+}
+
+func AnalyticsHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		analytics, err := svc.GetAnalytics(r.Context())
+		if err != nil {
+			logger.Ctx(r.Context()).Error("voxhire analytics failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to load analytics")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"analytics": analytics})
 	}
 }
 

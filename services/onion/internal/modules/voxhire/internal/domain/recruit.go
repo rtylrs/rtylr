@@ -109,6 +109,62 @@ type ApplicationFilter struct {
 	Offset   int32
 }
 
+// Analytics is the aggregate recruiter view used by the admin overview.
+type Analytics struct {
+	Totals               AnalyticsTotals     `json:"totals"`
+	ApplicationsByStatus []AnalyticsBucket   `json:"applications_by_status"`
+	LeadServiceMix       []AnalyticsBucket   `json:"lead_service_mix"`
+	LeadTimelineMix      []AnalyticsBucket   `json:"lead_timeline_mix"`
+	RecentDays           []AnalyticsDay      `json:"recent_days"`
+	TopOpenings          []AnalyticsOpening  `json:"top_openings"`
+	RecentActivity       []AnalyticsActivity `json:"recent_activity"`
+}
+
+type AnalyticsTotals struct {
+	OpenJobs             int64   `json:"open_jobs"`
+	ClosedJobs           int64   `json:"closed_jobs"`
+	ApplicationsTotal    int64   `json:"applications_total"`
+	Applications7d       int64   `json:"applications_7d"`
+	Applications30d      int64   `json:"applications_30d"`
+	NewApplications      int64   `json:"new_applications"`
+	LeadsTotal           int64   `json:"leads_total"`
+	Leads7d              int64   `json:"leads_7d"`
+	Leads30d             int64   `json:"leads_30d"`
+	AdminsTotal          int64   `json:"admins_total"`
+	CVRate               float64 `json:"cv_rate"`
+	AvgSalaryExpectation float64 `json:"avg_salary_expectation"`
+}
+
+type AnalyticsBucket struct {
+	Key   string `json:"key"`
+	Count int64  `json:"count"`
+}
+
+type AnalyticsDay struct {
+	Date         string `json:"date"`
+	Applications int64  `json:"applications"`
+	Leads        int64  `json:"leads"`
+}
+
+type AnalyticsOpening struct {
+	ID                int64      `json:"id"`
+	Title             string     `json:"title"`
+	IsActive          bool       `json:"is_active"`
+	TotalCount        int64      `json:"total_count"`
+	NewCount          int64      `json:"new_count"`
+	RecentCount       int64      `json:"recent_count"`
+	LastApplicationAt *time.Time `json:"last_application_at,omitempty"`
+}
+
+type AnalyticsActivity struct {
+	Kind      string    `json:"kind"`
+	ID        int64     `json:"id"`
+	Primary   string    `json:"primary"`
+	Secondary string    `json:"secondary"`
+	Meta      string    `json:"meta"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // Lead is the admin-panel view of a company hiring inquiry submitted
 // through the "Talk to us about a role" form (voxhire_company_leads).
 type Lead struct {

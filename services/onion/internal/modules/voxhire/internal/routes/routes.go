@@ -46,6 +46,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		gr.Get(handlers.AdminMeRoute(), handlers.AdminMeHandler(service))
 		gr.Get(handlers.AdminAdminsRoute(), handlers.ListAdminsHandler(service))
 		gr.Post(handlers.AdminAdminsRoute(), handlers.CreateAdminHandler(service))
+		gr.Get(handlers.AdminAnalyticsRoute(), handlers.AnalyticsHandler(service))
 		gr.Get(handlers.AdminOpeningsRoute(), handlers.ListOpeningsHandler(service))
 		gr.Post(handlers.AdminCareersRoute(), handlers.CreateCareerHandler(service))
 		gr.Put(handlers.AdminCareerRoute(), handlers.UpdateCareerHandler(service))

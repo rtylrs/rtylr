@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	gosqlmysql "github.com/go-sql-driver/mysql"
@@ -157,6 +158,262 @@ func (r *Repository) ListOpenings(ctx context.Context) ([]domain.Opening, error)
 		openings = append(openings, o)
 	}
 	return openings, rows.Err()
+}
+
+// GetAnalytics returns aggregate counts and activity for the recruiter overview.
+func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error) {
+	analytics := &domain.Analytics{}
+
+	if err := r.loadAnalyticsTotals(ctx, &analytics.Totals); err != nil {
+		return nil, err
+	}
+
+	var err error
+	analytics.ApplicationsByStatus, err = r.analyticsBuckets(ctx, `
+		SELECT LOWER(COALESCE(NULLIF(a.status, ''), 'new')) AS bucket, COUNT(*) AS count
+		  FROM voxire_career_applications a
+		  JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		 GROUP BY bucket
+		 ORDER BY count DESC, bucket ASC`, voxhireCareerOwnerID)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.LeadServiceMix, err = r.analyticsBuckets(ctx, `
+		SELECT LOWER(COALESCE(NULLIF(service, ''), 'unsure')) AS bucket, COUNT(*) AS count
+		  FROM voxhire_company_leads
+		 GROUP BY bucket
+		 ORDER BY count DESC, bucket ASC`)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.LeadTimelineMix, err = r.analyticsBuckets(ctx, `
+		SELECT LOWER(COALESCE(NULLIF(timeline, ''), 'unknown')) AS bucket, COUNT(*) AS count
+		  FROM voxhire_company_leads
+		 GROUP BY bucket
+		 ORDER BY count DESC, bucket ASC`)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.RecentDays, err = r.analyticsRecentDays(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.TopOpenings, err = r.analyticsTopOpenings(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.RecentActivity, err = r.analyticsRecentActivity(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return analytics, nil
+}
+
+func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.AnalyticsTotals) error {
+	err := r.db.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END), 0)
+		  FROM careers
+		 WHERE owner_id = ?`, voxhireCareerOwnerID).Scan(&totals.OpenJobs, &totals.ClosedJobs)
+	if err != nil {
+		return err
+	}
+
+	var cvCount int64
+	var avgSalary sql.NullFloat64
+	err = r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*),
+		       COALESCE(SUM(CASE WHEN a.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 7 DAY) THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN a.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN LOWER(COALESCE(a.status, 'new')) = 'new' THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN a.cv_key IS NOT NULL AND a.cv_key <> '' THEN 1 ELSE 0 END), 0),
+		       AVG(NULLIF(a.salary_expectation, 0))
+		  FROM voxire_career_applications a
+		  JOIN careers c ON c.id = a.job_id AND c.owner_id = ?`, voxhireCareerOwnerID).Scan(
+		&totals.ApplicationsTotal,
+		&totals.Applications7d,
+		&totals.Applications30d,
+		&totals.NewApplications,
+		&cvCount,
+		&avgSalary,
+	)
+	if err != nil {
+		return err
+	}
+	if totals.ApplicationsTotal > 0 {
+		totals.CVRate = float64(cvCount) / float64(totals.ApplicationsTotal)
+	}
+	if avgSalary.Valid {
+		totals.AvgSalaryExpectation = avgSalary.Float64
+	}
+
+	err = r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*),
+		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 7 DAY) THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0)
+		  FROM voxhire_company_leads`).Scan(&totals.LeadsTotal, &totals.Leads7d, &totals.Leads30d)
+	if err != nil {
+		return err
+	}
+
+	admins, err := r.CountAdmins(ctx)
+	if err != nil {
+		return err
+	}
+	totals.AdminsTotal = admins
+	return nil
+}
+
+func (r *Repository) analyticsBuckets(ctx context.Context, query string, args ...any) ([]domain.AnalyticsBucket, error) {
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	buckets := make([]domain.AnalyticsBucket, 0)
+	for rows.Next() {
+		var bucket domain.AnalyticsBucket
+		if err := rows.Scan(&bucket.Key, &bucket.Count); err != nil {
+			return nil, err
+		}
+		buckets = append(buckets, bucket)
+	}
+	return buckets, rows.Err()
+}
+
+func (r *Repository) analyticsRecentDays(ctx context.Context) ([]domain.AnalyticsDay, error) {
+	apps, err := r.analyticsDailyCounts(ctx, `
+		SELECT DATE_FORMAT(a.created_at, '%Y-%m-%d') AS day, COUNT(*) AS count
+		  FROM voxire_career_applications a
+		  JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		 WHERE a.created_at >= DATE_SUB(UTC_DATE(), INTERVAL 13 DAY)
+		 GROUP BY day`, voxhireCareerOwnerID)
+	if err != nil {
+		return nil, err
+	}
+
+	leads, err := r.analyticsDailyCounts(ctx, `
+		SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day, COUNT(*) AS count
+		  FROM voxhire_company_leads
+		 WHERE created_at >= DATE_SUB(UTC_DATE(), INTERVAL 13 DAY)
+		 GROUP BY day`)
+	if err != nil {
+		return nil, err
+	}
+
+	days := make([]domain.AnalyticsDay, 0, 14)
+	start := time.Now().UTC().AddDate(0, 0, -13)
+	for i := 0; i < 14; i++ {
+		key := start.AddDate(0, 0, i).Format("2006-01-02")
+		days = append(days, domain.AnalyticsDay{
+			Date:         key,
+			Applications: apps[key],
+			Leads:        leads[key],
+		})
+	}
+	return days, nil
+}
+
+func (r *Repository) analyticsDailyCounts(ctx context.Context, query string, args ...any) (map[string]int64, error) {
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	for rows.Next() {
+		var day string
+		var count int64
+		if err := rows.Scan(&day, &count); err != nil {
+			return nil, err
+		}
+		counts[day] = count
+	}
+	return counts, rows.Err()
+}
+
+func (r *Repository) analyticsTopOpenings(ctx context.Context) ([]domain.AnalyticsOpening, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT c.id,
+		       c.title,
+		       c.is_active,
+		       COALESCE(COUNT(a.id), 0) AS total_count,
+		       COALESCE(SUM(CASE WHEN LOWER(COALESCE(a.status, 'new')) = 'new' THEN 1 ELSE 0 END), 0) AS new_count,
+		       COALESCE(SUM(CASE WHEN a.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0) AS recent_count,
+		       MAX(a.created_at) AS last_application_at
+		  FROM careers c
+		  LEFT JOIN voxire_career_applications a ON a.job_id = c.id
+		 WHERE c.owner_id = ?
+		 GROUP BY c.id, c.title, c.is_active, c.created_at
+		 ORDER BY recent_count DESC, total_count DESC, c.created_at DESC
+		 LIMIT 6`, voxhireCareerOwnerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	openings := make([]domain.AnalyticsOpening, 0)
+	for rows.Next() {
+		var opening domain.AnalyticsOpening
+		var last sql.NullTime
+		if err := rows.Scan(&opening.ID, &opening.Title, &opening.IsActive, &opening.TotalCount,
+			&opening.NewCount, &opening.RecentCount, &last); err != nil {
+			return nil, err
+		}
+		if last.Valid {
+			t := last.Time
+			opening.LastApplicationAt = &t
+		}
+		openings = append(openings, opening)
+	}
+	return openings, rows.Err()
+}
+
+func (r *Repository) analyticsRecentActivity(ctx context.Context) ([]domain.AnalyticsActivity, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT kind, id, primary_text, secondary_text, meta, created_at
+		  FROM (
+		        SELECT 'application' AS kind,
+		               a.id AS id,
+		               c.title AS primary_text,
+		               a.name AS secondary_text,
+		               COALESCE(a.status, 'new') AS meta,
+		               a.created_at AS created_at
+		          FROM voxire_career_applications a
+		          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		        UNION ALL
+		        SELECT 'lead' AS kind,
+		               id,
+		               company_name AS primary_text,
+		               COALESCE(role, '') AS secondary_text,
+		               COALESCE(timeline, '') AS meta,
+		               created_at
+		          FROM voxhire_company_leads
+		       ) recent
+		 ORDER BY created_at DESC
+		 LIMIT 10`, voxhireCareerOwnerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	activity := make([]domain.AnalyticsActivity, 0)
+	for rows.Next() {
+		var item domain.AnalyticsActivity
+		if err := rows.Scan(&item.Kind, &item.ID, &item.Primary, &item.Secondary, &item.Meta, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		activity = append(activity, item)
+	}
+	return activity, rows.Err()
 }
 
 // CreateCareer writes a new job posting to the shared careers table.
