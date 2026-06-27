@@ -23,11 +23,11 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
 
 mysql_cmd() {
-    mysql \
+    MYSQL_PWD="$DB_PASSWORD" mysql \
         --host="$DB_HOST" \
         --port="$DB_PORT" \
         --user="$DB_USER" \
-        --password="$DB_PASSWORD" \
+        "$@" \
         "$DB_NAME"
 }
 

@@ -1564,10 +1564,10 @@ func (r *Repository) AddShortlistItem(ctx context.Context, in domain.ShortlistIt
 		return nil, domain.ErrApplicationNotFound
 	}
 	res, err := r.db.ExecContext(ctx, `
-		INSERT INTO voxhire_shortlist_items (shortlist_id, application_id, rank, notes)
+		INSERT INTO voxhire_shortlist_items (shortlist_id, application_id, sort_order, notes)
 		VALUES (?, ?, ?, ?)
 		ON DUPLICATE KEY UPDATE
-			rank = VALUES(rank),
+			sort_order = VALUES(sort_order),
 			notes = VALUES(notes),
 			id = LAST_INSERT_ID(id)`, in.ShortlistID, in.ApplicationID, in.Rank, nullStr(in.Notes))
 	if err != nil {
@@ -1588,11 +1588,11 @@ func (r *Repository) AddShortlistItem(ctx context.Context, in domain.ShortlistIt
 func (r *Repository) listShortlistItems(ctx context.Context, shortlistID int64) ([]domain.ShortlistItem, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT i.id, i.shortlist_id, i.application_id, a.name, a.email, COALESCE(a.status, 'new'),
-		       i.rank, COALESCE(i.notes, ''), COALESCE(a.cv_profile_json, ''), i.created_at
+		       i.sort_order, COALESCE(i.notes, ''), COALESCE(a.cv_profile_json, ''), i.created_at
 		  FROM voxhire_shortlist_items i
 		  JOIN voxire_career_applications a ON a.id = i.application_id
 		 WHERE i.shortlist_id = ?
-		 ORDER BY i.rank ASC, i.created_at ASC`, shortlistID)
+		 ORDER BY i.sort_order ASC, i.created_at ASC`, shortlistID)
 	if err != nil {
 		return nil, err
 	}
@@ -1611,7 +1611,7 @@ func (r *Repository) listShortlistItems(ctx context.Context, shortlistID int64) 
 func (r *Repository) getShortlistItemByID(ctx context.Context, id int64) (*domain.ShortlistItem, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT i.id, i.shortlist_id, i.application_id, a.name, a.email, COALESCE(a.status, 'new'),
-		       i.rank, COALESCE(i.notes, ''), COALESCE(a.cv_profile_json, ''), i.created_at
+		       i.sort_order, COALESCE(i.notes, ''), COALESCE(a.cv_profile_json, ''), i.created_at
 		  FROM voxhire_shortlist_items i
 		  JOIN voxire_career_applications a ON a.id = i.application_id
 		 WHERE i.id = ?`, id)
@@ -1750,7 +1750,7 @@ func (r *Repository) listTaskTimelineEvents(ctx context.Context, id int64) ([]do
 
 func (r *Repository) listShortlistTimelineEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT s.name, i.rank, i.created_at
+		SELECT s.name, i.sort_order, i.created_at
 		  FROM voxhire_shortlist_items i
 		  JOIN voxhire_shortlists s ON s.id = i.shortlist_id
 		 WHERE i.application_id = ?`, id)

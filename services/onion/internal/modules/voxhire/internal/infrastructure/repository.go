@@ -176,7 +176,7 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 			id             BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			shortlist_id   BIGINT NOT NULL,
 			application_id BIGINT NOT NULL,
-			rank           INT NOT NULL DEFAULT 0,
+			sort_order     INT NOT NULL DEFAULT 0,
 			notes          TEXT,
 			created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			INDEX idx_voxhire_shortlist_items_shortlist (shortlist_id),
