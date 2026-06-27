@@ -25,6 +25,9 @@ func AdminLoginRoute() string        { return "/voxhire/admin/login" }
 func AdminAdminsRoute() string       { return "/voxhire/admin/admins" }
 func AdminMeRoute() string           { return "/voxhire/admin/me" }
 func AdminOpeningsRoute() string     { return "/voxhire/admin/openings" }
+func AdminCareersRoute() string      { return "/voxhire/admin/careers" }
+func AdminCareerRoute() string       { return "/voxhire/admin/careers/{id}" }
+func AdminCareerActiveRoute() string { return "/voxhire/admin/careers/{id}/active" }
 func AdminLeadsRoute() string        { return "/voxhire/admin/leads" }
 func AdminApplicationsRoute() string { return "/voxhire/admin/openings/{id}/applications" }
 func AdminAppStatusRoute() string    { return "/voxhire/admin/applications/{id}/status" }
@@ -39,6 +42,9 @@ func RecruitAnonymousRoutes() []string {
 		AdminAdminsRoute(),
 		AdminMeRoute(),
 		AdminOpeningsRoute(),
+		AdminCareersRoute(),
+		AdminCareerRoute(),
+		AdminCareerActiveRoute(),
 		AdminLeadsRoute(),
 		AdminApplicationsRoute(),
 		AdminAppStatusRoute(),
@@ -176,6 +182,115 @@ func ListOpeningsHandler(svc *application.Service) http.HandlerFunc {
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"openings": openings})
+	}
+}
+
+type adminCareerRequest struct {
+	Title          string  `json:"title"`
+	Department     string  `json:"department"`
+	Location       string  `json:"location"`
+	EmploymentType string  `json:"employment_type"`
+	WorkMode       string  `json:"work_mode"`
+	Seniority      string  `json:"seniority"`
+	Details        string  `json:"details"`
+	SalaryMin      float64 `json:"salary_min"`
+	SalaryMax      float64 `json:"salary_max"`
+	SalaryCurrency string  `json:"salary_currency"`
+}
+
+func (b adminCareerRequest) careerInput(id int64) domain.CareerInput {
+	return domain.CareerInput{
+		ID:             id,
+		Title:          b.Title,
+		Department:     b.Department,
+		Location:       b.Location,
+		EmploymentType: b.EmploymentType,
+		WorkMode:       b.WorkMode,
+		Seniority:      b.Seniority,
+		Details:        b.Details,
+		SalaryMin:      b.SalaryMin,
+		SalaryMax:      b.SalaryMax,
+		SalaryCurrency: b.SalaryCurrency,
+	}
+}
+
+func CreateCareerHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body adminCareerRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+
+		career, err := svc.CreateCareer(r.Context(), body.careerInput(0))
+		if err != nil {
+			writeCareerMutationError(w, r, err, "create")
+			return
+		}
+		writeJSON(w, http.StatusCreated, map[string]any{"career": career})
+	}
+}
+
+func UpdateCareerHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || id <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid career id")
+			return
+		}
+
+		var body adminCareerRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+
+		career, err := svc.UpdateCareer(r.Context(), body.careerInput(id))
+		if err != nil {
+			writeCareerMutationError(w, r, err, "update")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"career": career})
+	}
+}
+
+func SetCareerActiveHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || id <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid career id")
+			return
+		}
+
+		var body struct {
+			Active bool `json:"active"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+
+		career, err := svc.SetCareerActive(r.Context(), id, body.Active)
+		if err != nil {
+			writeCareerMutationError(w, r, err, "update active state for")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"career": career})
+	}
+}
+
+func writeCareerMutationError(w http.ResponseWriter, r *http.Request, err error, action string) {
+	switch {
+	case errors.Is(err, domain.ErrInvalidInput):
+		writeApplyError(w, http.StatusBadRequest, "Title is required")
+	case errors.Is(err, domain.ErrCareerNotFound):
+		writeApplyError(w, http.StatusNotFound, "Career not found")
+	default:
+		logger.Ctx(r.Context()).Error("voxhire career mutation failed",
+			logger.String("action", action),
+			logger.Error(err),
+		)
+		writeApplyError(w, http.StatusInternalServerError, "Failed to "+action+" career")
 	}
 }
 

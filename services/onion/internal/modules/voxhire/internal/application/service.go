@@ -28,6 +28,9 @@ type repository interface {
 	CountAdmins(ctx context.Context) (int64, error)
 	ListCompanyLeads(ctx context.Context) ([]domain.Lead, error)
 	ListOpenings(ctx context.Context) ([]domain.Opening, error)
+	CreateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error)
+	UpdateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error)
+	SetCareerActive(ctx context.Context, id int64, active bool) (*domain.Opening, error)
 	ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error)
 	UpdateApplicationStatus(ctx context.Context, id int64, status string) error
 	GetApplicationCVKey(ctx context.Context, id int64) (string, error)

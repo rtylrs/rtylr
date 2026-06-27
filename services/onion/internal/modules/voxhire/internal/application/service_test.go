@@ -13,6 +13,8 @@ type mockRepo struct {
 	companyErr error
 	talentID   int64
 	talentErr  error
+	career     *domain.Opening
+	careerErr  error
 }
 
 func (m *mockRepo) CreateCompanyLead(_ context.Context, _ domain.CompanyLeadInput) (int64, error) {
@@ -40,6 +42,18 @@ func (m *mockRepo) CountAdmins(_ context.Context) (int64, error) { return 0, nil
 func (m *mockRepo) ListCompanyLeads(_ context.Context) ([]domain.Lead, error) { return nil, nil }
 
 func (m *mockRepo) ListOpenings(_ context.Context) ([]domain.Opening, error) { return nil, nil }
+
+func (m *mockRepo) CreateCareer(_ context.Context, _ domain.CareerInput) (*domain.Opening, error) {
+	return m.career, m.careerErr
+}
+
+func (m *mockRepo) UpdateCareer(_ context.Context, _ domain.CareerInput) (*domain.Opening, error) {
+	return m.career, m.careerErr
+}
+
+func (m *mockRepo) SetCareerActive(_ context.Context, _ int64, _ bool) (*domain.Opening, error) {
+	return m.career, m.careerErr
+}
 
 func (m *mockRepo) ListApplications(_ context.Context, _ domain.ApplicationFilter) ([]domain.Application, int64, error) {
 	return nil, 0, nil
@@ -112,6 +126,13 @@ func TestSubmitTalentApplication_ZeroIDOnError(t *testing.T) {
 	id, _ := s.SubmitTalentApplication(context.Background(), domain.TalentApplicationInput{})
 	if id != 0 {
 		t.Errorf("expected 0 on error, got %d", id)
+	}
+}
+
+func TestCreateCareerRequiresTitle(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.CreateCareer(context.Background(), domain.CareerInput{}); !errors.Is(err, domain.ErrInvalidInput) {
+		t.Errorf("expected invalid input, got %v", err)
 	}
 }
 

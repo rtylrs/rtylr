@@ -13,6 +13,7 @@ var (
 	ErrInvalidCredentials  = errors.New("invalid voxhire admin credentials")
 	ErrAdminExists         = errors.New("voxhire admin already exists")
 	ErrApplicationNotFound = errors.New("voxhire application not found")
+	ErrCareerNotFound      = errors.New("voxhire career not found")
 )
 
 // Admin is a recruiter/HR account that can sign in to the
@@ -45,15 +46,37 @@ func (c *AdminClaims) SetExpiration(exp time.Time) {
 // with the count of applications received for it. Powers the position
 // picker in the admin panel.
 type Opening struct {
-	ID             int64  `json:"id"`
-	Title          string `json:"title"`
-	Department     string `json:"department"`
-	Location       string `json:"location"`
-	EmploymentType string `json:"employment_type"`
-	WorkMode       string `json:"work_mode"`
-	Seniority      string `json:"seniority"`
-	NewCount       int64  `json:"new_count"`
-	TotalCount     int64  `json:"total_count"`
+	ID             int64   `json:"id"`
+	Slug           string  `json:"slug"`
+	Title          string  `json:"title"`
+	Department     string  `json:"department"`
+	Location       string  `json:"location"`
+	EmploymentType string  `json:"employment_type"`
+	WorkMode       string  `json:"work_mode"`
+	Seniority      string  `json:"seniority"`
+	Details        string  `json:"details"`
+	SalaryMin      float64 `json:"salary_min"`
+	SalaryMax      float64 `json:"salary_max"`
+	SalaryCurrency string  `json:"salary_currency"`
+	IsActive       bool    `json:"is_active"`
+	NewCount       int64   `json:"new_count"`
+	TotalCount     int64   `json:"total_count"`
+}
+
+// CareerInput is the editable shape for the VoxHire admin jobs panel.
+// It writes to the shared careers table that powers GET /careers.
+type CareerInput struct {
+	ID             int64
+	Title          string
+	Department     string
+	Location       string
+	EmploymentType string
+	WorkMode       string
+	Seniority      string
+	Details        string
+	SalaryMin      float64
+	SalaryMax      float64
+	SalaryCurrency string
 }
 
 // Application is the HR-panel view of a candidate application, read from

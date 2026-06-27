@@ -116,6 +116,20 @@ func GetRedisCache() RedisCache {
 	return redisCacheInstance
 }
 
+func DisableRedisForProcess(ctx context.Context) {
+	if client != nil {
+		if err := client.Close(); err != nil {
+			logger.Ctx(ctx).Warn("failed to close redis client", logger.Error(err))
+		}
+	}
+	client = nil
+	redisCacheInstance = &noopRedisCache{}
+}
+
+func RedisAvailable() bool {
+	return client != nil
+}
+
 // PutMulti stores multiple key-value pairs in Redis.
 func (r *redisCache) PutMulti(ctx context.Context, keyVals map[string][]byte, ttl time.Duration) {
 	ctx, cancel := getTimeoutContext(ctx)

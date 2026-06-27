@@ -45,12 +45,11 @@ func Initialize(ctx context.Context) error {
 	// Test Redis cache if enabled and configured
 	if config.IsRedisConfigured() {
 		if err := testRedisCache(ctx); err != nil {
-			logger.Ctx(ctx).Error("Redis cache initialization failed", logger.Error(err))
-
-			return err
+			logger.Ctx(ctx).Warn("Redis cache initialization failed, using local cache only", logger.Error(err))
+			cacher.DisableRedisForProcess(ctx)
+		} else {
+			logger.Ctx(ctx).Info("Redis cache initialized successfully")
 		}
-
-		logger.Ctx(ctx).Info("Redis cache initialized successfully")
 	} else if config.IsRedisEnabled() {
 		logger.Ctx(ctx).Warn("Redis is enabled but not properly configured, using local cache only")
 	} else {
@@ -60,6 +59,10 @@ func Initialize(ctx context.Context) error {
 	logger.Ctx(ctx).Info("Cache system initialization completed successfully")
 
 	return nil
+}
+
+func RedisAvailable() bool {
+	return cacher.RedisAvailable()
 }
 
 // testLocalCache performs a basic health check on the local cache.

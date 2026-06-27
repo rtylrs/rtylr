@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -19,6 +20,7 @@ const (
 	cvURLTTL       = 10 * time.Minute
 
 	minAdminPasswordLen = 6
+	careersCatalogKey   = "cache:careers:active"
 )
 
 var errJWTSecretMissing = errors.New("jwt secret not configured")
@@ -123,6 +125,67 @@ func (s *Service) GetAdmin(ctx context.Context, id int64) (*domain.Admin, error)
 // ListOpenings returns active job openings with application counts.
 func (s *Service) ListOpenings(ctx context.Context) ([]domain.Opening, error) {
 	return s.repo.ListOpenings(ctx)
+}
+
+// CreateCareer creates a public VoxHire job posting.
+func (s *Service) CreateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error) {
+	in = normalizeCareerInput(in)
+	if in.Title == "" {
+		return nil, domain.ErrInvalidInput
+	}
+	career, err := s.repo.CreateCareer(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	invalidateCareersCatalog(ctx)
+	return career, nil
+}
+
+// UpdateCareer updates an existing VoxHire job posting.
+func (s *Service) UpdateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error) {
+	in = normalizeCareerInput(in)
+	if in.ID <= 0 || in.Title == "" {
+		return nil, domain.ErrInvalidInput
+	}
+	career, err := s.repo.UpdateCareer(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	invalidateCareersCatalog(ctx)
+	return career, nil
+}
+
+// SetCareerActive closes or reopens a VoxHire job posting.
+func (s *Service) SetCareerActive(ctx context.Context, id int64, active bool) (*domain.Opening, error) {
+	if id <= 0 {
+		return nil, domain.ErrInvalidInput
+	}
+	career, err := s.repo.SetCareerActive(ctx, id, active)
+	if err != nil {
+		return nil, err
+	}
+	invalidateCareersCatalog(ctx)
+	return career, nil
+}
+
+func invalidateCareersCatalog(ctx context.Context) {
+	cacher.GetInMemoryCache(ctx).DeleteByPattern(ctx, careersCatalogKey)
+	cacher.GetRedisCache().DeleteByPattern(ctx, careersCatalogKey)
+}
+
+func normalizeCareerInput(in domain.CareerInput) domain.CareerInput {
+	in.Title = strings.TrimSpace(in.Title)
+	in.Department = strings.TrimSpace(in.Department)
+	in.Location = strings.TrimSpace(in.Location)
+	in.EmploymentType = strings.TrimSpace(in.EmploymentType)
+	in.WorkMode = strings.TrimSpace(in.WorkMode)
+	in.Seniority = strings.TrimSpace(in.Seniority)
+	in.Details = strings.TrimSpace(in.Details)
+	in.SalaryCurrency = strings.ToUpper(strings.TrimSpace(in.SalaryCurrency))
+	if in.SalaryCurrency == "" {
+		in.SalaryCurrency = "USD"
+	}
+	return in
 }
 
 // ListCompanyLeads returns company hiring inquiries for the admin panel.
