@@ -19,7 +19,7 @@ import (
 // hire.voxire.com careers form. Multipart/form-data because the CV is
 // attached as a file. Writes to voxire_career_applications (the shared
 // careers applications table) with the recruiter-panel fields (location,
-// salary expectation). CV upload is best-effort.
+// salary expectation). A stored CV is required for successful submission.
 func CareerApplyHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, maxApplicationMultipartBytes)
@@ -75,45 +75,41 @@ func CareerApplyHandler(svc *application.Service) http.HandlerFunc {
 			CoverLetter:       r.FormValue("cover_letter"),
 		}
 
-		// CV upload — best-effort. If R2 is not configured or the upload
-		// fails, the application still saves without a CV key.
 		file, header, fileErr := r.FormFile("cv")
-		if fileErr == nil {
-			defer file.Close()
-			if header.Size > maxResumeUploadBytes {
-				writeApplyError(w, http.StatusRequestEntityTooLarge, "CV must be 5 MB or smaller")
-				return
-			}
-
-			contentType := header.Header.Get("Content-Type")
-			if contentType == "" {
-				fname := strings.ToLower(header.Filename)
-				switch {
-				case strings.HasSuffix(fname, ".pdf"):
-					contentType = "application/pdf"
-				case strings.HasSuffix(fname, ".docx"):
-					contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-				case strings.HasSuffix(fname, ".doc"):
-					contentType = "application/msword"
-				}
-			}
-
-			if storage.AllowedResumeContentTypes[contentType] {
-				client, storageErr := storage.Default()
-				if storageErr == nil {
-					safeName := storage.SanitizeObjectKey(header.Filename)
-					key := fmt.Sprintf("voxire/applications/%d/%s-%s", jobID, uuid.NewString(), safeName)
-					if uploadErr := client.Upload(r.Context(), key, contentType, file); uploadErr != nil {
-						logger.Ctx(r.Context()).Warn("VoxHire career CV upload failed, proceeding without CV",
-							logger.Error(uploadErr),
-							logger.Any("applicant_email", email),
-						)
-					} else {
-						in.CVKey = key
-					}
-				}
-			}
+		if fileErr != nil {
+			writeApplyError(w, http.StatusBadRequest, "CV is required")
+			return
 		}
+		defer file.Close()
+		if header.Size > maxResumeUploadBytes {
+			writeApplyError(w, http.StatusRequestEntityTooLarge, "CV must be 5 MB or smaller")
+			return
+		}
+		contentType := resumeContentType(header)
+		if !allowedVoxhireResumeContentType(contentType) {
+			writeApplyError(w, http.StatusBadRequest, "Only PDF or DOCX CVs are accepted")
+			return
+		}
+		client, storageErr := storage.Default()
+		if storageErr != nil {
+			logger.Ctx(r.Context()).Error("VoxHire career CV storage unavailable",
+				logger.Error(storageErr),
+				logger.Any("applicant_email", email),
+			)
+			writeApplyError(w, http.StatusInternalServerError, "CV upload storage is unavailable")
+			return
+		}
+		safeName := storage.SanitizeObjectKey(header.Filename)
+		key := fmt.Sprintf("voxire/applications/%d/%s-%s", jobID, uuid.NewString(), safeName)
+		if uploadErr := client.Upload(r.Context(), key, contentType, file); uploadErr != nil {
+			logger.Ctx(r.Context()).Error("VoxHire career CV upload failed",
+				logger.Error(uploadErr),
+				logger.Any("applicant_email", email),
+			)
+			writeApplyError(w, http.StatusInternalServerError, "Failed to store CV")
+			return
+		}
+		in.CVKey = key
 
 		id, err := svc.SubmitCareerApplication(r.Context(), in)
 		if err != nil {

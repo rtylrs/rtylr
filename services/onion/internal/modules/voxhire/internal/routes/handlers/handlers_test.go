@@ -123,7 +123,51 @@ func TestApplicationsHandlerRejectsOversizedCV(t *testing.T) {
 	}
 }
 
+func TestApplicationsHandlerRequiresCV(t *testing.T) {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	for key, value := range map[string]string{
+		"fullName": "Ada Lovelace",
+		"email":    "ada@example.com",
+		"consent":  "true",
+	} {
+		if err := writer.WriteField(key, value); err != nil {
+			t.Fatalf("WriteField(%s): %v", key, err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/voxhire/applications", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	ApplicationsHandler(nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+	}
+}
+
+func TestApplicationsHandlerRejectsUnsupportedCV(t *testing.T) {
+	body, contentType := newVoxhireMultipartBodyWithFile(t, 10, "notes.txt")
+	req := httptest.NewRequest(http.MethodPost, "/voxhire/applications", body)
+	req.Header.Set("Content-Type", contentType)
+	rec := httptest.NewRecorder()
+
+	ApplicationsHandler(nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+	}
+}
+
 func newVoxhireMultipartBody(t *testing.T, cvSize int) (*bytes.Buffer, string) {
+	return newVoxhireMultipartBodyWithFile(t, cvSize, "resume.pdf")
+}
+
+func newVoxhireMultipartBodyWithFile(t *testing.T, cvSize int, filename string) (*bytes.Buffer, string) {
 	t.Helper()
 
 	body := &bytes.Buffer{}
@@ -139,7 +183,7 @@ func newVoxhireMultipartBody(t *testing.T, cvSize int) (*bytes.Buffer, string) {
 		}
 	}
 
-	part, err := writer.CreateFormFile("cv", "resume.pdf")
+	part, err := writer.CreateFormFile("cv", filename)
 	if err != nil {
 		t.Fatalf("CreateFormFile: %v", err)
 	}

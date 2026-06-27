@@ -69,6 +69,14 @@ func (m *mockRepo) CreateCareerApplication(_ context.Context, _ domain.CareerApp
 	return 0, nil
 }
 
+func (m *mockRepo) ListPendingCVProcessingTargets(_ context.Context, _ int) ([]domain.CVProcessingTarget, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) UpdateCVProcessingResult(_ context.Context, _ domain.CVProcessingResult) error {
+	return nil
+}
+
 func TestSubmitCompanyLead_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{companyID: 42}}
 	id, err := s.SubmitCompanyLead(context.Background(), domain.CompanyLeadInput{

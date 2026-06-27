@@ -53,11 +53,21 @@ type TalentApplication struct {
 	YearsExperience    string `json:"years_experience"`
 	NoticePeriod       string `json:"notice_period"`
 	OpenTo             string `json:"open_to"`
+	CurrentRole        string `json:"current_role"`
+	DesiredRoles       string `json:"desired_roles"`
+	SalaryExpectation  string `json:"salary_expectation"`
+	WorkAuthorization  string `json:"work_authorization"`
+	WorkHistory        string `json:"work_history"`
+	Education          string `json:"education"`
 	LinkedinURL        string `json:"linkedin_url"`
 	PortfolioURL       string `json:"portfolio_url"`
 	Pitch              string `json:"pitch"`
 	Consent            bool   `json:"consent"`
 	CVKey              string `json:"cv_key"`
+	CVProcessingStatus string `json:"cv_processing_status"`
+	CVProcessingError  string `json:"cv_processing_error"`
+	CVExtractedText    string `json:"cv_extracted_text"`
+	CVSummary          string `json:"cv_summary"`
 }
 
 // TalentApplicationInput is what the service accepts when an application arrives.
@@ -72,6 +82,12 @@ type TalentApplicationInput struct {
 	YearsExperience    string
 	NoticePeriod       string
 	OpenTo             string
+	CurrentRole        string
+	DesiredRoles       string
+	SalaryExpectation  string
+	WorkAuthorization  string
+	WorkHistory        string
+	Education          string
 	LinkedinURL        string
 	PortfolioURL       string
 	Pitch              string

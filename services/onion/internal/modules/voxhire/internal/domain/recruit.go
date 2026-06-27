@@ -131,6 +131,12 @@ type AnalyticsTotals struct {
 	Leads7d              int64   `json:"leads_7d"`
 	Leads30d             int64   `json:"leads_30d"`
 	AdminsTotal          int64   `json:"admins_total"`
+	TalentPoolTotal      int64   `json:"talent_pool_total"`
+	TalentPool7d         int64   `json:"talent_pool_7d"`
+	TalentPool30d        int64   `json:"talent_pool_30d"`
+	CVProcessedTotal     int64   `json:"cv_processed_total"`
+	CVPendingTotal       int64   `json:"cv_pending_total"`
+	CVErrorTotal         int64   `json:"cv_error_total"`
 	CVRate               float64 `json:"cv_rate"`
 	AvgSalaryExpectation float64 `json:"avg_salary_expectation"`
 }
@@ -198,4 +204,21 @@ type CareerApplicationInput struct {
 	ExperienceSummary string
 	CoverLetter       string
 	CVKey             string
+}
+
+// CVProcessingTarget is a stored CV that the worker can download,
+// extract, and write back into searchable columns.
+type CVProcessingTarget struct {
+	Source string
+	ID     int64
+	CVKey  string
+}
+
+type CVProcessingResult struct {
+	Source        string
+	ID            int64
+	Status        string
+	ExtractedText string
+	Summary       string
+	Error         string
 }

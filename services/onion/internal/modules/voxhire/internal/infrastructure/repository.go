@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -59,11 +60,22 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 			years_experience     VARCHAR(32),
 			notice_period        VARCHAR(32),
 			open_to              VARCHAR(255),
+			current_role         VARCHAR(255),
+			desired_roles        TEXT,
+			salary_expectation   VARCHAR(128),
+			work_authorization   VARCHAR(255),
+			work_history         TEXT,
+			education            TEXT,
 			linkedin_url         VARCHAR(512),
 			portfolio_url        VARCHAR(512),
 			pitch                TEXT,
 			consent              TINYINT(1) NOT NULL DEFAULT 0,
 			cv_key               VARCHAR(512),
+			cv_processing_status VARCHAR(32) NOT NULL DEFAULT 'pending',
+			cv_processing_error  TEXT,
+			cv_extracted_text    MEDIUMTEXT,
+			cv_summary           TEXT,
+			cv_processed_at      TIMESTAMP NULL,
 			status               VARCHAR(32) NOT NULL DEFAULT 'new',
 			created_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			INDEX idx_voxhire_talent_applications_email   (email),
@@ -74,6 +86,22 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 	`); err != nil {
 		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_talent_applications", logger.Error(err))
 	}
+	ensureColumn(ctx, db, "voxhire_talent_applications", "current_role", "current_role VARCHAR(255)")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "desired_roles", "desired_roles TEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "salary_expectation", "salary_expectation VARCHAR(128)")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "work_authorization", "work_authorization VARCHAR(255)")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "work_history", "work_history TEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "education", "education TEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_processing_status", "cv_processing_status VARCHAR(32) NOT NULL DEFAULT 'pending'")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_processing_error", "cv_processing_error TEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_extracted_text", "cv_extracted_text MEDIUMTEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_summary", "cv_summary TEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_processed_at", "cv_processed_at TIMESTAMP NULL")
+	ensureColumn(ctx, db, "voxire_career_applications", "cv_processing_status", "cv_processing_status VARCHAR(32) NOT NULL DEFAULT 'pending'")
+	ensureColumn(ctx, db, "voxire_career_applications", "cv_processing_error", "cv_processing_error TEXT")
+	ensureColumn(ctx, db, "voxire_career_applications", "cv_extracted_text", "cv_extracted_text MEDIUMTEXT")
+	ensureColumn(ctx, db, "voxire_career_applications", "cv_summary", "cv_summary TEXT")
+	ensureColumn(ctx, db, "voxire_career_applications", "cv_processed_at", "cv_processed_at TIMESTAMP NULL")
 
 	if _, err := db.ExecContext(ctx, `
 		CREATE TABLE IF NOT EXISTS voxhire_admins (
@@ -86,6 +114,35 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 		)
 	`); err != nil {
 		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_admins", logger.Error(err))
+	}
+}
+
+func ensureColumn(ctx context.Context, db *sql.DB, tableName, columnName, ddl string) {
+	var count int
+	err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		  FROM INFORMATION_SCHEMA.COLUMNS
+		 WHERE TABLE_SCHEMA = DATABASE()
+		   AND TABLE_NAME = ?
+		   AND COLUMN_NAME = ?
+	`, tableName, columnName).Scan(&count)
+	if err != nil {
+		logger.Ctx(ctx).Warn("Failed to inspect column for voxhire auto-migrate",
+			logger.String("table", tableName),
+			logger.String("column", columnName),
+			logger.Error(err),
+		)
+		return
+	}
+	if count > 0 {
+		return
+	}
+	if _, err := db.ExecContext(ctx, fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s", tableName, ddl)); err != nil {
+		logger.Ctx(ctx).Warn("Failed to add column for voxhire auto-migrate",
+			logger.String("table", tableName),
+			logger.String("column", columnName),
+			logger.Error(err),
+		)
 	}
 }
 
@@ -126,7 +183,7 @@ func (r *Repository) CreateCompanyLead(ctx context.Context, input domain.Company
 func (r *Repository) CreateTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error) {
 	query, args, err := sq.
 		Insert("voxhire_talent_applications").
-		Columns("full_name", "email", "phone", "country_of_residence", "nationality", "track", "years_experience", "notice_period", "open_to", "linkedin_url", "portfolio_url", "pitch", "consent", "cv_key").
+		Columns("full_name", "email", "phone", "country_of_residence", "nationality", "track", "years_experience", "notice_period", "open_to", "current_role", "desired_roles", "salary_expectation", "work_authorization", "work_history", "education", "linkedin_url", "portfolio_url", "pitch", "consent", "cv_key", "cv_processing_status").
 		Values(
 			input.FullName,
 			input.Email,
@@ -137,11 +194,18 @@ func (r *Repository) CreateTalentApplication(ctx context.Context, input domain.T
 			input.YearsExperience,
 			input.NoticePeriod,
 			input.OpenTo,
+			input.CurrentRole,
+			input.DesiredRoles,
+			input.SalaryExpectation,
+			input.WorkAuthorization,
+			input.WorkHistory,
+			input.Education,
 			input.LinkedinURL,
 			input.PortfolioURL,
 			input.Pitch,
 			input.Consent,
 			input.CVKey,
+			"pending",
 		).
 		PlaceholderFormat(sq.Question).
 		ToSql()

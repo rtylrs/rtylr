@@ -257,6 +257,37 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		SELECT COUNT(*),
 		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 7 DAY) THEN 1 ELSE 0 END), 0),
 		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0)
+		  FROM voxhire_talent_applications`).Scan(&totals.TalentPoolTotal, &totals.TalentPool7d, &totals.TalentPool30d)
+	if err != nil {
+		return err
+	}
+
+	err = r.db.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(CASE WHEN status = 'processed' THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN status NOT IN ('processed', 'error') THEN 1 ELSE 0 END), 0)
+		  FROM (
+		        SELECT COALESCE(a.cv_processing_status, 'pending') AS status
+		          FROM voxire_career_applications a
+		          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		         WHERE a.cv_key IS NOT NULL AND a.cv_key <> ''
+		        UNION ALL
+		        SELECT COALESCE(cv_processing_status, 'pending') AS status
+		          FROM voxhire_talent_applications
+		         WHERE cv_key IS NOT NULL AND cv_key <> ''
+		       ) cv_statuses`, voxhireCareerOwnerID).Scan(
+		&totals.CVProcessedTotal,
+		&totals.CVErrorTotal,
+		&totals.CVPendingTotal,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*),
+		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 7 DAY) THEN 1 ELSE 0 END), 0),
+		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0)
 		  FROM voxhire_company_leads`).Scan(&totals.LeadsTotal, &totals.Leads7d, &totals.Leads30d)
 	if err != nil {
 		return err
@@ -653,6 +684,7 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 			sq.Like{"work_history": like},
 			sq.Like{"experience_summary": like},
 			sq.Like{"cover_letter": like},
+			sq.Like{"cv_extracted_text": like},
 			sq.Like{"name": like},
 		})
 	}
@@ -771,6 +803,104 @@ func (r *Repository) CreateCareerApplication(ctx context.Context, in domain.Care
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+// ListPendingCVProcessingTargets returns stored CVs that have not been
+// extracted into searchable text yet. It covers both the talent pool and
+// job-specific application tables.
+func (r *Repository) ListPendingCVProcessingTargets(ctx context.Context, limit int) ([]domain.CVProcessingTarget, error) {
+	if limit <= 0 {
+		limit = 25
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	targets := make([]domain.CVProcessingTarget, 0, limit)
+	perTable := limit / 2
+	if perTable < 1 {
+		perTable = 1
+	}
+
+	talentRows, err := r.db.QueryContext(ctx, `
+		SELECT id, cv_key
+		  FROM voxhire_talent_applications
+		 WHERE cv_key IS NOT NULL
+		   AND cv_key <> ''
+		   AND COALESCE(cv_processing_status, 'pending') IN ('pending', 'error')
+		 ORDER BY created_at ASC
+		 LIMIT ?
+	`, perTable)
+	if err != nil {
+		return nil, err
+	}
+	defer talentRows.Close()
+	for talentRows.Next() {
+		var t domain.CVProcessingTarget
+		t.Source = "talent"
+		if err := talentRows.Scan(&t.ID, &t.CVKey); err != nil {
+			return nil, err
+		}
+		targets = append(targets, t)
+	}
+	if err := talentRows.Err(); err != nil {
+		return nil, err
+	}
+
+	remaining := limit - len(targets)
+	if remaining <= 0 {
+		return targets, nil
+	}
+	careerRows, err := r.db.QueryContext(ctx, `
+		SELECT id, cv_key
+		  FROM voxire_career_applications
+		 WHERE cv_key IS NOT NULL
+		   AND cv_key <> ''
+		   AND COALESCE(cv_processing_status, 'pending') IN ('pending', 'error')
+		 ORDER BY created_at ASC
+		 LIMIT ?
+	`, remaining)
+	if err != nil {
+		return nil, err
+	}
+	defer careerRows.Close()
+	for careerRows.Next() {
+		var t domain.CVProcessingTarget
+		t.Source = "career"
+		if err := careerRows.Scan(&t.ID, &t.CVKey); err != nil {
+			return nil, err
+		}
+		targets = append(targets, t)
+	}
+	return targets, careerRows.Err()
+}
+
+// UpdateCVProcessingResult stores extracted CV text and summary for search.
+func (r *Repository) UpdateCVProcessingResult(ctx context.Context, result domain.CVProcessingResult) error {
+	table := ""
+	switch result.Source {
+	case "talent":
+		table = "voxhire_talent_applications"
+	case "career":
+		table = "voxire_career_applications"
+	default:
+		return fmt.Errorf("unknown cv processing source %q", result.Source)
+	}
+	status := strings.TrimSpace(result.Status)
+	if status == "" {
+		status = "processed"
+	}
+
+	_, err := r.db.ExecContext(ctx, fmt.Sprintf(`
+		UPDATE %s
+		   SET cv_processing_status = ?,
+		       cv_processing_error = ?,
+		       cv_extracted_text = ?,
+		       cv_summary = ?,
+		       cv_processed_at = CURRENT_TIMESTAMP
+		 WHERE id = ?
+	`, table), status, nullStr(result.Error), nullStr(result.ExtractedText), nullStr(result.Summary), result.ID)
+	return err
 }
 
 func nullStr(s string) any {

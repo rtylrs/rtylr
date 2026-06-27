@@ -17,8 +17,10 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/application"
+	internaljobs "github.com/voxire/onion/internal/modules/voxhire/internal/jobs"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/routes"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/routes/handlers"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 )
 
 type Module struct {
@@ -44,4 +46,12 @@ func (m *Module) GetAnonymousRoutes() []string {
 	// surface (self-guarded by the admin JWT, see AdminAuthMiddleware).
 	anon = append(anon, handlers.RecruitAnonymousRoutes()...)
 	return anon
+}
+
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	internaljobs.Register(ctx, registry, m.service)
+}
+
+func (m *Module) ProcessPendingCVs(ctx context.Context) error {
+	return m.service.ProcessPendingCVs(ctx)
 }

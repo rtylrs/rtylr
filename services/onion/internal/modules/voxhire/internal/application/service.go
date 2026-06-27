@@ -36,6 +36,8 @@ type repository interface {
 	UpdateApplicationStatus(ctx context.Context, id int64, status string) error
 	GetApplicationCVKey(ctx context.Context, id int64) (string, error)
 	CreateCareerApplication(ctx context.Context, in domain.CareerApplicationInput) (int64, error)
+	ListPendingCVProcessingTargets(ctx context.Context, limit int) ([]domain.CVProcessingTarget, error)
+	UpdateCVProcessingResult(ctx context.Context, result domain.CVProcessingResult) error
 }
 
 type Service struct {
@@ -156,13 +158,27 @@ func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app dom
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Years experience</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Notice period</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Open to</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Current role</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Desired roles</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Salary expectation</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Authorization/location notes</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">LinkedIn</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">Portfolio</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
       <tr><td style="padding:8px 0;color:rgba(240,240,246,0.55);font-size:13px;">CV</td><td style="padding:8px 0;font-size:15px;color:#f0f0f6;">%s</td></tr>
     </table>
 
     <div style="margin-top:24px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:3px solid #63c6bd;">
-      <p style="font-size:13px;color:rgba(240,240,246,0.55);margin:0 0 6px 0;">Most interesting thing they shipped</p>
+      <p style="font-size:13px;color:rgba(240,240,246,0.55);margin:0 0 6px 0;">Why they are a strong match</p>
+      <p style="font-size:14px;color:#f0f0f6;margin:0;line-height:1.6;">%s</p>
+    </div>
+
+    <div style="margin-top:16px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:3px solid #63c6bd;">
+      <p style="font-size:13px;color:rgba(240,240,246,0.55);margin:0 0 6px 0;">Work history</p>
+      <p style="font-size:14px;color:#f0f0f6;margin:0;line-height:1.6;">%s</p>
+    </div>
+
+    <div style="margin-top:16px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:3px solid #63c6bd;">
+      <p style="font-size:13px;color:rgba(240,240,246,0.55);margin:0 0 6px 0;">Education and certifications</p>
       <p style="font-size:14px;color:#f0f0f6;margin:0;line-height:1.6;">%s</p>
     </div>
 
@@ -181,10 +197,16 @@ func (s *Service) notifyTalentApplication(ctx context.Context, id int64, app dom
 		html.EscapeString(orDash(app.YearsExperience)),
 		html.EscapeString(orDash(app.NoticePeriod)),
 		html.EscapeString(orDash(app.OpenTo)),
+		html.EscapeString(orDash(app.CurrentRole)),
+		html.EscapeString(orDash(app.DesiredRoles)),
+		html.EscapeString(orDash(app.SalaryExpectation)),
+		html.EscapeString(orDash(app.WorkAuthorization)),
 		linkOrDash(app.LinkedinURL),
 		linkOrDash(app.PortfolioURL),
 		cvLine,
 		html.EscapeString(orDash(app.Pitch)),
+		html.EscapeString(orDash(app.WorkHistory)),
+		html.EscapeString(orDash(app.Education)),
 		html.EscapeString(app.Email),
 		html.EscapeString(app.FullName),
 	)
