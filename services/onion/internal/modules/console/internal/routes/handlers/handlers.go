@@ -129,6 +129,58 @@ func (h *CreateUserHandler) Serve(ctx context.Context, req *CreateUserRequest) (
 	return CreateUserResponse{User: *user, Message: "User created"}, nil
 }
 
+// Internal owner + business onboarding.
+
+type CreateBusinessOwnerRequest struct {
+	Email              string `json:"email"`
+	Password           string `json:"password"`
+	FullName           string `json:"full_name"`
+	BusinessName       string `json:"business_name"`
+	Industry           string `json:"industry"`
+	Country            string `json:"country"`
+	Timezone           string `json:"timezone"`
+	Currency           string `json:"currency"`
+	GrantPlan          bool   `json:"grant_plan"`
+	PlanID             int64  `json:"plan_id"`
+	SubscriptionStatus string `json:"subscription_status"`
+	GrantDays          int    `json:"grant_days"`
+}
+
+type CreateBusinessOwnerResponse = application.CreateBusinessOwnerResult
+
+type CreateBusinessOwnerHandler struct{ Service *application.Service }
+
+func (h *CreateBusinessOwnerHandler) Validate(_ context.Context, req *CreateBusinessOwnerRequest) *errorModels.ServerError {
+	if req.Email == "" || req.Password == "" || req.BusinessName == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Email, password, and business name are required"}
+	}
+	return nil
+}
+
+func (h *CreateBusinessOwnerHandler) Serve(ctx context.Context, req *CreateBusinessOwnerRequest) (CreateBusinessOwnerResponse, *errorModels.ServerError) {
+	if sErr := requireConsoleAdmin(ctx); sErr != nil {
+		return CreateBusinessOwnerResponse{}, sErr
+	}
+	result, err := h.Service.CreateBusinessOwner(ctx, application.CreateBusinessOwnerInput{
+		Email:              req.Email,
+		Password:           req.Password,
+		FullName:           req.FullName,
+		BusinessName:       req.BusinessName,
+		Industry:           req.Industry,
+		Country:            req.Country,
+		Timezone:           req.Timezone,
+		Currency:           req.Currency,
+		GrantPlan:          req.GrantPlan,
+		PlanID:             req.PlanID,
+		SubscriptionStatus: req.SubscriptionStatus,
+		GrantDays:          req.GrantDays,
+	})
+	if err != nil {
+		return CreateBusinessOwnerResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: err.Error()}
+	}
+	return *result, nil
+}
+
 // UpdateUser
 
 type UpdateUserRequest struct {

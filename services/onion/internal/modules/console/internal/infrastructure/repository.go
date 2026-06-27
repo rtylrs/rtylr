@@ -31,6 +31,27 @@ type BusinessRow struct {
 	CreatedAt sql.NullTime
 }
 
+type CreateBusinessOwnerParams struct {
+	Email              string
+	PasswordHash       string
+	FullName           string
+	BusinessName       string
+	Industry           string
+	Country            string
+	Timezone           string
+	Currency           string
+	GrantPlan          bool
+	PlanID             int64
+	SubscriptionStatus string
+	GrantDays          int
+}
+
+type CreateBusinessOwnerRow struct {
+	OwnerID        int64
+	BusinessID     int64
+	SubscriptionID sql.NullInt64
+}
+
 type SubscriptionRow struct {
 	ID                  int64
 	OwnerID             int64
@@ -628,6 +649,166 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func (r *Repository) CreateBusinessOwner(ctx context.Context, params CreateBusinessOwnerParams) (*CreateBusinessOwnerRow, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	userRes, err := tx.ExecContext(ctx, `
+INSERT INTO users (email, password_hash, full_name, onboarded, auth_provider)
+VALUES (?, ?, ?, TRUE, 'password')`,
+		params.Email,
+		params.PasswordHash,
+		nullableString(params.FullName),
+	)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	ownerID, err := userRes.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	businessRes, err := tx.ExecContext(ctx, `
+INSERT INTO businesses (name, owner_id, industry, country, timezone, currency, is_active)
+VALUES (?, ?, ?, ?, ?, ?, TRUE)`,
+		params.BusinessName,
+		ownerID,
+		nullableString(params.Industry),
+		nullableString(params.Country),
+		params.Timezone,
+		params.Currency,
+	)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	businessID, err := businessRes.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	if _, err = tx.ExecContext(ctx, `
+UPDATE users
+SET business_id = ?, onboarded = TRUE, updated_at = NOW()
+WHERE id = ?`,
+		businessID,
+		ownerID,
+	); err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	appsJSON := `["dash","pos","erp","hr","crm","finance","flow","insights"]`
+	if params.PlanID > 0 {
+		if err = tx.QueryRowContext(ctx, `
+SELECT apps
+FROM plans
+WHERE id = ? AND is_active = TRUE
+LIMIT 1`,
+			params.PlanID,
+		).Scan(&appsJSON); err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+		if !json.Valid([]byte(appsJSON)) {
+			_ = tx.Rollback()
+			return nil, fmt.Errorf("plan %d has invalid apps JSON", params.PlanID)
+		}
+	}
+
+	if _, err = tx.ExecContext(ctx, `
+INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
+VALUES (?, ?, ?, ?, 'owner', TRUE)
+ON DUPLICATE KEY UPDATE
+  business_id = VALUES(business_id),
+  apps = VALUES(apps),
+  role = VALUES(role),
+  is_active = TRUE,
+  updated_at = NOW()`,
+		businessID,
+		ownerID,
+		ownerID,
+		appsJSON,
+	); err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	result := &CreateBusinessOwnerRow{
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+	}
+	if params.GrantPlan {
+		var trialEndsAt any
+		var periodEndsAt any
+		if params.GrantDays > 0 {
+			endsAt := time.Now().UTC().AddDate(0, 0, params.GrantDays)
+			trialEndsAt = endsAt
+			periodEndsAt = endsAt
+		}
+
+		subRes, subErr := tx.ExecContext(ctx, `
+INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, current_period_ends_at)
+VALUES (?, ?, ?, 1, ?, ?)
+ON DUPLICATE KEY UPDATE
+  plan_id = VALUES(plan_id),
+  status = VALUES(status),
+  seat_count = VALUES(seat_count),
+  trial_ends_at = VALUES(trial_ends_at),
+  current_period_ends_at = VALUES(current_period_ends_at),
+  updated_at = NOW()`,
+			ownerID,
+			params.PlanID,
+			params.SubscriptionStatus,
+			trialEndsAt,
+			periodEndsAt,
+		)
+		if subErr != nil {
+			_ = tx.Rollback()
+			return nil, subErr
+		}
+		if subID, idErr := subRes.LastInsertId(); idErr == nil && subID > 0 {
+			result.SubscriptionID = sql.NullInt64{Int64: subID, Valid: true}
+		} else {
+			var existingID int64
+			if scanErr := tx.QueryRowContext(ctx, "SELECT id FROM subscriptions WHERE owner_id = ? LIMIT 1", ownerID).Scan(&existingID); scanErr != nil {
+				_ = tx.Rollback()
+				return nil, scanErr
+			}
+			result.SubscriptionID = sql.NullInt64{Int64: existingID, Valid: true}
+		}
+	}
+
+	_, _ = tx.ExecContext(ctx, `
+INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
+SELECT ?, COALESCE(u.business_id, 0), u.id,
+       COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
+       CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
+       u.email, 'active'
+FROM users u
+WHERE u.id = ?
+  AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id)`,
+		ownerID,
+		ownerID,
+	)
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (r *Repository) UpdateUser(ctx context.Context, id int64, fullName, email string) error {

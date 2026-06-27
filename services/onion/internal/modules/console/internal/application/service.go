@@ -301,6 +301,134 @@ func (s *Service) CreateUser(ctx context.Context, email, password, fullName stri
 	return s.GetUser(ctx, id)
 }
 
+type CreateBusinessOwnerInput struct {
+	Email              string
+	Password           string
+	FullName           string
+	BusinessName       string
+	Industry           string
+	Country            string
+	Timezone           string
+	Currency           string
+	GrantPlan          bool
+	PlanID             int64
+	SubscriptionStatus string
+	GrantDays          int
+}
+
+type CreateBusinessOwnerResult struct {
+	Owner        UserDTO          `json:"owner"`
+	Business     BusinessDTO      `json:"business"`
+	Subscription *SubscriptionDTO `json:"subscription,omitempty"`
+	Message      string           `json:"message"`
+}
+
+func (s *Service) CreateBusinessOwner(ctx context.Context, input CreateBusinessOwnerInput) (*CreateBusinessOwnerResult, error) {
+	defer invalidateConsoleScope(ctx)
+
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	if email == "" {
+		return nil, errors.New("owner email is required")
+	}
+	if strings.TrimSpace(input.Password) == "" {
+		return nil, errors.New("password is required")
+	}
+	if len(input.Password) < 8 {
+		return nil, errors.New("password must be at least 8 characters")
+	}
+
+	businessName := strings.TrimSpace(input.BusinessName)
+	if businessName == "" {
+		return nil, errors.New("business name is required")
+	}
+
+	timezone := strings.TrimSpace(input.Timezone)
+	if timezone == "" {
+		timezone = "UTC"
+	}
+	currency := strings.ToUpper(strings.TrimSpace(input.Currency))
+	if currency == "" {
+		currency = "USD"
+	}
+
+	status := strings.ToLower(strings.TrimSpace(input.SubscriptionStatus))
+	if status == "" {
+		if input.GrantDays > 0 {
+			status = "trial"
+		} else {
+			status = "active"
+		}
+	}
+	if status != "active" && status != "trial" {
+		return nil, errors.New("subscription status must be active or trial")
+	}
+	if input.GrantDays < 0 {
+		return nil, errors.New("grant days cannot be negative")
+	}
+	if input.GrantPlan && input.PlanID <= 0 {
+		return nil, errors.New("plan is required when granting access")
+	}
+
+	if _, err := s.repo.GetUserByEmail(ctx, email); err == nil {
+		return nil, errors.New("owner email already exists")
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return nil, err
+	}
+	if _, total, err := s.repo.ListBusinesses(ctx, 1, 0, 0, businessName, 0); err != nil {
+		return nil, err
+	} else if total > 0 {
+		return nil, errors.New("business name already exists")
+	}
+
+	hash, err := passwordutils.HashPassword(input.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	created, err := s.repo.CreateBusinessOwner(ctx, infrastructure.CreateBusinessOwnerParams{
+		Email:              email,
+		PasswordHash:       hash,
+		FullName:           strings.TrimSpace(input.FullName),
+		BusinessName:       businessName,
+		Industry:           strings.TrimSpace(input.Industry),
+		Country:            strings.TrimSpace(input.Country),
+		Timezone:           timezone,
+		Currency:           currency,
+		GrantPlan:          input.GrantPlan,
+		PlanID:             input.PlanID,
+		SubscriptionStatus: status,
+		GrantDays:          input.GrantDays,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	owner, err := s.GetUser(ctx, created.OwnerID)
+	if err != nil {
+		return nil, err
+	}
+	business, err := s.GetBusiness(ctx, created.BusinessID)
+	if err != nil {
+		return nil, err
+	}
+
+	var subscription *SubscriptionDTO
+	if created.SubscriptionID.Valid {
+		sub, subErr := s.GetSubscriptionByOwner(ctx, created.OwnerID)
+		if subErr != nil {
+			return nil, subErr
+		}
+		subscription = sub
+	}
+
+	return &CreateBusinessOwnerResult{
+		Owner:        *owner,
+		Business:     *business,
+		Subscription: subscription,
+		Message:      "Owner and business created",
+	}, nil
+}
+
 func (s *Service) UpdateUser(ctx context.Context, id int64, fullName, email string) error {
 	defer invalidateConsoleScope(ctx)
 	return s.repo.UpdateUser(ctx, id, fullName, email)

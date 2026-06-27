@@ -49,6 +49,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, []string{"/console/users"},
 		&handlers.CreateUserHandler{Service: service},
 	)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateBusinessOwnerRequest, handlers.CreateBusinessOwnerResponse](
+		ctx, router, []string{"/console/internal-onboarding/business-owner"},
+		&handlers.CreateBusinessOwnerHandler{Service: service},
+	)
 
 	// Users by ID (raw handlers for path params)
 	router.Get("/console/users/{id}", rawGetUser(ctx, service))
