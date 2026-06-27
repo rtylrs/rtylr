@@ -33,9 +33,19 @@ type repository interface {
 	UpdateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error)
 	SetCareerActive(ctx context.Context, id int64, active bool) (*domain.Opening, error)
 	ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error)
+	ListCandidates(ctx context.Context, f domain.CandidateFilter) ([]domain.Candidate, int64, error)
+	ListCVJobs(ctx context.Context, f domain.CandidateFilter) ([]domain.CVJob, error)
+	RetryCVProcessing(ctx context.Context, source string, id int64) error
 	UpdateApplicationStatus(ctx context.Context, id int64, status string) error
 	UpdateApplicationReview(ctx context.Context, id int64, in domain.ApplicationReviewInput) error
 	GetApplicationCVKey(ctx context.Context, id int64) (string, error)
+	ListApplicationTimeline(ctx context.Context, id int64) ([]domain.TimelineEvent, error)
+	ListTasks(ctx context.Context, status string) ([]domain.Task, error)
+	UpsertTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error)
+	UpdateTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error)
+	ListShortlists(ctx context.Context, jobID int64) ([]domain.Shortlist, error)
+	CreateShortlist(ctx context.Context, in domain.ShortlistInput) (*domain.Shortlist, error)
+	AddShortlistItem(ctx context.Context, in domain.ShortlistItemInput) (*domain.ShortlistItem, error)
 	CreateCareerApplication(ctx context.Context, in domain.CareerApplicationInput) (int64, error)
 	ListPendingCVProcessingTargets(ctx context.Context, limit int) ([]domain.CVProcessingTarget, error)
 	UpdateCVProcessingResult(ctx context.Context, result domain.CVProcessingResult) error

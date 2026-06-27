@@ -100,6 +100,7 @@ type Application struct {
 	CVProcessingError  string     `json:"cv_processing_error"`
 	CVSummary          string     `json:"cv_summary"`
 	CVSearchExcerpt    string     `json:"cv_search_excerpt,omitempty"`
+	CVProfile          CVProfile  `json:"cv_profile,omitempty"`
 	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
 	ReviewRating       int        `json:"review_rating"`
 	ReviewNotes        string     `json:"review_notes"`
@@ -131,6 +132,9 @@ type ApplicationFilter struct {
 type Analytics struct {
 	Totals               AnalyticsTotals     `json:"totals"`
 	ApplicationsByStatus []AnalyticsBucket   `json:"applications_by_status"`
+	CVStatusMix          []AnalyticsBucket   `json:"cv_status_mix"`
+	TaskStatusMix        []AnalyticsBucket   `json:"task_status_mix"`
+	ProfileFunctions     []AnalyticsBucket   `json:"profile_functions"`
 	LeadServiceMix       []AnalyticsBucket   `json:"lead_service_mix"`
 	LeadTimelineMix      []AnalyticsBucket   `json:"lead_timeline_mix"`
 	RecentDays           []AnalyticsDay      `json:"recent_days"`
@@ -139,24 +143,28 @@ type Analytics struct {
 }
 
 type AnalyticsTotals struct {
-	OpenJobs             int64   `json:"open_jobs"`
-	ClosedJobs           int64   `json:"closed_jobs"`
-	ApplicationsTotal    int64   `json:"applications_total"`
-	Applications7d       int64   `json:"applications_7d"`
-	Applications30d      int64   `json:"applications_30d"`
-	NewApplications      int64   `json:"new_applications"`
-	LeadsTotal           int64   `json:"leads_total"`
-	Leads7d              int64   `json:"leads_7d"`
-	Leads30d             int64   `json:"leads_30d"`
-	AdminsTotal          int64   `json:"admins_total"`
-	TalentPoolTotal      int64   `json:"talent_pool_total"`
-	TalentPool7d         int64   `json:"talent_pool_7d"`
-	TalentPool30d        int64   `json:"talent_pool_30d"`
-	CVProcessedTotal     int64   `json:"cv_processed_total"`
-	CVPendingTotal       int64   `json:"cv_pending_total"`
-	CVErrorTotal         int64   `json:"cv_error_total"`
-	CVRate               float64 `json:"cv_rate"`
-	AvgSalaryExpectation float64 `json:"avg_salary_expectation"`
+	OpenJobs              int64   `json:"open_jobs"`
+	ClosedJobs            int64   `json:"closed_jobs"`
+	ApplicationsTotal     int64   `json:"applications_total"`
+	Applications7d        int64   `json:"applications_7d"`
+	Applications30d       int64   `json:"applications_30d"`
+	NewApplications       int64   `json:"new_applications"`
+	LeadsTotal            int64   `json:"leads_total"`
+	Leads7d               int64   `json:"leads_7d"`
+	Leads30d              int64   `json:"leads_30d"`
+	AdminsTotal           int64   `json:"admins_total"`
+	TalentPoolTotal       int64   `json:"talent_pool_total"`
+	TalentPool7d          int64   `json:"talent_pool_7d"`
+	TalentPool30d         int64   `json:"talent_pool_30d"`
+	CVProcessedTotal      int64   `json:"cv_processed_total"`
+	CVPendingTotal        int64   `json:"cv_pending_total"`
+	CVErrorTotal          int64   `json:"cv_error_total"`
+	CVRate                float64 `json:"cv_rate"`
+	AvgSalaryExpectation  float64 `json:"avg_salary_expectation"`
+	OpenTasks             int64   `json:"open_tasks"`
+	OverdueTasks          int64   `json:"overdue_tasks"`
+	ShortlistsTotal       int64   `json:"shortlists_total"`
+	ShortlistedCandidates int64   `json:"shortlisted_candidates"`
 }
 
 type AnalyticsBucket struct {
@@ -238,5 +246,136 @@ type CVProcessingResult struct {
 	Status        string
 	ExtractedText string
 	Summary       string
+	Profile       CVProfile
 	Error         string
+}
+
+type CVProfile struct {
+	Skills          []string `json:"skills,omitempty"`
+	Functions       []string `json:"functions,omitempty"`
+	Industries      []string `json:"industries,omitempty"`
+	RoleTitles      []string `json:"role_titles,omitempty"`
+	Seniority       string   `json:"seniority,omitempty"`
+	YearsExperience string   `json:"years_experience,omitempty"`
+	Education       []string `json:"education,omitempty"`
+	Languages       []string `json:"languages,omitempty"`
+	Certifications  []string `json:"certifications,omitempty"`
+	Locations       []string `json:"locations,omitempty"`
+	Availability    string   `json:"availability,omitempty"`
+	SalarySignals   []string `json:"salary_signals,omitempty"`
+}
+
+type CandidateFilter struct {
+	Query    string
+	Source   string
+	CVStatus string
+	Limit    int32
+	Offset   int32
+}
+
+type Candidate struct {
+	Source             string     `json:"source"`
+	ID                 int64      `json:"id"`
+	ApplicationID      int64      `json:"application_id,omitempty"`
+	JobID              int64      `json:"job_id,omitempty"`
+	OpeningTitle       string     `json:"opening_title,omitempty"`
+	Name               string     `json:"name"`
+	Email              string     `json:"email"`
+	Phone              string     `json:"phone,omitempty"`
+	Location           string     `json:"location,omitempty"`
+	Track              string     `json:"track,omitempty"`
+	CurrentRole        string     `json:"current_role,omitempty"`
+	DesiredRoles       string     `json:"desired_roles,omitempty"`
+	Status             string     `json:"status"`
+	CVProcessingStatus string     `json:"cv_processing_status"`
+	CVProcessingError  string     `json:"cv_processing_error,omitempty"`
+	CVSummary          string     `json:"cv_summary,omitempty"`
+	CVSearchExcerpt    string     `json:"cv_search_excerpt,omitempty"`
+	CVProfile          CVProfile  `json:"cv_profile,omitempty"`
+	CreatedAt          time.Time  `json:"created_at"`
+	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
+}
+
+type CVJob struct {
+	Source             string     `json:"source"`
+	ID                 int64      `json:"id"`
+	Name               string     `json:"name"`
+	Email              string     `json:"email"`
+	Role               string     `json:"role"`
+	CVKey              string     `json:"cv_key"`
+	CVProcessingStatus string     `json:"cv_processing_status"`
+	CVProcessingError  string     `json:"cv_processing_error,omitempty"`
+	CVSummary          string     `json:"cv_summary,omitempty"`
+	CVProfile          CVProfile  `json:"cv_profile,omitempty"`
+	CreatedAt          time.Time  `json:"created_at"`
+	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
+}
+
+type Task struct {
+	ID             int64      `json:"id"`
+	ApplicationID  int64      `json:"application_id"`
+	JobID          int64      `json:"job_id"`
+	OpeningTitle   string     `json:"opening_title"`
+	CandidateName  string     `json:"candidate_name"`
+	CandidateEmail string     `json:"candidate_email"`
+	Title          string     `json:"title"`
+	Status         string     `json:"status"`
+	DueAt          *time.Time `json:"due_at,omitempty"`
+	CompletedAt    *time.Time `json:"completed_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+}
+
+type TaskInput struct {
+	ID            int64
+	ApplicationID int64
+	Title         string
+	Status        string
+	DueAt         *time.Time
+}
+
+type Shortlist struct {
+	ID        int64           `json:"id"`
+	JobID     int64           `json:"job_id"`
+	JobTitle  string          `json:"job_title"`
+	Name      string          `json:"name"`
+	Status    string          `json:"status"`
+	Notes     string          `json:"notes"`
+	Items     []ShortlistItem `json:"items,omitempty"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+}
+
+type ShortlistItem struct {
+	ID             int64     `json:"id"`
+	ShortlistID    int64     `json:"shortlist_id"`
+	ApplicationID  int64     `json:"application_id"`
+	CandidateName  string    `json:"candidate_name"`
+	CandidateEmail string    `json:"candidate_email"`
+	Status         string    `json:"status"`
+	Rank           int       `json:"rank"`
+	Notes          string    `json:"notes"`
+	CVProfile      CVProfile `json:"cv_profile,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+}
+
+type ShortlistInput struct {
+	ID     int64
+	JobID  int64
+	Name   string
+	Status string
+	Notes  string
+}
+
+type ShortlistItemInput struct {
+	ShortlistID   int64
+	ApplicationID int64
+	Rank          int
+	Notes         string
+}
+
+type TimelineEvent struct {
+	Kind      string    `json:"kind"`
+	Title     string    `json:"title"`
+	Detail    string    `json:"detail,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 }

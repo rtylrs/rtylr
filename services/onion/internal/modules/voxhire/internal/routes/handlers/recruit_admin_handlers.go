@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -34,7 +35,17 @@ func AdminApplicationsRoute() string { return "/voxhire/admin/openings/{id}/appl
 func AdminAppStatusRoute() string    { return "/voxhire/admin/applications/{id}/status" }
 func AdminAppReviewRoute() string    { return "/voxhire/admin/applications/{id}/review" }
 func AdminAppCVRoute() string        { return "/voxhire/admin/applications/{id}/cv" }
-func CareerApplyRoute() string       { return "/voxhire/careers/apply" }
+func AdminAppTimelineRoute() string  { return "/voxhire/admin/applications/{id}/timeline" }
+func AdminCandidatesRoute() string   { return "/voxhire/admin/candidates" }
+func AdminCVJobsRoute() string       { return "/voxhire/admin/cv-jobs" }
+func AdminCVJobRetryRoute() string   { return "/voxhire/admin/cv-jobs/{source}/{id}/retry" }
+func AdminTasksRoute() string        { return "/voxhire/admin/tasks" }
+func AdminTaskRoute() string         { return "/voxhire/admin/tasks/{id}" }
+func AdminShortlistsRoute() string   { return "/voxhire/admin/shortlists" }
+func AdminShortlistItemsRoute() string {
+	return "/voxhire/admin/shortlists/{id}/items"
+}
+func CareerApplyRoute() string { return "/voxhire/careers/apply" }
 
 // RecruitAnonymousRoutes lists every recruit/admin path that bypasses
 // the platform JWT middleware.
@@ -53,6 +64,14 @@ func RecruitAnonymousRoutes() []string {
 		AdminAppStatusRoute(),
 		AdminAppReviewRoute(),
 		AdminAppCVRoute(),
+		AdminAppTimelineRoute(),
+		AdminCandidatesRoute(),
+		AdminCVJobsRoute(),
+		AdminCVJobRetryRoute(),
+		AdminTasksRoute(),
+		AdminTaskRoute(),
+		AdminShortlistsRoute(),
+		AdminShortlistItemsRoute(),
 		CareerApplyRoute(),
 	}
 }
@@ -451,6 +470,275 @@ func ApplicationCVHandler(svc *application.Service) http.HandlerFunc {
 	}
 }
 
+func ApplicationTimelineHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || id <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid application id")
+			return
+		}
+		events, err := svc.ListApplicationTimeline(r.Context(), id)
+		if err != nil {
+			if errors.Is(err, domain.ErrApplicationNotFound) {
+				writeApplyError(w, http.StatusNotFound, "Application not found")
+				return
+			}
+			logger.Ctx(r.Context()).Error("voxhire timeline failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to load timeline")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"events": events})
+	}
+}
+
+func ListCandidatesHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		filter := domain.CandidateFilter{
+			Query:    strings.TrimSpace(q.Get("q")),
+			Source:   strings.TrimSpace(q.Get("source")),
+			CVStatus: strings.TrimSpace(q.Get("cv_status")),
+			Limit:    parseInt32(q.Get("limit")),
+			Offset:   parseInt32(q.Get("offset")),
+		}
+		candidates, total, err := svc.ListCandidates(r.Context(), filter)
+		if err != nil {
+			logger.Ctx(r.Context()).Error("voxhire list candidates failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to list candidates")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"candidates": candidates,
+			"total":      total,
+			"limit":      filter.Limit,
+			"offset":     filter.Offset,
+		})
+	}
+}
+
+func ListCVJobsHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		filter := domain.CandidateFilter{
+			Query:    strings.TrimSpace(q.Get("q")),
+			Source:   strings.TrimSpace(q.Get("source")),
+			CVStatus: strings.TrimSpace(q.Get("cv_status")),
+			Limit:    parseInt32(q.Get("limit")),
+		}
+		jobs, err := svc.ListCVJobs(r.Context(), filter)
+		if err != nil {
+			logger.Ctx(r.Context()).Error("voxhire list cv jobs failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to list CV jobs")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"jobs": jobs})
+	}
+}
+
+func RetryCVJobHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || id <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid CV job id")
+			return
+		}
+		source := strings.TrimSpace(chi.URLParam(r, "source"))
+		if err := svc.RetryCVProcessing(r.Context(), source, id); err != nil {
+			switch {
+			case errors.Is(err, domain.ErrInvalidInput):
+				writeApplyError(w, http.StatusBadRequest, "Invalid CV job")
+			case errors.Is(err, domain.ErrApplicationNotFound):
+				writeApplyError(w, http.StatusNotFound, "CV job not found")
+			default:
+				logger.Ctx(r.Context()).Error("voxhire retry cv job failed", logger.Error(err))
+				writeApplyError(w, http.StatusInternalServerError, "Failed to retry CV job")
+			}
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"status": "success"})
+	}
+}
+
+type adminTaskRequest struct {
+	ApplicationID int64  `json:"application_id"`
+	Title         string `json:"title"`
+	Status        string `json:"status"`
+	DueAt         string `json:"due_at"`
+}
+
+func (b adminTaskRequest) taskInput(id int64) (domain.TaskInput, error) {
+	dueAt, err := parseAdminTime(b.DueAt)
+	if err != nil {
+		return domain.TaskInput{}, err
+	}
+	return domain.TaskInput{
+		ID:            id,
+		ApplicationID: b.ApplicationID,
+		Title:         b.Title,
+		Status:        b.Status,
+		DueAt:         dueAt,
+	}, nil
+}
+
+func ListTasksHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tasks, err := svc.ListTasks(r.Context(), strings.TrimSpace(r.URL.Query().Get("status")))
+		if err != nil {
+			logger.Ctx(r.Context()).Error("voxhire list tasks failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to list tasks")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"tasks": tasks})
+	}
+}
+
+func CreateTaskHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body adminTaskRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+		in, err := body.taskInput(0)
+		if err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid due date")
+			return
+		}
+		task, err := svc.UpsertTask(r.Context(), in)
+		if err != nil {
+			writeTaskMutationError(w, r, err, "create")
+			return
+		}
+		writeJSON(w, http.StatusCreated, map[string]any{"task": task})
+	}
+}
+
+func UpdateTaskHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || id <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid task id")
+			return
+		}
+		var body adminTaskRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+		in, err := body.taskInput(id)
+		if err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid due date")
+			return
+		}
+		task, err := svc.UpdateTask(r.Context(), in)
+		if err != nil {
+			writeTaskMutationError(w, r, err, "update")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"task": task})
+	}
+}
+
+func writeTaskMutationError(w http.ResponseWriter, r *http.Request, err error, action string) {
+	switch {
+	case errors.Is(err, domain.ErrInvalidInput):
+		writeApplyError(w, http.StatusBadRequest, "Application and task title are required")
+	case errors.Is(err, domain.ErrApplicationNotFound):
+		writeApplyError(w, http.StatusNotFound, "Task or application not found")
+	default:
+		logger.Ctx(r.Context()).Error("voxhire task mutation failed",
+			logger.String("action", action),
+			logger.Error(err),
+		)
+		writeApplyError(w, http.StatusInternalServerError, "Failed to "+action+" task")
+	}
+}
+
+type adminShortlistRequest struct {
+	JobID  int64  `json:"job_id"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	Notes  string `json:"notes"`
+}
+
+func ListShortlistsHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		jobID, _ := strconv.ParseInt(r.URL.Query().Get("job_id"), 10, 64)
+		shortlists, err := svc.ListShortlists(r.Context(), jobID)
+		if err != nil {
+			logger.Ctx(r.Context()).Error("voxhire list shortlists failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to list shortlists")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"shortlists": shortlists})
+	}
+}
+
+func CreateShortlistHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body adminShortlistRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+		shortlist, err := svc.CreateShortlist(r.Context(), domain.ShortlistInput{
+			JobID:  body.JobID,
+			Name:   body.Name,
+			Status: body.Status,
+			Notes:  body.Notes,
+		})
+		if err != nil {
+			if errors.Is(err, domain.ErrInvalidInput) {
+				writeApplyError(w, http.StatusBadRequest, "Job and shortlist name are required")
+				return
+			}
+			logger.Ctx(r.Context()).Error("voxhire create shortlist failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to create shortlist")
+			return
+		}
+		writeJSON(w, http.StatusCreated, map[string]any{"shortlist": shortlist})
+	}
+}
+
+func AddShortlistItemHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		shortlistID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || shortlistID <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid shortlist id")
+			return
+		}
+		var body struct {
+			ApplicationID int64  `json:"application_id"`
+			Rank          int    `json:"rank"`
+			Notes         string `json:"notes"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+		item, err := svc.AddShortlistItem(r.Context(), domain.ShortlistItemInput{
+			ShortlistID:   shortlistID,
+			ApplicationID: body.ApplicationID,
+			Rank:          body.Rank,
+			Notes:         body.Notes,
+		})
+		if err != nil {
+			if errors.Is(err, domain.ErrInvalidInput) {
+				writeApplyError(w, http.StatusBadRequest, "Shortlist and application are required")
+				return
+			}
+			if errors.Is(err, domain.ErrApplicationNotFound) {
+				writeApplyError(w, http.StatusNotFound, "Shortlist item not found")
+				return
+			}
+			logger.Ctx(r.Context()).Error("voxhire add shortlist item failed", logger.Error(err))
+			writeApplyError(w, http.StatusInternalServerError, "Failed to add shortlist item")
+			return
+		}
+		writeJSON(w, http.StatusCreated, map[string]any{"item": item})
+	}
+}
+
 // ── helpers ──────────────────────────────────────────────────────────
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
@@ -470,4 +758,18 @@ func parseInt32(s string) int32 {
 		return 0
 	}
 	return int32(n)
+}
+
+func parseAdminTime(raw string) (*time.Time, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+	if t, err := time.Parse(time.RFC3339, raw); err == nil {
+		return &t, nil
+	}
+	if t, err := time.Parse("2006-01-02", raw); err == nil {
+		return &t, nil
+	}
+	return nil, errors.New("invalid time")
 }

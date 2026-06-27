@@ -3,8 +3,10 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -179,6 +181,38 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		return nil, err
 	}
 
+	analytics.CVStatusMix, err = r.analyticsBuckets(ctx, `
+		SELECT status AS bucket, COUNT(*) AS count
+		  FROM (
+		        SELECT LOWER(COALESCE(a.cv_processing_status, 'pending')) AS status
+		          FROM voxire_career_applications a
+		          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		         WHERE a.cv_key IS NOT NULL AND a.cv_key <> ''
+		        UNION ALL
+		        SELECT LOWER(COALESCE(cv_processing_status, 'pending')) AS status
+		          FROM voxhire_talent_applications
+		         WHERE cv_key IS NOT NULL AND cv_key <> ''
+		       ) statuses
+		 GROUP BY status
+		 ORDER BY count DESC, status ASC`, voxhireCareerOwnerID)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.TaskStatusMix, err = r.analyticsBuckets(ctx, `
+		SELECT LOWER(COALESCE(NULLIF(status, ''), 'open')) AS bucket, COUNT(*) AS count
+		  FROM voxhire_follow_up_tasks
+		 GROUP BY bucket
+		 ORDER BY count DESC, bucket ASC`)
+	if err != nil {
+		return nil, err
+	}
+
+	analytics.ProfileFunctions, err = r.analyticsProfileFunctions(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	analytics.LeadServiceMix, err = r.analyticsBuckets(ctx, `
 		SELECT LOWER(COALESCE(NULLIF(service, ''), 'unsure')) AS bucket, COUNT(*) AS count
 		  FROM voxhire_company_leads
@@ -298,6 +332,22 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		return err
 	}
 	totals.AdminsTotal = admins
+
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT COUNT(*),
+		       COALESCE(SUM(CASE WHEN status = 'open' AND due_at IS NOT NULL AND due_at < UTC_TIMESTAMP() THEN 1 ELSE 0 END), 0)
+		  FROM voxhire_follow_up_tasks
+		 WHERE status <> 'done'`).Scan(&totals.OpenTasks, &totals.OverdueTasks); err != nil {
+		return err
+	}
+
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT
+		  (SELECT COUNT(*) FROM voxhire_shortlists),
+		  (SELECT COUNT(*) FROM voxhire_shortlist_items)
+	`).Scan(&totals.ShortlistsTotal, &totals.ShortlistedCandidates); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -317,6 +367,38 @@ func (r *Repository) analyticsBuckets(ctx context.Context, query string, args ..
 		buckets = append(buckets, bucket)
 	}
 	return buckets, rows.Err()
+}
+
+func (r *Repository) analyticsProfileFunctions(ctx context.Context) ([]domain.AnalyticsBucket, error) {
+	functions := []string{"Operations", "Sales", "Customer Support", "Finance", "HR", "Marketing", "Product", "Design", "Engineering", "Data", "Healthcare", "Retail", "Logistics"}
+	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
+	for _, fn := range functions {
+		pattern := `%"` + fn + `"%`
+		var count int64
+		if err := r.db.QueryRowContext(ctx, `
+			SELECT COUNT(*)
+			  FROM (
+			        SELECT COALESCE(a.cv_profile_json, '') AS profile
+			          FROM voxire_career_applications a
+			          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+			        UNION ALL
+			        SELECT COALESCE(cv_profile_json, '') AS profile
+			          FROM voxhire_talent_applications
+			       ) profiles
+			 WHERE profile LIKE ?`, voxhireCareerOwnerID, pattern).Scan(&count); err != nil {
+			return nil, err
+		}
+		if count > 0 {
+			buckets = append(buckets, domain.AnalyticsBucket{Key: strings.ToLower(strings.ReplaceAll(fn, " ", "_")), Count: count})
+		}
+	}
+	sort.SliceStable(buckets, func(i, j int) bool {
+		if buckets[i].Count == buckets[j].Count {
+			return buckets[i].Key < buckets[j].Key
+		}
+		return buckets[i].Count > buckets[j].Count
+	})
+	return buckets, nil
 }
 
 func (r *Repository) analyticsRecentDays(ctx context.Context) ([]domain.AnalyticsDay, error) {
@@ -672,7 +754,7 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	         COALESCE(work_history,''), COALESCE(education,''), COALESCE(experience_summary,''),
 	         COALESCE(cover_letter,''), (cv_key IS NOT NULL AND cv_key <> '') AS has_cv,
 	         COALESCE(cv_processing_status,'pending'), COALESCE(cv_processing_error,''), COALESCE(cv_summary,''),
-	         COALESCE(cv_extracted_text,''), cv_processed_at, COALESCE(review_rating,0),
+	         COALESCE(cv_extracted_text,''), COALESCE(cv_profile_json,''), cv_processed_at, COALESCE(review_rating,0),
 	         COALESCE(review_notes,''), COALESCE(next_step,''), reviewed_at, created_at`
 
 	base := sq.Select().From("voxire_career_applications").Where(sq.Eq{"job_id": f.JobID})
@@ -728,16 +810,18 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	for rows.Next() {
 		var a domain.Application
 		var cvExtractedText string
+		var cvProfileJSON string
 		var cvProcessedAt sql.NullTime
 		var reviewedAt sql.NullTime
 		if err := rows.Scan(&a.ID, &a.JobID, &a.Name, &a.Email, &a.Phone, &a.Location,
 			&a.SalaryExpectation, &a.SalaryCurrency, &a.Status, &a.WorkHistory, &a.Education,
 			&a.ExperienceSummary, &a.CoverLetter, &a.HasCV, &a.CVProcessingStatus, &a.CVProcessingError,
-			&a.CVSummary, &cvExtractedText, &cvProcessedAt, &a.ReviewRating, &a.ReviewNotes,
+			&a.CVSummary, &cvExtractedText, &cvProfileJSON, &cvProcessedAt, &a.ReviewRating, &a.ReviewNotes,
 			&a.NextStep, &reviewedAt, &a.CreatedAt); err != nil {
 			return nil, 0, err
 		}
 		a.CVSearchExcerpt = cvSearchExcerpt(f.Query, a.CVSummary, cvExtractedText)
+		a.CVProfile = parseCVProfileJSON(cvProfileJSON)
 		if cvProcessedAt.Valid {
 			a.CVProcessedAt = &cvProcessedAt.Time
 		}
@@ -879,6 +963,7 @@ func (r *Repository) UpdateApplicationStatus(ctx context.Context, id int64, stat
 		}
 		return domain.ErrApplicationNotFound
 	}
+	_ = r.recordApplicationEvent(ctx, id, "status", "Status changed", status)
 	return nil
 }
 
@@ -912,6 +997,11 @@ func (r *Repository) UpdateApplicationReview(ctx context.Context, id int64, in d
 		}
 		return domain.ErrApplicationNotFound
 	}
+	detail := strings.TrimSpace(in.ReviewNotes)
+	if detail == "" {
+		detail = in.NextStep
+	}
+	_ = r.recordApplicationEvent(ctx, id, "review", "Recruiter review saved", detail)
 	return nil
 }
 
@@ -957,6 +1047,721 @@ func (r *Repository) CreateCareerApplication(ctx context.Context, in domain.Care
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+const candidateUnionSQL = `
+	SELECT 'career' AS source,
+	       a.id,
+	       a.id AS application_id,
+	       a.job_id,
+	       COALESCE(c.title, '') AS opening_title,
+	       a.name,
+	       a.email,
+	       COALESCE(a.phone, '') AS phone,
+	       COALESCE(a.location, '') AS location,
+	       '' AS track,
+	       '' AS current_role,
+	       '' AS desired_roles,
+	       COALESCE(a.status, 'new') AS status,
+	       COALESCE(a.cv_processing_status, 'pending') AS cv_processing_status,
+	       COALESCE(a.cv_processing_error, '') AS cv_processing_error,
+	       COALESCE(a.cv_summary, '') AS cv_summary,
+	       COALESCE(a.cv_extracted_text, '') AS cv_extracted_text,
+	       COALESCE(a.cv_profile_json, '') AS cv_profile_json,
+	       a.created_at,
+	       a.cv_processed_at
+	  FROM voxire_career_applications a
+	  LEFT JOIN careers c ON c.id = a.job_id
+	 WHERE c.owner_id = ?
+	UNION ALL
+	SELECT 'talent' AS source,
+	       t.id,
+	       0 AS application_id,
+	       0 AS job_id,
+	       'Talent pool' AS opening_title,
+	       t.full_name AS name,
+	       t.email,
+	       COALESCE(t.phone, '') AS phone,
+	       COALESCE(t.country_of_residence, '') AS location,
+	       COALESCE(t.track, '') AS track,
+	       COALESCE(t.current_role, '') AS current_role,
+	       COALESCE(t.desired_roles, '') AS desired_roles,
+	       COALESCE(t.status, 'new') AS status,
+	       COALESCE(t.cv_processing_status, 'pending') AS cv_processing_status,
+	       COALESCE(t.cv_processing_error, '') AS cv_processing_error,
+	       COALESCE(t.cv_summary, '') AS cv_summary,
+	       COALESCE(t.cv_extracted_text, '') AS cv_extracted_text,
+	       COALESCE(t.cv_profile_json, '') AS cv_profile_json,
+	       t.created_at,
+	       t.cv_processed_at
+	  FROM voxhire_talent_applications t`
+
+func (r *Repository) ListCandidates(ctx context.Context, f domain.CandidateFilter) ([]domain.Candidate, int64, error) {
+	where, args := candidateFilterWhere(f)
+	countArgs := append([]any{voxhireCareerOwnerID}, args...)
+	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM (%s) candidates WHERE %s", candidateUnionSQL, strings.Join(where, " AND "))
+
+	var total int64
+	if err := r.db.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	limit := int(f.Limit)
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > 200 {
+		limit = 200
+	}
+	offset := int(f.Offset)
+	if offset < 0 {
+		offset = 0
+	}
+
+	listArgs := append([]any{voxhireCareerOwnerID}, args...)
+	listArgs = append(listArgs, limit, offset)
+	listSQL := fmt.Sprintf(`
+		SELECT source, id, application_id, job_id, opening_title, name, email, phone, location,
+		       track, current_role, desired_roles, status, cv_processing_status, cv_processing_error,
+		       cv_summary, cv_extracted_text, cv_profile_json, created_at, cv_processed_at
+		  FROM (%s) candidates
+		 WHERE %s
+		 ORDER BY created_at DESC
+		 LIMIT ? OFFSET ?`, candidateUnionSQL, strings.Join(where, " AND "))
+
+	rows, err := r.db.QueryContext(ctx, listSQL, listArgs...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	candidates := make([]domain.Candidate, 0, limit)
+	for rows.Next() {
+		var c domain.Candidate
+		var cvExtractedText string
+		var cvProfileJSON string
+		var cvProcessedAt sql.NullTime
+		if err := rows.Scan(&c.Source, &c.ID, &c.ApplicationID, &c.JobID, &c.OpeningTitle,
+			&c.Name, &c.Email, &c.Phone, &c.Location, &c.Track, &c.CurrentRole, &c.DesiredRoles,
+			&c.Status, &c.CVProcessingStatus, &c.CVProcessingError, &c.CVSummary,
+			&cvExtractedText, &cvProfileJSON, &c.CreatedAt, &cvProcessedAt); err != nil {
+			return nil, 0, err
+		}
+		c.CVSearchExcerpt = cvSearchExcerpt(f.Query, c.CVSummary, cvExtractedText)
+		c.CVProfile = parseCVProfileJSON(cvProfileJSON)
+		if cvProcessedAt.Valid {
+			c.CVProcessedAt = &cvProcessedAt.Time
+		}
+		candidates = append(candidates, c)
+	}
+	return candidates, total, rows.Err()
+}
+
+func candidateFilterWhere(f domain.CandidateFilter) ([]string, []any) {
+	where := []string{"1=1"}
+	args := make([]any, 0)
+	if source := strings.TrimSpace(f.Source); source != "" && source != "all" {
+		where = append(where, "source = ?")
+		args = append(args, source)
+	}
+	if status := strings.TrimSpace(f.CVStatus); status != "" && status != "all" {
+		where = append(where, "cv_processing_status = ?")
+		args = append(args, status)
+	}
+	if q := strings.TrimSpace(f.Query); q != "" {
+		for _, term := range searchTerms(q) {
+			where = append(where, `LOWER(CONCAT_WS(' ', name, email, phone, location, opening_title, track, current_role, desired_roles, status, cv_summary, cv_extracted_text, cv_profile_json)) LIKE ?`)
+			args = append(args, "%"+strings.ToLower(term)+"%")
+		}
+	}
+	return where, args
+}
+
+func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) ([]domain.CVJob, error) {
+	where, args := candidateFilterWhere(f)
+	where = append(where, "cv_key <> ''")
+
+	limit := int(f.Limit)
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 250 {
+		limit = 250
+	}
+
+	sqlStr := fmt.Sprintf(`
+		SELECT source, id, name, email, role, cv_key, cv_processing_status, cv_processing_error,
+		       cv_summary, cv_profile_json, created_at, cv_processed_at
+		  FROM (
+			SELECT 'career' AS source,
+			       a.id,
+			       a.name,
+			       a.email,
+			       COALESCE(c.title, '') AS role,
+			       COALESCE(a.cv_key, '') AS cv_key,
+			       COALESCE(a.cv_processing_status, 'pending') AS cv_processing_status,
+			       COALESCE(a.cv_processing_error, '') AS cv_processing_error,
+			       COALESCE(a.cv_summary, '') AS cv_summary,
+			       COALESCE(a.cv_profile_json, '') AS cv_profile_json,
+			       a.created_at,
+			       a.cv_processed_at,
+			       COALESCE(a.cv_extracted_text, '') AS cv_extracted_text,
+			       COALESCE(a.phone, '') AS phone,
+			       COALESCE(a.location, '') AS location,
+			       COALESCE(a.status, 'new') AS status,
+			       COALESCE(c.title, '') AS opening_title,
+			       '' AS track,
+			       '' AS current_role,
+			       '' AS desired_roles
+			  FROM voxire_career_applications a
+			  LEFT JOIN careers c ON c.id = a.job_id
+			 WHERE c.owner_id = ?
+			UNION ALL
+			SELECT 'talent' AS source,
+			       t.id,
+			       t.full_name AS name,
+			       t.email,
+			       COALESCE(NULLIF(t.current_role, ''), NULLIF(t.track, ''), 'Talent pool') AS role,
+			       COALESCE(t.cv_key, '') AS cv_key,
+			       COALESCE(t.cv_processing_status, 'pending') AS cv_processing_status,
+			       COALESCE(t.cv_processing_error, '') AS cv_processing_error,
+			       COALESCE(t.cv_summary, '') AS cv_summary,
+			       COALESCE(t.cv_profile_json, '') AS cv_profile_json,
+			       t.created_at,
+			       t.cv_processed_at,
+			       COALESCE(t.cv_extracted_text, '') AS cv_extracted_text,
+			       COALESCE(t.phone, '') AS phone,
+			       COALESCE(t.country_of_residence, '') AS location,
+			       COALESCE(t.status, 'new') AS status,
+			       'Talent pool' AS opening_title,
+			       COALESCE(t.track, '') AS track,
+			       COALESCE(t.current_role, '') AS current_role,
+			       COALESCE(t.desired_roles, '') AS desired_roles
+			  FROM voxhire_talent_applications t
+		  ) cv_jobs
+		 WHERE %s
+		 ORDER BY
+		   CASE cv_processing_status WHEN 'error' THEN 0 WHEN 'pending' THEN 1 ELSE 2 END,
+		   created_at ASC
+		 LIMIT ?`, strings.Join(where, " AND "))
+
+	queryArgs := append([]any{voxhireCareerOwnerID}, args...)
+	queryArgs = append(queryArgs, limit)
+	rows, err := r.db.QueryContext(ctx, sqlStr, queryArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	jobs := make([]domain.CVJob, 0, limit)
+	for rows.Next() {
+		var job domain.CVJob
+		var cvProfileJSON string
+		var cvProcessedAt sql.NullTime
+		if err := rows.Scan(&job.Source, &job.ID, &job.Name, &job.Email, &job.Role, &job.CVKey,
+			&job.CVProcessingStatus, &job.CVProcessingError, &job.CVSummary, &cvProfileJSON,
+			&job.CreatedAt, &cvProcessedAt); err != nil {
+			return nil, err
+		}
+		job.CVProfile = parseCVProfileJSON(cvProfileJSON)
+		if cvProcessedAt.Valid {
+			job.CVProcessedAt = &cvProcessedAt.Time
+		}
+		jobs = append(jobs, job)
+	}
+	return jobs, rows.Err()
+}
+
+func (r *Repository) RetryCVProcessing(ctx context.Context, source string, id int64) error {
+	table := ""
+	switch source {
+	case "talent":
+		table = "voxhire_talent_applications"
+	case "career":
+		table = "voxire_career_applications"
+	default:
+		return domain.ErrInvalidInput
+	}
+	res, err := r.db.ExecContext(ctx, fmt.Sprintf(`
+		UPDATE %s
+		   SET cv_processing_status = 'pending',
+		       cv_processing_error = NULL,
+		       cv_extracted_text = NULL,
+		       cv_summary = NULL,
+		       cv_profile_json = NULL,
+		       cv_processed_at = NULL
+		 WHERE id = ?
+		   AND cv_key IS NOT NULL
+		   AND cv_key <> ''`, table), id)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrApplicationNotFound
+	}
+	if source == "career" {
+		_ = r.recordApplicationEvent(ctx, id, "cv_retry", "CV queued for reprocessing", "")
+	}
+	return nil
+}
+
+func (r *Repository) ListTasks(ctx context.Context, status string) ([]domain.Task, error) {
+	where := ""
+	args := make([]any, 0)
+	if status != "" && status != "all" {
+		where = "WHERE t.status = ?"
+		args = append(args, status)
+	}
+	rows, err := r.db.QueryContext(ctx, fmt.Sprintf(`
+		SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, ''), a.name, a.email,
+		       t.title, t.status, t.due_at, t.completed_at, t.created_at
+		  FROM voxhire_follow_up_tasks t
+		  JOIN voxire_career_applications a ON a.id = t.application_id
+		  LEFT JOIN careers c ON c.id = a.job_id
+		  %s
+		 ORDER BY
+		   CASE t.status WHEN 'open' THEN 0 WHEN 'done' THEN 2 ELSE 1 END,
+		   t.due_at IS NULL,
+		   t.due_at ASC,
+		   t.created_at DESC`, where), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tasks := make([]domain.Task, 0)
+	for rows.Next() {
+		task, err := scanTask(rows)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	return tasks, rows.Err()
+}
+
+func (r *Repository) UpsertTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
+	if ok, err := r.applicationExists(ctx, in.ApplicationID); err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, domain.ErrApplicationNotFound
+	}
+
+	status := in.Status
+	if status == "" {
+		status = "open"
+	}
+	query := `
+		INSERT INTO voxhire_follow_up_tasks (application_id, title, status, due_at)
+		VALUES (?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE
+			status = VALUES(status),
+			due_at = VALUES(due_at),
+			completed_at = CASE
+				WHEN VALUES(status) = 'done' THEN COALESCE(completed_at, CURRENT_TIMESTAMP)
+				ELSE NULL
+			END,
+			id = LAST_INSERT_ID(id)`
+	res, err := r.db.ExecContext(ctx, query, in.ApplicationID, in.Title, status, in.DueAt)
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	_ = r.recordApplicationEvent(ctx, in.ApplicationID, "task", "Follow-up task set", in.Title)
+	return r.getTaskByID(ctx, id)
+}
+
+func (r *Repository) UpdateTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
+	res, err := r.db.ExecContext(ctx, `
+		UPDATE voxhire_follow_up_tasks
+		   SET title = CASE WHEN ? <> '' THEN ? ELSE title END,
+		       status = CASE WHEN ? <> '' THEN ? ELSE status END,
+		       due_at = ?,
+		       completed_at = CASE
+		         WHEN ? = 'done' THEN COALESCE(completed_at, CURRENT_TIMESTAMP)
+		         WHEN ? = 'open' THEN NULL
+		         ELSE completed_at
+		       END
+		 WHERE id = ?`,
+		in.Title, in.Title, in.Status, in.Status, in.DueAt, in.Status, in.Status, in.ID)
+	if err != nil {
+		return nil, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if affected == 0 {
+		var exists int
+		if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxhire_follow_up_tasks WHERE id = ?`, in.ID).Scan(&exists); err != nil {
+			return nil, err
+		}
+		if exists == 0 {
+			return nil, domain.ErrApplicationNotFound
+		}
+	}
+	task, err := r.getTaskByID(ctx, in.ID)
+	if err != nil {
+		return nil, err
+	}
+	_ = r.recordApplicationEvent(ctx, task.ApplicationID, "task", "Follow-up task updated", task.Title)
+	return task, nil
+}
+
+func (r *Repository) getTaskByID(ctx context.Context, id int64) (*domain.Task, error) {
+	row := r.db.QueryRowContext(ctx, `
+		SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, ''), a.name, a.email,
+		       t.title, t.status, t.due_at, t.completed_at, t.created_at
+		  FROM voxhire_follow_up_tasks t
+		  JOIN voxire_career_applications a ON a.id = t.application_id
+		  LEFT JOIN careers c ON c.id = a.job_id
+		 WHERE t.id = ?`, id)
+	task, err := scanTask(row)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrApplicationNotFound
+		}
+		return nil, err
+	}
+	return &task, nil
+}
+
+type taskScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanTask(scanner taskScanner) (domain.Task, error) {
+	var task domain.Task
+	var dueAt sql.NullTime
+	var completedAt sql.NullTime
+	if err := scanner.Scan(&task.ID, &task.ApplicationID, &task.JobID, &task.OpeningTitle,
+		&task.CandidateName, &task.CandidateEmail, &task.Title, &task.Status,
+		&dueAt, &completedAt, &task.CreatedAt); err != nil {
+		return task, err
+	}
+	if dueAt.Valid {
+		task.DueAt = &dueAt.Time
+	}
+	if completedAt.Valid {
+		task.CompletedAt = &completedAt.Time
+	}
+	return task, nil
+}
+
+func (r *Repository) ListShortlists(ctx context.Context, jobID int64) ([]domain.Shortlist, error) {
+	where := ""
+	args := make([]any, 0)
+	if jobID > 0 {
+		where = "WHERE s.job_id = ?"
+		args = append(args, jobID)
+	}
+	rows, err := r.db.QueryContext(ctx, fmt.Sprintf(`
+		SELECT s.id, s.job_id, COALESCE(c.title, ''), s.name, s.status,
+		       COALESCE(s.notes, ''), s.created_at, s.updated_at
+		  FROM voxhire_shortlists s
+		  LEFT JOIN careers c ON c.id = s.job_id
+		  %s
+		 ORDER BY s.updated_at DESC`, where), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	shortlists := make([]domain.Shortlist, 0)
+	for rows.Next() {
+		var shortlist domain.Shortlist
+		if err := rows.Scan(&shortlist.ID, &shortlist.JobID, &shortlist.JobTitle, &shortlist.Name,
+			&shortlist.Status, &shortlist.Notes, &shortlist.CreatedAt, &shortlist.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items, err := r.listShortlistItems(ctx, shortlist.ID)
+		if err != nil {
+			return nil, err
+		}
+		shortlist.Items = items
+		shortlists = append(shortlists, shortlist)
+	}
+	return shortlists, rows.Err()
+}
+
+func (r *Repository) CreateShortlist(ctx context.Context, in domain.ShortlistInput) (*domain.Shortlist, error) {
+	res, err := r.db.ExecContext(ctx, `
+		INSERT INTO voxhire_shortlists (job_id, name, status, notes)
+		VALUES (?, ?, ?, ?)`, in.JobID, in.Name, in.Status, nullStr(in.Notes))
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	lists, err := r.ListShortlists(ctx, in.JobID)
+	if err != nil {
+		return nil, err
+	}
+	for _, shortlist := range lists {
+		if shortlist.ID == id {
+			return &shortlist, nil
+		}
+	}
+	return nil, domain.ErrApplicationNotFound
+}
+
+func (r *Repository) AddShortlistItem(ctx context.Context, in domain.ShortlistItemInput) (*domain.ShortlistItem, error) {
+	if ok, err := r.shortlistExists(ctx, in.ShortlistID); err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, domain.ErrApplicationNotFound
+	}
+	if ok, err := r.applicationExists(ctx, in.ApplicationID); err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, domain.ErrApplicationNotFound
+	}
+	res, err := r.db.ExecContext(ctx, `
+		INSERT INTO voxhire_shortlist_items (shortlist_id, application_id, rank, notes)
+		VALUES (?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE
+			rank = VALUES(rank),
+			notes = VALUES(notes),
+			id = LAST_INSERT_ID(id)`, in.ShortlistID, in.ApplicationID, in.Rank, nullStr(in.Notes))
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	item, err := r.getShortlistItemByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	_ = r.recordApplicationEvent(ctx, in.ApplicationID, "shortlist", "Added to shortlist", fmt.Sprintf("Rank %d", item.Rank))
+	return item, nil
+}
+
+func (r *Repository) listShortlistItems(ctx context.Context, shortlistID int64) ([]domain.ShortlistItem, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT i.id, i.shortlist_id, i.application_id, a.name, a.email, COALESCE(a.status, 'new'),
+		       i.rank, COALESCE(i.notes, ''), COALESCE(a.cv_profile_json, ''), i.created_at
+		  FROM voxhire_shortlist_items i
+		  JOIN voxire_career_applications a ON a.id = i.application_id
+		 WHERE i.shortlist_id = ?
+		 ORDER BY i.rank ASC, i.created_at ASC`, shortlistID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]domain.ShortlistItem, 0)
+	for rows.Next() {
+		item, err := scanShortlistItem(rows)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+func (r *Repository) getShortlistItemByID(ctx context.Context, id int64) (*domain.ShortlistItem, error) {
+	row := r.db.QueryRowContext(ctx, `
+		SELECT i.id, i.shortlist_id, i.application_id, a.name, a.email, COALESCE(a.status, 'new'),
+		       i.rank, COALESCE(i.notes, ''), COALESCE(a.cv_profile_json, ''), i.created_at
+		  FROM voxhire_shortlist_items i
+		  JOIN voxire_career_applications a ON a.id = i.application_id
+		 WHERE i.id = ?`, id)
+	item, err := scanShortlistItem(row)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+type shortlistItemScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanShortlistItem(scanner shortlistItemScanner) (domain.ShortlistItem, error) {
+	var item domain.ShortlistItem
+	var profileJSON string
+	if err := scanner.Scan(&item.ID, &item.ShortlistID, &item.ApplicationID, &item.CandidateName,
+		&item.CandidateEmail, &item.Status, &item.Rank, &item.Notes, &profileJSON, &item.CreatedAt); err != nil {
+		return item, err
+	}
+	item.CVProfile = parseCVProfileJSON(profileJSON)
+	return item, nil
+}
+
+func (r *Repository) ListApplicationTimeline(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
+	var createdAt time.Time
+	var cvStatus string
+	var cvError string
+	var cvProcessedAt sql.NullTime
+	var reviewedAt sql.NullTime
+	err := r.db.QueryRowContext(ctx, `
+		SELECT created_at, COALESCE(cv_processing_status, 'pending'), COALESCE(cv_processing_error, ''),
+		       cv_processed_at, reviewed_at
+		  FROM voxire_career_applications
+		 WHERE id = ?`, id).Scan(&createdAt, &cvStatus, &cvError, &cvProcessedAt, &reviewedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrApplicationNotFound
+		}
+		return nil, err
+	}
+
+	events := []domain.TimelineEvent{{
+		Kind:      "application",
+		Title:     "Application submitted",
+		CreatedAt: createdAt,
+	}}
+	if cvProcessedAt.Valid {
+		title := "CV processed"
+		if cvStatus == "error" {
+			title = "CV extraction failed"
+		}
+		events = append(events, domain.TimelineEvent{
+			Kind:      "cv",
+			Title:     title,
+			Detail:    cvError,
+			CreatedAt: cvProcessedAt.Time,
+		})
+	}
+	if reviewedAt.Valid {
+		events = append(events, domain.TimelineEvent{
+			Kind:      "review",
+			Title:     "Recruiter review saved",
+			CreatedAt: reviewedAt.Time,
+		})
+	}
+	extra, err := r.listRecordedApplicationEvents(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	events = append(events, extra...)
+	taskEvents, err := r.listTaskTimelineEvents(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	events = append(events, taskEvents...)
+	shortlistEvents, err := r.listShortlistTimelineEvents(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	events = append(events, shortlistEvents...)
+	sort.SliceStable(events, func(i, j int) bool {
+		return events[i].CreatedAt.After(events[j].CreatedAt)
+	})
+	return events, nil
+}
+
+func (r *Repository) listRecordedApplicationEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT kind, title, COALESCE(detail, ''), created_at
+		  FROM voxhire_application_events
+		 WHERE application_id = ?
+		 ORDER BY created_at DESC`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]domain.TimelineEvent, 0)
+	for rows.Next() {
+		var event domain.TimelineEvent
+		if err := rows.Scan(&event.Kind, &event.Title, &event.Detail, &event.CreatedAt); err != nil {
+			return nil, err
+		}
+		events = append(events, event)
+	}
+	return events, rows.Err()
+}
+
+func (r *Repository) listTaskTimelineEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT title, status, created_at, completed_at
+		  FROM voxhire_follow_up_tasks
+		 WHERE application_id = ?`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]domain.TimelineEvent, 0)
+	for rows.Next() {
+		var title, status string
+		var createdAt time.Time
+		var completedAt sql.NullTime
+		if err := rows.Scan(&title, &status, &createdAt, &completedAt); err != nil {
+			return nil, err
+		}
+		events = append(events, domain.TimelineEvent{Kind: "task", Title: "Task opened", Detail: title, CreatedAt: createdAt})
+		if completedAt.Valid {
+			events = append(events, domain.TimelineEvent{Kind: "task", Title: "Task completed", Detail: title, CreatedAt: completedAt.Time})
+		} else if status != "open" {
+			events[len(events)-1].Title = "Task " + status
+		}
+	}
+	return events, rows.Err()
+}
+
+func (r *Repository) listShortlistTimelineEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT s.name, i.rank, i.created_at
+		  FROM voxhire_shortlist_items i
+		  JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+		 WHERE i.application_id = ?`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]domain.TimelineEvent, 0)
+	for rows.Next() {
+		var name string
+		var rank int
+		var createdAt time.Time
+		if err := rows.Scan(&name, &rank, &createdAt); err != nil {
+			return nil, err
+		}
+		events = append(events, domain.TimelineEvent{
+			Kind:      "shortlist",
+			Title:     "Added to shortlist",
+			Detail:    fmt.Sprintf("%s · rank %d", name, rank),
+			CreatedAt: createdAt,
+		})
+	}
+	return events, rows.Err()
+}
+
+func (r *Repository) applicationExists(ctx context.Context, id int64) (bool, error) {
+	var count int
+	if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxire_career_applications WHERE id = ?`, id).Scan(&count); err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *Repository) shortlistExists(ctx context.Context, id int64) (bool, error) {
+	var count int
+	if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxhire_shortlists WHERE id = ?`, id).Scan(&count); err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *Repository) recordApplicationEvent(ctx context.Context, applicationID int64, kind, title, detail string) error {
+	if applicationID <= 0 || kind == "" || title == "" {
+		return nil
+	}
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO voxhire_application_events (application_id, kind, title, detail)
+		VALUES (?, ?, ?, ?)`, applicationID, kind, title, nullStr(detail))
+	return err
 }
 
 // ListPendingCVProcessingTargets returns stored CVs that have not been
@@ -1044,6 +1849,7 @@ func (r *Repository) UpdateCVProcessingResult(ctx context.Context, result domain
 	if status == "" {
 		status = "processed"
 	}
+	profileJSON := marshalCVProfileJSON(result.Profile)
 
 	_, err := r.db.ExecContext(ctx, fmt.Sprintf(`
 		UPDATE %s
@@ -1051,10 +1857,30 @@ func (r *Repository) UpdateCVProcessingResult(ctx context.Context, result domain
 		       cv_processing_error = ?,
 		       cv_extracted_text = ?,
 		       cv_summary = ?,
+		       cv_profile_json = ?,
 		       cv_processed_at = CURRENT_TIMESTAMP
 		 WHERE id = ?
-	`, table), status, nullStr(result.Error), nullStr(result.ExtractedText), nullStr(result.Summary), result.ID)
+	`, table), status, nullStr(result.Error), nullStr(result.ExtractedText), nullStr(result.Summary), nullStr(profileJSON), result.ID)
 	return err
+}
+
+func marshalCVProfileJSON(profile domain.CVProfile) string {
+	raw, err := json.Marshal(profile)
+	if err != nil || string(raw) == "{}" {
+		return ""
+	}
+	return string(raw)
+}
+
+func parseCVProfileJSON(raw string) domain.CVProfile {
+	var profile domain.CVProfile
+	if strings.TrimSpace(raw) == "" {
+		return profile
+	}
+	if err := json.Unmarshal([]byte(raw), &profile); err != nil {
+		return domain.CVProfile{}
+	}
+	return profile
 }
 
 func nullStr(s string) any {

@@ -204,6 +204,28 @@ func (s *Service) ListApplications(ctx context.Context, f domain.ApplicationFilt
 	return s.repo.ListApplications(ctx, f)
 }
 
+func (s *Service) ListCandidates(ctx context.Context, f domain.CandidateFilter) ([]domain.Candidate, int64, error) {
+	f.Query = strings.TrimSpace(f.Query)
+	f.Source = strings.ToLower(strings.TrimSpace(f.Source))
+	f.CVStatus = strings.ToLower(strings.TrimSpace(f.CVStatus))
+	return s.repo.ListCandidates(ctx, f)
+}
+
+func (s *Service) ListCVJobs(ctx context.Context, f domain.CandidateFilter) ([]domain.CVJob, error) {
+	f.Query = strings.TrimSpace(f.Query)
+	f.Source = strings.ToLower(strings.TrimSpace(f.Source))
+	f.CVStatus = strings.ToLower(strings.TrimSpace(f.CVStatus))
+	return s.repo.ListCVJobs(ctx, f)
+}
+
+func (s *Service) RetryCVProcessing(ctx context.Context, source string, id int64) error {
+	source = strings.ToLower(strings.TrimSpace(source))
+	if id <= 0 || (source != "career" && source != "talent") {
+		return domain.ErrInvalidInput
+	}
+	return s.repo.RetryCVProcessing(ctx, source, id)
+}
+
 // UpdateApplicationStatus changes an application's status (e.g. marking
 // it "viewed" when HR opens it).
 func (s *Service) UpdateApplicationStatus(ctx context.Context, id int64, status string) error {
@@ -226,7 +248,75 @@ func (s *Service) UpdateApplicationReview(ctx context.Context, id int64, in doma
 	if in.ReviewRating < 0 || in.ReviewRating > 5 {
 		return domain.ErrInvalidInput
 	}
-	return s.repo.UpdateApplicationReview(ctx, id, in)
+	if err := s.repo.UpdateApplicationReview(ctx, id, in); err != nil {
+		return err
+	}
+	if in.NextStep != "" {
+		_, err := s.repo.UpsertTask(ctx, domain.TaskInput{
+			ApplicationID: id,
+			Title:         in.NextStep,
+			Status:        "open",
+		})
+		return err
+	}
+	return nil
+}
+
+func (s *Service) ListApplicationTimeline(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
+	if id <= 0 {
+		return nil, domain.ErrInvalidInput
+	}
+	return s.repo.ListApplicationTimeline(ctx, id)
+}
+
+func (s *Service) ListTasks(ctx context.Context, status string) ([]domain.Task, error) {
+	return s.repo.ListTasks(ctx, strings.ToLower(strings.TrimSpace(status)))
+}
+
+func (s *Service) UpsertTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
+	in.Title = strings.TrimSpace(in.Title)
+	in.Status = strings.ToLower(strings.TrimSpace(in.Status))
+	if in.Status == "" {
+		in.Status = "open"
+	}
+	if in.ApplicationID <= 0 || in.Title == "" {
+		return nil, domain.ErrInvalidInput
+	}
+	return s.repo.UpsertTask(ctx, in)
+}
+
+func (s *Service) UpdateTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
+	in.Title = strings.TrimSpace(in.Title)
+	in.Status = strings.ToLower(strings.TrimSpace(in.Status))
+	if in.ID <= 0 || (in.Status == "" && in.Title == "" && in.DueAt == nil) {
+		return nil, domain.ErrInvalidInput
+	}
+	return s.repo.UpdateTask(ctx, in)
+}
+
+func (s *Service) ListShortlists(ctx context.Context, jobID int64) ([]domain.Shortlist, error) {
+	return s.repo.ListShortlists(ctx, jobID)
+}
+
+func (s *Service) CreateShortlist(ctx context.Context, in domain.ShortlistInput) (*domain.Shortlist, error) {
+	in.Name = strings.TrimSpace(in.Name)
+	in.Status = strings.ToLower(strings.TrimSpace(in.Status))
+	in.Notes = strings.TrimSpace(in.Notes)
+	if in.Status == "" {
+		in.Status = "draft"
+	}
+	if in.JobID <= 0 || in.Name == "" {
+		return nil, domain.ErrInvalidInput
+	}
+	return s.repo.CreateShortlist(ctx, in)
+}
+
+func (s *Service) AddShortlistItem(ctx context.Context, in domain.ShortlistItemInput) (*domain.ShortlistItem, error) {
+	in.Notes = strings.TrimSpace(in.Notes)
+	if in.ShortlistID <= 0 || in.ApplicationID <= 0 {
+		return nil, domain.ErrInvalidInput
+	}
+	return s.repo.AddShortlistItem(ctx, in)
 }
 
 // GetApplicationCVURL returns a short-lived presigned URL to download an

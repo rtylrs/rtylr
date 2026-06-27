@@ -67,6 +67,16 @@ func (m *mockRepo) ListApplications(_ context.Context, _ domain.ApplicationFilte
 	return nil, 0, nil
 }
 
+func (m *mockRepo) ListCandidates(_ context.Context, _ domain.CandidateFilter) ([]domain.Candidate, int64, error) {
+	return nil, 0, nil
+}
+
+func (m *mockRepo) ListCVJobs(_ context.Context, _ domain.CandidateFilter) ([]domain.CVJob, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) RetryCVProcessing(_ context.Context, _ string, _ int64) error { return nil }
+
 func (m *mockRepo) UpdateApplicationStatus(_ context.Context, _ int64, _ string) error { return nil }
 
 func (m *mockRepo) UpdateApplicationReview(_ context.Context, id int64, in domain.ApplicationReviewInput) error {
@@ -76,6 +86,32 @@ func (m *mockRepo) UpdateApplicationReview(_ context.Context, id int64, in domai
 }
 
 func (m *mockRepo) GetApplicationCVKey(_ context.Context, _ int64) (string, error) { return "", nil }
+
+func (m *mockRepo) ListApplicationTimeline(_ context.Context, _ int64) ([]domain.TimelineEvent, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) ListTasks(_ context.Context, _ string) ([]domain.Task, error) { return nil, nil }
+
+func (m *mockRepo) UpsertTask(_ context.Context, in domain.TaskInput) (*domain.Task, error) {
+	return &domain.Task{ApplicationID: in.ApplicationID, Title: in.Title, Status: in.Status}, nil
+}
+
+func (m *mockRepo) UpdateTask(_ context.Context, in domain.TaskInput) (*domain.Task, error) {
+	return &domain.Task{ID: in.ID, ApplicationID: in.ApplicationID, Title: in.Title, Status: in.Status}, nil
+}
+
+func (m *mockRepo) ListShortlists(_ context.Context, _ int64) ([]domain.Shortlist, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) CreateShortlist(_ context.Context, in domain.ShortlistInput) (*domain.Shortlist, error) {
+	return &domain.Shortlist{ID: 1, JobID: in.JobID, Name: in.Name, Status: in.Status}, nil
+}
+
+func (m *mockRepo) AddShortlistItem(_ context.Context, in domain.ShortlistItemInput) (*domain.ShortlistItem, error) {
+	return &domain.ShortlistItem{ID: 1, ShortlistID: in.ShortlistID, ApplicationID: in.ApplicationID, Rank: in.Rank, Notes: in.Notes}, nil
+}
 
 func (m *mockRepo) CreateCareerApplication(_ context.Context, _ domain.CareerApplicationInput) (int64, error) {
 	return 0, nil

@@ -75,6 +75,7 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 			cv_processing_error  TEXT,
 			cv_extracted_text    MEDIUMTEXT,
 			cv_summary           TEXT,
+			cv_profile_json      TEXT,
 			cv_processed_at      TIMESTAMP NULL,
 			status               VARCHAR(32) NOT NULL DEFAULT 'new',
 			created_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -96,11 +97,13 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_processing_error", "cv_processing_error TEXT")
 	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_extracted_text", "cv_extracted_text MEDIUMTEXT")
 	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_summary", "cv_summary TEXT")
+	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_profile_json", "cv_profile_json TEXT")
 	ensureColumn(ctx, db, "voxhire_talent_applications", "cv_processed_at", "cv_processed_at TIMESTAMP NULL")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_processing_status", "cv_processing_status VARCHAR(32) NOT NULL DEFAULT 'pending'")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_processing_error", "cv_processing_error TEXT")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_extracted_text", "cv_extracted_text MEDIUMTEXT")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_summary", "cv_summary TEXT")
+	ensureColumn(ctx, db, "voxire_career_applications", "cv_profile_json", "cv_profile_json TEXT")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_processed_at", "cv_processed_at TIMESTAMP NULL")
 	ensureColumn(ctx, db, "voxire_career_applications", "review_rating", "review_rating TINYINT NOT NULL DEFAULT 0")
 	ensureColumn(ctx, db, "voxire_career_applications", "review_notes", "review_notes TEXT")
@@ -118,6 +121,69 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 		)
 	`); err != nil {
 		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_admins", logger.Error(err))
+	}
+
+	if _, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS voxhire_application_events (
+			id             BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			application_id BIGINT NOT NULL,
+			admin_id       BIGINT,
+			kind           VARCHAR(64) NOT NULL,
+			title          VARCHAR(255) NOT NULL,
+			detail         TEXT,
+			created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			INDEX idx_voxhire_events_application (application_id),
+			INDEX idx_voxhire_events_created (created_at)
+		)
+	`); err != nil {
+		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_application_events", logger.Error(err))
+	}
+
+	if _, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS voxhire_follow_up_tasks (
+			id             BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			application_id BIGINT NOT NULL,
+			title          VARCHAR(255) NOT NULL,
+			status         VARCHAR(32) NOT NULL DEFAULT 'open',
+			due_at         TIMESTAMP NULL,
+			completed_at   TIMESTAMP NULL,
+			created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			INDEX idx_voxhire_tasks_application (application_id),
+			INDEX idx_voxhire_tasks_status_due (status, due_at),
+			UNIQUE KEY uk_voxhire_task_application_title (application_id, title)
+		)
+	`); err != nil {
+		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_follow_up_tasks", logger.Error(err))
+	}
+
+	if _, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS voxhire_shortlists (
+			id         BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			job_id     BIGINT NOT NULL,
+			name       VARCHAR(255) NOT NULL,
+			status     VARCHAR(32) NOT NULL DEFAULT 'draft',
+			notes      TEXT,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			INDEX idx_voxhire_shortlists_job (job_id)
+		)
+	`); err != nil {
+		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_shortlists", logger.Error(err))
+	}
+
+	if _, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS voxhire_shortlist_items (
+			id             BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			shortlist_id   BIGINT NOT NULL,
+			application_id BIGINT NOT NULL,
+			rank           INT NOT NULL DEFAULT 0,
+			notes          TEXT,
+			created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			INDEX idx_voxhire_shortlist_items_shortlist (shortlist_id),
+			UNIQUE KEY uk_voxhire_shortlist_application (shortlist_id, application_id)
+		)
+	`); err != nil {
+		logger.Ctx(ctx).Error("Failed to auto-migrate voxhire_shortlist_items", logger.Error(err))
 	}
 }
 

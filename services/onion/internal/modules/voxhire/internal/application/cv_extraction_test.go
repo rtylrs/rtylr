@@ -44,6 +44,12 @@ func TestProcessCVTargetExtractsDOCXText(t *testing.T) {
 	if !strings.Contains(result.Summary, "payroll") {
 		t.Fatalf("summary = %q", result.Summary)
 	}
+	if len(result.Profile.Functions) == 0 || !containsString(result.Profile.Functions, "Operations") {
+		t.Fatalf("profile functions = %#v", result.Profile.Functions)
+	}
+	if !containsString(result.Profile.Industries, "Retail") {
+		t.Fatalf("profile industries = %#v", result.Profile.Industries)
+	}
 }
 
 func TestProcessPendingCVsMarksTargetsErroredWhenStorageUnavailable(t *testing.T) {
@@ -103,6 +109,15 @@ func TestTruncateBytesDoesNotSplitRunes(t *testing.T) {
 	if got != "abc" {
 		t.Fatalf("truncateBytes split a rune: %q", got)
 	}
+}
+
+func containsString(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func newTestDOCX(t *testing.T, text string) []byte {
