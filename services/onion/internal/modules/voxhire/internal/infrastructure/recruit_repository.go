@@ -672,8 +672,8 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	         COALESCE(work_history,''), COALESCE(education,''), COALESCE(experience_summary,''),
 	         COALESCE(cover_letter,''), (cv_key IS NOT NULL AND cv_key <> '') AS has_cv,
 	         COALESCE(cv_processing_status,'pending'), COALESCE(cv_processing_error,''), COALESCE(cv_summary,''),
-	         cv_processed_at, COALESCE(review_rating,0), COALESCE(review_notes,''), COALESCE(next_step,''),
-	         reviewed_at, created_at`
+	         COALESCE(cv_extracted_text,''), cv_processed_at, COALESCE(review_rating,0),
+	         COALESCE(review_notes,''), COALESCE(next_step,''), reviewed_at, created_at`
 
 	base := sq.Select().From("voxire_career_applications").Where(sq.Eq{"job_id": f.JobID})
 
@@ -681,15 +681,7 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 		base = base.Where(sq.Like{"location": "%" + loc + "%"})
 	}
 	if q := strings.TrimSpace(f.Query); q != "" {
-		like := "%" + q + "%"
-		// Raw substring search across the experience-bearing columns.
-		base = base.Where(sq.Or{
-			sq.Like{"work_history": like},
-			sq.Like{"experience_summary": like},
-			sq.Like{"cover_letter": like},
-			sq.Like{"cv_extracted_text": like},
-			sq.Like{"name": like},
-		})
+		base = base.Where(applicationSearchPredicate(q))
 	}
 
 	// Total count for pagination.
@@ -735,15 +727,17 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	apps := make([]domain.Application, 0)
 	for rows.Next() {
 		var a domain.Application
+		var cvExtractedText string
 		var cvProcessedAt sql.NullTime
 		var reviewedAt sql.NullTime
 		if err := rows.Scan(&a.ID, &a.JobID, &a.Name, &a.Email, &a.Phone, &a.Location,
 			&a.SalaryExpectation, &a.SalaryCurrency, &a.Status, &a.WorkHistory, &a.Education,
 			&a.ExperienceSummary, &a.CoverLetter, &a.HasCV, &a.CVProcessingStatus, &a.CVProcessingError,
-			&a.CVSummary, &cvProcessedAt, &a.ReviewRating, &a.ReviewNotes, &a.NextStep, &reviewedAt,
-			&a.CreatedAt); err != nil {
+			&a.CVSummary, &cvExtractedText, &cvProcessedAt, &a.ReviewRating, &a.ReviewNotes,
+			&a.NextStep, &reviewedAt, &a.CreatedAt); err != nil {
 			return nil, 0, err
 		}
+		a.CVSearchExcerpt = cvSearchExcerpt(f.Query, a.CVSummary, cvExtractedText)
 		if cvProcessedAt.Valid {
 			a.CVProcessedAt = &cvProcessedAt.Time
 		}
@@ -753,6 +747,113 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 		apps = append(apps, a)
 	}
 	return apps, total, rows.Err()
+}
+
+func cvSearchExcerpt(query, summary, extractedText string) string {
+	if excerpt := searchExcerpt(summary, query, 90); excerpt != "" {
+		return excerpt
+	}
+	if excerpt := searchExcerpt(extractedText, query, 90); excerpt != "" {
+		return excerpt
+	}
+	for _, term := range searchTerms(query) {
+		if excerpt := searchExcerpt(summary, term, 90); excerpt != "" {
+			return excerpt
+		}
+		if excerpt := searchExcerpt(extractedText, term, 90); excerpt != "" {
+			return excerpt
+		}
+	}
+	return ""
+}
+
+func applicationSearchPredicate(query string) sq.Sqlizer {
+	raw := strings.TrimSpace(query)
+	exact := applicationSearchLike("%" + raw + "%")
+	terms := searchTerms(raw)
+	if len(terms) <= 1 {
+		return exact
+	}
+
+	allTerms := make(sq.And, 0, len(terms))
+	for _, term := range terms {
+		allTerms = append(allTerms, applicationSearchLike("%"+term+"%"))
+	}
+	return sq.Or{exact, allTerms}
+}
+
+func applicationSearchLike(pattern string) sq.Or {
+	return sq.Or{
+		sq.Like{"name": pattern},
+		sq.Like{"email": pattern},
+		sq.Like{"phone": pattern},
+		sq.Like{"location": pattern},
+		sq.Like{"work_history": pattern},
+		sq.Like{"education": pattern},
+		sq.Like{"experience_summary": pattern},
+		sq.Like{"cover_letter": pattern},
+		sq.Like{"cv_summary": pattern},
+		sq.Like{"cv_extracted_text": pattern},
+		sq.Like{"review_notes": pattern},
+		sq.Like{"next_step": pattern},
+	}
+}
+
+func searchTerms(query string) []string {
+	parts := strings.FieldsFunc(query, func(r rune) bool {
+		return r == ',' || r == ';' || r == '\n' || r == '\t' || r == ' '
+	})
+	terms := make([]string, 0, len(parts))
+	seen := make(map[string]struct{}, len(parts))
+	for _, part := range parts {
+		term := strings.TrimSpace(part)
+		if term == "" {
+			continue
+		}
+		key := strings.ToLower(term)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		terms = append(terms, term)
+	}
+	return terms
+}
+
+func searchExcerpt(text, query string, radius int) string {
+	clean := strings.Join(strings.Fields(text), " ")
+	q := strings.TrimSpace(query)
+	if clean == "" || q == "" {
+		return ""
+	}
+
+	lowerClean := strings.ToLower(clean)
+	lowerQuery := strings.ToLower(q)
+	idx := strings.Index(lowerClean, lowerQuery)
+	if idx < 0 {
+		return ""
+	}
+
+	runes := []rune(clean)
+	matchStart := len([]rune(clean[:idx]))
+	matchLen := len([]rune(clean[idx : idx+len(q)]))
+	start := matchStart - radius
+	if start < 0 {
+		start = 0
+	}
+	end := matchStart + matchLen + radius
+	if end > len(runes) {
+		end = len(runes)
+	}
+
+	excerpt := string(runes[start:end])
+	if start > 0 {
+		excerpt = "..." + excerpt
+	}
+	if end < len(runes) {
+		excerpt += "..."
+	}
+	return excerpt
 }
 
 // UpdateApplicationStatus sets the status of a single application

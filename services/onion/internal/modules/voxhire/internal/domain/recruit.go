@@ -99,6 +99,7 @@ type Application struct {
 	CVProcessingStatus string     `json:"cv_processing_status"`
 	CVProcessingError  string     `json:"cv_processing_error"`
 	CVSummary          string     `json:"cv_summary"`
+	CVSearchExcerpt    string     `json:"cv_search_excerpt,omitempty"`
 	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
 	ReviewRating       int        `json:"review_rating"`
 	ReviewNotes        string     `json:"review_notes"`

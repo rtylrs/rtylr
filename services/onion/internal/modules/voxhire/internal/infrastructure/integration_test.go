@@ -2,7 +2,9 @@ package infrastructure_test
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/infrastructure"
@@ -164,6 +166,54 @@ func TestVoxhire_AutoMigrate_TablesExist(t *testing.T) {
 	}
 	if err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM voxhire_talent_applications").Scan(&count); err != nil {
 		t.Fatalf("voxhire_talent_applications not accessible: %v", err)
+	}
+}
+
+func TestVoxhire_ListApplications_SearchesExtractedCVText(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	jobID := time.Now().UnixNano()
+
+	id, err := repo.CreateCareerApplication(ctx, domain.CareerApplicationInput{
+		JobID:             jobID,
+		Name:              "CV Search Candidate",
+		Email:             "cv-search@example.com",
+		Location:          "Beirut",
+		ExperienceSummary: "General operations profile",
+		CVKey:             "voxhire/applications/cv-search/resume.pdf",
+	})
+	if err != nil {
+		t.Fatalf("CreateCareerApplication: %v", err)
+	}
+
+	_, err = db.ExecContext(ctx, `
+		UPDATE voxire_career_applications
+		   SET cv_processing_status = 'processed',
+		       cv_summary = 'Clinic operations and staffing background',
+		       cv_extracted_text = 'Led oncology clinic scheduling, patient intake, and insurance coordination.'
+		 WHERE id = ?`, id)
+	if err != nil {
+		t.Fatalf("seed extracted cv text: %v", err)
+	}
+
+	apps, total, err := repo.ListApplications(ctx, domain.ApplicationFilter{
+		JobID: jobID,
+		Query: "oncology insurance",
+		Limit: 20,
+	})
+	if err != nil {
+		t.Fatalf("ListApplications: %v", err)
+	}
+	if total != 1 || len(apps) != 1 {
+		t.Fatalf("expected one CV-text match, got total=%d len=%d", total, len(apps))
+	}
+	if apps[0].ID != id {
+		t.Fatalf("expected application id %d, got %d", id, apps[0].ID)
+	}
+	excerpt := strings.ToLower(apps[0].CVSearchExcerpt)
+	if !strings.Contains(excerpt, "oncology") || !strings.Contains(excerpt, "insurance") {
+		t.Fatalf("expected CV excerpt to include search phrase, got %q", apps[0].CVSearchExcerpt)
 	}
 }
 
