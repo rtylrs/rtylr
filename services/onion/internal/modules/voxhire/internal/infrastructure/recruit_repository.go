@@ -670,7 +670,10 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	cols := `id, job_id, name, email, COALESCE(phone,''), COALESCE(location,''),
 	         COALESCE(salary_expectation,0), COALESCE(salary_currency,'USD'), status,
 	         COALESCE(work_history,''), COALESCE(education,''), COALESCE(experience_summary,''),
-	         COALESCE(cover_letter,''), (cv_key IS NOT NULL AND cv_key <> '') AS has_cv, created_at`
+	         COALESCE(cover_letter,''), (cv_key IS NOT NULL AND cv_key <> '') AS has_cv,
+	         COALESCE(cv_processing_status,'pending'), COALESCE(cv_processing_error,''), COALESCE(cv_summary,''),
+	         cv_processed_at, COALESCE(review_rating,0), COALESCE(review_notes,''), COALESCE(next_step,''),
+	         reviewed_at, created_at`
 
 	base := sq.Select().From("voxire_career_applications").Where(sq.Eq{"job_id": f.JobID})
 
@@ -732,10 +735,20 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	apps := make([]domain.Application, 0)
 	for rows.Next() {
 		var a domain.Application
+		var cvProcessedAt sql.NullTime
+		var reviewedAt sql.NullTime
 		if err := rows.Scan(&a.ID, &a.JobID, &a.Name, &a.Email, &a.Phone, &a.Location,
 			&a.SalaryExpectation, &a.SalaryCurrency, &a.Status, &a.WorkHistory, &a.Education,
-			&a.ExperienceSummary, &a.CoverLetter, &a.HasCV, &a.CreatedAt); err != nil {
+			&a.ExperienceSummary, &a.CoverLetter, &a.HasCV, &a.CVProcessingStatus, &a.CVProcessingError,
+			&a.CVSummary, &cvProcessedAt, &a.ReviewRating, &a.ReviewNotes, &a.NextStep, &reviewedAt,
+			&a.CreatedAt); err != nil {
 			return nil, 0, err
+		}
+		if cvProcessedAt.Valid {
+			a.CVProcessedAt = &cvProcessedAt.Time
+		}
+		if reviewedAt.Valid {
+			a.ReviewedAt = &reviewedAt.Time
 		}
 		apps = append(apps, a)
 	}
@@ -756,6 +769,46 @@ func (r *Repository) UpdateApplicationStatus(ctx context.Context, id int64, stat
 		return err
 	}
 	if affected == 0 {
+		var exists int
+		if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxire_career_applications WHERE id = ?`, id).Scan(&exists); err != nil {
+			return err
+		}
+		if exists > 0 {
+			return nil
+		}
+		return domain.ErrApplicationNotFound
+	}
+	return nil
+}
+
+// UpdateApplicationReview stores recruiter-owned review state for a
+// candidate application. Status is optional; an empty status preserves the
+// current pipeline state.
+func (r *Repository) UpdateApplicationReview(ctx context.Context, id int64, in domain.ApplicationReviewInput) error {
+	res, err := r.db.ExecContext(ctx, `
+		UPDATE voxire_career_applications
+		   SET status = CASE WHEN ? <> '' THEN ? ELSE status END,
+		       review_rating = ?,
+		       review_notes = ?,
+		       next_step = ?,
+		       reviewed_at = CURRENT_TIMESTAMP
+		 WHERE id = ?
+	`, in.Status, in.Status, in.ReviewRating, nullStr(in.ReviewNotes), nullStr(in.NextStep), id)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		var exists int
+		if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxire_career_applications WHERE id = ?`, id).Scan(&exists); err != nil {
+			return err
+		}
+		if exists > 0 {
+			return nil
+		}
 		return domain.ErrApplicationNotFound
 	}
 	return nil

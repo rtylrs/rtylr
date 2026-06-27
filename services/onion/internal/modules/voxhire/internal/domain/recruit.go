@@ -82,21 +82,38 @@ type CareerInput struct {
 // Application is the HR-panel view of a candidate application, read from
 // voxire_career_applications.
 type Application struct {
-	ID                int64     `json:"id"`
-	JobID             int64     `json:"job_id"`
-	Name              string    `json:"name"`
-	Email             string    `json:"email"`
-	Phone             string    `json:"phone"`
-	Location          string    `json:"location"`
-	SalaryExpectation float64   `json:"salary_expectation"`
-	SalaryCurrency    string    `json:"salary_currency"`
-	Status            string    `json:"status"`
-	WorkHistory       string    `json:"work_history"`
-	Education         string    `json:"education"`
-	ExperienceSummary string    `json:"experience_summary"`
-	CoverLetter       string    `json:"cover_letter"`
-	HasCV             bool      `json:"has_cv"`
-	CreatedAt         time.Time `json:"created_at"`
+	ID                 int64      `json:"id"`
+	JobID              int64      `json:"job_id"`
+	Name               string     `json:"name"`
+	Email              string     `json:"email"`
+	Phone              string     `json:"phone"`
+	Location           string     `json:"location"`
+	SalaryExpectation  float64    `json:"salary_expectation"`
+	SalaryCurrency     string     `json:"salary_currency"`
+	Status             string     `json:"status"`
+	WorkHistory        string     `json:"work_history"`
+	Education          string     `json:"education"`
+	ExperienceSummary  string     `json:"experience_summary"`
+	CoverLetter        string     `json:"cover_letter"`
+	HasCV              bool       `json:"has_cv"`
+	CVProcessingStatus string     `json:"cv_processing_status"`
+	CVProcessingError  string     `json:"cv_processing_error"`
+	CVSummary          string     `json:"cv_summary"`
+	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
+	ReviewRating       int        `json:"review_rating"`
+	ReviewNotes        string     `json:"review_notes"`
+	NextStep           string     `json:"next_step"`
+	ReviewedAt         *time.Time `json:"reviewed_at,omitempty"`
+	CreatedAt          time.Time  `json:"created_at"`
+}
+
+// ApplicationReviewInput is the recruiter-owned review state for a
+// candidate application.
+type ApplicationReviewInput struct {
+	Status       string
+	ReviewRating int
+	ReviewNotes  string
+	NextStep     string
 }
 
 // ApplicationFilter controls the admin applications list query.
@@ -104,7 +121,7 @@ type ApplicationFilter struct {
 	JobID    int64
 	Sort     string // "recent" | "salary_asc" | "salary_desc"
 	Location string // substring match on location
-	Query    string // experience search over work history / summary / cover letter
+	Query    string // search over application fields and extracted CV text
 	Limit    int32
 	Offset   int32
 }

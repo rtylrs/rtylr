@@ -214,6 +214,21 @@ func (s *Service) UpdateApplicationStatus(ctx context.Context, id int64, status 
 	return s.repo.UpdateApplicationStatus(ctx, id, status)
 }
 
+// UpdateApplicationReview stores HR review state such as rating, notes,
+// next step, and optionally the current pipeline status.
+func (s *Service) UpdateApplicationReview(ctx context.Context, id int64, in domain.ApplicationReviewInput) error {
+	if id <= 0 {
+		return domain.ErrInvalidInput
+	}
+	in.Status = strings.ToLower(strings.TrimSpace(in.Status))
+	in.ReviewNotes = strings.TrimSpace(in.ReviewNotes)
+	in.NextStep = strings.TrimSpace(in.NextStep)
+	if in.ReviewRating < 0 || in.ReviewRating > 5 {
+		return domain.ErrInvalidInput
+	}
+	return s.repo.UpdateApplicationReview(ctx, id, in)
+}
+
 // GetApplicationCVURL returns a short-lived presigned URL to download an
 // application's CV.
 func (s *Service) GetApplicationCVURL(ctx context.Context, id int64) (string, error) {

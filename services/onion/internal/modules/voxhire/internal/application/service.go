@@ -34,6 +34,7 @@ type repository interface {
 	SetCareerActive(ctx context.Context, id int64, active bool) (*domain.Opening, error)
 	ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error)
 	UpdateApplicationStatus(ctx context.Context, id int64, status string) error
+	UpdateApplicationReview(ctx context.Context, id int64, in domain.ApplicationReviewInput) error
 	GetApplicationCVKey(ctx context.Context, id int64) (string, error)
 	CreateCareerApplication(ctx context.Context, in domain.CareerApplicationInput) (int64, error)
 	ListPendingCVProcessingTargets(ctx context.Context, limit int) ([]domain.CVProcessingTarget, error)

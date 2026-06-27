@@ -102,6 +102,10 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_extracted_text", "cv_extracted_text MEDIUMTEXT")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_summary", "cv_summary TEXT")
 	ensureColumn(ctx, db, "voxire_career_applications", "cv_processed_at", "cv_processed_at TIMESTAMP NULL")
+	ensureColumn(ctx, db, "voxire_career_applications", "review_rating", "review_rating TINYINT NOT NULL DEFAULT 0")
+	ensureColumn(ctx, db, "voxire_career_applications", "review_notes", "review_notes TEXT")
+	ensureColumn(ctx, db, "voxire_career_applications", "next_step", "next_step VARCHAR(255)")
+	ensureColumn(ctx, db, "voxire_career_applications", "reviewed_at", "reviewed_at TIMESTAMP NULL")
 
 	if _, err := db.ExecContext(ctx, `
 		CREATE TABLE IF NOT EXISTS voxhire_admins (

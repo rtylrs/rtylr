@@ -32,6 +32,7 @@ func AdminCareerActiveRoute() string { return "/voxhire/admin/careers/{id}/activ
 func AdminLeadsRoute() string        { return "/voxhire/admin/leads" }
 func AdminApplicationsRoute() string { return "/voxhire/admin/openings/{id}/applications" }
 func AdminAppStatusRoute() string    { return "/voxhire/admin/applications/{id}/status" }
+func AdminAppReviewRoute() string    { return "/voxhire/admin/applications/{id}/review" }
 func AdminAppCVRoute() string        { return "/voxhire/admin/applications/{id}/cv" }
 func CareerApplyRoute() string       { return "/voxhire/careers/apply" }
 
@@ -50,6 +51,7 @@ func RecruitAnonymousRoutes() []string {
 		AdminLeadsRoute(),
 		AdminApplicationsRoute(),
 		AdminAppStatusRoute(),
+		AdminAppReviewRoute(),
 		AdminAppCVRoute(),
 		CareerApplyRoute(),
 	}
@@ -379,6 +381,47 @@ func UpdateApplicationStatusHandler(svc *application.Service) http.HandlerFunc {
 			default:
 				logger.Ctx(r.Context()).Error("voxhire update application status failed", logger.Error(err))
 				writeApplyError(w, http.StatusInternalServerError, "Failed to update status")
+			}
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"status": "success"})
+	}
+}
+
+func UpdateApplicationReviewHandler(svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+		if err != nil || id <= 0 {
+			writeApplyError(w, http.StatusBadRequest, "Invalid application id")
+			return
+		}
+
+		var body struct {
+			Status       string `json:"status"`
+			ReviewRating int    `json:"review_rating"`
+			ReviewNotes  string `json:"review_notes"`
+			NextStep     string `json:"next_step"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid request")
+			return
+		}
+
+		err = svc.UpdateApplicationReview(r.Context(), id, domain.ApplicationReviewInput{
+			Status:       body.Status,
+			ReviewRating: body.ReviewRating,
+			ReviewNotes:  body.ReviewNotes,
+			NextStep:     body.NextStep,
+		})
+		if err != nil {
+			switch {
+			case errors.Is(err, domain.ErrApplicationNotFound):
+				writeApplyError(w, http.StatusNotFound, "Application not found")
+			case errors.Is(err, domain.ErrInvalidInput):
+				writeApplyError(w, http.StatusBadRequest, "Invalid review")
+			default:
+				logger.Ctx(r.Context()).Error("voxhire update application review failed", logger.Error(err))
+				writeApplyError(w, http.StatusInternalServerError, "Failed to update review")
 			}
 			return
 		}

@@ -18,6 +18,9 @@ type mockRepo struct {
 	cvTargets   []domain.CVProcessingTarget
 	cvResults   []domain.CVProcessingResult
 	cvUpdateErr error
+	reviewID    int64
+	reviewInput domain.ApplicationReviewInput
+	reviewErr   error
 }
 
 func (m *mockRepo) CreateCompanyLead(_ context.Context, _ domain.CompanyLeadInput) (int64, error) {
@@ -65,6 +68,12 @@ func (m *mockRepo) ListApplications(_ context.Context, _ domain.ApplicationFilte
 }
 
 func (m *mockRepo) UpdateApplicationStatus(_ context.Context, _ int64, _ string) error { return nil }
+
+func (m *mockRepo) UpdateApplicationReview(_ context.Context, id int64, in domain.ApplicationReviewInput) error {
+	m.reviewID = id
+	m.reviewInput = in
+	return m.reviewErr
+}
 
 func (m *mockRepo) GetApplicationCVKey(_ context.Context, _ int64) (string, error) { return "", nil }
 
@@ -215,5 +224,40 @@ func TestSubmitTalentApplication_MinimalInput(t *testing.T) {
 	id, err := s.SubmitTalentApplication(context.Background(), domain.TalentApplicationInput{})
 	if err != nil || id != 1 {
 		t.Errorf("id=%d err=%v", id, err)
+	}
+}
+
+func TestUpdateApplicationReview_NormalizesInput(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+
+	err := s.UpdateApplicationReview(context.Background(), 77, domain.ApplicationReviewInput{
+		Status:       " Shortlisted ",
+		ReviewRating: 4,
+		ReviewNotes:  "  Strong operations profile.  ",
+		NextStep:     "  Send to client  ",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if repo.reviewID != 77 {
+		t.Fatalf("reviewID = %d, want 77", repo.reviewID)
+	}
+	want := domain.ApplicationReviewInput{
+		Status:       "shortlisted",
+		ReviewRating: 4,
+		ReviewNotes:  "Strong operations profile.",
+		NextStep:     "Send to client",
+	}
+	if repo.reviewInput != want {
+		t.Fatalf("reviewInput = %#v, want %#v", repo.reviewInput, want)
+	}
+}
+
+func TestUpdateApplicationReview_RejectsInvalidRating(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	err := s.UpdateApplicationReview(context.Background(), 77, domain.ApplicationReviewInput{ReviewRating: 6})
+	if !errors.Is(err, domain.ErrInvalidInput) {
+		t.Fatalf("err = %v, want ErrInvalidInput", err)
 	}
 }
