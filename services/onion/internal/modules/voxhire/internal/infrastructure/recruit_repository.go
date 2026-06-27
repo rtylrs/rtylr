@@ -181,7 +181,7 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		return nil, err
 	}
 
-	analytics.CVStatusMix, err = r.analyticsBuckets(ctx, `
+	analytics.CVStatusMix, err = r.optionalAnalyticsBuckets(ctx, `
 		SELECT status AS bucket, COUNT(*) AS count
 		  FROM (
 		        SELECT LOWER(COALESCE(a.cv_processing_status, 'pending')) AS status
@@ -199,7 +199,7 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		return nil, err
 	}
 
-	analytics.TaskStatusMix, err = r.analyticsBuckets(ctx, `
+	analytics.TaskStatusMix, err = r.optionalAnalyticsBuckets(ctx, `
 		SELECT LOWER(COALESCE(NULLIF(status, ''), 'open')) AS bucket, COUNT(*) AS count
 		  FROM voxhire_follow_up_tasks
 		 GROUP BY bucket
@@ -208,7 +208,7 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		return nil, err
 	}
 
-	analytics.ProfileFunctions, err = r.analyticsProfileFunctions(ctx)
+	analytics.ProfileFunctions, err = r.optionalAnalyticsProfileFunctions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +293,9 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		       COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0)
 		  FROM voxhire_talent_applications`).Scan(&totals.TalentPoolTotal, &totals.TalentPool7d, &totals.TalentPool30d)
 	if err != nil {
-		return err
+		if !isOptionalAnalyticsSchemaError(err) {
+			return err
+		}
 	}
 
 	err = r.db.QueryRowContext(ctx, `
@@ -315,7 +317,9 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		&totals.CVPendingTotal,
 	)
 	if err != nil {
-		return err
+		if !isOptionalAnalyticsSchemaError(err) {
+			return err
+		}
 	}
 
 	err = r.db.QueryRowContext(ctx, `
@@ -338,7 +342,9 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		       COALESCE(SUM(CASE WHEN status = 'open' AND due_at IS NOT NULL AND due_at < UTC_TIMESTAMP() THEN 1 ELSE 0 END), 0)
 		  FROM voxhire_follow_up_tasks
 		 WHERE status <> 'done'`).Scan(&totals.OpenTasks, &totals.OverdueTasks); err != nil {
-		return err
+		if !isOptionalAnalyticsSchemaError(err) {
+			return err
+		}
 	}
 
 	if err := r.db.QueryRowContext(ctx, `
@@ -346,7 +352,9 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		  (SELECT COUNT(*) FROM voxhire_shortlists),
 		  (SELECT COUNT(*) FROM voxhire_shortlist_items)
 	`).Scan(&totals.ShortlistsTotal, &totals.ShortlistedCandidates); err != nil {
-		return err
+		if !isOptionalAnalyticsSchemaError(err) {
+			return err
+		}
 	}
 	return nil
 }
@@ -369,6 +377,36 @@ func (r *Repository) analyticsBuckets(ctx context.Context, query string, args ..
 	return buckets, rows.Err()
 }
 
+func (r *Repository) optionalAnalyticsBuckets(ctx context.Context, query string, args ...any) ([]domain.AnalyticsBucket, error) {
+	buckets, err := r.analyticsBuckets(ctx, query, args...)
+	if err != nil && isOptionalAnalyticsSchemaError(err) {
+		return []domain.AnalyticsBucket{}, nil
+	}
+	return buckets, err
+}
+
+func (r *Repository) optionalAnalyticsProfileFunctions(ctx context.Context) ([]domain.AnalyticsBucket, error) {
+	buckets, err := r.analyticsProfileFunctions(ctx)
+	if err != nil && isOptionalAnalyticsSchemaError(err) {
+		return []domain.AnalyticsBucket{}, nil
+	}
+	return buckets, err
+}
+
+func isOptionalAnalyticsSchemaError(err error) bool {
+	var myErr *gosqlmysql.MySQLError
+	if !errors.As(err, &myErr) {
+		return false
+	}
+	switch myErr.Number {
+	case 1054, // unknown column, usually a just-added optional analytics column
+		1146: // table does not exist, usually a just-added optional analytics table
+		return true
+	default:
+		return false
+	}
+}
+
 func (r *Repository) analyticsProfileFunctions(ctx context.Context) ([]domain.AnalyticsBucket, error) {
 	functions := []string{"Operations", "Sales", "Customer Support", "Finance", "HR", "Marketing", "Product", "Design", "Engineering", "Data", "Healthcare", "Retail", "Logistics"}
 	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
@@ -378,14 +416,14 @@ func (r *Repository) analyticsProfileFunctions(ctx context.Context) ([]domain.An
 		if err := r.db.QueryRowContext(ctx, `
 			SELECT COUNT(*)
 			  FROM (
-			        SELECT COALESCE(a.cv_profile_json, '') AS profile
+			        SELECT COALESCE(a.cv_profile_json, '') AS profile_json
 			          FROM voxire_career_applications a
 			          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 			        UNION ALL
-			        SELECT COALESCE(cv_profile_json, '') AS profile
+			        SELECT COALESCE(cv_profile_json, '') AS profile_json
 			          FROM voxhire_talent_applications
 			       ) profiles
-			 WHERE profile LIKE ?`, voxhireCareerOwnerID, pattern).Scan(&count); err != nil {
+			 WHERE profile_json LIKE ?`, voxhireCareerOwnerID, pattern).Scan(&count); err != nil {
 			return nil, err
 		}
 		if count > 0 {
