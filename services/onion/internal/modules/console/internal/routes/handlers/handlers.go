@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/console/internal/application"
@@ -23,6 +24,19 @@ func requireConsoleAdmin(ctx context.Context) *errorModels.ServerError {
 		return &errorModels.ServerError{Code: http.StatusForbidden, Message: "Console admin access required"}
 	}
 	return nil
+}
+
+func parseOptionalConsoleTime(value string) (*time.Time, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil, nil
+	}
+	for _, layout := range []string{time.RFC3339, "2006-01-02T15:04", "2006-01-02"} {
+		if t, err := time.Parse(layout, value); err == nil {
+			return &t, nil
+		}
+	}
+	return nil, errors.New("invalid time")
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -315,9 +329,15 @@ func (h *ListSubscriptionsHandler) Serve(ctx context.Context, req *ListSubscript
 }
 
 type UpdateSubscriptionRequest struct {
-	PlanID    int64  `json:"plan_id"`
-	Status    string `json:"status"`
-	SeatCount int    `json:"seat_count"`
+	PlanID               int64  `json:"plan_id"`
+	Status               string `json:"status"`
+	SeatCount            int    `json:"seat_count"`
+	TrialEndsAt          string `json:"trial_ends_at,omitempty"`
+	NextBillingDate      string `json:"next_billing_date,omitempty"`
+	CurrentPeriodEndsAt  string `json:"current_period_ends_at,omitempty"`
+	TotalDays            *int   `json:"total_days,omitempty"`
+	PaddleSubscriptionID string `json:"paddle_subscription_id,omitempty"`
+	PaddleCustomerID     string `json:"paddle_customer_id,omitempty"`
 }
 
 type UpdateSubscriptionResponse struct {
@@ -333,11 +353,17 @@ func (h *UpdateSubscriptionHandler) Serve(_ context.Context, _ *UpdateSubscripti
 // UpsertSubscriptionForUser
 
 type UpsertSubscriptionRequest struct {
-	OwnerID   int64  `json:"owner_id"`
-	PlanID    int64  `json:"plan_id"`
-	Status    string `json:"status"`
-	SeatCount int    `json:"seat_count"`
-	ExpiresAt string `json:"expires_at,omitempty"`
+	OwnerID              int64  `json:"owner_id"`
+	PlanID               int64  `json:"plan_id"`
+	Status               string `json:"status"`
+	SeatCount            int    `json:"seat_count"`
+	ExpiresAt            string `json:"expires_at,omitempty"`
+	TrialEndsAt          string `json:"trial_ends_at,omitempty"`
+	NextBillingDate      string `json:"next_billing_date,omitempty"`
+	CurrentPeriodEndsAt  string `json:"current_period_ends_at,omitempty"`
+	TotalDays            *int   `json:"total_days,omitempty"`
+	PaddleSubscriptionID string `json:"paddle_subscription_id,omitempty"`
+	PaddleCustomerID     string `json:"paddle_customer_id,omitempty"`
 }
 
 type UpsertSubscriptionResponse struct {
@@ -360,20 +386,42 @@ func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscr
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return UpsertSubscriptionResponse{}, sErr
 	}
-	seatCount := req.SeatCount
-	if seatCount <= 0 {
-		seatCount = 1
+	trialEndsAt, err := parseOptionalConsoleTime(req.TrialEndsAt)
+	if err != nil {
+		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid trial_ends_at"}
 	}
-	var expiresAt *time.Time
-	if req.ExpiresAt != "" {
-		t, err := time.Parse(time.RFC3339, req.ExpiresAt)
-		if err == nil {
-			expiresAt = &t
+	nextBillingDate, err := parseOptionalConsoleTime(req.NextBillingDate)
+	if err != nil {
+		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid next_billing_date"}
+	}
+	currentPeriodEndsAt, err := parseOptionalConsoleTime(req.CurrentPeriodEndsAt)
+	if err != nil {
+		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid current_period_ends_at"}
+	}
+	if currentPeriodEndsAt == nil && req.ExpiresAt != "" {
+		currentPeriodEndsAt, err = parseOptionalConsoleTime(req.ExpiresAt)
+		if err != nil {
+			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expires_at"}
 		}
 	}
-	if err := h.Service.UpsertSubscription(ctx, req.OwnerID, req.PlanID, req.Status, seatCount, expiresAt); err != nil {
+
+	if err := h.Service.UpsertSubscription(ctx, application.SubscriptionWriteInput{
+		OwnerID:              req.OwnerID,
+		PlanID:               req.PlanID,
+		Status:               req.Status,
+		SeatCount:            req.SeatCount,
+		TrialEndsAt:          trialEndsAt,
+		NextBillingDate:      nextBillingDate,
+		CurrentPeriodEndsAt:  currentPeriodEndsAt,
+		TotalDays:            req.TotalDays,
+		PaddleSubscriptionID: req.PaddleSubscriptionID,
+		PaddleCustomerID:     req.PaddleCustomerID,
+	}); err != nil {
 		if errors.Is(err, application.ErrNotOrganizationOwner) {
 			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Subscriptions can only be set for organization owners"}
+		}
+		if errors.Is(err, application.ErrInvalidSubscription) {
+			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: err.Error()}
 		}
 		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to upsert subscription"}
 	}

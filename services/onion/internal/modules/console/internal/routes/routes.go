@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -164,6 +166,19 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {
 	}
 
 	return true
+}
+
+func parseOptionalConsoleTime(value string) (*time.Time, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil, nil
+	}
+	for _, layout := range []string{time.RFC3339, "2006-01-02T15:04", "2006-01-02"} {
+		if t, err := time.Parse(layout, value); err == nil {
+			return &t, nil
+		}
+	}
+	return nil, errors.New("invalid time")
 }
 
 func decodeOptionalJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {
@@ -578,16 +593,59 @@ func rawUpdateSubscription(_ context.Context, svc *application.Service) http.Han
 			return
 		}
 		var req struct {
-			PlanID    int64  `json:"plan_id"`
-			Status    string `json:"status"`
-			SeatCount int    `json:"seat_count"`
+			PlanID               int64  `json:"plan_id"`
+			Status               string `json:"status"`
+			SeatCount            int    `json:"seat_count"`
+			ExpiresAt            string `json:"expires_at,omitempty"`
+			TrialEndsAt          string `json:"trial_ends_at,omitempty"`
+			NextBillingDate      string `json:"next_billing_date,omitempty"`
+			CurrentPeriodEndsAt  string `json:"current_period_ends_at,omitempty"`
+			TotalDays            *int   `json:"total_days,omitempty"`
+			PaddleSubscriptionID string `json:"paddle_subscription_id,omitempty"`
+			PaddleCustomerID     string `json:"paddle_customer_id,omitempty"`
 		}
 		if !decodeJSONBody(w, r, &req) {
 			return
 		}
-		if err := svc.UpdateSubscription(r.Context(), id, req.PlanID, req.Status, req.SeatCount); err != nil {
+		trialEndsAt, err := parseOptionalConsoleTime(req.TrialEndsAt)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "Invalid trial_ends_at")
+			return
+		}
+		nextBillingDate, err := parseOptionalConsoleTime(req.NextBillingDate)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "Invalid next_billing_date")
+			return
+		}
+		currentPeriodEndsAt, err := parseOptionalConsoleTime(req.CurrentPeriodEndsAt)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "Invalid current_period_ends_at")
+			return
+		}
+		if currentPeriodEndsAt == nil && req.ExpiresAt != "" {
+			currentPeriodEndsAt, err = parseOptionalConsoleTime(req.ExpiresAt)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "Invalid expires_at")
+				return
+			}
+		}
+		if err := svc.UpdateSubscription(r.Context(), id, application.SubscriptionWriteInput{
+			PlanID:               req.PlanID,
+			Status:               req.Status,
+			SeatCount:            req.SeatCount,
+			TrialEndsAt:          trialEndsAt,
+			NextBillingDate:      nextBillingDate,
+			CurrentPeriodEndsAt:  currentPeriodEndsAt,
+			TotalDays:            req.TotalDays,
+			PaddleSubscriptionID: req.PaddleSubscriptionID,
+			PaddleCustomerID:     req.PaddleCustomerID,
+		}); err != nil {
 			if errors.Is(err, application.ErrNotOrganizationOwner) {
 				writeError(w, http.StatusBadRequest, "Subscriptions can only be set for organization owners")
+				return
+			}
+			if errors.Is(err, application.ErrInvalidSubscription) {
+				writeError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 			writeError(w, http.StatusInternalServerError, "Failed to update subscription")

@@ -23,6 +23,7 @@ var (
 	ErrNotOrganizationOwner   = errors.New("access can only be granted to organization owners")
 	ErrBusinessNotOwnedByUser = errors.New("business does not belong to the requested owner")
 	ErrAddonNotFound          = errors.New("addon not found")
+	ErrInvalidSubscription    = errors.New("invalid subscription input")
 )
 
 // Console is a global admin surface — caches are keyed on the admin namespace
@@ -522,23 +523,28 @@ func (s *Service) DeleteBusiness(ctx context.Context, id int64) error {
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
 type SubscriptionDTO struct {
-	ID                  int64   `json:"id"`
-	OwnerID             int64   `json:"owner_id"`
-	OwnerName           string  `json:"owner_name"`
-	OwnerEmail          string  `json:"owner_email"`
-	BusinessID          *int64  `json:"business_id,omitempty"`
-	BusinessName        string  `json:"business_name"`
-	PlanID              int64   `json:"plan_id"`
-	PlanName            string  `json:"plan_name"`
-	Status              string  `json:"status"`
-	SeatCount           int     `json:"seat_count"`
-	ActiveSeatCount     int     `json:"active_seat_count"`
-	IncludedSeatLimit   int     `json:"included_seat_limit"`
-	IncludedSeatCount   int     `json:"included_seat_count"`
-	BillableSeatCount   int     `json:"billable_seat_count"`
-	TrialEndsAt         *string `json:"trial_ends_at,omitempty"`
-	CurrentPeriodEndsAt *string `json:"current_period_ends_at,omitempty"`
-	CreatedAt           string  `json:"created_at"`
+	ID                   int64   `json:"id"`
+	OwnerID              int64   `json:"owner_id"`
+	OwnerName            string  `json:"owner_name"`
+	OwnerEmail           string  `json:"owner_email"`
+	BusinessID           *int64  `json:"business_id,omitempty"`
+	BusinessName         string  `json:"business_name"`
+	PlanID               int64   `json:"plan_id"`
+	PlanName             string  `json:"plan_name"`
+	Status               string  `json:"status"`
+	SeatCount            int     `json:"seat_count"`
+	ActiveSeatCount      int     `json:"active_seat_count"`
+	IncludedSeatLimit    int     `json:"included_seat_limit"`
+	IncludedSeatCount    int     `json:"included_seat_count"`
+	BillableSeatCount    int     `json:"billable_seat_count"`
+	TrialEndsAt          *string `json:"trial_ends_at,omitempty"`
+	NextBillingDate      *string `json:"next_billing_date,omitempty"`
+	CurrentPeriodEndsAt  *string `json:"current_period_ends_at,omitempty"`
+	PaddleSubscriptionID *string `json:"paddle_subscription_id,omitempty"`
+	PaddleCustomerID     *string `json:"paddle_customer_id,omitempty"`
+	DaysRemaining        *int    `json:"days_remaining,omitempty"`
+	CreatedAt            string  `json:"created_at"`
+	UpdatedAt            string  `json:"updated_at"`
 }
 
 type ListSubscriptionsResult struct {
@@ -570,12 +576,30 @@ func toSubDTO(s infrastructure.SubscriptionRow) SubscriptionDTO {
 		t := s.TrialEndsAt.Time.Format(time.RFC3339)
 		dto.TrialEndsAt = &t
 	}
+	if s.NextBillingDate.Valid {
+		t := s.NextBillingDate.Time.Format("2006-01-02")
+		dto.NextBillingDate = &t
+	}
 	if s.CurrentPeriodEndsAt.Valid {
 		t := s.CurrentPeriodEndsAt.Time.Format(time.RFC3339)
 		dto.CurrentPeriodEndsAt = &t
+		days := int(time.Until(s.CurrentPeriodEndsAt.Time).Hours() / 24)
+		if days < 0 {
+			days = 0
+		}
+		dto.DaysRemaining = &days
+	}
+	if s.PaddleSubscriptionID.Valid {
+		dto.PaddleSubscriptionID = &s.PaddleSubscriptionID.String
+	}
+	if s.PaddleCustomerID.Valid {
+		dto.PaddleCustomerID = &s.PaddleCustomerID.String
 	}
 	if s.CreatedAt.Valid {
 		dto.CreatedAt = s.CreatedAt.Time.Format(time.RFC3339)
+	}
+	if s.UpdatedAt.Valid {
+		dto.UpdatedAt = s.UpdatedAt.Time.Format(time.RFC3339)
 	}
 	return dto
 }
@@ -620,28 +644,123 @@ func (s *Service) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*S
 	return &dto, nil
 }
 
-func (s *Service) UpsertSubscription(ctx context.Context, ownerID, planID int64, status string, seatCount int, expiresAt *time.Time) error {
-	defer invalidateConsoleScope(ctx)
-	defer invalidateOwnerSubscriptionScope(ctx, ownerID)
-	seatCount, err := s.activeSeatCountForOwner(ctx, ownerID)
+type SubscriptionWriteInput struct {
+	OwnerID              int64
+	PlanID               int64
+	Status               string
+	SeatCount            int
+	TrialEndsAt          *time.Time
+	NextBillingDate      *time.Time
+	CurrentPeriodEndsAt  *time.Time
+	TotalDays            *int
+	PaddleSubscriptionID string
+	PaddleCustomerID     string
+}
+
+func nullableInputTime(value *time.Time) sql.NullTime {
+	if value == nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: value.UTC(), Valid: true}
+}
+
+func nullableInputString(value string) sql.NullString {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: value, Valid: true}
+}
+
+func normalizeSubscriptionStatus(status string) (string, error) {
+	status = strings.ToLower(strings.TrimSpace(status))
+	if status == "" {
+		return "active", nil
+	}
+	switch status {
+	case "active", "trial", "cancelled", "expired":
+		return status, nil
+	default:
+		return "", fmt.Errorf("%w: status must be active, trial, cancelled, or expired", ErrInvalidSubscription)
+	}
+}
+
+func (s *Service) subscriptionWriteParams(ctx context.Context, input SubscriptionWriteInput) (infrastructure.SubscriptionWriteParams, error) {
+	if input.OwnerID <= 0 || input.PlanID <= 0 {
+		return infrastructure.SubscriptionWriteParams{}, fmt.Errorf("%w: owner_id and plan_id are required", ErrInvalidSubscription)
+	}
+	if _, err := s.repo.GetActiveBusinessByOwner(ctx, input.OwnerID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return infrastructure.SubscriptionWriteParams{}, ErrNotOrganizationOwner
+		}
+		return infrastructure.SubscriptionWriteParams{}, err
+	}
+
+	status, err := normalizeSubscriptionStatus(input.Status)
+	if err != nil {
+		return infrastructure.SubscriptionWriteParams{}, err
+	}
+
+	seatCount := input.SeatCount
+	if seatCount <= 0 {
+		seatCount, err = s.repo.CountActiveSeatsForOwner(ctx, input.OwnerID)
+		if err != nil {
+			return infrastructure.SubscriptionWriteParams{}, err
+		}
+		if seatCount < 1 {
+			seatCount = 1
+		}
+	}
+
+	trialEndsAt := input.TrialEndsAt
+	currentPeriodEndsAt := input.CurrentPeriodEndsAt
+	if input.TotalDays != nil {
+		if *input.TotalDays < 0 {
+			return infrastructure.SubscriptionWriteParams{}, fmt.Errorf("%w: total_days cannot be negative", ErrInvalidSubscription)
+		}
+		endsAt := time.Now().UTC().AddDate(0, 0, *input.TotalDays)
+		currentPeriodEndsAt = &endsAt
+		if status == "trial" {
+			trialEndsAt = &endsAt
+		}
+	}
+
+	return infrastructure.SubscriptionWriteParams{
+		OwnerID:              input.OwnerID,
+		PlanID:               input.PlanID,
+		Status:               status,
+		SeatCount:            seatCount,
+		TrialEndsAt:          nullableInputTime(trialEndsAt),
+		NextBillingDate:      nullableInputTime(input.NextBillingDate),
+		CurrentPeriodEndsAt:  nullableInputTime(currentPeriodEndsAt),
+		PaddleSubscriptionID: nullableInputString(input.PaddleSubscriptionID),
+		PaddleCustomerID:     nullableInputString(input.PaddleCustomerID),
+	}, nil
+}
+
+func (s *Service) UpsertSubscription(ctx context.Context, input SubscriptionWriteInput) error {
+	params, err := s.subscriptionWriteParams(ctx, input)
 	if err != nil {
 		return err
 	}
-	return s.repo.UpsertSubscription(ctx, ownerID, planID, status, seatCount, expiresAt)
+	defer invalidateConsoleScope(ctx)
+	defer invalidateOwnerSubscriptionScope(ctx, input.OwnerID)
+	return s.repo.UpsertSubscription(ctx, params)
 }
 
-func (s *Service) UpdateSubscription(ctx context.Context, id, planID int64, status string, seatCount int) error {
+func (s *Service) UpdateSubscription(ctx context.Context, id int64, input SubscriptionWriteInput) error {
 	defer invalidateConsoleScope(ctx)
 	sub, err := s.repo.GetSubscriptionByID(ctx, id)
 	if err != nil {
 		return err
 	}
+	input.OwnerID = sub.OwnerID
 	defer invalidateOwnerSubscriptionScope(ctx, sub.OwnerID)
-	seatCount, err = s.activeSeatCountForOwner(ctx, sub.OwnerID)
+	params, err := s.subscriptionWriteParams(ctx, input)
 	if err != nil {
 		return err
 	}
-	return s.repo.UpdateSubscription(ctx, id, planID, status, seatCount)
+	return s.repo.UpdateSubscription(ctx, id, params)
 }
 
 func (s *Service) DeleteSubscription(ctx context.Context, id int64) error {
@@ -806,7 +925,13 @@ func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int
 	}
 
 	// Also activate the subscription for that owner.
-	if subErr := s.repo.UpsertSubscription(ctx, userID, planID, "active", seatCount, expiresAt); subErr != nil {
+	if subErr := s.repo.UpsertSubscription(ctx, infrastructure.SubscriptionWriteParams{
+		OwnerID:             userID,
+		PlanID:              planID,
+		Status:              "active",
+		SeatCount:           seatCount,
+		CurrentPeriodEndsAt: nullableInputTime(expiresAt),
+	}); subErr != nil {
 		logger.Ctx(ctx).Warn("failed to upsert subscription for grant", logger.Error(subErr))
 	}
 

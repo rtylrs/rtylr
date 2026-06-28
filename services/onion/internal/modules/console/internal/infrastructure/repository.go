@@ -53,22 +53,38 @@ type CreateBusinessOwnerRow struct {
 }
 
 type SubscriptionRow struct {
-	ID                  int64
-	OwnerID             int64
-	OwnerName           sql.NullString
-	PlanID              int64
-	PlanName            string
-	Status              string
-	SeatCount           int
-	ActiveSeatCount     int
-	IncludedSeatCount   int
-	BillableSeatCount   int
-	TrialEndsAt         sql.NullTime
-	CurrentPeriodEndsAt sql.NullTime
-	CreatedAt           sql.NullTime
-	OwnerEmail          sql.NullString
-	BusinessID          sql.NullInt64
-	BusinessName        sql.NullString
+	ID                   int64
+	OwnerID              int64
+	OwnerName            sql.NullString
+	PlanID               int64
+	PlanName             string
+	Status               string
+	SeatCount            int
+	ActiveSeatCount      int
+	IncludedSeatCount    int
+	BillableSeatCount    int
+	TrialEndsAt          sql.NullTime
+	NextBillingDate      sql.NullTime
+	CurrentPeriodEndsAt  sql.NullTime
+	PaddleSubscriptionID sql.NullString
+	PaddleCustomerID     sql.NullString
+	CreatedAt            sql.NullTime
+	UpdatedAt            sql.NullTime
+	OwnerEmail           sql.NullString
+	BusinessID           sql.NullInt64
+	BusinessName         sql.NullString
+}
+
+type SubscriptionWriteParams struct {
+	OwnerID              int64
+	PlanID               int64
+	Status               string
+	SeatCount            int
+	TrialEndsAt          sql.NullTime
+	NextBillingDate      sql.NullTime
+	CurrentPeriodEndsAt  sql.NullTime
+	PaddleSubscriptionID sql.NullString
+	PaddleCustomerID     sql.NullString
 }
 
 type PlanRow struct {
@@ -1097,7 +1113,8 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 
 	listSQL, listArgs, err := sq.
 		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
-			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email", "b.id", "b.name").
+			"s.trial_ends_at", "s.next_billing_date", "s.current_period_ends_at", "s.paddle_subscription_id", "s.paddle_customer_id",
+			"s.created_at", "s.updated_at", "u.email", "b.id", "b.name").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
 		LeftJoin("users u ON u.id = s.owner_id").
@@ -1122,7 +1139,8 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	for rows.Next() {
 		var s SubscriptionRow
 		if err := rows.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
-			&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+			&s.TrialEndsAt, &s.NextBillingDate, &s.CurrentPeriodEndsAt, &s.PaddleSubscriptionID, &s.PaddleCustomerID,
+			&s.CreatedAt, &s.UpdatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
 			return nil, 0, err
 		}
 		if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {
@@ -1136,7 +1154,8 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*SubscriptionRow, error) {
 	query, args, err := sq.
 		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
-			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email", "b.id", "b.name").
+			"s.trial_ends_at", "s.next_billing_date", "s.current_period_ends_at", "s.paddle_subscription_id", "s.paddle_customer_id",
+			"s.created_at", "s.updated_at", "u.email", "b.id", "b.name").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
 		LeftJoin("users u ON u.id = s.owner_id").
@@ -1152,7 +1171,8 @@ func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*Subscr
 	row := r.pool.QueryRowContext(ctx, query, args...)
 	var s SubscriptionRow
 	if err := row.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
-		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+		&s.TrialEndsAt, &s.NextBillingDate, &s.CurrentPeriodEndsAt, &s.PaddleSubscriptionID, &s.PaddleCustomerID,
+		&s.CreatedAt, &s.UpdatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
 		return nil, err
 	}
 	if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {
@@ -1164,7 +1184,8 @@ func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*Subscr
 func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*SubscriptionRow, error) {
 	query, args, err := sq.
 		Select("s.id", "s.owner_id", "COALESCE(u.full_name, '')", "s.plan_id", "p.name", "s.status", "s.seat_count",
-			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email", "b.id", "b.name").
+			"s.trial_ends_at", "s.next_billing_date", "s.current_period_ends_at", "s.paddle_subscription_id", "s.paddle_customer_id",
+			"s.created_at", "s.updated_at", "u.email", "b.id", "b.name").
 		From("subscriptions s").
 		Join("plans p ON p.id = s.plan_id").
 		LeftJoin("users u ON u.id = s.owner_id").
@@ -1180,7 +1201,8 @@ func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) 
 	row := r.pool.QueryRowContext(ctx, query, args...)
 	var s SubscriptionRow
 	if err := row.Scan(&s.ID, &s.OwnerID, &s.OwnerName, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
-		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
+		&s.TrialEndsAt, &s.NextBillingDate, &s.CurrentPeriodEndsAt, &s.PaddleSubscriptionID, &s.PaddleCustomerID,
+		&s.CreatedAt, &s.UpdatedAt, &s.OwnerEmail, &s.BusinessID, &s.BusinessName); err != nil {
 		return nil, err
 	}
 	if err := r.decorateSubscriptionSeats(ctx, &s); err != nil {
@@ -1189,17 +1211,49 @@ func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) 
 	return &s, nil
 }
 
-func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, status string, seatCount int, expiresAt *time.Time) error {
-	var expiresSQL interface{}
-	if expiresAt != nil {
-		expiresSQL = *expiresAt
+func nullableTimeValue(value sql.NullTime) any {
+	if value.Valid {
+		return value.Time
 	}
+	return nil
+}
+
+func nullableStringValue(value sql.NullString) any {
+	if value.Valid {
+		return value.String
+	}
+	return nil
+}
+
+func (r *Repository) UpsertSubscription(ctx context.Context, params SubscriptionWriteParams) error {
 	query, args, err := sq.
 		Insert("subscriptions").
-		Columns("owner_id", "plan_id", "status", "seat_count", "current_period_ends_at").
-		Values(ownerID, planID, status, seatCount, expiresSQL).
+		Columns(
+			"owner_id",
+			"plan_id",
+			"status",
+			"seat_count",
+			"trial_ends_at",
+			"next_billing_date",
+			"current_period_ends_at",
+			"paddle_subscription_id",
+			"paddle_customer_id",
+		).
+		Values(
+			params.OwnerID,
+			params.PlanID,
+			params.Status,
+			params.SeatCount,
+			nullableTimeValue(params.TrialEndsAt),
+			nullableTimeValue(params.NextBillingDate),
+			nullableTimeValue(params.CurrentPeriodEndsAt),
+			nullableStringValue(params.PaddleSubscriptionID),
+			nullableStringValue(params.PaddleCustomerID),
+		).
 		Suffix(`ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status),
-		   seat_count = VALUES(seat_count), current_period_ends_at = VALUES(current_period_ends_at),
+		   seat_count = VALUES(seat_count), trial_ends_at = VALUES(trial_ends_at),
+		   next_billing_date = VALUES(next_billing_date), current_period_ends_at = VALUES(current_period_ends_at),
+		   paddle_subscription_id = VALUES(paddle_subscription_id), paddle_customer_id = VALUES(paddle_customer_id),
 		   updated_at = NOW()`).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -1211,12 +1265,17 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	return err
 }
 
-func (r *Repository) UpdateSubscription(ctx context.Context, id, planID int64, status string, seatCount int) error {
+func (r *Repository) UpdateSubscription(ctx context.Context, id int64, params SubscriptionWriteParams) error {
 	query, args, err := sq.
 		Update("subscriptions").
-		Set("plan_id", planID).
-		Set("status", status).
-		Set("seat_count", seatCount).
+		Set("plan_id", params.PlanID).
+		Set("status", params.Status).
+		Set("seat_count", params.SeatCount).
+		Set("trial_ends_at", nullableTimeValue(params.TrialEndsAt)).
+		Set("next_billing_date", nullableTimeValue(params.NextBillingDate)).
+		Set("current_period_ends_at", nullableTimeValue(params.CurrentPeriodEndsAt)).
+		Set("paddle_subscription_id", nullableStringValue(params.PaddleSubscriptionID)).
+		Set("paddle_customer_id", nullableStringValue(params.PaddleCustomerID)).
 		Set("updated_at", sq.Expr("NOW()")).
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Question).
