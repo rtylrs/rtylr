@@ -27,29 +27,44 @@ export const useSetBusinessSlug = () => {
 
 export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
+  const setWebsiteData = useConfigStore((s) => s.setWebsiteData);
+  const setContactInfo = useConfigStore((s) => s.setContactInfo);
 
   return useMutation({
     mutationFn: async ({ data }: { data: Record<string, unknown> }) => {
       const payload: Record<string, unknown> = {};
-      if (data.storeName) payload.siteName = data.storeName;
-      if (data.companyName && !payload.siteName) payload.siteName = data.companyName;
-      if (data.contactEmail) payload.contactEmail = data.contactEmail;
-      if (data.telephone) payload.contactNumber = data.telephone;
-      if (data.aboutContent) payload.aboutContent = data.aboutContent;
-      if (data.logoUrl) payload.logoUrl = data.logoUrl;
-      if (data.instagram) payload.instagram = data.instagram;
-      if (data.senderEmail) payload.senderEmail = data.senderEmail;
-      if (data.mapsUrl) payload.mapsUrl = data.mapsUrl;
-      if (data.website) payload.website = data.website;
-      if (data.address) payload.address = data.address;
-      if (data.city) payload.city = data.city;
-      if (data.zipcode) payload.zipcode = data.zipcode;
-      if (data.country) payload.country = data.country;
+      const has = (key: string) => Object.prototype.hasOwnProperty.call(data, key);
+      const setIfPresent = (sourceKey: string, targetKey = sourceKey) => {
+        if (has(sourceKey) && data[sourceKey] !== undefined) payload[targetKey] = data[sourceKey];
+      };
+
+      setIfPresent('storeName', 'siteName');
+      if (!payload.siteName) setIfPresent('companyName', 'siteName');
+      setIfPresent('contactEmail');
+      setIfPresent('telephone', 'contactNumber');
+      setIfPresent('aboutContent');
+      setIfPresent('logoUrl');
+      setIfPresent('instagram');
+      setIfPresent('senderEmail');
+      setIfPresent('mapsUrl');
+      setIfPresent('website');
+      setIfPresent('address');
+      setIfPresent('city');
+      setIfPresent('zipcode');
+      setIfPresent('country');
       if (data.maintenanceMode !== undefined) payload.maintenanceMode = data.maintenanceMode;
 
-      return unwrap(safe.put('/config/update', payload));
+      return unwrap<{ config?: Record<string, unknown> }>(safe.put('/config/update', payload));
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
+      if (res.config) {
+        const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
+        setWebsiteData({ ...currentWebsiteData, ...res.config });
+        setContactInfo({
+          contactEmail: (res.config.contactEmail as string | null | undefined) ?? null,
+          contactNumber: (res.config.contactNumber as string | null | undefined) ?? null,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Business information updated successfully');
