@@ -24,6 +24,11 @@ export const SERVER_STORE_KEY = 'pos-server-config';
 export const HOSTED_API_URL = 'https://api.voxire.com/';
 export const HOSTED_AUTH_URL = 'https://auth.rtylr.com';
 
+export function isHostedPosOrigin(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.location.hostname.toLowerCase() === 'pos.rtylr.com';
+}
+
 interface PersistedServerState {
   mode: ServerMode;
   customApiUrl: string | null;
@@ -32,6 +37,15 @@ interface PersistedServerState {
 }
 
 function readPersistedState(): PersistedServerState | null {
+  if (isHostedPosOrigin()) {
+    return {
+      mode: 'hosted',
+      customApiUrl: null,
+      authUrl: null,
+      uploadUrl: null,
+    };
+  }
+
   if (typeof localStorage === 'undefined') return null;
   try {
     const raw = localStorage.getItem(SERVER_STORE_KEY);

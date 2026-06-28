@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
   isValidServerUrl,
+  isHostedPosOrigin,
   normalizeBaseUrl,
   resolveApiBaseUrl,
   SERVER_STORE_KEY,
@@ -43,8 +44,17 @@ const initialState: ServerState = {
   customApiUrl: null,
   authUrl: null,
   uploadUrl: null,
-  configured: false,
+  configured: isHostedPosOrigin(),
 };
+
+const hostedOriginState = (state: ServerState & ServerActions): ServerState & ServerActions => ({
+  ...state,
+  mode: 'hosted',
+  customApiUrl: null,
+  authUrl: null,
+  uploadUrl: null,
+  configured: true,
+});
 
 export const useServerStore = create<ServerState & ServerActions>()(
   persist(
@@ -84,6 +94,13 @@ export const useServerStore = create<ServerState & ServerActions>()(
     }),
     {
       name: SERVER_STORE_KEY,
+      merge: (persistedState, currentState) => {
+        if (isHostedPosOrigin()) return hostedOriginState(currentState);
+        return {
+          ...currentState,
+          ...(persistedState as Partial<ServerState> | null),
+        };
+      },
       partialize: (state) => ({
         mode: state.mode,
         customApiUrl: state.customApiUrl,
