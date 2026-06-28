@@ -159,8 +159,9 @@ func (h *GetConfigByOwnerHandler) Validate(_ context.Context, _ *GetConfigByOwne
 }
 
 func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil {
+	device := authPkg.DeviceCtx(ctx)
+	authUser := device.User
+	if authUser == nil {
 		return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
