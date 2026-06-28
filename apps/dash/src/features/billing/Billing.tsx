@@ -176,10 +176,11 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
   );
 };
 
-const CycleToggle: React.FC<{ cycle: BillingCycle; onChange: (cycle: BillingCycle) => void }> = ({
-  cycle,
-  onChange,
-}) => (
+const CycleToggle: React.FC<{
+  cycle: BillingCycle;
+  onChange: (cycle: BillingCycle) => void;
+  disabled?: boolean;
+}> = ({ cycle, onChange, disabled = false }) => (
   <div
     className="inline-flex rounded-lg p-0.5"
     style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
@@ -190,8 +191,11 @@ const CycleToggle: React.FC<{ cycle: BillingCycle; onChange: (cycle: BillingCycl
         <button
           key={value}
           type="button"
-          onClick={() => onChange(value)}
-          className="px-3 py-1.5 rounded-md text-xs font-semibold transition-colors capitalize"
+          onClick={() => {
+            if (!disabled) onChange(value);
+          }}
+          disabled={disabled}
+          className="px-3 py-1.5 rounded-md text-xs font-semibold transition-colors capitalize disabled:cursor-not-allowed disabled:opacity-60"
           style={{
             background: active ? '#4583C4' : 'transparent',
             color: active ? '#fff' : 'var(--dash-text-muted)',
@@ -313,10 +317,21 @@ const PlanAction: React.FC<{
   isGranted?: boolean;
   currentTier?: number;
   ownerEmail: string;
-}> = ({ plan, isCurrent, isGranted, currentTier, ownerEmail }) => {
+  disabled?: boolean;
+  disabledLabel?: string;
+}> = ({
+  plan,
+  isCurrent,
+  isGranted,
+  currentTier,
+  ownerEmail,
+  disabled = false,
+  disabledLabel = 'Unavailable',
+}) => {
   const checkout = useCheckout();
 
   const handleCheckout = (): void => {
+    if (disabled || isCurrent || checkout.isPending) return;
     checkout.mutate(
       { planSlug: plan.slug, email: ownerEmail || undefined },
       {
@@ -331,27 +346,32 @@ const PlanAction: React.FC<{
   };
 
   const actionLabel = useMemo(() => {
+    if (!isCurrent && disabled) return disabledLabel;
     if (isCurrent && isGranted) return 'Granted';
     if (isCurrent) return 'Current plan';
     if (currentTier === undefined) return 'Choose plan';
     return plan.tierOrder > currentTier ? 'Upgrade' : 'Switch';
-  }, [currentTier, isCurrent, isGranted, plan.tierOrder]);
+  }, [currentTier, disabled, disabledLabel, isCurrent, isGranted, plan.tierOrder]);
+
+  const isDisabled = isCurrent || disabled || checkout.isPending;
 
   return (
     <button
       type="button"
       onClick={handleCheckout}
-      disabled={isCurrent || checkout.isPending}
-      className="inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity disabled:opacity-70"
+      disabled={isDisabled}
+      className="inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
       style={{
-        background: isCurrent ? 'var(--dash-hover)' : '#4583C4',
-        color: isCurrent ? 'var(--dash-text-muted)' : '#fff',
-        border: isCurrent ? '1px solid var(--dash-border)' : '1px solid transparent',
+        background: isCurrent || disabled ? 'var(--dash-hover)' : '#4583C4',
+        color: isCurrent || disabled ? 'var(--dash-text-muted)' : '#fff',
+        border: isCurrent || disabled ? '1px solid var(--dash-border)' : '1px solid transparent',
       }}
     >
       {checkout.isPending ? <Loader2 size={12} className="animate-spin" /> : null}
       {checkout.isPending ? 'Opening...' : actionLabel}
-      {!isCurrent && !checkout.isPending ? <ArrowRight size={12} className="shrink-0" /> : null}
+      {!isCurrent && !disabled && !checkout.isPending ? (
+        <ArrowRight size={12} className="shrink-0" />
+      ) : null}
     </button>
   );
 };
@@ -365,7 +385,18 @@ const SuitePlanCard: React.FC<{
   includedSeatLimit: number;
   ownerEmail: string;
   isGranted?: boolean;
-}> = ({ plan, cycle, isCurrent, currentTier, seats, includedSeatLimit, ownerEmail, isGranted }) => {
+  planActionsDisabled?: boolean;
+}> = ({
+  plan,
+  cycle,
+  isCurrent,
+  currentTier,
+  seats,
+  includedSeatLimit,
+  ownerEmail,
+  isGranted,
+  planActionsDisabled = false,
+}) => {
   const price = planPrice(plan, cycle);
   const seatSplit = splitIncludedSeats(seats, includedSeatLimit);
   const monthlyTotal = price * seatSplit.billable;
@@ -407,6 +438,8 @@ const SuitePlanCard: React.FC<{
           isGranted={isGranted}
           currentTier={currentTier}
           ownerEmail={ownerEmail}
+          disabled={planActionsDisabled}
+          disabledLabel="Trial mode"
         />
       </div>
 
@@ -481,7 +514,8 @@ const SoloPlanCard: React.FC<{
   isCurrent: boolean;
   isGranted?: boolean;
   ownerEmail: string;
-}> = ({ plan, isCurrent, isGranted, ownerEmail }) => {
+  planActionsDisabled?: boolean;
+}> = ({ plan, isCurrent, isGranted, ownerEmail, planActionsDisabled = false }) => {
   const app = plan.apps[0] ?? plan.slug;
 
   return (
@@ -506,6 +540,8 @@ const SoloPlanCard: React.FC<{
           isCurrent={isCurrent}
           isGranted={isGranted}
           ownerEmail={ownerEmail}
+          disabled={planActionsDisabled}
+          disabledLabel="Trial mode"
         />
       </div>
       <div className="flex items-center justify-between gap-3">
@@ -538,6 +574,7 @@ const PlansSection: React.FC<{
   const seats = billing?.currentSeatCount ?? sub?.seatCount ?? 1;
   const includedSeatLimit = billing?.includedSeatLimit ?? sub?.includedSeatLimit ?? 10;
   const isGranted = Boolean(sub?.isGranted ?? billing?.isGranted);
+  const planActionsDisabled = sub?.status === 'trial' || billing?.status === 'trial';
 
   return (
     <>
@@ -545,8 +582,24 @@ const PlansSection: React.FC<{
         <SectionHeader
           title="Plan suite"
           description="Current plan selected, with monthly and yearly upgrade options."
-          action={<CycleToggle cycle={cycle} onChange={setCycle} />}
+          action={<CycleToggle cycle={cycle} onChange={setCycle} disabled={planActionsDisabled} />}
         />
+        {planActionsDisabled ? (
+          <div
+            className="rounded-xl px-4 py-3 flex items-start gap-2 text-xs"
+            style={{
+              background: 'var(--status-trial-bg)',
+              color: 'var(--status-trial)',
+              border: '1px solid var(--dash-border)',
+            }}
+          >
+            <AlertCircle size={14} className="mt-0.5 shrink-0" />
+            <span>
+              Plan changes are disabled while this account is in trial. Pricing is still being
+              finalized for this test workspace.
+            </span>
+          </div>
+        ) : null}
         {loading ? (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
             {[1, 2, 3].map((i) => (
@@ -570,6 +623,7 @@ const PlansSection: React.FC<{
                 seats={seats}
                 includedSeatLimit={includedSeatLimit}
                 ownerEmail={ownerEmail}
+                planActionsDisabled={planActionsDisabled}
               />
             ))}
           </div>
@@ -600,6 +654,7 @@ const PlansSection: React.FC<{
                 isCurrent={plan.slug === sub?.planSlug}
                 isGranted={isGranted && plan.slug === sub?.planSlug}
                 ownerEmail={ownerEmail}
+                planActionsDisabled={planActionsDisabled}
               />
             ))}
           </div>
