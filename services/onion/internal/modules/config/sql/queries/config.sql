@@ -8,6 +8,13 @@ SELECT
     meta_tags,
     contact_email,
     contact_number,
+    sender_email,
+    website,
+    maps_url,
+    address,
+    city,
+    zipcode,
+    country,
     instagram,
     maintenance_mode,
     maintenance_notice,
@@ -27,6 +34,13 @@ UPDATE config SET
     meta_tags = ?,
     contact_email = ?,
     contact_number = ?,
+    sender_email = ?,
+    website = ?,
+    maps_url = ?,
+    address = ?,
+    city = ?,
+    zipcode = ?,
+    country = ?,
     instagram = ?,
     maintenance_mode = ?,
     maintenance_notice = ?,
@@ -48,6 +62,13 @@ INSERT INTO config (
     meta_tags,
     contact_email,
     contact_number,
+    sender_email,
+    website,
+    maps_url,
+    address,
+    city,
+    zipcode,
+    country,
     instagram,
     maintenance_mode,
     maintenance_notice,
@@ -58,7 +79,7 @@ INSERT INTO config (
     about_content,
     footer_sub_text
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 
 -- name: GetBusinessSlugByOwnerID :one

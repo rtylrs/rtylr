@@ -26,6 +26,13 @@ type UpdateConfigRequest struct {
 	FaviconURL             *string `json:"favicon_url"`
 	ContactEmail           *string `json:"contact_email"`
 	ContactNumber          *string `json:"contact_number"`
+	SenderEmail            *string `json:"sender_email"`
+	Website                *string `json:"website"`
+	MapsURL                *string `json:"maps_url"`
+	Address                *string `json:"address"`
+	City                   *string `json:"city"`
+	Zipcode                *string `json:"zipcode"`
+	Country                *string `json:"country"`
 	Instagram              *string `json:"instagram"`
 	MaintenanceMode        *bool   `json:"maintenance_mode"`
 	MaintenanceNotice      *string `json:"maintenance_notice"`
@@ -38,7 +45,8 @@ type UpdateConfigRequest struct {
 }
 
 type UpdateConfigResponse struct {
-	Message string `json:"message"`
+	Message string         `json:"message"`
+	Config  *ConfigPayload `json:"config,omitempty"`
 }
 
 func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigRequest) (UpdateConfigResponse, *errorModels.ServerError) {
@@ -71,6 +79,13 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 		MetaTags:               current.MetaTags,
 		ContactEmail:           current.ContactEmail,
 		ContactNumber:          current.ContactNumber,
+		SenderEmail:            current.SenderEmail,
+		Website:                current.Website,
+		MapsURL:                current.MapsURL,
+		Address:                current.Address,
+		City:                   current.City,
+		Zipcode:                current.Zipcode,
+		Country:                current.Country,
 		Instagram:              current.Instagram,
 		MaintenanceMode:        current.MaintenanceMode,
 		MaintenanceNotice:      current.MaintenanceNotice,
@@ -96,6 +111,27 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 	}
 	if req.ContactNumber != nil {
 		input.ContactNumber = *req.ContactNumber
+	}
+	if req.SenderEmail != nil {
+		input.SenderEmail = *req.SenderEmail
+	}
+	if req.Website != nil {
+		input.Website = *req.Website
+	}
+	if req.MapsURL != nil {
+		input.MapsURL = *req.MapsURL
+	}
+	if req.Address != nil {
+		input.Address = *req.Address
+	}
+	if req.City != nil {
+		input.City = *req.City
+	}
+	if req.Zipcode != nil {
+		input.Zipcode = *req.Zipcode
+	}
+	if req.Country != nil {
+		input.Country = *req.Country
 	}
 	if req.Instagram != nil {
 		input.Instagram = *req.Instagram
@@ -133,5 +169,36 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 		}
 	}
 
-	return UpdateConfigResponse{Message: "Config updated successfully"}, nil
+	updated := domain.Config{
+		OwnerId:                input.OwnerId,
+		BusinessID:             businessID,
+		SiteName:               input.SiteName,
+		LogoUrl:                input.LogoUrl,
+		FaviconUrl:             input.FaviconUrl,
+		MetaTags:               input.MetaTags,
+		ContactEmail:           input.ContactEmail,
+		ContactNumber:          input.ContactNumber,
+		SenderEmail:            input.SenderEmail,
+		Website:                input.Website,
+		MapsURL:                input.MapsURL,
+		Address:                input.Address,
+		City:                   input.City,
+		Zipcode:                input.Zipcode,
+		Country:                input.Country,
+		Instagram:              input.Instagram,
+		MaintenanceMode:        input.MaintenanceMode,
+		MaintenanceNotice:      input.MaintenanceNotice,
+		AddonsEnabled:          input.AddonsEnabled,
+		EnableReviews:          input.EnableReviews,
+		EnableWishlist:         input.EnableWishlist,
+		EnableNewsletterSignup: input.EnableNewsletterSignup,
+		AboutContent:           input.AboutContent,
+		FooterSubText:          input.FooterSubText,
+		BusinessSlug:           current.BusinessSlug,
+	}
+
+	return UpdateConfigResponse{
+		Message: "Config updated successfully",
+		Config:  newConfigPayload(updated),
+	}, nil
 }

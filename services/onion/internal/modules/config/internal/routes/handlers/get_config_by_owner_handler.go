@@ -67,6 +67,13 @@ type ConfigPayload struct {
 	MetaTags               []string `json:"meta_tags"`
 	ContactEmail           string   `json:"contact_email"`
 	ContactNumber          string   `json:"contact_number"`
+	SenderEmail            string   `json:"sender_email"`
+	Website                string   `json:"website"`
+	MapsURL                string   `json:"maps_url"`
+	Address                string   `json:"address"`
+	City                   string   `json:"city"`
+	Zipcode                string   `json:"zipcode"`
+	Country                string   `json:"country"`
 	Instagram              string   `json:"instagram"`
 	MaintenanceMode        bool     `json:"maintenance_mode"`
 	MaintenanceNotice      string   `json:"maintenance_notice"`
@@ -127,6 +134,13 @@ func newConfigPayload(config domain.Config) *ConfigPayload {
 		MetaTags:               config.MetaTags,
 		ContactEmail:           config.ContactEmail,
 		ContactNumber:          config.ContactNumber,
+		SenderEmail:            config.SenderEmail,
+		Website:                config.Website,
+		MapsURL:                config.MapsURL,
+		Address:                config.Address,
+		City:                   config.City,
+		Zipcode:                config.Zipcode,
+		Country:                config.Country,
 		Instagram:              config.Instagram,
 		MaintenanceMode:        config.MaintenanceMode,
 		MaintenanceNotice:      config.MaintenanceNotice,

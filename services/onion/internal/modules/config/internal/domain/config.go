@@ -11,13 +11,20 @@ var ErrConfigNotFound = errors.New("config not found")
 
 type Config struct {
 	OwnerId                string
-	BusinessID             int64  `json:"business_id"`
+	BusinessID             int64 `json:"business_id"`
 	SiteName               string
 	LogoUrl                string
 	FaviconUrl             string
 	MetaTags               []string
 	ContactEmail           string
 	ContactNumber          string
+	SenderEmail            string
+	Website                string
+	MapsURL                string
+	Address                string
+	City                   string
+	Zipcode                string
+	Country                string
 	Instagram              string
 	MaintenanceMode        bool
 	MaintenanceNotice      string
@@ -43,6 +50,13 @@ func (c *Config) FromRows(row sqlc.GetConfigRow) {
 	}
 	c.ContactEmail = row.ContactEmail
 	c.ContactNumber = row.ContactNumber
+	c.SenderEmail = convert.ToString(row.SenderEmail)
+	c.Website = convert.ToString(row.Website)
+	c.MapsURL = convert.ToString(row.MapsUrl)
+	c.Address = convert.ToString(row.Address)
+	c.City = convert.ToString(row.City)
+	c.Zipcode = convert.ToString(row.Zipcode)
+	c.Country = convert.ToString(row.Country)
 	c.Instagram = convert.ToString(row.Instagram)
 	c.MaintenanceMode = convert.ToBool(row.MaintenanceMode)
 	c.MaintenanceNotice = convert.ToString(row.MaintenanceNotice)
@@ -56,13 +70,20 @@ func (c *Config) FromRows(row sqlc.GetConfigRow) {
 
 type ConfigInput struct {
 	OwnerId                string
-	BusinessID             int64  `json:"business_id"`
+	BusinessID             int64 `json:"business_id"`
 	SiteName               string
 	LogoUrl                string
 	FaviconUrl             string
 	MetaTags               []string
 	ContactEmail           string
 	ContactNumber          string
+	SenderEmail            string
+	Website                string
+	MapsURL                string
+	Address                string
+	City                   string
+	Zipcode                string
+	Country                string
 	Instagram              string
 	MaintenanceMode        bool
 	MaintenanceNotice      string

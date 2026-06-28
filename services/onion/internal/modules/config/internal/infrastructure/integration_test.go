@@ -439,6 +439,14 @@ func TestUpdateConfig_MultipleFieldsRoundTrip(t *testing.T) {
 		OwnerId:        ownerStr,
 		SiteName:       "Multi Field Test",
 		ContactEmail:   "multi@example.com",
+		ContactNumber:  original.ContactNumber,
+		SenderEmail:    "sender@example.com",
+		Website:        "https://example.com",
+		MapsURL:        "https://maps.example.com/store",
+		Address:        "123 Test Street",
+		City:           "Beirut",
+		Zipcode:        "1100",
+		Country:        "Lebanon",
 		FooterSubText:  "Multi Footer",
 		EnableReviews:  true,
 		EnableWishlist: true,
@@ -451,6 +459,14 @@ func TestUpdateConfig_MultipleFieldsRoundTrip(t *testing.T) {
 			OwnerId:        ownerStr,
 			SiteName:       original.SiteName,
 			ContactEmail:   original.ContactEmail,
+			ContactNumber:  original.ContactNumber,
+			SenderEmail:    original.SenderEmail,
+			Website:        original.Website,
+			MapsURL:        original.MapsURL,
+			Address:        original.Address,
+			City:           original.City,
+			Zipcode:        original.Zipcode,
+			Country:        original.Country,
 			FooterSubText:  original.FooterSubText,
 			EnableReviews:  original.EnableReviews,
 			EnableWishlist: original.EnableWishlist,
@@ -466,5 +482,17 @@ func TestUpdateConfig_MultipleFieldsRoundTrip(t *testing.T) {
 	}
 	if updated.ContactEmail != "multi@example.com" {
 		t.Errorf("ContactEmail = %q, want 'multi@example.com'", updated.ContactEmail)
+	}
+	if updated.Website != "https://example.com" {
+		t.Errorf("Website = %q, want 'https://example.com'", updated.Website)
+	}
+	if updated.MapsURL != "https://maps.example.com/store" {
+		t.Errorf("MapsURL = %q, want 'https://maps.example.com/store'", updated.MapsURL)
+	}
+	if updated.SenderEmail != "sender@example.com" {
+		t.Errorf("SenderEmail = %q, want 'sender@example.com'", updated.SenderEmail)
+	}
+	if updated.Address != "123 Test Street" || updated.City != "Beirut" || updated.Zipcode != "1100" || updated.Country != "Lebanon" {
+		t.Errorf("address fields = %q, %q, %q, %q", updated.Address, updated.City, updated.Zipcode, updated.Country)
 	}
 }
