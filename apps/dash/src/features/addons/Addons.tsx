@@ -29,7 +29,11 @@ import { Input } from '../../shared/components/ui';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import { ADDONS_QUERY_KEY, type AddonData, useAddons } from '../../shared/hooks/queries/useAddons';
-import { centsToDisplay, useBillingDetail } from '../../shared/hooks/queries/useSubscription';
+import {
+  centsToDisplay,
+  useBillingDetail,
+  useMySubscription,
+} from '../../shared/hooks/queries/useSubscription';
 
 const ICON_MAP: Record<
   string,
@@ -113,15 +117,20 @@ const Addons: React.FC = () => {
   const navigate = useNavigate();
   const { data: addons = [], isLoading } = useAddons();
   const { data: billing } = useBillingDetail();
+  const { data: sub } = useMySubscription();
   const [searchTerm, setSearchTerm] = useState('');
   const [enablingId, setEnablingId] = useState<string | null>(null);
   const [purchaseTarget, setPurchaseTarget] = useState<AddonData | null>(null);
   const [disableTarget, setDisableTarget] = useState<AddonData | null>(null);
   const [confirmText, setConfirmText] = useState('');
   const [showEnableSuccess, setShowEnableSuccess] = useState<string | null>(null);
+  const isTrialMode = sub?.status === 'trial' || billing?.status === 'trial';
 
   const enableMutation = useMutation({
     mutationFn: async (addonId: string) => {
+      if (isTrialMode) {
+        throw new Error('addons unavailable during trial');
+      }
       setEnablingId(addonId);
       await unwrap(safe.post('/addons/enable', { addonId }));
     },
@@ -141,6 +150,9 @@ const Addons: React.FC = () => {
 
   const disableMutation = useMutation({
     mutationFn: async (addonId: string) => {
+      if (isTrialMode) {
+        throw new Error('addons unavailable during trial');
+      }
       await unwrap(safe.post('/addons/disable', { addonId }));
     },
     onSuccess: () => {
@@ -153,6 +165,9 @@ const Addons: React.FC = () => {
 
   const purchaseMutation = useMutation({
     mutationFn: async (addonId: string) => {
+      if (isTrialMode) {
+        throw new Error('addons unavailable during trial');
+      }
       await unwrap(safe.post('/addons/enable', { addonId }));
     },
     onSuccess: (_, addonId) => {
@@ -214,6 +229,20 @@ const Addons: React.FC = () => {
           </div>
         </div>
 
+        {isTrialMode ? (
+          <div
+            className="rounded-xl px-4 py-3 flex items-center gap-2 text-sm font-semibold"
+            style={{
+              background: 'var(--status-trial-bg)',
+              color: 'var(--status-trial)',
+              border: '1px solid var(--dash-border)',
+            }}
+          >
+            <AlertTriangle size={16} className="shrink-0" />
+            <span>Not available in trial mode</span>
+          </div>
+        ) : null}
+
         {isLoading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
@@ -237,6 +266,7 @@ const Addons: React.FC = () => {
               const manageRoute = getAddonManageRoute(addon.id);
               const isGranted = grantedAddonIds.has(addon.id);
               const handlePaidAddonClick = () => {
+                if (isTrialMode) return;
                 if (addon.isEnabled && manageRoute) {
                   void navigate({ to: manageRoute });
                   return;
@@ -323,19 +353,28 @@ const Addons: React.FC = () => {
                     {!addon.isFree ? (
                       <button
                         onClick={handlePaidAddonClick}
-                        disabled={purchaseMutation.isPending && purchaseTarget?.id === addon.id}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-60"
+                        disabled={
+                          isTrialMode ||
+                          (purchaseMutation.isPending && purchaseTarget?.id === addon.id)
+                        }
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
                         style={{
-                          background: addon.isEnabled ? 'var(--dash-hover)' : '#4583C4',
-                          color: addon.isEnabled ? 'var(--dash-text-muted)' : '#fff',
-                          border: addon.isEnabled ? '1px solid var(--dash-border)' : 'none',
+                          background:
+                            addon.isEnabled || isTrialMode ? 'var(--dash-hover)' : '#4583C4',
+                          color: addon.isEnabled || isTrialMode ? 'var(--dash-text-muted)' : '#fff',
+                          border:
+                            addon.isEnabled || isTrialMode
+                              ? '1px solid var(--dash-border)'
+                              : 'none',
                         }}
                       >
-                        {purchaseMutation.isPending && purchaseTarget?.id === addon.id
-                          ? 'Purchasing...'
-                          : addon.isEnabled
-                            ? 'Manage'
-                            : 'Purchase'}
+                        {isTrialMode
+                          ? 'Trial mode'
+                          : purchaseMutation.isPending && purchaseTarget?.id === addon.id
+                            ? 'Purchasing...'
+                            : addon.isEnabled
+                              ? 'Manage'
+                              : 'Purchase'}
                       </button>
                     ) : isEnabling ? (
                       <div className="flex items-center gap-2 px-3 py-1.5">
@@ -363,23 +402,33 @@ const Addons: React.FC = () => {
                       </div>
                     ) : addon.isEnabled ? (
                       <button
-                        onClick={() => setDisableTarget(addon)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        onClick={() => {
+                          if (!isTrialMode) setDisableTarget(addon);
+                        }}
+                        disabled={isTrialMode}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
                         style={{
                           background: 'var(--dash-hover)',
                           color: 'var(--dash-text-muted)',
                           border: '1px solid var(--dash-border)',
                         }}
                       >
-                        Disable
+                        {isTrialMode ? 'Trial mode' : 'Disable'}
                       </button>
                     ) : (
                       <button
-                        onClick={() => enableMutation.mutate(addon.id)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                        style={{ background: '#4583C4', color: '#fff' }}
+                        onClick={() => {
+                          if (!isTrialMode) enableMutation.mutate(addon.id);
+                        }}
+                        disabled={isTrialMode}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                        style={{
+                          background: isTrialMode ? 'var(--dash-hover)' : '#4583C4',
+                          color: isTrialMode ? 'var(--dash-text-muted)' : '#fff',
+                          border: isTrialMode ? '1px solid var(--dash-border)' : 'none',
+                        }}
                       >
-                        Enable
+                        {isTrialMode ? 'Trial mode' : 'Enable'}
                       </button>
                     )}
                   </div>
@@ -493,12 +542,21 @@ const Addons: React.FC = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={() => purchaseMutation.mutate(purchaseTarget.id)}
-                    disabled={purchaseMutation.isPending}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-60"
-                    style={{ background: '#4583C4', color: '#fff' }}
+                    onClick={() => {
+                      if (!isTrialMode) purchaseMutation.mutate(purchaseTarget.id);
+                    }}
+                    disabled={isTrialMode || purchaseMutation.isPending}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+                    style={{
+                      background: isTrialMode ? 'var(--dash-hover)' : '#4583C4',
+                      color: isTrialMode ? 'var(--dash-text-muted)' : '#fff',
+                    }}
                   >
-                    {purchaseMutation.isPending ? 'Purchasing...' : 'Confirm purchase'}
+                    {isTrialMode
+                      ? 'Trial mode'
+                      : purchaseMutation.isPending
+                        ? 'Purchasing...'
+                        : 'Confirm purchase'}
                   </button>
                 </div>
               </motion.div>
@@ -577,24 +635,33 @@ const Addons: React.FC = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={() => disableMutation.mutate(disableTarget.id)}
-                    disabled={confirmText.toLowerCase() !== CONFIRM_PHRASE}
+                    onClick={() => {
+                      if (!isTrialMode) disableMutation.mutate(disableTarget.id);
+                    }}
+                    disabled={isTrialMode || confirmText.toLowerCase() !== CONFIRM_PHRASE}
                     className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
                     style={{
                       background:
-                        confirmText.toLowerCase() === CONFIRM_PHRASE
+                        !isTrialMode && confirmText.toLowerCase() === CONFIRM_PHRASE
                           ? '#ef4444'
                           : 'var(--dash-hover)',
                       color:
-                        confirmText.toLowerCase() === CONFIRM_PHRASE
+                        !isTrialMode && confirmText.toLowerCase() === CONFIRM_PHRASE
                           ? '#fff'
                           : 'var(--dash-text-dim)',
-                      opacity: confirmText.toLowerCase() === CONFIRM_PHRASE ? 1 : 0.5,
+                      opacity:
+                        !isTrialMode && confirmText.toLowerCase() === CONFIRM_PHRASE ? 1 : 0.5,
                       cursor:
-                        confirmText.toLowerCase() === CONFIRM_PHRASE ? 'pointer' : 'not-allowed',
+                        !isTrialMode && confirmText.toLowerCase() === CONFIRM_PHRASE
+                          ? 'pointer'
+                          : 'not-allowed',
                     }}
                   >
-                    {disableMutation.isPending ? 'Disabling...' : 'Disable'}
+                    {isTrialMode
+                      ? 'Trial mode'
+                      : disableMutation.isPending
+                        ? 'Disabling...'
+                        : 'Disable'}
                   </button>
                 </div>
               </motion.div>
