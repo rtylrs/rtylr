@@ -101,9 +101,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         {visibleSuggestions.length > 0 && (
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(138px, 1fr))',
-              gap: 6,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 7,
               width: '100%',
             }}
           >
@@ -113,14 +113,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
                 type="button"
                 onClick={() => onSuggestion?.(s)}
                 style={{
-                  minHeight: 40,
-                  padding: '8px 9px',
+                  minHeight: 38,
+                  padding: '9px 11px',
                   background: caretTokens.surface,
                   border: `1px solid ${caretTokens.border}`,
                   borderRadius: caretRadius.md,
                   color: caretTokens.text,
                   cursor: 'pointer',
                   textAlign: 'left',
+                  width: '100%',
                 }}
               >
                 <span
