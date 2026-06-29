@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -158,6 +161,86 @@ func (h *GetConfigByOwnerHandler) Validate(_ context.Context, _ *GetConfigByOwne
 	return nil
 }
 
+func parseRequestedBusinessID(req *GetConfigByOwnerRequest) (int64, bool, error) {
+	if req == nil || strings.TrimSpace(req.Owner) == "" {
+		return 0, false, nil
+	}
+
+	businessID, err := strconv.ParseInt(strings.TrimSpace(req.Owner), 10, 64)
+	if err != nil || businessID <= 0 {
+		return 0, false, tenant.ErrNoBusinessScope
+	}
+
+	return businessID, true, nil
+}
+
+func resolveOwnedConfigBusinessID(ctx context.Context, ownerID, requestedBusinessID int64) (int64, error) {
+	db := dbclient.Pool()
+	if db == nil {
+		return 0, tenant.ErrNoBusinessScope
+	}
+
+	var resolved int64
+	if requestedBusinessID > 0 {
+		err := db.QueryRowContext(
+			ctx,
+			`SELECT id FROM businesses WHERE id = ? AND owner_id = ? AND COALESCE(is_active, TRUE) = TRUE LIMIT 1`,
+			requestedBusinessID,
+			ownerID,
+		).Scan(&resolved)
+		if err != nil {
+			return 0, err
+		}
+		return resolved, nil
+	}
+
+	err := db.QueryRowContext(
+		ctx,
+		`SELECT id FROM businesses WHERE owner_id = ? AND COALESCE(is_active, TRUE) = TRUE ORDER BY created_at ASC LIMIT 1`,
+		ownerID,
+	).Scan(&resolved)
+	if err != nil {
+		return 0, err
+	}
+	return resolved, nil
+}
+
+func resolveConfigBusinessID(ctx context.Context, authUser *authPkg.AuthUser, req *GetConfigByOwnerRequest) (int64, *errorModels.ServerError) {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr == nil {
+		return businessID, nil
+	}
+
+	requestedBusinessID, hasRequestedBusinessID, parseErr := parseRequestedBusinessID(req)
+	if parseErr != nil {
+		return 0, errorModels.PermissionDeniedServerError()
+	}
+
+	if strings.EqualFold(authUser.Role, "console_admin") {
+		if !hasRequestedBusinessID {
+			return 0, errorModels.PermissionDeniedServerError()
+		}
+		return requestedBusinessID, nil
+	}
+
+	if !strings.EqualFold(authUser.Role, "owner") || authUser.UserID <= 0 {
+		return 0, errorModels.PermissionDeniedServerError()
+	}
+
+	resolvedBusinessID, err := resolveOwnedConfigBusinessID(ctx, authUser.UserID, requestedBusinessID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, tenant.ErrNoBusinessScope) {
+			return 0, errorModels.PermissionDeniedServerError()
+		}
+		return 0, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to resolve business",
+		}
+	}
+
+	return resolvedBusinessID, nil
+}
+
 func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwnerRequest) (GetConfigByOwnerResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	authUser := device.User
@@ -165,16 +248,9 @@ func (h *GetConfigByOwnerHandler) Serve(ctx context.Context, req *GetConfigByOwn
 		return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
-	if bizErr != nil {
-		if !strings.EqualFold(authUser.Role, "console_admin") || req == nil || req.Owner == "" {
-			return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
-		}
-		ownerBusinessID, parseErr := strconv.ParseInt(req.Owner, 10, 64)
-		if parseErr != nil || ownerBusinessID <= 0 {
-			return GetConfigByOwnerResponse{}, errorModels.PermissionDeniedServerError()
-		}
-		businessID = ownerBusinessID
+	businessID, resolveErr := resolveConfigBusinessID(ctx, authUser, req)
+	if resolveErr != nil {
+		return GetConfigByOwnerResponse{}, resolveErr
 	}
 
 	businessIDStr := strconv.FormatInt(businessID, 10)

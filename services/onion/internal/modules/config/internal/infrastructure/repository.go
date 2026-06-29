@@ -7,11 +7,15 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/convert"
 )
+
+const mysqlDuplicateEntry = 1062
 
 type Repository struct {
 	queries *sqlc.Queries
@@ -205,6 +209,11 @@ func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput)
 		FooterSubText:          sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
 	})
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == mysqlDuplicateEntry {
+			return nil
+		}
+
 		logger.Ctx(ctx).Error("Failed to create config", logger.Error(err))
 
 		return err
