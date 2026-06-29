@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Tooltip,
 } from '../../shared/components/ui';
 import { useUserStore } from '../../shared/stores/userStore';
 import {
@@ -22,14 +23,17 @@ import {
   useSwitchBusiness,
   type OwnedBusiness,
 } from '../../shared/hooks/queries/useBusinesses';
+import { useBillingDetail, useMySubscription } from '../../shared/hooks/queries/useSubscription';
 
 const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
   const { t } = useTranslation();
   const { user } = useUserStore();
   const currentBusinessId = user?.businessId ?? 0;
 
-  const { data, isLoading } = useListMyBusinesses();
+  const { data } = useListMyBusinesses();
   const businesses: OwnedBusiness[] = data?.businesses ?? [];
+  const { data: sub } = useMySubscription();
+  const { data: billing } = useBillingDetail();
 
   const switchMutation = useSwitchBusiness();
   const createMutation = useCreateSubBusiness();
@@ -39,6 +43,7 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
   const [search, setSearch] = useState('');
 
   const currentBusiness = businesses.find((b) => b.id === currentBusinessId);
+  const isTrialMode = sub?.status === 'trial' || billing?.status === 'trial';
 
   // Only surface the search field once the list is long enough to warrant it.
   const showSearch = businesses.length > 5;
@@ -170,10 +175,28 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
               )}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setModalOpen(true)}>
-              <Plus size={13} />
-              {t('businesses.addBusiness')}
-            </DropdownMenuItem>
+            <Tooltip
+              side="right"
+              className="block"
+              disabled={!isTrialMode}
+              content={t('businesses.trialSingleBusinessTooltip')}
+            >
+              <DropdownMenuItem
+                aria-disabled={isTrialMode}
+                className={isTrialMode ? 'cursor-not-allowed opacity-60 hover:bg-transparent' : ''}
+                onClick={(e) => {
+                  if (isTrialMode) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  setModalOpen(true);
+                }}
+              >
+                <Plus size={13} />
+                {t('businesses.addBusiness')}
+              </DropdownMenuItem>
+            </Tooltip>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

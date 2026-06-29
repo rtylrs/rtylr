@@ -11,5 +11,6 @@
   "switchError": "Failed to switch business",
   "createSuccess": "Business created",
   "createError": "Failed to create business",
-  "parentRequired": "Parent business is required"
+  "parentRequired": "Parent business is required",
+  "trialSingleBusinessTooltip": "in trial mode you can only have a single business"
 }

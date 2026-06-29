@@ -103,7 +103,9 @@ const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
       style={{ color: destructive ? undefined : 'var(--dash-text)', ...style }}
       onClick={(e) => {
         onClick?.(e);
-        setOpen(false);
+        if (!e.defaultPrevented) {
+          setOpen(false);
+        }
       }}
       {...props}
     />

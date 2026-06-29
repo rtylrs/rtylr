@@ -11,5 +11,6 @@
   "switchError": "فشل تبديل النشاط التجاري",
   "createSuccess": "تم إنشاء النشاط التجاري",
   "createError": "فشل إنشاء النشاط التجاري",
-  "parentRequired": "النشاط التجاري الأصلي مطلوب"
+  "parentRequired": "النشاط التجاري الأصلي مطلوب",
+  "trialSingleBusinessTooltip": "في وضع التجربة، يمكنك امتلاك نشاط تجاري واحد فقط"
 }

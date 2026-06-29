@@ -19,6 +19,9 @@ export { Separator } from './separator';
 
 export { Skeleton } from './skeleton';
 
+export { Tooltip } from './tooltip';
+export type { TooltipProps, TooltipSide } from './tooltip';
+
 export { Avatar } from './avatar';
 export type { AvatarProps, AvatarSize } from './avatar';
 

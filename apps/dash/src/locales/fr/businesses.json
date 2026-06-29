@@ -11,5 +11,6 @@
   "switchError": "Échec du changement d'entreprise",
   "createSuccess": "Entreprise créée",
   "createError": "Échec de la création de l'entreprise",
-  "parentRequired": "L'entreprise parente est requise"
+  "parentRequired": "L'entreprise parente est requise",
+  "trialSingleBusinessTooltip": "En mode essai, vous ne pouvez avoir qu’une seule entreprise"
 }
