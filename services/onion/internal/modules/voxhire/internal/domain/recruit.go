@@ -82,31 +82,44 @@ type CareerInput struct {
 // Application is the HR-panel view of a candidate application, read from
 // voxire_career_applications.
 type Application struct {
-	ID                 int64      `json:"id"`
-	JobID              int64      `json:"job_id"`
-	Name               string     `json:"name"`
-	Email              string     `json:"email"`
-	Phone              string     `json:"phone"`
-	Location           string     `json:"location"`
-	SalaryExpectation  float64    `json:"salary_expectation"`
-	SalaryCurrency     string     `json:"salary_currency"`
-	Status             string     `json:"status"`
-	WorkHistory        string     `json:"work_history"`
-	Education          string     `json:"education"`
-	ExperienceSummary  string     `json:"experience_summary"`
-	CoverLetter        string     `json:"cover_letter"`
-	HasCV              bool       `json:"has_cv"`
-	CVProcessingStatus string     `json:"cv_processing_status"`
-	CVProcessingError  string     `json:"cv_processing_error"`
-	CVSummary          string     `json:"cv_summary"`
-	CVSearchExcerpt    string     `json:"cv_search_excerpt,omitempty"`
-	CVProfile          CVProfile  `json:"cv_profile,omitempty"`
-	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
-	ReviewRating       int        `json:"review_rating"`
-	ReviewNotes        string     `json:"review_notes"`
-	NextStep           string     `json:"next_step"`
-	ReviewedAt         *time.Time `json:"reviewed_at,omitempty"`
-	CreatedAt          time.Time  `json:"created_at"`
+	ID                 int64       `json:"id"`
+	JobID              int64       `json:"job_id"`
+	Name               string      `json:"name"`
+	Email              string      `json:"email"`
+	Phone              string      `json:"phone"`
+	Location           string      `json:"location"`
+	SalaryExpectation  float64     `json:"salary_expectation"`
+	SalaryCurrency     string      `json:"salary_currency"`
+	Status             string      `json:"status"`
+	WorkHistory        string      `json:"work_history"`
+	Education          string      `json:"education"`
+	ExperienceSummary  string      `json:"experience_summary"`
+	CoverLetter        string      `json:"cover_letter"`
+	HasCV              bool        `json:"has_cv"`
+	CVProcessingStatus string      `json:"cv_processing_status"`
+	CVProcessingError  string      `json:"cv_processing_error"`
+	CVSummary          string      `json:"cv_summary"`
+	CVSearchExcerpt    string      `json:"cv_search_excerpt,omitempty"`
+	CVProfile          CVProfile   `json:"cv_profile,omitempty"`
+	MatchSignal        MatchSignal `json:"match_signal,omitempty"`
+	CVProcessedAt      *time.Time  `json:"cv_processed_at,omitempty"`
+	ReviewRating       int         `json:"review_rating"`
+	ReviewNotes        string      `json:"review_notes"`
+	NextStep           string      `json:"next_step"`
+	ReviewedAt         *time.Time  `json:"reviewed_at,omitempty"`
+	CreatedAt          time.Time   `json:"created_at"`
+}
+
+// MatchSignal is a derived recruiter signal. It is intentionally computed
+// from existing application, role, and CV fields so the admin can rank
+// candidates without another migration or background job.
+type MatchSignal struct {
+	Score        int      `json:"score"`
+	Label        string   `json:"label"`
+	Summary      string   `json:"summary,omitempty"`
+	Strengths    []string `json:"strengths,omitempty"`
+	Risks        []string `json:"risks,omitempty"`
+	MatchedTerms []string `json:"matched_terms,omitempty"`
 }
 
 // ApplicationReviewInput is the recruiter-owned review state for a
@@ -274,26 +287,27 @@ type CandidateFilter struct {
 }
 
 type Candidate struct {
-	Source             string     `json:"source"`
-	ID                 int64      `json:"id"`
-	ApplicationID      int64      `json:"application_id,omitempty"`
-	JobID              int64      `json:"job_id,omitempty"`
-	OpeningTitle       string     `json:"opening_title,omitempty"`
-	Name               string     `json:"name"`
-	Email              string     `json:"email"`
-	Phone              string     `json:"phone,omitempty"`
-	Location           string     `json:"location,omitempty"`
-	Track              string     `json:"track,omitempty"`
-	CurrentRole        string     `json:"current_role,omitempty"`
-	DesiredRoles       string     `json:"desired_roles,omitempty"`
-	Status             string     `json:"status"`
-	CVProcessingStatus string     `json:"cv_processing_status"`
-	CVProcessingError  string     `json:"cv_processing_error,omitempty"`
-	CVSummary          string     `json:"cv_summary,omitempty"`
-	CVSearchExcerpt    string     `json:"cv_search_excerpt,omitempty"`
-	CVProfile          CVProfile  `json:"cv_profile,omitempty"`
-	CreatedAt          time.Time  `json:"created_at"`
-	CVProcessedAt      *time.Time `json:"cv_processed_at,omitempty"`
+	Source             string      `json:"source"`
+	ID                 int64       `json:"id"`
+	ApplicationID      int64       `json:"application_id,omitempty"`
+	JobID              int64       `json:"job_id,omitempty"`
+	OpeningTitle       string      `json:"opening_title,omitempty"`
+	Name               string      `json:"name"`
+	Email              string      `json:"email"`
+	Phone              string      `json:"phone,omitempty"`
+	Location           string      `json:"location,omitempty"`
+	Track              string      `json:"track,omitempty"`
+	CurrentRole        string      `json:"current_role,omitempty"`
+	DesiredRoles       string      `json:"desired_roles,omitempty"`
+	Status             string      `json:"status"`
+	CVProcessingStatus string      `json:"cv_processing_status"`
+	CVProcessingError  string      `json:"cv_processing_error,omitempty"`
+	CVSummary          string      `json:"cv_summary,omitempty"`
+	CVSearchExcerpt    string      `json:"cv_search_excerpt,omitempty"`
+	CVProfile          CVProfile   `json:"cv_profile,omitempty"`
+	MatchSignal        MatchSignal `json:"match_signal,omitempty"`
+	CreatedAt          time.Time   `json:"created_at"`
+	CVProcessedAt      *time.Time  `json:"cv_processed_at,omitempty"`
 }
 
 type CVJob struct {
@@ -346,16 +360,17 @@ type Shortlist struct {
 }
 
 type ShortlistItem struct {
-	ID             int64     `json:"id"`
-	ShortlistID    int64     `json:"shortlist_id"`
-	ApplicationID  int64     `json:"application_id"`
-	CandidateName  string    `json:"candidate_name"`
-	CandidateEmail string    `json:"candidate_email"`
-	Status         string    `json:"status"`
-	Rank           int       `json:"rank"`
-	Notes          string    `json:"notes"`
-	CVProfile      CVProfile `json:"cv_profile,omitempty"`
-	CreatedAt      time.Time `json:"created_at"`
+	ID             int64       `json:"id"`
+	ShortlistID    int64       `json:"shortlist_id"`
+	ApplicationID  int64       `json:"application_id"`
+	CandidateName  string      `json:"candidate_name"`
+	CandidateEmail string      `json:"candidate_email"`
+	Status         string      `json:"status"`
+	Rank           int         `json:"rank"`
+	Notes          string      `json:"notes"`
+	CVProfile      CVProfile   `json:"cv_profile,omitempty"`
+	MatchSignal    MatchSignal `json:"match_signal,omitempty"`
+	CreatedAt      time.Time   `json:"created_at"`
 }
 
 type ShortlistInput struct {

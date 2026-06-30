@@ -201,14 +201,31 @@ func (s *Service) ListCompanyLeads(ctx context.Context) ([]domain.Lead, error) {
 // ListApplications returns the applications for a single opening,
 // filtered/sorted, plus the total matching count.
 func (s *Service) ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error) {
-	return s.repo.ListApplications(ctx, f)
+	apps, total, err := s.repo.ListApplications(ctx, f)
+	if err != nil {
+		return nil, 0, err
+	}
+	var opening *domain.Opening
+	if openings, err := s.repo.ListOpenings(ctx); err == nil {
+		for i := range openings {
+			if openings[i].ID == f.JobID {
+				opening = &openings[i]
+				break
+			}
+		}
+	}
+	return enrichApplicationMatches(apps, opening), total, nil
 }
 
 func (s *Service) ListCandidates(ctx context.Context, f domain.CandidateFilter) ([]domain.Candidate, int64, error) {
 	f.Query = strings.TrimSpace(f.Query)
 	f.Source = strings.ToLower(strings.TrimSpace(f.Source))
 	f.CVStatus = strings.ToLower(strings.TrimSpace(f.CVStatus))
-	return s.repo.ListCandidates(ctx, f)
+	candidates, total, err := s.repo.ListCandidates(ctx, f)
+	if err != nil {
+		return nil, 0, err
+	}
+	return enrichCandidateMatches(candidates), total, nil
 }
 
 func (s *Service) ListCVJobs(ctx context.Context, f domain.CandidateFilter) ([]domain.CVJob, error) {
@@ -295,7 +312,11 @@ func (s *Service) UpdateTask(ctx context.Context, in domain.TaskInput) (*domain.
 }
 
 func (s *Service) ListShortlists(ctx context.Context, jobID int64) ([]domain.Shortlist, error) {
-	return s.repo.ListShortlists(ctx, jobID)
+	shortlists, err := s.repo.ListShortlists(ctx, jobID)
+	if err != nil {
+		return nil, err
+	}
+	return enrichShortlistMatches(shortlists), nil
 }
 
 func (s *Service) CreateShortlist(ctx context.Context, in domain.ShortlistInput) (*domain.Shortlist, error) {
