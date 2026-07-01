@@ -69,6 +69,16 @@ func TestListOrders_ReturnsBothFixtureOrders(t *testing.T) {
 	if len(orders) < 2 {
 		t.Fatalf("expected at least 2 orders, got %d", len(orders))
 	}
+	foundWithItems := false
+	for _, order := range orders {
+		if order.ID == 3301 && len(order.Items) > 0 {
+			foundWithItems = true
+			break
+		}
+	}
+	if !foundWithItems {
+		t.Fatalf("expected listed fixture order 3301 to include purchased items, got %+v", orders)
+	}
 }
 
 func TestCreateLocation_ReturnsPositiveID(t *testing.T) {

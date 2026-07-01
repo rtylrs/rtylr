@@ -395,6 +395,11 @@ func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64
 		return nil, 0, false, err
 	}
 
+	orders, err = r.loadOrderItemsForOrders(ctx, orders)
+	if err != nil {
+		return nil, 0, false, err
+	}
+
 	total, err := r.countOrders(ctx, businessID, sessionID, status, dateFrom, dateTo, search)
 	if err != nil {
 		return nil, 0, false, err
@@ -457,6 +462,94 @@ func (r *Repository) listOrdersRows(ctx context.Context, businessID, sessionID i
 	}
 
 	return orders, hasMore, nil
+}
+
+func (r *Repository) loadOrderItemsForOrders(ctx context.Context, orders []domain.Order) ([]domain.Order, error) {
+	if len(orders) == 0 {
+		return orders, nil
+	}
+
+	orderIDs := make([]int64, 0, len(orders))
+	for _, order := range orders {
+		orderIDs = append(orderIDs, order.ID)
+	}
+
+	query, args, err := sq.
+		Select(
+			"id", "order_id", "COALESCE(menu_item_id,0)", "name", "COALESCE(sku,'')",
+			"quantity", "unit_price", "COALESCE(discount_pct,0)", "COALESCE(discount_amount,0)",
+			"COALESCE(tax_rate,0)", "total", "COALESCE(notes,'')", "COALESCE(status,'pending')",
+			"created_at",
+		).
+		From("pos_order_items").
+		Where(sq.Eq{"order_id": orderIDs}).
+		OrderBy("created_at ASC", "id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list pos order items query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list pos order items", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	itemsByOrderID := make(map[int64][]domain.OrderItem, len(orders))
+	for rows.Next() {
+		var (
+			item           domain.OrderItem
+			quantity       sql.NullString
+			unitPrice      sql.NullString
+			discountPct    sql.NullString
+			discountAmount sql.NullString
+			taxRate        sql.NullString
+			total          sql.NullString
+			status         string
+		)
+
+		if err := rows.Scan(
+			&item.ID,
+			&item.OrderID,
+			&item.MenuItemID,
+			&item.Name,
+			&item.SKU,
+			&quantity,
+			&unitPrice,
+			&discountPct,
+			&discountAmount,
+			&taxRate,
+			&total,
+			&item.Notes,
+			&status,
+			&item.CreatedAt,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan pos order item row", logger.Error(err))
+			return nil, err
+		}
+
+		item.Quantity = decimalToFloat(quantity.String)
+		item.UnitPrice = decimalToFloat(unitPrice.String)
+		item.DiscountPct = decimalToFloat(discountPct.String)
+		item.DiscountAmount = decimalToFloat(discountAmount.String)
+		item.TaxRate = decimalToFloat(taxRate.String)
+		item.Total = decimalToFloat(total.String)
+		item.Status = domain.ItemStatus(status)
+		itemsByOrderID[item.OrderID] = append(itemsByOrderID[item.OrderID], item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	for i := range orders {
+		orders[i].Items = itemsByOrderID[orders[i].ID]
+	}
+
+	return orders, nil
 }
 
 func (r *Repository) countOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string) (int64, error) {
