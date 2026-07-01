@@ -1,0 +1,66 @@
+-- cross-schema read from users — workspace member display names
+-- name: ListWorkspaceMembers :many
+SELECT
+    wm.id, wm.workspace_id, wm.user_id, wm.role, wm.joined_at,
+    COALESCE(u.full_name, '') AS name,
+    COALESCE(u.email, '') AS email
+FROM flow_workspace_members wm
+LEFT JOIN users u ON u.id = wm.user_id
+WHERE wm.workspace_id = ?
+ORDER BY wm.joined_at ASC;
+
+-- name: UpdateWorkspaceMemberRole :exec
+UPDATE flow_workspace_members
+SET role = ?
+WHERE workspace_id = ? AND user_id = ?;
+
+-- name: GetPersonalWorkspaceByOwner :one
+SELECT id
+FROM flow_workspaces
+WHERE owner_id = ? AND is_personal = TRUE
+LIMIT 1;
+
+-- name: CreatePersonalWorkspace :execresult
+INSERT INTO flow_workspaces (owner_id, name, icon, color, is_default, is_personal, created_by)
+VALUES (?, 'Personal', '🏠', '#64C5B9', TRUE, TRUE, ?);
+
+-- cross-schema read from users — project member display names
+-- name: ListProjectMembers :many
+SELECT
+    pm.id, pm.project_id, pm.user_id, pm.role, pm.joined_at,
+    COALESCE(u.full_name, '') AS name,
+    COALESCE(u.email, '') AS email
+FROM flow_project_members pm
+LEFT JOIN users u ON u.id = pm.user_id
+WHERE pm.project_id = ?
+ORDER BY pm.joined_at ASC;
+
+-- name: AddProjectMember :exec
+INSERT INTO flow_project_members (project_id, user_id, role)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE role = VALUES(role);
+
+-- name: RemoveProjectMember :exec
+DELETE FROM flow_project_members
+WHERE project_id = ? AND user_id = ?;
+
+-- name: UpdateProjectMemberRole :exec
+UPDATE flow_project_members
+SET role = ?
+WHERE project_id = ? AND user_id = ?;
+
+-- name: TransferProjectOwnership :exec
+UPDATE flow_projects
+SET owner_id = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: MoveProject :exec
+UPDATE flow_projects
+SET workspace_id = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: GetUserWorkspaceRole :one
+SELECT role
+FROM flow_workspace_members
+WHERE workspace_id = ? AND user_id = ?
+LIMIT 1;

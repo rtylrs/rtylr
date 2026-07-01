@@ -28,8 +28,20 @@ INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, descriptio
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetProjectsByWorkspace :many
-SELECT id, workspace_id, owner_id, business_id, name, description, icon, color, status, start_date, due_date, created_by, created_at, updated_at
-FROM flow_projects WHERE workspace_id = ? AND business_id = ? AND status != 'archived' ORDER BY created_at ASC;
+SELECT
+    p.id, p.workspace_id, p.owner_id, p.business_id, p.name,
+    COALESCE(p.description, '') AS description,
+    COALESCE(p.icon, '') AS icon,
+    COALESCE(p.color, '') AS color,
+    COALESCE(p.status, 'active') AS status,
+    p.start_date, p.due_date,
+    p.created_by, p.created_at, p.updated_at,
+    COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id), 0) AS task_count,
+    COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done'), 0) AS completed_count,
+    COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count
+FROM flow_projects p
+WHERE p.workspace_id = ? AND p.business_id = ?
+ORDER BY p.created_at DESC;
 
 -- name: UpdateProject :exec
 UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status = ?, start_date = ?, due_date = ?

@@ -188,71 +188,47 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 }
 
 func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, businessID int64) ([]domain.Project, error) {
-	// Enriched projection: task_count, completed_count, and member_count
-	// are computed via correlated subqueries so the list view doesn't
-	// need separate fetches per project.
-	q, args, err := sq.
-		Select(
-			"p.id", "p.workspace_id", "p.owner_id", "p.business_id", "p.name",
-			"COALESCE(p.description, '')", "COALESCE(p.icon, '')", "COALESCE(p.color, '')",
-			"COALESCE(p.status, 'active')",
-			"p.start_date", "p.due_date",
-			"p.created_by", "p.created_at", "p.updated_at",
-			"COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id), 0) AS task_count",
-			"COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done'), 0) AS completed_count",
-			"COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count",
-		).
-		From("flow_projects p").
-		Where(sq.Eq{"p.workspace_id": workspaceID, "p.business_id": businessID}).
-		OrderBy("p.created_at DESC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("GetProjectsByWorkspace build failed", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	rows, err := r.queries.GetProjectsByWorkspace(ctx, sqlc.GetProjectsByWorkspaceParams{
+		WorkspaceID: workspaceID,
+		BusinessID:  businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetProjectsByWorkspace failed", logger.Error(err))
 		return nil, err
 	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Warn("GetProjectsByWorkspace close failed", logger.Error(closeErr))
-		}
-	}()
 
-	var projects []domain.Project
-	for rows.Next() {
-		var p domain.Project
-		var startDate, dueDate sql.NullTime
-		var createdAt, updatedAt sql.NullTime
-		if scanErr := rows.Scan(
-			&p.ID, &p.WorkspaceID, &p.OwnerID, &p.BusinessID, &p.Name,
-			&p.Description, &p.Icon, &p.Color, &p.Status,
-			&startDate, &dueDate,
-			&p.CreatedBy, &createdAt, &updatedAt,
-			&p.TaskCount, &p.CompletedCount, &p.MemberCount,
-		); scanErr != nil {
-			logger.Ctx(ctx).Error("GetProjectsByWorkspace scan failed", logger.Error(scanErr))
-			return nil, scanErr
+	projects := make([]domain.Project, 0, len(rows))
+	for _, row := range rows {
+		p := domain.Project{
+			ID:             row.ID,
+			WorkspaceID:    row.WorkspaceID,
+			OwnerID:        row.OwnerID,
+			BusinessID:     row.BusinessID,
+			Name:           row.Name,
+			Description:    row.Description,
+			Icon:           row.Icon,
+			Color:          row.Color,
+			Status:         string(row.Status),
+			CreatedBy:      row.CreatedBy,
+			TaskCount:      int32(countIfaceToInt64(row.TaskCount)),
+			CompletedCount: int32(countIfaceToInt64(row.CompletedCount)),
+			MemberCount:    int32(countIfaceToInt64(row.MemberCount)),
 		}
-		if startDate.Valid {
-			p.StartDate = &startDate.Time
+		if row.StartDate.Valid {
+			p.StartDate = &row.StartDate.Time
 		}
-		if dueDate.Valid {
-			p.DueDate = &dueDate.Time
+		if row.DueDate.Valid {
+			p.DueDate = &row.DueDate.Time
 		}
-		if createdAt.Valid {
-			p.CreatedAt = createdAt.Time
+		if row.CreatedAt.Valid {
+			p.CreatedAt = row.CreatedAt.Time
 		}
-		if updatedAt.Valid {
-			p.UpdatedAt = updatedAt.Time
+		if row.UpdatedAt.Valid {
+			p.UpdatedAt = row.UpdatedAt.Time
 		}
 		projects = append(projects, p)
 	}
-	return projects, rows.Err()
+	return projects, nil
 }
 
 func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error {
@@ -584,20 +560,7 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 // comment handlers to route realtime events to the correct task topic
 // before the row disappears.
 func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int64, error) {
-	q, args, err := sq.
-		Select("task_id").
-		From("flow_comments").
-		Where(sq.Eq{"id": commentID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
-	var taskID int64
-	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&taskID); err != nil {
-		return 0, err
-	}
-	return taskID, nil
+	return r.queries.GetCommentTaskID(ctx, commentID)
 }
 
 // ─────────────────────────────────────────────
@@ -788,19 +751,17 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64
 }
 
 func (r *Repository) UpdateLabel(ctx context.Context, id, actorID int64, input domain.LabelInput) error {
-	q, args, err := sq.
-		Update("flow_labels").
-		Set("name", input.Name).
-		Set("color", input.Color).
-		Where(sq.Eq{"id": id}).
-		Where(workspaceMemberPredicate("flow_labels"), actorID, actorID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("UpdateLabel build failed", logger.Error(err))
-		return err
+	color := input.Color
+	if color == "" {
+		color = "#6366f1"
 	}
-	res, err := r.pool.ExecContext(ctx, q, args...)
+	res, err := r.queries.UpdateLabel(ctx, sqlc.UpdateLabelParams{
+		Name:    input.Name,
+		Color:   color,
+		ID:      id,
+		OwnerID: actorID,
+		UserID:  actorID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateLabel failed", logger.Error(err))
 		return err
@@ -809,17 +770,11 @@ func (r *Repository) UpdateLabel(ctx context.Context, id, actorID int64, input d
 }
 
 func (r *Repository) DeleteLabel(ctx context.Context, id, actorID int64) error {
-	q, args, err := sq.
-		Delete("flow_labels").
-		Where(sq.Eq{"id": id}).
-		Where(workspaceMemberPredicate("flow_labels"), actorID, actorID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteLabel build failed", logger.Error(err))
-		return err
-	}
-	res, err := r.pool.ExecContext(ctx, q, args...)
+	res, err := r.queries.DeleteLabel(ctx, sqlc.DeleteLabelParams{
+		ID:      id,
+		OwnerID: actorID,
+		UserID:  actorID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteLabel failed", logger.Error(err))
 		return err
@@ -828,22 +783,16 @@ func (r *Repository) DeleteLabel(ctx context.Context, id, actorID int64) error {
 }
 
 func (r *Repository) SetTaskLabels(ctx context.Context, taskID, actorID int64, labelIDs []int64) error {
-	b, err := json.Marshal(labelIDs)
+	labelsJSON, err := json.Marshal(labelIDs)
 	if err != nil {
 		return err
 	}
-	q, args, err := sq.
-		Update("flow_tasks").
-		Set("labels", b).
-		Where(sq.Eq{"id": taskID}).
-		Where(workspaceMemberPredicate("flow_tasks"), actorID, actorID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("SetTaskLabels build failed", logger.Error(err))
-		return err
-	}
-	res, err := r.pool.ExecContext(ctx, q, args...)
+	res, err := r.queries.SetTaskLabels(ctx, sqlc.SetTaskLabelsParams{
+		Labels:  labelsJSON,
+		ID:      taskID,
+		OwnerID: actorID,
+		UserID:  actorID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("SetTaskLabels failed", logger.Error(err))
 		return err
@@ -856,51 +805,23 @@ func (r *Repository) SetTaskLabels(ctx context.Context, taskID, actorID int64, l
 // ─────────────────────────────────────────────
 
 func (r *Repository) GetTimeLogTaskID(ctx context.Context, id int64) (int64, error) {
-	q, args, err := sq.
-		Select("task_id").
-		From("flow_time_logs").
-		Where(sq.Eq{"id": id}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
-	var taskID int64
-	err = r.pool.QueryRowContext(ctx, q, args...).Scan(&taskID)
-	return taskID, err
+	return r.queries.GetTimeLogTaskID(ctx, id)
 }
 
 func (r *Repository) DeleteTimeLog(ctx context.Context, id, userID int64) error {
-	q, args, err := sq.
-		Delete("flow_time_logs").
-		Where(sq.Eq{"id": id, "user_id": userID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.DeleteTimeLog(ctx, sqlc.DeleteTimeLogParams{ID: id, UserID: userID})
 	if err != nil {
-		logger.Ctx(ctx).Error("DeleteTimeLog build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("DeleteTimeLog failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) RecalcActualHours(ctx context.Context, taskID int64) error {
-	q, args, err := sq.
-		Update("flow_tasks").
-		Set("actual_hours", sq.Expr(
-			`(SELECT COALESCE(SUM(duration_minutes), 0) / 60.0 FROM flow_time_logs WHERE task_id = ?)`,
-			taskID,
-		)).
-		Where(sq.Eq{"id": taskID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.RecalcActualHours(ctx, sqlc.RecalcActualHoursParams{
+		TaskID: taskID,
+		ID:     taskID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("RecalcActualHours build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("RecalcActualHours failed", logger.Error(err))
 	}
 	return err
@@ -1181,94 +1102,53 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 // ─────────────────────────────────────────────
 
 func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID int64) ([]domain.WorkspaceMember, error) {
-	q, args, err := sq.
-		Select(
-			"wm.id", "wm.workspace_id", "wm.user_id", "wm.role", "wm.invited_by", "wm.joined_at",
-			"COALESCE(u.full_name, '') AS name", "COALESCE(u.email, '') AS email",
-		).
-		From("flow_workspace_members wm").
-		LeftJoin("users u ON u.id = wm.user_id").
-		Where(sq.Eq{"wm.workspace_id": workspaceID}).
-		OrderBy("wm.joined_at ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("ListWorkspaceMembers build failed", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	// cross-schema read from users — workspace member display names
+	rows, err := r.queries.ListWorkspaceMembers(ctx, workspaceID)
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkspaceMembers failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var members []domain.WorkspaceMember
-	for rows.Next() {
-		var m domain.WorkspaceMember
-		var invitedBy sql.NullInt64
-		if err := rows.Scan(&m.ID, &m.WorkspaceID, &m.UserID, &m.Role, &invitedBy, &m.JoinedAt, &m.Name, &m.Email); err != nil {
-			return nil, err
-		}
-		if invitedBy.Valid {
-			m.InvitedBy = &invitedBy.Int64
-		}
-		members = append(members, m)
+	members := make([]domain.WorkspaceMember, 0, len(rows))
+	for _, row := range rows {
+		members = append(members, domain.WorkspaceMember{
+			ID:          row.ID,
+			WorkspaceID: row.WorkspaceID,
+			UserID:      row.UserID,
+			Role:        string(row.Role.FlowWorkspaceMembersRole),
+			JoinedAt:    row.JoinedAt.Time,
+			Name:        row.Name,
+			Email:       row.Email,
+		})
 	}
-	return members, rows.Err()
+	return members, nil
 }
 
 func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain.UpdateWorkspaceMemberRoleInput) error {
-	q, args, err := sq.
-		Update("flow_workspace_members").
-		Set("role", input.Role).
-		Where(sq.Eq{"workspace_id": input.WorkspaceID, "user_id": input.UserID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.UpdateWorkspaceMemberRole(ctx, sqlc.UpdateWorkspaceMemberRoleParams{
+		Role:        sqlc.NullFlowWorkspaceMembersRole{FlowWorkspaceMembersRole: sqlc.FlowWorkspaceMembersRole(input.Role), Valid: true},
+		WorkspaceID: input.WorkspaceID,
+		UserID:      input.UserID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("UpdateWorkspaceMemberRole build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("UpdateWorkspaceMemberRole failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
-	// Idempotent: do nothing if personal workspace already exists for this user
-	existingQ, existingArgs, err := sq.
-		Select("id").
-		From("flow_workspaces").
-		Where(sq.Eq{"owner_id": userID}).
-		Where("is_personal = TRUE").
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("CreatePersonalWorkspace build failed", logger.Error(err))
-		return 0, err
-	}
-	var existing int64
-	if scanErr := r.pool.QueryRowContext(ctx, existingQ, existingArgs...).Scan(&existing); scanErr != nil && !errors.Is(scanErr, sql.ErrNoRows) {
-		logger.Ctx(ctx).Warn("CreatePersonalWorkspace lookup failed", logger.Error(scanErr))
-	}
-	if existing > 0 {
+	existing, err := r.queries.GetPersonalWorkspaceByOwner(ctx, userID)
+	if err == nil && existing > 0 {
 		return existing, nil
 	}
-
-	insertQ, insertArgs, err := sq.
-		Insert("flow_workspaces").
-		Columns("owner_id", "name", "icon", "color", "is_default", "is_personal", "created_by").
-		Values(userID, "Personal", "🏠", "#64C5B9", true, true, userID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("CreatePersonalWorkspace insert build failed", logger.Error(err))
-		return 0, err
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("CreatePersonalWorkspace lookup failed", logger.Error(err))
 	}
-	res, err := r.pool.ExecContext(ctx, insertQ, insertArgs...)
+
+	res, err := r.queries.CreatePersonalWorkspace(ctx, sqlc.CreatePersonalWorkspaceParams{
+		OwnerID:   userID,
+		CreatedBy: userID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreatePersonalWorkspace failed", logger.Error(err))
 		return 0, err
@@ -1279,20 +1159,12 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) 
 		return 0, err
 	}
 
-	// Add creator as manager
-	memberQ, memberArgs, err := sq.
-		Insert("flow_workspace_members").
-		Columns("workspace_id", "user_id", "role").
-		Values(id, userID, "manager").
-		Suffix("ON DUPLICATE KEY UPDATE role = VALUES(role)").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Warn("CreatePersonalWorkspace member build failed", logger.Error(err))
-		return id, nil
-	}
-	if _, memberErr := r.pool.ExecContext(ctx, memberQ, memberArgs...); memberErr != nil {
-		logger.Ctx(ctx).Warn("CreatePersonalWorkspace add member failed", logger.Error(memberErr))
+	if addErr := r.queries.AddWorkspaceMember(ctx, sqlc.AddWorkspaceMemberParams{
+		WorkspaceID: id,
+		UserID:      userID,
+		Role:        sqlc.NullFlowWorkspaceMembersRole{FlowWorkspaceMembersRole: sqlc.FlowWorkspaceMembersRoleAdmin, Valid: true},
+	}); addErr != nil {
+		logger.Ctx(ctx).Warn("CreatePersonalWorkspace add member failed", logger.Error(addErr))
 	}
 	return id, nil
 }
@@ -1302,42 +1174,25 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) 
 // ─────────────────────────────────────────────
 
 func (r *Repository) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
-	q, args, err := sq.
-		Select(
-			"pm.id", "pm.project_id", "pm.user_id", "pm.role", "pm.added_by", "pm.joined_at",
-			"COALESCE(u.full_name, '') AS name", "COALESCE(u.email, '') AS email",
-		).
-		From("flow_project_members pm").
-		LeftJoin("users u ON u.id = pm.user_id").
-		Where(sq.Eq{"pm.project_id": projectID}).
-		OrderBy("pm.joined_at ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("ListProjectMembers build failed", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	rows, err := r.queries.ListProjectMembers(ctx, projectID)
 	if err != nil {
 		logger.Ctx(ctx).Error("ListProjectMembers failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var members []domain.ProjectMember
-	for rows.Next() {
-		var m domain.ProjectMember
-		var addedBy sql.NullInt64
-		if err := rows.Scan(&m.ID, &m.ProjectID, &m.UserID, &m.Role, &addedBy, &m.AddedAt, &m.Name, &m.Email); err != nil {
-			return nil, err
-		}
-		if addedBy.Valid {
-			m.AddedBy = &addedBy.Int64
-		}
-		members = append(members, m)
+	members := make([]domain.ProjectMember, 0, len(rows))
+	for _, row := range rows {
+		members = append(members, domain.ProjectMember{
+			ID:        row.ID,
+			ProjectID: row.ProjectID,
+			UserID:    row.UserID,
+			Role:      string(row.Role.FlowProjectMembersRole),
+			AddedAt:   row.JoinedAt.Time,
+			Name:      row.Name,
+			Email:     row.Email,
+		})
 	}
-	return members, rows.Err()
+	return members, nil
 }
 
 func (r *Repository) AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error {
@@ -1345,153 +1200,113 @@ func (r *Repository) AddProjectMember(ctx context.Context, input domain.AddProje
 	if role == "" {
 		role = "member"
 	}
-	q, args, err := sq.
-		Insert("flow_project_members").
-		Columns("project_id", "user_id", "role", "added_by").
-		Values(input.ProjectID, input.UserID, role, input.AddedBy).
-		Suffix("ON DUPLICATE KEY UPDATE role = VALUES(role), added_by = VALUES(added_by)").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.AddProjectMember(ctx, sqlc.AddProjectMemberParams{
+		ProjectID: input.ProjectID,
+		UserID:    input.UserID,
+		Role:      sqlc.NullFlowProjectMembersRole{FlowProjectMembersRole: sqlc.FlowProjectMembersRole(role), Valid: true},
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("AddProjectMember build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("AddProjectMember failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) RemoveProjectMember(ctx context.Context, input domain.RemoveProjectMemberInput) error {
-	q, args, err := sq.
-		Delete("flow_project_members").
-		Where(sq.Eq{"project_id": input.ProjectID, "user_id": input.UserID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.RemoveProjectMember(ctx, sqlc.RemoveProjectMemberParams{
+		ProjectID: input.ProjectID,
+		UserID:    input.UserID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("RemoveProjectMember build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("RemoveProjectMember failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error {
-	q, args, err := sq.
-		Update("flow_project_members").
-		Set("role", input.Role).
-		Where(sq.Eq{"project_id": input.ProjectID, "user_id": input.UserID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.UpdateProjectMemberRole(ctx, sqlc.UpdateProjectMemberRoleParams{
+		Role:      sqlc.NullFlowProjectMembersRole{FlowProjectMembersRole: sqlc.FlowProjectMembersRole(input.Role), Valid: true},
+		ProjectID: input.ProjectID,
+		UserID:    input.UserID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("UpdateProjectMemberRole build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("UpdateProjectMemberRole failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) TransferProjectOwnership(ctx context.Context, input domain.TransferProjectOwnershipInput) error {
-	q, args, err := sq.
-		Update("flow_projects").
-		Set("owner_id", input.NewOwnerID).
-		Where(sq.Eq{"id": input.ProjectID, "owner_id": input.CallerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.TransferProjectOwnership(ctx, sqlc.TransferProjectOwnershipParams{
+		OwnerID:   input.NewOwnerID,
+		ID:        input.ProjectID,
+		OwnerID_2: input.CallerID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("TransferProjectOwnership build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("TransferProjectOwnership failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {
-	q, args, err := sq.
-		Update("flow_projects").
-		Set("workspace_id", input.WorkspaceID).
-		Where(sq.Eq{"id": input.ProjectID, "owner_id": input.CallerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.MoveProject(ctx, sqlc.MoveProjectParams{
+		WorkspaceID: input.WorkspaceID,
+		ID:          input.ProjectID,
+		OwnerID:     input.CallerID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("MoveProject build failed", logger.Error(err))
-		return err
-	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("MoveProject failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, userID int64) (string, error) {
-	q, args, err := sq.
-		Select("role").
-		From("flow_workspace_members").
-		Where(sq.Eq{"workspace_id": workspaceID, "user_id": userID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	role, err := r.queries.GetUserWorkspaceRole(ctx, sqlc.GetUserWorkspaceRoleParams{
+		WorkspaceID: workspaceID,
+		UserID:      userID,
+	})
 	if err != nil {
 		return "", err
 	}
-	var role string
-	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&role); err != nil {
-		return "", err
+	if !role.Valid {
+		return "", sql.ErrNoRows
 	}
-	return role, nil
+	return string(role.FlowWorkspaceMembersRole), nil
 }
 
 // ─── Project Columns ─────────────────────────────────────────────────────────
 
 func (r *Repository) GetColumnsByProject(ctx context.Context, projectID int64) ([]domain.ProjectColumn, error) {
-	q, args, err := sq.
-		Select("id", "project_id", "workspace_id", "name", "color", "sort_order", "created_by", "created_at", "updated_at").
-		From("flow_project_columns").
-		Where(sq.Eq{"project_id": projectID}).
-		OrderBy("sort_order ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("GetColumnsByProject build failed", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	rows, err := r.queries.GetColumnsByProject(ctx, projectID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetColumnsByProject failed", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var cols []domain.ProjectColumn
-	for rows.Next() {
-		var c domain.ProjectColumn
-		if err := rows.Scan(&c.ID, &c.ProjectID, &c.WorkspaceID, &c.Name, &c.Color,
-			&c.SortOrder, &c.CreatedBy, &c.CreatedAt, &c.UpdatedAt); err != nil {
-			return nil, err
-		}
-		cols = append(cols, c)
+	cols := make([]domain.ProjectColumn, 0, len(rows))
+	for _, row := range rows {
+		cols = append(cols, domain.ProjectColumn{
+			ID:          row.ID,
+			ProjectID:   row.ProjectID,
+			WorkspaceID: row.WorkspaceID,
+			Name:        row.Name,
+			Color:       row.Color.String,
+			SortOrder:   int(row.SortOrder.Int32),
+			CreatedBy:   row.CreatedBy,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+		})
 	}
-	return cols, rows.Err()
+	return cols, nil
 }
 
 func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (int64, error) {
-	q, args, err := sq.
-		Insert("flow_project_columns").
-		Columns("project_id", "workspace_id", "name", "color", "sort_order", "created_by").
-		Values(input.ProjectID, input.WorkspaceID, input.Name, input.Color, input.SortOrder, input.CreatedBy).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("CreateColumn build failed", logger.Error(err))
-		return 0, err
-	}
-	res, err := r.pool.ExecContext(ctx, q, args...)
+	res, err := r.queries.CreateColumn(ctx, sqlc.CreateColumnParams{
+		ProjectID:   input.ProjectID,
+		WorkspaceID: input.WorkspaceID,
+		Name:        input.Name,
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		CreatedBy:   input.CreatedBy,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateColumn failed", logger.Error(err))
 		return 0, err
@@ -1500,21 +1315,14 @@ func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColum
 }
 
 func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
-	q, args, err := sq.
-		Update("flow_project_columns").
-		Set("name", input.Name).
-		Set("color", input.Color).
-		Set("sort_order", input.SortOrder).
-		Set("updated_at", sq.Expr("NOW()")).
-		Where(sq.Eq{"id": input.ID}).
-		Where(workspaceMemberPredicate("flow_project_columns"), input.ActorID, input.ActorID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("UpdateColumn build failed", logger.Error(err))
-		return err
-	}
-	res, err := r.pool.ExecContext(ctx, q, args...)
+	res, err := r.queries.UpdateColumn(ctx, sqlc.UpdateColumnParams{
+		Name:      input.Name,
+		Color:     sql.NullString{String: input.Color, Valid: input.Color != ""},
+		SortOrder: sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		ID:        input.ID,
+		OwnerID:   input.ActorID,
+		UserID:    input.ActorID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateColumn failed", logger.Error(err))
 		return err
@@ -1523,33 +1331,19 @@ func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjec
 }
 
 func (r *Repository) DeleteColumn(ctx context.Context, id, actorID int64) error {
-	// Null out section_id for tasks in this column before deleting
-	clearQ, clearArgs, err := sq.
-		Update("flow_tasks").
-		Set("section_id", nil).
-		Where(sq.Eq{"section_id": id}).
-		Where(workspaceMemberPredicate("flow_tasks"), actorID, actorID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteColumn clear build failed", logger.Error(err))
-		return err
-	}
-	if _, err := r.pool.ExecContext(ctx, clearQ, clearArgs...); err != nil {
+	if err := r.queries.ClearTasksSectionID(ctx, sqlc.ClearTasksSectionIDParams{
+		SectionID: sql.NullInt64{Int64: id, Valid: true},
+		OwnerID:   actorID,
+		UserID:    actorID,
+	}); err != nil {
 		return err
 	}
 
-	delQ, delArgs, err := sq.
-		Delete("flow_project_columns").
-		Where(sq.Eq{"id": id}).
-		Where(workspaceMemberPredicate("flow_project_columns"), actorID, actorID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteColumn build failed", logger.Error(err))
-		return err
-	}
-	res, err := r.pool.ExecContext(ctx, delQ, delArgs...)
+	res, err := r.queries.DeleteColumn(ctx, sqlc.DeleteColumnParams{
+		ID:      id,
+		OwnerID: actorID,
+		UserID:  actorID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteColumn failed", logger.Error(err))
 		return err
@@ -1558,26 +1352,17 @@ func (r *Repository) DeleteColumn(ctx context.Context, id, actorID int64) error 
 }
 
 func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error {
-	var sectionVal interface{}
-	if columnID == 0 {
-		sectionVal = nil
-	} else {
-		sectionVal = columnID
+	var sectionID sql.NullInt64
+	if columnID != 0 {
+		sectionID = sql.NullInt64{Int64: columnID, Valid: true}
 	}
-	q, args, err := sq.
-		Update("flow_tasks").
-		Set("section_id", sectionVal).
-		Set("updated_at", sq.Expr("NOW()")).
-		Where(sq.Eq{"id": taskID}).
-		Where(workspaceMemberPredicate("flow_tasks"), actorID, actorID).
-		Where("(? = 0 OR EXISTS (SELECT 1 FROM flow_project_columns c WHERE c.id = ? AND c.workspace_id = flow_tasks.workspace_id))", columnID, columnID).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("MoveTaskToColumn build failed", logger.Error(err))
-		return err
-	}
-	res, err := r.pool.ExecContext(ctx, q, args...)
+	res, err := r.queries.MoveTaskToColumn(ctx, sqlc.MoveTaskToColumnParams{
+		SectionID: sectionID,
+		ID:        taskID,
+		OwnerID:   actorID,
+		UserID:    actorID,
+		ColumnID:  columnID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
 		return err
@@ -1608,11 +1393,14 @@ func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspac
 		{"Done", "#22c55e", 3},
 	}
 	for _, d := range defaults {
-		if _, err := r.pool.ExecContext(ctx,
-			`INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)
-			 VALUES (?, ?, ?, ?, ?, ?)`,
-			projectID, workspaceID, d.name, d.color, d.sortOrder, createdBy,
-		); err != nil {
+		if _, err := r.queries.SeedDefaultColumn(ctx, sqlc.SeedDefaultColumnParams{
+			ProjectID:   projectID,
+			WorkspaceID: workspaceID,
+			Name:        d.name,
+			Color:       sql.NullString{String: d.color, Valid: true},
+			SortOrder:   sql.NullInt32{Int32: int32(d.sortOrder), Valid: true},
+			CreatedBy:   createdBy,
+		}); err != nil {
 			return err
 		}
 	}
@@ -1657,8 +1445,7 @@ func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q strin
 // ─────────────────────────────────────────────
 
 func (r *Repository) LookupUserByEmail(ctx context.Context, email string) (int64, bool, error) {
-	var id int64
-	err := r.pool.QueryRowContext(ctx, `SELECT id FROM users WHERE email = ? LIMIT 1`, email).Scan(&id)
+	id, err := r.queries.LookupUserByEmail(ctx, email)
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, false, nil
 	}
@@ -1681,99 +1468,66 @@ func (r *Repository) IsWorkspaceMember(ctx context.Context, userID, workspaceID 
 	if userID == 0 || workspaceID == 0 {
 		return false
 	}
-	var exists int
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT 1 FROM flow_workspaces WHERE id = ? AND owner_id = ?
-		UNION
-		SELECT 1 FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?
-		LIMIT 1`,
-		workspaceID, userID, workspaceID, userID,
-	).Scan(&exists)
+	member, err := r.queries.IsWorkspaceMember(ctx, sqlc.IsWorkspaceMemberParams{
+		ID:          workspaceID,
+		OwnerID:     userID,
+		WorkspaceID: workspaceID,
+		UserID:      userID,
+	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("IsWorkspaceMember check failed", logger.Error(err))
 	}
-	return exists == 1
+	return member.Bool
 }
 
-// GetMyTasksProject returns the id and current name of the caller's
-// auto-provisioned personal project inside a workspace, or (0, "") if none
-// exists. Identified by name — "My Tasks" now, with "Inbox" recognised as the
-// legacy name so existing data is reused (the service migrates it on access).
 func (r *Repository) GetMyTasksProject(ctx context.Context, userID, workspaceID int64) (int64, string) {
-	var id int64
-	var name string
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT id, name FROM flow_projects
-		 WHERE owner_id = ? AND workspace_id = ? AND name IN ('My Tasks', 'Inbox')
-		 ORDER BY (name = 'My Tasks') DESC, created_at ASC LIMIT 1`,
-		userID, workspaceID,
-	).Scan(&id, &name)
+	row, err := r.queries.GetMyTasksProject(ctx, sqlc.GetMyTasksProjectParams{
+		OwnerID:     userID,
+		WorkspaceID: workspaceID,
+	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("GetMyTasksProject failed", logger.Error(err))
+		return 0, ""
 	}
-	return id, name
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, ""
+	}
+	return row.ID, row.Name
 }
 
-// RenameProject updates a project's name. Used to migrate the legacy "Inbox"
-// personal project to "My Tasks" on access.
 func (r *Repository) RenameProject(ctx context.Context, projectID int64, name string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_projects SET name = ? WHERE id = ?`, name, projectID)
-	return err
+	return r.queries.RenameProject(ctx, sqlc.RenameProjectParams{Name: name, ID: projectID})
 }
 
-// GetProjectWorkspace returns the workspace id of the given project, or
-// 0 if the project doesn't exist. Used by the realtime publish paths.
 func (r *Repository) GetProjectWorkspace(ctx context.Context, projectID int64) int64 {
-	var workspaceID int64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT workspace_id FROM flow_projects WHERE id = ? LIMIT 1`,
-		projectID,
-	).Scan(&workspaceID)
+	workspaceID, err := r.queries.GetProjectWorkspace(ctx, projectID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("GetProjectWorkspace failed", logger.Error(err))
 	}
 	return workspaceID
 }
 
-// GetColumnProject returns the project id that owns the given column,
-// or 0 if the column is missing. Used by the realtime publish paths to
-// find the correct topic when the handler only has the column id
-// (update/delete).
 func (r *Repository) GetColumnProject(ctx context.Context, columnID int64) int64 {
-	var projectID int64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT project_id FROM flow_project_columns WHERE id = ? LIMIT 1`,
-		columnID,
-	).Scan(&projectID)
+	projectID, err := r.queries.GetColumnProject(ctx, columnID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("GetColumnProject failed", logger.Error(err))
 	}
 	return projectID
 }
 
-// IsProjectMember returns true when the user can access the project —
-// either because they're listed on flow_project_members or because they
-// belong to the project's workspace. This matches the read-access model
-// the REST endpoints enforce.
 func (r *Repository) IsProjectMember(ctx context.Context, userID, projectID int64) bool {
 	if userID == 0 || projectID == 0 {
 		return false
 	}
-	var exists int
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT 1 FROM flow_project_members WHERE project_id = ? AND user_id = ?
-		UNION
-		SELECT 1
-		FROM flow_projects p
-		LEFT JOIN flow_workspace_members wm
-		  ON wm.workspace_id = p.workspace_id AND wm.user_id = ?
-		WHERE p.id = ? AND (p.owner_id = ? OR wm.user_id IS NOT NULL)
-		LIMIT 1`,
-		projectID, userID, userID, projectID, userID,
-	).Scan(&exists)
+	member, err := r.queries.IsProjectMember(ctx, sqlc.IsProjectMemberParams{
+		ProjectID: projectID,
+		UserID:    userID,
+		UserID_2:  userID,
+		ID:        projectID,
+		OwnerID:   userID,
+	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("IsProjectMember check failed", logger.Error(err))
 	}
-	return exists == 1
+	return member.Bool
 }

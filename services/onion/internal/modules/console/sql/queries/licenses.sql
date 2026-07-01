@@ -1,5 +1,38 @@
 -- name: GetSelfHostLicenseByKey :one
-SELECT id, license_key, owner_id, status, created_at
+SELECT status, expires_at, grace_until
 FROM self_host_licenses
-WHERE license_key = ?
+WHERE key_hash = ?
 LIMIT 1;
+
+-- name: GetSelfHostLicenseByID :one
+SELECT id, owner_email, customer_name, plan, features, seat_limit, expires_at, grace_until,
+       status, license_key, key_hash, created_by, updated_by, created_at, updated_at,
+       regenerated_at, revoked_at
+FROM self_host_licenses
+WHERE id = ?
+LIMIT 1;
+
+-- name: GetSelfHostLicenseByOwnerEmail :one
+SELECT id, owner_email, customer_name, plan, features, seat_limit, expires_at, grace_until,
+       status, license_key, key_hash, created_by, updated_by, created_at, updated_at,
+       regenerated_at, revoked_at
+FROM self_host_licenses
+WHERE LOWER(owner_email) = LOWER(?)
+LIMIT 1;
+
+-- name: CreateSelfHostLicense :execresult
+INSERT INTO self_host_licenses (
+    owner_email, customer_name, plan, features, seat_limit, expires_at, grace_until,
+    license_key, key_hash, created_by, updated_by
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: RegenerateSelfHostLicenseKey :execrows
+UPDATE self_host_licenses
+SET license_key = ?, key_hash = ?, status = 'active', updated_by = ?,
+    regenerated_at = CURRENT_TIMESTAMP, revoked_at = NULL
+WHERE id = ?;
+
+-- name: RevokeSelfHostLicense :execrows
+UPDATE self_host_licenses
+SET status = 'revoked', updated_by = ?, revoked_at = CURRENT_TIMESTAMP
+WHERE id = ?;
