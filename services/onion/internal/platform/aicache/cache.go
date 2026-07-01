@@ -17,6 +17,7 @@ import (
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
+	aicachesqlc "github.com/voxire/onion/internal/platform/aicache/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -423,30 +424,23 @@ func persistAnalyticsEventToDB(record analyticsEventRecord) {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	_, err := db.ExecContext(ctx, `
-		INSERT INTO ai_cache_events (
-			event_id, occurred_at, outcome, mode, provider, reason, cache_key_preview,
-			business_id, user_id, prompt_chars, response_chars, provider_tokens,
-			estimated_savings_tokens, latency_ms
-		)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		ON DUPLICATE KEY UPDATE event_id = event_id
-	`,
-		record.ID,
-		event.At.UTC(),
-		event.Outcome,
-		event.Mode,
-		nullableString(event.Provider),
-		nullableString(event.Reason),
-		nullableString(event.CacheKeyPreview),
-		nullableInt64(event.BusinessID),
-		nullableInt64(event.UserID),
-		nullableInt(event.PromptChars),
-		nullableInt(event.ResponseChars),
-		nullableInt(event.ProviderTokens),
-		nullableInt(event.EstimatedSavings),
-		nullableInt64(event.LatencyMs),
-	)
+	queries := aicachesqlc.New(db)
+	err := queries.InsertAICacheEvent(ctx, aicachesqlc.InsertAICacheEventParams{
+		EventID:                record.ID,
+		OccurredAt:             event.At.UTC(),
+		Outcome:                event.Outcome,
+		Mode:                   event.Mode,
+		Provider:               nullSQLString(event.Provider),
+		Reason:                 nullSQLString(event.Reason),
+		CacheKeyPreview:        nullSQLString(event.CacheKeyPreview),
+		BusinessID:             nullSQLInt64(event.BusinessID),
+		UserID:                 nullSQLInt64(event.UserID),
+		PromptChars:            nullSQLInt32(event.PromptChars),
+		ResponseChars:          nullSQLInt32(event.ResponseChars),
+		ProviderTokens:         nullSQLInt32(event.ProviderTokens),
+		EstimatedSavingsTokens: nullSQLInt32(event.EstimatedSavings),
+		LatencyMs:              nullSQLInt64(event.LatencyMs),
+	})
 	if err != nil {
 		logger.Global().Debug("could not persist AI cache analytics event", logger.Error(err))
 	}
@@ -497,40 +491,69 @@ func persistentDatabaseSnapshot() (AnalyticsSnapshot, bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
 	defer cancel()
 
-	rows, err := db.QueryContext(ctx, `
-		SELECT
-			occurred_at, outcome, mode, provider, reason, cache_key_preview,
-			business_id, user_id, prompt_chars, response_chars, provider_tokens,
-			estimated_savings_tokens, latency_ms
-		FROM ai_cache_events
-		WHERE occurred_at >= ?
-		ORDER BY occurred_at DESC
-		LIMIT ?
-	`, time.Now().UTC().Add(-analyticsEventTTL), maxAnalyticsEvents)
+	rows, err := aicachesqlc.New(db).ListRecentAICacheEvents(ctx, aicachesqlc.ListRecentAICacheEventsParams{
+		OccurredAt: time.Now().UTC().Add(-analyticsEventTTL),
+		Limit:      int32(maxAnalyticsEvents),
+	})
 	if err != nil {
 		logger.Global().Debug("could not load AI cache analytics events", logger.Error(err))
 		return AnalyticsSnapshot{}, false
 	}
-	defer rows.Close()
 
 	events := make([]Event, 0, maxAnalyticsEvents)
-	for rows.Next() {
-		event, scanErr := scanAnalyticsEvent(rows)
+	for _, row := range rows {
+		event, scanErr := eventFromAICacheRow(row)
 		if scanErr != nil {
 			logger.Global().Debug("could not scan AI cache analytics event", logger.Error(scanErr))
 			continue
 		}
 		events = append(events, normalizeEvent(event))
 	}
-	if err := rows.Err(); err != nil {
-		logger.Global().Debug("could not iterate AI cache analytics events", logger.Error(err))
-		return AnalyticsSnapshot{}, false
-	}
 	if len(events) == 0 {
 		return AnalyticsSnapshot{}, false
 	}
 
 	return withAnalyticsSource(snapshotFromEvents(events), analyticsSourceDB, true), true
+}
+
+func eventFromAICacheRow(row aicachesqlc.ListRecentAICacheEventsRow) (Event, error) {
+	event := Event{
+		At:              row.OccurredAt,
+		Outcome:         row.Outcome,
+		Mode:            row.Mode,
+		Provider:        row.Provider.String,
+		Reason:          row.Reason.String,
+		CacheKeyPreview: row.CacheKeyPreview.String,
+		BusinessID:      row.BusinessID.Int64,
+		UserID:          row.UserID.Int64,
+		PromptChars:     int(row.PromptChars.Int32),
+		ResponseChars:   int(row.ResponseChars.Int32),
+		ProviderTokens:  int(row.ProviderTokens.Int32),
+		EstimatedSavings: int(row.EstimatedSavingsTokens.Int32),
+		LatencyMs:       row.LatencyMs.Int64,
+	}
+	return event, nil
+}
+
+func nullSQLString(value string) sql.NullString {
+	if strings.TrimSpace(value) == "" {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: value, Valid: true}
+}
+
+func nullSQLInt32(value int) sql.NullInt32 {
+	if value == 0 {
+		return sql.NullInt32{}
+	}
+	return sql.NullInt32{Int32: int32(value), Valid: true}
+}
+
+func nullSQLInt64(value int64) sql.NullInt64 {
+	if value == 0 {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: value, Valid: true}
 }
 
 func scanAnalyticsEvent(rows *sql.Rows) (Event, error) {

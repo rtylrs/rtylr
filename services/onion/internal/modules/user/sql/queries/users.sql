@@ -42,7 +42,7 @@ SELECT business_id FROM users WHERE id = ?;
 UPDATE users SET business_id = ? WHERE id = ?;
 
 -- name: GetBusinessOwnerID :one
-SELECT owner_id FROM businesses WHERE id = ?;
+SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1;
 
 -- name: GetUserAppRole :one
 SELECT role FROM user_app_permissions WHERE business_id = ? AND user_id = ?;
@@ -61,3 +61,14 @@ ON DUPLICATE KEY UPDATE
   status = VALUES(status),
   trial_ends_at = VALUES(trial_ends_at),
   updated_at = CURRENT_TIMESTAMP;
+
+-- cross-schema write to hr_core — every user is also an hr_employees row
+-- name: EnsureEmployeeForUser :exec
+INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
+SELECT ?, COALESCE(u.business_id, 0), u.id,
+       COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
+       CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
+       u.email, 'active'
+FROM users u
+WHERE u.id = ?
+  AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);

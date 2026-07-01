@@ -9,6 +9,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type Repository struct {
@@ -22,15 +23,14 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
-	var businessID sql.NullInt64
-	err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id = ?", userID).Scan(&businessID)
+	businessID, err := tenant.ResolveBusinessID(ctx, 0, userID)
 	if err != nil {
+		if errors.Is(err, tenant.ErrNoBusinessScope) {
+			return 0, nil
+		}
 		return 0, err
 	}
-	if !businessID.Valid {
-		return 0, nil
-	}
-	return businessID.Int64, nil
+	return businessID, nil
 }
 
 // GetEnabledAddons returns addon IDs that are enabled for the given business.

@@ -38,4 +38,5 @@ func RegisterStatusRoutes(ctx context.Context, r *chi.Mux) {
 func initializeStatusProviders() {
 	status.RegisterProvider(providers.NewCacheStatusProvider())
 	status.RegisterProvider(providers.NewDatabaseStatusProvider())
+	status.RegisterProvider(providers.NewTrinoStatusProvider())
 }

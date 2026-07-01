@@ -40,6 +40,9 @@ SELECT id, email, COALESCE(full_name,'') AS full_name FROM users WHERE email = ?
 -- name: GetUserByID :one
 SELECT email, COALESCE(full_name,'') AS full_name, is_console_admin FROM users WHERE id = ?;
 
+-- name: GetUserBusinessID :one
+SELECT business_id FROM users WHERE id = ?;
+
 -- name: CreateUser :execresult
 INSERT INTO users (email, password_hash, full_name) VALUES (?, ?, ?);
 
@@ -115,3 +118,14 @@ ORDER BY ar.created_at DESC;
 -- name: CreateHubNotification :exec
 INSERT INTO hub_notifications (owner_id, user_id, title, body, type, link)
 VALUES (?, ?, ?, ?, ?, ?);
+
+-- cross-schema write to hr_core — every invited user is also an hr_employees row
+-- name: EnsureEmployeeForUser :exec
+INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
+SELECT ?, COALESCE(u.business_id, 0), u.id,
+       COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
+       CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
+       u.email, 'active'
+FROM users u
+WHERE u.id = ?
+  AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);

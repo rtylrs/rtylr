@@ -107,6 +107,18 @@ type AppConfig struct {
 	RedisEnabled           bool
 	InMemoryCacheMaxSizeMb int
 
+	// Trino analytics warehouse (optional)
+	TrinoEnabled     bool
+	TrinoHost        string
+	TrinoPort        string
+	TrinoUser        string
+	TrinoPassword    string
+	TrinoAccessToken string
+	TrinoCatalog     string
+	TrinoSchema      string
+	TrinoTLS         bool
+	TrinoSource      string
+
 	// Paddle
 	PaddleAPIKey        string
 	PaddleWebhookSecret string
@@ -277,6 +289,18 @@ func LoadAndValidate() (*AppConfig, error) {
 		RedisPassword:          os.Getenv("REDIS_PASSWORD"),
 		RedisEnabled:           strings.ToLower(os.Getenv("REDIS_ENABLED")) == "true",
 		InMemoryCacheMaxSizeMb: inMemoryCacheMaxSizeMb,
+
+		// Trino analytics warehouse (optional)
+		TrinoEnabled:     strings.ToLower(strings.TrimSpace(os.Getenv("TRINO_ENABLED"))) == "true",
+		TrinoHost:        strings.TrimSpace(os.Getenv("TRINO_HOST")),
+		TrinoPort:        strings.TrimSpace(os.Getenv("TRINO_PORT")),
+		TrinoUser:        strings.TrimSpace(os.Getenv("TRINO_USER")),
+		TrinoPassword:    os.Getenv("TRINO_PASSWORD"),
+		TrinoAccessToken: os.Getenv("TRINO_ACCESS_TOKEN"),
+		TrinoCatalog:     strings.TrimSpace(os.Getenv("TRINO_CATALOG")),
+		TrinoSchema:      strings.TrimSpace(os.Getenv("TRINO_SCHEMA")),
+		TrinoTLS:         strings.EqualFold(strings.TrimSpace(os.Getenv("TRINO_TLS")), "true"),
+		TrinoSource:      strings.TrimSpace(os.Getenv("TRINO_SOURCE")),
 
 		// Paddle
 		PaddleAPIKey:        os.Getenv("PADDLE_API_KEY"),

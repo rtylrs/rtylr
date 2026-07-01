@@ -7,10 +7,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	customersyncsqlc "github.com/voxire/onion/internal/platform/customer_sync/persistence/sqlc"
 )
 
 type DBTX interface {
 	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
+	PrepareContext(context.Context, string) (*sql.Stmt, error)
+	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
 	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
 }
 
@@ -37,44 +41,36 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact C
 
 	firstName, lastName := splitCustomerName(name, email, phone)
 	totalSpent := strconv.FormatFloat(contact.TotalSpent, 'f', 2, 64)
-	visitCount := 0
+	visitCount := int32(0)
 	var lastVisit sql.NullTime
 	if contact.CountVisit {
 		visitCount = 1
 		lastVisit = sql.NullTime{Time: time.Now().UTC(), Valid: true}
 	}
 
-	var customerID int64
-	err := db.QueryRowContext(ctx,
-		`SELECT id FROM crm_customers
-		 WHERE business_id = ?
-		   AND ((? <> '' AND LOWER(email) = LOWER(?)) OR (? <> '' AND phone = ?))
-		 ORDER BY CASE WHEN ? <> '' AND LOWER(email) = LOWER(?) THEN 0 ELSE 1 END
-		 LIMIT 1`,
-		businessID, email, email, phone, phone, email, email).Scan(&customerID)
+	queries := customersyncsqlc.New(db)
+	customerID, err := queries.FindCRMCustomerByContact(ctx, customersyncsqlc.FindCRMCustomerByContactParams{
+		BusinessID: businessID,
+		Email:      email,
+		PhoneInput: nullString(phone),
+	})
 	if errors.Is(err, sql.ErrNoRows) {
-		var ownerID int64
-		if lookupErr := db.QueryRowContext(ctx,
-			`SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1`,
-			businessID,
-		).Scan(&ownerID); lookupErr != nil {
+		ownerID, lookupErr := queries.GetActiveBusinessOwnerID(ctx, businessID)
+		if lookupErr != nil {
 			return 0, lookupErr
 		}
 
-		result, insertErr := db.ExecContext(ctx,
-			`INSERT INTO crm_customers
-			 (owner_id, business_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'bronze', JSON_ARRAY(), TRUE)`,
-			ownerID,
-			businessID,
-			firstName,
-			nullString(lastName),
-			nullString(email),
-			nullString(phone),
-			totalSpent,
-			visitCount,
-			lastVisit,
-		)
+		result, insertErr := queries.InsertCRMCustomerFromSync(ctx, customersyncsqlc.InsertCRMCustomerFromSyncParams{
+			OwnerID:     ownerID,
+			BusinessID:  businessID,
+			FirstName:   firstName,
+			LastName:    nullString(lastName),
+			Email:       nullString(email),
+			Phone:       nullString(phone),
+			TotalSpent:  sql.NullString{String: totalSpent, Valid: true},
+			VisitCount:  sql.NullInt32{Int32: visitCount, Valid: true},
+			LastVisitAt: lastVisit,
+		})
 		if insertErr != nil {
 			return 0, insertErr
 		}
@@ -84,27 +80,22 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact C
 		return 0, err
 	}
 
-	_, err = db.ExecContext(ctx,
-		`UPDATE crm_customers
-		 SET first_name = CASE WHEN ? <> '' THEN ? ELSE first_name END,
-		     last_name = CASE WHEN ? <> '' THEN ? ELSE last_name END,
-		     email = CASE WHEN ? <> '' THEN ? ELSE email END,
-		     phone = CASE WHEN ? <> '' THEN ? ELSE phone END,
-		     total_spent = total_spent + ?,
-		     visit_count = visit_count + ?,
-		     last_visit_at = CASE WHEN ? THEN ? ELSE last_visit_at END,
-		     is_active = TRUE
-		 WHERE business_id = ? AND id = ?`,
-		firstName, firstName,
-		lastName, lastName,
-		email, email,
-		phone, phone,
-		totalSpent,
-		visitCount,
-		contact.CountVisit,
-		lastVisit,
-		businessID, customerID,
-	)
+	updateLastVisit := sql.NullTime{}
+	if contact.CountVisit {
+		updateLastVisit = lastVisit
+	}
+
+	err = queries.UpdateCRMCustomerFromSync(ctx, customersyncsqlc.UpdateCRMCustomerFromSyncParams{
+		FirstName:       firstName,
+		LastName:        nullString(lastName),
+		Email:           nullString(email),
+		Phone:           nullString(phone),
+		TotalSpentDelta: sql.NullString{String: totalSpent, Valid: true},
+		VisitCountDelta: sql.NullInt32{Int32: visitCount, Valid: true},
+		LastVisitAt:     updateLastVisit,
+		BusinessID:      businessID,
+		CustomerID:      customerID,
+	})
 	if err != nil {
 		return 0, err
 	}

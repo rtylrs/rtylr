@@ -11,7 +11,6 @@ import (
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -175,34 +174,7 @@ func parseRequestedBusinessID(req *GetConfigByOwnerRequest) (int64, bool, error)
 }
 
 func resolveOwnedConfigBusinessID(ctx context.Context, ownerID, requestedBusinessID int64) (int64, error) {
-	db := dbclient.Pool()
-	if db == nil {
-		return 0, tenant.ErrNoBusinessScope
-	}
-
-	var resolved int64
-	if requestedBusinessID > 0 {
-		err := db.QueryRowContext(
-			ctx,
-			`SELECT id FROM businesses WHERE id = ? AND owner_id = ? AND COALESCE(is_active, TRUE) = TRUE LIMIT 1`,
-			requestedBusinessID,
-			ownerID,
-		).Scan(&resolved)
-		if err != nil {
-			return 0, err
-		}
-		return resolved, nil
-	}
-
-	err := db.QueryRowContext(
-		ctx,
-		`SELECT id FROM businesses WHERE owner_id = ? AND COALESCE(is_active, TRUE) = TRUE ORDER BY created_at ASC LIMIT 1`,
-		ownerID,
-	).Scan(&resolved)
-	if err != nil {
-		return 0, err
-	}
-	return resolved, nil
+	return tenant.ResolveOwnedConfigBusinessID(ctx, ownerID, requestedBusinessID)
 }
 
 func resolveConfigBusinessID(ctx context.Context, authUser *authPkg.AuthUser, req *GetConfigByOwnerRequest) (int64, *errorModels.ServerError) {

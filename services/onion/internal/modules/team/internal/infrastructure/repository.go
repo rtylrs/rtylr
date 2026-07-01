@@ -146,8 +146,8 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (string, string,
 }
 
 func (r *Repository) GetUserBusinessID(ctx context.Context, id int64) (int64, error) {
-	var businessID sql.NullInt64
-	if err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id = ?", id).Scan(&businessID); err != nil {
+	businessID, err := r.queries.GetUserBusinessID(ctx, id)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, domain.ErrUserNotFound
 		}
@@ -175,17 +175,10 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 }
 
 func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID int64) error {
-	// cross-schema write to hr_core — every invited user is also an hr_employees row
-	_, err := r.pool.ExecContext(ctx, `
-INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
-SELECT ?, COALESCE(u.business_id, 0), u.id,
-       COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
-       CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
-       u.email, 'active'
-FROM users u
-WHERE u.id = ?
-  AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id)`, ownerID, userID)
-	return err
+	return r.queries.EnsureEmployeeForUser(ctx, sqlc.EnsureEmployeeForUserParams{
+		OwnerID: ownerID,
+		ID:      userID,
+	})
 }
 
 func (r *Repository) UpdateUserProfile(ctx context.Context, userID int64, fullName string) error {

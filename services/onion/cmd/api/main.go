@@ -153,6 +153,7 @@ import (
 	"github.com/voxire/onion/internal/platform/server/probe"
 	"github.com/voxire/onion/internal/platform/server/profiling"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
+	trinoPkg "github.com/voxire/onion/internal/platform/trino"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
@@ -278,6 +279,8 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("cache initialization failed: %w", err)
 	}
+
+	trinoPkg.Connect(ctx)
 
 	ctx, err = jwtutils.InitializeJWT(ctx)
 	if err != nil {
