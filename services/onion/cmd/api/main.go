@@ -691,6 +691,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	accessPolicy.RegisterAnonymousRoutes("/runtime-config")
 	accessPolicy.RegisterAnonymousRoutes("/.well-known/rtylr.json")
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
+	accessPolicy.RegisterAnonymousRoutes("/invalidate-cache")
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
 		nil,

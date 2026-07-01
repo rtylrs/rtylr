@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -18,17 +16,6 @@ const (
 	AuthHeaderKey = "Authorization"
 	BearerPrefix  = "Bearer "
 )
-
-func GetAuthUser(ctx context.Context) (*authPkg.AuthUser, bool) {
-	value := ctx.Value(authPkg.AuthUserKey)
-	if value == nil {
-		return nil, false
-	}
-
-	authUser, ok := value.(*authPkg.AuthUser)
-
-	return authUser, ok
-}
 
 func writeUnauthorizedResponse(w http.ResponseWriter, message string, logoff bool) {
 	w.Header().Set("Content-Type", "application/json")
@@ -108,13 +95,6 @@ func authSuccessLogsEnabled() bool {
 }
 
 func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolver authPkg.TokenValidatorResolver) MiddlewareFunc {
-	var internalToken string
-	if config.GlobalConfig != nil {
-		internalToken = config.GlobalConfig.InternalToken
-	} else {
-		internalToken = os.Getenv("INTERNAL_TOKEN")
-	}
-
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			path := r.URL.Path
@@ -131,13 +111,6 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 			}
 
 			if accessPolicy != nil && accessPolicy.IsAllowedForAgent(userAgent, path) {
-				next.ServeHTTP(w, r)
-
-				return
-			}
-
-			internalTokenHeader := r.Header.Get("Internal-Token")
-			if internalTokenHeader != "" && internalToken != "" && internalTokenHeader == internalToken {
 				next.ServeHTTP(w, r)
 
 				return

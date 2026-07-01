@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/voxire/onion/internal/platform/models"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func GetInvalidationRoutes() []string {
@@ -22,11 +22,12 @@ type Response struct{}
 
 type Handler struct{}
 
-func (c Handler) Serve(ctx context.Context, req *Request) (Response, *models.ServerError) {
+func (c Handler) Serve(ctx context.Context, req *Request) (Response, *errorModels.ServerError) {
 	if ok := InvalidateCacheGroup(ctx, req.InvalidationType, req.IDs); !ok {
-		return Response{}, &models.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "unknown cache invalidation group",
+		return Response{}, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "unknown cache invalidation group",
 		}
 	}
 

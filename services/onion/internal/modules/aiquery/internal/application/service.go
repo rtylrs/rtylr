@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/aiquery/internal/domain"
 	"github.com/voxire/onion/internal/modules/aiquery/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type executor interface {
@@ -61,7 +62,10 @@ func (s *Service) RunJSON(ctx context.Context, businessID, userID int64, specJSO
 	if err := json.Unmarshal([]byte(specJSON), &spec); err != nil {
 		return nil, "", fmt.Errorf("invalid query spec JSON: %w", err)
 	}
-	ownerID := infrastructure.ResolveOwnerID(ctx, businessID, userID)
+	ownerID, err := tenant.ResolveOwnerID(ctx, businessID, userID)
+	if err != nil {
+		return nil, "", err
+	}
 	res, err := s.RunSpec(ctx, ownerID, spec)
 	if err != nil {
 		return nil, "", err

@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/license"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // licenseStatusReporter is the subset of license.CachedValidator the
@@ -76,8 +77,10 @@ func LicenseEnforcementMiddleware(validator licenseStatusReporter, accessPolicy 
 func writeLicenseInvalidResponse(w http.ResponseWriter, status string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusPaymentRequired)
-	_ = json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"error":  "license_invalid",
 		"status": status,
-	})
+	}); err != nil {
+		logger.Global().Warn("failed to encode license invalid response", logger.Error(err))
+	}
 }

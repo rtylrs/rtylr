@@ -8,6 +8,7 @@ import (
 
 	platformconfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/license"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // runtimeApps is the set of rtylr frontend apps a deployment serves. Frontends
@@ -67,7 +68,9 @@ func RegisterRuntimeConfigRoutes(r *chi.Mux, validator *license.CachedValidator)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			logger.Ctx(req.Context()).Warn("failed to encode runtime config response", logger.Error(err))
+		}
 	}
 	r.Get("/runtime-config", handler)
 	r.Get("/.well-known/rtylr.json", handler)

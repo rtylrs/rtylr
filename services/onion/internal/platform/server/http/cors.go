@@ -2,15 +2,10 @@ package http
 
 import (
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/voxire/onion/internal/platform/origins"
 )
-
-func getAllowedOrigins() []*regexp.Regexp {
-	return origins.AllowedPatterns()
-}
 
 func allowedHeaders() []string {
 	return []string{
@@ -41,17 +36,7 @@ func corsMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
-
-			allowed := false
-			allowedOrigins := getAllowedOrigins()
-
-			for _, regex := range allowedOrigins {
-				if regex.MatchString(origin) {
-					allowed = true
-
-					break
-				}
-			}
+			allowed := origins.IsAllowed(origin)
 
 			// The allowed origin is reflected per-request, so the response
 			// varies by Origin. Without this, a shared cache could serve one

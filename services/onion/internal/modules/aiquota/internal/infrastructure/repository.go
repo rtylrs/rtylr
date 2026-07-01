@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/aiquota/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type Repository struct {
@@ -23,13 +24,12 @@ func NewRepository(db *sql.DB) *Repository {
 // every member of a team resolves to the same pool. Falls back to the caller's
 // own user id (owner accounts, or if the lookup fails).
 func (r *Repository) ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64 {
-	if businessID <= 0 {
-		return fallbackUserID
-	}
-	var ownerID int64
-	// cross-schema read from businesses (owned by the user module)
-	err := r.pool.QueryRowContext(ctx, "SELECT owner_id FROM businesses WHERE id = ?", businessID).Scan(&ownerID)
-	if err != nil || ownerID <= 0 {
+	ownerID, err := tenant.ResolveOwnerID(ctx, businessID, fallbackUserID)
+	if err != nil {
+		logger.Ctx(ctx).Warn("failed to resolve owner for AI quota",
+			logger.Any("business_id", businessID),
+			logger.Error(err),
+		)
 		return fallbackUserID
 	}
 	return ownerID
