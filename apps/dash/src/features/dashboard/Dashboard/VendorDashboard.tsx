@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ResponsiveGridLayout, type Layout, type ResponsiveLayouts } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'motion/react';
@@ -42,8 +42,11 @@ type SavedLayoutItem = Record<string, unknown> & {
   maxH?: number;
 };
 type SavedLayout = SavedLayoutItem[];
+type LayoutSignatureItem = Partial<
+  Pick<SavedLayoutItem, 'i' | 'x' | 'y' | 'w' | 'h' | 'minW' | 'minH' | 'maxW' | 'maxH'>
+>;
 
-function layoutSignature(layout: Array<Partial<SavedLayoutItem>> | Layout[] | undefined): string {
+function layoutSignature(layout: ReadonlyArray<LayoutSignatureItem> | undefined): string {
   return JSON.stringify(
     (layout ?? []).map((item) => ({
       i: String(item.i ?? ''),
@@ -85,7 +88,7 @@ const AdminDashboard: React.FC = () => {
   const [activeWidgets, setActiveWidgets] = useState<string[]>(loadActiveWidgets);
   const [showCatalog, setShowCatalog] = useState(false);
 
-  const handleLayoutChange = useCallback((_: Layout[], allLayouts: ResponsiveLayouts) => {
+  const handleLayoutChange = useCallback((_: Layout, allLayouts: ResponsiveLayouts) => {
     const nextLayout = (allLayouts.lg ?? []) as unknown as SavedLayout;
     setLayouts((current) => {
       if (layoutSignature(current.lg) === layoutSignature(nextLayout)) return current;
@@ -150,10 +153,6 @@ const AdminDashboard: React.FC = () => {
     saveActiveWidgets(ids);
     setShowCatalog(false);
   }, []);
-
-  const availableToAdd = useMemo(() => {
-    return WIDGET_CATALOG.filter((w) => !activeWidgets.includes(w.id));
-  }, [activeWidgets]);
 
   return (
     <div ref={containerRef} className="space-y-4 overflow-hidden">
