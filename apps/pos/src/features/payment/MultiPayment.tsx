@@ -1,5 +1,5 @@
 import { unwrap } from '@voxire/api';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -24,6 +24,7 @@ const MultiPaymentScreen: React.FC = () => {
   // come from that order — never the live cart, which is unrelated.
   const [order, setOrder] = useState<Order | null>(null);
   const [loadingOrder, setLoadingOrder] = useState(true);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [tip, setTip] = useState(0);
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
   const [method, setMethod] = useState<PaymentMethod>('cash');
@@ -31,30 +32,47 @@ const MultiPaymentScreen: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const tipsEnabled = useSettingsStore((s) => s.features.tips);
 
+  const loadOrder = useCallback(async (canApply: () => boolean = () => true): Promise<void> => {
+    const id = Number(orderId);
+    setLoadingOrder(true);
+    setOrderError(null);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      if (canApply()) {
+        setOrder(null);
+        setOrderError('This order link is invalid.');
+        setLoadingOrder(false);
+      }
+      return;
+    }
+
+    try {
+      const res = await unwrap(posService.getOrder(id));
+      const normalized = normalizeOrderResponse(res);
+      if (canApply()) {
+        setOrder(normalized);
+        setOrderError(normalized ? null : 'The order response was empty.');
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Could not load the order to charge';
+      if (canApply()) {
+        setOrder(null);
+        setOrderError(message);
+        toast.error(message);
+      }
+    } finally {
+      if (canApply()) setLoadingOrder(false);
+    }
+  }, [orderId]);
+
   useEffect(() => {
     let active = true;
-    void (async () => {
-      const id = Number(orderId);
-      if (!Number.isInteger(id) || id <= 0) {
-        if (active) setLoadingOrder(false);
-        return;
-      }
-      try {
-        const res = await unwrap(posService.getOrder(id));
-        const normalized = normalizeOrderResponse(res);
-        if (active) {
-          setOrder(normalized);
-        }
-      } catch {
-        if (active) toast.error('Could not load the order to charge');
-      } finally {
-        if (active) setLoadingOrder(false);
-      }
-    })();
+    void loadOrder(() => active);
     return () => {
       active = false;
     };
-  }, [orderId]);
+  }, [loadOrder]);
 
   const subtotal = order?.subtotal ?? 0;
   const tax = order?.tax ?? 0;
@@ -118,9 +136,30 @@ const MultiPaymentScreen: React.FC = () => {
   if (!order) {
     return (
       <ScreenLayout title="Payment" subtitle={`Order #${orderId ?? ''}`}>
-        <p className="p-5 text-sm text-pos-muted">
-          Couldn't load this order. Go back and reopen it from the order list.
-        </p>
+        <div className="p-5 space-y-4">
+          <div className="rounded-xl border border-pos-border bg-pos-card p-4">
+            <p className="text-sm font-semibold text-pos-text">Couldn't load this order.</p>
+            <p className="mt-1 text-sm text-pos-muted">
+              {orderError ?? 'Go back and reopen it from the order list.'}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void loadOrder()}
+                className="h-10 px-4 rounded-lg bg-pos-text text-pos-bg text-sm font-bold"
+              >
+                Try again
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/orders')}
+                className="h-10 px-4 rounded-lg bg-white/8 text-pos-text text-sm font-bold hover:bg-white/12"
+              >
+                Back to orders
+              </button>
+            </div>
+          </div>
+        </div>
       </ScreenLayout>
     );
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Banknote, CreditCard, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -173,10 +173,13 @@ const Payment: React.FC = () => {
     }
   };
 
-  if (items.length === 0) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/', { replace: true });
+    }
+  }, [items.length, navigate]);
+
+  if (items.length === 0) return null;
 
   const methods: { id: CheckoutPaymentMethod; label: string; icon: LucideIcon }[] = [
     { id: 'card', label: 'Card', icon: CreditCard },
