@@ -3,21 +3,29 @@ package tenant
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// ResolveOwnerID maps an authenticated business context to the canonical tenant
-// owner id used by ERP/POS tables. It falls back to the caller user id for older
-// tokens, owner accounts without a selected business, and tests without a DB.
-func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64 {
+var ErrOwnerLookupFailed = errors.New("failed to resolve business owner")
+
+// ResolveOwnerID maps a business id to the account owner user id on that
+// business. Prefer ResolveBusinessID for tenant data scoping — owner id is only
+// needed for billing aggregation and legacy owner_id columns.
+//
+// Returns fallbackUserID when businessID is unset, the DB is unavailable, or the
+// business row is missing. Returns an error only when the lookup fails for
+// reasons other than a missing row.
+func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
 	if businessID <= 0 {
-		return fallbackUserID
+		return fallbackUserID, nil
 	}
 
 	db := dbclient.Pool()
 	if db == nil {
-		return fallbackUserID
+		return fallbackUserID, nil
 	}
 
 	var ownerID int64
@@ -26,13 +34,17 @@ func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) int64
 		businessID,
 	).Scan(&ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return fallbackUserID
+		if errors.Is(err, sql.ErrNoRows) {
+			return fallbackUserID, nil
 		}
-		return fallbackUserID
+		logger.Ctx(ctx).Error("failed to resolve owner for business",
+			logger.Any("business_id", businessID),
+			logger.Error(err),
+		)
+		return 0, ErrOwnerLookupFailed
 	}
 	if ownerID <= 0 {
-		return fallbackUserID
+		return fallbackUserID, nil
 	}
-	return ownerID
+	return ownerID, nil
 }

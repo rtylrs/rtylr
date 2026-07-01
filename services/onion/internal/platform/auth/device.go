@@ -10,6 +10,8 @@ import (
 	"github.com/voxire/onion/internal/platform/utils/stringutils"
 )
 
+var desktopAppVersionRegex = regexp.MustCompile(`anghami/([0-9.]+).*electron`)
+
 type deviceCtxKey struct{}
 
 type Device struct {
@@ -347,9 +349,7 @@ func detectOtherPlatforms(userAgent string) string {
 
 func detectPlatformVersion(userAgent, deviceInfo string, isDesktopApp bool) string {
 	if isDesktopApp {
-		regex := regexp.MustCompile(`anghami/([0-9.]+).*electron`)
-
-		desktopAppInfo := regex.FindStringSubmatch(strings.ToLower(userAgent))
+		desktopAppInfo := desktopAppVersionRegex.FindStringSubmatch(strings.ToLower(userAgent))
 		if len(desktopAppInfo) > 1 {
 			return desktopAppInfo[1]
 		}

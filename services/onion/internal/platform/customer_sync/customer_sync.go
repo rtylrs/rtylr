@@ -22,21 +22,9 @@ type Contact struct {
 	CountVisit bool
 }
 
-func UpsertCRMCustomerForBusiness(ctx context.Context, db DBTX, businessID int64, contact Contact) (int64, error) {
+// UpsertCRMCustomer creates or updates a CRM customer scoped to businessID.
+func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact Contact) (int64, error) {
 	if businessID <= 0 {
-		return 0, nil
-	}
-
-	var ownerID int64
-	if err := db.QueryRowContext(ctx, `SELECT owner_id FROM businesses WHERE id = ? LIMIT 1`, businessID).Scan(&ownerID); err != nil {
-		return 0, err
-	}
-
-	return UpsertCRMCustomer(ctx, db, ownerID, contact)
-}
-
-func UpsertCRMCustomer(ctx context.Context, db DBTX, ownerID int64, contact Contact) (int64, error) {
-	if ownerID <= 0 {
 		return 0, nil
 	}
 
@@ -59,17 +47,26 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, ownerID int64, contact Cont
 	var customerID int64
 	err := db.QueryRowContext(ctx,
 		`SELECT id FROM crm_customers
-		 WHERE owner_id = ?
+		 WHERE business_id = ?
 		   AND ((? <> '' AND LOWER(email) = LOWER(?)) OR (? <> '' AND phone = ?))
 		 ORDER BY CASE WHEN ? <> '' AND LOWER(email) = LOWER(?) THEN 0 ELSE 1 END
 		 LIMIT 1`,
-		ownerID, email, email, phone, phone, email, email).Scan(&customerID)
+		businessID, email, email, phone, phone, email, email).Scan(&customerID)
 	if errors.Is(err, sql.ErrNoRows) {
+		var ownerID int64
+		if lookupErr := db.QueryRowContext(ctx,
+			`SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1`,
+			businessID,
+		).Scan(&ownerID); lookupErr != nil {
+			return 0, lookupErr
+		}
+
 		result, insertErr := db.ExecContext(ctx,
 			`INSERT INTO crm_customers
-			 (owner_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'bronze', JSON_ARRAY(), TRUE)`,
+			 (owner_id, business_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'bronze', JSON_ARRAY(), TRUE)`,
 			ownerID,
+			businessID,
 			firstName,
 			nullString(lastName),
 			nullString(email),
@@ -97,7 +94,7 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, ownerID int64, contact Cont
 		     visit_count = visit_count + ?,
 		     last_visit_at = CASE WHEN ? THEN ? ELSE last_visit_at END,
 		     is_active = TRUE
-		 WHERE owner_id = ? AND id = ?`,
+		 WHERE business_id = ? AND id = ?`,
 		firstName, firstName,
 		lastName, lastName,
 		email, email,
@@ -106,7 +103,7 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, ownerID int64, contact Cont
 		visitCount,
 		contact.CountVisit,
 		lastVisit,
-		ownerID, customerID,
+		businessID, customerID,
 	)
 	if err != nil {
 		return 0, err

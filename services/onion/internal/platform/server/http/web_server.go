@@ -38,9 +38,6 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// Hard 15 s request deadline — cancels in-flight DB queries when
 	// the deadline fires. Also logs a warn for requests >5 s.
 	r.Use(RequestTimeoutMiddleware)
-	// Deduplicates mutating requests that carry Idempotency-Key header.
-	// Runs after auth so user-scoped keys work correctly.
-	r.Use(IdempotencyMiddleware)
 	// Counter-only middleware — /metrics itself skips it so a scrape
 	// doesn't inflate its own numbers.
 	r.Use(MetricsMiddleware)

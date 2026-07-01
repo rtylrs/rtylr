@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -159,38 +157,9 @@ import (
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
-// loadDotEnv reads a .env file from the working directory and sets any key=value
-// pairs as environment variables. Missing or unreadable .env files are silently
-// ignored — in production, variables are injected by the container runtime.
+// loadDotEnv is kept as a thin wrapper so existing call sites stay stable.
 func loadDotEnv() {
-	f, err := os.Open(".env")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		key := strings.TrimSpace(parts[0])
-		val := strings.TrimSpace(parts[1])
-		if key == "" {
-			continue
-		}
-		if err := os.Setenv(key, val); err != nil {
-			logger.Global().Warn("could not set env var",
-				logger.String("key", key),
-				logger.Error(err),
-			)
-		}
-	}
+	platformConfig.LoadDotEnv()
 }
 
 func main() {
@@ -758,6 +727,8 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver),
 		authPkg.DeviceMiddleware(),
+		// After auth so idempotency keys are scoped per authenticated user.
+		http.IdempotencyMiddleware,
 		// AFTER auth: gate protected API routes when a self-host license is
 		// invalid. Strict no-op in hosted mode (never consults the validator).
 		http.LicenseEnforcementMiddleware(licenseValidator, accessPolicy),
@@ -789,7 +760,7 @@ func (a apiServer) Setup(ctx context.Context, r *chi.Mux) {
 
 func startAPIServer(ctx context.Context) error {
 	server := apiServer{}
-	return http.Start(ctx, server, "9999")
+	return http.Start(ctx, server, platformConfig.ListenPort("9999"))
 }
 
 func recoverAndLog(ctx context.Context) {

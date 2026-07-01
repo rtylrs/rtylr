@@ -462,15 +462,7 @@ func truncateString(s string, maxLen int) string {
 }
 
 func getRemoteIP(r *http.Request) string {
-	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
-		return strings.Split(ip, ",")[0]
-	}
-
-	if ip := r.Header.Get("X-Real-IP"); ip != "" {
-		return ip
-	}
-
-	return r.RemoteAddr
+	return getClientKey(r)
 }
 
 func formatList(items []string, prefix string) string {

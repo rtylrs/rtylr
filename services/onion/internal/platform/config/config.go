@@ -341,10 +341,6 @@ func LoadAndValidate() (*AppConfig, error) {
 		MetricsPass: os.Getenv("METRICS_PASS"),
 	}
 
-	if cfg.Port == "" {
-		cfg.Port = "9999"
-	}
-
 	if cfg.AuthAppURL == "" {
 		cfg.AuthAppURL = AuthAppURL
 	}

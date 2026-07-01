@@ -4,7 +4,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -42,29 +41,7 @@ type verifyRequest struct {
 }
 
 func loadDotEnv() {
-	file, err := os.Open(".env")
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		key := strings.TrimSpace(parts[0])
-		value := strings.Trim(strings.TrimSpace(parts[1]), `"'`)
-		if key != "" && os.Getenv(key) == "" {
-			_ = os.Setenv(key, value)
-		}
-	}
+	platformconfig.LoadDotEnv()
 }
 
 func (m licenseRunMode) UsesDatabaseHealthCheck() bool {
@@ -181,10 +158,7 @@ func main() {
 	flushSentry := observability.InitSentry(ctx)
 	defer flushSentry()
 
-	port := cfg.Port
-	if os.Getenv("PORT") == "" {
-		port = "8082"
-	}
+	port := platformconfig.ListenPort("8082")
 
 	logger.Ctx(ctx).Info("license runmode starting",
 		logger.String("deployment_mode", cfg.DeploymentMode),

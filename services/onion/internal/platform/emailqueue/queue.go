@@ -175,19 +175,29 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		if newAttempts >= int(job.MaxAttempts) {
 			newStatus = sqlc.EmailJobsStatusFailed
 		}
-		_ = p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
+		if err := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
 			Status:    newStatus,
 			Attempts:  uint8(newAttempts),
 			LastError: sql.NullString{String: sendErr.Error(), Valid: true},
 			JobID:     sql.NullString{}, // NULL resets job_id so it can be retried
 			DATEADD:   retryDelay(newAttempts),
 			ID:        job.ID,
-		})
+		}); err != nil {
+			logger.Ctx(ctx).Error("failed to reschedule email job after send error",
+				logger.Any("job_id", job.ID),
+				logger.Error(err),
+			)
+		}
 	} else {
-		_ = p.q.MarkJobSent(ctx, sqlc.MarkJobSentParams{
+		if err := p.q.MarkJobSent(ctx, sqlc.MarkJobSentParams{
 			Attempts: uint8(int(job.Attempts) + 1),
 			ID:       job.ID,
-		})
+		}); err != nil {
+			logger.Ctx(ctx).Error("failed to mark email job sent",
+				logger.Any("job_id", job.ID),
+				logger.Error(err),
+			)
+		}
 	}
 
 	return true
@@ -199,7 +209,9 @@ func (p *Pool) recoverStuck(ctx context.Context) {
 		logger.Ctx(ctx).Error("stuck job recovery failed", logger.Error(err))
 		return
 	}
-	if n, _ := res.RowsAffected(); n > 0 {
+	if n, err := res.RowsAffected(); err != nil {
+		logger.Ctx(ctx).Warn("could not read stuck job recovery row count", logger.Error(err))
+	} else if n > 0 {
 		logger.Ctx(ctx).Info("recovered stuck email jobs", logger.Int("count", int(n)))
 	}
 }

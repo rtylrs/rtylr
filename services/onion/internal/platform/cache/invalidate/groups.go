@@ -29,11 +29,11 @@ func RegisterDefaultGroups() {
 func patternGroup(t keys.InvalidationType) invalidation.InvalidateFunc {
 	return func(ctx context.Context, ids []string, options ...cacher.ClientOption) {
 		if len(ids) == 0 && t == keys.InvalidateAll {
-			_ = Invalidate(ctx, t, "")
+			Invalidate(ctx, t, "")
 			return
 		}
 		for _, id := range ids {
-			_ = Invalidate(ctx, t, id)
+			Invalidate(ctx, t, id)
 		}
 	}
 }

@@ -99,7 +99,7 @@ func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int6
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, input.BusinessID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, input.BusinessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 	}); err != nil {

@@ -273,14 +273,14 @@ func (r *Repository) GetContact(ctx context.Context, id, businessID int64) (doma
 	return c, nil
 }
 
-func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domain.CreateContactRequest) (domain.Contact, error) {
+func (r *Repository) CreateContact(ctx context.Context, businessID int64, req domain.CreateContactRequest) (domain.Contact, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return domain.Contact{}, err
 	}
 	defer tx.Rollback()
 
-	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  req.Name,
 		Email: req.Email,
 		Phone: req.Phone,
@@ -289,10 +289,18 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 		return domain.Contact{}, err
 	}
 
+	var contactOwnerID int64
+	if err := tx.QueryRowContext(ctx,
+		`SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1`,
+		businessID,
+	).Scan(&contactOwnerID); err != nil {
+		return domain.Contact{}, err
+	}
+
 	query, args, err := sq.
 		Insert("crm_contacts").
 		Columns("owner_id", "business_id", "lead_id", "customer_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
-		Values(ownerID, ownerID, req.LeadID, nullableInt64Value(customerID), req.Name, nullableString(req.Role), nullableString(req.Email),
+		Values(contactOwnerID, businessID, req.LeadID, nullableInt64Value(customerID), req.Name, nullableString(req.Role), nullableString(req.Email),
 			nullableString(req.Phone), nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes)).
 		PlaceholderFormat(sq.Question).
 		ToSql()
@@ -311,7 +319,7 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 	if err := tx.Commit(); err != nil {
 		return domain.Contact{}, err
 	}
-	return r.GetContact(ctx, id, ownerID)
+	return r.GetContact(ctx, id, businessID)
 }
 
 func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error) {

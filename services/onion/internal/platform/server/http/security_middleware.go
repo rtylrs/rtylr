@@ -1,10 +1,13 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type blockedRequest struct {
@@ -65,8 +68,30 @@ func (b *securityBatcher) flushRoutine() {
 
 func (b *securityBatcher) flush() {
 	b.mutex.Lock()
-	defer b.mutex.Unlock()
+	snapshot := b.requests
 	b.requests = make(map[string][]blockedRequest)
+	b.mutex.Unlock()
+
+	if len(snapshot) == 0 {
+		return
+	}
+
+	ctx := context.Background()
+	for ip, reqs := range snapshot {
+		logger.Ctx(ctx).Warn("blocked suspicious requests batch",
+			logger.String("ip", ip),
+			logger.Int("count", len(reqs)),
+		)
+		for _, req := range reqs {
+			logger.Ctx(ctx).Warn("blocked suspicious request",
+				logger.String("ip", req.IP),
+				logger.String("reason", req.Reason),
+				logger.String("method", req.Method),
+				logger.String("path", req.Path),
+				logger.String("user_agent", req.UserAgent),
+			)
+		}
+	}
 }
 
 
@@ -305,7 +330,7 @@ func SecurityMiddleware() MiddlewareFunc {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := getRemoteIP(r)
+			ip := getClientKey(r)
 			userAgent := r.UserAgent()
 			path := r.URL.Path
 			method := r.Method

@@ -63,7 +63,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 	}); err != nil {
@@ -113,7 +113,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
 		Email: input.CustomerEmail,
 	}); err != nil {
@@ -241,7 +241,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 		notes = quoteRow.Notes.String
 	}
 
-	if _, err = customersync.UpsertCRMCustomerForBusiness(ctx, tx, businessID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  quoteRow.CustomerName,
 		Email: customerEmail,
 	}); err != nil {

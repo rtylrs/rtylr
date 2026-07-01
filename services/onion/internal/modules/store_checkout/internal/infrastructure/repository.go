@@ -37,7 +37,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, ownerID int64
 		}
 	}()
 
-	if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Email: input.CustomerEmail,
 	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to sync checkout customer", logger.Error(err))
@@ -91,7 +91,7 @@ func (r *Repository) Complete(ctx context.Context, businessID, id int64, ownerID
 		return err
 	} else {
 		total, _ := strconv.ParseFloat(totalString, 64)
-		if _, err = customersync.UpsertCRMCustomer(ctx, tx, ownerID, customersync.Contact{
+		if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 			Email:      customerEmail.String,
 			TotalSpent: total,
 			CountVisit: true,

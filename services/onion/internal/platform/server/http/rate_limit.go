@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 )
-
-// serverCtx is the context passed by Start() when the HTTP server boots.
 // Rate limiters created before Start is called (e.g. package-level vars)
 // use context.Background() and are effectively immortal — that's fine for
 // singletons that last the whole process.
@@ -182,22 +182,15 @@ func PerRouteRateLimit(limit int, window time.Duration) func(http.Handler) http.
 	})
 }
 
-// AIUserRateLimit returns middleware that rate-limits per authenticated user ID
-// (read from the "userId" JSON field in the request body) for the AI SSE endpoint.
-// It applies a tighter limit than the global limiter so that individual users
-// cannot monopolise the AI generation capacity.
+// AIUserRateLimit returns middleware that rate-limits per authenticated user for
+// the AI SSE endpoint. Falls back to IP when the request is not authenticated.
 //
 // Rollouts:
 //   - /ai/generate-text-stream → 5/min/user  (AI cost control)
-//
-// The userId is taken from the GenerateTextStreamRequest struct (snake_case JSON
-// key "userId") which is already part of the request contract.  If the header
-// X-User-Id is present, that value is preferred to avoid re-parsing the body.
-// Falls back to IP if neither source provides a non-empty value.
 func AIUserRateLimit(limit int, window time.Duration) func(http.Handler) http.Handler {
 	return perRouteRateLimitWithKeyFn(limit, window, func(r *http.Request) string {
-		if uid := r.Header.Get("X-User-Id"); uid != "" {
-			return r.URL.Path + "|user:" + uid
+		if authUser, ok := authPkg.GetAuthUser(r.Context()); ok && authUser.UserID > 0 {
+			return r.URL.Path + "|user:" + strconv.FormatInt(authUser.UserID, 10)
 		}
 		return r.URL.Path + "|" + getClientKey(r)
 	})

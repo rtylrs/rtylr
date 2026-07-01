@@ -6,12 +6,10 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
@@ -26,35 +24,8 @@ import (
 	"github.com/voxire/onion/internal/platform/storage"
 )
 
-// loadDotEnv reads a .env file from the working directory and sets any
-// key=value pairs as environment variables. Missing or unreadable .env files
-// are silently ignored — in production, variables are injected by the runtime.
 func loadDotEnv() {
-	f, err := os.Open(".env")
-	if err != nil {
-		return
-	}
-	defer func() { _ = f.Close() }()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		key := strings.TrimSpace(parts[0])
-		val := strings.TrimSpace(parts[1])
-		if key == "" {
-			continue
-		}
-		if err := os.Setenv(key, val); err != nil {
-			logger.Global().Warn("could not set env var", logger.String("key", key), logger.Error(err))
-		}
-	}
+	platformConfig.LoadDotEnv()
 }
 
 // uploadRunMode wires the CDN routes onto the shared chi router.
@@ -124,10 +95,7 @@ func main() {
 		logger.Ctx(ctx).Warn("media-engine unavailable; image transformations will fail", logger.Error(err))
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	port := platformConfig.ListenPort("8080")
 
 	logger.Ctx(ctx).Info("CDN (upload) runmode starting",
 		logger.String("port", port),
