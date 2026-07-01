@@ -100,8 +100,78 @@ SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?;
 -- name: MarkOnboarded :exec
 UPDATE users SET onboarded = TRUE WHERE id = ?;
 
+-- name: UpdateUserProfile :exec
+UPDATE users SET full_name = ?, updated_at = NOW() WHERE id = ?;
+
+-- name: GetBusinessIDByOwnerID :one
+SELECT id FROM businesses WHERE owner_id = ? LIMIT 1;
+
 -- name: CountActiveMembers :one
-SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1;
+SELECT COUNT(DISTINCT user_id)
+FROM (
+    SELECT b.owner_id AS user_id
+    FROM businesses b
+    JOIN users u ON u.id = b.owner_id
+    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+    UNION
+    SELECT p.user_id AS user_id
+    FROM user_app_permissions p
+    JOIN users u ON u.id = p.user_id
+    WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+    UNION
+    SELECT u.id AS user_id
+    FROM users u
+    JOIN businesses b ON b.id = u.business_id
+    WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
+) active_users;
+
+-- cross-schema read from subscriptions + plans — approved for owner app resolution
+-- name: GetOwnerApps :one
+SELECT p.apps
+FROM subscriptions s
+JOIN plans p ON p.id = s.plan_id
+WHERE s.owner_id = ?;
+
+-- cross-schema read from subscriptions + plans — approved for owner subscription info
+-- name: GetOwnerSubscriptionInfo :one
+SELECT p.slug, s.status
+FROM subscriptions s
+JOIN plans p ON p.id = s.plan_id
+WHERE s.owner_id = ?;
+
+-- cross-schema read from subscriptions — approved for seat period management
+-- name: LockSubscriptionForSeatChange :one
+SELECT s.id, p.price_per_seat_cents
+FROM subscriptions s
+JOIN plans p ON p.id = s.plan_id
+WHERE s.owner_id = ?
+FOR UPDATE;
+
+-- cross-schema write to seat_periods — approved for seat billing accuracy
+-- name: CloseActiveSeatPeriod :exec
+UPDATE seat_periods SET period_end = ?
+WHERE subscription_id = ? AND period_end IS NULL;
+
+-- cross-schema write to seat_periods — approved for seat billing accuracy
+-- name: OpenSeatPeriod :exec
+INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- cross-schema write to subscriptions — approved for seat billing accuracy
+-- name: UpdateSubscriptionSeatCount :exec
+UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?;
+
+-- cross-schema read from hub — approved for business-wide admin notification fan-out
+-- name: ListAdminsAndOwnerUserIDs :many
+SELECT b.owner_id AS user_id
+FROM businesses b
+WHERE b.id = ?
+UNION
+SELECT p.user_id
+FROM user_app_permissions p
+WHERE p.business_id = ?
+  AND p.role IN ('admin', 'owner')
+  AND p.is_active = TRUE;
 
 -- name: ResolveAccessRequest :exec
 UPDATE access_requests SET status = ? WHERE id = ? AND business_id = ?;

@@ -249,7 +249,7 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		}
 	}
 
-	if err := r.replacePrimaryProductImage(ctx, tx, ownerID, id, input.Name, input.ImageURL); err != nil {
+	if err := r.replacePrimaryProductImage(ctx, qtx, ownerID, id, input.Name, input.ImageURL); err != nil {
 		return 0, err
 	}
 
@@ -267,7 +267,9 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 	}
 	defer tx.Rollback()
 
-	currentStock, err := r.lockProductStock(ctx, tx, ownerID, id)
+	qtx := r.queries.WithTx(tx)
+
+	currentStock, err := r.lockProductStock(ctx, qtx, ownerID, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrProductNotFound
@@ -275,7 +277,6 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		return err
 	}
 
-	qtx := r.queries.WithTx(tx)
 	err = qtx.UpdateProduct(ctx, sqlc.UpdateProductParams{
 		CategoryID:        nullInt64(input.CategoryID),
 		SupplierID:        nullInt64(input.SupplierID),
@@ -320,7 +321,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 	}
 
 	if strings.TrimSpace(input.ImageURL) != "" {
-		if err := r.replacePrimaryProductImage(ctx, tx, ownerID, id, input.Name, input.ImageURL); err != nil {
+		if err := r.replacePrimaryProductImage(ctx, qtx, ownerID, id, input.Name, input.ImageURL); err != nil {
 			return err
 		}
 	}
@@ -332,30 +333,32 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 	return nil
 }
 
-func (r *Repository) replacePrimaryProductImage(ctx context.Context, tx *sql.Tx, ownerID, productID int64, alt, imageURL string) error {
+func (r *Repository) replacePrimaryProductImage(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64, alt, imageURL string) error {
 	imageURL = strings.TrimSpace(imageURL)
-	if _, err := tx.ExecContext(ctx,
-		`DELETE FROM erp_product_images WHERE business_id = ? AND product_id = ? AND is_primary = TRUE`,
-		ownerID, productID,
-	); err != nil {
+	if err := qtx.DeletePrimaryProductImage(ctx, sqlc.DeletePrimaryProductImageParams{
+		BusinessID: ownerID,
+		ProductID:  productID,
+	}); err != nil {
 		return err
 	}
 	if imageURL == "" {
 		return nil
 	}
-	_, err := tx.ExecContext(ctx,
-		`INSERT INTO erp_product_images (owner_id, business_id, product_id, url, alt, position, is_primary)
-		 VALUES (?, ?, ?, ?, ?, 0, TRUE)`,
-		ownerID, ownerID, productID, imageURL, nullString(alt),
-	)
-	return err
+	return qtx.InsertPrimaryProductImage(ctx, sqlc.InsertPrimaryProductImageParams{
+		OwnerID:    ownerID,
+		BusinessID: ownerID,
+		ProductID:  productID,
+		Url:        imageURL,
+		Alt:        nullString(alt),
+	})
 }
 
-func (r *Repository) lockProductStock(ctx context.Context, tx *sql.Tx, ownerID, productID int64) (float64, error) {
-	var stock string
-	if err := tx.QueryRowContext(ctx,
-		`SELECT stock_quantity FROM erp_products WHERE business_id = ? AND id = ? FOR UPDATE`,
-		ownerID, productID).Scan(&stock); err != nil {
+func (r *Repository) lockProductStock(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64) (float64, error) {
+	stock, err := qtx.LockProductStockForUpdate(ctx, sqlc.LockProductStockForUpdateParams{
+		BusinessID: ownerID,
+		ID:         productID,
+	})
+	if err != nil {
 		return 0, err
 	}
 	return parseDecimal(stock), nil
@@ -410,26 +413,23 @@ func (r *Repository) DeleteProduct(ctx context.Context, ownerID, id int64) error
 // CountProducts returns the total number of products for the given owner,
 // optionally filtered by category. Pass categoryID=0 to count all categories.
 func (r *Repository) CountProducts(ctx context.Context, ownerID int64, categoryID int) (int64, error) {
-	qb := squirrel.Select("COUNT(*)").
-		From("erp_products").
-		Where(squirrel.Eq{"business_id": ownerID})
-
 	if categoryID > 0 {
-		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
+		count, err := r.queries.CountProductsByCategory(ctx, sqlc.CountProductsByCategoryParams{
+			BusinessID: ownerID,
+			CategoryID: sql.NullInt64{Int64: int64(categoryID), Valid: true},
+		})
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to count products by category", logger.Error(err))
+			return 0, err
+		}
+		return count, nil
 	}
 
-	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
+	count, err := r.queries.CountAllProducts(ctx, ownerID)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build count products query", logger.Error(err))
-		return 0, err
-	}
-
-	var count int64
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
 		logger.Ctx(ctx).Error("Failed to count products", logger.Error(err))
 		return 0, err
 	}
-
 	return count, nil
 }
 

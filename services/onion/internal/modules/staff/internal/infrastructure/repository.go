@@ -234,98 +234,79 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 }
 
 func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
-	businessID := ownerID
-	var s domain.Staff
-	var (
-		userID                sql.NullInt64
-		departmentID          sql.NullInt64
-		phone                 sql.NullString
-		employmentType        sql.NullString
-		statusVal             sql.NullString
-		salary                sql.NullString
-		hourlyRate            sql.NullString
-		overtimeRate          sql.NullString
-		endDate               sql.NullTime
-		address               sql.NullString
-		emergencyContactName  sql.NullString
-		emergencyContactPhone sql.NullString
-		apps                  []byte
-		notes                 sql.NullString
-		createdAt             sql.NullTime
-		updatedAt             sql.NullTime
-	)
-
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT id, owner_id, business_id, user_id, department_id, first_name, last_name, email, phone,
-		       role, employment_type, status, salary, hourly_rate, overtime_rate,
-		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
-		       apps, notes, created_at, updated_at
-		FROM hr_staff
-		WHERE id = ? AND business_id = ?
-	`, staffID, businessID).Scan(
-		&s.ID, &s.OwnerID, &s.BusinessID, &userID, &departmentID,
-		&s.FirstName, &s.LastName, &s.Email, &phone,
-		&s.Role, &employmentType, &statusVal, &salary, &hourlyRate, &overtimeRate,
-		&s.StartDate, &endDate, &address, &emergencyContactName, &emergencyContactPhone,
-		&apps, &notes, &createdAt, &updatedAt,
-	)
+	row, err := r.queries.GetStaffByID(ctx, sqlc.GetStaffByIDParams{
+		ID:         staffID,
+		BusinessID: ownerID,
+	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrStaffNotFound
 		}
 		return nil, err
 	}
-
-	if userID.Valid {
-		s.UserID = userID.Int64
-	}
-	if departmentID.Valid {
-		s.DepartmentID = departmentID.Int64
-	}
-	if phone.Valid {
-		s.Phone = phone.String
-	}
-	if employmentType.Valid {
-		s.EmploymentType = employmentType.String
-	}
-	if statusVal.Valid {
-		s.Status = statusVal.String
-	}
-	if salary.Valid {
-		s.Salary = parseDecimal(salary.String)
-	}
-	if hourlyRate.Valid {
-		s.HourlyRate = parseDecimal(hourlyRate.String)
-	}
-	if overtimeRate.Valid {
-		s.OvertimeRate = parseDecimal(overtimeRate.String)
-	}
-	if endDate.Valid {
-		s.EndDate = endDate.Time
-	}
-	if address.Valid {
-		s.Address = address.String
-	}
-	if emergencyContactName.Valid {
-		s.EmergencyContactName = emergencyContactName.String
-	}
-	if emergencyContactPhone.Valid {
-		s.EmergencyContactPhone = emergencyContactPhone.String
-	}
-	if apps != nil {
-		s.Apps = string(apps)
-	}
-	if notes.Valid {
-		s.Notes = notes.String
-	}
-	if createdAt.Valid {
-		s.CreatedAt = createdAt.Time
-	}
-	if updatedAt.Valid {
-		s.UpdatedAt = updatedAt.Time
-	}
-
+	s := staffFromGetRow(row)
 	return &s, nil
+}
+
+func staffFromGetRow(row sqlc.GetStaffByIDRow) domain.Staff {
+	var s domain.Staff
+	s.ID = row.ID
+	s.OwnerID = row.OwnerID
+	s.BusinessID = row.BusinessID
+	if row.UserID.Valid {
+		s.UserID = row.UserID.Int64
+	}
+	if row.DepartmentID.Valid {
+		s.DepartmentID = row.DepartmentID.Int64
+	}
+	s.FirstName = row.FirstName
+	s.LastName = row.LastName
+	s.Email = row.Email
+	if row.Phone.Valid {
+		s.Phone = row.Phone.String
+	}
+	s.Role = row.Role
+	if row.EmploymentType.Valid {
+		s.EmploymentType = string(row.EmploymentType.HrStaffEmploymentType)
+	}
+	if row.Status.Valid {
+		s.Status = string(row.Status.HrStaffStatus)
+	}
+	if row.Salary.Valid {
+		s.Salary = parseDecimal(row.Salary.String)
+	}
+	if row.HourlyRate.Valid {
+		s.HourlyRate = parseDecimal(row.HourlyRate.String)
+	}
+	if row.OvertimeRate.Valid {
+		s.OvertimeRate = parseDecimal(row.OvertimeRate.String)
+	}
+	s.StartDate = row.StartDate
+	if row.EndDate.Valid {
+		s.EndDate = row.EndDate.Time
+	}
+	if row.Address.Valid {
+		s.Address = row.Address.String
+	}
+	if row.EmergencyContactName.Valid {
+		s.EmergencyContactName = row.EmergencyContactName.String
+	}
+	if row.EmergencyContactPhone.Valid {
+		s.EmergencyContactPhone = row.EmergencyContactPhone.String
+	}
+	if row.Apps != nil {
+		s.Apps = string(row.Apps)
+	}
+	if row.Notes.Valid {
+		s.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		s.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		s.UpdatedAt = row.UpdatedAt.Time
+	}
+	return s
 }
 
 func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error) {
@@ -350,54 +331,58 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 	}
 	defer func() {
 		if p := recover(); p != nil {
-			_ = tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				logger.Ctx(ctx).Error("failed to rollback after create staff panic", logger.Error(rollbackErr))
+			}
 			panic(p)
 		}
 	}()
 
-	result, err := tx.ExecContext(ctx, `
-		INSERT INTO hr_staff
-			(owner_id, business_id, user_id, department_id, first_name, last_name, email, phone, role,
-			 employment_type, status, salary, hourly_rate, overtime_rate, start_date, end_date,
-			 address, emergency_contact_name, emergency_contact_phone, apps, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`,
-		input.OwnerID,
-		input.BusinessID,
-		sql.NullInt64{Int64: input.UserID, Valid: input.UserID != 0},
-		sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
-		input.FirstName,
-		input.LastName,
-		input.Email,
-		sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		input.Role,
-		employmentType,
-		staffStatus,
-		nullDecimal(input.Salary),
-		nullDecimal(input.HourlyRate),
-		nullDecimal(input.OvertimeRate),
-		parseDate(input.StartDate),
-		parseNullDate(input.EndDate),
-		sql.NullString{String: input.Address, Valid: input.Address != ""},
-		sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
-		sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
-		appsJSON,
-		sql.NullString{String: input.Notes, Valid: input.Notes != ""},
-	)
+	qtx := r.queries.WithTx(tx)
+
+	result, err := qtx.CreateStaff(ctx, sqlc.CreateStaffParams{
+		OwnerID:               input.OwnerID,
+		BusinessID:            input.BusinessID,
+		UserID:                sql.NullInt64{Int64: input.UserID, Valid: input.UserID != 0},
+		DepartmentID:          sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		FirstName:             input.FirstName,
+		LastName:              input.LastName,
+		Email:                 input.Email,
+		Phone:                 sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		Role:                  input.Role,
+		EmploymentType:        sqlc.NullHrStaffEmploymentType{HrStaffEmploymentType: sqlc.HrStaffEmploymentType(employmentType), Valid: true},
+		Status:                sqlc.NullHrStaffStatus{HrStaffStatus: sqlc.HrStaffStatus(staffStatus), Valid: true},
+		Salary:                nullDecimal(input.Salary),
+		HourlyRate:            nullDecimal(input.HourlyRate),
+		OvertimeRate:          nullDecimal(input.OvertimeRate),
+		StartDate:             parseDate(input.StartDate),
+		EndDate:               parseNullDate(input.EndDate),
+		Address:               sql.NullString{String: input.Address, Valid: input.Address != ""},
+		EmergencyContactName:  sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
+		EmergencyContactPhone: sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
+		Apps:                  appsJSON,
+		Notes:                 sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+	})
 	if err != nil {
-		_ = tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after create staff", logger.Error(rollbackErr))
+		}
 		logger.Ctx(ctx).Error("Failed to create staff", logger.Error(err))
 		return 0, err
 	}
 
 	staffID, err := result.LastInsertId()
 	if err != nil {
-		_ = tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after create staff id", logger.Error(rollbackErr))
+		}
 		return 0, err
 	}
 
-	if err := r.syncEmployeeFromStaff(ctx, tx, input.BusinessID, staffID); err != nil {
-		_ = tx.Rollback()
+	if err := r.syncEmployeeFromStaff(ctx, qtx, input.BusinessID, staffID); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after staff sync", logger.Error(rollbackErr))
+		}
 		logger.Ctx(ctx).Error("Failed to sync created staff to HR employee", logger.Error(err))
 		return 0, err
 	}
@@ -422,47 +407,48 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 	}
 	defer func() {
 		if p := recover(); p != nil {
-			_ = tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				logger.Ctx(ctx).Error("failed to rollback after update staff panic", logger.Error(rollbackErr))
+			}
 			panic(p)
 		}
 	}()
 
-	_, err = tx.ExecContext(ctx, `
-		UPDATE hr_staff
-		SET department_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
-		    role = ?, employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
-		    overtime_rate = ?, end_date = ?, address = ?, emergency_contact_name = ?,
-		    emergency_contact_phone = ?, apps = ?, notes = ?, updated_at = NOW()
-		WHERE id = ? AND business_id = ?
-	`,
-		sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
-		input.FirstName,
-		input.LastName,
-		input.Email,
-		sql.NullString{String: input.Phone, Valid: input.Phone != ""},
-		input.Role,
-		sql.NullString{String: input.EmploymentType, Valid: input.EmploymentType != ""},
-		sql.NullString{String: input.Status, Valid: input.Status != ""},
-		nullDecimal(input.Salary),
-		nullDecimal(input.HourlyRate),
-		nullDecimal(input.OvertimeRate),
-		parseNullDate(input.EndDate),
-		sql.NullString{String: input.Address, Valid: input.Address != ""},
-		sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
-		sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
-		appsJSON,
-		sql.NullString{String: input.Notes, Valid: input.Notes != ""},
-		input.ID,
-		businessID,
-	)
+	qtx := r.queries.WithTx(tx)
+
+	err = qtx.UpdateStaff(ctx, sqlc.UpdateStaffParams{
+		DepartmentID:          sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		FirstName:             input.FirstName,
+		LastName:              input.LastName,
+		Email:                 input.Email,
+		Phone:                 sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		Role:                  input.Role,
+		EmploymentType:        sqlc.NullHrStaffEmploymentType{HrStaffEmploymentType: sqlc.HrStaffEmploymentType(input.EmploymentType), Valid: input.EmploymentType != ""},
+		Status:                sqlc.NullHrStaffStatus{HrStaffStatus: sqlc.HrStaffStatus(input.Status), Valid: input.Status != ""},
+		Salary:                nullDecimal(input.Salary),
+		HourlyRate:            nullDecimal(input.HourlyRate),
+		OvertimeRate:          nullDecimal(input.OvertimeRate),
+		EndDate:               parseNullDate(input.EndDate),
+		Address:               sql.NullString{String: input.Address, Valid: input.Address != ""},
+		EmergencyContactName:  sql.NullString{String: input.EmergencyContactName, Valid: input.EmergencyContactName != ""},
+		EmergencyContactPhone: sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
+		Apps:                  appsJSON,
+		Notes:                 sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		ID:                    input.ID,
+		BusinessID:            businessID,
+	})
 	if err != nil {
-		_ = tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after update staff", logger.Error(rollbackErr))
+		}
 		logger.Ctx(ctx).Error("Failed to update staff", logger.Error(err))
 		return err
 	}
 
-	if err := r.syncEmployeeFromStaff(ctx, tx, businessID, input.ID); err != nil {
-		_ = tx.Rollback()
+	if err := r.syncEmployeeFromStaff(ctx, qtx, businessID, input.ID); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after staff sync", logger.Error(rollbackErr))
+		}
 		logger.Ctx(ctx).Error("Failed to sync updated staff to HR employee", logger.Error(err))
 		return err
 	}
@@ -478,23 +464,31 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 	}
 	defer func() {
 		if p := recover(); p != nil {
-			_ = tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				logger.Ctx(ctx).Error("failed to rollback after delete staff panic", logger.Error(rollbackErr))
+			}
 			panic(p)
 		}
 	}()
 
-	_, err = tx.ExecContext(ctx, `
-		UPDATE hr_staff SET status = 'terminated', updated_at = NOW()
-		WHERE id = ? AND business_id = ?
-	`, staffID, businessID)
+	qtx := r.queries.WithTx(tx)
+
+	err = qtx.TerminateStaff(ctx, sqlc.TerminateStaffParams{
+		ID:         staffID,
+		BusinessID: businessID,
+	})
 	if err != nil {
-		_ = tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after terminate staff", logger.Error(rollbackErr))
+		}
 		logger.Ctx(ctx).Error("Failed to terminate staff", logger.Error(err))
 		return err
 	}
 
-	if err := r.syncEmployeeFromStaff(ctx, tx, businessID, staffID); err != nil {
-		_ = tx.Rollback()
+	if err := r.syncEmployeeFromStaff(ctx, qtx, businessID, staffID); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback after staff sync", logger.Error(rollbackErr))
+		}
 		logger.Ctx(ctx).Error("Failed to sync terminated staff to HR employee", logger.Error(err))
 		return err
 	}
@@ -569,12 +563,12 @@ type staffEmployeeSyncRow struct {
 	LastName              string
 	Email                 string
 	Phone                 sql.NullString
-	EmploymentType        sql.NullString
-	Status                sql.NullString
+	EmploymentType        sqlc.NullHrStaffEmploymentType
+	Status                sqlc.NullHrStaffStatus
 	Salary                sql.NullString
 	HourlyRate            sql.NullString
 	OvertimeRate          sql.NullString
-	StartDate             sql.NullTime
+	StartDate             time.Time
 	EndDate               sql.NullTime
 	Address               sql.NullString
 	EmergencyContactName  sql.NullString
@@ -582,9 +576,9 @@ type staffEmployeeSyncRow struct {
 	Notes                 sql.NullString
 }
 
-func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, ownerID, staffID int64) error {
+func (r *Repository) syncEmployeeFromStaff(ctx context.Context, qtx *sqlc.Queries, ownerID, staffID int64) error {
 	businessID := ownerID
-	staff, err := loadStaffEmployeeSyncRow(ctx, tx, businessID, staffID)
+	staff, err := loadStaffEmployeeSyncRow(ctx, qtx, businessID, staffID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil
@@ -594,52 +588,46 @@ func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, owne
 
 	employeeID := staff.EmployeeID
 	if !employeeID.Valid && staff.UserID.Valid {
-		employeeID, err = findEmployeeIDByUser(ctx, tx, staff.BusinessID, staff.UserID.Int64)
+		employeeID, err = findEmployeeIDByUser(ctx, qtx, staff.BusinessID, staff.UserID.Int64)
 		if err != nil {
 			return err
 		}
 	}
 	if !employeeID.Valid && staff.Email != "" {
-		employeeID, err = findEmployeeIDByEmail(ctx, tx, staff.BusinessID, staff.Email)
+		employeeID, err = findEmployeeIDByEmail(ctx, qtx, staff.BusinessID, staff.Email)
 		if err != nil {
 			return err
 		}
 	}
 
 	if employeeID.Valid {
-		if err := updateEmployeeFromStaff(ctx, tx, employeeID.Int64, staff); err != nil {
+		if err := updateEmployeeFromStaff(ctx, qtx, employeeID.Int64, staff); err != nil {
 			return err
 		}
-		return linkStaffEmployee(ctx, tx, staff.BusinessID, staff.StaffID, employeeID.Int64)
+		return linkStaffEmployee(ctx, qtx, staff.BusinessID, staff.StaffID, employeeID.Int64)
 	}
 
-	result, err := tx.ExecContext(ctx, `
-		INSERT INTO hr_employees
-			(owner_id, business_id, user_id, department_id, first_name, last_name, email, phone,
-			 employment_type, status, salary, hourly_rate, overtime_rate, start_date,
-			 end_date, address, emergency_contact_name, emergency_contact_phone, notes)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`,
-		staff.OwnerID,
-		staff.BusinessID,
-		staff.UserID,
-		staff.DepartmentID,
-		staff.FirstName,
-		staff.LastName,
-		staff.Email,
-		staff.Phone,
-		normalizedStaffEmploymentType(staff.EmploymentType),
-		normalizedStaffStatus(staff.Status),
-		staff.Salary,
-		staff.HourlyRate,
-		staff.OvertimeRate,
-		staff.StartDate,
-		staff.EndDate,
-		staff.Address,
-		staff.EmergencyContactName,
-		staff.EmergencyContactPhone,
-		staff.Notes,
-	)
+	result, err := qtx.InsertEmployeeFromStaff(ctx, sqlc.InsertEmployeeFromStaffParams{
+		OwnerID:               staff.OwnerID,
+		BusinessID:            staff.BusinessID,
+		UserID:                staff.UserID,
+		DepartmentID:          staff.DepartmentID,
+		FirstName:             staff.FirstName,
+		LastName:              staff.LastName,
+		Email:                 staff.Email,
+		Phone:                 staff.Phone,
+		EmploymentType:        normalizedStaffEmploymentType(staff.EmploymentType),
+		Status:                normalizedStaffStatus(staff.Status),
+		Salary:                staff.Salary,
+		HourlyRate:            staff.HourlyRate,
+		OvertimeRate:          staff.OvertimeRate,
+		StartDate:             sql.NullTime{Time: staff.StartDate, Valid: !staff.StartDate.IsZero()},
+		EndDate:               staff.EndDate,
+		Address:               staff.Address,
+		EmergencyContactName:  staff.EmergencyContactName,
+		EmergencyContactPhone: staff.EmergencyContactPhone,
+		Notes:                 staff.Notes,
+	})
 	if err != nil {
 		return err
 	}
@@ -648,124 +636,112 @@ func (r *Repository) syncEmployeeFromStaff(ctx context.Context, tx *sql.Tx, owne
 	if err != nil {
 		return err
 	}
-	return linkStaffEmployee(ctx, tx, staff.BusinessID, staff.StaffID, newEmployeeID)
+	return linkStaffEmployee(ctx, qtx, staff.BusinessID, staff.StaffID, newEmployeeID)
 }
 
-func loadStaffEmployeeSyncRow(ctx context.Context, tx *sql.Tx, businessID, staffID int64) (staffEmployeeSyncRow, error) {
-	var staff staffEmployeeSyncRow
-	err := tx.QueryRowContext(ctx, `
-		SELECT owner_id, business_id, id, employee_id, user_id, department_id, first_name, last_name,
-		       email, phone, employment_type, status, salary, hourly_rate, overtime_rate,
-		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone, notes
-		FROM hr_staff
-		WHERE business_id = ? AND id = ?
-	`, businessID, staffID).Scan(
-		&staff.OwnerID,
-		&staff.BusinessID,
-		&staff.StaffID,
-		&staff.EmployeeID,
-		&staff.UserID,
-		&staff.DepartmentID,
-		&staff.FirstName,
-		&staff.LastName,
-		&staff.Email,
-		&staff.Phone,
-		&staff.EmploymentType,
-		&staff.Status,
-		&staff.Salary,
-		&staff.HourlyRate,
-		&staff.OvertimeRate,
-		&staff.StartDate,
-		&staff.EndDate,
-		&staff.Address,
-		&staff.EmergencyContactName,
-		&staff.EmergencyContactPhone,
-		&staff.Notes,
-	)
-	return staff, err
+func loadStaffEmployeeSyncRow(ctx context.Context, qtx *sqlc.Queries, businessID, staffID int64) (staffEmployeeSyncRow, error) {
+	row, err := qtx.GetStaffEmployeeSyncRow(ctx, sqlc.GetStaffEmployeeSyncRowParams{
+		BusinessID: businessID,
+		ID:         staffID,
+	})
+	if err != nil {
+		return staffEmployeeSyncRow{}, err
+	}
+	return staffEmployeeSyncRow{
+		OwnerID:               row.OwnerID,
+		BusinessID:            row.BusinessID,
+		StaffID:               row.ID,
+		EmployeeID:            row.EmployeeID,
+		UserID:                row.UserID,
+		DepartmentID:          row.DepartmentID,
+		FirstName:             row.FirstName,
+		LastName:              row.LastName,
+		Email:                 row.Email,
+		Phone:                 row.Phone,
+		EmploymentType:        row.EmploymentType,
+		Status:                row.Status,
+		Salary:                row.Salary,
+		HourlyRate:            row.HourlyRate,
+		OvertimeRate:          row.OvertimeRate,
+		StartDate:             row.StartDate,
+		EndDate:               row.EndDate,
+		Address:               row.Address,
+		EmergencyContactName:  row.EmergencyContactName,
+		EmergencyContactPhone: row.EmergencyContactPhone,
+		Notes:                 row.Notes,
+	}, nil
 }
 
-func findEmployeeIDByUser(ctx context.Context, tx *sql.Tx, businessID, userID int64) (sql.NullInt64, error) {
-	var employeeID sql.NullInt64
-	err := tx.QueryRowContext(ctx, `
-		SELECT id FROM hr_employees
-		WHERE business_id = ? AND user_id = ?
-		ORDER BY id ASC
-		LIMIT 1
-	`, businessID, userID).Scan(&employeeID)
+func findEmployeeIDByUser(ctx context.Context, qtx *sqlc.Queries, businessID, userID int64) (sql.NullInt64, error) {
+	id, err := qtx.FindEmployeeIDByUser(ctx, sqlc.FindEmployeeIDByUserParams{
+		BusinessID: businessID,
+		UserID:     sql.NullInt64{Int64: userID, Valid: true},
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return sql.NullInt64{}, nil
 	}
-	return employeeID, err
+	if err != nil {
+		return sql.NullInt64{}, err
+	}
+	return sql.NullInt64{Int64: id, Valid: true}, nil
 }
 
-func findEmployeeIDByEmail(ctx context.Context, tx *sql.Tx, businessID int64, email string) (sql.NullInt64, error) {
-	var employeeID sql.NullInt64
-	err := tx.QueryRowContext(ctx, `
-		SELECT id FROM hr_employees
-		WHERE business_id = ? AND LOWER(email) = LOWER(?)
-		ORDER BY id ASC
-		LIMIT 1
-	`, businessID, email).Scan(&employeeID)
+func findEmployeeIDByEmail(ctx context.Context, qtx *sqlc.Queries, businessID int64, email string) (sql.NullInt64, error) {
+	id, err := qtx.FindEmployeeIDByEmail(ctx, sqlc.FindEmployeeIDByEmailParams{
+		BusinessID: businessID,
+		LOWER:      email,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return sql.NullInt64{}, nil
 	}
-	return employeeID, err
+	if err != nil {
+		return sql.NullInt64{}, err
+	}
+	return sql.NullInt64{Int64: id, Valid: true}, nil
 }
 
-func updateEmployeeFromStaff(ctx context.Context, tx *sql.Tx, employeeID int64, staff staffEmployeeSyncRow) error {
-	_, err := tx.ExecContext(ctx, `
-		UPDATE hr_employees
-		SET user_id = COALESCE(?, user_id),
-		    department_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
-		    employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
-		    overtime_rate = ?, start_date = ?, end_date = ?, address = ?,
-		    emergency_contact_name = ?, emergency_contact_phone = ?, notes = ?,
-		    updated_at = NOW()
-		WHERE id = ? AND business_id = ?
-	`,
-		staff.UserID,
-		staff.DepartmentID,
-		staff.FirstName,
-		staff.LastName,
-		staff.Email,
-		staff.Phone,
-		normalizedStaffEmploymentType(staff.EmploymentType),
-		normalizedStaffStatus(staff.Status),
-		staff.Salary,
-		staff.HourlyRate,
-		staff.OvertimeRate,
-		staff.StartDate,
-		staff.EndDate,
-		staff.Address,
-		staff.EmergencyContactName,
-		staff.EmergencyContactPhone,
-		staff.Notes,
-		employeeID,
-		staff.BusinessID,
-	)
-	return err
+func updateEmployeeFromStaff(ctx context.Context, qtx *sqlc.Queries, employeeID int64, staff staffEmployeeSyncRow) error {
+	return qtx.UpdateEmployeeFromStaff(ctx, sqlc.UpdateEmployeeFromStaffParams{
+		UserID:                staff.UserID,
+		DepartmentID:          staff.DepartmentID,
+		FirstName:             staff.FirstName,
+		LastName:              staff.LastName,
+		Email:                 staff.Email,
+		Phone:                 staff.Phone,
+		EmploymentType:        normalizedStaffEmploymentType(staff.EmploymentType),
+		Status:                normalizedStaffStatus(staff.Status),
+		Salary:                staff.Salary,
+		HourlyRate:            staff.HourlyRate,
+		OvertimeRate:          staff.OvertimeRate,
+		StartDate:             sql.NullTime{Time: staff.StartDate, Valid: !staff.StartDate.IsZero()},
+		EndDate:               staff.EndDate,
+		Address:               staff.Address,
+		EmergencyContactName:  staff.EmergencyContactName,
+		EmergencyContactPhone: staff.EmergencyContactPhone,
+		Notes:                 staff.Notes,
+		ID:                    employeeID,
+		BusinessID:            staff.BusinessID,
+	})
 }
 
-func linkStaffEmployee(ctx context.Context, tx *sql.Tx, businessID, staffID, employeeID int64) error {
-	_, err := tx.ExecContext(ctx, `
-		UPDATE hr_staff
-		SET employee_id = ?
-		WHERE id = ? AND business_id = ?
-	`, employeeID, staffID, businessID)
-	return err
+func linkStaffEmployee(ctx context.Context, qtx *sqlc.Queries, businessID, staffID, employeeID int64) error {
+	return qtx.LinkStaffEmployee(ctx, sqlc.LinkStaffEmployeeParams{
+		EmployeeID: sql.NullInt64{Int64: employeeID, Valid: true},
+		ID:         staffID,
+		BusinessID: businessID,
+	})
 }
 
-func normalizedStaffEmploymentType(value sql.NullString) string {
-	if value.Valid && value.String != "" {
-		return value.String
+func normalizedStaffEmploymentType(value sqlc.NullHrStaffEmploymentType) string {
+	if value.Valid && value.HrStaffEmploymentType != "" {
+		return string(value.HrStaffEmploymentType)
 	}
 	return "full_time"
 }
 
-func normalizedStaffStatus(value sql.NullString) string {
-	if value.Valid && value.String != "" {
-		return value.String
+func normalizedStaffStatus(value sqlc.NullHrStaffStatus) string {
+	if value.Valid && value.HrStaffStatus != "" {
+		return string(value.HrStaffStatus)
 	}
 	return "active"
 }

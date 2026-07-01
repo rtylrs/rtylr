@@ -12,29 +12,22 @@ import (
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
+	"github.com/voxire/onion/internal/modules/subscriptions/internal/infrastructure/persistence/sqlc"
 )
 
 type Repository struct {
-	db *sql.DB
+	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{
+		queries: sqlc.New(db),
+		db:      db,
+	}
 }
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
-
-// planSelectCols is the canonical column list for reading a plan row.
-// Kept in one place so the three GetPlan* variants stay in sync when columns change.
-var planSelectCols = []string{
-	"id", "name", "slug", "apps", "price_per_seat_cents",
-	"COALESCE(annual_price_per_seat_cents, 0)", "trial_days",
-	"COALESCE(paddle_price_id, '')", "COALESCE(tagline, '')",
-	"max_seats", "max_locations",
-	"COALESCE(ai_credits_per_month, 0)", "COALESCE(features, JSON_ARRAY())",
-	"COALESCE(tier_order, 100)", "COALESCE(is_solo, FALSE)", "COALESCE(is_featured, FALSE)",
-	"is_active", "created_at",
-}
 
 // scanPlan hydrates a Plan from a row matching planSelectCols.
 // Reused by all three GetPlan* entrypoints.
@@ -57,6 +50,11 @@ func scanPlan(scanner interface {
 	if err != nil {
 		return domain.Plan{}, err
 	}
+	hydratePlanJSON(&p, appsJSON, featuresJSON, maxSeats, maxLocations)
+	return p, nil
+}
+
+func hydratePlanJSON(p *domain.Plan, appsJSON, featuresJSON string, maxSeats, maxLocations sql.NullInt64) {
 	if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
 		p.Apps = []string{}
 	}
@@ -71,110 +69,115 @@ func scanPlan(scanner interface {
 		v := int(maxLocations.Int64)
 		p.MaxLocations = &v
 	}
-	return p, nil
+}
+
+func planFromSlugRow(row sqlc.GetPlanBySlugRow) domain.Plan {
+	return planFromFields(
+		row.ID, row.Name, row.Slug, row.Apps, row.PricePerSeatCents, row.AnnualPricePerSeatCents,
+		row.TrialDays, row.PaddlePriceID, row.Tagline, row.MaxSeats, row.MaxLocations,
+		row.AiCreditsPerMonth, row.Features, row.TierOrder, row.IsSolo, row.IsFeatured,
+		row.IsActive, row.CreatedAt,
+	)
+}
+
+func planFromIDRow(row sqlc.GetPlanByIDRow) domain.Plan {
+	return planFromFields(
+		row.ID, row.Name, row.Slug, row.Apps, row.PricePerSeatCents, row.AnnualPricePerSeatCents,
+		row.TrialDays, row.PaddlePriceID, row.Tagline, row.MaxSeats, row.MaxLocations,
+		row.AiCreditsPerMonth, row.Features, row.TierOrder, row.IsSolo, row.IsFeatured,
+		row.IsActive, row.CreatedAt,
+	)
+}
+
+func planFromListRow(row sqlc.ListPlansRow) domain.Plan {
+	return planFromFields(
+		row.ID, row.Name, row.Slug, row.Apps, row.PricePerSeatCents, row.AnnualPricePerSeatCents,
+		row.TrialDays, row.PaddlePriceID, row.Tagline, row.MaxSeats, row.MaxLocations,
+		row.AiCreditsPerMonth, row.Features, row.TierOrder, row.IsSolo, row.IsFeatured,
+		row.IsActive, row.CreatedAt,
+	)
+}
+
+func planFromFields(
+	id int64, name, slug string, apps json.RawMessage,
+	pricePerSeatCents, annualPricePerSeatCents, trialDays int32,
+	paddlePriceID, tagline string,
+	maxSeats, maxLocations sql.NullInt32,
+	aiCreditsPerMonth int32, features json.RawMessage,
+	tierOrder int32, isSolo, isFeatured bool,
+	isActive sql.NullBool, createdAt sql.NullTime,
+) domain.Plan {
+	var p domain.Plan
+	p.ID = id
+	p.Name = name
+	p.Slug = slug
+	p.PricePerSeatCents = int(pricePerSeatCents)
+	p.AnnualPricePerSeatCents = int(annualPricePerSeatCents)
+	p.TrialDays = int(trialDays)
+	p.PaddlePriceID = paddlePriceID
+	p.Tagline = tagline
+	p.AICreditsPerMonth = int(aiCreditsPerMonth)
+	p.TierOrder = int(tierOrder)
+	p.IsSolo = isSolo
+	p.IsFeatured = isFeatured
+	if isActive.Valid {
+		p.IsActive = isActive.Bool
+	}
+	if createdAt.Valid {
+		p.CreatedAt = createdAt.Time
+	}
+	var maxSeatsNull, maxLocationsNull sql.NullInt64
+	if maxSeats.Valid {
+		maxSeatsNull = sql.NullInt64{Int64: int64(maxSeats.Int32), Valid: true}
+	}
+	if maxLocations.Valid {
+		maxLocationsNull = sql.NullInt64{Int64: int64(maxLocations.Int32), Valid: true}
+	}
+	hydratePlanJSON(&p, string(apps), string(features), maxSeatsNull, maxLocationsNull)
+	return p
 }
 
 func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
-	query, args, err := sq.
-		Select(planSelectCols...).
-		From("plans").
-		Where(sq.Eq{"is_active": true}).
-		OrderBy("is_solo ASC", "tier_order ASC", "id ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.ListPlans(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
+	plans := make([]domain.Plan, 0, len(rows))
+	for _, row := range rows {
+		plans = append(plans, planFromListRow(row))
 	}
-	defer rows.Close()
-
-	plans := make([]domain.Plan, 0)
-	for rows.Next() {
-		p, scanErr := scanPlan(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		plans = append(plans, p)
-	}
-
-	return plans, rows.Err()
+	return plans, nil
 }
 
 func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Plan, error) {
-	query, args, err := sq.
-		Select(planSelectCols...).
-		From("plans").
-		Where(sq.Eq{"slug": slug, "is_active": true}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-	p, err := scanPlan(row)
+	row, err := r.queries.GetPlanBySlug(ctx, slug)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPlanNotFound
 		}
 		return nil, err
 	}
+	p := planFromSlugRow(row)
 	return &p, nil
 }
 
 func (r *Repository) GetPlanByID(ctx context.Context, id int64) (*domain.Plan, error) {
-	query, args, err := sq.
-		Select(planSelectCols...).
-		From("plans").
-		Where(sq.Eq{"id": id}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-	p, err := scanPlan(row)
+	row, err := r.queries.GetPlanByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPlanNotFound
 		}
 		return nil, err
 	}
+	p := planFromIDRow(row)
 	return &p, nil
 }
 
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
 func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
-	var sub domain.Subscription
-	var appsJSON string
-	var trialEndsAt, periodEndsAt, nextBillingDate sql.NullTime
-	var paddleSubID, paddleCustID sql.NullString
-
-	query, args, err := sq.
-		Select(
-			"s.id", "s.owner_id", "s.plan_id", "p.name", "p.slug", "p.apps", "p.price_per_seat_cents",
-			"s.status", "s.seat_count", "s.trial_ends_at", "s.next_billing_date",
-			"s.current_period_ends_at", "s.paddle_subscription_id", "s.paddle_customer_id", "s.created_at",
-		).
-		From("subscriptions s").
-		Join("plans p ON p.id = s.plan_id").
-		Where(sq.Eq{"s.owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(
-		&sub.ID, &sub.OwnerID, &sub.PlanID, &sub.PlanName, &sub.PlanSlug, &appsJSON, &sub.PricePerSeatCents,
-		&sub.Status, &sub.SeatCount, &trialEndsAt, &nextBillingDate,
-		&periodEndsAt, &paddleSubID, &paddleCustID, &sub.CreatedAt)
+	row, err := r.queries.GetSubscription(ctx, ownerID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
@@ -182,51 +185,56 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 		return nil, err
 	}
 
-	if jsonErr := json.Unmarshal([]byte(appsJSON), &sub.Apps); jsonErr != nil {
+	sub := &domain.Subscription{
+		ID:                row.ID,
+		OwnerID:           row.OwnerID,
+		PlanID:            row.PlanID,
+		PlanName:          row.PlanName,
+		PlanSlug:          row.PlanSlug,
+		PricePerSeatCents: int(row.PricePerSeatCents),
+		SeatCount:         int(row.SeatCount),
+	}
+	if row.Status.Valid {
+		sub.Status = string(row.Status.SubscriptionsStatus)
+	}
+	if jsonErr := json.Unmarshal(row.Apps, &sub.Apps); jsonErr != nil {
 		sub.Apps = []string{}
 	}
-	if trialEndsAt.Valid {
-		t := trialEndsAt.Time
+	if row.TrialEndsAt.Valid {
+		t := row.TrialEndsAt.Time
 		sub.TrialEndsAt = &t
 	}
-	if nextBillingDate.Valid {
-		t := nextBillingDate.Time
+	if row.NextBillingDate.Valid {
+		t := row.NextBillingDate.Time
 		sub.NextBillingDate = &t
 	}
-	if periodEndsAt.Valid {
-		t := periodEndsAt.Time
+	if row.CurrentPeriodEndsAt.Valid {
+		t := row.CurrentPeriodEndsAt.Time
 		sub.CurrentPeriodEndsAt = &t
 	}
-	if paddleSubID.Valid {
-		sub.PaddleSubscriptionID = paddleSubID.String
+	if row.PaddleSubscriptionID.Valid {
+		sub.PaddleSubscriptionID = row.PaddleSubscriptionID.String
 	}
-	if paddleCustID.Valid {
-		sub.PaddleCustomerID = paddleCustID.String
+	if row.PaddleCustomerID.Valid {
+		sub.PaddleCustomerID = row.PaddleCustomerID.String
+	}
+	if row.CreatedAt.Valid {
+		sub.CreatedAt = row.CreatedAt.Time
 	}
 
-	if err := r.hydrateActiveGrant(ctx, &sub); err != nil {
+	if err := r.hydrateActiveGrant(ctx, sub); err != nil {
 		return nil, err
 	}
 
-	return &sub, nil
+	return sub, nil
 }
 
 func (r *Repository) hydrateActiveGrant(ctx context.Context, sub *domain.Subscription) error {
-	query, args, err := sq.
-		Select("expires_at").
-		From("manual_access_grants").
-		Where(sq.Eq{"user_id": sub.OwnerID, "plan_id": sub.PlanID, "revoked_at": nil}).
-		Where("(expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)").
-		OrderBy("created_at DESC").
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	expiresAt, err := r.queries.GetActiveManualGrantExpiresAt(ctx, sqlc.GetActiveManualGrantExpiresAtParams{
+		UserID: sub.OwnerID,
+		PlanID: sub.PlanID,
+	})
 	if err != nil {
-		return err
-	}
-
-	var expiresAt sql.NullTime
-	if err := r.db.QueryRowContext(ctx, query, args...).Scan(&expiresAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil
 		}
@@ -242,78 +250,45 @@ func (r *Repository) hydrateActiveGrant(ctx context.Context, sub *domain.Subscri
 }
 
 func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error {
-	status := "active"
+	status := sqlc.SubscriptionsStatusActive
 	trialEnd := sql.NullTime{}
 	if trialDays > 0 {
-		status = "trial"
+		status = sqlc.SubscriptionsStatusTrial
 		trialEnd = sql.NullTime{Time: time.Now().UTC().AddDate(0, 0, trialDays), Valid: true}
 	}
 	if seatCount < 1 {
 		seatCount = 1
 	}
-	// next_billing_date is always the 1st of next month
 	now := time.Now().UTC()
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 
-	query, args, err := sq.
-		Insert("subscriptions").
-		Columns("owner_id", "plan_id", "status", "seat_count", "trial_ends_at", "next_billing_date").
-		Values(ownerID, planID, status, seatCount, trialEnd, nextBilling).
-		Suffix("ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status), seat_count = VALUES(seat_count), trial_ends_at = VALUES(trial_ends_at), updated_at = CURRENT_TIMESTAMP").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
+		OwnerID:   ownerID,
+		PlanID:    planID,
+		Status:    sqlc.NullSubscriptionsStatus{SubscriptionsStatus: status, Valid: true},
+		SeatCount: int32(seatCount),
+		TrialEndsAt: trialEnd,
+		NextBillingDate: sql.NullTime{Time: nextBilling, Valid: true},
+	})
 }
 
 func (r *Repository) CountActiveSeats(ctx context.Context, ownerID int64) (int, error) {
-	const query = `
-SELECT COUNT(DISTINCT user_id)
-FROM (
-	SELECT b.owner_id AS user_id
-	FROM businesses b
-	JOIN users u ON u.id = b.owner_id
-	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-	UNION
-	SELECT p.user_id AS user_id
-	FROM user_app_permissions p
-	JOIN users u ON u.id = p.user_id
-	WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-	UNION
-	SELECT u.id AS user_id
-	FROM users u
-	JOIN businesses b ON b.id = u.business_id
-	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-) active_users`
-
-	var count int
-	if err := r.db.QueryRowContext(ctx, query, ownerID, ownerID, ownerID).Scan(&count); err != nil {
+	count, err := r.queries.CountActiveSeats(ctx, sqlc.CountActiveSeatsParams{
+		OwnerID:   ownerID,
+		OwnerID_2: ownerID,
+		OwnerID_3: ownerID,
+	})
+	if err != nil {
 		return 0, err
 	}
 	if count < 1 {
 		return 1, nil
 	}
-	return count, nil
+	return int(count), nil
 }
 
 func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
-	var appsJSON string
-	query, args, err := sq.
-		Select("p.apps").
-		From("subscriptions s").
-		Join("plans p ON p.id = s.plan_id").
-		Where(sq.Eq{"s.owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&appsJSON)
+	appsJSON, err := r.queries.GetOwnerApps(ctx, ownerID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
@@ -322,132 +297,97 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 	}
 
 	var apps []string
-	if jsonErr := json.Unmarshal([]byte(appsJSON), &apps); jsonErr != nil {
+	if jsonErr := json.Unmarshal(appsJSON, &apps); jsonErr != nil {
 		return []string{}, nil
 	}
 	return apps, nil
 }
 
 func (r *Repository) UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error {
-	query, args, err := sq.
-		Update("subscriptions").
-		Set("seat_count", seatCount).
-		Set("updated_at", sq.Expr("CURRENT_TIMESTAMP")).
-		Where(sq.Eq{"owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.UpdateSeatCount(ctx, sqlc.UpdateSeatCountParams{
+		SeatCount: int32(seatCount),
+		OwnerID:   ownerID,
+	})
 }
 
 // ── Seat Periods ──────────────────────────────────────────────────────────────
 
 func (r *Repository) GetActivePeriod(ctx context.Context, subscriptionID int64) (*domain.SeatPeriod, error) {
-	var sp domain.SeatPeriod
-	var periodEnd sql.NullTime
-
-	query, args, err := sq.
-		Select(
-			"id", "subscription_id", "owner_id", "seat_count", "price_per_seat_cents",
-			"period_start", "period_end", "billing_month",
-		).
-		From("seat_periods").
-		Where(sq.Eq{"subscription_id": subscriptionID, "period_end": nil}).
-		OrderBy("period_start DESC").
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(
-		&sp.ID, &sp.SubscriptionID, &sp.OwnerID, &sp.SeatCount, &sp.PricePerSeatCents,
-		&sp.PeriodStart, &periodEnd, &sp.BillingMonth)
+	row, err := r.queries.GetActiveSeatPeriod(ctx, subscriptionID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
+	return seatPeriodFromRow(
+		row.ID, row.SubscriptionID, row.OwnerID,
+		int(row.SeatCount), int(row.PricePerSeatCents),
+		row.PeriodStart, row.PeriodEnd, row.BillingMonth,
+	), nil
+}
+
+func seatPeriodFromRow(
+	id, subscriptionID, ownerID int64,
+	seatCount, pricePerSeatCents int,
+	periodStart time.Time,
+	periodEnd sql.NullTime,
+	billingMonth time.Time,
+) *domain.SeatPeriod {
+	sp := &domain.SeatPeriod{
+		ID:                id,
+		SubscriptionID:    subscriptionID,
+		OwnerID:           ownerID,
+		SeatCount:         seatCount,
+		PricePerSeatCents: pricePerSeatCents,
+		PeriodStart:       periodStart,
+		BillingMonth:      billingMonth,
+	}
 	if periodEnd.Valid {
 		t := periodEnd.Time
 		sp.PeriodEnd = &t
 	}
-	return &sp, nil
+	return sp
 }
 
 func (r *Repository) CloseActivePeriod(ctx context.Context, subscriptionID int64, periodEnd time.Time) error {
-	query, args, err := sq.
-		Update("seat_periods").
-		Set("period_end", periodEnd).
-		Where(sq.Eq{"subscription_id": subscriptionID, "period_end": nil}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.CloseActiveSeatPeriod(ctx, sqlc.CloseActiveSeatPeriodParams{
+		PeriodEnd:      sql.NullTime{Time: periodEnd, Valid: true},
+		SubscriptionID: subscriptionID,
+	})
 }
 
 func (r *Repository) OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error {
-	query, args, err := sq.
-		Insert("seat_periods").
-		Columns("subscription_id", "owner_id", "seat_count", "price_per_seat_cents", "period_start", "billing_month").
-		Values(subscriptionID, ownerID, seatCount, pricePerSeatCents, periodStart.Format("2006-01-02"), billingMonth.Format("2006-01-02")).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
+		SubscriptionID:    subscriptionID,
+		OwnerID:           ownerID,
+		SeatCount:         int32(seatCount),
+		PricePerSeatCents: int32(pricePerSeatCents),
+		PeriodStart:       periodStart,
+		BillingMonth:      billingMonth,
+	})
 }
 
 func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]domain.SeatPeriod, error) {
 	billingMonth := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
-	query, args, err := sq.
-		Select(
-			"id", "subscription_id", "owner_id", "seat_count", "price_per_seat_cents",
-			"period_start", "period_end", "billing_month",
-		).
-		From("seat_periods").
-		Where(sq.Eq{"owner_id": ownerID, "billing_month": billingMonth.Format("2006-01-02")}).
-		OrderBy("period_start ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.GetSeatPeriodsForMonth(ctx, sqlc.GetSeatPeriodsForMonthParams{
+		OwnerID:      ownerID,
+		BillingMonth: billingMonth,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
+	periods := make([]domain.SeatPeriod, 0, len(rows))
+	for _, row := range rows {
+		sp := seatPeriodFromRow(
+			row.ID, row.SubscriptionID, row.OwnerID,
+			int(row.SeatCount), int(row.PricePerSeatCents),
+			row.PeriodStart, row.PeriodEnd, row.BillingMonth,
+		)
+		periods = append(periods, *sp)
 	}
-	defer rows.Close()
-
-	periods := make([]domain.SeatPeriod, 0)
-	for rows.Next() {
-		var sp domain.SeatPeriod
-		var periodEnd sql.NullTime
-		if err := rows.Scan(&sp.ID, &sp.SubscriptionID, &sp.OwnerID, &sp.SeatCount, &sp.PricePerSeatCents,
-			&sp.PeriodStart, &periodEnd, &sp.BillingMonth); err != nil {
-			return nil, err
-		}
-		if periodEnd.Valid {
-			t := periodEnd.Time
-			sp.PeriodEnd = &t
-		}
-		periods = append(periods, sp)
-	}
-	return periods, rows.Err()
+	return periods, nil
 }
 
 func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
@@ -536,48 +476,27 @@ AND (mag.expires_at IS NULL OR mag.expires_at >= ?)`
 }
 
 func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
-	// Get distinct billing months that have closed periods (past months)
 	now := time.Now().UTC()
 	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
-	// fetch enough rows for limit months
-	query, args, err := sq.
-		Select("billing_month", "seat_count", "price_per_seat_cents", "period_start", "period_end").
-		From("seat_periods").
-		Where(sq.Eq{"owner_id": ownerID}).
-		Where(sq.Lt{"billing_month": currentMonth.Format("2006-01-02")}).
-		OrderBy("billing_month DESC", "period_start ASC").
-		Limit(uint64(limit * 20)).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.GetBillingHistoryPeriods(ctx, sqlc.GetBillingHistoryPeriodsParams{
+		OwnerID:      ownerID,
+		BillingMonth: currentMonth,
+		Limit:        int32(limit * 20),
+	})
 	if err != nil {
 		return nil, err
 	}
-
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 
 	monthMap := make(map[string]*domain.BillingHistoryMonth, limit)
 	monthOrder := make([]string, 0, limit)
 
-	for rows.Next() {
-		var billingMonth time.Time
-		var seatCount, pricePerSeatCents int
-		var periodStart time.Time
-		var periodEnd sql.NullTime
-
-		if err := rows.Scan(&billingMonth, &seatCount, &pricePerSeatCents, &periodStart, &periodEnd); err != nil {
-			return nil, err
-		}
-
-		key := billingMonth.Format("2006-01")
+	for _, row := range rows {
+		key := row.BillingMonth.Format("2006-01")
 		m, exists := monthMap[key]
 		if !exists {
 			m = &domain.BillingHistoryMonth{
-				Month:  billingMonth,
+				Month:  row.BillingMonth,
 				Status: "paid",
 			}
 			monthMap[key] = m
@@ -585,18 +504,20 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 		}
 
 		var endDate *time.Time
-		if periodEnd.Valid {
-			t := periodEnd.Time
+		if row.PeriodEnd.Valid {
+			t := row.PeriodEnd.Time
 			endDate = &t
 		}
 
-		item := computeLineItem(seatCount, pricePerSeatCents, periodStart, endDate, billingMonth)
+		item := computeLineItem(
+			int(row.SeatCount),
+			int(row.PricePerSeatCents),
+			row.PeriodStart,
+			endDate,
+			row.BillingMonth,
+		)
 		m.LineItems = append(m.LineItems, item)
 		m.TotalCents += item.AmountCents
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
 	}
 
 	result := make([]domain.BillingHistoryMonth, 0, len(monthOrder))
@@ -616,11 +537,9 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		effectiveEnd = *end
 	}
 
-	// days_in_month for this billing month
 	firstOfNextMonth := time.Date(billingMonth.Year(), billingMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 	daysInMonth := int(firstOfNextMonth.Sub(billingMonth).Hours() / 24)
 
-	// days used in this period
 	daysUsed := int(effectiveEnd.Sub(start).Hours()/24) + 1
 	if daysUsed < 1 {
 		daysUsed = 1
@@ -677,43 +596,18 @@ func decimalStringToCents(value string) int {
 
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
-// UpdatePaddleSubscription writes the Paddle subscription ID, customer ID, and status
-// to the subscriptions row for the given owner.
 func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) error {
-	query, args, err := sq.
-		Update("subscriptions").
-		Set("paddle_subscription_id", paddleSubID).
-		Set("paddle_customer_id", paddleCustID).
-		Set("status", status).
-		Set("updated_at", sq.Expr("CURRENT_TIMESTAMP")).
-		Where(sq.Eq{"owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.UpdatePaddleSubscription(ctx, sqlc.UpdatePaddleSubscriptionParams{
+		PaddleSubscriptionID: sql.NullString{String: paddleSubID, Valid: paddleSubID != ""},
+		PaddleCustomerID:     sql.NullString{String: paddleCustID, Valid: paddleCustID != ""},
+		Status: sqlc.NullSubscriptionsStatus{
+			SubscriptionsStatus: sqlc.SubscriptionsStatus(status),
+			Valid:               status != "",
+		},
+		OwnerID: ownerID,
+	})
 }
 
-// GetOwnerIDByPaddleSubscription returns the owner_id for a given Paddle subscription ID.
 func (r *Repository) GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error) {
-	var ownerID int64
-	query, args, err := sq.
-		Select("owner_id").
-		From("subscriptions").
-		Where(sq.Eq{"paddle_subscription_id": paddleSubID}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&ownerID)
-	if err != nil {
-		return 0, err
-	}
-	return ownerID, nil
+	return r.queries.GetOwnerIDByPaddleSubscription(ctx, sql.NullString{String: paddleSubID, Valid: paddleSubID != ""})
 }

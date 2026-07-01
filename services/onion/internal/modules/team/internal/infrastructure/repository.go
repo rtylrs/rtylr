@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -182,22 +180,14 @@ func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID 
 }
 
 func (r *Repository) UpdateUserProfile(ctx context.Context, userID int64, fullName string) error {
-	query, args, err := sq.
-		Update("users").
-		Set("full_name", strings.TrimSpace(fullName)).
-		Set("updated_at", sq.Expr("NOW()")).
-		Where(sq.Eq{"id": userID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	err := r.queries.UpdateUserProfile(ctx, sqlc.UpdateUserProfileParams{
+		FullName: sql.NullString{String: strings.TrimSpace(fullName), Valid: strings.TrimSpace(fullName) != ""},
+		ID:       userID,
+	})
 	if err != nil {
-		return err
-	}
-
-	if _, err := r.pool.ExecContext(ctx, query, args...); err != nil {
 		logger.Ctx(ctx).Error("Failed to update user profile via team", logger.Error(err))
 		return err
 	}
-
 	return nil
 }
 
@@ -320,39 +310,18 @@ func (r *Repository) groupsForUsers(ctx context.Context, ownerID int64, userIDs 
 		return result, nil
 	}
 
-	query, args, err := sq.
-		Select("m.user_id", "g.id", "g.name", "g.color").
-		From("user_group_members m").
-		Join("user_groups g ON g.id = m.group_id").
-		Where(sq.Eq{"m.user_id": userIDs}).
-		Where(sq.Eq{"m.owner_id": ownerID}).
-		OrderBy("g.name").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build batch list user groups query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.ListUserGroupsForUsers(ctx, sqlc.ListUserGroupsForUsersParams{
+		UserIds: userIDs,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch list user groups", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var userID int64
-		var color sql.NullString
-		var summary domain.GroupSummary
-		if err := rows.Scan(&userID, &summary.ID, &summary.Name, &color); err != nil {
-			return nil, err
-		}
-		summary.Color = color.String
-		result[userID] = append(result[userID], summary)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
+	for _, row := range rows {
+		summary := domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String}
+		result[row.UserID] = append(result[row.UserID], summary)
 	}
 
 	return result, nil
@@ -455,22 +424,7 @@ func (r *Repository) GetBusinessByID(ctx context.Context, businessID int64) (str
 }
 
 func (r *Repository) GetBusinessIDByOwnerID(ctx context.Context, ownerID int64) (int64, error) {
-	q, args, err := sq.
-		Select("id").
-		From("businesses").
-		Where(sq.Eq{"owner_id": ownerID}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	var businessID int64
-	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&businessID); err != nil {
-		return 0, err
-	}
-	return businessID, nil
+	return r.queries.GetBusinessIDByOwnerID(ctx, ownerID)
 }
 
 // ─── Access Requests ────────────────────────────────────────────────────────
@@ -544,33 +498,18 @@ func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sql
 
 // CountActiveMembers returns the billable active seat count for an owner.
 func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
-	const query = `
-SELECT COUNT(DISTINCT user_id)
-FROM (
-	SELECT b.owner_id AS user_id
-	FROM businesses b
-	JOIN users u ON u.id = b.owner_id
-	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-	UNION
-	SELECT p.user_id AS user_id
-	FROM user_app_permissions p
-	JOIN users u ON u.id = p.user_id
-	WHERE p.owner_id = ? AND COALESCE(p.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-	UNION
-	SELECT u.id AS user_id
-	FROM users u
-	JOIN businesses b ON b.id = u.business_id
-	WHERE b.owner_id = ? AND COALESCE(b.is_active, TRUE) = TRUE AND COALESCE(u.is_banned, FALSE) = FALSE
-) active_users`
-
-	var count int
-	if err := r.pool.QueryRowContext(ctx, query, ownerID, ownerID, ownerID).Scan(&count); err != nil {
+	count, err := r.queries.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{
+		OwnerID:   ownerID,
+		OwnerID_2: ownerID,
+		OwnerID_3: ownerID,
+	})
+	if err != nil {
 		return 0, err
 	}
 	if count < 1 {
 		return 1, nil
 	}
-	return count, nil
+	return int(count), nil
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
@@ -688,37 +627,18 @@ func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs 
 		return result
 	}
 
-	query, args, err := sq.
-		Select("group_id", "resource_key", "permission_level").
-		From("user_group_resource_permissions").
-		Where(sq.Eq{"group_id": groupIDs}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build batch list group resource permissions query", logger.Error(err))
-		return result
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.ListGroupResourcePermissionsForGroups(ctx, groupIDs)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch list group resource permissions", logger.Error(err))
 		return result
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var groupID int64
-		var p domain.ResourcePermission
-		var level string
-		if err := rows.Scan(&groupID, &p.ResourceKey, &level); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan group resource permission", logger.Error(err))
-			return result
+	for _, row := range rows {
+		p := domain.ResourcePermission{
+			ResourceKey:     row.ResourceKey,
+			PermissionLevel: domain.PermissionLevel(row.PermissionLevel),
 		}
-		p.PermissionLevel = domain.PermissionLevel(level)
-		result[groupID] = append(result[groupID], p)
-	}
-	if err := rows.Err(); err != nil {
-		logger.Ctx(ctx).Error("Failed to iterate group resource permissions", logger.Error(err))
+		result[row.GroupID] = append(result[row.GroupID], p)
 	}
 	return result
 }
@@ -828,26 +748,14 @@ func (r *Repository) GetUserEffectiveResources(ctx context.Context, ownerID, use
 
 // GetOwnerApps returns the list of apps the owner is subscribed to.
 func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
-	var appsJSON string
 	// cross-schema read from subscriptions + plans — approved for owner app resolution
-	query, args, err := sq.
-		Select("p.apps").
-		From("subscriptions s").
-		Join("plans p ON p.id = s.plan_id").
-		Where(sq.Eq{"s.owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&appsJSON)
+	appsJSON, err := r.queries.GetOwnerApps(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
 
 	var apps []string
-	if jsonErr := json.Unmarshal([]byte(appsJSON), &apps); jsonErr != nil {
+	if jsonErr := json.Unmarshal(appsJSON, &apps); jsonErr != nil {
 		return []string{}, nil
 	}
 
@@ -856,21 +764,16 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 
 // GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.
 func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
-	var planSlug, status string
 	// cross-schema read from subscriptions + plans — approved for owner subscription info
-	query, args, err := sq.
-		Select("p.slug", "s.status").
-		From("subscriptions s").
-		Join("plans p ON p.id = s.plan_id").
-		Where(sq.Eq{"s.owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	row, err := r.queries.GetOwnerSubscriptionInfo(ctx, ownerID)
 	if err != nil {
 		return "", "", err
 	}
-
-	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&planSlug, &status)
-	return planSlug, status, err
+	status := ""
+	if row.Status.Valid {
+		status = string(row.Status.SubscriptionsStatus)
+	}
+	return row.Slug, status, nil
 }
 
 // RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
@@ -892,74 +795,44 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 		}
 	}()
 
-	var subscriptionID int64
-	var pricePerSeatCents int
+	qtx := r.queries.WithTx(tx)
+
 	// cross-schema read from subscriptions — approved for seat period management
-	selectQuery, selectArgs, err := sq.
-		Select("id", "price_per_seat_cents").
-		From("subscriptions").
-		Where(sq.Eq{"owner_id": ownerID}).
-		Suffix("FOR UPDATE").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	sub, err := qtx.LockSubscriptionForSeatChange(ctx, ownerID)
 	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	if err := tx.QueryRowContext(ctx, selectQuery, selectArgs...).
-		Scan(&subscriptionID, &pricePerSeatCents); err != nil {
 		_ = tx.Rollback()
 		return err
 	}
 
 	// cross-schema write to seat_periods — approved for seat billing accuracy
-	closeQuery, closeArgs, err := sq.
-		Update("seat_periods").
-		Set("period_end", yesterday).
-		Where(sq.Eq{"subscription_id": subscriptionID}).
-		Where(sq.Eq{"period_end": nil}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
+	if err := qtx.CloseActiveSeatPeriod(ctx, sqlc.CloseActiveSeatPeriodParams{
+		PeriodEnd:      sql.NullTime{Time: yesterday, Valid: true},
+		SubscriptionID: sub.ID,
+	}); err != nil {
 		_ = tx.Rollback()
 		return err
-	}
-	if _, execErr := tx.ExecContext(ctx, closeQuery, closeArgs...); execErr != nil {
-		_ = tx.Rollback()
-		return execErr
 	}
 
 	// cross-schema write to seat_periods — approved for seat billing accuracy
-	insertQuery, insertArgs, err := sq.
-		Insert("seat_periods").
-		Columns("subscription_id", "owner_id", "seat_count", "price_per_seat_cents", "period_start", "billing_month").
-		Values(subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
+	if err := qtx.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
+		SubscriptionID:    sub.ID,
+		OwnerID:           ownerID,
+		SeatCount:         int32(newCount),
+		PricePerSeatCents: sub.PricePerSeatCents,
+		PeriodStart:       now,
+		BillingMonth:      billingMonth,
+	}); err != nil {
 		_ = tx.Rollback()
 		return err
-	}
-	if _, execErr := tx.ExecContext(ctx, insertQuery, insertArgs...); execErr != nil {
-		_ = tx.Rollback()
-		return execErr
 	}
 
 	// cross-schema write to subscriptions — approved for seat billing accuracy
-	updateQuery, updateArgs, err := sq.
-		Update("subscriptions").
-		Set("seat_count", newCount).
-		Set("updated_at", sq.Expr("CURRENT_TIMESTAMP")).
-		Where(sq.Eq{"owner_id": ownerID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
+	if err := qtx.UpdateSubscriptionSeatCount(ctx, sqlc.UpdateSubscriptionSeatCountParams{
+		SeatCount: int32(newCount),
+		OwnerID:   ownerID,
+	}); err != nil {
 		_ = tx.Rollback()
 		return err
-	}
-	if _, execErr := tx.ExecContext(ctx, updateQuery, updateArgs...); execErr != nil {
-		_ = tx.Rollback()
-		return execErr
 	}
 
 	return tx.Commit()
@@ -996,30 +869,10 @@ func (r *Repository) ListAccessRequests(ctx context.Context, businessID int64) (
 // role in ('admin','owner') in user_app_permissions.
 func (r *Repository) GetAdminsAndOwnerUserIDs(ctx context.Context, businessID int64) ([]int64, error) {
 	// cross-schema read from hub — approved for business-wide admin notification fan-out
-	sqlRows, err := r.pool.QueryContext(ctx, `
-		SELECT b.owner_id
-		FROM businesses b
-		WHERE b.id = ?
-		UNION
-		SELECT p.user_id
-		FROM user_app_permissions p
-		WHERE p.business_id = ?
-		  AND p.role IN ('admin', 'owner')
-		  AND p.is_active = TRUE
-	`, businessID, businessID)
-	if err != nil {
-		return nil, err
-	}
-	defer sqlRows.Close()
-	var ids []int64
-	for sqlRows.Next() {
-		var id int64
-		if err := sqlRows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, sqlRows.Err()
+	return r.queries.ListAdminsAndOwnerUserIDs(ctx, sqlc.ListAdminsAndOwnerUserIDsParams{
+		ID:         businessID,
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
+	})
 }
 
 // BulkCreateHubNotification writes an in-app notification to hub_notifications for

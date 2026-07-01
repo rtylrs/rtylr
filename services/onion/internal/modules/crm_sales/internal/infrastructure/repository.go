@@ -4,20 +4,25 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-
-	sq "github.com/Masterminds/squirrel"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
+	"github.com/voxire/onion/internal/modules/crm_sales/internal/infrastructure/persistence/sqlc"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	db *sql.DB
+	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{
+		queries: sqlc.New(db),
+		db:      db,
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -25,65 +30,27 @@ func NewRepository(db *sql.DB) *Repository {
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
-			"source", "stage", "assigned_to", "mrr_potential", "COALESCE(notes,'')",
-			"created_at", "updated_at").
-		From("crm_leads").
-		Where(sq.Eq{"business_id": businessID}).
-		OrderBy("created_at DESC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.ListLeads(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Error("failed to close leads rows", logger.Error(closeErr))
-		}
-	}()
-
-	leads := make([]domain.Lead, 0)
-	for rows.Next() {
-		l, scanErr := scanLead(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		leads = append(leads, l)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
+	leads := make([]domain.Lead, 0, len(rows))
+	for _, row := range rows {
+		leads = append(leads, leadFromRow(row))
 	}
 	return leads, nil
 }
 
 func (r *Repository) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
-			"source", "stage", "assigned_to", "mrr_potential", "COALESCE(notes,'')",
-			"created_at", "updated_at").
-		From("crm_leads").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Lead{}, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-	l, err := scanLeadRow(row)
+	row, err := r.queries.GetLead(ctx, sqlc.GetLeadParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Lead{}, domain.ErrLeadNotFound
 		}
 		return domain.Lead{}, err
 	}
-	return l, nil
+	return leadFromGetRow(row), nil
 }
 
 func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.CreateLeadRequest) (domain.Lead, error) {
@@ -96,19 +63,18 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 		stage = domain.LeadStageCold
 	}
 
-	query, args, err := sq.
-		Insert("crm_leads").
-		Columns("owner_id", "business_id", "company_name", "industry", "size", "source", "stage", "assigned_to", "mrr_potential", "notes").
-		Values(ownerID, ownerID, req.CompanyName, nullableString(req.Industry), nullableString(req.Size),
-			source, string(stage), nullableInt64(req.AssignedTo), nullableFloat64(req.MRRPotential),
-			nullableString(req.Notes)).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Lead{}, err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.CreateLead(ctx, sqlc.CreateLeadParams{
+		OwnerID:      ownerID,
+		BusinessID:   ownerID,
+		CompanyName:  req.CompanyName,
+		Industry:     nullableString(req.Industry),
+		Size:         nullableString(req.Size),
+		Source:       source,
+		Stage:        string(stage),
+		AssignedTo:   nullableInt64(req.AssignedTo),
+		MrrPotential: nullableDecimalString(req.MRRPotential),
+		Notes:        nullableString(req.Notes),
+	})
 	if err != nil {
 		return domain.Lead{}, err
 	}
@@ -120,24 +86,18 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 }
 
 func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
-	query, args, err := sq.
-		Update("crm_leads").
-		Set("company_name", req.CompanyName).
-		Set("industry", nullableString(req.Industry)).
-		Set("size", nullableString(req.Size)).
-		Set("source", req.Source).
-		Set("stage", string(req.Stage)).
-		Set("assigned_to", nullableInt64(req.AssignedTo)).
-		Set("mrr_potential", nullableFloat64(req.MRRPotential)).
-		Set("notes", nullableString(req.Notes)).
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Lead{}, err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
+	err := r.queries.UpdateLead(ctx, sqlc.UpdateLeadParams{
+		CompanyName:  req.CompanyName,
+		Industry:     nullableString(req.Industry),
+		Size:         nullableString(req.Size),
+		Source:       req.Source,
+		Stage:        string(req.Stage),
+		AssignedTo:   nullableInt64(req.AssignedTo),
+		MrrPotential: nullableDecimalString(req.MRRPotential),
+		Notes:        nullableString(req.Notes),
+		ID:           id,
+		BusinessID:   businessID,
+	})
 	if err != nil {
 		return domain.Lead{}, err
 	}
@@ -145,16 +105,7 @@ func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req d
 }
 
 func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error {
-	query, args, err := sq.
-		Delete("crm_leads").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.DeleteLead(ctx, sqlc.DeleteLeadParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		return err
 	}
@@ -169,37 +120,18 @@ func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error
 }
 
 func (r *Repository) GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error) {
-	query, args, err := sq.
-		Select("stage", "COUNT(*) as cnt", "COALESCE(SUM(mrr_potential), 0) as total_mrr").
-		From("crm_leads").
-		Where(sq.Eq{"business_id": businessID}).
-		GroupBy("stage").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.GetPipeline(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Error("failed to close pipeline rows", logger.Error(closeErr))
-		}
-	}()
-
-	summaries := make([]domain.PipelineSummary, 0)
-	for rows.Next() {
-		var s domain.PipelineSummary
-		if scanErr := rows.Scan(&s.Stage, &s.Count, &s.TotalMRR); scanErr != nil {
-			return nil, scanErr
-		}
-		summaries = append(summaries, s)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
+	summaries := make([]domain.PipelineSummary, 0, len(rows))
+	for _, row := range rows {
+		summaries = append(summaries, domain.PipelineSummary{
+			Stage:    row.Stage,
+			Count:    int(row.Cnt),
+			TotalMRR: parsePipelineMRR(row.TotalMrr),
+		})
 	}
 	return summaries, nil
 }
@@ -209,68 +141,41 @@ func (r *Repository) GetPipeline(ctx context.Context, businessID int64) ([]domai
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error) {
-	builder := sq.
-		Select("id", "owner_id", "business_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
-			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
-			"created_at", "updated_at").
-		From("crm_contacts").
-		Where(sq.Eq{"business_id": businessID})
 	if leadID != nil {
-		builder = builder.Where(sq.Eq{"lead_id": *leadID})
+		rows, err := r.queries.ListContactsByLead(ctx, sqlc.ListContactsByLeadParams{
+			BusinessID: businessID,
+			LeadID:     *leadID,
+		})
+		if err != nil {
+			return nil, err
+		}
+		contacts := make([]domain.Contact, 0, len(rows))
+		for _, row := range rows {
+			contacts = append(contacts, contactFromLeadRow(row))
+		}
+		return contacts, nil
 	}
-	builder = builder.OrderBy("created_at DESC")
 
-	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	rows, err := r.queries.ListContacts(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
-
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Error("failed to close contacts rows", logger.Error(closeErr))
-		}
-	}()
-
-	contacts := make([]domain.Contact, 0)
-	for rows.Next() {
-		c, scanErr := scanContact(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		contacts = append(contacts, c)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
+	contacts := make([]domain.Contact, 0, len(rows))
+	for _, row := range rows {
+		contacts = append(contacts, contactFromRow(row))
 	}
 	return contacts, nil
 }
 
 func (r *Repository) GetContact(ctx context.Context, id, businessID int64) (domain.Contact, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "lead_id", "customer_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
-			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
-			"created_at", "updated_at").
-		From("crm_contacts").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Contact{}, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-	c, err := scanContactRow(row)
+	row, err := r.queries.GetContact(ctx, sqlc.GetContactParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Contact{}, domain.ErrContactNotFound
 		}
 		return domain.Contact{}, err
 	}
-	return c, nil
+	return contactFromGetRow(row), nil
 }
 
 func (r *Repository) CreateContact(ctx context.Context, businessID int64, req domain.CreateContactRequest) (domain.Contact, error) {
@@ -278,7 +183,11 @@ func (r *Repository) CreateContact(ctx context.Context, businessID int64, req do
 	if err != nil {
 		return domain.Contact{}, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			logger.Ctx(ctx).Error("failed to rollback create contact tx", logger.Error(rollbackErr))
+		}
+	}()
 
 	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  req.Name,
@@ -289,26 +198,25 @@ func (r *Repository) CreateContact(ctx context.Context, businessID int64, req do
 		return domain.Contact{}, err
 	}
 
-	var contactOwnerID int64
-	if err := tx.QueryRowContext(ctx,
-		`SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1`,
-		businessID,
-	).Scan(&contactOwnerID); err != nil {
-		return domain.Contact{}, err
-	}
-
-	query, args, err := sq.
-		Insert("crm_contacts").
-		Columns("owner_id", "business_id", "lead_id", "customer_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
-		Values(contactOwnerID, businessID, req.LeadID, nullableInt64Value(customerID), req.Name, nullableString(req.Role), nullableString(req.Email),
-			nullableString(req.Phone), nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes)).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	qtx := r.queries.WithTx(tx)
+	contactOwnerID, err := qtx.GetBusinessOwnerID(ctx, businessID)
 	if err != nil {
 		return domain.Contact{}, err
 	}
 
-	result, err := tx.ExecContext(ctx, query, args...)
+	result, err := qtx.CreateContact(ctx, sqlc.CreateContactParams{
+		OwnerID:    contactOwnerID,
+		BusinessID: businessID,
+		LeadID:     req.LeadID,
+		CustomerID: nullableInt64Value(customerID),
+		Name:       req.Name,
+		Role:       nullableString(req.Role),
+		Email:      nullableString(req.Email),
+		Phone:      nullableString(req.Phone),
+		Linkedin:   nullableString(req.LinkedIn),
+		IsPrimary:  req.IsPrimary,
+		Notes:      nullableString(req.Notes),
+	})
 	if err != nil {
 		return domain.Contact{}, err
 	}
@@ -327,13 +235,14 @@ func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, re
 	if err != nil {
 		return domain.Contact{}, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			logger.Ctx(ctx).Error("failed to rollback update contact tx", logger.Error(rollbackErr))
+		}
+	}()
 
-	var existingContactID int64
-	if err := tx.QueryRowContext(ctx,
-		`SELECT id FROM crm_contacts WHERE business_id = ? AND id = ? LIMIT 1`,
-		businessID, id,
-	).Scan(&existingContactID); err != nil {
+	qtx := r.queries.WithTx(tx)
+	if _, err := qtx.GetContact(ctx, sqlc.GetContactParams{ID: id, BusinessID: businessID}); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Contact{}, domain.ErrContactNotFound
 		}
@@ -349,24 +258,18 @@ func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, re
 		return domain.Contact{}, err
 	}
 
-	query, args, err := sq.
-		Update("crm_contacts").
-		Set("customer_id", nullableInt64Value(customerID)).
-		Set("name", req.Name).
-		Set("role", nullableString(req.Role)).
-		Set("email", nullableString(req.Email)).
-		Set("phone", nullableString(req.Phone)).
-		Set("linkedin", nullableString(req.LinkedIn)).
-		Set("is_primary", req.IsPrimary).
-		Set("notes", nullableString(req.Notes)).
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Contact{}, err
-	}
-
-	_, err = tx.ExecContext(ctx, query, args...)
+	err = qtx.UpdateContact(ctx, sqlc.UpdateContactParams{
+		CustomerID: nullableInt64Value(customerID),
+		Name:       req.Name,
+		Role:       nullableString(req.Role),
+		Email:      nullableString(req.Email),
+		Phone:      nullableString(req.Phone),
+		Linkedin:   nullableString(req.LinkedIn),
+		IsPrimary:  req.IsPrimary,
+		Notes:      nullableString(req.Notes),
+		ID:         id,
+		BusinessID: businessID,
+	})
 	if err != nil {
 		return domain.Contact{}, err
 	}
@@ -377,16 +280,7 @@ func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, re
 }
 
 func (r *Repository) DeleteContact(ctx context.Context, id, businessID int64) error {
-	query, args, err := sq.
-		Delete("crm_contacts").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.DeleteContact(ctx, sqlc.DeleteContactParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		return err
 	}
@@ -405,63 +299,30 @@ func (r *Repository) DeleteContact(ctx context.Context, id, businessID int64) er
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListTouchpoints(ctx context.Context, businessID, leadID int64) ([]domain.Touchpoint, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "lead_id", "contact_id", "type", "outcome",
-			"COALESCE(notes,'')", "next_follow_up", "created_by", "created_at").
-		From("crm_touchpoints").
-		Where(sq.Eq{"business_id": businessID, "lead_id": leadID}).
-		OrderBy("created_at DESC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.ListTouchpoints(ctx, sqlc.ListTouchpointsParams{
+		BusinessID: businessID,
+		LeadID:     leadID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Error("failed to close touchpoints rows", logger.Error(closeErr))
-		}
-	}()
-
-	tps := make([]domain.Touchpoint, 0)
-	for rows.Next() {
-		tp, scanErr := scanTouchpoint(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		tps = append(tps, tp)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
+	tps := make([]domain.Touchpoint, 0, len(rows))
+	for _, row := range rows {
+		tps = append(tps, touchpointFromRow(row))
 	}
 	return tps, nil
 }
 
 func (r *Repository) GetTouchpoint(ctx context.Context, id, businessID int64) (domain.Touchpoint, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "lead_id", "contact_id", "type", "outcome",
-			"COALESCE(notes,'')", "next_follow_up", "created_by", "created_at").
-		From("crm_touchpoints").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Touchpoint{}, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-	tp, err := scanTouchpointRow(row)
+	row, err := r.queries.GetTouchpoint(ctx, sqlc.GetTouchpointParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Touchpoint{}, domain.ErrTouchpointNotFound
 		}
 		return domain.Touchpoint{}, err
 	}
-	return tp, nil
+	return touchpointFromGetRow(row), nil
 }
 
 func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error) {
@@ -474,18 +335,17 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 		outcome = "other"
 	}
 
-	query, args, err := sq.
-		Insert("crm_touchpoints").
-		Columns("owner_id", "business_id", "lead_id", "contact_id", "type", "outcome", "notes", "next_follow_up", "created_by").
-		Values(ownerID, ownerID, req.LeadID, nullableInt64(req.ContactID), tp, outcome,
-			nullableString(req.Notes), nullableStringPtr(req.NextFollowUp), createdBy).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Touchpoint{}, err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.CreateTouchpoint(ctx, sqlc.CreateTouchpointParams{
+		OwnerID:      ownerID,
+		BusinessID:   ownerID,
+		LeadID:       req.LeadID,
+		ContactID:    nullableInt64(req.ContactID),
+		Type:         tp,
+		Outcome:      outcome,
+		Notes:        nullableString(req.Notes),
+		NextFollowUp: nullableDatePtr(req.NextFollowUp),
+		CreatedBy:    createdBy,
+	})
 	if err != nil {
 		return domain.Touchpoint{}, err
 	}
@@ -497,16 +357,7 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 }
 
 func (r *Repository) DeleteTouchpoint(ctx context.Context, id, businessID int64) error {
-	query, args, err := sq.
-		Delete("crm_touchpoints").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.DeleteTouchpoint(ctx, sqlc.DeleteTouchpointParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		return err
 	}
@@ -525,65 +376,27 @@ func (r *Repository) DeleteTouchpoint(ctx context.Context, id, businessID int64)
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "lead_id", "plan", "mrr", "seats",
-			"signed_at", "COALESCE(signed_by_name,'')", "closed_by", "COALESCE(notes,'')",
-			"created_at", "updated_at").
-		From("crm_contracts").
-		Where(sq.Eq{"business_id": businessID}).
-		OrderBy("created_at DESC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.ListContracts(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Error("failed to close contracts rows", logger.Error(closeErr))
-		}
-	}()
-
-	contracts := make([]domain.Contract, 0)
-	for rows.Next() {
-		c, scanErr := scanContract(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-		contracts = append(contracts, c)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
+	contracts := make([]domain.Contract, 0, len(rows))
+	for _, row := range rows {
+		contracts = append(contracts, contractFromRow(row))
 	}
 	return contracts, nil
 }
 
 func (r *Repository) GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error) {
-	query, args, err := sq.
-		Select("id", "owner_id", "business_id", "lead_id", "plan", "mrr", "seats",
-			"signed_at", "COALESCE(signed_by_name,'')", "closed_by", "COALESCE(notes,'')",
-			"created_at", "updated_at").
-		From("crm_contracts").
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Contract{}, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-	c, err := scanContractRow(row)
+	row, err := r.queries.GetContract(ctx, sqlc.GetContractParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Contract{}, domain.ErrContractNotFound
 		}
 		return domain.Contract{}, err
 	}
-	return c, nil
+	return contractFromGetRow(row), nil
 }
 
 func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req domain.CreateContractRequest) (domain.Contract, error) {
@@ -596,18 +409,18 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		seats = 1
 	}
 
-	query, args, err := sq.
-		Insert("crm_contracts").
-		Columns("owner_id", "business_id", "lead_id", "plan", "mrr", "seats", "signed_at", "signed_by_name", "closed_by", "notes").
-		Values(ownerID, ownerID, req.LeadID, plan, req.MRR, seats, nullableStringPtr(req.SignedAt),
-			nullableString(req.SignedByName), nullableInt64(req.ClosedBy), nullableString(req.Notes)).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Contract{}, err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.CreateContract(ctx, sqlc.CreateContractParams{
+		OwnerID:       ownerID,
+		BusinessID:    ownerID,
+		LeadID:        req.LeadID,
+		Plan:          plan,
+		Mrr:           strconv.FormatFloat(req.MRR, 'g', -1, 64),
+		Seats:         int32(seats),
+		SignedAt:      nullableDatePtr(req.SignedAt),
+		SignedByName:  nullableString(req.SignedByName),
+		ClosedBy:      nullableInt64(req.ClosedBy),
+		Notes:         nullableString(req.Notes),
+	})
 	if err != nil {
 		return domain.Contract{}, err
 	}
@@ -623,23 +436,17 @@ func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, r
 	if seats == 0 {
 		seats = 1
 	}
-	query, args, err := sq.
-		Update("crm_contracts").
-		Set("plan", req.Plan).
-		Set("mrr", req.MRR).
-		Set("seats", seats).
-		Set("signed_at", nullableStringPtr(req.SignedAt)).
-		Set("signed_by_name", nullableString(req.SignedByName)).
-		Set("closed_by", nullableInt64(req.ClosedBy)).
-		Set("notes", nullableString(req.Notes)).
-		Where(sq.Eq{"id": id, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return domain.Contract{}, err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
+	err := r.queries.UpdateContract(ctx, sqlc.UpdateContractParams{
+		Plan:         req.Plan,
+		Mrr:          strconv.FormatFloat(req.MRR, 'g', -1, 64),
+		Seats:        int32(seats),
+		SignedAt:     nullableDatePtr(req.SignedAt),
+		SignedByName: nullableString(req.SignedByName),
+		ClosedBy:     nullableInt64(req.ClosedBy),
+		Notes:        nullableString(req.Notes),
+		ID:           id,
+		BusinessID:   businessID,
+	})
 	if err != nil {
 		return domain.Contract{}, err
 	}
@@ -647,181 +454,232 @@ func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, r
 }
 
 // ---------------------------------------------------------------------------
-// Scan helpers
+// Row mappers
 // ---------------------------------------------------------------------------
 
-type leadScanner interface {
-	Scan(dest ...interface{}) error
+func leadFromRow(row sqlc.ListLeadsRow) domain.Lead {
+	return leadFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.CompanyName, row.Industry, row.Size,
+		row.Source, row.Stage, row.AssignedTo, row.MrrPotential, row.Notes,
+		row.CreatedAt, row.UpdatedAt,
+	)
 }
 
-func scanLead(s leadScanner) (domain.Lead, error) {
-	var l domain.Lead
-	var assignedTo sql.NullInt64
-	var mrrPotential sql.NullFloat64
-	err := s.Scan(
-		&l.ID, &l.OwnerID, &l.BusinessID, &l.CompanyName, &l.Industry, &l.Size,
-		&l.Source, &l.Stage, &assignedTo, &mrrPotential, &l.Notes,
-		&l.CreatedAt, &l.UpdatedAt,
+func leadFromGetRow(row sqlc.GetLeadRow) domain.Lead {
+	return leadFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.CompanyName, row.Industry, row.Size,
+		row.Source, row.Stage, row.AssignedTo, row.MrrPotential, row.Notes,
+		row.CreatedAt, row.UpdatedAt,
 	)
-	if err != nil {
-		return domain.Lead{}, err
+}
+
+func leadFromFields(
+	id, ownerID, businessID int64,
+	companyName, industry, size, source, stage string,
+	assignedTo sql.NullInt64,
+	mrrPotential sql.NullString,
+	notes string,
+	createdAt, updatedAt time.Time,
+) domain.Lead {
+	l := domain.Lead{
+		ID:          id,
+		OwnerID:     ownerID,
+		BusinessID:  businessID,
+		CompanyName: companyName,
+		Industry:    industry,
+		Size:        size,
+		Source:      source,
+		Stage:       domain.LeadStage(stage),
+		Notes:       notes,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}
 	if assignedTo.Valid {
 		l.AssignedTo = &assignedTo.Int64
 	}
-	if mrrPotential.Valid {
-		l.MRRPotential = &mrrPotential.Float64
+	if mrrPotential.Valid && mrrPotential.String != "" {
+		if f, err := strconv.ParseFloat(mrrPotential.String, 64); err == nil {
+			l.MRRPotential = &f
+		}
 	}
-	return l, nil
+	return l
 }
 
-func scanLeadRow(row *sql.Row) (domain.Lead, error) {
-	var l domain.Lead
-	var assignedTo sql.NullInt64
-	var mrrPotential sql.NullFloat64
-	err := row.Scan(
-		&l.ID, &l.OwnerID, &l.BusinessID, &l.CompanyName, &l.Industry, &l.Size,
-		&l.Source, &l.Stage, &assignedTo, &mrrPotential, &l.Notes,
-		&l.CreatedAt, &l.UpdatedAt,
+func contactFromRow(row sqlc.ListContactsRow) domain.Contact {
+	return contactFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.CustomerID,
+		row.Name, row.Role, row.Email, row.Phone, row.Linkedin,
+		row.IsPrimary, row.Notes, row.CreatedAt, row.UpdatedAt,
 	)
-	if err != nil {
-		return domain.Lead{}, err
-	}
-	if assignedTo.Valid {
-		l.AssignedTo = &assignedTo.Int64
-	}
-	if mrrPotential.Valid {
-		l.MRRPotential = &mrrPotential.Float64
-	}
-	return l, nil
 }
 
-type contactScanner interface {
-	Scan(dest ...interface{}) error
-}
-
-func scanContact(s contactScanner) (domain.Contact, error) {
-	var c domain.Contact
-	var customerID sql.NullInt64
-	err := s.Scan(
-		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
-		&c.Phone, &c.LinkedIn, &c.IsPrimary, &c.Notes,
-		&c.CreatedAt, &c.UpdatedAt,
+func contactFromLeadRow(row sqlc.ListContactsByLeadRow) domain.Contact {
+	return contactFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.CustomerID,
+		row.Name, row.Role, row.Email, row.Phone, row.Linkedin,
+		row.IsPrimary, row.Notes, row.CreatedAt, row.UpdatedAt,
 	)
-	if err != nil {
-		return domain.Contact{}, err
+}
+
+func contactFromGetRow(row sqlc.GetContactRow) domain.Contact {
+	return contactFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.CustomerID,
+		row.Name, row.Role, row.Email, row.Phone, row.Linkedin,
+		row.IsPrimary, row.Notes, row.CreatedAt, row.UpdatedAt,
+	)
+}
+
+func contactFromFields(
+	id, ownerID, businessID, leadID int64,
+	customerID sql.NullInt64,
+	name, role, email, phone, linkedin string,
+	isPrimary bool,
+	notes string,
+	createdAt, updatedAt time.Time,
+) domain.Contact {
+	c := domain.Contact{
+		ID:         id,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		LeadID:     leadID,
+		Name:       name,
+		Role:       role,
+		Email:      email,
+		Phone:      phone,
+		LinkedIn:   linkedin,
+		IsPrimary:  isPrimary,
+		Notes:      notes,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
 	}
 	if customerID.Valid {
 		c.CustomerID = customerID.Int64
 	}
-	return c, nil
+	return c
 }
 
-func scanContactRow(row *sql.Row) (domain.Contact, error) {
-	var c domain.Contact
-	var customerID sql.NullInt64
-	err := row.Scan(
-		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &customerID, &c.Name, &c.Role, &c.Email,
-		&c.Phone, &c.LinkedIn, &c.IsPrimary, &c.Notes,
-		&c.CreatedAt, &c.UpdatedAt,
+func touchpointFromRow(row sqlc.ListTouchpointsRow) domain.Touchpoint {
+	return touchpointFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.ContactID,
+		row.Type, row.Outcome, row.Notes, row.NextFollowUp, row.CreatedBy, row.CreatedAt,
 	)
-	if err != nil {
-		return domain.Contact{}, err
-	}
-	if customerID.Valid {
-		c.CustomerID = customerID.Int64
-	}
-	return c, nil
 }
 
-type touchpointScanner interface {
-	Scan(dest ...interface{}) error
-}
-
-func scanTouchpoint(s touchpointScanner) (domain.Touchpoint, error) {
-	var tp domain.Touchpoint
-	var contactID sql.NullInt64
-	var nextFollowUp sql.NullString
-	err := s.Scan(
-		&tp.ID, &tp.OwnerID, &tp.BusinessID, &tp.LeadID, &contactID, &tp.Type, &tp.Outcome,
-		&tp.Notes, &nextFollowUp, &tp.CreatedBy, &tp.CreatedAt,
+func touchpointFromGetRow(row sqlc.GetTouchpointRow) domain.Touchpoint {
+	return touchpointFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.ContactID,
+		row.Type, row.Outcome, row.Notes, row.NextFollowUp, row.CreatedBy, row.CreatedAt,
 	)
-	if err != nil {
-		return domain.Touchpoint{}, err
+}
+
+func touchpointFromFields(
+	id, ownerID, businessID, leadID int64,
+	contactID sql.NullInt64,
+	tpType, outcome, notes string,
+	nextFollowUp sql.NullTime,
+	createdBy int64,
+	createdAt time.Time,
+) domain.Touchpoint {
+	tp := domain.Touchpoint{
+		ID:         id,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		LeadID:     leadID,
+		Type:       tpType,
+		Outcome:    outcome,
+		Notes:      notes,
+		CreatedBy:  createdBy,
+		CreatedAt:  createdAt,
 	}
 	if contactID.Valid {
 		tp.ContactID = &contactID.Int64
 	}
-	if nextFollowUp.Valid && nextFollowUp.String != "" {
-		tp.NextFollowUp = &nextFollowUp.String
+	if nextFollowUp.Valid {
+		s := nextFollowUp.Time.Format("2006-01-02")
+		tp.NextFollowUp = &s
 	}
-	return tp, nil
+	return tp
 }
 
-func scanTouchpointRow(row *sql.Row) (domain.Touchpoint, error) {
-	var tp domain.Touchpoint
-	var contactID sql.NullInt64
-	var nextFollowUp sql.NullString
-	err := row.Scan(
-		&tp.ID, &tp.OwnerID, &tp.BusinessID, &tp.LeadID, &contactID, &tp.Type, &tp.Outcome,
-		&tp.Notes, &nextFollowUp, &tp.CreatedBy, &tp.CreatedAt,
+func contractFromRow(row sqlc.ListContractsRow) domain.Contract {
+	return contractFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
+		int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+		row.CreatedAt, row.UpdatedAt,
 	)
-	if err != nil {
-		return domain.Touchpoint{}, err
-	}
-	if contactID.Valid {
-		tp.ContactID = &contactID.Int64
-	}
-	if nextFollowUp.Valid && nextFollowUp.String != "" {
-		tp.NextFollowUp = &nextFollowUp.String
-	}
-	return tp, nil
 }
 
-type contractScanner interface {
-	Scan(dest ...interface{}) error
-}
-
-func scanContract(s contractScanner) (domain.Contract, error) {
-	var c domain.Contract
-	var signedAt sql.NullString
-	var closedBy sql.NullInt64
-	err := s.Scan(
-		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &c.Plan, &c.MRR, &c.Seats,
-		&signedAt, &c.SignedByName, &closedBy, &c.Notes,
-		&c.CreatedAt, &c.UpdatedAt,
+func contractFromGetRow(row sqlc.GetContractRow) domain.Contract {
+	return contractFromFields(
+		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
+		int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+		row.CreatedAt, row.UpdatedAt,
 	)
-	if err != nil {
-		return domain.Contract{}, err
+}
+
+func contractFromFields(
+	id, ownerID, businessID, leadID int64,
+	plan, mrr string,
+	seats int,
+	signedAt sql.NullTime,
+	signedByName string,
+	closedBy sql.NullInt64,
+	notes string,
+	createdAt, updatedAt time.Time,
+) domain.Contract {
+	c := domain.Contract{
+		ID:           id,
+		OwnerID:      ownerID,
+		BusinessID:   businessID,
+		LeadID:       leadID,
+		Plan:         plan,
+		MRR:          parseDecimalString(mrr),
+		Seats:        seats,
+		SignedByName: signedByName,
+		Notes:        notes,
+		CreatedAt:    createdAt,
+		UpdatedAt:    updatedAt,
 	}
-	if signedAt.Valid && signedAt.String != "" {
-		c.SignedAt = &signedAt.String
+	if signedAt.Valid {
+		s := signedAt.Time.Format("2006-01-02")
+		c.SignedAt = &s
 	}
 	if closedBy.Valid {
 		c.ClosedBy = &closedBy.Int64
 	}
-	return c, nil
+	return c
 }
 
-func scanContractRow(row *sql.Row) (domain.Contract, error) {
-	var c domain.Contract
-	var signedAt sql.NullString
-	var closedBy sql.NullInt64
-	err := row.Scan(
-		&c.ID, &c.OwnerID, &c.BusinessID, &c.LeadID, &c.Plan, &c.MRR, &c.Seats,
-		&signedAt, &c.SignedByName, &closedBy, &c.Notes,
-		&c.CreatedAt, &c.UpdatedAt,
-	)
+func parsePipelineMRR(v interface{}) float64 {
+	switch n := v.(type) {
+	case float64:
+		return n
+	case []byte:
+		f, err := strconv.ParseFloat(string(n), 64)
+		if err != nil {
+			return 0
+		}
+		return f
+	case string:
+		f, err := strconv.ParseFloat(n, 64)
+		if err != nil {
+			return 0
+		}
+		return f
+	default:
+		return 0
+	}
+}
+
+func parseDecimalString(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		return domain.Contract{}, err
+		return 0
 	}
-	if signedAt.Valid && signedAt.String != "" {
-		c.SignedAt = &signedAt.String
-	}
-	if closedBy.Valid {
-		c.ClosedBy = &closedBy.Int64
-	}
-	return c, nil
+	return f
 }
 
 // ---------------------------------------------------------------------------
@@ -832,11 +690,15 @@ func nullableString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
 
-func nullableStringPtr(s *string) sql.NullString {
+func nullableDatePtr(s *string) sql.NullTime {
 	if s == nil || *s == "" {
-		return sql.NullString{}
+		return sql.NullTime{}
 	}
-	return sql.NullString{String: *s, Valid: true}
+	t, err := time.Parse("2006-01-02", *s)
+	if err != nil {
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: t, Valid: true}
 }
 
 func nullableInt64(v *int64) sql.NullInt64 {
@@ -850,9 +712,9 @@ func nullableInt64Value(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
-func nullableFloat64(v *float64) sql.NullFloat64 {
+func nullableDecimalString(v *float64) sql.NullString {
 	if v == nil {
-		return sql.NullFloat64{}
+		return sql.NullString{}
 	}
-	return sql.NullFloat64{Float64: *v, Valid: true}
+	return sql.NullString{String: strconv.FormatFloat(*v, 'g', -1, 64), Valid: true}
 }

@@ -6,192 +6,119 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
-	"time"
-
-	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
+	"github.com/voxire/onion/internal/modules/oauth/internal/infrastructure/persistence/sqlc"
 )
 
 type Repository struct {
-	db *sql.DB
+	queries *sqlc.Queries
 }
 
-// NewRepository accepts a ctx for parity with other modules but no longer
-// stashes it on the struct — every method takes ctx as the first arg so
-// request cancellation / deadlines / trace ids propagate correctly.
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{queries: sqlc.New(db)}
 }
 
 func (r *Repository) GetClient(ctx context.Context, clientID string) (*domain.Client, error) {
-	query, args, err := sq.
-		Select("id", "name", "redirect_uris", "scopes", "is_public", "created_at").
-		From("oauth_clients").
-		Where(sq.Eq{"id": clientID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	row, err := r.queries.GetOAuthClient(ctx, clientID)
 	if err != nil {
-		return nil, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-
-	var c domain.Client
-	var redirectURIsJSON, scopesStr string
-	var createdAt time.Time
-
-	if err := row.Scan(&c.ID, &c.Name, &redirectURIsJSON, &scopesStr, &c.IsPublic, &createdAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrClientNotFound
 		}
 		return nil, err
 	}
 
-	if err := json.Unmarshal([]byte(redirectURIsJSON), &c.RedirectURIs); err != nil {
+	c := &domain.Client{
+		ID:        row.ID,
+		Name:      row.Name,
+		IsPublic:  row.IsPublic,
+		CreatedAt: row.CreatedAt.Time,
+	}
+	if err := json.Unmarshal([]byte(row.RedirectUris), &c.RedirectURIs); err != nil {
 		c.RedirectURIs = []string{}
 	}
-	c.Scopes = strings.Fields(scopesStr)
-	c.CreatedAt = createdAt
-
-	return &c, nil
+	c.Scopes = strings.Fields(row.Scopes)
+	return c, nil
 }
 
 func (r *Repository) SaveAuthCode(ctx context.Context, code *domain.AuthCode) error {
-	query, args, err := sq.
-		Insert("oauth_auth_codes").
-		Columns("code", "client_id", "user_id", "redirect_uri", "scope", "code_challenge", "code_challenge_method", "expires_at").
-		Values(code.Code, code.ClientID, code.UserID, code.RedirectURI, code.Scope,
-			code.CodeChallenge, code.CodeChallengeMethod, code.ExpiresAt).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.SaveAuthCode(ctx, sqlc.SaveAuthCodeParams{
+		Code:                code.Code,
+		ClientID:            code.ClientID,
+		UserID:              code.UserID,
+		RedirectUri:         code.RedirectURI,
+		Scope:               code.Scope,
+		CodeChallenge:       code.CodeChallenge,
+		CodeChallengeMethod: code.CodeChallengeMethod,
+		ExpiresAt:           code.ExpiresAt,
+	})
 }
 
 func (r *Repository) GetAuthCode(ctx context.Context, code string) (*domain.AuthCode, error) {
-	query, args, err := sq.
-		Select("code", "client_id", "user_id", "redirect_uri", "scope", "code_challenge", "code_challenge_method", "expires_at", "used").
-		From("oauth_auth_codes").
-		Where(sq.Eq{"code": code}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	row, err := r.queries.GetAuthCode(ctx, code)
 	if err != nil {
-		return nil, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-
-	var c domain.AuthCode
-	var used int
-
-	if err := row.Scan(
-		&c.Code, &c.ClientID, &c.UserID, &c.RedirectURI, &c.Scope,
-		&c.CodeChallenge, &c.CodeChallengeMethod, &c.ExpiresAt, &used,
-	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrCodeNotFound
 		}
 		return nil, err
 	}
 
-	c.Used = used == 1
-	return &c, nil
+	return &domain.AuthCode{
+		Code:                row.Code,
+		ClientID:            row.ClientID,
+		UserID:              row.UserID,
+		RedirectURI:         row.RedirectUri,
+		Scope:               row.Scope,
+		CodeChallenge:       row.CodeChallenge,
+		CodeChallengeMethod: row.CodeChallengeMethod,
+		ExpiresAt:           row.ExpiresAt,
+		Used:                row.Used,
+	}, nil
 }
 
 func (r *Repository) MarkAuthCodeUsed(ctx context.Context, code string) error {
-	query, args, err := sq.
-		Update("oauth_auth_codes").
-		Set("used", 1).
-		Where(sq.Eq{"code": code}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.MarkAuthCodeUsed(ctx, code)
 }
 
 func (r *Repository) SaveToken(ctx context.Context, token *domain.Token) error {
-	query, args, err := sq.
-		Insert("oauth_tokens").
-		Columns("access_token", "refresh_token", "client_id", "user_id", "scope", "expires_at").
-		Values(token.AccessToken, token.RefreshToken, token.ClientID, token.UserID, token.Scope, token.ExpiresAt).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.SaveToken(ctx, sqlc.SaveTokenParams{
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+		ClientID:     token.ClientID,
+		UserID:       token.UserID,
+		Scope:        token.Scope,
+		ExpiresAt:    token.ExpiresAt,
+	})
 }
 
 func (r *Repository) GetTokenByRefresh(ctx context.Context, refreshToken string) (*domain.Token, error) {
-	query, args, err := sq.
-		Select("id", "access_token", "refresh_token", "client_id", "user_id", "scope", "expires_at", "revoked").
-		From("oauth_tokens").
-		Where(sq.Eq{"refresh_token": refreshToken}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	row, err := r.queries.GetTokenByRefresh(ctx, refreshToken)
 	if err != nil {
-		return nil, err
-	}
-
-	row := r.db.QueryRowContext(ctx, query, args...)
-
-	var t domain.Token
-	var revoked int
-
-	if err := row.Scan(
-		&t.ID, &t.AccessToken, &t.RefreshToken, &t.ClientID, &t.UserID,
-		&t.Scope, &t.ExpiresAt, &revoked,
-	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTokenNotFound
 		}
 		return nil, err
 	}
 
-	t.Revoked = revoked == 1
-	return &t, nil
+	return &domain.Token{
+		ID:           row.ID,
+		AccessToken:  row.AccessToken,
+		RefreshToken: row.RefreshToken,
+		ClientID:     row.ClientID,
+		UserID:       row.UserID,
+		Scope:        row.Scope,
+		ExpiresAt:    row.ExpiresAt,
+		Revoked:      row.Revoked,
+	}, nil
 }
 
 func (r *Repository) RevokeToken(ctx context.Context, refreshToken string) error {
-	query, args, err := sq.
-		Update("oauth_tokens").
-		Set("revoked", 1).
-		Where(sq.Eq{"refresh_token": refreshToken}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-	return err
+	return r.queries.RevokeToken(ctx, refreshToken)
 }
 
 func (r *Repository) GetUserPasswordHash(ctx context.Context, userID int64) (string, error) {
 	// cross-schema read from shared users table — password hash for resource owner password grant
-	query, args, err := sq.
-		Select("password_hash").
-		From("users").
-		Where(sq.Eq{"id": userID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return "", err
-	}
-
-	var hash string
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&hash)
+	hash, err := r.queries.GetUserPasswordHash(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", errors.New("user not found")
 	}
@@ -200,19 +127,7 @@ func (r *Repository) GetUserPasswordHash(ctx context.Context, userID int64) (str
 
 func (r *Repository) GetUserIDByEmail(ctx context.Context, email string) (int64, error) {
 	// cross-schema read from shared users table — resolve user id from email for password grant
-	query, args, err := sq.
-		Select("id").
-		From("users").
-		Where(sq.Eq{"email": email}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	var userID int64
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&userID)
+	userID, err := r.queries.GetUserIDByEmail(ctx, email)
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, errors.New("user not found")
 	}
@@ -221,32 +136,21 @@ func (r *Repository) GetUserIDByEmail(ctx context.Context, email string) (int64,
 
 func (r *Repository) GetUserBusinessIDAndRole(ctx context.Context, userID int64) (int64, string, error) {
 	// cross-schema read from shared users table and user_app_permissions — for JWT claims population
-	var businessID sql.NullInt64
-	var role string
-
-	query, args, err := sq.
-		Select(
-			"u.business_id",
-			"CASE WHEN b.owner_id = u.id THEN 'owner' ELSE COALESCE(uap.role, 'staff') END",
-		).
-		From("users u").
-		LeftJoin("businesses b ON b.id = u.business_id").
-		LeftJoin("user_app_permissions uap ON uap.user_id = u.id AND (uap.business_id = u.business_id OR (uap.business_id IS NULL AND uap.owner_id = b.owner_id))").
-		Where(sq.Eq{"u.id": userID}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, "", err
-	}
-
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&businessID, &role)
-
+	row, err := r.queries.GetUserBusinessIDAndRole(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, "", nil
 	}
 	if err != nil {
 		return 0, "", err
 	}
-	return businessID.Int64, role, nil
+	role := ""
+	if row.Role != nil {
+		switch v := row.Role.(type) {
+		case string:
+			role = v
+		case []byte:
+			role = string(v)
+		}
+	}
+	return row.BusinessID.Int64, role, nil
 }

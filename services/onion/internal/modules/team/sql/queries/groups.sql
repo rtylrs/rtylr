@@ -65,3 +65,15 @@ WHERE ugm.user_id = ? AND ugm.owner_id = ?;
 
 -- name: CountGroupMembers :one
 SELECT COUNT(*) FROM user_group_members WHERE group_id = ?;
+
+-- name: ListUserGroupsForUsers :many
+SELECT m.user_id, g.id, g.name, g.color
+FROM user_group_members m
+JOIN user_groups g ON g.id = m.group_id
+WHERE m.user_id IN (sqlc.slice('user_ids')) AND m.owner_id = ?
+ORDER BY g.name;
+
+-- name: ListGroupResourcePermissionsForGroups :many
+SELECT group_id, resource_key, permission_level
+FROM user_group_resource_permissions
+WHERE group_id IN (sqlc.slice('group_ids'));

@@ -474,75 +474,33 @@ func (r *Repository) loadOrderItemsForOrders(ctx context.Context, orders []domai
 		orderIDs = append(orderIDs, order.ID)
 	}
 
-	query, args, err := sq.
-		Select(
-			"id", "order_id", "COALESCE(menu_item_id,0)", "name", "COALESCE(sku,'')",
-			"quantity", "unit_price", "COALESCE(discount_pct,0)", "COALESCE(discount_amount,0)",
-			"COALESCE(tax_rate,0)", "total", "COALESCE(notes,'')", "COALESCE(status,'pending')",
-			"created_at",
-		).
-		From("pos_order_items").
-		Where(sq.Eq{"order_id": orderIDs}).
-		OrderBy("created_at ASC", "id ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build list pos order items query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetOrderItemsForOrders(ctx, orderIDs)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list pos order items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	itemsByOrderID := make(map[int64][]domain.OrderItem, len(orders))
-	for rows.Next() {
-		var (
-			item           domain.OrderItem
-			quantity       sql.NullString
-			unitPrice      sql.NullString
-			discountPct    sql.NullString
-			discountAmount sql.NullString
-			taxRate        sql.NullString
-			total          sql.NullString
-			status         string
-		)
-
-		if err := rows.Scan(
-			&item.ID,
-			&item.OrderID,
-			&item.MenuItemID,
-			&item.Name,
-			&item.SKU,
-			&quantity,
-			&unitPrice,
-			&discountPct,
-			&discountAmount,
-			&taxRate,
-			&total,
-			&item.Notes,
-			&status,
-			&item.CreatedAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan pos order item row", logger.Error(err))
-			return nil, err
+	for _, row := range rows {
+		item := domain.OrderItem{
+			ID:             row.ID,
+			OrderID:        row.OrderID,
+			MenuItemID:     row.MenuItemID,
+			Name:           row.Name,
+			SKU:            row.Sku,
+			Quantity:       decimalToFloat(row.Quantity),
+			UnitPrice:      decimalToFloat(row.UnitPrice),
+			DiscountPct:    decimalToFloat(row.DiscountPct),
+			DiscountAmount: decimalToFloat(row.DiscountAmount),
+			TaxRate:        decimalToFloat(row.TaxRate),
+			Total:          decimalToFloat(row.Total),
+			Notes:          row.Notes,
+			Status:         domain.ItemStatus(row.Status),
 		}
-
-		item.Quantity = decimalToFloat(quantity.String)
-		item.UnitPrice = decimalToFloat(unitPrice.String)
-		item.DiscountPct = decimalToFloat(discountPct.String)
-		item.DiscountAmount = decimalToFloat(discountAmount.String)
-		item.TaxRate = decimalToFloat(taxRate.String)
-		item.Total = decimalToFloat(total.String)
-		item.Status = domain.ItemStatus(status)
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time
+		}
 		itemsByOrderID[item.OrderID] = append(itemsByOrderID[item.OrderID], item)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
 	}
 
 	for i := range orders {
@@ -891,43 +849,23 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 // permitted (POS should not block a sale on a lagging count) — this should
 // become a per-tenant policy flag.
 func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, businessID, orderID int64) error {
+	qtx := r.queries.WithTx(tx)
+
 	// cross-schema read from stock_core — idempotency guard on the shared stock ledger
-	idempotencyQuery, idempotencyArgs, err := sq.
-		Select("1").
-		From("stock_ledger").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.Eq{"reference_type": "pos_order"}).
-		Where(sq.Eq{"reference_id": orderID}).
-		Where(sq.Eq{"entry_type": "sale"}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
+	if _, err := qtx.HasSaleLedgerEntry(ctx, sqlc.HasSaleLedgerEntryParams{
+		BusinessID:  businessID,
+		ReferenceID: sql.NullInt64{Int64: orderID, Valid: true},
+	}); err == nil {
+		return nil
+	} else if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 
-	var already int
-	idErr := tx.QueryRowContext(ctx, idempotencyQuery, idempotencyArgs...).Scan(&already)
-	if idErr == nil {
-		return nil // already deducted for this order
-	}
-	if !errors.Is(idErr, sql.ErrNoRows) {
-		return idErr
-	}
-
-	locQuery, locArgs, err := sq.
-		Select("COALESCE(location_id, 0)").
-		From("pos_orders").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.Eq{"id": orderID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	locationID, err := qtx.GetOrderLocationID(ctx, sqlc.GetOrderLocationIDParams{
+		BusinessID: businessID,
+		ID:         orderID,
+	})
 	if err != nil {
-		return err
-	}
-
-	var locationID int64
-	if err := tx.QueryRowContext(ctx, locQuery, locArgs...).Scan(&locationID); err != nil {
 		return err
 	}
 
@@ -937,20 +875,10 @@ func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, businessID
 	}
 
 	// cross-schema read from erp — join POS line items against ERP products to find inventory-tracked SKUs
-	linesQuery, linesArgs, err := sq.
-		Select("oi.menu_item_id", "oi.quantity").
-		From("pos_order_items oi").
-		Join("erp_products p ON p.id = oi.menu_item_id AND p.business_id = ?", businessID).
-		Where("oi.order_id = ?", orderID).
-		Where("oi.menu_item_id IS NOT NULL").
-		Where(sq.Eq{"p.track_inventory": true}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	rows, err := tx.QueryContext(ctx, linesQuery, linesArgs...)
+	rows, err := qtx.ListInventoryTrackedOrderLines(ctx, sqlc.ListInventoryTrackedOrderLinesParams{
+		BusinessID: businessID,
+		OrderID:    orderID,
+	})
 	if err != nil {
 		return err
 	}
@@ -959,28 +887,18 @@ func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, businessID
 		productID int64
 		qty       float64
 	}
-	var lines []line
-	for rows.Next() {
-		var pid int64
-		var qStr string
-		if scanErr := rows.Scan(&pid, &qStr); scanErr != nil {
-			_ = rows.Close()
-			return scanErr
+	lines := make([]line, 0, len(rows))
+	for _, row := range rows {
+		if !row.MenuItemID.Valid {
+			continue
 		}
-		q, perr := strconv.ParseFloat(qStr, 64)
+		q, perr := strconv.ParseFloat(row.Quantity, 64)
 		if perr != nil {
-			_ = rows.Close()
 			return perr
 		}
-		lines = append(lines, line{productID: pid, qty: q})
+		lines = append(lines, line{productID: row.MenuItemID.Int64, qty: q})
 	}
-	if rerr := rows.Err(); rerr != nil {
-		_ = rows.Close()
-		return rerr
-	}
-	_ = rows.Close()
 
-	// Lock product rows in ascending order to avoid deadlocks across concurrent orders.
 	sort.Slice(lines, func(i, j int) bool { return lines[i].productID < lines[j].productID })
 
 	for _, l := range lines {
@@ -1063,76 +981,54 @@ func (r *Repository) VoidOrderItem(ctx context.Context, businessID, orderID, ite
 
 	defer func() {
 		if p := recover(); p != nil {
-			_ = tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				logger.Ctx(ctx).Error("failed to rollback void-order-item panic", logger.Error(rollbackErr))
+			}
 			panic(p)
 		}
 	}()
 
-	selectQuery, selectArgs, buildErr := sq.
-		Select("status").
-		From("pos_order_items").
-		Where(sq.Eq{"id": itemID}).
-		Where(sq.Eq{"order_id": orderID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if buildErr != nil {
-		_ = tx.Rollback()
-		return buildErr
-	}
+	qtx := r.queries.WithTx(tx)
 
-	var itemStatus string
-	if scanErr := tx.QueryRowContext(ctx, selectQuery, selectArgs...).Scan(&itemStatus); scanErr != nil {
-		_ = tx.Rollback()
-		if errors.Is(scanErr, sql.ErrNoRows) {
+	if _, err := qtx.GetOrderItemStatus(ctx, sqlc.GetOrderItemStatusParams{
+		ID:      itemID,
+		OrderID: orderID,
+	}); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item lookup", logger.Error(rollbackErr))
+		}
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
 		}
-		logger.Ctx(ctx).Error("Failed to fetch order item for void", logger.Error(scanErr))
-		return scanErr
+		logger.Ctx(ctx).Error("Failed to fetch order item for void", logger.Error(err))
+		return err
 	}
 
-	cancelQuery, cancelArgs, buildErr := sq.
-		Update("pos_order_items").
-		Set("status", "cancelled").
-		Where(sq.Eq{"id": itemID}).
-		Where(sq.Eq{"order_id": orderID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if buildErr != nil {
-		_ = tx.Rollback()
-		return buildErr
+	if _, err := qtx.VoidOrderItem(ctx, sqlc.VoidOrderItemParams{
+		ID:      itemID,
+		OrderID: orderID,
+	}); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item update", logger.Error(rollbackErr))
+		}
+		logger.Ctx(ctx).Error("Failed to cancel order item", logger.Error(err))
+		return err
 	}
 
-	if _, execErr := tx.ExecContext(ctx, cancelQuery, cancelArgs...); execErr != nil {
-		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("Failed to cancel order item", logger.Error(execErr))
-		return execErr
+	if err := qtx.RecalcOrderTotal(ctx, sqlc.RecalcOrderTotalParams{
+		ID:         orderID,
+		BusinessID: businessID,
+	}); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item recalc", logger.Error(rollbackErr))
+		}
+		logger.Ctx(ctx).Error("Failed to recalculate order total after item void", logger.Error(err))
+		return err
 	}
 
-	recalcQuery, recalcArgs, buildErr := sq.
-		Update("pos_orders").
-		Set("subtotal", sq.Expr(
-			"(SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id=? AND status != 'cancelled')",
-			orderID,
-		)).
-		Set("total", sq.Expr("subtotal + tax_amount - discount_amount")).
-		Where(sq.Eq{"id": orderID}).
-		Where(sq.Eq{"business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if buildErr != nil {
-		_ = tx.Rollback()
-		return buildErr
-	}
-
-	if _, execErr := tx.ExecContext(ctx, recalcQuery, recalcArgs...); execErr != nil {
-		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("Failed to recalculate order total after item void", logger.Error(execErr))
-		return execErr
-	}
-
-	if commitErr := tx.Commit(); commitErr != nil {
-		logger.Ctx(ctx).Error("Failed to commit void-order-item transaction", logger.Error(commitErr))
-		return commitErr
+	if err := tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit void-order-item transaction", logger.Error(err))
+		return err
 	}
 
 	return nil
@@ -1147,70 +1043,54 @@ func (r *Repository) TransferTable(ctx context.Context, businessID, orderID, old
 
 	defer func() {
 		if p := recover(); p != nil {
-			_ = tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				logger.Ctx(ctx).Error("failed to rollback transfer-table panic", logger.Error(rollbackErr))
+			}
 			panic(p)
 		}
 	}()
 
+	qtx := r.queries.WithTx(tx)
+
 	if oldTableID > 0 {
-		freeQuery, freeArgs, buildErr := sq.
-			Update("pos_tables").
-			Set("status", "available").
-			Where(sq.Eq{"id": oldTableID}).
-			Where(sq.Eq{"business_id": businessID}).
-			PlaceholderFormat(sq.Question).
-			ToSql()
-		if buildErr != nil {
-			_ = tx.Rollback()
-			return buildErr
-		}
-
-		if _, execErr := tx.ExecContext(ctx, freeQuery, freeArgs...); execErr != nil {
-			_ = tx.Rollback()
-			logger.Ctx(ctx).Error("Failed to free old table during transfer", logger.Error(execErr))
-			return execErr
+		if err := qtx.FreeTableByID(ctx, sqlc.FreeTableByIDParams{
+			ID:         oldTableID,
+			BusinessID: businessID,
+		}); err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				logger.Ctx(ctx).Error("failed to rollback free old table", logger.Error(rollbackErr))
+			}
+			logger.Ctx(ctx).Error("Failed to free old table during transfer", logger.Error(err))
+			return err
 		}
 	}
 
-	moveQuery, moveArgs, buildErr := sq.
-		Update("pos_orders").
-		Set("table_id", newTableID).
-		Where(sq.Eq{"id": orderID}).
-		Where(sq.Eq{"business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if buildErr != nil {
-		_ = tx.Rollback()
-		return buildErr
+	if err := qtx.MoveOrderToTable(ctx, sqlc.MoveOrderToTableParams{
+		TableID:    sql.NullInt64{Int64: newTableID, Valid: true},
+		ID:         orderID,
+		BusinessID: businessID,
+	}); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback move order", logger.Error(rollbackErr))
+		}
+		logger.Ctx(ctx).Error("Failed to update order table_id during transfer", logger.Error(err))
+		return err
 	}
 
-	if _, execErr := tx.ExecContext(ctx, moveQuery, moveArgs...); execErr != nil {
-		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("Failed to update order table_id during transfer", logger.Error(execErr))
-		return execErr
+	if err := qtx.OccupyTableByID(ctx, sqlc.OccupyTableByIDParams{
+		ID:         newTableID,
+		BusinessID: businessID,
+	}); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback occupy table", logger.Error(rollbackErr))
+		}
+		logger.Ctx(ctx).Error("Failed to mark new table occupied during transfer", logger.Error(err))
+		return err
 	}
 
-	occupyQuery, occupyArgs, buildErr := sq.
-		Update("pos_tables").
-		Set("status", "occupied").
-		Where(sq.Eq{"id": newTableID}).
-		Where(sq.Eq{"business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if buildErr != nil {
-		_ = tx.Rollback()
-		return buildErr
-	}
-
-	if _, execErr := tx.ExecContext(ctx, occupyQuery, occupyArgs...); execErr != nil {
-		_ = tx.Rollback()
-		logger.Ctx(ctx).Error("Failed to mark new table occupied during transfer", logger.Error(execErr))
-		return execErr
-	}
-
-	if commitErr := tx.Commit(); commitErr != nil {
-		logger.Ctx(ctx).Error("Failed to commit transfer-table transaction", logger.Error(commitErr))
-		return commitErr
+	if err := tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit transfer-table transaction", logger.Error(err))
+		return err
 	}
 
 	return nil
@@ -1602,12 +1482,7 @@ func (r *Repository) GetOrderIDByPaddleTx(ctx context.Context, txID string) (int
 // ─── Public Online Ordering ──────────────────────────────────────────────────
 
 func (r *Repository) IsOnlineOrderingEnabled(ctx context.Context, businessID int64) (bool, error) {
-	var count int64
-	err := r.pool.QueryRowContext(
-		ctx,
-		"SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE",
-		businessID,
-	).Scan(&count)
+	count, err := r.queries.IsOnlineOrderingEnabled(ctx, businessID)
 	if err != nil {
 		return false, err
 	}
@@ -1615,35 +1490,22 @@ func (r *Repository) IsOnlineOrderingEnabled(ctx context.Context, businessID int
 }
 
 func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItemID int64) (domain.OrderItemInput, error) {
-	query, args, err := sq.
-		Select("id", "name", "sku", "sale_price", "tax_rate").
-		From("erp_products").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.Eq{"id": menuItemID}).
-		Where(sq.Eq{"is_active": true}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	// cross-schema read from erp — public menu item lookup
+	row, err := r.queries.GetPublicMenuItem(ctx, sqlc.GetPublicMenuItemParams{
+		BusinessID: businessID,
+		ID:         menuItemID,
+	})
 	if err != nil {
 		return domain.OrderItemInput{}, err
 	}
 
-	var item domain.OrderItemInput
-	var sku sql.NullString
-	var salePrice string
-	var taxRate sql.NullString
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
-		&item.MenuItemID,
-		&item.Name,
-		&sku,
-		&salePrice,
-		&taxRate,
-	); err != nil {
-		return domain.OrderItemInput{}, err
+	item := domain.OrderItemInput{
+		MenuItemID: row.ID,
+		Name:       row.Name,
+		SKU:        row.Sku.String,
+		UnitPrice:  decimalToFloat(row.SalePrice),
+		TaxRate:    decimalToFloat(row.TaxRate),
 	}
-
-	item.SKU = sku.String
-	item.UnitPrice = decimalToFloat(salePrice)
-	item.TaxRate = decimalToFloat(taxRate.String)
 	return item, nil
 }
 
@@ -1656,7 +1518,9 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 
 	defer func() {
 		if err != nil {
-			_ = tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+				logger.Ctx(ctx).Error("failed to rollback public order tx", logger.Error(rollbackErr))
+			}
 		}
 	}()
 
@@ -1677,24 +1541,18 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 		return 0, err
 	}
 
-	orderQuery, orderArgs, err := sq.
-		Insert("pos_orders").
-		Columns(
-			"owner_id", "business_id", "order_number", "type", "status", "customer_id", "customer_name", "customer_phone",
-			"subtotal", "total", "payment_status", "notes", "created_at", "updated_at",
-		).
-		Values(
-			businessID, businessID, orderNumber, "online", "pending", nullableInt64(customerID), nullableString(customerName), nullableString(customerPhone),
-			floatToDecimal(subtotal), floatToDecimal(subtotal), "unpaid", nullableString(notes), sq.Expr("NOW()"), sq.Expr("NOW()"),
-		).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build public order insert", logger.Error(err))
-		return 0, err
-	}
-
-	res, err := tx.ExecContext(ctx, orderQuery, orderArgs...)
+	qtx := r.queries.WithTx(tx)
+	res, err := qtx.CreatePublicOrder(ctx, sqlc.CreatePublicOrderParams{
+		OwnerID:       businessID,
+		BusinessID:    businessID,
+		OrderNumber:   orderNumber,
+		CustomerID:    sql.NullInt64{Int64: customerID, Valid: customerID != 0},
+		CustomerName:  nullString(customerName),
+		CustomerPhone: nullString(customerPhone),
+		Subtotal:      sql.NullString{String: floatToDecimal(subtotal), Valid: true},
+		Total:         sql.NullString{String: floatToDecimal(subtotal), Valid: true},
+		Notes:         nullString(notes),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
 		return 0, err
@@ -1707,26 +1565,15 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 
 	for _, item := range items {
 		itemTotal := item.UnitPrice * item.Quantity
-		var itemQuery string
-		var itemArgs []interface{}
-		itemQuery, itemArgs, err = sq.
-			Insert("pos_order_items").
-			Columns(
-				"order_id", "menu_item_id", "name", "quantity", "unit_price", "total", "notes", "status", "created_at",
-			).
-			Values(
-				orderID, nullableInt64(item.MenuItemID), item.Name, floatToDecimal3(item.Quantity),
-				floatToDecimal(item.UnitPrice), floatToDecimal(itemTotal), nullableString(item.Notes), "pending", sq.Expr("NOW()"),
-			).
-			PlaceholderFormat(sq.Question).
-			ToSql()
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to build public order item insert", logger.Error(err))
-			return 0, err
-		}
-
-		_, err = tx.ExecContext(ctx, itemQuery, itemArgs...)
-		if err != nil {
+		if err := qtx.CreatePublicOrderItem(ctx, sqlc.CreatePublicOrderItemParams{
+			OrderID:    orderID,
+			MenuItemID: sql.NullInt64{Int64: item.MenuItemID, Valid: item.MenuItemID != 0},
+			Name:       item.Name,
+			Quantity:   floatToDecimal3(item.Quantity),
+			UnitPrice:  floatToDecimal(item.UnitPrice),
+			Total:      floatToDecimal(itemTotal),
+			Notes:      nullString(item.Notes),
+		}); err != nil {
 			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))
 			return 0, err
 		}
@@ -1744,18 +1591,4 @@ func (r *Repository) GetPublicOrderStatus(ctx context.Context, orderID int64) (o
 		return "", "", err
 	}
 	return row.OrderNumber, string(row.Status.PosOrdersStatus), nil
-}
-
-func nullableString(s string) interface{} {
-	if s == "" {
-		return nil
-	}
-	return s
-}
-
-func nullableInt64(n int64) interface{} {
-	if n == 0 {
-		return nil
-	}
-	return n
 }

@@ -265,8 +265,8 @@ func TestGetMySubscription_CreatesFreeWhenMissing(t *testing.T) {
 	if repo.upsertOwnerID != 98765 || repo.upsertPlanID != 42 || repo.upsertTrialDays != 0 {
 		t.Fatalf("unexpected upsert args owner=%d plan=%d trial=%d", repo.upsertOwnerID, repo.upsertPlanID, repo.upsertTrialDays)
 	}
-	if repo.getSubCalls != 3 {
-		t.Fatalf("expected missing read, upsert verification, and read after repair, got %d calls", repo.getSubCalls)
+	if repo.getSubCalls != 5 {
+		t.Fatalf("expected initial miss, upsert verification reads, and final read, got %d calls", repo.getSubCalls)
 	}
 }
 
@@ -362,8 +362,8 @@ func TestHandlePaddleWebhook_FailsWithNoOwnerInfo(t *testing.T) {
 func TestComputeLineItem_SingleSeat(t *testing.T) {
 	billing := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2026, 3, 31, 0, 0, 0, 0, time.UTC)
-	// March has 31 days. 1 seat x 31 days x 500 / 31 = 500 cents.
-	li := computeLineItem(1, 500, billing, &end, billing)
+	// March has 31 days. 1 billable seat x 31 days x 500 / 31 = 500 cents (no free allowance in this unit test).
+	li := computeLineItemWithAllowance(1, 500, billing, &end, billing, 0)
 	if li.AmountCents != 500 {
 		t.Errorf("expected 500 cents, got %d", li.AmountCents)
 	}
