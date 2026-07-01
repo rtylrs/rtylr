@@ -178,7 +178,7 @@ const Tooltip: React.FC<TooltipProps> = ({
               id={tooltipId}
               role="tooltip"
               className={cn(
-                'pointer-events-none fixed z-[1000] w-max max-w-64 rounded-md px-2.5 py-1.5 text-xs font-medium leading-snug shadow-lg transition-opacity duration-150',
+                'pointer-events-none fixed z-[2147483647] w-max min-w-44 max-w-72 rounded-md px-2.5 py-1.5 text-left text-xs font-medium leading-snug shadow-lg transition-opacity duration-150',
                 position ? 'opacity-100' : 'opacity-0',
                 contentClassName
               )}
