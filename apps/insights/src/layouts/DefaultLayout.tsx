@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn, Avatar } from '@voxire/ui';
-import { useLocation, Link, Outlet } from '@tanstack/react-router';
+import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-router';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
@@ -119,6 +119,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 const DefaultLayout: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const [theme, setThemeState] = useState<Theme>(() => {
     return (localStorage.getItem('rtylr-insights-theme') as Theme) || 'dark';
   });
@@ -148,11 +149,11 @@ const DefaultLayout: React.FC = () => {
         appId: 'insights',
         appName: 'Insights',
         pathname: location.pathname,
-        search: location.search,
+        search,
         page: pageTitle,
         routeLabels,
       }),
-    [location.pathname, location.search, pageTitle]
+    [location.pathname, search, pageTitle]
   );
   const sidebarRef = useRef<HTMLElement | null>(null);
 

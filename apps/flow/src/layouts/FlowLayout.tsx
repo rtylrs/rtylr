@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
-import { Link, useLocation, useNavigate, useParams } from '@tanstack/react-router';
+import { Link, useLocation, useNavigate, useParams, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Inbox,
@@ -25,14 +25,13 @@ import {
   Eye,
   Archive,
   Search,
-  Command,
   ArrowUp,
   ArrowDown,
   Menu,
   X,
   Shield,
 } from 'lucide-react';
-import { APP_URLS, useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
+import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
@@ -229,6 +228,7 @@ interface FlowLayoutProps {
 
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const location = useLocation();
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
   const { workspaceId, projectId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
@@ -494,7 +494,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         appId: 'flow',
         appName: 'Flow',
         pathname: location.pathname,
-        search: location.search,
+        search,
         page: flowPageTitle,
         businessName: activeWorkspace.name,
         selected: {
@@ -521,7 +521,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       flowPageTitle,
       inQuietHours,
       location.pathname,
-      location.search,
+      search,
       myIssuesCount,
       todayFocusCount,
       workspaceProjects,

@@ -122,12 +122,14 @@ export function useAddAttachment() {
       name,
       size,
       mime,
+      url,
     }: {
       taskId: string;
       name: string;
       size: number;
       mime: string;
-    }) => unwrap(flowApi.addAttachment(taskId, { name, size, mime })),
+      url?: string;
+    }) => unwrap(flowApi.addAttachment(taskId, { name, size, mime, url })),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
       qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });

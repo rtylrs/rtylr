@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn, Avatar } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
-import { useLocation, useNavigate, Link, Outlet } from '@tanstack/react-router';
+import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
@@ -183,7 +183,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 
 const DefaultLayout: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const search = useRouterState({ select: (s) => s.location.searchStr });
   const { openPalette } = useShortcuts();
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -227,11 +227,11 @@ const DefaultLayout: React.FC = () => {
         appId: 'crm',
         appName: 'CRM',
         pathname: location.pathname,
-        search: location.search,
+        search,
         page: pageTitle,
         routeLabels,
       }),
-    [location.pathname, location.search, pageTitle]
+    [location.pathname, search, pageTitle]
   );
 
   useEffect(() => {
