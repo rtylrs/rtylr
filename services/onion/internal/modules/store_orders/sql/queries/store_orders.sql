@@ -24,3 +24,32 @@ VALUES (?, ?, ?, ?, ?, ?);
 -- name: UpdateStoreOrder :exec
 UPDATE store_orders SET customer_email = ?, customer_name = ?, customer_phone = ?, status = ?, subtotal = ?, tax = ?, shipping_cost = ?, total = ?, shipping_address = ?, notes = ?
 WHERE business_id = ? AND id = ?;
+
+-- cross-schema read from erp_products — inventory tracking flag for stock deduction
+-- name: ProductTracksInventory :one
+SELECT track_inventory FROM erp_products WHERE owner_id = ? AND id = ?;
+
+-- cross-schema read/write crm_customers — order checkout customer upsert
+-- name: FindCRMCustomerByContact :one
+SELECT id FROM crm_customers
+WHERE business_id = ?
+  AND ((? <> '' AND email = ?) OR (? <> '' AND phone = ?))
+ORDER BY CASE WHEN ? <> '' AND email = ? THEN 0 ELSE 1 END
+LIMIT 1;
+
+-- name: InsertCRMCustomerFromOrder :exec
+INSERT INTO crm_customers
+  (owner_id, business_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), 'bronze', JSON_ARRAY(), TRUE);
+
+-- name: UpdateCRMCustomerFromOrder :exec
+UPDATE crm_customers
+SET first_name = CASE WHEN ? <> '' THEN ? ELSE first_name END,
+    last_name = CASE WHEN ? <> '' THEN ? ELSE last_name END,
+    email = CASE WHEN ? <> '' THEN ? ELSE email END,
+    phone = CASE WHEN ? <> '' THEN ? ELSE phone END,
+    total_spent = total_spent + ?,
+    visit_count = visit_count + 1,
+    last_visit_at = NOW(),
+    is_active = TRUE
+WHERE business_id = ? AND id = ?;

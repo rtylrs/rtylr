@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -90,8 +88,8 @@ func (r *Repository) DeleteFlag(ctx context.Context, key string) error {
 }
 
 func (r *Repository) GetUserEmail(ctx context.Context, userID int64) (string, error) {
-	var email string
-	err := r.pool.QueryRowContext(ctx, "SELECT email FROM users WHERE id = ?", userID).Scan(&email)
+	// cross-schema read from users — feature evaluation subject email
+	email, err := r.queries.GetUserEmailByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", nil
@@ -233,32 +231,15 @@ func (r *Repository) listConditionsByRuleIDs(ctx context.Context, ruleIDs []int6
 		return condByRule, nil
 	}
 
-	query, args, err := sq.
-		Select("id", "rule_id", "attribute", "operator", "value").
-		From("feature_rule_conditions").
-		Where(sq.Eq{"rule_id": ruleIDs}).
-		OrderBy("rule_id ASC", "id ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	condRows, err := r.queries.ListConditionsByRuleIDs(ctx, ruleIDs)
 	if err != nil {
 		return nil, err
 	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var c domain.Condition
-		if scanErr := rows.Scan(&c.ID, &c.RuleID, &c.Attribute, &c.Operator, &c.Value); scanErr != nil {
-			return nil, scanErr
-		}
-		condByRule[c.RuleID] = append(condByRule[c.RuleID], c)
+	for _, c := range condRows {
+		condByRule[c.RuleID] = append(condByRule[c.RuleID], conditionFromRow(c))
 	}
 
-	return condByRule, rows.Err()
+	return condByRule, nil
 }
 
 func (r *Repository) CreateRule(ctx context.Context, rule domain.Rule) (int64, error) {

@@ -6,8 +6,6 @@ import (
 	"errors"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -402,41 +400,29 @@ func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, businessID,
 		return existing, nil
 	}
 
-	sqlStr, args, err := sq.Select("task_id").
-		From("hr_time_entries").
-		Where(sq.Eq{
-			"business_id": businessID,
-			"employee_id": employeeID,
-			"source":      source,
-			"task_id":     taskIDs,
-		}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to build existing task entries query",
-			logger.Any("business_id", businessID), logger.Error(err))
-		return nil, err
+	nullableTaskIDs := make([]sql.NullInt64, len(taskIDs))
+	for i, id := range taskIDs {
+		nullableTaskIDs[i] = sql.NullInt64{Int64: id, Valid: true}
 	}
-
-	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
+	rows, err := r.queries.GetExistingTaskIDsBySource(ctx, sqlc.GetExistingTaskIDsBySourceParams{
+		BusinessID: businessID,
+		EmployeeID: employeeID,
+		Source:     source,
+		TaskIds:    nullableTaskIDs,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to batch-check existing task entries",
 			logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var taskID sql.NullInt64
-		if scanErr := rows.Scan(&taskID); scanErr != nil {
-			return nil, scanErr
-		}
+	for _, taskID := range rows {
 		if taskID.Valid {
 			existing[taskID.Int64] = struct{}{}
 		}
 	}
 
-	return existing, rows.Err()
+	return existing, nil
 }
 
 func (r *Repository) ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]domain.TimeEntryRecord, error) {
@@ -461,31 +447,17 @@ func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID,
 }
 
 func (r *Repository) ListTimesheetBusinessIDs(ctx context.Context) ([]int64, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT DISTINCT business_id
-		FROM hr_time_entries
-		UNION
-		SELECT DISTINCT business_id
-		FROM hr_timesheets
-	`)
+	rows, err := r.queries.ListTimesheetBusinessIDs(ctx)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list timesheet business IDs", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	businessIDs := make([]int64, 0)
-	for rows.Next() {
-		var businessID sql.NullInt64
-		if scanErr := rows.Scan(&businessID); scanErr != nil {
-			return nil, scanErr
-		}
-		if businessID.Valid {
-			businessIDs = append(businessIDs, businessID.Int64)
-		}
+	businessIDs := make([]int64, 0, len(rows))
+	for _, businessID := range rows {
+		businessIDs = append(businessIDs, businessID)
 	}
-
-	return businessIDs, rows.Err()
+	return businessIDs, nil
 }
 
 func (r *Repository) ListUnsubmittedEmployees(ctx context.Context, businessID int64, periodStart, periodEnd string) ([]int64, error) {

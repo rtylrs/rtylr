@@ -43,3 +43,38 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 UPDATE crm_loyalty_rewards
 SET name = ?, description = ?, category = ?, points_cost = ?, stock = ?, icon = ?, active = ?
 WHERE id = ? AND business_id = ?;
+
+-- cross-schema read from crm_customers — loyalty members projection
+-- name: ListLoyaltyMembers :many
+SELECT
+    id,
+    owner_id,
+    CONCAT_WS(' ', first_name, COALESCE(last_name, '')) AS name,
+    COALESCE(loyalty_points, 0) AS loyalty_points,
+    COALESCE(loyalty_tier, 'bronze') AS loyalty_tier,
+    COALESCE(visit_count, 0) AS visit_count,
+    created_at,
+    COALESCE(last_visit_at, created_at) AS last_active_at
+FROM crm_customers
+WHERE business_id = ? AND is_active = TRUE
+  AND (loyalty_points > 0 OR visit_count > 0)
+ORDER BY loyalty_points DESC, visit_count DESC
+LIMIT ? OFFSET ?;
+
+-- name: ListLoyaltyRewards :many
+SELECT id, owner_id, name, COALESCE(description, '') AS description,
+       COALESCE(category, 'general') AS category, points_cost, stock,
+       COALESCE(icon, '') AS icon, COALESCE(active, TRUE) AS active,
+       created_at, updated_at
+FROM crm_loyalty_rewards
+WHERE business_id = ?
+ORDER BY points_cost ASC, id ASC;
+
+-- name: ListActiveLoyaltyRewards :many
+SELECT id, owner_id, name, COALESCE(description, '') AS description,
+       COALESCE(category, 'general') AS category, points_cost, stock,
+       COALESCE(icon, '') AS icon, COALESCE(active, TRUE) AS active,
+       created_at, updated_at
+FROM crm_loyalty_rewards
+WHERE business_id = ? AND active = TRUE
+ORDER BY points_cost ASC, id ASC;

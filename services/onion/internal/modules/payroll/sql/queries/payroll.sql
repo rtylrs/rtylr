@@ -17,3 +17,24 @@ FROM hr_shifts
 WHERE business_id = ? AND status = 'completed'
   AND date >= ? AND date <= ?
 GROUP BY staff_id;
+
+-- name: ListPayrollRecords :many
+SELECT id, owner_id, business_id, staff_id, period_start, period_end, period_label,
+       regular_hours, overtime_hours, base_pay, overtime_pay, bonuses,
+       deductions, tax_withheld, net_pay, status, paid_at, notes, created_at
+FROM hr_payroll_records
+WHERE business_id = ?
+ORDER BY period_start DESC, staff_id ASC;
+
+-- name: ListPayrollRecordsByPeriod :many
+SELECT id, owner_id, business_id, staff_id, period_start, period_end, period_label,
+       regular_hours, overtime_hours, base_pay, overtime_pay, bonuses,
+       deductions, tax_withheld, net_pay, status, paid_at, notes, created_at
+FROM hr_payroll_records
+WHERE business_id = ? AND period_label = ?
+ORDER BY period_start DESC, staff_id ASC;
+
+-- name: GetStaffPayRatesByIDs :many
+SELECT id, salary, hourly_rate, overtime_rate
+FROM hr_staff
+WHERE business_id = ? AND id IN (sqlc.slice('staff_ids'));

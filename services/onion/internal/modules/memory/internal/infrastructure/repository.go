@@ -117,24 +117,26 @@ func (r *Repository) DeleteChatSession(ctx context.Context, sessionID string, us
 		_ = tx.Rollback()
 	}()
 
-	if _, err := tx.ExecContext(ctx, `
-		DELETE FROM conversation_messages
-		WHERE session_id = ? AND user_id = ?
-	`, sessionID, userID); err != nil {
+	qtx := r.queries.WithTx(tx)
+
+	if err := qtx.DeleteSessionMessages(ctx, sqlc.DeleteSessionMessagesParams{
+		SessionID: sessionID,
+		UserID:    int32(userID),
+	}); err != nil {
 		return fmt.Errorf("failed to delete chat messages: %w", err)
 	}
 
-	if _, err := tx.ExecContext(ctx, `
-		DELETE FROM conversation_summaries
-		WHERE session_id = ? AND user_id = ?
-	`, sessionID, userID); err != nil {
+	if err := qtx.DeleteSessionSummaries(ctx, sqlc.DeleteSessionSummariesParams{
+		SessionID: sessionID,
+		UserID:    int32(userID),
+	}); err != nil {
 		return fmt.Errorf("failed to delete chat summaries: %w", err)
 	}
 
-	result, err := tx.ExecContext(ctx, `
-		DELETE FROM chat_sessions
-		WHERE session_id = ? AND user_id = ?
-	`, sessionID, userID)
+	result, err := qtx.DeleteChatSessionByID(ctx, sqlc.DeleteChatSessionByIDParams{
+		SessionID: sessionID,
+		UserID:    int32(userID),
+	})
 	if err != nil {
 		return fmt.Errorf("failed to delete chat session: %w", err)
 	}
@@ -255,14 +257,10 @@ func titleFromFirstUserMessage(content string) string {
 }
 
 func (r *Repository) firstUserMessageTitle(ctx context.Context, sessionID string, userID int) (string, error) {
-	var content string
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT content
-		FROM conversation_messages
-		WHERE session_id = ? AND user_id = ? AND role = 'user'
-		ORDER BY created_at ASC, id ASC
-		LIMIT 1
-	`, sessionID, userID).Scan(&content)
+	content, err := r.queries.GetFirstUserMessageContent(ctx, sqlc.GetFirstUserMessageContentParams{
+		SessionID: sessionID,
+		UserID:    int32(userID),
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", nil
 	}

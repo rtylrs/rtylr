@@ -209,3 +209,19 @@ SELECT
     SUM(tokens_used) AS total_tokens_used
 FROM conversation_messages 
 WHERE user_id = ?;
+
+-- name: DeleteSessionMessages :exec
+DELETE FROM conversation_messages WHERE session_id = ? AND user_id = ?;
+
+-- name: DeleteSessionSummaries :exec
+DELETE FROM conversation_summaries WHERE session_id = ? AND user_id = ?;
+
+-- name: DeleteChatSessionByID :execresult
+DELETE FROM chat_sessions WHERE session_id = ? AND user_id = ?;
+
+-- name: GetFirstUserMessageContent :one
+SELECT content
+FROM conversation_messages
+WHERE session_id = ? AND user_id = ? AND role = 'user'
+ORDER BY created_at ASC, id ASC
+LIMIT 1;

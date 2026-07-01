@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/infrastructure/persistence/sqlc"
@@ -107,7 +108,7 @@ func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int6
 		return 0, err
 	}
 
-	if err = upsertSupportCustomer(ctx, tx, input.BusinessID, input.CustomerName, input.CustomerEmail); err != nil {
+	if err = upsertSupportCustomer(ctx, r.queries.WithTx(tx), input.BusinessID, input.CustomerName, input.CustomerEmail); err != nil {
 		logger.Ctx(ctx).Error("Failed to sync support customer summary", logger.Error(err))
 		return 0, err
 	}
@@ -146,41 +147,30 @@ func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int6
 	return id, nil
 }
 
-func upsertSupportCustomer(ctx context.Context, tx *sql.Tx, businessID int64, name, email string) error {
-	var customerID int64
-	err := tx.QueryRowContext(ctx,
-		`SELECT id FROM support_customers
-		 WHERE business_id = ? AND LOWER(email) = LOWER(?)
-		 LIMIT 1`,
-		businessID, email,
-	).Scan(&customerID)
-	if err == sql.ErrNoRows {
-		_, err = tx.ExecContext(ctx,
-			`INSERT INTO support_customers
-			 (business_id, name, email, total_tickets, last_ticket_at)
-			 VALUES (?, ?, ?, 1, NOW())`,
-			businessID,
-			name,
-			sql.NullString{String: email, Valid: email != ""},
-		)
-		return err
+func upsertSupportCustomer(ctx context.Context, qtx *sqlc.Queries, businessID int64, name, email string) error {
+	customerID, err := qtx.FindSupportCustomerByEmail(ctx, sqlc.FindSupportCustomerByEmailParams{
+		BusinessID: businessID,
+		LOWER:      email,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return qtx.InsertSupportCustomer(ctx, sqlc.InsertSupportCustomerParams{
+			BusinessID: businessID,
+			Name:       name,
+			Email:      sql.NullString{String: email, Valid: email != ""},
+		})
 	}
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx,
-		`UPDATE support_customers
-		 SET name = CASE WHEN ? <> '' THEN ? ELSE name END,
-		     email = CASE WHEN ? <> '' THEN ? ELSE email END,
-		     total_tickets = total_tickets + 1,
-		     last_ticket_at = NOW()
-		 WHERE business_id = ? AND id = ?`,
-		name, name,
-		email, email,
-		businessID, customerID,
-	)
-	return err
+	return qtx.IncrementSupportCustomer(ctx, sqlc.IncrementSupportCustomerParams{
+		Column1:    name,
+		Name:       name,
+		Column3:    email,
+		Email:      sql.NullString{String: email, Valid: email != ""},
+		BusinessID: businessID,
+		ID:         customerID,
+	})
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TicketUpdateInput) error {

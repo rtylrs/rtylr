@@ -93,3 +93,13 @@ DELETE FROM feature_rule_conditions WHERE id = ?;
 
 -- name: DeleteConditionsByRule :exec
 DELETE FROM feature_rule_conditions WHERE rule_id = ?;
+
+-- cross-schema read from users — feature evaluation subject email
+-- name: GetUserEmailByID :one
+SELECT email FROM users WHERE id = ?;
+
+-- name: ListConditionsByRuleIDs :many
+SELECT id, rule_id, attribute, operator, value, created_at
+FROM feature_rule_conditions
+WHERE rule_id IN (sqlc.slice('rule_ids'))
+ORDER BY rule_id ASC, id ASC;

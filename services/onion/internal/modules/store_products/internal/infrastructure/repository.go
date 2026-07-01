@@ -23,53 +23,21 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.StoreProduct, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT
-			sp.id,
-			sp.owner_id,
-			sp.business_id,
-			sp.product_id,
-			COALESCE(ep.name, sp.title) AS title,
-			sp.slug,
-			COALESCE(ep.description, sp.description) AS description,
-			COALESCE(epi.images, sp.images, JSON_ARRAY()) AS images,
-			COALESCE(ep.sale_price, sp.price) AS price,
-			COALESCE(ep.compare_at_price, sp.compare_at_price) AS compare_at_price,
-			sp.is_published,
-			sp.sort_order,
-			sp.created_at,
-			sp.updated_at
-		FROM store_products sp
-		LEFT JOIN erp_products ep
-		  ON ep.business_id = sp.business_id
-		 AND ep.id = sp.product_id
-		LEFT JOIN (
-			SELECT business_id, product_id, JSON_ARRAYAGG(url) AS images
-			FROM erp_product_images
-			GROUP BY business_id, product_id
-		) epi
-		  ON epi.business_id = sp.business_id
-		 AND epi.product_id = sp.product_id
-		WHERE sp.business_id = ?
-		ORDER BY sp.sort_order ASC
-	`, businessID)
+	// cross-schema read from erp_products + erp_product_images — catalog enrichment
+	rows, err := r.queries.ListStoreProductsWithCatalog(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list store products", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.StoreProduct, 0)
-	for rows.Next() {
-		item, err := scanStoreProduct(ctx, rows)
+	items := make([]domain.StoreProduct, 0, len(rows))
+	for _, row := range rows {
+		item, err := storeProductFromCatalogRow(ctx, row)
 		if err != nil {
-			logger.Ctx(ctx).Error("Failed to scan store product", logger.Error(err))
+			logger.Ctx(ctx).Error("Failed to map store product", logger.Error(err))
 			return nil, err
 		}
 		items = append(items, item)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
 	}
 	return items, nil
 }
@@ -244,6 +212,44 @@ func scanStoreProduct(ctx context.Context, rows *sql.Rows) (domain.StoreProduct,
 	}
 	if updatedAt.Valid {
 		p.UpdatedAt = updatedAt.Time
+	}
+	return p, nil
+}
+
+func storeProductFromCatalogRow(ctx context.Context, row sqlc.ListStoreProductsWithCatalogRow) (domain.StoreProduct, error) {
+	p := domain.StoreProduct{
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID,
+		Title:      row.Title,
+	}
+	if row.ProductID.Valid {
+		p.ProductID = row.ProductID.Int64
+	}
+	if row.Slug.Valid {
+		p.Slug = row.Slug.String
+	}
+	if row.Description.Valid {
+		p.Description = row.Description.String
+	}
+	if len(row.Images) != 0 {
+		p.Images = string(row.Images)
+	}
+	p.Price = parseMonetary(ctx, row.Price)
+	if row.CompareAtPrice != "" {
+		p.CompareAtPrice = parseMonetary(ctx, row.CompareAtPrice)
+	}
+	if row.IsPublished.Valid {
+		p.IsPublished = row.IsPublished.Bool
+	}
+	if row.SortOrder.Valid {
+		p.SortOrder = int(row.SortOrder.Int32)
+	}
+	if row.CreatedAt.Valid {
+		p.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		p.UpdatedAt = row.UpdatedAt.Time
 	}
 	return p, nil
 }

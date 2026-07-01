@@ -4,6 +4,7 @@ sql:
     queries: "queries"
     schema:
       - "schema.sql"
+      - "../../../../internal/platform/database/schemas/shared/users.sql"
     gen:
       go:
         package: "sqlc"

@@ -6,51 +6,24 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_settings/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	db *sql.DB
+	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{db: db}
+	return &Repository{queries: sqlc.New(db), db: db}
 }
 
 func (r *Repository) GetSettings(ctx context.Context, businessID int64) (domain.Settings, error) {
-	row := r.db.QueryRowContext(ctx, `
-		SELECT
-			id,
-			business_id,
-			business_profile,
-			theme,
-			features,
-			receipt_footer,
-			created_at,
-			updated_at
-		FROM pos_business_settings
-		WHERE business_id = ?
-		LIMIT 1
-	`, businessID)
-
-	var settings domain.Settings
-	var featuresRaw []byte
-	var receiptFooter sql.NullString
-	var createdAt sql.NullTime
-	var updatedAt sql.NullTime
-	if err := row.Scan(
-		&settings.ID,
-		&settings.BusinessID,
-		&settings.Profile,
-		&settings.Theme,
-		&featuresRaw,
-		&receiptFooter,
-		&createdAt,
-		&updatedAt,
-	); err != nil {
+	row, err := r.queries.GetPOSSettings(ctx, businessID)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Settings{}, domain.ErrSettingsNotFound
 		}
@@ -58,20 +31,27 @@ func (r *Repository) GetSettings(ctx context.Context, businessID int64) (domain.
 		return domain.Settings{}, err
 	}
 
-	features := domain.DefaultFeatures(domain.NormalizeProfile(settings.Profile))
-	if len(featuresRaw) > 0 {
-		if err := json.Unmarshal(featuresRaw, &features); err != nil {
+	profile := string(row.BusinessProfile)
+	theme := string(row.Theme)
+	features := domain.DefaultFeatures(domain.NormalizeProfile(profile))
+	if len(row.Features) > 0 {
+		if err := json.Unmarshal(row.Features, &features); err != nil {
 			logger.Ctx(ctx).Warn("failed to decode POS feature settings",
 				logger.Any("business_id", businessID),
 				logger.Error(err))
 		}
 	}
-	settings.Features = features
-	if receiptFooter.Valid {
-		settings.ReceiptFooter = receiptFooter.String
+
+	settings := domain.Settings{
+		ID:            row.ID,
+		BusinessID:    row.BusinessID,
+		Profile:       profile,
+		Theme:         theme,
+		Features:      features,
+		ReceiptFooter: nullStr(row.ReceiptFooter),
+		CreatedAt:     row.CreatedAt,
+		UpdatedAt:     row.UpdatedAt,
 	}
-	settings.CreatedAt = timeOrZero(createdAt)
-	settings.UpdatedAt = timeOrZero(updatedAt)
 	return domain.NormalizeSettings(settings), nil
 }
 
@@ -81,21 +61,13 @@ func (r *Repository) UpsertSettings(ctx context.Context, settings domain.Setting
 		return fmt.Errorf("marshal POS settings features: %w", err)
 	}
 
-	_, err = r.db.ExecContext(ctx, `
-		INSERT INTO pos_business_settings (
-			business_id,
-			business_profile,
-			theme,
-			features,
-			receipt_footer
-		) VALUES (?, ?, ?, ?, ?)
-		ON DUPLICATE KEY UPDATE
-			business_profile = VALUES(business_profile),
-			theme = VALUES(theme),
-			features = VALUES(features),
-			receipt_footer = VALUES(receipt_footer),
-			updated_at = CURRENT_TIMESTAMP
-	`, settings.BusinessID, settings.Profile, settings.Theme, string(featuresJSON), settings.ReceiptFooter)
+	err = r.queries.UpsertPOSSettings(ctx, sqlc.UpsertPOSSettingsParams{
+		BusinessID:      settings.BusinessID,
+		BusinessProfile: sqlc.PosBusinessSettingsBusinessProfile(settings.Profile),
+		Theme:           sqlc.PosBusinessSettingsTheme(settings.Theme),
+		Features:        featuresJSON,
+		ReceiptFooter:   sql.NullString{String: settings.ReceiptFooter, Valid: settings.ReceiptFooter != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to upsert POS business settings", logger.Error(err))
 		return err
@@ -103,9 +75,9 @@ func (r *Repository) UpsertSettings(ctx context.Context, settings domain.Setting
 	return nil
 }
 
-func timeOrZero(t sql.NullTime) time.Time {
-	if t.Valid {
-		return t.Time
+func nullStr(s sql.NullString) string {
+	if s.Valid {
+		return s.String
 	}
-	return time.Time{}
+	return ""
 }

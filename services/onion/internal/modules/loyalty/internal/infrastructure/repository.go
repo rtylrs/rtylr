@@ -6,8 +6,6 @@ import (
 	"errors"
 	"strconv"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -216,123 +214,79 @@ func (r *Repository) ListMembers(ctx context.Context, businessID int64, limit, o
 	}
 
 	// cross-schema read from crm_customers — loyalty members projection
-	listSQL, args, err := sq.Select(
-		"id", "owner_id",
-		"CONCAT_WS(' ', first_name, COALESCE(last_name, '')) AS name",
-		"COALESCE(loyalty_points, 0)",
-		"COALESCE(loyalty_tier, 'bronze')",
-		"COALESCE(visit_count, 0)",
-		"created_at",
-		"COALESCE(last_visit_at, created_at) AS last_active_at",
-	).
-		From("crm_customers").
-		Where(sq.Eq{"business_id": businessID, "is_active": true}).
-		Where(sq.Or{sq.Gt{"loyalty_points": 0}, sq.Gt{"visit_count": 0}}).
-		OrderBy("loyalty_points DESC", "visit_count DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build loyalty members query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, listSQL, args...)
+	rows, err := r.queries.ListLoyaltyMembers(ctx, sqlc.ListLoyaltyMembersParams{
+		BusinessID: businessID,
+		Limit:      int32(limit),
+		Offset:     int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty members", logger.Error(err))
 		return nil, err
 	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Warn("Failed to close loyalty member rows", logger.Error(closeErr))
-		}
-	}()
 
-	members := make([]domain.LoyaltyMember, 0)
-	for rows.Next() {
-		var m domain.LoyaltyMember
-		var joinedAt, lastActive sql.NullTime
-		if scanErr := rows.Scan(&m.ID, &m.OwnerID, &m.Name, &m.Points, &m.Tier, &m.Visits, &joinedAt, &lastActive); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan loyalty member", logger.Error(scanErr))
-			return nil, scanErr
+	members := make([]domain.LoyaltyMember, 0, len(rows))
+	for _, row := range rows {
+		m := domain.LoyaltyMember{
+			ID:      row.ID,
+			OwnerID: row.OwnerID,
+			Name:    row.Name,
+			Points:  int(row.LoyaltyPoints),
+			Tier:    string(row.LoyaltyTier),
+			Visits:  int(row.VisitCount),
 		}
-		if joinedAt.Valid {
-			m.JoinedAt = joinedAt.Time
+		if row.CreatedAt.Valid {
+			m.JoinedAt = row.CreatedAt.Time
 		}
-		if lastActive.Valid {
-			m.LastActiveAt = lastActive.Time
+		if row.LastActiveAt.Valid {
+			m.LastActiveAt = row.LastActiveAt.Time
 		}
 		members = append(members, m)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
 	}
 	return members, nil
 }
 
 // ListRewards returns the catalog of rewards for an owner.
 func (r *Repository) ListRewards(ctx context.Context, businessID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
-	builder := sq.Select(
-		"id", "owner_id", "name",
-		"COALESCE(description, '')",
-		"COALESCE(category, 'general')",
-		"points_cost", "stock",
-		"COALESCE(icon, '')",
-		"COALESCE(active, TRUE)",
-		"created_at", "updated_at",
-	).
-		From("crm_loyalty_rewards").
-		Where(sq.Eq{"business_id": businessID})
-
+	var rows []sqlc.ListLoyaltyRewardsRow
+	var err error
 	if activeOnly {
-		builder = builder.Where(sq.Eq{"active": true})
+		activeRows, activeErr := r.queries.ListActiveLoyaltyRewards(ctx, businessID)
+		rows = make([]sqlc.ListLoyaltyRewardsRow, len(activeRows))
+		for i, row := range activeRows {
+			rows[i] = sqlc.ListLoyaltyRewardsRow(row)
+		}
+		err = activeErr
+	} else {
+		rows, err = r.queries.ListLoyaltyRewards(ctx, businessID)
 	}
-
-	listSQL, args, err := builder.
-		OrderBy("points_cost ASC", "id ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build loyalty rewards query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, listSQL, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty rewards", logger.Error(err))
 		return nil, err
 	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Warn("Failed to close loyalty reward rows", logger.Error(closeErr))
-		}
-	}()
 
-	rewards := make([]domain.LoyaltyReward, 0)
-	for rows.Next() {
-		var rw domain.LoyaltyReward
-		var stock sql.NullInt64
-		var createdAt, updatedAt sql.NullTime
-		if scanErr := rows.Scan(&rw.ID, &rw.OwnerID, &rw.Name, &rw.Description, &rw.Category,
-			&rw.PointsCost, &stock, &rw.Icon, &rw.Active, &createdAt, &updatedAt); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan loyalty reward", logger.Error(scanErr))
-			return nil, scanErr
+	rewards := make([]domain.LoyaltyReward, 0, len(rows))
+	for _, row := range rows {
+		rw := domain.LoyaltyReward{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			Name:        row.Name,
+			Description: row.Description,
+			Category:    row.Category,
+			PointsCost:  int(row.PointsCost),
+			Icon:        row.Icon,
+			Active:      row.Active,
 		}
-		if stock.Valid {
-			n := int(stock.Int64)
-			rw.Stock = &n
+		if row.Stock.Valid {
+			v := int(row.Stock.Int32)
+			rw.Stock = &v
 		}
-		if createdAt.Valid {
-			rw.CreatedAt = createdAt.Time
+		if row.CreatedAt.Valid {
+			rw.CreatedAt = row.CreatedAt.Time
 		}
-		if updatedAt.Valid {
-			rw.UpdatedAt = updatedAt.Time
+		if row.UpdatedAt.Valid {
+			rw.UpdatedAt = row.UpdatedAt.Time
 		}
 		rewards = append(rewards, rw)
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
 	}
 	return rewards, nil
 }

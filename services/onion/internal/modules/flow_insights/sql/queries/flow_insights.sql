@@ -44,7 +44,7 @@ SELECT
 FROM flow_tasks ft
 LEFT JOIN users u ON ft.assignee_id = u.id
 WHERE ft.business_id = ? AND ft.assignee_id IS NOT NULL
-GROUP BY ft.assignee_id, u.name;
+GROUP BY ft.assignee_id, u.full_name;
 
 -- name: GetRoadmapProjects :many
 SELECT
@@ -71,4 +71,18 @@ FROM flow_milestones fm
 LEFT JOIN flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL
 WHERE fm.project_id = ?
 GROUP BY fm.id, fm.name, fm.target_date
+ORDER BY fm.target_date ASC;
+
+-- name: GetMilestonesByProjectIDs :many
+SELECT
+    fm.project_id,
+    fm.id,
+    fm.name,
+    COALESCE(DATE_FORMAT(fm.target_date, '%Y-%m-%d'), '') AS due_date,
+    COUNT(ft.id) AS task_count,
+    COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_count
+FROM flow_milestones fm
+LEFT JOIN flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL
+WHERE fm.project_id IN (sqlc.slice('project_ids'))
+GROUP BY fm.project_id, fm.id, fm.name, fm.target_date
 ORDER BY fm.target_date ASC;

@@ -82,7 +82,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		return 0, err
 	}
 	id, _ := result.LastInsertId()
-	if err := r.upsertOrderCustomerTx(ctx, tx, ownerID, businessID, input); err != nil {
+	if err := r.upsertOrderCustomerTx(ctx, qtx, ownerID, businessID, input); err != nil {
 		return 0, err
 	}
 
@@ -109,7 +109,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 			return 0, err
 		}
 		if deductStock && item.ProductID != 0 {
-			if err := r.deductStoreOrderItemTx(ctx, tx, ownerID, stockLocationID, id, item); err != nil {
+			if err := r.deductStoreOrderItemTx(ctx, tx, qtx, ownerID, stockLocationID, id, item); err != nil {
 				return 0, err
 			}
 		}
@@ -138,8 +138,8 @@ func hasProductItems(items []domain.OrderItemInput) bool {
 	return false
 }
 
-func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, ownerID, locationID, orderID int64, item domain.OrderItemInput) error {
-	tracked, err := r.productTracksInventory(ctx, tx, ownerID, item.ProductID)
+func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, locationID, orderID int64, item domain.OrderItemInput) error {
+	tracked, err := r.productTracksInventory(ctx, qtx, ownerID, item.ProductID)
 	if err != nil {
 		return err
 	}
@@ -164,11 +164,12 @@ func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, own
 	return nil
 }
 
-func (r *Repository) productTracksInventory(ctx context.Context, tx *sql.Tx, ownerID, productID int64) (bool, error) {
-	var tracked sql.NullBool
-	err := tx.QueryRowContext(ctx,
-		`SELECT track_inventory FROM erp_products WHERE owner_id = ? AND id = ?`,
-		ownerID, productID).Scan(&tracked)
+func (r *Repository) productTracksInventory(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64) (bool, error) {
+	// cross-schema read from erp_products — inventory tracking flag
+	tracked, err := qtx.ProductTracksInventory(ctx, sqlc.ProductTracksInventoryParams{
+		OwnerID: ownerID,
+		ID:      productID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return false, fmt.Errorf("store order product %d not found for owner %d", productID, ownerID)
 	}
@@ -178,7 +179,7 @@ func (r *Repository) productTracksInventory(ctx context.Context, tx *sql.Tx, own
 	return !tracked.Valid || tracked.Bool, nil
 }
 
-func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, ownerID, businessID int64, input domain.StoreOrderInput) error {
+func (r *Repository) upsertOrderCustomerTx(ctx context.Context, qtx *sqlc.Queries, ownerID, businessID int64, input domain.StoreOrderInput) error {
 	email := strings.TrimSpace(input.CustomerEmail)
 	phone := strings.TrimSpace(input.CustomerPhone)
 	name := strings.TrimSpace(input.CustomerName)
@@ -187,44 +188,43 @@ func (r *Repository) upsertOrderCustomerTx(ctx context.Context, tx *sql.Tx, owne
 	}
 
 	firstName, lastName := splitCustomerName(name, email, phone)
-	var customerID int64
-	err := tx.QueryRowContext(ctx,
-		`SELECT id FROM crm_customers
-		 WHERE business_id = ?
-		   AND ((? <> '' AND email = ?) OR (? <> '' AND phone = ?))
-		 ORDER BY CASE WHEN ? <> '' AND email = ? THEN 0 ELSE 1 END
-		 LIMIT 1`,
-		businessID, email, email, phone, phone, email, email).Scan(&customerID)
+	customerID, err := qtx.FindCRMCustomerByContact(ctx, sqlc.FindCRMCustomerByContactParams{
+		BusinessID: businessID,
+		Column2:    email,
+		Email:      nullString(email),
+		Column4:    phone,
+		Phone:      nullString(phone),
+		Column6:    email,
+		Email_2:    nullString(email),
+	})
 	if errors.Is(err, sql.ErrNoRows) {
-		_, err = tx.ExecContext(ctx,
-			`INSERT INTO crm_customers
-			 (owner_id, business_id, first_name, last_name, email, phone, total_spent, visit_count, last_visit_at, loyalty_tier, tags, is_active)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), 'bronze', JSON_ARRAY(), TRUE)`,
-			ownerID, businessID, firstName, nullString(lastName), nullString(email), nullString(phone), strconv.FormatFloat(input.Total, 'f', 2, 64))
-		return err
+		return qtx.InsertCRMCustomerFromOrder(ctx, sqlc.InsertCRMCustomerFromOrderParams{
+			OwnerID:    ownerID,
+			BusinessID: businessID,
+			FirstName:  firstName,
+			LastName:   nullString(lastName),
+			Email:      nullString(email),
+			Phone:      nullString(phone),
+			TotalSpent: sql.NullString{String: strconv.FormatFloat(input.Total, 'f', 2, 64), Valid: true},
+		})
 	}
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx,
-		`UPDATE crm_customers
-		 SET first_name = CASE WHEN ? <> '' THEN ? ELSE first_name END,
-		     last_name = CASE WHEN ? <> '' THEN ? ELSE last_name END,
-		     email = CASE WHEN ? <> '' THEN ? ELSE email END,
-		     phone = CASE WHEN ? <> '' THEN ? ELSE phone END,
-		     total_spent = total_spent + ?,
-		     visit_count = visit_count + 1,
-		     last_visit_at = NOW(),
-		     is_active = TRUE
-		 WHERE business_id = ? AND id = ?`,
-		firstName, firstName,
-		lastName, lastName,
-		email, email,
-		phone, phone,
-		strconv.FormatFloat(input.Total, 'f', 2, 64),
-		businessID, customerID)
-	return err
+	return qtx.UpdateCRMCustomerFromOrder(ctx, sqlc.UpdateCRMCustomerFromOrderParams{
+		Column1:    firstName,
+		FirstName:  firstName,
+		Column3:    lastName,
+		LastName:   nullString(lastName),
+		Column5:    email,
+		Email:      nullString(email),
+		Column7:    phone,
+		Phone:      nullString(phone),
+		TotalSpent: sql.NullString{String: strconv.FormatFloat(input.Total, 'f', 2, 64), Valid: true},
+		BusinessID: businessID,
+		ID:         customerID,
+	})
 }
 
 func splitCustomerName(name, email, phone string) (string, string) {

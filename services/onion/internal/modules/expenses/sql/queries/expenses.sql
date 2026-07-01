@@ -28,3 +28,14 @@ SELECT id, owner_id, business_id, name, color, created_at
 FROM finance_expense_categories
 WHERE business_id = ?
 ORDER BY name;
+
+-- name: SumExpensesByBusiness :one
+SELECT COALESCE(SUM(CAST(amount AS DECIMAL(14,2))), 0) AS total
+FROM finance_expenses
+WHERE business_id = ?;
+
+-- name: CountExpensesByCategory :many
+SELECT COALESCE(CAST(category_id AS CHAR), 'uncategorised') AS category_key, COUNT(*) AS cnt
+FROM finance_expenses
+WHERE business_id = ?
+GROUP BY category_id;

@@ -9,98 +9,57 @@ import (
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{pool: db}
+	return &Repository{queries: sqlc.New(db), pool: db}
 }
 
 func (r *Repository) ListMovements(ctx context.Context, businessID, ownerID, branchID, productID int64) ([]domain.StockMovement, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT
-			l.id,
-			l.product_id,
-			l.entry_type,
-			l.quantity_change,
-			l.reference_id,
-			l.reference_type,
-			l.note,
-			l.employee_id,
-			l.created_at
-		FROM stock_ledger l
-		INNER JOIN stock_locations loc
-		  ON loc.id = l.location_id
-		 AND loc.business_id = l.business_id
-		WHERE l.business_id = ?
-		  AND loc.source_table = 'pos_locations'
-		  AND loc.source_id = ?
-		  AND l.product_id = ?
-		  AND l.channel = 'pos'
-		ORDER BY l.created_at DESC, l.id DESC
-	`, businessID, branchID, productID)
+	rows, err := r.queries.ListPOSStockMovements(ctx, sqlc.ListPOSStockMovementsParams{
+		BusinessID: businessID,
+		SourceID:   branchID,
+		ProductID:  productID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock movements", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	movements := make([]domain.StockMovement, 0)
-	for rows.Next() {
-		var (
-			m             domain.StockMovement
-			entryType     string
-			quantity      string
-			referenceID   sql.NullInt64
-			referenceType sql.NullString
-			note          sql.NullString
-			employeeID    sql.NullInt64
-			createdAt     sql.NullTime
-		)
-		if err := rows.Scan(
-			&m.ID,
-			&m.ProductID,
-			&entryType,
-			&quantity,
-			&referenceID,
-			&referenceType,
-			&note,
-			&employeeID,
-			&createdAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan stock movement", logger.Error(err))
-			return nil, err
+	movements := make([]domain.StockMovement, 0, len(rows))
+	for _, row := range rows {
+		m := domain.StockMovement{
+			ID:        row.ID,
+			BusinessID: businessID,
+			BranchID:  branchID,
+			ProductID: row.ProductID,
+			Type:      posMovementType(string(row.EntryType)),
+			Quantity:  decimalToFloat(row.QuantityChange),
 		}
-
-		m.BusinessID = businessID
-		m.BranchID = branchID
-		m.Type = posMovementType(entryType)
-		m.Quantity = decimalToFloat(quantity)
-		if referenceID.Valid {
-			m.ReferenceID = &referenceID.Int64
+		if row.ReferenceID.Valid {
+			m.ReferenceID = &row.ReferenceID.Int64
 		}
-		if referenceType.Valid {
-			m.ReferenceType = &referenceType.String
+		if row.ReferenceType.Valid {
+			m.ReferenceType = &row.ReferenceType.String
 		}
-		if note.Valid {
-			m.Note = &note.String
+		if row.Note.Valid {
+			m.Note = &row.Note.String
 		}
-		if employeeID.Valid {
-			m.EmployeeID = &employeeID.Int64
+		if row.EmployeeID.Valid {
+			m.EmployeeID = &row.EmployeeID.Int64
 		}
-		if createdAt.Valid {
-			m.CreatedAt = createdAt.Time
+		if row.CreatedAt.Valid {
+			m.CreatedAt = row.CreatedAt.Time
 		}
 		movements = append(movements, m)
-	}
-	if err := rows.Err(); err != nil {
-		logger.Ctx(ctx).Error("Failed to iterate stock movements", logger.Error(err))
-		return nil, err
 	}
 	return movements, nil
 }
@@ -170,7 +129,12 @@ func (r *Repository) TransferStock(ctx context.Context, input domain.TransferSto
 		return 0, err
 	}
 	transferGroup := outID
-	if _, err = tx.ExecContext(ctx, `UPDATE stock_ledger SET transfer_group = ? WHERE id = ? AND business_id = ?`, transferGroup, outID, input.BusinessID); err != nil {
+	qtx := r.queries.WithTx(tx)
+	if err = qtx.UpdateStockLedgerTransferGroup(ctx, sqlc.UpdateStockLedgerTransferGroupParams{
+		TransferGroup: sql.NullInt64{Int64: transferGroup, Valid: true},
+		ID:            outID,
+		BusinessID:    input.BusinessID,
+	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to mark POS transfer out group", logger.Error(err))
 		return 0, err
 	}
@@ -275,54 +239,48 @@ func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branc
 }
 
 func (r *Repository) ListBranchInventory(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
-	rows, err := r.pool.QueryContext(ctx, inventorySelectSQL(`
-		WHERE p.business_id = ?
-		  AND p.is_active = TRUE
-		  AND p.track_inventory = TRUE
-		ORDER BY p.name
-	`), branchID, businessID)
+	rows, err := r.queries.ListBranchInventory(ctx, sqlc.ListBranchInventoryParams{
+		SourceID:   branchID,
+		BusinessID: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list branch inventory", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
-
-	return scanBranchInventoryRows(ctx, rows, businessID, branchID)
+	return mapBranchInventoryRows(ctx, rows, businessID, branchID)
 }
 
 func (r *Repository) ListLowStockItems(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
-	rows, err := r.pool.QueryContext(ctx, inventorySelectSQL(`
-		WHERE p.business_id = ?
-		  AND p.is_active = TRUE
-		  AND p.track_inventory = TRUE
-		  AND COALESCE(sl.reorder_point, p.low_stock_threshold) IS NOT NULL
-		  AND COALESCE(sl.on_hand, 0) <= COALESCE(sl.reorder_point, p.low_stock_threshold)
-		ORDER BY COALESCE(sl.on_hand, 0) ASC, p.name
-	`), branchID, businessID)
+	rows, err := r.queries.ListLowStockBranchInventory(ctx, sqlc.ListLowStockBranchInventoryParams{
+		SourceID:   branchID,
+		BusinessID: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list low stock items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
-
-	return scanBranchInventoryRows(ctx, rows, businessID, branchID)
+	converted := make([]sqlc.ListBranchInventoryRow, len(rows))
+	for i, row := range rows {
+		converted[i] = sqlc.ListBranchInventoryRow(row)
+	}
+	return mapBranchInventoryRows(ctx, converted, businessID, branchID)
 }
 
 func (r *Repository) GetInventoryItem(ctx context.Context, businessID, ownerID, branchID, productID int64) (domain.BranchInventory, error) {
-	rows, err := r.pool.QueryContext(ctx, inventorySelectSQL(`
-		WHERE p.business_id = ?
-		  AND p.id = ?
-		  AND p.is_active = TRUE
-		  AND p.track_inventory = TRUE
-		LIMIT 1
-	`), branchID, businessID, productID)
+	rows, err := r.queries.GetBranchInventoryItem(ctx, sqlc.GetBranchInventoryItemParams{
+		SourceID:   branchID,
+		BusinessID: businessID,
+		ID:         productID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get inventory item", logger.Error(err))
 		return domain.BranchInventory{}, err
 	}
-	defer rows.Close()
-
-	items, err := scanBranchInventoryRows(ctx, rows, businessID, branchID)
+	converted := make([]sqlc.ListBranchInventoryRow, len(rows))
+	for i, row := range rows {
+		converted[i] = sqlc.ListBranchInventoryRow(row)
+	}
+	items, err := mapBranchInventoryRows(ctx, converted, businessID, branchID)
 	if err != nil {
 		return domain.BranchInventory{}, err
 	}
@@ -406,7 +364,7 @@ func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input move
 		return 0, err
 	}
 
-	ledgerID, err := lastStockLedgerID(ctx, tx, input.BusinessID, locationID, input.ProductID)
+	ledgerID, err := lastStockLedgerID(ctx, r.queries.WithTx(tx), input.BusinessID, locationID, input.ProductID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to read POS stock ledger id", logger.Error(err))
 		return 0, err
@@ -415,16 +373,11 @@ func (r *Repository) applyMovementTx(ctx context.Context, tx *sql.Tx, input move
 }
 
 func (r *Repository) ensureInventoryProduct(ctx context.Context, tx *sql.Tx, businessID, productID int64) error {
-	var exists int
-	err := tx.QueryRowContext(ctx, `
-		SELECT 1
-		FROM erp_products
-		WHERE business_id = ?
-		  AND id = ?
-		  AND is_active = TRUE
-		  AND track_inventory = TRUE
-		LIMIT 1
-	`, businessID, productID).Scan(&exists)
+	// cross-schema read from erp_products — validate inventory-tracked product
+	_, err := r.queries.WithTx(tx).InventoryProductExists(ctx, sqlc.InventoryProductExistsParams{
+		BusinessID: businessID,
+		ID:         productID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrInventoryNotFound
 	}
@@ -439,120 +392,58 @@ func (r *Repository) ownerIDForBusiness(ctx context.Context, businessID int64) i
 	if businessID <= 0 {
 		return businessID
 	}
-	var ownerID int64
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT owner_id
-		FROM businesses
-		WHERE id = ?
-		  AND is_active = TRUE
-		LIMIT 1
-	`, businessID).Scan(&ownerID)
+	ownerID, err := r.queries.GetBusinessOwnerID(ctx, businessID)
 	if err != nil || ownerID <= 0 {
 		return businessID
 	}
 	return ownerID
 }
 
-func inventorySelectSQL(whereClause string) string {
-	return `
-		SELECT
-			p.id AS id,
-			p.id AS product_id,
-			p.name,
-			p.sku,
-			p.unit,
-			COALESCE(sl.on_hand, 0) AS quantity,
-			COALESCE(sl.reorder_point, p.low_stock_threshold) AS reorder_point,
-			COALESCE(sl.reorder_quantity, p.reorder_quantity) AS reorder_quantity,
-			p.low_stock_threshold,
-			COALESCE(sl.updated_at, p.updated_at) AS updated_at
-		FROM erp_products p
-		LEFT JOIN stock_locations loc
-		  ON loc.business_id = p.business_id
-		 AND loc.source_table = 'pos_locations'
-		 AND loc.source_id = ?
-		LEFT JOIN stock_levels sl
-		  ON sl.business_id = p.business_id
-		 AND sl.location_id = loc.id
-		 AND sl.product_id = p.id
-	` + whereClause
-}
-
-func scanBranchInventoryRows(ctx context.Context, rows *sql.Rows, businessID, branchID int64) ([]domain.BranchInventory, error) {
-	items := make([]domain.BranchInventory, 0)
-	for rows.Next() {
-		var (
-			item              domain.BranchInventory
-			sku               sql.NullString
-			unit              sql.NullString
-			quantity          string
-			reorderPoint      sql.NullString
-			reorderQuantity   sql.NullString
-			lowStockThreshold sql.NullString
-			updatedAt         sql.NullTime
-		)
-		if err := rows.Scan(
-			&item.ID,
-			&item.ProductID,
-			&item.Name,
-			&sku,
-			&unit,
-			&quantity,
-			&reorderPoint,
-			&reorderQuantity,
-			&lowStockThreshold,
-			&updatedAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan branch inventory", logger.Error(err))
-			return nil, err
+func mapBranchInventoryRows(ctx context.Context, rows []sqlc.ListBranchInventoryRow, businessID, branchID int64) ([]domain.BranchInventory, error) {
+	items := make([]domain.BranchInventory, 0, len(rows))
+	for _, row := range rows {
+		item := domain.BranchInventory{
+			ID:         row.ID,
+			ProductID:  row.ProductID,
+			BusinessID: businessID,
+			BranchID:   branchID,
+			Name:       row.Name,
+			Quantity:   decimalToFloat(row.Quantity),
 		}
-		item.BusinessID = businessID
-		item.BranchID = branchID
-		if sku.Valid {
-			item.SKU = sku.String
+		if row.Sku.Valid {
+			item.SKU = row.Sku.String
 		}
-		if unit.Valid && strings.TrimSpace(unit.String) != "" {
-			item.Unit = unit.String
+		if row.Unit.Valid && strings.TrimSpace(row.Unit.String) != "" {
+			item.Unit = row.Unit.String
 		} else {
 			item.Unit = "units"
 		}
-		item.Quantity = decimalToFloat(quantity)
-		if reorderPoint.Valid {
-			rp := decimalToFloat(reorderPoint.String)
+		if row.ReorderPoint.Valid {
+			rp := decimalToFloat(row.ReorderPoint.String)
 			item.ReorderPoint = &rp
 		}
-		if reorderQuantity.Valid {
-			rq := decimalToFloat(reorderQuantity.String)
+		if row.ReorderQuantity.Valid {
+			rq := decimalToFloat(row.ReorderQuantity.String)
 			item.ReorderQuantity = &rq
 		}
-		if lowStockThreshold.Valid {
-			threshold := decimalToFloat(lowStockThreshold.String)
+		if row.LowStockThreshold.Valid {
+			threshold := decimalToFloat(row.LowStockThreshold.String)
 			item.LowStockThreshold = &threshold
 		}
-		if updatedAt.Valid {
-			item.UpdatedAt = updatedAt.Time
+		if row.UpdatedAt.Valid {
+			item.UpdatedAt = row.UpdatedAt.Time
 		}
 		items = append(items, item)
-	}
-	if err := rows.Err(); err != nil {
-		logger.Ctx(ctx).Error("Failed to iterate branch inventory", logger.Error(err))
-		return nil, err
 	}
 	return items, nil
 }
 
-func lastStockLedgerID(ctx context.Context, tx *sql.Tx, businessID, locationID, productID int64) (int64, error) {
-	var id int64
-	err := tx.QueryRowContext(ctx, `
-		SELECT id
-		FROM stock_ledger
-		WHERE business_id = ?
-		  AND location_id = ?
-		  AND product_id = ?
-		ORDER BY id DESC
-		LIMIT 1
-	`, businessID, locationID, productID).Scan(&id)
-	return id, err
+func lastStockLedgerID(ctx context.Context, qtx *sqlc.Queries, businessID, locationID, productID int64) (int64, error) {
+	return qtx.LastStockLedgerID(ctx, sqlc.LastStockLedgerIDParams{
+		BusinessID: businessID,
+		LocationID: locationID,
+		ProductID:  productID,
+	})
 }
 
 func rollbackOnError(tx *sql.Tx, err *error) {

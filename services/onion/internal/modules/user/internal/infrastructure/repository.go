@@ -162,9 +162,7 @@ func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
 // BusinessNameExists reports whether a business with the given (trimmed) name
 // already exists. Business names are globally unique.
 func (r *Repository) BusinessNameExists(ctx context.Context, name string) (bool, error) {
-	var exists bool
-	err := r.db.QueryRowContext(ctx,
-		`SELECT EXISTS(SELECT 1 FROM businesses WHERE name = ? LIMIT 1)`, name).Scan(&exists)
+	exists, err := r.queries.BusinessNameExists(ctx, name)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to check business name existence", logger.Error(err))
 		return false, err
@@ -247,15 +245,13 @@ func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, metho
 // or has been explicitly granted access via user_business_access.
 func (r *Repository) CheckBusinessAccess(ctx context.Context, userID, businessID int64) (bool, error) {
 	// cross-schema read from user_business_access — multi-business switch validation
-	var count int
-	err := r.db.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM (
-			SELECT 1 FROM businesses WHERE id = ? AND owner_id = ? AND is_active = TRUE
-			UNION ALL
-			SELECT 1 FROM user_business_access WHERE user_id = ? AND business_id = ?
-		) x
-	`, businessID, userID, userID, businessID).Scan(&count)
-	return count > 0, err
+	cnt, err := r.queries.CheckBusinessAccess(ctx, sqlc.CheckBusinessAccessParams{
+		ID:         businessID,
+		OwnerID:    userID,
+		UserID:     userID,
+		BusinessID: businessID,
+	})
+	return cnt > 0, err
 }
 
 // AssignSubscription looks up the plan by slug and creates the owner's initial subscription.

@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -30,44 +28,26 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListPayrollRecords(ctx context.Context, businessID int64, periodLabel string) ([]domain.PayrollRecord, error) {
-	// Dynamic WHERE clause - built with squirrel
-	builder := sq.
-		Select("id", "owner_id", "business_id", "staff_id", "period_start", "period_end", "period_label",
-			"regular_hours", "overtime_hours", "base_pay", "overtime_pay", "bonuses",
-			"deductions", "tax_withheld", "net_pay", "status", "paid_at", "notes", "created_at").
-		From("hr_payroll_records").
-		Where(sq.Eq{"business_id": businessID})
-
+	var rows []sqlc.HrPayrollRecord
+	var err error
 	if periodLabel != "" {
-		builder = builder.Where(sq.Eq{"period_label": periodLabel})
+		rows, err = r.queries.ListPayrollRecordsByPeriod(ctx, sqlc.ListPayrollRecordsByPeriodParams{
+			BusinessID:  businessID,
+			PeriodLabel: periodLabel,
+		})
+	} else {
+		rows, err = r.queries.ListPayrollRecords(ctx, businessID)
 	}
-
-	builder = builder.OrderBy("period_start DESC", "staff_id ASC")
-
-	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build payroll records query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list payroll records", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var records []domain.PayrollRecord
-	for rows.Next() {
-		var p domain.PayrollRecord
-		if scanErr := p.FromRow(rows); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan payroll row", logger.Error(scanErr))
-			return nil, scanErr
-		}
-		records = append(records, p)
+	records := make([]domain.PayrollRecord, 0, len(rows))
+	for _, row := range rows {
+		records = append(records, payrollRecordFromRow(row))
 	}
-
-	return records, rows.Err()
+	return records, nil
 }
 
 func (r *Repository) CreatePayrollRecord(ctx context.Context, businessID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error) {
@@ -207,47 +187,71 @@ func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, businessID int64
 		return out, nil
 	}
 
-	query, args, err := sq.
-		Select("id", "salary", "hourly_rate", "overtime_rate").
-		From("hr_staff").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.Eq{"id": staffIDs}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build staff pay rates query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetStaffPayRatesByIDs(ctx, sqlc.GetStaffPayRatesByIDsParams{
+		BusinessID: businessID,
+		StaffIds:   staffIDs,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch-load staff pay rates", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var (
-			id                               int64
-			salary, hourlyRate, overtimeRate sql.NullString
-		)
-		if scanErr := rows.Scan(&id, &salary, &hourlyRate, &overtimeRate); scanErr != nil {
-			return nil, scanErr
-		}
+	for _, row := range rows {
 		var rates domain.StaffPayRates
-		if salary.Valid {
-			rates.Salary = parseDecimal(salary.String)
+		if row.Salary.Valid {
+			rates.Salary = parseDecimal(row.Salary.String)
 		}
-		if hourlyRate.Valid {
-			rates.HourlyRate = parseDecimal(hourlyRate.String)
+		if row.HourlyRate.Valid {
+			rates.HourlyRate = parseDecimal(row.HourlyRate.String)
 		}
-		if overtimeRate.Valid {
-			rates.OvertimeRate = parseDecimal(overtimeRate.String)
+		if row.OvertimeRate.Valid {
+			rates.OvertimeRate = parseDecimal(row.OvertimeRate.String)
 		}
-		out[id] = rates
+		out[row.ID] = rates
 	}
+	return out, nil
+}
 
-	return out, rows.Err()
+func payrollRecordFromRow(row sqlc.HrPayrollRecord) domain.PayrollRecord {
+	var p domain.PayrollRecord
+	p.ID = row.ID
+	p.OwnerID = row.OwnerID
+	p.BusinessID = row.BusinessID
+	p.StaffID = row.StaffID
+	p.PeriodStart = row.PeriodStart
+	p.PeriodEnd = row.PeriodEnd
+	p.PeriodLabel = row.PeriodLabel
+	if row.RegularHours.Valid {
+		p.RegularHours = parseDecimal(row.RegularHours.String)
+	}
+	if row.OvertimeHours.Valid {
+		p.OvertimeHours = parseDecimal(row.OvertimeHours.String)
+	}
+	p.BasePay = parseDecimal(row.BasePay)
+	if row.OvertimePay.Valid {
+		p.OvertimePay = parseDecimal(row.OvertimePay.String)
+	}
+	if row.Bonuses.Valid {
+		p.Bonuses = parseDecimal(row.Bonuses.String)
+	}
+	if row.Deductions.Valid {
+		p.Deductions = parseDecimal(row.Deductions.String)
+	}
+	if row.TaxWithheld.Valid {
+		p.TaxWithheld = parseDecimal(row.TaxWithheld.String)
+	}
+	p.NetPay = parseDecimal(row.NetPay)
+	p.Status = string(row.Status.HrPayrollRecordsStatus)
+	if row.PaidAt.Valid {
+		p.PaidAt = row.PaidAt.Time
+	}
+	if row.Notes.Valid {
+		p.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		p.CreatedAt = row.CreatedAt.Time
+	}
+	return p
 }
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt

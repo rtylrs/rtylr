@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -165,60 +163,41 @@ func (r *Repository) ListCategories(ctx context.Context, businessID int64) ([]do
 // SumByOwner returns the total expense amount for the given business, regardless
 // of category or date.
 func (r *Repository) SumByOwner(ctx context.Context, businessID int64) (float64, error) {
-	sqlStr, args, err := sq.Select("COALESCE(SUM(CAST(amount AS REAL)), 0)").
-		From("finance_expenses").
-		Where(sq.Eq{"business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	total, err := r.queries.SumExpensesByBusiness(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build sum expenses query", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to sum expenses", logger.Error(err))
 		return 0, err
 	}
-
-	var total float64
-	if scanErr := r.pool.QueryRowContext(ctx, sqlStr, args...).Scan(&total); scanErr != nil {
-		logger.Ctx(ctx).Error("Failed to sum expenses", logger.Error(scanErr))
-		return 0, scanErr
-	}
-
-	return total, nil
+	return interfaceToFloat(total), nil
 }
 
-// CountByCategory returns the number of expenses in each category for the business.
-// The map key is the category_id (as a string) or "uncategorised" for null values.
-func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map[string]int64, error) {
-	sqlStr, args, err := sq.Select(
-		"COALESCE(CAST(category_id AS TEXT), 'uncategorised')",
-		"COUNT(*) AS cnt",
-	).
-		From("finance_expenses").
-		Where(sq.Eq{"business_id": businessID}).
-		GroupBy("category_id").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build count expenses by category query", logger.Error(err))
-		return nil, err
+func interfaceToFloat(v interface{}) float64 {
+	switch val := v.(type) {
+	case float64:
+		return val
+	case int64:
+		return float64(val)
+	case []byte:
+		return parseDecimal(string(val))
+	case string:
+		return parseDecimal(val)
+	default:
+		return 0
 	}
+}
 
-	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
+func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map[string]int64, error) {
+	rows, err := r.queries.CountExpensesByCategory(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count expenses by category", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	counts := make(map[string]int64)
-	for rows.Next() {
-		var cat string
-		var cnt int64
-		if scanErr := rows.Scan(&cat, &cnt); scanErr != nil {
-			return nil, scanErr
-		}
-		counts[cat] = cnt
+	counts := make(map[string]int64, len(rows))
+	for _, row := range rows {
+		counts[fmt.Sprint(row.CategoryKey)] = row.Cnt
 	}
-
-	return counts, rows.Err()
+	return counts, nil
 }
 
 // ---------------------------------------------------------------------------
@@ -301,6 +280,19 @@ func fmtFloat(f float64) string {
 }
 
 func parseFloat(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse expense decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return v
+}
+
+func parseDecimal(s string) float64 {
 	if s == "" {
 		return 0
 	}

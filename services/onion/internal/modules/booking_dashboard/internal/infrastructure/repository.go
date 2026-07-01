@@ -3,123 +3,103 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
+	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	pool *sql.DB
+	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		pool: db,
+		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 
 func (r *Repository) GetTodayCount(ctx context.Context, businessID int64, start, end time.Time) (int, error) {
-	var count int
-	query, args, err := sq.Select("COUNT(*)").
-		From("booking_appointments").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.GtOrEq{"start_time": start}).
-		Where(sq.Lt{"start_time": end}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build today count query", logger.Error(err))
-		return 0, err
-	}
-	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&count)
+	cnt, err := r.queries.CountAppointmentsToday(ctx, sqlc.CountAppointmentsTodayParams{
+		BusinessID: businessID,
+		StartTime:  start,
+		StartTime_2: end,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get today count in repo", logger.Error(err))
 		return 0, err
 	}
-	return count, nil
+	return int(cnt), nil
 }
 
 func (r *Repository) GetUpcomingCount(ctx context.Context, businessID int64, start time.Time) (int, error) {
-	var count int
-	query, args, err := sq.Select("COUNT(*)").
-		From("booking_appointments").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.GtOrEq{"start_time": start}).
-		Where(sq.Eq{"status": []string{"pending", "confirmed"}}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build upcoming count query", logger.Error(err))
-		return 0, err
-	}
-	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&count)
+	cnt, err := r.queries.CountUpcomingAppointments(ctx, sqlc.CountUpcomingAppointmentsParams{
+		BusinessID: businessID,
+		StartTime:  start,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get upcoming count in repo", logger.Error(err))
 		return 0, err
 	}
-	return count, nil
+	return int(cnt), nil
 }
 
 func (r *Repository) GetMonthCounts(ctx context.Context, businessID int64, start time.Time) (total, cancelled int, err error) {
-	totalSQL, totalArgs, err := sq.Select("COUNT(*)").
-		From("booking_appointments").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.GtOrEq{"start_time": start}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build total month count query", logger.Error(err))
-		return 0, 0, err
-	}
-	err = r.pool.QueryRowContext(ctx, totalSQL, totalArgs...).Scan(&total)
+	total64, err := r.queries.CountAppointmentsThisMonth(ctx, sqlc.CountAppointmentsThisMonthParams{
+		BusinessID: businessID,
+		StartTime:  start,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get total month count in repo", logger.Error(err))
 		return 0, 0, err
 	}
 
-	cancelledSQL, cancelledArgs, err := sq.Select("COUNT(*)").
-		From("booking_appointments").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.GtOrEq{"start_time": start}).
-		Where(sq.Eq{"status": "cancelled"}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build cancelled month count query", logger.Error(err))
-		return 0, 0, err
-	}
-	err = r.pool.QueryRowContext(ctx, cancelledSQL, cancelledArgs...).Scan(&cancelled)
+	cancelled64, err := r.queries.CountCancelledAppointmentsThisMonth(ctx, sqlc.CountCancelledAppointmentsThisMonthParams{
+		BusinessID: businessID,
+		StartTime:  start,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get cancelled month count in repo", logger.Error(err))
 		return 0, 0, err
 	}
 
-	return total, cancelled, nil
+	return int(total64), int(cancelled64), nil
 }
 
 func (r *Repository) GetMonthRevenue(ctx context.Context, businessID int64, start time.Time) (float64, error) {
-	var revenue sql.NullFloat64
-	query, args, err := sq.Select("COALESCE(SUM(bs.price), 0)").
-		From("booking_appointments ba").
-		Join("booking_services bs ON ba.service_id = bs.id").
-		Where(sq.Eq{"ba.business_id": businessID}).
-		Where(sq.GtOrEq{"ba.start_time": start}).
-		Where(sq.Eq{"ba.status": []string{"completed", "confirmed"}}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build revenue query", logger.Error(err))
-		return 0, err
-	}
-	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&revenue)
+	revenue, err := r.queries.SumMonthRevenue(ctx, sqlc.SumMonthRevenueParams{
+		BusinessID: businessID,
+		StartTime:  start,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get revenue in repo", logger.Error(err))
 		return 0, err
 	}
-	if revenue.Valid {
-		return revenue.Float64, nil
+	return interfaceToFloat64(revenue), nil
+}
+
+func interfaceToFloat64(v interface{}) float64 {
+	switch val := v.(type) {
+	case float64:
+		return val
+	case int64:
+		return float64(val)
+	case []byte:
+		f, err := strconv.ParseFloat(string(val), 64)
+		if err != nil {
+			return 0
+		}
+		return f
+	case string:
+		f, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return 0
+		}
+		return f
+	default:
+		return 0
 	}
-	return 0, nil
 }

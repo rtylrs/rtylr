@@ -72,3 +72,14 @@ SELECT ?, COALESCE(u.business_id, 0), u.id,
 FROM users u
 WHERE u.id = ?
   AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);
+
+-- name: BusinessNameExists :one
+SELECT EXISTS(SELECT 1 FROM businesses WHERE name = ? LIMIT 1) AS exists_flag;
+
+-- cross-schema read from user_business_access — multi-business switch validation
+-- name: CheckBusinessAccess :one
+SELECT COUNT(*) AS cnt FROM (
+    SELECT 1 FROM businesses b WHERE b.id = ? AND b.owner_id = ? AND b.is_active = TRUE
+    UNION ALL
+    SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = ?
+) x;
