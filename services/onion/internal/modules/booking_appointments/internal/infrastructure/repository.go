@@ -55,30 +55,10 @@ func (r *Repository) ListToday(ctx context.Context, businessID int64) ([]domain.
 }
 
 func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Appointment, error) {
-	var row sqlc.BookingAppointment
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT id, owner_id, business_id, service_id, resource_id, staff_id,
-		       customer_name, customer_email, customer_phone, start_time, end_time,
-		       status, notes, created_at, updated_at
-		FROM booking_appointments
-		WHERE business_id = ? AND id = ?
-	`, businessID, id).Scan(
-		&row.ID,
-		&row.OwnerID,
-		&row.BusinessID,
-		&row.ServiceID,
-		&row.ResourceID,
-		&row.StaffID,
-		&row.CustomerName,
-		&row.CustomerEmail,
-		&row.CustomerPhone,
-		&row.StartTime,
-		&row.EndTime,
-		&row.Status,
-		&row.Notes,
-		&row.CreatedAt,
-		&row.UpdatedAt,
-	)
+	row, err := r.queries.GetAppointment(ctx, sqlc.GetAppointmentParams{
+		BusinessID: businessID,
+		ID:         id,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get appointment", logger.Error(err))
 		return domain.Appointment{}, err

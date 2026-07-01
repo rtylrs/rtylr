@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
 	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -77,42 +75,23 @@ func (r *Repository) getLinesForEntries(ctx context.Context, entryIDs []int64) (
 		return out, nil
 	}
 
-	query, args, err := sq.
-		Select("id", "entry_id", "account_id", "debit", "credit").
-		From("finance_journal_lines").
-		Where(sq.Eq{"entry_id": entryIDs}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build journal lines query", logger.Error(err))
-		return nil, err
-	}
-
-	dbRows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetJournalLinesForEntries(ctx, entryIDs)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch-load journal lines", logger.Error(err))
 		return nil, err
 	}
-	defer dbRows.Close()
 
-	for dbRows.Next() {
-		var (
-			id, entryID, accountID int64
-			debit, credit          sql.NullString
-		)
-		if scanErr := dbRows.Scan(&id, &entryID, &accountID, &debit, &credit); scanErr != nil {
-			return nil, scanErr
-		}
-		out[entryID] = append(out[entryID], domain.JournalLine{
-			ID:        id,
-			EntryID:   entryID,
-			AccountID: accountID,
-			Debit:     parseFloatNull(debit),
-			Credit:    parseFloatNull(credit),
+	for _, row := range rows {
+		out[row.EntryID] = append(out[row.EntryID], domain.JournalLine{
+			ID:        row.ID,
+			EntryID:   row.EntryID,
+			AccountID: row.AccountID,
+			Debit:     parseFloatNull(row.Debit),
+			Credit:    parseFloatNull(row.Credit),
 		})
 	}
 
-	return out, dbRows.Err()
+	return out, nil
 }
 
 func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.JournalEntry, error) {

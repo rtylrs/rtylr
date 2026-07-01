@@ -31,6 +31,8 @@ func (r *Repository) Search(ctx context.Context, businessID int64, query string)
 	}
 	searchTerm := searchutil.BooleanPrefixQuery(query)
 
+	// sqlc cannot codegen MATCH ... AGAINST with bound parameters reliably; keep
+	// this one full-text branch as parameterized raw SQL.
 	rows, err := r.pool.QueryContext(ctx, `
 SELECT id, business_id, first_name, last_name, email, phone
 FROM crm_customers

@@ -10,5 +10,8 @@ VALUES (?, ?, ?, ?, ?, 'available');
 UPDATE pos_tables SET location_id = ?, name = ?, capacity = ?, status = ?
 WHERE id = ? AND business_id = ?;
 
+-- name: UpdateTableStatus :execresult
+UPDATE pos_tables SET status = ? WHERE id = ? AND business_id = ?;
+
 -- name: DeleteTable :execresult
 DELETE FROM pos_tables WHERE id = ? AND business_id = ?;

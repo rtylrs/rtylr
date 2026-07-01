@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/business/internal/domain"
 	"github.com/voxire/onion/internal/modules/business/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -31,50 +29,36 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 		return profile, errors.New("ownerID must be non-zero")
 	}
 
-	if err := r.db.QueryRowContext(ctx, `
-		SELECT
-			b.id,
-			b.name,
-			COALESCE(NULLIF(c.site_name, ''), b.name) AS site_name,
-			COALESCE(NULLIF(c.logo_url, ''), COALESCE(b.logo_url, '')) AS logo_url,
-			COALESCE(c.contact_email, '') AS contact_email,
-			COALESCE(c.contact_number, '') AS contact_number,
-			COALESCE(b.currency, 'USD') AS currency,
-			COALESCE(b.timezone, 'UTC') AS timezone
-		FROM businesses b
-		LEFT JOIN config c ON c.business_id = b.id
-		WHERE (b.id = ? OR b.owner_id = ?) AND b.is_active = TRUE
-		ORDER BY b.id ASC
-		LIMIT 1
-	`, ownerID, ownerID).Scan(
-		&profile.ID,
-		&profile.Name,
-		&profile.SiteName,
-		&profile.LogoURL,
-		&profile.ContactEmail,
-		&profile.ContactPhone,
-		&profile.Currency,
-		&profile.Timezone,
-	); err == nil {
+	row, err := r.queries.GetBusinessProfileByBusiness(ctx, sqlc.GetBusinessProfileByBusinessParams{OwnerID: ownerID})
+	if err == nil {
+		profile.ID = row.ID
+		profile.Name = row.Name
+		profile.SiteName = row.SiteName
+		profile.LogoURL = sqlcString(row.LogoUrl)
+		profile.ContactEmail = row.ContactEmail
+		profile.ContactPhone = row.ContactNumber
+		profile.Currency = row.Currency
+		profile.Timezone = row.Timezone
 		profile.Plan = "free"
 		return profile, nil
-	} else if !errors.Is(err, sql.ErrNoRows) {
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
 		return profile, err
 	}
 
-	row, err := r.queries.GetBusinessProfile(ctx, int32(ownerID))
+	cfg, err := r.queries.GetBusinessProfile(ctx, int32(ownerID))
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
 		return profile, err
 	}
 
 	profile.ID = ownerID
-	profile.Name = row.SiteName
-	profile.SiteName = row.SiteName
-	profile.LogoURL = row.LogoUrl
-	profile.ContactEmail = row.ContactEmail
-	profile.ContactPhone = row.ContactNumber
+	profile.Name = cfg.SiteName
+	profile.SiteName = cfg.SiteName
+	profile.LogoURL = cfg.LogoUrl
+	profile.ContactEmail = cfg.ContactEmail
+	profile.ContactPhone = cfg.ContactNumber
 	profile.Currency = "USD"
 	profile.Timezone = "UTC"
 	profile.Plan = "free"
@@ -84,130 +68,88 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 
 func (r *Repository) GetPublicBusiness(ctx context.Context, businessID int64) (domain.PublicBusiness, error) {
 	// cross-schema read from businesses (shared) — public storefront lookup
-	q, args, err := sq.Select(
-		"id", "name", "COALESCE(slug, '')", "COALESCE(logo_url, '')",
-		"COALESCE(currency, 'USD')", "COALESCE(timezone, 'UTC')",
-	).
-		From("businesses").
-		Where(sq.Eq{"id": businessID, "is_active": true}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	row, err := r.queries.GetPublicBusiness(ctx, businessID)
 	if err != nil {
 		return domain.PublicBusiness{}, err
 	}
-
-	var res domain.PublicBusiness
-	row := r.db.QueryRowContext(ctx, q, args...)
-	scanErr := row.Scan(&res.ID, &res.Name, &res.Slug, &res.LogoURL, &res.Currency, &res.Timezone)
-	return res, scanErr
+	return domain.PublicBusiness{
+		ID:       row.ID,
+		Name:     row.Name,
+		Slug:     row.Slug,
+		LogoURL:  row.LogoUrl,
+		Currency: row.Currency,
+		Timezone: row.Timezone,
+	}, nil
 }
 
 func (r *Repository) LookupBySlug(ctx context.Context, slug string) (domain.SlugLookupResult, error) {
 	var out domain.SlugLookupResult
 
 	// cross-schema read from businesses (shared) — resolve storefront by slug
-	bizQ, bizArgs, err := sq.Select(
-		"id", "name", "COALESCE(slug, '')", "COALESCE(logo_url, '')",
-		"COALESCE(currency, 'USD')", "COALESCE(timezone, 'UTC')", "COALESCE(owner_id, 0)",
-	).
-		From("businesses").
-		Where(sq.Eq{"slug": slug, "is_active": true}).
-		Limit(1).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	biz, err := r.queries.LookupBusinessBySlug(ctx, sql.NullString{String: slug, Valid: slug != ""})
 	if err != nil {
 		return out, err
 	}
 
-	var ownerID int64
-	row := r.db.QueryRowContext(ctx, bizQ, bizArgs...)
-	if err := row.Scan(&out.Business.ID, &out.Business.Name, &out.Business.Slug, &out.Business.LogoURL, &out.Business.Currency, &out.Business.Timezone, &ownerID); err != nil {
-		return out, err
+	out.Business = domain.PublicBusiness{
+		ID:       biz.ID,
+		Name:     biz.Name,
+		Slug:     biz.Slug,
+		LogoURL:  biz.LogoUrl,
+		Currency: biz.Currency,
+		Timezone: biz.Timezone,
 	}
 
 	// cross-schema read from hr_locations (hr_core) — active storefront locations
-	locQ, locArgs, err := sq.Select(
-		"id", "name", "COALESCE(slug, '')", "COALESCE(address, '')", "COALESCE(timezone, '')", "is_active",
-	).
-		From("hr_locations").
-		Where(sq.Eq{"owner_id": ownerID, "is_active": true}).
-		OrderBy("is_default DESC", "name ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.ListPublicLocationsByOwner(ctx, biz.OwnerID)
 	if err != nil {
 		return out, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, locQ, locArgs...)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return out, nil
-		}
-		return out, err
+	for _, row := range rows {
+		out.Locations = append(out.Locations, domain.PublicLocation{
+			ID:       row.ID,
+			Name:     row.Name,
+			Slug:     row.Slug,
+			Address:  row.Address,
+			Timezone: row.Timezone,
+			IsActive: row.IsActive,
+		})
 	}
-	defer func() { _ = rows.Close() }()
-
-	for rows.Next() {
-		var loc domain.PublicLocation
-		if err := rows.Scan(&loc.ID, &loc.Name, &loc.Slug, &loc.Address, &loc.Timezone, &loc.IsActive); err != nil {
-			return out, err
-		}
-		out.Locations = append(out.Locations, loc)
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 func (r *Repository) UpdateSlug(ctx context.Context, businessID int64, slug string) error {
 	// cross-schema write to businesses (shared) — set storefront slug
-	q, args, err := sq.Update("businesses").
-		Set("slug", slug).
-		Where(sq.Eq{"id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, q, args...)
-	return err
+	return r.queries.UpdateBusinessSlug(ctx, sqlc.UpdateBusinessSlugParams{
+		Slug: sql.NullString{String: slug, Valid: slug != ""},
+		ID:   businessID,
+	})
 }
 
 // ListUserBusinesses returns all businesses the user owns (businesses.owner_id = userID)
 // or has explicit access to via user_business_access.
 func (r *Repository) ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error) {
 	// cross-schema read from user_business_access — multi-business ownership
-	q, args, err := sq.Select(
-		"b.id", "b.name", "COALESCE(b.logo_url, '')", "COALESCE(b.parent_id, 0)", "b.is_active",
-	).
-		From("businesses b").
-		Where(sq.Or{
-			sq.Eq{"b.owner_id": userID},
-			sq.Expr("EXISTS (SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = b.id)", userID),
-		}).
-		Where(sq.Eq{"b.is_active": true}).
-		OrderBy("b.id ASC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	rows, err := r.queries.ListUserBusinesses(ctx, sqlc.ListUserBusinessesParams{
+		OwnerID: userID,
+		UserID:  userID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, q, args...)
-	if err != nil {
-		return nil, err
+	result := make([]domain.OwnedBusiness, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, domain.OwnedBusiness{
+			ID:       row.ID,
+			Name:     row.Name,
+			LogoURL:  row.LogoUrl,
+			ParentID: row.ParentID,
+			IsActive: row.IsActive.Valid && row.IsActive.Bool,
+		})
 	}
-	defer func() { _ = rows.Close() }()
-
-	var result []domain.OwnedBusiness
-	for rows.Next() {
-		var b domain.OwnedBusiness
-		if err := rows.Scan(&b.ID, &b.Name, &b.LogoURL, &b.ParentID, &b.IsActive); err != nil {
-			return nil, err
-		}
-		result = append(result, b)
-	}
-	return result, rows.Err()
+	return result, nil
 }
 
 // CreateSubBusiness creates a new child business and grants the owner access to it.
@@ -223,8 +165,13 @@ func (r *Repository) CreateSubBusiness(ctx context.Context, name string, ownerUs
 		}
 	}()
 
-	res, err := tx.ExecContext(ctx, `INSERT INTO businesses (name, owner_id, parent_id) VALUES (?, ?, ?)`,
-		name, ownerUserID, parentBusinessID)
+	qtx := r.queries.WithTx(tx)
+
+	res, err := qtx.InsertSubBusiness(ctx, sqlc.InsertSubBusinessParams{
+		Name:     name,
+		OwnerID:  ownerUserID,
+		ParentID: sql.NullInt64{Int64: parentBusinessID, Valid: parentBusinessID != 0},
+	})
 	if err != nil {
 		_ = tx.Rollback()
 		return 0, err
@@ -236,9 +183,10 @@ func (r *Repository) CreateSubBusiness(ctx context.Context, name string, ownerUs
 	}
 
 	// cross-schema write to user_business_access — grant owner access to the new sub-business
-	_, err = tx.ExecContext(ctx, `INSERT INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner')`,
-		ownerUserID, businessID)
-	if err != nil {
+	if err = qtx.GrantUserBusinessAccess(ctx, sqlc.GrantUserBusinessAccessParams{
+		UserID:     ownerUserID,
+		BusinessID: businessID,
+	}); err != nil {
 		_ = tx.Rollback()
 		return 0, err
 	}
@@ -248,9 +196,25 @@ func (r *Repository) CreateSubBusiness(ctx context.Context, name string, ownerUs
 
 // CheckSubBusinessOwnership validates that parentBusinessID is owned by ownerUserID.
 func (r *Repository) CheckSubBusinessOwnership(ctx context.Context, ownerUserID, parentBusinessID int64) (bool, error) {
-	var count int
-	err := r.db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM businesses WHERE id = ? AND owner_id = ? AND is_active = TRUE`,
-		parentBusinessID, ownerUserID).Scan(&count)
-	return count > 0, err
+	cnt, err := r.queries.CheckSubBusinessOwnership(ctx, sqlc.CheckSubBusinessOwnershipParams{
+		ID:      parentBusinessID,
+		OwnerID: ownerUserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return cnt > 0, nil
+}
+
+func sqlcString(v any) string {
+	if v == nil {
+		return ""
+	}
+	if s, ok := v.(string); ok {
+		return s
+	}
+	if b, ok := v.([]byte); ok {
+		return string(b)
+	}
+	return ""
 }

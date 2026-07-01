@@ -3,3 +3,62 @@ SELECT COALESCE(site_name,'') AS site_name, COALESCE(logo_url,'') AS logo_url, C
 FROM config
 WHERE owner_id = ?
 LIMIT 1;
+
+-- name: GetBusinessProfileByBusiness :one
+SELECT
+    b.id,
+    b.name,
+    COALESCE(NULLIF(c.site_name, ''), b.name) AS site_name,
+    COALESCE(NULLIF(c.logo_url, ''), COALESCE(b.logo_url, '')) AS logo_url,
+    COALESCE(c.contact_email, '') AS contact_email,
+    COALESCE(c.contact_number, '') AS contact_number,
+    COALESCE(b.currency, 'USD') AS currency,
+    COALESCE(b.timezone, 'UTC') AS timezone
+FROM businesses b
+LEFT JOIN config c ON c.business_id = b.id
+WHERE (b.id = sqlc.arg(owner_id) OR b.owner_id = sqlc.arg(owner_id)) AND b.is_active = TRUE
+ORDER BY b.id ASC
+LIMIT 1;
+
+-- name: GetPublicBusiness :one
+SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(logo_url, '') AS logo_url,
+       COALESCE(currency, 'USD') AS currency, COALESCE(timezone, 'UTC') AS timezone
+FROM businesses
+WHERE id = ? AND is_active = TRUE
+LIMIT 1;
+
+-- name: LookupBusinessBySlug :one
+SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(logo_url, '') AS logo_url,
+       COALESCE(currency, 'USD') AS currency, COALESCE(timezone, 'UTC') AS timezone,
+       COALESCE(owner_id, 0) AS owner_id
+FROM businesses
+WHERE slug = ? AND is_active = TRUE
+LIMIT 1;
+
+-- name: ListPublicLocationsByOwner :many
+SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(address, '') AS address,
+       COALESCE(timezone, '') AS timezone, is_active
+FROM hr_locations
+WHERE owner_id = ? AND is_active = TRUE
+ORDER BY is_default DESC, name ASC;
+
+-- name: UpdateBusinessSlug :exec
+UPDATE businesses SET slug = ? WHERE id = ?;
+
+-- name: ListUserBusinesses :many
+SELECT b.id, b.name, COALESCE(b.logo_url, '') AS logo_url, COALESCE(b.parent_id, 0) AS parent_id, b.is_active
+FROM businesses b
+WHERE b.is_active = TRUE
+  AND (b.owner_id = ? OR EXISTS (
+    SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = b.id
+  ))
+ORDER BY b.id ASC;
+
+-- name: InsertSubBusiness :execresult
+INSERT INTO businesses (name, owner_id, parent_id) VALUES (?, ?, ?);
+
+-- name: GrantUserBusinessAccess :exec
+INSERT INTO user_business_access (user_id, business_id, role) VALUES (?, ?, 'owner');
+
+-- name: CheckSubBusinessOwnership :one
+SELECT COUNT(*) AS cnt FROM businesses WHERE id = ? AND owner_id = ? AND is_active = TRUE;

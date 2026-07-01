@@ -24,149 +24,50 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuItem, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT
-			p.id,
-			p.owner_id,
-			p.business_id,
-			p.category_id,
-			COALESCE(c.name, 'Other') AS category_name,
-			p.name,
-			p.sku,
-			p.barcode,
-			p.sale_price,
-			p.tax_rate,
-			p.description,
-			COALESCE(img.url, '') AS image_url,
-			COALESCE(pst.total_quantity, p.stock_quantity) AS stock_quantity,
-			p.is_active,
-			p.created_at,
-			p.updated_at
-		FROM erp_products p
-		LEFT JOIN erp_categories c
-		  ON c.id = p.category_id
-		 AND c.business_id = p.business_id
-		LEFT JOIN product_stock_total pst
-		  ON pst.business_id = p.business_id
-		 AND pst.product_id = p.id
-		LEFT JOIN (
-			SELECT business_id, product_id, url
-			FROM (
-				SELECT
-					business_id,
-					product_id,
-					url,
-					ROW_NUMBER() OVER (
-						PARTITION BY business_id, product_id
-						ORDER BY is_primary DESC, position ASC, id ASC
-					) AS image_rank
-				FROM erp_product_images
-				WHERE business_id = ?
-			) ranked_product_images
-			WHERE image_rank = 1
-		) img
-		  ON img.business_id = p.business_id
-		 AND img.product_id = p.id
-		WHERE p.business_id = ?
-		  AND p.is_active = TRUE
-		ORDER BY c.name, p.name
-	`, businessID, businessID)
+	rows, err := r.queries.ListMenuItemsWithDetails(ctx, sqlc.ListMenuItemsWithDetailsParams{
+		BusinessID:   businessID,
+		BusinessID_2: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list menu items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	items := make([]domain.MenuItem, 0)
-	for rows.Next() {
-		var (
-			categoryID sql.NullInt64
-			category   sql.NullString
-			sku        sql.NullString
-			barcode    sql.NullString
-			salePrice  string
-			taxRate    string
-			desc       sql.NullString
-			imageURL   sql.NullString
-			stock      string
-			active     sql.NullBool
-			createdAt  sql.NullTime
-			updatedAt  sql.NullTime
-			item       domain.MenuItem
-		)
-		if err := rows.Scan(
-			&item.ID,
-			&item.OwnerID,
-			&item.BusinessID,
-			&categoryID,
-			&category,
-			&item.Name,
-			&sku,
-			&barcode,
-			&salePrice,
-			&taxRate,
-			&desc,
-			&imageURL,
-			&stock,
-			&active,
-			&createdAt,
-			&updatedAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan menu item", logger.Error(err))
-			return nil, err
+	items := make([]domain.MenuItem, 0, len(rows))
+	for _, row := range rows {
+		item := domain.MenuItem{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
+			Name:        row.Name,
+			SalePrice:   decimalToFloat(row.SalePrice),
+			TaxRate:     decimalToFloat(row.TaxRate),
+			Stock:       decimalToFloat(row.StockQuantity),
+			IsActive:    row.IsActive.Valid && row.IsActive.Bool,
+			Category:    row.CategoryName,
 		}
-		if categoryID.Valid {
-			item.CategoryID = categoryID.Int64
+		if row.CategoryID.Valid {
+			item.CategoryID = row.CategoryID.Int64
 		}
-		if category.Valid && category.String != "" {
-			item.Category = category.String
-		} else {
-			item.Category = "Other"
+		if row.Sku.Valid {
+			item.SKU = row.Sku.String
 		}
-		if sku.Valid {
-			item.SKU = sku.String
+		if row.Barcode.Valid {
+			item.Barcode = row.Barcode.String
 		}
-		if barcode.Valid {
-			item.Barcode = barcode.String
+		if row.Description.Valid {
+			item.Description = row.Description.String
 		}
-		item.SalePrice = decimalToFloat(salePrice)
-		item.TaxRate = decimalToFloat(taxRate)
-		if desc.Valid {
-			item.Description = desc.String
+		if row.ImageUrl != "" {
+			item.ImageURL = row.ImageUrl
 		}
-		if imageURL.Valid {
-			item.ImageURL = imageURL.String
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time
 		}
-		item.Stock = decimalToFloat(stock)
-		item.IsActive = active.Valid && active.Bool
-		if createdAt.Valid {
-			item.CreatedAt = createdAt.Time
+		if row.UpdatedAt.Valid {
+			item.UpdatedAt = row.UpdatedAt.Time
 		}
-		if updatedAt.Valid {
-			item.UpdatedAt = updatedAt.Time
-		}
-		items = append(items, domain.MenuItem{
-			ID:          item.ID,
-			OwnerID:     item.OwnerID,
-			BusinessID:  item.BusinessID,
-			CategoryID:  item.CategoryID,
-			Category:    item.Category,
-			Name:        item.Name,
-			SKU:         item.SKU,
-			Barcode:     item.Barcode,
-			SalePrice:   item.SalePrice,
-			TaxRate:     item.TaxRate,
-			Description: item.Description,
-			ImageURL:    item.ImageURL,
-			Stock:       item.Stock,
-			IsActive:    item.IsActive,
-			CreatedAt:   item.CreatedAt,
-			UpdatedAt:   item.UpdatedAt,
-		})
-	}
-	if err := rows.Err(); err != nil {
-		logger.Ctx(ctx).Error("Failed to iterate menu items", logger.Error(err))
-		return nil, err
+		items = append(items, item)
 	}
 	return items, nil
 }
@@ -187,8 +88,7 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 }
 
 func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
-	var ownerID int64
-	err := r.pool.QueryRowContext(ctx, `SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE`, businessID).Scan(&ownerID)
+	ownerID, err := r.queries.GetMenuBusinessOwnerID(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to resolve menu business owner", logger.Error(err))
 		return 0, err

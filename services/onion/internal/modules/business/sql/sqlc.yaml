@@ -3,8 +3,10 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared"
-      - "../../../../internal/platform/database/schemas/hub"
+      - "../../../../internal/platform/database/schemas/shared/config.sql"
+      - "schema/businesses.sql"
+      - "schema/user_business_access.sql"
+      - "../../../../internal/platform/database/schemas/hr_core/schema.sql"
     gen:
       go:
         package: "sqlc"

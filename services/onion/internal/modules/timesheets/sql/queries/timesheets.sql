@@ -8,5 +8,7 @@ SELECT s.staff_id,
 FROM hr_shifts s
 JOIN hr_staff st ON st.id = s.staff_id AND st.business_id = s.business_id
 WHERE s.business_id = ? AND s.status = 'completed'
+  AND (sqlc.narg('week_start') IS NULL OR DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) = sqlc.narg('week_start'))
 GROUP BY s.staff_id, staff_name, week_start
 ORDER BY week_start DESC, staff_name ASC;
+

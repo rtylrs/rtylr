@@ -3,9 +3,8 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"time"
-
-	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/shifts/internal/infrastructure/persistence/sqlc"
@@ -27,48 +26,28 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListShifts(ctx context.Context, businessID, staffID int64, date string) ([]domain.Shift, error) {
-	// Dynamic WHERE clauses - built with squirrel
-	builder := sq.Select(
-		"id", "owner_id", "business_id", "staff_id", "department_id", "date", "start_time", "end_time",
-		"break_duration_minutes", "status", "clock_in_at", "clock_out_at",
-		"hours_worked", "overtime_hours", "notes", "created_at", "updated_at",
-	).
-		From("hr_shifts").
-		Where(sq.Eq{"business_id": businessID}).
-		Where(sq.Expr("staff_id IS NOT NULL"))
-
+	params := sqlc.ListShiftsParams{BusinessID: businessID}
 	if staffID != 0 {
-		builder = builder.Where(sq.Eq{"staff_id": staffID})
+		params.StaffID = sql.NullInt64{Int64: staffID, Valid: true}
 	}
 	if date != "" {
-		builder = builder.Where(sq.Eq{"date": date})
+		if t, err := time.Parse("2006-01-02", date); err == nil {
+			params.Date = sql.NullTime{Time: t, Valid: true}
+		}
 	}
 
-	builder = builder.OrderBy("date DESC", "start_time ASC")
-
-	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build list shifts query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.ListShifts(ctx, params)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list shifts", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var shifts []domain.Shift
-	for rows.Next() {
-		var s domain.Shift
-		if err := s.FromRow(rows); err != nil {
-			return nil, err
-		}
-		shifts = append(shifts, s)
+	shifts := make([]domain.Shift, 0, len(rows))
+	for _, row := range rows {
+		shifts = append(shifts, shiftFromSqlcRow(row))
 	}
 
-	return shifts, rows.Err()
+	return shifts, nil
 }
 
 func (r *Repository) CreateShift(ctx context.Context, input domain.ShiftInput) (int64, error) {
@@ -137,4 +116,51 @@ func parseTime(s string) time.Time {
 		return ref.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute)
 	}
 	return ref
+}
+
+func shiftFromSqlcRow(row sqlc.ListShiftsRow) domain.Shift {
+	s := domain.Shift{
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
+		BusinessID: row.BusinessID,
+		StartTime:  row.StartTime.Format("15:04:05"),
+		EndTime:    row.EndTime.Format("15:04:05"),
+	}
+	if row.StaffID.Valid {
+		s.StaffID = row.StaffID.Int64
+	}
+	if row.DepartmentID.Valid {
+		s.DepartmentID = row.DepartmentID.Int64
+	}
+	if row.Date.Valid {
+		s.Date = row.Date.Time
+	}
+	if row.BreakDurationMinutes.Valid {
+		s.BreakDurationMinutes = int(row.BreakDurationMinutes.Int32)
+	}
+	if row.Status.Valid {
+		s.Status = string(row.Status.HrShiftsStatus)
+	}
+	if row.ClockInAt.Valid {
+		s.ClockInAt = row.ClockInAt.Time
+	}
+	if row.ClockOutAt.Valid {
+		s.ClockOutAt = row.ClockOutAt.Time
+	}
+	if row.HoursWorked.Valid {
+		s.HoursWorked, _ = strconv.ParseFloat(row.HoursWorked.String, 64)
+	}
+	if row.OvertimeHours.Valid {
+		s.OvertimeHours, _ = strconv.ParseFloat(row.OvertimeHours.String, 64)
+	}
+	if row.Notes.Valid {
+		s.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		s.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		s.UpdatedAt = row.UpdatedAt.Time
+	}
+	return s
 }

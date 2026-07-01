@@ -25,6 +25,12 @@ FROM finance_journal_lines
 WHERE entry_id = ?
 ORDER BY id ASC;
 
+-- name: GetJournalLinesForEntries :many
+SELECT id, entry_id, account_id, debit, credit
+FROM finance_journal_lines
+WHERE entry_id IN (sqlc.slice('entry_ids'))
+ORDER BY id ASC;
+
 -- name: CreateJournalLine :exec
 INSERT INTO finance_journal_lines (entry_id, account_id, debit, credit)
 VALUES (?, ?, ?, ?);

@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -99,47 +97,26 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 		ids = append(ids, stockTakes[i].ID)
 	}
 
-	q, args, err := squirrel.
-		Select("id", "stock_take_id", "product_id", "expected_qty", "counted_qty", "variance", "created_at").
-		From("erp_stock_take_items").
-		Where(squirrel.Eq{"stock_take_id": ids}).
-		OrderBy("id ASC").
-		PlaceholderFormat(squirrel.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build stock take items query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	rows, err := r.queries.GetStockTakeItemsByStockTakeIDs(ctx, ids)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch get stock take items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	result := make(map[int64][]domain.StockTakeItem, len(stockTakes))
-	for rows.Next() {
-		var item domain.StockTakeItem
-		var expectedQty, countedQty, variance string
-		var createdAt sql.NullTime
-		if err := rows.Scan(
-			&item.ID, &item.StockTakeID, &item.ProductID,
-			&expectedQty, &countedQty, &variance, &createdAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan stock take item row", logger.Error(err))
-			return nil, err
+	for _, row := range rows {
+		item := domain.StockTakeItem{
+			ID:          row.ID,
+			StockTakeID: row.StockTakeID,
+			ProductID:   row.ProductID,
+			ExpectedQty: parseDecimal(row.ExpectedQty),
+			CountedQty:  parseDecimal(row.CountedQty),
+			Variance:    parseDecimal(row.Variance),
 		}
-		item.ExpectedQty = parseDecimal(expectedQty)
-		item.CountedQty = parseDecimal(countedQty)
-		item.Variance = parseDecimal(variance)
-		if createdAt.Valid {
-			item.CreatedAt = createdAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00")
 		}
 		result[item.StockTakeID] = append(result[item.StockTakeID], item)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
 	}
 
 	return result, nil

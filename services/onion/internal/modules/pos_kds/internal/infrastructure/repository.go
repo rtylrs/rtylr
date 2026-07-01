@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"strconv"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -72,47 +70,23 @@ func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (m
 		return itemsByOrder, nil
 	}
 
-	query, args, err := sq.Select("id", "order_id", "name", "quantity", "notes", "status").
-		From("pos_order_items").
-		Where(sq.Eq{"order_id": orderIDs}).
-		OrderBy("id").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build KDS order items query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetKDSOrderItemsForOrders(ctx, orderIDs)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch fetch KDS order items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var (
-			id       int64
-			orderID  int64
-			name     string
-			quantity string
-			notes    sql.NullString
-			status   sqlc.NullPosOrderItemsStatus
-		)
-		if scanErr := rows.Scan(&id, &orderID, &name, &quantity, &notes, &status); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan KDS order item", logger.Error(scanErr))
-			return nil, scanErr
-		}
-		itemsByOrder[orderID] = append(itemsByOrder[orderID], domain.KDSItem{
-			ID:       id,
-			OrderID:  orderID,
-			Name:     name,
-			Quantity: decimalToFloat(quantity),
-			Notes:    notes.String,
-			Status:   string(status.PosOrderItemsStatus),
+	for _, row := range rows {
+		itemsByOrder[row.OrderID] = append(itemsByOrder[row.OrderID], domain.KDSItem{
+			ID:       row.ID,
+			OrderID:  row.OrderID,
+			Name:     row.Name,
+			Quantity: decimalToFloat(row.Quantity),
+			Notes:    row.Notes.String,
+			Status:   string(row.Status.PosOrderItemsStatus),
 		})
 	}
-	return itemsByOrder, rows.Err()
+	return itemsByOrder, nil
 }
 
 func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {

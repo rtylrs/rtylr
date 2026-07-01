@@ -4,10 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
-
-	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	"github.com/voxire/onion/internal/modules/bills/internal/infrastructure/persistence/sqlc"
@@ -132,23 +131,16 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 // SumByStatus returns the total bill amount for a given status and owner.
 // It returns 0 when the owner has no bills with that status.
 func (r *Repository) SumByStatus(ctx context.Context, businessID int64, status string) (float64, error) {
-	query, args, err := sq.Select("COALESCE(SUM(CAST(amount AS REAL)), 0)").
-		From("finance_bills").
-		Where(sq.Eq{"business_id": businessID, "status": status}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	total, err := r.queries.SumBillsByStatus(ctx, sqlc.SumBillsByStatusParams{
+		BusinessID: businessID,
+		Status:     sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(status), Valid: true},
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build sum bills query", logger.Error(err))
-		return 0, err
-	}
-
-	var result float64
-	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&result); err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bills by status", logger.Error(err))
 		return 0, err
 	}
 
-	return result, nil
+	return parseFloatAny(total), nil
 }
 
 // CountByStatus returns the number of bills in each status for the owner.
@@ -230,4 +222,23 @@ func parseFloat(s string) float64 {
 		return 0
 	}
 	return v
+}
+
+func parseFloatAny(v any) float64 {
+	switch val := v.(type) {
+	case nil:
+		return 0
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		return parseFloat(string(val))
+	case string:
+		return parseFloat(val)
+	default:
+		return parseFloat(fmt.Sprintf("%v", val))
+	}
 }

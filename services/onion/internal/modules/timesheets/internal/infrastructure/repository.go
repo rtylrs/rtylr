@@ -3,8 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-
-	sq "github.com/Masterminds/squirrel"
+	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/timesheets/internal/domain"
 	"github.com/voxire/onion/internal/modules/timesheets/internal/infrastructure/persistence/sqlc"
@@ -26,49 +27,65 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetTimesheets(ctx context.Context, businessID int64, weekStart string) ([]domain.TimesheetEntry, error) {
-	// Dynamic WHERE clause and complex aggregation - built with squirrel
-	builder := sq.
-		Select(
-			"s.staff_id",
-			"CONCAT(st.first_name, ' ', st.last_name) AS staff_name",
-			"DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) AS week_start",
-			"COALESCE(SUM(s.hours_worked), 0) AS total_hours",
-			"COALESCE(SUM(s.hours_worked) - SUM(s.overtime_hours), 0) AS regular_hours",
-			"COALESCE(SUM(s.overtime_hours), 0) AS overtime_hours",
-		).
-		From("hr_shifts s").
-		Join("hr_staff st ON st.id = s.staff_id AND st.business_id = s.business_id").
-		Where(sq.Eq{"s.business_id": businessID}).
-		Where(sq.Eq{"s.status": "completed"})
-
+	params := sqlc.GetTimesheetsParams{BusinessID: businessID}
 	if weekStart != "" {
-		builder = builder.Where(sq.Expr("DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) = ?", weekStart))
+		if t, err := time.Parse("2006-01-02", weekStart); err == nil {
+			params.WeekStart = sql.NullTime{Time: t, Valid: true}
+		}
 	}
 
-	builder = builder.
-		GroupBy("s.staff_id", "staff_name", "week_start").
-		OrderBy("week_start DESC", "staff_name ASC")
-
-	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build timesheets query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.queries.GetTimesheets(ctx, params)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get timesheets", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var entries []domain.TimesheetEntry
-	for rows.Next() {
-		var e domain.TimesheetEntry
-		if err := rows.Scan(&e.StaffID, &e.StaffName, &e.WeekStart, &e.TotalHours, &e.RegularHours, &e.OvertimeHours); err != nil {
-			return nil, err
+	entries := make([]domain.TimesheetEntry, 0, len(rows))
+	for _, row := range rows {
+		staffID := int64(0)
+		if row.StaffID.Valid {
+			staffID = row.StaffID.Int64
 		}
-		entries = append(entries, e)
+		entries = append(entries, domain.TimesheetEntry{
+			StaffID:       staffID,
+			StaffName:     row.StaffName,
+			WeekStart:     formatWeekStart(row.WeekStart),
+			TotalHours:    parseDecimal(row.TotalHours),
+			RegularHours:  parseDecimal(row.RegularHours),
+			OvertimeHours: parseDecimal(row.OvertimeHours),
+		})
 	}
-	return entries, rows.Err()
+	return entries, nil
+}
+
+func formatWeekStart(t time.Time) string {
+	return t.Format("2006-01-02")
+}
+
+func parseDecimal(v any) float64 {
+	switch val := v.(type) {
+	case nil:
+		return 0
+	case float64:
+		return val
+	case []byte:
+		return parseDecimalString(string(val))
+	case string:
+		return parseDecimalString(val)
+	default:
+		return parseDecimalString(fmt.Sprintf("%v", val))
+	}
+}
+
+func parseDecimalString(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse timesheet decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

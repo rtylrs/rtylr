@@ -81,11 +81,11 @@ func (r *Repository) Update(ctx context.Context, input domain.TableUpdateInput) 
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, input domain.TableStatusInput) error {
-	result, err := r.pool.ExecContext(ctx, `
-		UPDATE pos_tables
-		SET status = ?
-		WHERE id = ? AND business_id = ?
-	`, input.Status, input.ID, input.BusinessID)
+	result, err := r.queries.UpdateTableStatus(ctx, sqlc.UpdateTableStatusParams{
+		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(input.Status), Valid: true},
+		ID:         input.ID,
+		BusinessID: input.BusinessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update table status", logger.Error(err))
 		return err

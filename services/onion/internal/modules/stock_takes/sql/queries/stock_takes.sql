@@ -17,6 +17,12 @@ FROM erp_stock_take_items
 WHERE stock_take_id = ?
 ORDER BY id ASC;
 
+-- name: GetStockTakeItemsByStockTakeIDs :many
+SELECT id, stock_take_id, product_id, expected_qty, counted_qty, variance, created_at
+FROM erp_stock_take_items
+WHERE stock_take_id IN (sqlc.slice('stock_take_ids'))
+ORDER BY id ASC;
+
 -- name: InsertStockTake :execresult
 INSERT INTO erp_stock_takes (owner_id, business_id, warehouse_id, status, notes)
 VALUES (?, ?, ?, 'draft', ?);

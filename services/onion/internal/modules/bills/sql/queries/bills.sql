@@ -22,6 +22,11 @@ UPDATE finance_bills
 SET supplier_id = ?, amount = ?, currency = ?, due_date = ?, status = ?, description = ?
 WHERE id = ? AND business_id = ?;
 
+-- name: SumBillsByStatus :one
+SELECT COALESCE(SUM(CAST(amount AS REAL)), 0) AS total
+FROM finance_bills
+WHERE business_id = ? AND status = ?;
+
 -- name: CountBillsByStatus :many
 SELECT status, COUNT(*) AS cnt
 FROM finance_bills

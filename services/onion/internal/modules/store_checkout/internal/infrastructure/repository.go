@@ -84,16 +84,18 @@ func (r *Repository) Complete(ctx context.Context, businessID, id int64, ownerID
 
 	var customerEmail sql.NullString
 	var totalString string
-	err = tx.QueryRowContext(ctx,
-		`SELECT customer_email, total FROM store_checkouts WHERE business_id = ? AND id = ? LIMIT 1`,
-		businessID, id,
-	).Scan(&customerEmail, &totalString)
+	checkout, err := r.queries.WithTx(tx).GetCheckoutForComplete(ctx, sqlc.GetCheckoutForCompleteParams{
+		BusinessID: businessID,
+		ID:         id,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	} else if err != nil {
 		logger.Ctx(ctx).Error("Failed to load checkout customer", logger.Error(err))
 		return err
 	} else {
+		customerEmail = checkout.CustomerEmail
+		totalString = checkout.Total
 		total, parseErr := strconv.ParseFloat(totalString, 64)
 		if parseErr != nil {
 			logger.Ctx(ctx).Warn("failed to parse checkout total for CRM sync",

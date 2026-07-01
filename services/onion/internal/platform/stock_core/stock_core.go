@@ -6,7 +6,7 @@
 // sync as a denormalized cache (= SUM of on_hand across the product's
 // locations) so existing readers keep working until the read cutover.
 //
-// It is infrastructure-only (no HTTP surface) and uses raw parameterized SQL
+// It is infrastructure-only (no HTTP surface) and uses sqlc-generated queries
 // against a DBTX, so callers pass their own *sql.Tx and the stock change
 // commits atomically with the caller's own writes (PO receive, POS payment …).
 package stock_core
@@ -19,6 +19,7 @@ import (
 	"strconv"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	stocksqlc "github.com/voxire/onion/internal/platform/stock_core/persistence/sqlc"
 )
 
 // ErrInsufficientStock is returned when a movement would drive a location's
@@ -29,6 +30,8 @@ var ErrInsufficientStock = errors.New("insufficient stock at location")
 // *sql.Tx so they commit atomically with the caller's other writes.
 type DBTX interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
 }
 
@@ -78,15 +81,17 @@ func parseQty(ctx context.Context, s string) (float64, error) {
 	return v, nil
 }
 
+func queries(tx DBTX) *stocksqlc.Queries {
+	return stocksqlc.New(tx)
+}
+
 // DefaultLocationID returns the tenant's default warehouse location, creating a
 // native one on first use. Concurrency-safe via the (owner_id, source_table,
 // source_id) unique key on stock_locations.
 func DefaultLocationID(ctx context.Context, tx DBTX, ownerID int64) (int64, error) {
-	var id int64
-	err := tx.QueryRowContext(ctx,
-		`SELECT id FROM stock_locations
-		 WHERE owner_id = ? AND kind = 'warehouse' AND source_table = 'native' AND source_id = 0
-		 LIMIT 1`, ownerID).Scan(&id)
+	q := queries(tx)
+
+	id, err := q.GetDefaultWarehouseLocationID(ctx, ownerID)
 	if err == nil {
 		return id, nil
 	}
@@ -95,16 +100,11 @@ func DefaultLocationID(ctx context.Context, tx DBTX, ownerID int64) (int64, erro
 	}
 
 	// Insert-or-ignore on the unique key, then re-read (handles a concurrent creator).
-	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
-		 VALUES (?, 0, 'warehouse', 'native', 0, 'Default Warehouse', TRUE, TRUE)
-		 ON DUPLICATE KEY UPDATE id = id`, ownerID); err != nil {
+	if err := q.InsertDefaultWarehouseLocation(ctx, ownerID); err != nil {
 		return 0, fmt.Errorf("stock_core: create default location: %w", err)
 	}
-	if err := tx.QueryRowContext(ctx,
-		`SELECT id FROM stock_locations
-		 WHERE owner_id = ? AND kind = 'warehouse' AND source_table = 'native' AND source_id = 0
-		 LIMIT 1`, ownerID).Scan(&id); err != nil {
+	id, err = q.GetDefaultWarehouseLocationID(ctx, ownerID)
+	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read default location: %w", err)
 	}
 	return id, nil
@@ -121,8 +121,9 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID in
 		return DefaultLocationID(ctx, tx, ownerID)
 	}
 
-	var locOwner int64
-	err := tx.QueryRowContext(ctx, `SELECT owner_id FROM pos_locations WHERE id = ?`, posLocationID).Scan(&locOwner)
+	q := queries(tx)
+
+	locOwner, err := q.GetPOSLocationOwnerID(ctx, posLocationID)
 	if errors.Is(err, sql.ErrNoRows) {
 		// Unknown location — don't guess a branch; use the default warehouse.
 		return DefaultLocationID(ctx, tx, ownerID)
@@ -134,11 +135,10 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID in
 		return 0, fmt.Errorf("stock_core: pos_location %d belongs to owner %d, not %d (refusing to attribute stock)", posLocationID, locOwner, ownerID)
 	}
 
-	var id int64
-	err = tx.QueryRowContext(ctx,
-		`SELECT id FROM stock_locations
-		 WHERE owner_id = ? AND source_table = 'pos_locations' AND source_id = ? LIMIT 1`,
-		ownerID, posLocationID).Scan(&id)
+	id, err := q.GetPOSBranchLocationID(ctx, stocksqlc.GetPOSBranchLocationIDParams{
+		OwnerID:   ownerID,
+		SourceID:  posLocationID,
+	})
 	if err == nil {
 		return id, nil
 	}
@@ -146,17 +146,17 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID in
 		return 0, fmt.Errorf("stock_core: lookup pos branch location: %w", err)
 	}
 
-	if _, err = tx.ExecContext(ctx,
-		`INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
-		 VALUES (?, 0, 'pos_branch', 'pos_locations', ?, 'POS Branch', FALSE, TRUE)
-		 ON DUPLICATE KEY UPDATE source_id = VALUES(source_id)`,
-		ownerID, posLocationID); err != nil {
+	if err = q.InsertPOSBranchLocation(ctx, stocksqlc.InsertPOSBranchLocationParams{
+		OwnerID:  ownerID,
+		SourceID: posLocationID,
+	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create pos branch location: %w", err)
 	}
-	if err = tx.QueryRowContext(ctx,
-		`SELECT id FROM stock_locations
-		 WHERE owner_id = ? AND source_table = 'pos_locations' AND source_id = ? LIMIT 1`,
-		ownerID, posLocationID).Scan(&id); err != nil {
+	id, err = q.GetPOSBranchLocationID(ctx, stocksqlc.GetPOSBranchLocationIDParams{
+		OwnerID:  ownerID,
+		SourceID: posLocationID,
+	})
+	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read pos branch location: %w", err)
 	}
 	return id, nil
@@ -171,8 +171,9 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int6
 		return DefaultLocationID(ctx, tx, ownerID)
 	}
 
-	var whOwner int64
-	err := tx.QueryRowContext(ctx, `SELECT owner_id FROM erp_warehouses WHERE id = ?`, warehouseID).Scan(&whOwner)
+	q := queries(tx)
+
+	whOwner, err := q.GetWarehouseOwnerID(ctx, warehouseID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return DefaultLocationID(ctx, tx, ownerID)
 	}
@@ -183,11 +184,10 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int6
 		return 0, fmt.Errorf("stock_core: warehouse %d belongs to owner %d, not %d (refusing to attribute stock)", warehouseID, whOwner, ownerID)
 	}
 
-	var id int64
-	err = tx.QueryRowContext(ctx,
-		`SELECT id FROM stock_locations
-		 WHERE owner_id = ? AND source_table = 'erp_warehouses' AND source_id = ? LIMIT 1`,
-		ownerID, warehouseID).Scan(&id)
+	id, err := q.GetWarehouseLocationID(ctx, stocksqlc.GetWarehouseLocationIDParams{
+		OwnerID:  ownerID,
+		SourceID: warehouseID,
+	})
 	if err == nil {
 		return id, nil
 	}
@@ -195,17 +195,17 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int6
 		return 0, fmt.Errorf("stock_core: lookup warehouse location: %w", err)
 	}
 
-	if _, err = tx.ExecContext(ctx,
-		`INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
-		 SELECT ?, 0, 'warehouse', 'erp_warehouses', id, name, FALSE, is_active FROM erp_warehouses WHERE id = ?
-		 ON DUPLICATE KEY UPDATE source_id = VALUES(source_id)`,
-		ownerID, warehouseID); err != nil {
+	if err = q.InsertWarehouseLocation(ctx, stocksqlc.InsertWarehouseLocationParams{
+		OwnerID: ownerID,
+		ID:      warehouseID,
+	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create warehouse location: %w", err)
 	}
-	if err = tx.QueryRowContext(ctx,
-		`SELECT id FROM stock_locations
-		 WHERE owner_id = ? AND source_table = 'erp_warehouses' AND source_id = ? LIMIT 1`,
-		ownerID, warehouseID).Scan(&id); err != nil {
+	id, err = q.GetWarehouseLocationID(ctx, stocksqlc.GetWarehouseLocationIDParams{
+		OwnerID:  ownerID,
+		SourceID: warehouseID,
+	})
+	if err != nil {
 		return 0, fmt.Errorf("stock_core: re-read warehouse location: %w", err)
 	}
 	return id, nil
@@ -218,19 +218,23 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int6
 // cache to the owner-wide SUM of on_hand. Returns the before/after on_hand at
 // the location. MUST be called with a *sql.Tx.
 func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after float64, err error) {
+	q := queries(tx)
+
 	// Ensure the level row exists so FOR UPDATE has something to lock.
-	if _, err = tx.ExecContext(ctx,
-		`INSERT INTO stock_levels (owner_id, location_id, product_id, on_hand)
-		 VALUES (?, ?, ?, 0) ON DUPLICATE KEY UPDATE on_hand = on_hand`,
-		m.OwnerID, m.LocationID, m.ProductID); err != nil {
+	if err = q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
+		OwnerID:    m.OwnerID,
+		LocationID: m.LocationID,
+		ProductID:  m.ProductID,
+	}); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: ensure level row: %w", err)
 	}
 
-	var onHandStr string
-	if err = tx.QueryRowContext(ctx,
-		`SELECT on_hand FROM stock_levels
-		 WHERE owner_id = ? AND location_id = ? AND product_id = ? FOR UPDATE`,
-		m.OwnerID, m.LocationID, m.ProductID).Scan(&onHandStr); err != nil {
+	onHandStr, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
+		OwnerID:    m.OwnerID,
+		LocationID: m.LocationID,
+		ProductID:  m.ProductID,
+	})
+	if err != nil {
 		return 0, 0, fmt.Errorf("stock_core: lock level row: %w", err)
 	}
 
@@ -243,7 +247,7 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 	if after < 0 && !m.AllowNegative {
 		return before, before, ErrInsufficientStock
 	}
-	if _, _, err = applyKnown(ctx, tx, m, before, after); err != nil {
+	if _, _, err = applyKnown(ctx, q, m, before, after); err != nil {
 		return 0, 0, err
 	}
 	return before, after, nil
@@ -252,11 +256,13 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 // applyKnown writes the level update, ledger row, and scalar-cache sync given a
 // pre-locked level row and its before/after values. m.Change must equal
 // after-before. Used by both ApplyMovementTx and SetLevelTx.
-func applyKnown(ctx context.Context, tx DBTX, m Movement, before, after float64) (float64, float64, error) {
-	if _, err := tx.ExecContext(ctx,
-		`UPDATE stock_levels SET on_hand = ?
-		 WHERE owner_id = ? AND location_id = ? AND product_id = ?`,
-		fmtQty(after), m.OwnerID, m.LocationID, m.ProductID); err != nil {
+func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, after float64) (float64, float64, error) {
+	if err := q.UpdateStockLevelOnHand(ctx, stocksqlc.UpdateStockLevelOnHandParams{
+		OnHand:     fmtQty(after),
+		OwnerID:    m.OwnerID,
+		LocationID: m.LocationID,
+		ProductID:  m.ProductID,
+	}); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: update level: %w", err)
 	}
 
@@ -264,15 +270,22 @@ func applyKnown(ctx context.Context, tx DBTX, m Movement, before, after float64)
 	if channel == "" {
 		channel = "erp"
 	}
-	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO stock_ledger
-		 (owner_id, location_id, product_id, entry_type, quantity_change, quantity_before, quantity_after,
-		  reference_id, reference_type, transfer_group, channel, note, employee_id, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		m.OwnerID, m.LocationID, m.ProductID, string(m.EntryType),
-		fmtQty(m.Change), fmtQty(before), fmtQty(after),
-		nullInt(m.ReferenceID), nullStr(m.ReferenceType), nullInt(m.TransferGroup),
-		channel, nullStr(m.Note), nullInt(m.EmployeeID), nullInt(m.CreatedBy)); err != nil {
+	if err := q.InsertStockLedgerEntry(ctx, stocksqlc.InsertStockLedgerEntryParams{
+		OwnerID:         m.OwnerID,
+		LocationID:      m.LocationID,
+		ProductID:       m.ProductID,
+		EntryType:       stocksqlc.StockLedgerEntryType(m.EntryType),
+		QuantityChange:  fmtQty(m.Change),
+		QuantityBefore:  fmtQty(before),
+		QuantityAfter:   fmtQty(after),
+		ReferenceID:     nullInt(m.ReferenceID),
+		ReferenceType:   nullStr(m.ReferenceType),
+		TransferGroup:   nullInt(m.TransferGroup),
+		Channel:         stocksqlc.StockLedgerChannel(channel),
+		Note:            nullStr(m.Note),
+		EmployeeID:      nullInt(m.EmployeeID),
+		CreatedBy:       nullInt(m.CreatedBy),
+	}); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: insert ledger: %w", err)
 	}
 
@@ -282,10 +295,11 @@ func applyKnown(ctx context.Context, tx DBTX, m Movement, before, after float64)
 	// committed value — so it's immune to REPEATABLE-READ snapshot staleness (a
 	// SUM subquery could read a stale snapshot and clobber a concurrent write).
 	// The scalar therefore stays == SUM(on_hand) by construction.
-	if _, err := tx.ExecContext(ctx,
-		`UPDATE erp_products SET stock_quantity = stock_quantity + ?
-		 WHERE owner_id = ? AND id = ?`,
-		fmtQty(after-before), m.OwnerID, m.ProductID); err != nil {
+	if err := q.SyncProductStockScalar(ctx, stocksqlc.SyncProductStockScalarParams{
+		StockQuantity: fmtQty(after - before),
+		OwnerID:       m.OwnerID,
+		ID:            m.ProductID,
+	}); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: sync scalar cache: %w", err)
 	}
 
@@ -299,26 +313,33 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	if target < 0 && !m.AllowNegative {
 		return 0, 0, ErrInsufficientStock
 	}
-	if _, err = tx.ExecContext(ctx,
-		`INSERT INTO stock_levels (owner_id, location_id, product_id, on_hand)
-		 VALUES (?, ?, ?, 0) ON DUPLICATE KEY UPDATE on_hand = on_hand`,
-		m.OwnerID, m.LocationID, m.ProductID); err != nil {
+
+	q := queries(tx)
+
+	if err = q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
+		OwnerID:    m.OwnerID,
+		LocationID: m.LocationID,
+		ProductID:  m.ProductID,
+	}); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: ensure level row: %w", err)
 	}
-	var onHandStr string
-	if err = tx.QueryRowContext(ctx,
-		`SELECT on_hand FROM stock_levels
-		 WHERE owner_id = ? AND location_id = ? AND product_id = ? FOR UPDATE`,
-		m.OwnerID, m.LocationID, m.ProductID).Scan(&onHandStr); err != nil {
+
+	onHandStr, err := q.LockStockLevelOnHand(ctx, stocksqlc.LockStockLevelOnHandParams{
+		OwnerID:    m.OwnerID,
+		LocationID: m.LocationID,
+		ProductID:  m.ProductID,
+	})
+	if err != nil {
 		return 0, 0, fmt.Errorf("stock_core: lock level row: %w", err)
 	}
+
 	before, err = parseQty(ctx, onHandStr)
 	if err != nil {
 		return 0, 0, err
 	}
 	delta = target - before
 	m.Change = delta
-	if _, _, err = applyKnown(ctx, tx, m, before, target); err != nil {
+	if _, _, err = applyKnown(ctx, q, m, before, target); err != nil {
 		return before, 0, err
 	}
 	return before, delta, nil
