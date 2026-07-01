@@ -31,6 +31,8 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	r.Use(CrashNotifierMiddleware())
 	r.Use(SecurityHeadersMiddleware())
 	r.Use(SecureErrorMiddleware())
+	r.Use(responseCompressMiddleware())
+	r.Use(RequestBodyLimitMiddleware(DefaultMaxRequestBodyBytes))
 	// Global per-IP guardrail against scraping/abuse only — set very high so it
 	// never throttles real use (a SPA session bursts many calls/sec). Per-route
 	// limits (login/register/AI) stay tight via PerRouteRateLimit.

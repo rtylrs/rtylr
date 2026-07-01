@@ -59,6 +59,17 @@ func TestRequestLoggerPreservesLargeJSONBodyAfterPreviewLimit(t *testing.T) {
 	}
 }
 
+func TestSanitizeJSONTruncatesLargePayloads(t *testing.T) {
+	large := `{"items":[` + strings.Repeat(`"x",`, 500) + `"end"]}`
+	got := sanitizeJSON(large)
+	if len(got) > maxLoggedBodyPreviewBytes {
+		t.Fatalf("sanitized body length %d exceeds preview cap %d", len(got), maxLoggedBodyPreviewBytes)
+	}
+	if !strings.HasSuffix(got, "...") {
+		t.Fatalf("expected truncated preview suffix, got %q", got)
+	}
+}
+
 func TestSanitizeJSONRedactsSensitiveFieldVariants(t *testing.T) {
 	got := sanitizeJSON(`{
 		"password_hash":"hash",

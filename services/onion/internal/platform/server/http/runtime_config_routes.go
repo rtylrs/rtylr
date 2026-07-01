@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -31,7 +32,16 @@ type runtimeConfigResponse struct {
 	URLs               map[string]string    `json:"urls"`
 	Apps               runtimeAppsBlock     `json:"apps"`
 	AllFeaturesEnabled bool                 `json:"all_features_enabled"`
-	License            license.StatusReport `json:"license"`
+	License            runtimeLicenseSummary `json:"license"`
+}
+
+type runtimeLicenseSummary struct {
+	Valid      bool       `json:"valid"`
+	Status     string     `json:"status"`
+	Reason     string     `json:"reason,omitempty"`
+	Plan       string     `json:"plan,omitempty"`
+	ExpiresAt  *time.Time `json:"expires_at,omitempty"`
+	GraceUntil *time.Time `json:"grace_until,omitempty"`
 }
 
 type runtimeAppsBlock struct {
@@ -60,7 +70,7 @@ func RegisterRuntimeConfigRoutes(r *chi.Mux, validator *license.CachedValidator)
 			Version:            Version,
 			URLs:               platformconfig.RuntimeURLs(cfg),
 			AllFeaturesEnabled: selfHosted,
-			License:            validator.Current(req.Context()),
+			License:            runtimeLicenseFrom(validator.Current(req.Context()), selfHosted),
 			Apps: runtimeAppsBlock{
 				Enabled:      runtimeApps,
 				Dependencies: runtimeAppDeps,
@@ -74,4 +84,19 @@ func RegisterRuntimeConfigRoutes(r *chi.Mux, validator *license.CachedValidator)
 	}
 	r.Get("/runtime-config", handler)
 	r.Get("/.well-known/rtylr.json", handler)
+}
+
+func runtimeLicenseFrom(report license.StatusReport, selfHosted bool) runtimeLicenseSummary {
+	summary := runtimeLicenseSummary{
+		Valid:  report.Valid,
+		Status: report.Status,
+		Reason: report.Reason,
+	}
+	if !selfHosted {
+		return summary
+	}
+	summary.Plan = report.Plan
+	summary.ExpiresAt = report.ExpiresAt
+	summary.GraceUntil = report.GraceUntil
+	return summary
 }

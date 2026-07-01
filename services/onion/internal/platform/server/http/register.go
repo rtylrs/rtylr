@@ -229,7 +229,11 @@ func envFlag(key string) bool {
 
 func decodeJSONRequestBody(ctx context.Context, w http.ResponseWriter, r *http.Request, dst interface{}) bool {
 	if err := DecodeJSONRequestBody(w, r, dst); err != nil {
-		writeBadRequest(ctx, w)
+		if isRequestBodyTooLarge(err) {
+			writeRequestEntityTooLarge(ctx, w)
+		} else {
+			writeBadRequest(ctx, w)
+		}
 
 		return false
 	}
@@ -240,7 +244,9 @@ func decodeJSONRequestBody(ctx context.Context, w http.ResponseWriter, r *http.R
 // DecodeJSONRequestBody reads at most one JSON value from the request body.
 // Empty bodies are accepted so legacy no-payload endpoints keep working.
 func DecodeJSONRequestBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
-	r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
+	if !requestBodyLimitExempt(r.URL.Path) {
+		r.Body = http.MaxBytesReader(w, r.Body, DefaultMaxRequestBodyBytes)
+	}
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(dst); err != nil {

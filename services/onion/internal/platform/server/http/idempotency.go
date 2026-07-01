@@ -19,6 +19,7 @@ const (
 	idempotencyHeader            = "Idempotency-Key"
 	idempotencyTTL               = 30 * time.Minute
 	idempotencyMaxLen            = 128
+	idempotencyMaxStoredBodyBytes = 256 << 10
 	idempotencyCacheWriteTimeout = 2 * time.Second
 )
 
@@ -119,13 +120,10 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 	next.ServeHTTP(rec, r)
 
 	if rec.status >= 200 && rec.status < 300 {
-		entry := idempotencyRecord{Status: rec.status, Headers: w.Header().Clone(), Body: rec.buf.Bytes()}
-		if b, err := json.Marshal(entry); err == nil {
-			cacheCtx, cancel := idempotencyCacheContext(r.Context())
-			defer cancel()
-			rc.Put(cacheCtx, cacheKey, b, idempotencyTTL)
+		storeIdempotencyRecord(r.Context(), cacheKey, rec, func(cacheCtx context.Context, key string, payload []byte) {
+			rc.Put(cacheCtx, key, payload, idempotencyTTL)
 			stored = true
-		}
+		})
 	}
 }
 
@@ -152,12 +150,9 @@ func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Hand
 	// Only cache successful responses — errors may be transient and the
 	// client should be able to retry and get a fresh attempt.
 	if rec.status >= 200 && rec.status < 300 {
-		entry := idempotencyRecord{Status: rec.status, Headers: w.Header().Clone(), Body: rec.buf.Bytes()}
-		if b, err := json.Marshal(entry); err == nil {
-			cacheCtx, cancel := idempotencyCacheContext(r.Context())
-			defer cancel()
-			lc.Put(cacheCtx, cacheKey, b, idempotencyTTL)
-		}
+		storeIdempotencyRecord(r.Context(), cacheKey, rec, func(cacheCtx context.Context, key string, payload []byte) {
+			lc.Put(cacheCtx, key, payload, idempotencyTTL)
+		})
 	}
 }
 
@@ -184,6 +179,42 @@ func buildIdempotencyKey(r *http.Request, key string) string {
 		principal = fmt.Sprintf("u%d", authUser.UserID)
 	}
 	return fmt.Sprintf("idem:%s:%s", principal, key)
+}
+
+func storeIdempotencyRecord(ctx context.Context, cacheKey string, rec *responseRecorder, persist func(context.Context, string, []byte)) {
+	body := rec.buf.Bytes()
+	if len(body) > idempotencyMaxStoredBodyBytes {
+		logger.Ctx(ctx).Warn("skipping idempotency cache for oversized response body",
+			logger.Int("bytes", len(body)),
+			logger.Int("limit", idempotencyMaxStoredBodyBytes),
+		)
+		return
+	}
+
+	entry := idempotencyRecord{
+		Status:  rec.status,
+		Headers: idempotencyHeadersForReplay(rec.Header()),
+		Body:    body,
+	}
+	payload, err := json.Marshal(entry)
+	if err != nil {
+		logger.Ctx(ctx).Warn("failed to marshal idempotency record", logger.Error(err))
+		return
+	}
+
+	cacheCtx, cancel := idempotencyCacheContext(ctx)
+	defer cancel()
+	persist(cacheCtx, cacheKey, payload)
+}
+
+func idempotencyHeadersForReplay(h http.Header) http.Header {
+	out := make(http.Header)
+	for _, key := range []string{"Content-Type", "Content-Encoding"} {
+		if values := h.Values(key); len(values) > 0 {
+			out[key] = values
+		}
+	}
+	return out
 }
 
 // responseRecorder buffers the response so we can cache it after the handler

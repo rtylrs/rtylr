@@ -12,6 +12,14 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+type cacheErrorResponse struct {
+	Error string `json:"error"`
+}
+
+type cacheOKResponse struct {
+	Status string `json:"status"`
+}
+
 func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 	cacheInvalidate.RegisterDefaultGroups()
 
@@ -19,7 +27,7 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 		w.Header().Set("Content-Type", "application/json")
 		if !hasValidInternalToken(r) {
 			w.WriteHeader(http.StatusForbidden)
-			if err := json.NewEncoder(w).Encode(map[string]interface{}{"error": "Forbidden"}); err != nil {
+			if err := json.NewEncoder(w).Encode(cacheErrorResponse{Error: "Forbidden"}); err != nil {
 				logger.Ctx(ctx).Warn("Failed to encode forbidden response", logger.Error(err))
 			}
 			return
@@ -27,15 +35,17 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 
 		var req invalidation.Request
 		if err := DecodeJSONRequestBody(w, r, &req); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-
-			response := map[string]interface{}{
-				"error": "Invalid request body",
+			if isRequestBodyTooLarge(err) {
+				w.WriteHeader(http.StatusRequestEntityTooLarge)
+				if encErr := json.NewEncoder(w).Encode(cacheErrorResponse{Error: "Request body too large"}); encErr != nil {
+					logger.Ctx(ctx).Warn("Failed to encode error response", logger.Error(encErr))
+				}
+				return
 			}
-			if err := json.NewEncoder(w).Encode(response); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(w).Encode(cacheErrorResponse{Error: "Invalid request body"}); err != nil {
 				logger.Ctx(ctx).Warn("Failed to encode error response", logger.Error(err))
 			}
-
 			return
 		}
 
@@ -51,23 +61,14 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 				status = http.StatusInternalServerError
 			}
 			w.WriteHeader(status)
-
-			response := map[string]interface{}{
-				"error": serverErr.Message,
-			}
-			if err := json.NewEncoder(w).Encode(response); err != nil {
+			if err := json.NewEncoder(w).Encode(cacheErrorResponse{Error: serverErr.Message}); err != nil {
 				logger.Ctx(ctx).Warn("Failed to encode error response", logger.Error(err))
 			}
-
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-
-		response := map[string]interface{}{
-			"status": "ok",
-		}
-		if err := json.NewEncoder(w).Encode(response); err != nil {
+		if err := json.NewEncoder(w).Encode(cacheOKResponse{Status: "ok"}); err != nil {
 			logger.Ctx(ctx).Warn("Failed to encode success response", logger.Error(err))
 		}
 	})

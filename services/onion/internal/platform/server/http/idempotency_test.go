@@ -8,6 +8,24 @@ import (
 	"time"
 )
 
+func TestIdempotencyHeadersForReplayKeepsContentTypeOnly(t *testing.T) {
+	headers := http.Header{
+		"Content-Type":     []string{"application/json"},
+		"X-Request-Id":     []string{"abc"},
+		"Content-Encoding": []string{"gzip"},
+	}
+	got := idempotencyHeadersForReplay(headers)
+	if got.Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %q", got.Get("Content-Type"))
+	}
+	if got.Get("Content-Encoding") != "gzip" {
+		t.Fatalf("Content-Encoding = %q", got.Get("Content-Encoding"))
+	}
+	if got.Get("X-Request-Id") != "" {
+		t.Fatalf("unexpected X-Request-Id header: %q", got.Get("X-Request-Id"))
+	}
+}
+
 func TestIdempotencyCacheContextIgnoresParentCancellation(t *testing.T) {
 	parent, cancelParent := context.WithCancel(context.Background())
 	cancelParent()

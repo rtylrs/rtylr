@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,6 +15,8 @@ import (
 // use context.Background() and are effectively immortal — that's fine for
 // singletons that last the whole process.
 var serverCtx = context.Background()
+
+var rateLimitExceededJSON = []byte(`{"error":"Rate limit exceeded","message":"Too many requests, please try again later","retry_after":60}`)
 
 type SecurityRateLimiter struct {
 	requests map[string][]time.Time
@@ -126,17 +127,8 @@ func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) htt
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("Retry-After", "60")
 				w.WriteHeader(http.StatusTooManyRequests)
-
-				response := map[string]interface{}{
-					"error":       "Rate limit exceeded",
-					"message":     "Too many requests, please try again later",
-					"retry_after": 60,
-				}
-
-				if jsonBytes, err := json.Marshal(response); err == nil {
-					if _, writeErr := w.Write(jsonBytes); writeErr != nil {
-						logger.Ctx(r.Context()).Error("Failed to write rate limit response", logger.Error(writeErr))
-					}
+				if _, writeErr := w.Write(rateLimitExceededJSON); writeErr != nil {
+					logger.Ctx(r.Context()).Error("Failed to write rate limit response", logger.Error(writeErr))
 				}
 
 				return

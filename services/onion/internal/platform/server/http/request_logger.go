@@ -21,7 +21,11 @@ import (
 )
 
 const (
-	maxLoggedRequestBodyBytes        = 64 << 10
+	// maxLoggedRequestBodyBytes is how much of a JSON body we read for logging
+	// previews. The handler still receives the full body via replay.
+	maxLoggedRequestBodyBytes = 8 << 10
+	maxLoggedBodyPreviewBytes = 1024
+	maxLoggedHeaderValueBytes = 200
 	duplicateDetectorCleanupInterval = time.Minute
 )
 
@@ -328,9 +332,13 @@ func sanitizeMap(data map[string][]string) map[string][]string {
 	for key, values := range data {
 		if isSensitiveField(key) {
 			sanitized[key] = []string{"[REDACTED]"}
-		} else {
-			sanitized[key] = values
+			continue
 		}
+		trimmed := make([]string, len(values))
+		for i, value := range values {
+			trimmed[i] = truncateString(value, maxLoggedHeaderValueBytes)
+		}
+		sanitized[key] = trimmed
 	}
 
 	return sanitized
@@ -350,10 +358,10 @@ func sanitizeJSON(body string) string {
 
 	result, err := json.Marshal(data)
 	if err != nil {
-		return body
+		return truncateString(body, maxLoggedBodyPreviewBytes)
 	}
 
-	return string(result)
+	return truncateString(string(result), maxLoggedBodyPreviewBytes)
 }
 
 func sanitizeInterface(v interface{}) {
@@ -409,7 +417,7 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 
 	var bodyPreview string
 	if bodyContent != "" {
-		bodyPreview = truncateString(bodyContent, 1000)
+		bodyPreview = bodyContent
 	} else {
 		bodyPreview = "[No body]"
 	}
