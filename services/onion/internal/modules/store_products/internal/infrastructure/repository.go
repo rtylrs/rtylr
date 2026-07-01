@@ -50,7 +50,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	}
 	defer tx.Rollback()
 
-	productID, err := syncCatalogProduct(ctx, tx, businessID, input.ProductID, input)
+	productID, err := syncCatalogProduct(ctx, r.queries.WithTx(tx), businessID, input.ProductID, input)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sync catalog product for storefront", logger.Error(err))
 		return 0, err
@@ -91,11 +91,11 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 
 	productID := input.ProductID
 	if productID == 0 {
-		var linkedProductID sql.NullInt64
-		if err := tx.QueryRowContext(ctx,
-			`SELECT product_id FROM store_products WHERE business_id = ? AND id = ? LIMIT 1`,
-			businessID, id,
-		).Scan(&linkedProductID); err != nil {
+		linkedProductID, err := r.queries.WithTx(tx).GetStoreProductLinkedID(ctx, sqlc.GetStoreProductLinkedIDParams{
+			BusinessID: businessID,
+			ID:         id,
+		})
+		if err != nil {
 			logger.Ctx(ctx).Error("Failed to load existing store product link", logger.Error(err))
 			return err
 		}
@@ -104,7 +104,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		}
 	}
 
-	productID, err = syncCatalogProduct(ctx, tx, businessID, productID, input)
+	productID, err = syncCatalogProduct(ctx, r.queries.WithTx(tx), businessID, productID, input)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sync catalog product for storefront", logger.Error(err))
 		return err
@@ -254,50 +254,40 @@ func storeProductFromCatalogRow(ctx context.Context, row sqlc.ListStoreProductsW
 	return p, nil
 }
 
-func syncCatalogProduct(ctx context.Context, tx *sql.Tx, businessID, productID int64, input domain.StoreProductInput) (int64, error) {
+func syncCatalogProduct(ctx context.Context, q *sqlc.Queries, businessID, productID int64, input domain.StoreProductInput) (int64, error) {
 	if productID != 0 {
-		var existingID int64
-		if err := tx.QueryRowContext(ctx,
-			`SELECT id FROM erp_products WHERE business_id = ? AND id = ? LIMIT 1`,
-			businessID, productID,
-		).Scan(&existingID); err != nil {
-			return 0, err
-		}
-
-		_, err := tx.ExecContext(ctx,
-			`UPDATE erp_products
-			 SET name = ?,
-			     description = ?,
-			     sale_price = ?,
-			     compare_at_price = ?,
-			     is_active = TRUE
-			 WHERE business_id = ? AND id = ?`,
-			input.Title,
-			sql.NullString{String: input.Description, Valid: input.Description != ""},
-			strconv.FormatFloat(input.Price, 'f', 2, 64),
-			strconv.FormatFloat(input.CompareAtPrice, 'f', 2, 64),
-			businessID,
-			existingID,
-		)
+		_, err := q.GetCatalogProductByID(ctx, sqlc.GetCatalogProductByIDParams{
+			BusinessID: businessID,
+			ID:         productID,
+		})
 		if err != nil {
 			return 0, err
 		}
-		if err := syncCatalogImages(ctx, tx, businessID, existingID, input.Images); err != nil {
+
+		err = q.UpdateCatalogProduct(ctx, sqlc.UpdateCatalogProductParams{
+			Name:           input.Title,
+			Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
+			SalePrice:      strconv.FormatFloat(input.Price, 'f', 2, 64),
+			CompareAtPrice: strconv.FormatFloat(input.CompareAtPrice, 'f', 2, 64),
+			BusinessID:     businessID,
+			ID:             productID,
+		})
+		if err != nil {
 			return 0, err
 		}
-		return existingID, nil
+		if err := syncCatalogImages(ctx, q, businessID, productID, input.Images); err != nil {
+			return 0, err
+		}
+		return productID, nil
 	}
 
-	result, err := tx.ExecContext(ctx,
-		`INSERT INTO erp_products
-		 (business_id, name, description, sale_price, compare_at_price, is_active, track_inventory)
-		 VALUES (?, ?, ?, ?, ?, TRUE, TRUE)`,
-		businessID,
-		input.Title,
-		sql.NullString{String: input.Description, Valid: input.Description != ""},
-		strconv.FormatFloat(input.Price, 'f', 2, 64),
-		strconv.FormatFloat(input.CompareAtPrice, 'f', 2, 64),
-	)
+	result, err := q.InsertCatalogProduct(ctx, sqlc.InsertCatalogProductParams{
+		BusinessID:     businessID,
+		Name:           input.Title,
+		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
+		SalePrice:      strconv.FormatFloat(input.Price, 'f', 2, 64),
+		CompareAtPrice: strconv.FormatFloat(input.CompareAtPrice, 'f', 2, 64),
+	})
 	if err != nil {
 		return 0, err
 	}
@@ -305,7 +295,7 @@ func syncCatalogProduct(ctx context.Context, tx *sql.Tx, businessID, productID i
 	if err != nil {
 		return 0, err
 	}
-	if err := syncCatalogImages(ctx, tx, businessID, productID, input.Images); err != nil {
+	if err := syncCatalogImages(ctx, q, businessID, productID, input.Images); err != nil {
 		return 0, err
 	}
 	return productID, nil
@@ -316,13 +306,11 @@ type productImageInput struct {
 	Alt string `json:"alt"`
 }
 
-func syncCatalogImages(ctx context.Context, tx *sql.Tx, businessID, productID int64, imagesJSON string) error {
-	_, err := tx.ExecContext(ctx,
-		`DELETE FROM erp_product_images WHERE business_id = ? AND product_id = ?`,
-		businessID,
-		productID,
-	)
-	if err != nil {
+func syncCatalogImages(ctx context.Context, q *sqlc.Queries, businessID, productID int64, imagesJSON string) error {
+	if err := q.DeleteCatalogProductImages(ctx, sqlc.DeleteCatalogProductImagesParams{
+		BusinessID: businessID,
+		ProductID:  productID,
+	}); err != nil {
 		return err
 	}
 
@@ -333,17 +321,14 @@ func syncCatalogImages(ctx context.Context, tx *sql.Tx, businessID, productID in
 			continue
 		}
 		alt := strings.TrimSpace(image.Alt)
-		_, err = tx.ExecContext(ctx,
-			`INSERT INTO erp_product_images
-			 (business_id, product_id, url, alt, position, is_primary)
-			 VALUES (?, ?, ?, ?, ?, ?)`,
-			businessID,
-			productID,
-			url,
-			sql.NullString{String: alt, Valid: alt != ""},
-			i,
-			i == 0,
-		)
+		err := q.InsertCatalogProductImage(ctx, sqlc.InsertCatalogProductImageParams{
+			BusinessID: businessID,
+			ProductID:  productID,
+			Url:        url,
+			Alt:        sql.NullString{String: alt, Valid: alt != ""},
+			Position:   int32(i),
+			IsPrimary:  i == 0,
+		})
 		if err != nil {
 			return err
 		}

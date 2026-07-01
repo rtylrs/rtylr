@@ -7,8 +7,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -62,23 +60,10 @@ func (r *Repository) ListStockTransfers(ctx context.Context, businessID int64, l
 }
 
 func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.StockTransfer, error) {
-	var row sqlc.ErpStockTransfer
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id,
-		       status, notes, created_at, updated_at
-		FROM erp_stock_transfers
-		WHERE business_id = ? AND id = ?
-	`, businessID, id).Scan(
-		&row.ID,
-		&row.OwnerID,
-		&row.BusinessID,
-		&row.FromWarehouseID,
-		&row.ToWarehouseID,
-		&row.Status,
-		&row.Notes,
-		&row.CreatedAt,
-		&row.UpdatedAt,
-	)
+	row, err := r.queries.GetStockTransferByID(ctx, sqlc.GetStockTransferByIDParams{
+		BusinessID: businessID,
+		ID:         id,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.StockTransfer{}, domain.ErrStockTransferNotFound
 	}
@@ -122,8 +107,7 @@ func stockTransferFromRow(row sqlc.ErpStockTransfer) domain.StockTransfer {
 }
 
 // getTransferItemsBatch loads all items for the given transfers in a single
-// query (WHERE transfer_id IN (...)) and groups them by transfer ID, replacing
-// the previous per-transfer N+1 query pattern.
+// query (WHERE transfer_id IN (...)) and groups them by transfer ID.
 func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []domain.StockTransfer) (map[int64][]domain.StockTransferItem, error) {
 	if len(transfers) == 0 {
 		return nil, nil
@@ -134,42 +118,24 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 		ids = append(ids, transfers[i].ID)
 	}
 
-	sqlStr, args, err := squirrel.
-		Select("id", "transfer_id", "product_id", "quantity", "created_at").
-		From("erp_stock_transfer_items").
-		Where(squirrel.Eq{"transfer_id": ids}).
-		OrderBy("id ASC").
-		PlaceholderFormat(squirrel.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build batch get transfer items query", logger.Error(err))
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
+	rows, err := r.queries.ListTransferItemsByTransferIDs(ctx, ids)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch get transfer items", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	result := make(map[int64][]domain.StockTransferItem, len(transfers))
-	for rows.Next() {
-		var item domain.StockTransferItem
-		var quantity string
-		var createdAt sql.NullTime
-		if err := rows.Scan(&item.ID, &item.TransferID, &item.ProductID, &quantity, &createdAt); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan transfer item row", logger.Error(err))
-			return nil, err
+	for _, row := range rows {
+		item := domain.StockTransferItem{
+			ID:         row.ID,
+			TransferID: row.TransferID,
+			ProductID:  row.ProductID,
+			Quantity:   parseDecimal(row.Quantity),
 		}
-		item.Quantity = parseDecimal(quantity)
-		if createdAt.Valid {
-			item.CreatedAt = createdAt.Time
+		if row.CreatedAt.Valid {
+			item.CreatedAt = row.CreatedAt.Time
 		}
 		result[item.TransferID] = append(result[item.TransferID], item)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
 	}
 
 	return result, nil

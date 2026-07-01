@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
+	"github.com/voxire/onion/internal/modules/voxhire/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -15,12 +14,13 @@ import (
 // company hiring inquiries and talent applications. CV files live in
 // R2; we store the object key.
 type Repository struct {
-	db *sql.DB
+	db      *sql.DB
+	queries *sqlc.Queries
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	autoMigrate(context.Background(), db)
-	return &Repository{db: db}
+	return &Repository{db: db, queries: sqlc.New(db)}
 }
 
 func autoMigrate(ctx context.Context, db *sql.DB) {
@@ -218,30 +218,19 @@ func ensureColumn(ctx context.Context, db *sql.DB, tableName, columnName, ddl st
 
 // CreateCompanyLead inserts a hiring inquiry and returns its ID.
 func (r *Repository) CreateCompanyLead(ctx context.Context, input domain.CompanyLeadInput) (int64, error) {
-	query, args, err := sq.
-		Insert("voxhire_company_leads").
-		Columns("company_name", "contact_name", "contact_title", "work_email", "phone", "role", "headcount", "timeline", "service", "message", "agency_opt_in").
-		Values(
-			input.CompanyName,
-			input.ContactName,
-			input.ContactTitle,
-			input.WorkEmail,
-			input.Phone,
-			input.Role,
-			input.Headcount,
-			input.Timeline,
-			input.Service,
-			input.Message,
-			input.AgencyOptIn,
-		).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build insert voxhire company lead query", logger.Error(err))
-		return 0, err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.CreateVoxhireCompanyLead(ctx, sqlc.CreateVoxhireCompanyLeadParams{
+		CompanyName:  input.CompanyName,
+		ContactName:  input.ContactName,
+		ContactTitle: sql.NullString{String: input.ContactTitle, Valid: input.ContactTitle != ""},
+		WorkEmail:    input.WorkEmail,
+		Phone:        sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		Role:         input.Role,
+		Headcount:    sql.NullString{String: input.Headcount, Valid: input.Headcount != ""},
+		Timeline:     sql.NullString{String: input.Timeline, Valid: input.Timeline != ""},
+		Service:      sql.NullString{String: input.Service, Valid: input.Service != ""},
+		Message:      sql.NullString{String: input.Message, Valid: input.Message != ""},
+		AgencyOptIn:  input.AgencyOptIn,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert voxhire company lead", logger.Error(err))
 		return 0, err
@@ -251,40 +240,28 @@ func (r *Repository) CreateCompanyLead(ctx context.Context, input domain.Company
 
 // CreateTalentApplication inserts a talent application and returns its ID.
 func (r *Repository) CreateTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error) {
-	query, args, err := sq.
-		Insert("voxhire_talent_applications").
-		Columns("full_name", "email", "phone", "country_of_residence", "nationality", "track", "years_experience", "notice_period", "open_to", "current_role", "desired_roles", "salary_expectation", "work_authorization", "work_history", "education", "linkedin_url", "portfolio_url", "pitch", "consent", "cv_key", "cv_processing_status").
-		Values(
-			input.FullName,
-			input.Email,
-			input.Phone,
-			input.CountryOfResidence,
-			input.Nationality,
-			input.Track,
-			input.YearsExperience,
-			input.NoticePeriod,
-			input.OpenTo,
-			input.CurrentRole,
-			input.DesiredRoles,
-			input.SalaryExpectation,
-			input.WorkAuthorization,
-			input.WorkHistory,
-			input.Education,
-			input.LinkedinURL,
-			input.PortfolioURL,
-			input.Pitch,
-			input.Consent,
-			input.CVKey,
-			"pending",
-		).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build insert voxhire talent application query", logger.Error(err))
-		return 0, err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.CreateVoxhireTalentApplication(ctx, sqlc.CreateVoxhireTalentApplicationParams{
+		FullName:            input.FullName,
+		Email:               input.Email,
+		Phone:               sql.NullString{String: input.Phone, Valid: input.Phone != ""},
+		CountryOfResidence:  sql.NullString{String: input.CountryOfResidence, Valid: input.CountryOfResidence != ""},
+		Nationality:         sql.NullString{String: input.Nationality, Valid: input.Nationality != ""},
+		Track:               sql.NullString{String: input.Track, Valid: input.Track != ""},
+		YearsExperience:     sql.NullString{String: input.YearsExperience, Valid: input.YearsExperience != ""},
+		NoticePeriod:        sql.NullString{String: input.NoticePeriod, Valid: input.NoticePeriod != ""},
+		OpenTo:              sql.NullString{String: input.OpenTo, Valid: input.OpenTo != ""},
+		CurrentRole:         sql.NullString{String: input.CurrentRole, Valid: input.CurrentRole != ""},
+		DesiredRoles:        sql.NullString{String: input.DesiredRoles, Valid: input.DesiredRoles != ""},
+		SalaryExpectation:   sql.NullString{String: input.SalaryExpectation, Valid: input.SalaryExpectation != ""},
+		WorkAuthorization:   sql.NullString{String: input.WorkAuthorization, Valid: input.WorkAuthorization != ""},
+		WorkHistory:         sql.NullString{String: input.WorkHistory, Valid: input.WorkHistory != ""},
+		Education:           sql.NullString{String: input.Education, Valid: input.Education != ""},
+		LinkedinUrl:         sql.NullString{String: input.LinkedinURL, Valid: input.LinkedinURL != ""},
+		PortfolioUrl:        sql.NullString{String: input.PortfolioURL, Valid: input.PortfolioURL != ""},
+		Pitch:               sql.NullString{String: input.Pitch, Valid: input.Pitch != ""},
+		Consent:             input.Consent,
+		CvKey:               sql.NullString{String: input.CVKey, Valid: input.CVKey != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert voxhire talent application", logger.Error(err))
 		return 0, err
