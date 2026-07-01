@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
-import { useConfigStore } from '../../stores/configStore';
+import { normalizeConfigData, useConfigStore } from '../../stores/configStore';
 
 export const useSetBusinessSlug = () => {
   const queryClient = useQueryClient();
@@ -38,31 +38,32 @@ export const useUpdateBusiness = () => {
         if (has(sourceKey) && data[sourceKey] !== undefined) payload[targetKey] = data[sourceKey];
       };
 
-      setIfPresent('storeName', 'siteName');
-      if (!payload.siteName) setIfPresent('companyName', 'siteName');
-      setIfPresent('contactEmail');
-      setIfPresent('telephone', 'contactNumber');
-      setIfPresent('aboutContent');
-      setIfPresent('logoUrl');
+      setIfPresent('storeName', 'site_name');
+      if (!payload.site_name) setIfPresent('companyName', 'site_name');
+      setIfPresent('contactEmail', 'contact_email');
+      setIfPresent('telephone', 'contact_number');
+      setIfPresent('aboutContent', 'about_content');
+      setIfPresent('logoUrl', 'logo_url');
       setIfPresent('instagram');
-      setIfPresent('senderEmail');
-      setIfPresent('mapsUrl');
+      setIfPresent('senderEmail', 'sender_email');
+      setIfPresent('mapsUrl', 'maps_url');
       setIfPresent('website');
       setIfPresent('address');
       setIfPresent('city');
       setIfPresent('zipcode');
       setIfPresent('country');
-      if (data.maintenanceMode !== undefined) payload.maintenanceMode = data.maintenanceMode;
+      if (data.maintenanceMode !== undefined) payload.maintenance_mode = data.maintenanceMode;
 
       return unwrap<{ config?: Record<string, unknown> }>(safe.put('/config/update', payload));
     },
     onSuccess: (res) => {
       if (res.config) {
+        const config = normalizeConfigData(res.config);
         const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
-        setWebsiteData({ ...currentWebsiteData, ...res.config });
+        setWebsiteData({ ...currentWebsiteData, ...config });
         setContactInfo({
-          contactEmail: (res.config.contactEmail as string | null | undefined) ?? null,
-          contactNumber: (res.config.contactNumber as string | null | undefined) ?? null,
+          contactEmail: (config.contactEmail as string | null | undefined) ?? null,
+          contactNumber: (config.contactNumber as string | null | undefined) ?? null,
         });
       }
       queryClient.invalidateQueries({ queryKey: ['business'] });

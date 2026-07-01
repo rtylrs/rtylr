@@ -27,6 +27,38 @@ interface ConfigActions {
   reset: () => void;
 }
 
+const configKeyAliases: Record<string, string> = {
+  owner_id: 'ownerId',
+  site_name: 'siteName',
+  logo_url: 'logoUrl',
+  favicon_url: 'faviconUrl',
+  meta_tags: 'metaTags',
+  contact_email: 'contactEmail',
+  contact_number: 'contactNumber',
+  sender_email: 'senderEmail',
+  maps_url: 'mapsUrl',
+  maintenance_mode: 'maintenanceMode',
+  maintenance_notice: 'maintenanceNotice',
+  addons_enabled: 'addonsEnabled',
+  enable_reviews: 'enableReviews',
+  enable_wishlist: 'enableWishlist',
+  enable_newsletter_signup: 'enableNewsletterSignup',
+  about_content: 'aboutContent',
+  footer_sub_text: 'footerSubText',
+};
+
+export const normalizeConfigData = (data: Record<string, unknown>): Record<string, unknown> => {
+  const normalized = { ...data };
+
+  Object.entries(configKeyAliases).forEach(([sourceKey, targetKey]) => {
+    if (normalized[targetKey] === undefined && normalized[sourceKey] !== undefined) {
+      normalized[targetKey] = normalized[sourceKey];
+    }
+  });
+
+  return normalized;
+};
+
 const initialState: ConfigState = {
   websiteData: null,
   aboutContent: null,
@@ -47,12 +79,16 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
 
       setWebsiteData: (websiteData) =>
         set((state) => {
+          const normalizedWebsiteData = normalizeConfigData(websiteData);
           const current = state.websiteData ?? {};
           const nextSlug =
-            (websiteData.slug as string | undefined) ?? (current.slug as string | undefined);
+            (normalizedWebsiteData.slug as string | undefined) ??
+            (current.slug as string | undefined);
 
           return {
-            websiteData: nextSlug ? { ...websiteData, slug: nextSlug } : websiteData,
+            websiteData: nextSlug
+              ? { ...normalizedWebsiteData, slug: nextSlug }
+              : normalizedWebsiteData,
           };
         }),
 

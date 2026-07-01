@@ -16,7 +16,7 @@ import {
 import { unwrap } from '@voxire/api';
 import { Avatar } from '@voxire/ui';
 import { useUserStore, type StoredUser } from '../stores/userStore';
-import { useConfigStore } from '../stores/configStore';
+import { normalizeConfigData, useConfigStore } from '../stores/configStore';
 import { safe } from '../lib/api';
 
 const getCookieToken = (): string | null =>
@@ -392,7 +392,7 @@ function BusinessRoute(): React.JSX.Element | null {
             )
           )
             .then((configRes) => {
-              const config = configRes?.config ?? {};
+              const config = normalizeConfigData(configRes?.config ?? {});
               setWebsiteData(config);
               setContactInfo({
                 contactEmail: (config.contactEmail as string | null) ?? null,

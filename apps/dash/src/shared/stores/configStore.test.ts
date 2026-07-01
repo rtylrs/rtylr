@@ -42,6 +42,32 @@ describe('configStore', () => {
     });
   });
 
+  it('setWebsiteData normalizes snake_case API config fields', () => {
+    getState().setWebsiteData({
+      site_name: 'Suplab Store',
+      contact_email: 'suplabstore@gmail.com',
+      contact_number: '+961000000',
+      sender_email: 'orders@suplabstore.com',
+      maps_url: 'https://maps.example.com',
+      maintenance_mode: true,
+      about_content: 'Retail supplements',
+      footer_sub_text: 'Powered by rtylr',
+      website: 'https://suplabstore.com/',
+    });
+
+    expect(getState().websiteData).toMatchObject({
+      siteName: 'Suplab Store',
+      contactEmail: 'suplabstore@gmail.com',
+      contactNumber: '+961000000',
+      senderEmail: 'orders@suplabstore.com',
+      mapsUrl: 'https://maps.example.com',
+      maintenanceMode: true,
+      aboutContent: 'Retail supplements',
+      footerSubText: 'Powered by rtylr',
+      website: 'https://suplabstore.com/',
+    });
+  });
+
   it('setAboutContent updates aboutContent', () => {
     const content = { text: 'About us' };
     getState().setAboutContent(content);
