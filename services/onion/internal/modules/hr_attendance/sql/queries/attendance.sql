@@ -57,3 +57,19 @@ SELECT id, owner_id, business_id, app_enabled, qr_enabled, gps_enabled, pin_enab
        facial_enabled, geofence_radius_m, default_location_lat, default_location_lng
 FROM hr_attendance_config
 WHERE business_id = ?;
+
+
+-- name: GetEmployeePINHash :one
+SELECT clock_in_pin_hash
+FROM hr_employees
+WHERE id = ? AND business_id = ?;
+
+-- name: SetEmployeePINHash :execresult
+UPDATE hr_employees
+SET clock_in_pin_hash = ?, updated_at = NOW()
+WHERE id = ? AND business_id = ?;
+
+-- name: GetLocationCoordinates :one
+SELECT latitude, longitude
+FROM hr_locations
+WHERE id = ? AND business_id = ?;

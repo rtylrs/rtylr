@@ -5,6 +5,7 @@ sql:
     schema:
       - "../../../../internal/platform/database/schemas/shared"
       - "../../../../internal/platform/database/schemas/hr_attendance"
+      - "../../../../internal/platform/database/schemas/hr_core/schema.sql"
     gen:
       go:
         package: "sqlc"

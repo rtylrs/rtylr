@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,10 +15,56 @@ import (
 	gosqlmysql "github.com/go-sql-driver/mysql"
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
+	"github.com/voxire/onion/internal/modules/voxhire/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const mysqlErrDuplicateEntry = 1062
+
+
+
+func parseDecimalString(s string) float64 {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0
+	}
+	return f
+}
+
+func ifaceToInt64(v interface{}) int64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case int64:
+		return val
+	case int32:
+		return int64(val)
+	case float64:
+		return int64(val)
+	case []byte:
+		n, err := strconv.ParseInt(string(val), 10, 64)
+		if err != nil {
+			return 0
+		}
+		return n
+	case string:
+		n, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return 0
+		}
+		return n
+	default:
+		return 0
+	}
+}
+
+func adminCreatedAt(t sql.NullTime) time.Time {
+	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
 
 const voxhireCareerOwnerID int64 = 1
 
@@ -26,17 +73,9 @@ const voxhireCareerOwnerID int64 = 1
 // CreateAdmin inserts a new recruiter-admin account. Returns
 // domain.ErrAdminExists if the email is already taken.
 func (r *Repository) CreateAdmin(ctx context.Context, email, passwordHash, name string) (int64, error) {
-	query, args, err := sq.
-		Insert("voxhire_admins").
-		Columns("email", "password_hash", "name").
-		Values(email, passwordHash, name).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := r.queries.CreateAdmin(ctx, sqlc.CreateAdminParams{
+		Email: email, PasswordHash: passwordHash, Name: sql.NullString{String: name, Valid: name != ""},
+	})
 	if err != nil {
 		var myErr *gosqlmysql.MySQLError
 		if errors.As(err, &myErr) && myErr.Number == mysqlErrDuplicateEntry {
@@ -51,66 +90,46 @@ func (r *Repository) CreateAdmin(ctx context.Context, email, passwordHash, name 
 // GetAdminByEmail returns the admin with the given email, or
 // domain.ErrAdminNotFound.
 func (r *Repository) GetAdminByEmail(ctx context.Context, email string) (*domain.Admin, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT id, email, COALESCE(name,''), password_hash, created_at
-		   FROM voxhire_admins WHERE email = ?`, email)
-
-	var a domain.Admin
-	if err := row.Scan(&a.ID, &a.Email, &a.Name, &a.PasswordHash, &a.CreatedAt); err != nil {
+	row, err := r.queries.GetAdminByEmail(ctx, email)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrAdminNotFound
 		}
 		return nil, err
 	}
-	return &a, nil
+	return &domain.Admin{ID: row.ID, Email: row.Email, Name: row.Name, PasswordHash: row.PasswordHash, CreatedAt: adminCreatedAt(row.CreatedAt)}, nil
 }
 
 // GetAdminByID returns the admin with the given id, or
 // domain.ErrAdminNotFound.
 func (r *Repository) GetAdminByID(ctx context.Context, id int64) (*domain.Admin, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT id, email, COALESCE(name,''), password_hash, created_at
-		   FROM voxhire_admins WHERE id = ?`, id)
-
-	var a domain.Admin
-	if err := row.Scan(&a.ID, &a.Email, &a.Name, &a.PasswordHash, &a.CreatedAt); err != nil {
+	row, err := r.queries.GetAdminByID(ctx, id)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrAdminNotFound
 		}
 		return nil, err
 	}
-	return &a, nil
+	return &domain.Admin{ID: row.ID, Email: row.Email, Name: row.Name, PasswordHash: row.PasswordHash, CreatedAt: adminCreatedAt(row.CreatedAt)}, nil
 }
 
 // ListAdmins returns all recruiter-admin accounts, newest first.
 func (r *Repository) ListAdmins(ctx context.Context) ([]domain.Admin, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, email, COALESCE(name,''), created_at
-		   FROM voxhire_admins ORDER BY created_at DESC`)
+	rows, err := r.queries.ListAdmins(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	admins := make([]domain.Admin, 0)
-	for rows.Next() {
-		var a domain.Admin
-		if err := rows.Scan(&a.ID, &a.Email, &a.Name, &a.CreatedAt); err != nil {
-			return nil, err
-		}
-		admins = append(admins, a)
+	admins := make([]domain.Admin, 0, len(rows))
+	for _, row := range rows {
+		admins = append(admins, domain.Admin{ID: row.ID, Email: row.Email, Name: row.Name, CreatedAt: adminCreatedAt(row.CreatedAt)})
 	}
-	return admins, rows.Err()
+	return admins, nil
 }
 
 // CountAdmins returns the number of admin accounts. Used to decide
 // whether the default admin needs seeding.
 func (r *Repository) CountAdmins(ctx context.Context) (int64, error) {
-	var n int64
-	if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxhire_admins`).Scan(&n); err != nil {
-		return 0, err
-	}
-	return n, nil
+	return r.queries.CountAdmins(ctx)
 }
 
 // ── Openings (read from the shared careers table) ────────────────────
@@ -119,47 +138,22 @@ func (r *Repository) CountAdmins(ctx context.Context) (int64, error) {
 // counts for the recruiter panel's position picker.
 func (r *Repository) ListOpenings(ctx context.Context) ([]domain.Opening, error) {
 	// cross-schema read from careers — admin openings + application counts
-	const query = `
-		SELECT c.id,
-		       COALESCE(c.slug, ''),
-		       c.title,
-		       COALESCE(c.department, ''),
-		       COALESCE(c.location, ''),
-		       COALESCE(c.employment_type, ''),
-		       COALESCE(c.work_mode, ''),
-		       COALESCE(c.seniority, ''),
-		       COALESCE(c.details, ''),
-		       COALESCE(c.salary_min, 0),
-		       COALESCE(c.salary_max, 0),
-		       COALESCE(c.salary_currency, 'USD'),
-		       c.is_active,
-		       COALESCE(SUM(CASE WHEN a.status = 'new' THEN 1 ELSE 0 END), 0) AS new_count,
-		       COALESCE(COUNT(a.id), 0) AS total_count
-		  FROM careers c
-		  LEFT JOIN voxire_career_applications a ON a.job_id = c.id
-		 WHERE c.owner_id = ?
-		 GROUP BY c.id, c.slug, c.title, c.department, c.location, c.employment_type,
-		          c.work_mode, c.seniority, c.details, c.salary_min, c.salary_max,
-		          c.salary_currency, c.is_active
-		 ORDER BY c.is_active DESC, c.created_at DESC`
-
-	rows, err := r.db.QueryContext(ctx, query, voxhireCareerOwnerID)
+	rows, err := r.queries.ListOpenings(ctx, voxhireCareerOwnerID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	openings := make([]domain.Opening, 0)
-	for rows.Next() {
-		var o domain.Opening
-		if err := rows.Scan(&o.ID, &o.Slug, &o.Title, &o.Department, &o.Location,
-			&o.EmploymentType, &o.WorkMode, &o.Seniority, &o.Details, &o.SalaryMin,
-			&o.SalaryMax, &o.SalaryCurrency, &o.IsActive, &o.NewCount, &o.TotalCount); err != nil {
-			return nil, err
-		}
-		openings = append(openings, o)
+	openings := make([]domain.Opening, 0, len(rows))
+	for _, row := range rows {
+		openings = append(openings, domain.Opening{
+			ID: row.ID, Slug: row.Slug, Title: row.Title, Department: row.Department,
+			Location: row.Location, EmploymentType: row.EmploymentType, WorkMode: row.WorkMode,
+			Seniority: row.Seniority, Details: row.Details,
+			SalaryMin: parseDecimalString(row.SalaryMin), SalaryMax: parseDecimalString(row.SalaryMax),
+			SalaryCurrency: row.SalaryCurrency, IsActive: row.IsActive,
+			NewCount: ifaceToInt64(row.NewCount), TotalCount: ifaceToInt64(row.TotalCount),
+		})
 	}
-	return openings, rows.Err()
+	return openings, nil
 }
 
 // GetAnalytics returns aggregate counts and activity for the recruiter overview.
@@ -757,29 +751,24 @@ func slugifyCareerTitle(title string) string {
 
 // ListCompanyLeads returns company hiring inquiries newest first.
 func (r *Repository) ListCompanyLeads(ctx context.Context) ([]domain.Lead, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, company_name, contact_name, COALESCE(contact_title,''), work_email,
-		        COALESCE(phone,''), role, COALESCE(headcount,''), COALESCE(timeline,''),
-		        COALESCE(service,''), COALESCE(message,''), agency_opt_in, status, created_at
-		   FROM voxhire_company_leads
-		  ORDER BY created_at DESC
-		  LIMIT 500`)
+	rows, err := r.queries.ListCompanyLeads(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	leads := make([]domain.Lead, 0)
-	for rows.Next() {
-		var l domain.Lead
-		if err := rows.Scan(&l.ID, &l.CompanyName, &l.ContactName, &l.ContactTitle, &l.WorkEmail,
-			&l.Phone, &l.Role, &l.Headcount, &l.Timeline, &l.Service, &l.Message,
-			&l.AgencyOptIn, &l.Status, &l.CreatedAt); err != nil {
-			return nil, err
-		}
-		leads = append(leads, l)
+	leads := make([]domain.Lead, 0, len(rows))
+	for _, row := range rows {
+		leads = append(leads, domain.Lead{
+			ID: row.ID, CompanyName: row.CompanyName, ContactName: row.ContactName,
+			ContactTitle: row.ContactTitle, WorkEmail: row.WorkEmail, Phone: row.Phone,
+			Role: row.Role, Headcount: row.Headcount, Timeline: row.Timeline, Service: row.Service,
+			Message: row.Message, AgencyOptIn: row.AgencyOptIn, Status: row.Status,
+			CreatedAt: adminCreatedAt(row.CreatedAt),
+		})
 	}
-	return leads, rows.Err()
+	if len(leads) > 500 {
+		leads = leads[:500]
+	}
+	return leads, nil
 }
 
 // ── Applications ─────────────────────────────────────────────────────
@@ -982,23 +971,14 @@ func searchExcerpt(text, query string, radius int) string {
 // (e.g. "viewed", "new"). Returns domain.ErrApplicationNotFound if no
 // row matched.
 func (r *Repository) UpdateApplicationStatus(ctx context.Context, id int64, status string) error {
-	res, err := r.db.ExecContext(ctx,
-		`UPDATE voxire_career_applications SET status = ? WHERE id = ?`, status, id)
+	if err := r.queries.UpdateApplicationStatus(ctx, sqlc.UpdateApplicationStatusParams{Status: status, ID: id}); err != nil {
+		return err
+	}
+	n, err := r.queries.CountCareerApplications(ctx, id)
 	if err != nil {
 		return err
 	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affected == 0 {
-		var exists int
-		if err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM voxire_career_applications WHERE id = ?`, id).Scan(&exists); err != nil {
-			return err
-		}
-		if exists > 0 {
-			return nil
-		}
+	if n == 0 {
 		return domain.ErrApplicationNotFound
 	}
 	_ = r.recordApplicationEvent(ctx, id, "status", "Status changed", status)
@@ -1046,16 +1026,14 @@ func (r *Repository) UpdateApplicationReview(ctx context.Context, id int64, in d
 // GetApplicationCVKey returns the R2 object key of an application's CV,
 // or domain.ErrApplicationNotFound. An empty string means no CV.
 func (r *Repository) GetApplicationCVKey(ctx context.Context, id int64) (string, error) {
-	var key sql.NullString
-	err := r.db.QueryRowContext(ctx,
-		`SELECT cv_key FROM voxire_career_applications WHERE id = ?`, id).Scan(&key)
+	key, err := r.queries.GetApplicationCVKey(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrApplicationNotFound
 		}
 		return "", err
 	}
-	return key.String, nil
+	return key, nil
 }
 
 // CreateCareerApplication inserts a public application submitted on

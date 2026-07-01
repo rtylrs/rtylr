@@ -291,16 +291,17 @@ func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID 
 }
 
 func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, customerID int64, newPoints int, newTier string) error {
-	// Use raw SQL with plain scalar args to bypass the NullCrmCustomersLoyaltyTier
-	// enum wrapper which prevents the MySQL driver from calling Value() correctly.
-	_, err := r.pool.ExecContext(ctx,
-		"UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ?",
-		newPoints, newTier, customerID,
-	)
+	err := r.queries.UpdateCustomerLoyalty(ctx, sqlc.UpdateCustomerLoyaltyParams{
+		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true},
+		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{
+			CrmCustomersLoyaltyTier: sqlc.CrmCustomersLoyaltyTier(newTier),
+			Valid:                   newTier != "",
+		},
+		ID: customerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update customer loyalty", logger.Error(err))
 	}
-
 	return err
 }
 

@@ -7,8 +7,6 @@ import (
 	"math"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -227,18 +225,9 @@ func (r *Repository) GetAttendanceConfig(ctx context.Context, businessID int64) 
 
 func (r *Repository) GetEmployeePINHash(ctx context.Context, businessID, employeeID int64) (string, error) {
 	// cross-schema read from hr_core — employee PIN hash for attendance clock-in verification
-	queryStr, args, err := sq.Select("clock_in_pin_hash").
-		From("hr_employees").
-		Where(sq.Eq{"id": employeeID, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to build employee PIN hash query", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
-		return "", err
-	}
-
-	var hash sql.NullString
-	err = r.pool.QueryRowContext(ctx, queryStr, args...).Scan(&hash)
+	hash, err := r.queries.GetEmployeePINHash(ctx, sqlc.GetEmployeePINHashParams{
+		ID: employeeID, BusinessID: businessID,
+	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrAttendanceNotFound
@@ -254,18 +243,11 @@ func (r *Repository) GetEmployeePINHash(ctx context.Context, businessID, employe
 
 func (r *Repository) SetEmployeePINHash(ctx context.Context, businessID, employeeID int64, hash string) error {
 	// cross-schema write to hr_core — set employee PIN hash for attendance clock-in
-	queryStr, args, err := sq.Update("hr_employees").
-		Set("clock_in_pin_hash", hash).
-		Set("updated_at", sq.Expr("NOW()")).
-		Where(sq.Eq{"id": employeeID, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to build set employee PIN hash query", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
-		return err
-	}
-
-	result, err := r.pool.ExecContext(ctx, queryStr, args...)
+	result, err := r.queries.SetEmployeePINHash(ctx, sqlc.SetEmployeePINHashParams{
+		ClockInPinHash: sql.NullString{String: hash, Valid: hash != ""},
+		ID:             employeeID,
+		BusinessID:     businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to set employee PIN hash", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return err
@@ -284,18 +266,9 @@ func (r *Repository) SetEmployeePINHash(ctx context.Context, businessID, employe
 
 func (r *Repository) GetLocationCoordinates(ctx context.Context, businessID, locationID int64) (*domain.LocationCoordinates, error) {
 	// cross-schema read from hr_core — location coordinates for geofence attendance validation
-	queryStr, args, err := sq.Select("latitude", "longitude").
-		From("hr_locations").
-		Where(sq.Eq{"id": locationID, "business_id": businessID}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to build location coordinates query", logger.Any("business_id", businessID), logger.Any("location_id", locationID), logger.Error(err))
-		return nil, err
-	}
-
-	var lat, lng sql.NullFloat64
-	err = r.pool.QueryRowContext(ctx, queryStr, args...).Scan(&lat, &lng)
+	row, err := r.queries.GetLocationCoordinates(ctx, sqlc.GetLocationCoordinatesParams{
+		ID: locationID, BusinessID: businessID,
+	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -304,9 +277,9 @@ func (r *Repository) GetLocationCoordinates(ctx context.Context, businessID, loc
 		return nil, err
 	}
 	return &domain.LocationCoordinates{
-		Latitude:  lat.Float64,
-		Longitude: lng.Float64,
-		HasCoords: lat.Valid && lng.Valid && (lat.Float64 != 0 || lng.Float64 != 0),
+		Latitude:  row.Latitude.Float64,
+		Longitude: row.Longitude.Float64,
+		HasCoords: row.Latitude.Valid && row.Longitude.Valid && (row.Latitude.Float64 != 0 || row.Longitude.Float64 != 0),
 	}, nil
 }
 

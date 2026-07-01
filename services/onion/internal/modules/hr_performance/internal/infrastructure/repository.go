@@ -168,37 +168,8 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, businessID, id int64) 
 	}
 
 	// cross-schema read from hr_core — active employee list for review cycle initialisation
-	selectStr, selectArgs, err := sq.Select("id").
-		From("hr_employees").
-		Where(sq.Eq{"business_id": businessID, "status": "active"}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
+	employeeIDs, err := qtx.ListActiveEmployeeIDs(ctx, businessID)
 	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
-	rows, err := tx.QueryContext(ctx, selectStr, selectArgs...)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
-	var employeeIDs []int64
-	for rows.Next() {
-		var eid int64
-		if scanErr := rows.Scan(&eid); scanErr != nil {
-			_ = rows.Close()
-			_ = tx.Rollback()
-			return scanErr
-		}
-		employeeIDs = append(employeeIDs, eid)
-	}
-	if err = rows.Close(); err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	if err = rows.Err(); err != nil {
 		_ = tx.Rollback()
 		return err
 	}
@@ -421,34 +392,7 @@ func (r *Repository) ListGoals(ctx context.Context, businessID, employeeID, cycl
 
 func (r *Repository) ListActiveEmployeeIDs(ctx context.Context, businessID int64) ([]int64, error) {
 	// cross-schema read from hr_core — active employee IDs for performance review initialisation
-	queryStr, args, err := sq.Select("id").
-		From("hr_employees").
-		Where(sq.Eq{"business_id": businessID, "status": "active"}).
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, queryStr, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ids []int64
-	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return ids, nil
+	return r.queries.ListActiveEmployeeIDs(ctx, businessID)
 }
 
 // ===== Row conversion helpers =====
