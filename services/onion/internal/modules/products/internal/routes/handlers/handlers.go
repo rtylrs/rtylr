@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -226,7 +227,13 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 	}
 
 	// Best-effort: the product is created; attribute failure shouldn't fail it.
-	_ = h.Service.ReplaceProductAttributes(ctx, ownerID, id, req.Attributes)
+	if attrErr := h.Service.ReplaceProductAttributes(ctx, ownerID, id, req.Attributes); attrErr != nil {
+		logger.Ctx(ctx).Warn("failed to replace product attributes after create",
+			logger.Any("owner_id", ownerID),
+			logger.Any("product_id", id),
+			logger.Error(attrErr),
+		)
+	}
 
 	return CreateProductResponse{
 		ProductID: id,
@@ -395,7 +402,13 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 	}
 
 	// Replace the product's custom attributes with the submitted set.
-	_ = h.Service.ReplaceProductAttributes(ctx, ownerID, req.ID, req.Attributes)
+	if attrErr := h.Service.ReplaceProductAttributes(ctx, ownerID, req.ID, req.Attributes); attrErr != nil {
+		logger.Ctx(ctx).Warn("failed to replace product attributes after update",
+			logger.Any("owner_id", ownerID),
+			logger.Any("product_id", req.ID),
+			logger.Error(attrErr),
+		)
+	}
 
 	return UpdateProductResponse{Message: "Product updated successfully"}, nil
 }

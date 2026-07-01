@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -112,9 +111,7 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 						safeName,
 					)
 
-					const uploadTimeout = 30 * time.Second
 					uploadCtx := r.Context()
-					_ = uploadTimeout // context already carries deadline from the HTTP server
 
 					uploadErr := client.Upload(uploadCtx, key, contentType, file)
 					if uploadErr != nil {
@@ -141,11 +138,13 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":      id,
 			"message": "Application received",
 			"status":  "success",
-		})
+		}); err != nil {
+			logger.Ctx(r.Context()).Warn("failed to write apply success response", logger.Error(err))
+		}
 	}
 }
 

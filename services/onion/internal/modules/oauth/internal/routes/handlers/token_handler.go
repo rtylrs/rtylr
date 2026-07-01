@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // TokenRoutes returns the paths for the token endpoint.
@@ -111,7 +112,10 @@ func (h *RevokeHandler) Validate(_ context.Context, req *RevokeRequest) *errorMo
 }
 
 func (h *RevokeHandler) Serve(ctx context.Context, req *RevokeRequest) (RevokeResponse, *errorModels.ServerError) {
-	_ = h.Service.RevokeToken(ctx, req.Token)
+	if err := h.Service.RevokeToken(ctx, req.Token); err != nil {
+		// RFC 7009: always return 200 so token existence is not leaked.
+		logger.Ctx(ctx).Warn("oauth token revocation failed", logger.Error(err))
+	}
 	return RevokeResponse{OK: true}, nil
 }
 

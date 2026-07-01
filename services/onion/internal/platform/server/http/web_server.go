@@ -59,7 +59,9 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 			defer cancel()
 			if db := dbclient.Pool(); db == nil || db.PingContext(pingCtx) != nil {
 				w.WriteHeader(http.StatusServiceUnavailable)
-				_, _ = w.Write([]byte(`{"status":"unhealthy"}`))
+				if _, err := w.Write([]byte(`{"status":"unhealthy"}`)); err != nil {
+					logger.Ctx(r.Context()).Warn("Failed to write health response", logger.Error(err))
+				}
 				return
 			}
 		}

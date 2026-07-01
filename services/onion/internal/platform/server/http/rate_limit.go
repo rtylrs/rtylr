@@ -206,7 +206,9 @@ func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*htt
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("Retry-After", "60")
 				w.WriteHeader(http.StatusTooManyRequests)
-				_, _ = w.Write([]byte(`{"error":"Rate limit exceeded","message":"Too many attempts, please try again shortly","retry_after":60}`))
+				if _, writeErr := w.Write([]byte(`{"error":"Rate limit exceeded","message":"Too many attempts, please try again shortly","retry_after":60}`)); writeErr != nil {
+					logger.Ctx(r.Context()).Error("Failed to write per-route rate limit response", logger.Error(writeErr))
+				}
 				return
 			}
 			next.ServeHTTP(w, r)

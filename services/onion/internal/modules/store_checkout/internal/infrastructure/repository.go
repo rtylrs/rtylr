@@ -58,7 +58,11 @@ func (r *Repository) Create(ctx context.Context, businessID int64, ownerID int64
 		logger.Ctx(ctx).Error("Failed to create checkout", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read checkout insert id", logger.Error(err))
+		return 0, err
+	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit checkout transaction", logger.Error(err))
 		return 0, err
@@ -90,8 +94,13 @@ func (r *Repository) Complete(ctx context.Context, businessID, id int64, ownerID
 		logger.Ctx(ctx).Error("Failed to load checkout customer", logger.Error(err))
 		return err
 	} else {
-		total, _ := strconv.ParseFloat(totalString, 64)
-		if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
+		total, parseErr := strconv.ParseFloat(totalString, 64)
+		if parseErr != nil {
+			logger.Ctx(ctx).Warn("failed to parse checkout total for CRM sync",
+				logger.String("total", totalString),
+				logger.Error(parseErr),
+			)
+		} else if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 			Email:      customerEmail.String,
 			TotalSpent: total,
 			CountVisit: true,

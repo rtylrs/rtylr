@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/routes"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/routes/handlers"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Module struct {
@@ -50,7 +51,9 @@ func (m *Module) GetAnonymousRoutes() []string {
 // Safe to call multiple times — idempotent.
 func (m *Module) CreatePersonalWorkspace(ctx context.Context, userID int64) {
 	if _, err := m.service.CreatePersonalWorkspace(ctx, userID); err != nil {
-		// Non-fatal; log but don't block registration
-		_ = err
+		logger.Ctx(ctx).Warn("failed to create personal workspace",
+			logger.Any("user_id", userID),
+			logger.Error(err),
+		)
 	}
 }

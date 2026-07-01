@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/security/internal/application"
-	"github.com/voxire/onion/internal/modules/security/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
@@ -78,8 +77,6 @@ func (h *Toggle2FAHandler) Serve(ctx context.Context, req *Toggle2FARequest) (To
 	if device.User == nil {
 		return Toggle2FAResponse{}, errorModels.PermissionDeniedServerError()
 	}
-
-	_ = domain.TwoFactorInput{Enabled: req.Enabled}
 
 	if err := h.Service.SetTwoFactor(ctx, device.User.UserID, req.Enabled); err != nil {
 		return Toggle2FAResponse{}, &errorModels.ServerError{

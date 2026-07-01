@@ -60,7 +60,9 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 		if len(key) > idempotencyMaxLen {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(`{"error":"Idempotency-Key too long (max 128 chars)"}`))
+			if _, writeErr := w.Write([]byte(`{"error":"Idempotency-Key too long (max 128 chars)"}`)); writeErr != nil {
+				logger.Ctx(r.Context()).Warn("failed to write idempotency key length response", logger.Error(writeErr))
+			}
 			return
 		}
 
@@ -95,7 +97,9 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 				// replica) — tell the client to retry shortly.
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusConflict)
-				_, _ = w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`))
+				if _, writeErr := w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`)); writeErr != nil {
+					logger.Ctx(r.Context()).Warn("failed to write idempotency conflict response", logger.Error(writeErr))
+				}
 				return
 			}
 		}
@@ -170,7 +174,9 @@ func writeIdempotentReplay(w http.ResponseWriter, rec idempotencyRecord) {
 	}
 	w.Header().Set("Idempotent-Replayed", "true")
 	w.WriteHeader(rec.Status)
-	_, _ = w.Write(rec.Body)
+	if _, writeErr := w.Write(rec.Body); writeErr != nil {
+		logger.Global().Warn("failed to write idempotent replay body", logger.Error(writeErr))
+	}
 }
 
 func buildIdempotencyKey(r *http.Request, key string) string {

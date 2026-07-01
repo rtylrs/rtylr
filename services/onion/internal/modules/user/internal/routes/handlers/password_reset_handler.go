@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // PasswordResetRequestRoutes returns the route for requesting a password reset email.
@@ -42,7 +43,13 @@ func (h *PasswordResetRequestHandler) Validate(_ context.Context, req *PasswordR
 }
 
 func (h *PasswordResetRequestHandler) Serve(ctx context.Context, req *PasswordResetRequestBody) (PasswordResetRequestResponse, *errorModels.ServerError) {
-	_ = h.UserService.RequestPasswordReset(ctx, req.Email)
+	if err := h.UserService.RequestPasswordReset(ctx, req.Email); err != nil {
+		// Always return 200 to prevent user enumeration; log the failure for ops.
+		logger.Ctx(ctx).Error("password reset request failed",
+			logger.String("email", req.Email),
+			logger.Error(err),
+		)
+	}
 	return PasswordResetRequestResponse{Message: "If that email is registered, a reset link has been sent."}, nil
 }
 
