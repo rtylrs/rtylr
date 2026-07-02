@@ -25,6 +25,8 @@ func NewRepository(db *sql.DB) *Repository {
 
 // List returns feedback entries for an owner, applying optional filters by
 // type, source, and score range. Always filters by owner_id.
+//
+// dynamic-query: squirrel
 func (r *Repository) List(ctx context.Context, businessID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
 	if page < 1 {
 		page = 1

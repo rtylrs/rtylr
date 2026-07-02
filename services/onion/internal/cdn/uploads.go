@@ -39,6 +39,11 @@ func (c *CDN) uploadFile(ctx context.Context, filename, mimeType string, size in
 		return nil, err
 	}
 
+	body, err = c.moderateImage(ctx, mimeType, size, body)
+	if err != nil {
+		return nil, err
+	}
+
 	fileUUID := uuid.NewString()
 	storageKey := fmt.Sprintf("originals/%s%s", fileUUID, extensionForFormat(mimeTypeToFormat(mimeType)))
 
@@ -95,6 +100,10 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 
 	uploaded, err := c.uploadFile(r.Context(), header.Filename, mimeType, header.Size, file)
 	if err != nil {
+		if errors.Is(err, ErrImageBlocked) {
+			http.Error(w, "image rejected by content policy", http.StatusUnprocessableEntity)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

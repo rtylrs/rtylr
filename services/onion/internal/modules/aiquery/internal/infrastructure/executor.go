@@ -22,6 +22,8 @@ func NewExecutor() *Executor {
 
 // Run executes a prevalidated, parameterized query and returns up to MaxRows
 // rows as ordered column/value maps. Bounded by a hard timeout.
+//
+// dynamic-query: squirrel
 func (e *Executor) Run(ctx context.Context, query string, args []any) ([]map[string]any, error) {
 	ctx, cancel := context.WithTimeout(ctx, queryTimeout)
 	defer cancel()

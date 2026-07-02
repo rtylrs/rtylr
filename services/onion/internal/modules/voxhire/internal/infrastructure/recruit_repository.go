@@ -588,6 +588,7 @@ func (r *Repository) getCareerOpeningByID(ctx context.Context, id int64) (*domai
 	return openingFromCareerRow(row), nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) uniqueCareerSlug(ctx context.Context, title string, excludeID int64) (string, error) {
 	base := slugifyCareerTitle(title)
 	for i := 0; i < 1000; i++ {
@@ -671,6 +672,8 @@ func (r *Repository) ListCompanyLeads(ctx context.Context) ([]domain.Lead, error
 
 // ListApplications returns applications for a single opening, filtered
 // and sorted per the supplied filter, plus the total matching count.
+//
+// dynamic-query: squirrel
 func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error) {
 	cols := `id, job_id, name, email, COALESCE(phone,''), COALESCE(location,''),
 	         COALESCE(salary_expectation,0), COALESCE(salary_currency,'USD'), status,
@@ -984,6 +987,7 @@ const candidateUnionSQL = `
 	       t.cv_processed_at
 	  FROM voxhire_talent_applications t`
 
+// dynamic-query: squirrel
 func (r *Repository) ListCandidates(ctx context.Context, f domain.CandidateFilter) ([]domain.Candidate, int64, error) {
 	where, args := candidateFilterWhere(f)
 	countArgs := append([]any{voxhireCareerOwnerID}, args...)
@@ -1065,6 +1069,7 @@ func candidateFilterWhere(f domain.CandidateFilter) ([]string, []any) {
 	return where, args
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) ([]domain.CVJob, error) {
 	where, args := candidateFilterWhere(f)
 	where = append(where, "cv_key <> ''")

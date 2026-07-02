@@ -43,6 +43,7 @@ func (r *Repository) GetWidgets(ctx context.Context, businessID int64) ([]*domai
 	return widgets, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) UpsertWidgets(ctx context.Context, businessID int64, widgets []*domain.DashboardWidget) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {

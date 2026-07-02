@@ -166,6 +166,13 @@ type AppConfig struct {
 	CDNMediaEnginePath string // path to the C++ media-engine binary
 	CDNAPIKey          string // bearer key for write endpoints; empty disables auth
 
+	// CDN image moderation (nudity filter on stored uploads). Disabled by
+	// default; provider "openai" uses the free moderation endpoint (needs
+	// OPENAI_API_KEY), "local" uses an in-process skin-tone heuristic.
+	CDNModerationEnabled    bool
+	CDNModerationProvider   string // "openai" | "local"
+	CDNModerationFailClosed bool   // reject uploads when the moderation check errors
+
 	// License runmode / self-hosting controls.
 	LicenseKey               string
 	LicenseFile              string
@@ -346,6 +353,10 @@ func LoadAndValidate() (*AppConfig, error) {
 		CDNMaxUploadBytes:  int64(envIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
+
+		CDNModerationEnabled:    strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_ENABLED")), "true"),
+		CDNModerationProvider:   strings.ToLower(envOrDefault("CDN_MODERATION_PROVIDER", "openai")),
+		CDNModerationFailClosed: strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_FAIL_CLOSED")), "true"),
 
 		// License runmode / self-hosting controls. Self-host customers set the
 		// documented RTYLR_LICENSE_KEY; LICENSE_KEY stays as an internal alias.

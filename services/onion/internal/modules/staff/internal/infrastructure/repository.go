@@ -93,10 +93,10 @@ func staffFromRow(row sqlc.HrStaff) domain.Staff {
 	return s
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
 	businessID := ownerID
 	// cross-schema read from hr_departments — to include department name in staff list response
-	// Dynamic WHERE clause - built with squirrel
 	builder := sq.
 		Select("s.id", "s.owner_id", "s.business_id", "s.user_id", "s.department_id",
 			"COALESCE(d.name, '') AS department_name",

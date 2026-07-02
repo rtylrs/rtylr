@@ -32,6 +32,11 @@ type CDN struct {
 	mediaEngine string
 	apiKey      string
 
+	// moderator, when non-nil, screens image uploads for nudity before they
+	// are stored. moderationFailClosed rejects uploads when the check errors.
+	moderator            ImageModerator
+	moderationFailClosed bool
+
 	// engineSem bounds how many media-engine subprocesses run at once. Each
 	// invocation is CPU- and memory-heavy (libvips decode + encode), so a flood
 	// of cache-miss requests must not fork an unbounded number of them.
@@ -66,6 +71,14 @@ func New(db *sql.DB, store *storage.Client, baseURL string, maxUpload int64, med
 		apiKey:      apiKey,
 		engineSem:   make(chan struct{}, concurrency),
 	}
+}
+
+// SetModerator enables image content moderation on stored uploads. failClosed
+// controls behavior when the moderation check itself errors: true rejects the
+// upload, false allows it with a warning log.
+func (c *CDN) SetModerator(m ImageModerator, failClosed bool) {
+	c.moderator = m
+	c.moderationFailClosed = failClosed
 }
 
 // CheckMediaEngine verifies the configured media-engine binary exists and is

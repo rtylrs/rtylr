@@ -143,6 +143,7 @@ func (r *Repository) UpdateReviewCycleStatus(ctx context.Context, businessID, id
 	})
 }
 
+// dynamic-query: squirrel
 func (r *Repository) OpenReviewCycle(ctx context.Context, businessID, id int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
@@ -176,7 +177,6 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, businessID, id int64) 
 
 	// Insert all self-reviews in one multi-row INSERT instead of a statement
 	// per employee, removing N-1 round-trips inside the transaction.
-	// Built with squirrel since the value count is dynamic (one row per employee).
 	if len(employeeIDs) > 0 {
 		ib := sq.Insert("hr_performance_reviews").
 			Columns("owner_id", "business_id", "employee_id", "review_cycle_id", "reviewer_employee_id", "review_type", "status")

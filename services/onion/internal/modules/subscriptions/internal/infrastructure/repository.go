@@ -390,6 +390,7 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 	return periods, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, ownerID, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
 	if businessID <= 0 {
 		return []domain.AddonBillingPeriod{}, nil

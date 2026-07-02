@@ -270,6 +270,7 @@ var userColumns = []string{
 
 // ── Generic Resource CRUD ────────────────────────────────────────────────────
 
+// dynamic-query: squirrel
 func (r *Repository) ListResourceTables(ctx context.Context) ([]ResourceTableRow, error) {
 	rows, err := r.pool.QueryContext(ctx, `
 		SELECT table_name, table_comment
@@ -293,6 +294,7 @@ func (r *Repository) ListResourceTables(ctx context.Context) ([]ResourceTableRow
 	return tables, rows.Err()
 }
 
+// dynamic-query: squirrel
 func (r *Repository) DescribeResourceTable(ctx context.Context, table string) ([]ResourceColumnRow, string, error) {
 	rows, err := r.pool.QueryContext(ctx, `
 		SELECT column_name, data_type, is_nullable, column_key, column_default, extra, column_comment
@@ -337,6 +339,7 @@ func (r *Repository) DescribeResourceTable(ctx context.Context, table string) ([
 	return columns, primaryKey, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListResourceRows(ctx context.Context, table string, limit, offset int) (*ResourceRowsResult, error) {
 	columns, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -382,6 +385,7 @@ func (r *Repository) ListResourceRows(ctx context.Context, table string, limit, 
 	return &ResourceRowsResult{Columns: columns, PrimaryKey: primaryKey, Rows: resultRows, Total: total}, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) GetResourceRow(ctx context.Context, table, id string) (map[string]any, []ResourceColumnRow, string, error) {
 	columns, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -417,6 +421,7 @@ func (r *Repository) GetResourceRow(ctx context.Context, table, id string) (map[
 	return resultRows[0], columns, primaryKey, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) CreateResourceRow(ctx context.Context, table string, values map[string]any) (int64, error) {
 	columns, _, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -460,6 +465,7 @@ func (r *Repository) CreateResourceRow(ctx context.Context, table string, values
 	return res.LastInsertId()
 }
 
+// dynamic-query: squirrel
 func (r *Repository) UpdateResourceRow(ctx context.Context, table, id string, values map[string]any) error {
 	columns, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -503,6 +509,7 @@ func (r *Repository) UpdateResourceRow(ctx context.Context, table, id string, va
 	return err
 }
 
+// dynamic-query: squirrel
 func (r *Repository) DeleteResourceRow(ctx context.Context, table, id string) error {
 	_, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -556,6 +563,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*UserRow
 
 // ── Users CRUD ────────────────────────────────────────────────────────────────
 
+// dynamic-query: squirrel
 func (r *Repository) ListUsers(
 	ctx context.Context,
 	limit, offset int,
@@ -645,6 +653,7 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 	return res.LastInsertId()
 }
 
+// dynamic-query: squirrel
 func (r *Repository) CreateBusinessOwner(ctx context.Context, params CreateBusinessOwnerParams) (*CreateBusinessOwnerRow, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
@@ -805,6 +814,7 @@ WHERE u.id = ?
 	return result, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) UpdateUser(ctx context.Context, id int64, fullName, email string) error {
 	query, args, err := sq.
 		Update("users").
@@ -846,6 +856,7 @@ func (r *Repository) SetConsoleAdmin(ctx context.Context, id int64, isAdmin bool
 
 // ── Businesses CRUD ───────────────────────────────────────────────────────────
 
+// dynamic-query: squirrel
 func (r *Repository) ListBusinesses(
 	ctx context.Context,
 	limit, offset int,
@@ -967,6 +978,7 @@ func (r *Repository) decorateSubscriptionSeats(ctx context.Context, sub *Subscri
 
 // ── Subscriptions CRUD ────────────────────────────────────────────────────────
 
+// dynamic-query: squirrel
 func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, status string) ([]SubscriptionRow, int64, error) {
 	conds := sq.And{}
 	if status != "" {
@@ -1072,6 +1084,7 @@ func (r *Repository) UpsertSubscription(ctx context.Context, params Subscription
 	return r.queries.UpsertSubscription(ctx, upsertSubscriptionParams(params))
 }
 
+// dynamic-query: squirrel
 func (r *Repository) UpdateSubscription(ctx context.Context, id int64, params SubscriptionWriteParams) error {
 	query, args, err := sq.
 		Update("subscriptions").
@@ -1133,6 +1146,7 @@ func (r *Repository) UpdatePlan(ctx context.Context, id int64, name string, pric
 
 // ── Manual Access Grants CRUD ─────────────────────────────────────────────────
 
+// dynamic-query: squirrel
 func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]GrantRow, int64, error) {
 	countSQL, countArgs, err := sq.
 		Select("COUNT(*)").
@@ -1231,6 +1245,7 @@ func (r *Repository) GetGrantUserID(ctx context.Context, id int64) (int64, error
 	return userID, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) RevokeGrant(ctx context.Context, id int64) error {
 	query, args, err := sq.
 		Update("manual_access_grants").
@@ -1308,6 +1323,7 @@ func (r *Repository) AddonExists(ctx context.Context, addonID string) (bool, err
 	return count > 0, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]AddonGrantRow, int64, error) {
 	countSQL, countArgs, err := sq.
 		Select("COUNT(*)").
@@ -1405,6 +1421,7 @@ func (r *Repository) GetAddonGrantScope(ctx context.Context, id int64) (*AddonGr
 	return &scope, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) RevokeAddonGrant(ctx context.Context, id int64) error {
 	query, args, err := sq.
 		Update("manual_addon_grants").
@@ -1461,6 +1478,7 @@ ON DUPLICATE KEY UPDATE is_enabled = true, enabled_at = NOW(), disabled_at = NUL
 	return err
 }
 
+// dynamic-query: squirrel
 func (r *Repository) DisableBusinessAddon(ctx context.Context, businessID int64, addonID string) error {
 	query, args, err := sq.
 		Update("business_addons").

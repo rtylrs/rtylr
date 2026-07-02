@@ -206,8 +206,9 @@ func (r *Repository) GetCurrentOpenSession(ctx context.Context, businessID, staf
 	return s, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListSessions(ctx context.Context, businessID, locationID int64, dateFrom, dateTo string) ([]domain.Session, error) {
-	// Dynamic WHERE clause for optional filters (location/date range).
+	// Optional filters: location and date range.
 	builder := sq.
 		Select(
 			"id", "owner_id", "COALESCE(location_id,0)", "staff_id", "status",
@@ -408,6 +409,7 @@ func (r *Repository) ListOrders(ctx context.Context, businessID, sessionID int64
 	return orders, total, hasMore, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) listOrdersRows(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string, limit, offset int) ([]domain.Order, bool, error) {
 	builder := sq.
 		Select(
@@ -510,6 +512,7 @@ func (r *Repository) loadOrderItemsForOrders(ctx context.Context, orders []domai
 	return orders, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) countOrders(ctx context.Context, businessID, sessionID int64, status, dateFrom, dateTo, search string) (int64, error) {
 	builder := sq.Select("COUNT(*)").
 		From("pos_orders o").
@@ -530,6 +533,7 @@ func (r *Repository) countOrders(ctx context.Context, businessID, sessionID int6
 	return total, nil
 }
 
+// dynamic-query: squirrel
 func applyPOSOrderListFilters(builder sq.SelectBuilder, sessionID int64, status, dateFrom, dateTo, search string) sq.SelectBuilder {
 	if sessionID > 0 {
 		builder = builder.Where(sq.Eq{"o.session_id": sessionID})

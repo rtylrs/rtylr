@@ -32,6 +32,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, int64, bool, error) {
 	qb := squirrel.Select(
 		"p.id", "p.owner_id", "p.business_id", "p.category_id", "p.supplier_id", "p.name", "p.sku",
@@ -104,6 +105,7 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 	return products, total, hasMore, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) countProducts(ctx context.Context, ownerID int64, search string, categoryID int) (int64, error) {
 	qb := squirrel.Select("COUNT(*)").
 		From("erp_products p").
@@ -125,6 +127,7 @@ func (r *Repository) countProducts(ctx context.Context, ownerID int64, search st
 	return total, nil
 }
 
+// dynamic-query: squirrel
 func applyProductListFilters(qb squirrel.SelectBuilder, search string, categoryID int) squirrel.SelectBuilder {
 	qb = qb.Where("TRIM(COALESCE(p.name, '')) <> ''")
 

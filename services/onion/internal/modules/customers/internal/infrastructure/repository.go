@@ -77,6 +77,7 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 	return customers, int(total), nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.CustomerListFilter, offset int) ([]domain.Customer, int, error) {
 	conds := sq.And{sq.Eq{"business_id": filter.BusinessID}}
 
@@ -583,6 +584,7 @@ func (r *Repository) ListCampaigns(ctx context.Context, businessID int64, status
 	return campaigns, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) listCampaignsFiltered(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
 	listSQL, listArgs, err := sq.Select(
 		"id", "owner_id", "business_id", "name", "description", "channel", "status", "segment_id", "subject",

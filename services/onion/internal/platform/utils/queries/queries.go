@@ -1,3 +1,5 @@
+// Package queries builds parameterized dynamic SQL via Squirrel for callers
+// that cannot use sqlc (optional filters, multi-row inserts).
 package queries
 
 import (

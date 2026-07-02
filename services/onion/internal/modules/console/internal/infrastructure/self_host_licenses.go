@@ -57,6 +57,7 @@ func nullableString(raw string) any {
 	return raw
 }
 
+// dynamic-query: squirrel
 func (r *Repository) ListSelfHostLicenses(ctx context.Context, limit, offset int, email string) ([]SelfHostLicenseRow, int64, error) {
 	listQ := sq.Select(selfHostLicenseColumns).
 		From("self_host_licenses").

@@ -10,7 +10,7 @@ import (
 )
 
 // Repository aggregates cross-schema insights reads. Static queries use sqlc;
-// dynamic squirrel builders remain for churn cohort SQL.
+// churn cohort SQL is tagged dynamic-query: squirrel in customers_churn.go.
 type Repository struct {
 	queries *sqlc.Queries
 	pool    *sql.DB

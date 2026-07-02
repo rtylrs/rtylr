@@ -36,8 +36,8 @@ func NewRepository(db *sql.DB) *Repository {
 // Invoices
 // ---------------------------------------------------------------------------
 
+// dynamic-query: squirrel
 func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
-	// Dynamic filters: built with squirrel since sqlc cannot handle optional WHERE clauses.
 	qb := squirrel.Select(
 		"id", "owner_id", "business_id", "invoice_number", "client_name", "client_email", "client_address", "client_tax_id",
 		"status", "issue_date", "due_date", "paid_date", "currency", "subtotal", "discount_type",
@@ -183,14 +183,12 @@ func (r *Repository) CreateInvoice(ctx context.Context, businessID int64, inv do
 	return id, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error {
 	if len(items) == 0 {
 		return nil
 	}
 
-	// Insert all line items in a single multi-row INSERT instead of one
-	// statement per item, removing the per-item round-trip (N+1 writes).
-	// Built with squirrel since the value count is dynamic (one row per item).
 	ib := squirrel.Insert("finance_invoice_items").
 		Columns("invoice_id", "description", "quantity", "unit", "unit_price", "tax_rate", "discount_pct", "total", "sort_order")
 	for _, item := range items {
@@ -439,8 +437,8 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // Expenses
 // ---------------------------------------------------------------------------
 
+// dynamic-query: squirrel
 func (r *Repository) ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error) {
-	// Dynamic filters: built with squirrel since sqlc cannot handle optional WHERE clauses.
 	qb := squirrel.Select(
 		"id", "owner_id", "business_id", "category_id", "description", "amount", "currency", "expense_date", "vendor",
 		"payment_method", "receipt_url", "is_tax_deductible", "tax_amount", "notes", "created_at", "updated_at",

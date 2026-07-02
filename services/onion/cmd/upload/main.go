@@ -95,6 +95,14 @@ func main() {
 		logger.Ctx(ctx).Warn("media-engine unavailable; image transformations will fail", logger.Error(err))
 	}
 
+	if moderator, failClosed := cdn.NewModeratorFromConfig(cfg); moderator != nil {
+		service.SetModerator(moderator, failClosed)
+		logger.Ctx(ctx).Info("CDN image moderation enabled",
+			logger.String("provider", cfg.CDNModerationProvider),
+			logger.Bool("fail_closed", failClosed),
+		)
+	}
+
 	port := platformConfig.ListenPort("8080")
 
 	logger.Ctx(ctx).Info("CDN (upload) runmode starting",

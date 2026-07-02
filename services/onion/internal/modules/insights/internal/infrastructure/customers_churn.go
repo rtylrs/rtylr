@@ -25,6 +25,8 @@ var churnWindows = []int32{30, 60, 90, 180}
 // GetChurnRates returns churn percentages for each of the standard
 // windows. A fresh tenant with no orders at all returns zero-valued
 // rows rather than an error, per the fallback rules in CLAUDE.md §8.
+//
+// dynamic-query: squirrel
 func (r *Repository) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnRateRow, error) {
 	now := nowFn()
 	out := make([]ChurnRateRow, 0, len(churnWindows))

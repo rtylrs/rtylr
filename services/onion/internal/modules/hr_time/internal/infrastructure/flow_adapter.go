@@ -20,6 +20,7 @@ func NewFlowAdapter(db *sql.DB) *FlowAdapter {
 	return &FlowAdapter{pool: db}
 }
 
+// dynamic-query: squirrel
 func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, businessID, employeeID int64, periodStart, periodEnd string) ([]domain.FlowTaskRecord, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {

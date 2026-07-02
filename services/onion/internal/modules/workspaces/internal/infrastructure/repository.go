@@ -305,6 +305,7 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 	return res.LastInsertId()
 }
 
+// dynamic-query: squirrel
 func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
 	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(sq.Eq{"t.project_id": filter.ProjectID}).
@@ -327,6 +328,7 @@ func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTa
 	return r.listEnrichedTasks(ctx, builder)
 }
 
+// dynamic-query: squirrel
 func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
 	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(sq.Eq{"t.workspace_id": filter.WorkspaceID}).
@@ -372,6 +374,7 @@ func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]dom
 // "My tasks" board, so the Done column shows recent work without unbounded history.
 const myTasksDoneWindowDays = 14
 
+// dynamic-query: squirrel
 func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
 	// All active work assigned to the user, plus tasks they completed within the
 	// recent window so the board's Done column isn't always empty. Cancelled tasks
@@ -398,6 +401,7 @@ func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Tas
 	)
 }
 
+// dynamic-query: squirrel
 func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInput) error {
 	labelsJSON, err := marshalLabels(input.Labels)
 	if err != nil {
@@ -910,10 +914,13 @@ func enrichedTaskColumns(includeDescription bool) []string {
 // enrichedTaskSelect returns a squirrel builder with the enriched task
 // SELECT + JOINs preconfigured. Callers add WHERE/ORDER/LIMIT clauses.
 // All tenant-scope filtering is the caller's responsibility.
+//
+// dynamic-query: squirrel
 func enrichedTaskSelect() sq.SelectBuilder {
 	return enrichedTaskSelectForList(false)
 }
 
+// dynamic-query: squirrel
 func enrichedTaskSelectForList(compact bool) sq.SelectBuilder {
 	return sq.
 		Select(enrichedTaskColumns(!compact)...).
@@ -924,6 +931,7 @@ func enrichedTaskSelectForList(compact bool) sq.SelectBuilder {
 }
 
 // listEnrichedTasks runs an enriched task query built by the caller.
+// dynamic-query: squirrel
 func (r *Repository) listEnrichedTasks(ctx context.Context, builder sq.SelectBuilder) ([]domain.Task, error) {
 	q, args, err := builder.ToSql()
 	if err != nil {
@@ -1411,6 +1419,7 @@ func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspac
 // Task Search
 // ─────────────────────────────────────────────
 
+// dynamic-query: squirrel
 func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q string) ([]domain.Task, error) {
 	q = strings.TrimSpace(q)
 	if q == "" {

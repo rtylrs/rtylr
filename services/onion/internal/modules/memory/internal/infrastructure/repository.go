@@ -392,6 +392,7 @@ func (r *Repository) StoreUserMemory(ctx context.Context, memory *domain.UserMem
 	return &stored, nil
 }
 
+// dynamic-query: squirrel
 func (r *Repository) SearchUserMemory(ctx context.Context, userID int, query string) ([]domain.UserMemory, error) {
 	query = strings.TrimSpace(query)
 	if query == "" {
