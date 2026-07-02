@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package pos.cash.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/cash/v1/cash_adjust.proto";
+import "pos/cash/v1/cash_drop.proto";
+import "pos/cash/v1/cash_pickup.proto";
+import "pos/cash/v1/list_cash_movements.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/cash/v1";
+
+service CashService {
+  option (onekit.http.service_config) = {base_path: "/pos/cash"};
+
+  rpc ListCashMovements(ListCashMovementsRequest) returns (ListCashMovementsResponse) {
+    option (onekit.http.config) = {
+      path: "/movements"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CashDrop(CashDropRequest) returns (CashDropResponse) {
+    option (onekit.http.config) = {
+      path: "/drop"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc CashPickup(CashPickupRequest) returns (CashPickupResponse) {
+    option (onekit.http.config) = {
+      path: "/pickup"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc CashAdjust(CashAdjustRequest) returns (CashAdjustResponse) {
+    option (onekit.http.config) = {
+      path: "/adjust"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

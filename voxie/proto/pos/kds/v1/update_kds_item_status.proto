@@ -14,6 +14,13 @@ message UpdateKDSItemStatusRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
+  // order_id is the unique identifier for the order.
+  int64 order_id = 2 [(buf.validate.field).int64.gt = 0];
+  // item_id is the unique identifier for the order item.
+  int64 item_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message UpdateKDSItemStatusResponse {

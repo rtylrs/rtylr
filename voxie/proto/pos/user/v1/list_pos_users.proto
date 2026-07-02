@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.user.v1;
 
+import "onekit/http/annotations.proto";
 import "pos/user/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
 
 message ListPOSUsersRequest {
   // location_id is the location id value for this contract.
-  int64 location_id = 1;
+  int64 location_id = 1 [(onekit.http.query).name = "location_id"];
 }
 
 message ListPOSUsersResponse {

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.stock.v1;
 
+import "onekit/http/annotations.proto";
 import "pos/stock/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
 
 message ListInventoryRequest {
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 1;
+  int64 branch_id = 1 [(onekit.http.query).name = "branch_id"];
 }
 
 message ListInventoryResponse {

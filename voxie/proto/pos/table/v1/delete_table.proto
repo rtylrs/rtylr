@@ -2,11 +2,19 @@ syntax = "proto3";
 
 package pos.table.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
 
 // ── Delete ────────────────────────────────────────────────────────
 
-message DeleteTableRequest {}
+message DeleteTableRequest {
+  // id is the unique identifier for the table.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+}
 
 message DeleteTableResponse {
   // message is a human-readable result message.

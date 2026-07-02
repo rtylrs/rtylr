@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package pos.settings.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/settings/v1/get_pos_settings.proto";
+import "pos/settings/v1/update_pos_settings.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/settings/v1";
+
+service SettingsService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc GetPOSSettings(GetPOSSettingsRequest) returns (GetPOSSettingsResponse) {
+    option (onekit.http.config) = {
+      path: "/settings"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdatePOSSettings(UpdatePOSSettingsRequest) returns (UpdatePOSSettingsResponse) {
+    option (onekit.http.config) = {
+      path: "/settings"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

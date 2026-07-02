@@ -3,6 +3,7 @@ syntax = "proto3";
 package pos.audit.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 import "pos/audit/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
@@ -11,18 +12,20 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
 
 message ListAuditRequest {
   // action is the action value for this contract.
-  string action = 1;
+  string action = 1 [(onekit.http.query).name = "action"];
   // entity_type is the entity type value for this contract.
-  string entity_type = 2;
+  string entity_type = 2 [(onekit.http.query).name = "entity_type"];
   // employee_id is the employee id value for this contract.
-  int64 employee_id = 3;
+  int64 employee_id = 3 [(onekit.http.query).name = "employee_id"];
   // start_date is the start date value for this contract.
   string start_date = 4 [
+    (onekit.http.query).name = "start_date",
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // end_date is the end date value for this contract.
   string end_date = 5 [
+    (onekit.http.query).name = "end_date",
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];

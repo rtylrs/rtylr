@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package pos.session.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/session/v1/close_session.proto";
+import "pos/session/v1/list_sessions.proto";
+import "pos/session/v1/open_session.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/session/v1";
+
+service SessionService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (onekit.http.config) = {
+      path: "/sessions"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc OpenSession(OpenSessionRequest) returns (OpenSessionResponse) {
+    option (onekit.http.config) = {
+      path: "/sessions/open"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc CloseSession(CloseSessionRequest) returns (CloseSessionResponse) {
+    option (onekit.http.config) = {
+      path: "/sessions/{id}/close"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

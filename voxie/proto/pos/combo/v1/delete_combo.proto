@@ -2,11 +2,19 @@ syntax = "proto3";
 
 package pos.combo.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/combo/v1";
 
 // ── Delete ────────────────────────────────────────────────────────
 
-message DeleteComboRequest {}
+message DeleteComboRequest {
+  // id is the unique identifier for the combo.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+}
 
 message DeleteComboResponse {
   // message is a human-readable result message.

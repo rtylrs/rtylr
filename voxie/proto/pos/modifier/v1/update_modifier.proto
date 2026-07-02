@@ -23,6 +23,11 @@ message UpdateModifierRequest {
   ];
   // is_required is the is required value for this contract.
   bool is_required = 4;
+  // id is the unique identifier for the modifier.
+  int64 id = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message UpdateModifierResponse {

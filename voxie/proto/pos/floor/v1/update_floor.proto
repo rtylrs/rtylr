@@ -19,6 +19,11 @@ message UpdateFloorRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).int32.gt = 0
   ];
+  // id is the unique identifier for the floor.
+  int64 id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message UpdateFloorResponse {

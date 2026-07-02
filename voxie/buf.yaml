@@ -1,11 +1,14 @@
 version: v2
 modules:
   - path: proto
+  - path: third_party/onekit/proto
 deps:
   - buf.build/bufbuild/protovalidate
 lint:
   use:
     - STANDARD
+  ignore:
+    - third_party/onekit/proto
 breaking:
   use:
     - FILE

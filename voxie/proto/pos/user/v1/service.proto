@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package pos.user.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/user/v1/create_pos_user.proto";
+import "pos/user/v1/deactivate_pos_user.proto";
+import "pos/user/v1/list_pos_users.proto";
+import "pos/user/v1/update_pos_user.proto";
+import "pos/user/v1/verify_pos_user_pin.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
+
+service UserService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc ListPOSUsers(ListPOSUsersRequest) returns (ListPOSUsersResponse) {
+    option (onekit.http.config) = {
+      path: "/users"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreatePOSUser(CreatePOSUserRequest) returns (CreatePOSUserResponse) {
+    option (onekit.http.config) = {
+      path: "/users"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdatePOSUser(UpdatePOSUserRequest) returns (UpdatePOSUserResponse) {
+    option (onekit.http.config) = {
+      path: "/users/update"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  rpc DeactivatePOSUser(DeactivatePOSUserRequest) returns (DeactivatePOSUserResponse) {
+    option (onekit.http.config) = {
+      path: "/users/deactivate"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  rpc VerifyPOSUserPIN(VerifyPOSUserPINRequest) returns (VerifyPOSUserPINResponse) {
+    option (onekit.http.config) = {
+      path: "/users/verify-pin"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

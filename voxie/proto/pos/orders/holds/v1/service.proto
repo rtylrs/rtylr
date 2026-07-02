@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package pos.orders.holds.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/orders/holds/v1/hold_order.proto";
+import "pos/orders/holds/v1/list_held_orders.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/holds/v1";
+
+service OrderHoldService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc HoldOrder(HoldOrderRequest) returns (HoldOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/hold"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc ListHeldOrders(ListHeldOrdersRequest) returns (ListHeldOrdersResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/held"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

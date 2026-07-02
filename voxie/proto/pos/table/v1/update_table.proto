@@ -26,6 +26,11 @@ message UpdateTableRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
+  // id is the unique identifier for the table.
+  int64 id = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message UpdateTableResponse {

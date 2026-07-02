@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package pos.audit.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/audit/v1/create_audit.proto";
+import "pos/audit/v1/list_audit.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
+
+service AuditService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc ListAudit(ListAuditRequest) returns (ListAuditResponse) {
+    option (onekit.http.config) = {
+      path: "/audit"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateAudit(CreateAuditRequest) returns (CreateAuditResponse) {
+    option (onekit.http.config) = {
+      path: "/audit"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

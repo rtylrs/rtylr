@@ -3,6 +3,7 @@ syntax = "proto3";
 package pos.loyalty.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
 
@@ -11,6 +12,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
 message GetLoyaltyBalanceRequest {
   // customer_id is the customer id value for this contract.
   int64 customer_id = 1 [
+    (onekit.http.query).name = "customer_id",
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.orders.refunds.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/orders/refunds/v1/process_refund.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/refunds/v1";
+
+service OrderRefundService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc ProcessRefund(ProcessRefundRequest) returns (ProcessRefundResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/refund"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

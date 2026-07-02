@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package common.auth.v1;
+
+import "common/auth/v1/google_auth.proto";
+import "common/auth/v1/invite_accept.proto";
+import "common/auth/v1/login.proto";
+import "common/auth/v1/register.proto";
+import "common/auth/v1/resend_verification.proto";
+import "common/auth/v1/reset_password.proto";
+import "common/auth/v1/reset_password_confirm.proto";
+import "common/auth/v1/verify_email.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
+
+// AuthService defines the public authentication endpoints.
+service AuthService {
+  option (onekit.http.service_config) = {base_path: "/auth"};
+
+  // Register creates a new owner account and optional first business.
+  rpc Register(RegisterRequest) returns (RegisterResponse) {
+    option (onekit.http.config) = {
+      path: "/register"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // Login authenticates an email and password pair.
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (onekit.http.config) = {
+      path: "/login"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // GoogleAuth completes social authentication with an OAuth code.
+  rpc GoogleAuth(GoogleAuthRequest) returns (GoogleAuthResponse) {
+    option (onekit.http.config) = {
+      path: "/register/google"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ResetPassword starts a password reset flow.
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {
+    option (onekit.http.config) = {
+      path: "/password-reset/request"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ResetPasswordConfirm completes a password reset flow.
+  rpc ResetPasswordConfirm(ResetPasswordConfirmRequest) returns (ResetPasswordConfirmResponse) {
+    option (onekit.http.config) = {
+      path: "/password-reset/confirm"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // VerifyEmail verifies an account email using a token.
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse) {
+    option (onekit.http.config) = {
+      path: "/verify-email"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ResendVerification sends a fresh email verification message.
+  rpc ResendVerification(ResendVerificationRequest) returns (ResendVerificationResponse) {
+    option (onekit.http.config) = {
+      path: "/resend-verification"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // InviteAccept lets an invited user activate their account.
+  rpc InviteAccept(InviteAcceptRequest) returns (InviteAcceptResponse) {
+    option (onekit.http.config) = {
+      path: "/invite/accept"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

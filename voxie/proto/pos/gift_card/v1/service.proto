@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package pos.gift_card.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/gift_card/v1/create_gift_card.proto";
+import "pos/gift_card/v1/list_gift_cards.proto";
+import "pos/gift_card/v1/redeem_gift_card.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
+
+service GiftCardService {
+  option (onekit.http.service_config) = {base_path: "/pos"};
+
+  rpc ListGiftCards(ListGiftCardsRequest) returns (ListGiftCardsResponse) {
+    option (onekit.http.config) = {
+      path: "/gift-cards"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateGiftCard(CreateGiftCardRequest) returns (CreateGiftCardResponse) {
+    option (onekit.http.config) = {
+      path: "/gift-cards"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc RedeemGiftCard(RedeemGiftCardRequest) returns (RedeemGiftCardResponse) {
+    option (onekit.http.config) = {
+      path: "/gift-cards/{code}/redeem"
+      method: HTTP_METHOD_POST
+    };
+  }
+}
