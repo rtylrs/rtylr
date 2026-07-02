@@ -95,3 +95,38 @@ make generate-module NAME=<module_name>
 
 The generated module follows the current Onion package shape:
 `application`, `domain`, `infrastructure`, `routes`, and `sql`.
+
+## oneKit HTTP Boundary
+
+New or migrated HTTP endpoints should move toward:
+
+```text
+frontend <-> oneKit generated client/server <-> Onion application service
+```
+
+The generated oneKit server owns request binding, path/query/body decoding,
+header checks, and protovalidate validation. Onion handlers should stop
+duplicating that validation once an endpoint is on a generated proto service.
+
+Use `internal/platform/onekit` as the Onion bridge:
+
+- `onekit.NewMux()` creates the private `http.ServeMux` passed to generated
+  `WithMux(...)` options.
+- `onekit.ErrorHandler` keeps generated route failures in the existing Onion
+  JSON error envelope.
+- `onekit.Mount(...)` registers generated `"METHOD /path"` patterns on chi so
+  normal Onion middleware still runs.
+- `onekit.Serve(...)` adapts the current `Serve(ctx, req) (res, *ServerError)`
+  handler shape while modules migrate internally.
+
+Contract generation remains backwards-compatible:
+
+```bash
+make contracts
+ONION_REQUIRE_ONEKIT=1 make contracts
+```
+
+`make contracts` always generates Go proto types. If
+`protoc-gen-onekit-go-http` is installed, it also generates oneKit HTTP server
+files. `ONION_REQUIRE_ONEKIT=1` makes missing oneKit generation a hard failure
+for modules that have moved to generated HTTP services.

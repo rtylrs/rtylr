@@ -22,6 +22,7 @@ require (
 
 require (
 	buf.build/go/protovalidate v1.2.0
+	github.com/1homsi/onekit v0.1.0
 	github.com/aws/aws-sdk-go-v2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1

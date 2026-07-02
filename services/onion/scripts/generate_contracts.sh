@@ -27,6 +27,9 @@ if ! command -v protoc-gen-go >/dev/null 2>&1; then
   exit 1
 fi
 
+ONEKIT_PLUGIN="${ONEKIT_GO_HTTP_PLUGIN:-protoc-gen-onekit-go-http}"
+ONEKIT_REQUIRE="${ONION_REQUIRE_ONEKIT:-0}"
+
 cat > "$TEMPLATE_FILE" <<EOF
 version: v2
 plugins:
@@ -35,6 +38,20 @@ plugins:
     opt:
       - paths=source_relative
 EOF
+
+if command -v "$ONEKIT_PLUGIN" >/dev/null 2>&1; then
+  cat >> "$TEMPLATE_FILE" <<EOF
+  - local: $ONEKIT_PLUGIN
+    out: $OUT_DIR
+    opt:
+      - paths=source_relative
+EOF
+elif [ "$ONEKIT_REQUIRE" = "1" ] || [ "$ONEKIT_REQUIRE" = "true" ]; then
+  echo "Error: $ONEKIT_PLUGIN is required when ONION_REQUIRE_ONEKIT is enabled."
+  exit 1
+else
+  echo "Skipping oneKit HTTP generation; $ONEKIT_PLUGIN is not installed."
+fi
 
 rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
