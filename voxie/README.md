@@ -18,16 +18,14 @@ voxie/
     pos/             # POS contracts
 ```
 
-Generated code is intentionally not committed here. Consumers generate their own language output from the checked-out submodule:
-
-- `rtylr`: `pnpm contracts:sync` generates TypeScript into `packages/contracts/src`.
-- `onion`: `make contracts` generates Go into the local `voxie/gen/go` checkout before Go builds/tests.
+Go output (`gen/go`) is generated here and committed — `onion` consumes it directly from the submodule checkout, no local generation needed. `rtylr` still generates its own TypeScript: `pnpm contracts:sync` into `packages/contracts/src`.
 
 ## Usage
 
 ```bash
 make lint
 make format
+make generate   # regenerates gen/go — commit the result
 ```
 
 ## Adding New Contracts
@@ -36,10 +34,11 @@ make format
 2. Keep each endpoint in its own `.proto` file.
 3. Put shared cross-app contracts under `proto/common/`.
 4. Add comments for new messages and fields.
-5. Run `make lint`.
-6. Update the Voxie submodule in consumer repos and run their generation commands.
+5. Run `make lint` and `make generate`, and commit the resulting `gen/go` changes.
+6. Update the Voxie submodule pointer in `onion` and `rtylr`; run `pnpm contracts:sync` in `rtylr`.
 
 ## Tools
 
 - [buf](https://buf.build/) for linting, formatting, and breaking change detection.
-- Consumer repos own language-specific code generation.
+- `onekit` (github.com/1homsi/onekit) generates the Go HTTP server bindings in `gen/go`.
+- `rtylr` owns its own TypeScript code generation.

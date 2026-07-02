@@ -215,10 +215,10 @@ Create `proto/{domain}/v2/` only for genuinely breaking changes that cannot be h
 Order of operations when adding a new `.proto` file:
 1. Create the `.proto` file in `proto/common/{domain}/v1/` for shared contracts or `proto/{app}/{capability}/{subdomain}/v1/` for app-owned contracts.
 2. Run `make lint`.
-3. Commit the `.proto` source.
+3. Run `make generate` and commit the `.proto` source together with the regenerated `gen/go`.
 4. Add the export path to `packages/contracts/package.json` in `rtylr` if needed.
 5. Run `pnpm contracts:sync` in `rtylr`.
-6. Run `make contracts` in `onion`.
+6. In `onion`: bump the `voxie` submodule pointer — no generation step needed there.
 
 ---
 
@@ -267,7 +267,6 @@ Order of operations when adding a new `.proto` file:
 |---|---|---|
 | `@voxire/contracts/package.json` exports include `book/v1/*`, `store/v1/*`, and legacy `auth/v1/auth` paths with no corresponding proto files | `packages/contracts/package.json` (in rtylr) | Medium |
 | Go module is declared as `v0.0.0` — no semantic versioning enforced | `go.mod` | Low |
-| `onion`'s `scripts/generate_contracts.sh` and `make contracts` still regenerate `voxie/gen/go` locally — now redundant since `gen/go` ships pre-committed; should be simplified to a plain submodule checkout | `onion/scripts/generate_contracts.sh`, `onion/Makefile` | Medium |
 
 ---
 
