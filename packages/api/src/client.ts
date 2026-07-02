@@ -136,4 +136,59 @@ export function createApiClient(appId: string): AxiosInstance {
   return client;
 }
 
+export type OneKitClientOptions = {
+  fetch?: typeof fetch;
+  defaultHeaders?: Record<string, string>;
+};
+
+export type OneKitClientConstructor<TClient, TOptions extends OneKitClientOptions> = new (
+  baseUrl: string,
+  options?: TOptions
+) => TClient;
+
+export const getOneKitApiBaseUrl = (): string => getBaseUrl();
+
+export function createOneKitFetch(appId: string): typeof fetch {
+  return async (input, init) => {
+    const headers = new Headers(init?.headers);
+    const token = getToken();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const response = await fetch(input, {
+      ...init,
+      headers,
+    });
+
+    if (response.status === 401) {
+      clearTokenCookie();
+      window.location.href = getAuthUrl(appId);
+    }
+
+    return response;
+  };
+}
+
+export function createOneKitClientOptions<TOptions extends OneKitClientOptions>(
+  appId: string,
+  options?: TOptions
+): TOptions {
+  return {
+    ...(options ?? ({} as TOptions)),
+    fetch: options?.fetch ?? createOneKitFetch(appId),
+    defaultHeaders: {
+      ...options?.defaultHeaders,
+    },
+  };
+}
+
+export function createOneKitClient<TClient, TOptions extends OneKitClientOptions>(
+  Client: OneKitClientConstructor<TClient, TOptions>,
+  appId: string,
+  options?: TOptions
+): TClient {
+  return new Client(getOneKitApiBaseUrl(), createOneKitClientOptions(appId, options));
+}
+
 export const api: AxiosInstance = createApiClient('dash');

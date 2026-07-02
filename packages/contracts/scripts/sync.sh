@@ -32,6 +32,10 @@ if ! command -v protoc-gen-ts_proto >/dev/null 2>&1; then
   exit 1
 fi
 
+ONEKIT_TS_PLUGIN="${ONEKIT_TS_CLIENT_PLUGIN:-protoc-gen-onekit-ts-client}"
+ONEKIT_REQUIRE="${VOXIRE_REQUIRE_ONEKIT:-0}"
+ONEKIT_CLIENTS_DIR="$CONTRACTS_SRC/onekit"
+
 cat > "$TEMPLATE_FILE" <<EOF
 version: v2
 plugins:
@@ -45,6 +49,20 @@ plugins:
       - exportCommonSymbols=false
       - onlyTypes=true
 EOF
+
+if command -v "$ONEKIT_TS_PLUGIN" >/dev/null 2>&1; then
+  cat >> "$TEMPLATE_FILE" <<EOF
+  - local: $ONEKIT_TS_PLUGIN
+    out: $ONEKIT_CLIENTS_DIR
+    opt:
+      - paths=source_relative
+EOF
+elif [ "$ONEKIT_REQUIRE" = "1" ] || [ "$ONEKIT_REQUIRE" = "true" ]; then
+  echo "Error: $ONEKIT_TS_PLUGIN is required when VOXIRE_REQUIRE_ONEKIT is enabled."
+  exit 1
+else
+  echo "Skipping oneKit TypeScript client generation; $ONEKIT_TS_PLUGIN is not installed."
+fi
 
 echo "Generating contracts from voxie..."
 rm -rf "$CONTRACTS_SRC"

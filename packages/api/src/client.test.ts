@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createApiClient } from './client';
+import { createApiClient, createOneKitClient, createOneKitFetch } from './client';
 
 // We need to mock import.meta.env
 vi.stubGlobal('import', {
@@ -157,5 +157,53 @@ describe('createApiClient', () => {
     const interceptors = (client.interceptors.request as any).handlers;
     const result = interceptors[0].fulfilled(config);
     expect(result.headers['Authorization']).toBe('Bearer eyJhbGciOiJIUzI1NiJ9.test.sig');
+  });
+});
+
+describe('createOneKitFetch', () => {
+  it('adds Authorization header when token exists', async () => {
+    document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'));
+
+    await createOneKitFetch('hub')('https://api.test.com/demo', {
+      headers: {
+        'X-Test': 'yes',
+      },
+    });
+
+    const [, init] = fetchSpy.mock.calls[0]!;
+    const headers = new Headers(init?.headers);
+    expect(headers.get('Authorization')).toBe(
+      'Bearer eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig'
+    );
+    expect(headers.get('X-Test')).toBe('yes');
+  });
+
+  it('redirects to auth on 401', async () => {
+    document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 401 }));
+
+    await createOneKitFetch('hub')('https://api.test.com/demo');
+
+    expect(window.location.href).toContain('localhost:5176');
+  });
+});
+
+describe('createOneKitClient', () => {
+  it('creates generated clients with base URL and oneKit options', () => {
+    class DemoClient {
+      constructor(
+        public baseUrl: string,
+        public options?: { fetch?: typeof fetch; defaultHeaders?: Record<string, string> }
+      ) {}
+    }
+
+    const client = createOneKitClient(DemoClient, 'hub', {
+      defaultHeaders: { 'X-Demo': '1' },
+    });
+
+    expect(client.baseUrl).toBeDefined();
+    expect(client.options?.fetch).toBeDefined();
+    expect(client.options?.defaultHeaders).toEqual({ 'X-Demo': '1' });
   });
 });

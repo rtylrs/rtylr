@@ -1,4 +1,12 @@
-export { api, createApiClient } from './client';
+export {
+  api,
+  createApiClient,
+  createOneKitClient,
+  createOneKitClientOptions,
+  createOneKitFetch,
+  getOneKitApiBaseUrl,
+} from './client';
+export type { OneKitClientConstructor, OneKitClientOptions } from './client';
 export { safeFetch, unwrap, ok, err, ResultAsync } from './result';
 export type { ApiError, ApiErrorCode, SafeApi } from './result';
 export { RealtimeClient, getRealtimeClient } from './realtime';
