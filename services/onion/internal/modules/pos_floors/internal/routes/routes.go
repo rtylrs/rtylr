@@ -2,32 +2,31 @@ package routes
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	posfloorv1 "github.com/voxire/voxie/gen/go/pos/floor/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/routes/handlers"
-	"github.com/voxire/onion/internal/platform/server/http"
+	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Service) {
-	http.RegisterGET[handlers.ListFloorsRequest, handlers.ListFloorsResponse](
-		ctx, router, handlers.FloorListRoutes(),
-		&handlers.ListFloorsHandler{Service: svc},
-	)
+func RegisterRoutes(_ context.Context, router *chi.Mux, svc *application.Service) {
+	mux := http.NewServeMux()
+	if err := posfloorv1.RegisterFloorServiceServer(
+		handlers.NewFloorAPI(svc),
+		posfloorv1.WithMux(mux),
+		posfloorv1.WithErrorHandler(contractHttp.ErrorHandler),
+		posfloorv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS floor service: %w", err))
+	}
 
-	http.RegisterPOSTWithValidation[handlers.CreateFloorRequest, handlers.CreateFloorResponse](
-		ctx, router, handlers.FloorCreateRoutes(),
-		&handlers.CreateFloorHandler{Service: svc},
-	)
-
-	http.RegisterPUTWithValidation[handlers.UpdateFloorRequest, handlers.UpdateFloorResponse](
-		ctx, router, handlers.FloorUpdateRoutes(),
-		&handlers.UpdateFloorHandler{Service: svc},
-	)
-
-	http.RegisterDELETEWithValidation[handlers.DeleteFloorRequest, handlers.DeleteFloorResponse](
-		ctx, router, handlers.FloorDeleteRoutes(),
-		&handlers.DeleteFloorHandler{Service: svc},
-	)
+	router.Method(http.MethodGet, "/api/pos/floor/v1/floors", mux)
+	router.Method(http.MethodPost, "/api/pos/floor/v1/floors", mux)
+	router.Method(http.MethodPut, "/api/pos/floor/v1/floors/{id}", mux)
+	router.Method(http.MethodDelete, "/api/pos/floor/v1/floors/{id}", mux)
 }

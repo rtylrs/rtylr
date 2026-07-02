@@ -98,35 +98,36 @@ The generated module follows the current Onion package shape:
 
 ## oneKit HTTP Boundary
 
-New or migrated HTTP endpoints should move toward:
+HTTP endpoints are contract-first:
 
 ```text
 frontend <-> oneKit generated client/server <-> Onion application service
 ```
 
+Each backend module should expose one or more Voxie `service.proto` definitions.
+Those services import `onekit/http/annotations.proto` and declare an HTTP
+`base_path` that mirrors the proto file's own directory path, prefixed with
+`/api`: `pos/floor/v1/service.proto` → `base_path: "/api/pos/floor/v1"`. Each
+RPC's `path` option is appended to that base path (e.g. `/floors`), giving a
+full route of `/api/{app}/{module}/{version}/{route}`.
+
+Onion modules implement the generated `FooServiceServer` interfaces directly.
+Registration follows the Koussa/Anghamna pattern:
+
+1. Build a private `http.ServeMux`.
+2. Call generated `RegisterFooServiceServer(...)` with `WithMux(...)`.
+3. Mount that mux on the chi router at the exact same full path the proto
+   declares (`router.Method(http.MethodGet, "/api/pos/floor/v1/floors", mux)`)
+   — chi and the generated mux both match on this literal path, so they must
+   stay in sync by hand.
+4. Keep authorization, tenancy resolution, and domain orchestration in the
+   module implementation.
+
 The generated oneKit server owns request binding, path/query/body decoding,
-header checks, and protovalidate validation. Onion handlers should stop
-duplicating that validation once an endpoint is on a generated proto service.
+header checks, and protovalidate validation. Module implementations should not
+redefine HTTP request structs for endpoints that have generated service
+contracts.
 
-Use `internal/platform/onekit` as the Onion bridge:
-
-- `onekit.NewMux()` creates the private `http.ServeMux` passed to generated
-  `WithMux(...)` options.
-- `onekit.ErrorHandler` keeps generated route failures in the existing Onion
-  JSON error envelope.
-- `onekit.Mount(...)` registers generated `"METHOD /path"` patterns on chi so
-  normal Onion middleware still runs.
-- `onekit.Serve(...)` adapts the current `Serve(ctx, req) (res, *ServerError)`
-  handler shape while modules migrate internally.
-
-Contract generation remains backwards-compatible:
-
-```bash
-make contracts
-ONION_REQUIRE_ONEKIT=1 make contracts
-```
-
-`make contracts` always generates Go proto types. If
-`protoc-gen-onekit-go-http` is installed, it also generates oneKit HTTP server
-files. `ONION_REQUIRE_ONEKIT=1` makes missing oneKit generation a hard failure
-for modules that have moved to generated HTTP services.
+Contract generation is owned by the `voxie` repo, not `onion`. `gen/go` ships
+pre-committed in the `voxie` submodule — bump the submodule pointer to pick up
+new or changed contracts, there is nothing to run locally in `onion`.

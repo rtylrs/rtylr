@@ -43,11 +43,6 @@ jobs:
             | tar -xz -C /usr/local/bin sqlc
           sqlc version
 
-      - name: Install contract generators
-        run: |
-          go install github.com/bufbuild/buf/cmd/buf@v1.65.0
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
-
       # sqlc only parses the .sql files against the schema files to generate Go
       # code (the generated package is gitignored). It does not connect to any
       # database.
@@ -55,11 +50,6 @@ jobs:
         run: |
           chmod +x scripts/generate_sqlc.sh
           ./scripts/generate_sqlc.sh
-
-      - name: Generate Voxie contracts
-        run: |
-          chmod +x scripts/generate_contracts.sh
-          ./scripts/generate_contracts.sh
 
       - name: go vet
         run: go vet ./...
