@@ -30,7 +30,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/menu/combos", listCombosHandler)
+	config.mux.Handle("GET /api/pos/combo/v1/combos", listCombosHandler)
 
 	methodHeaders = getCreateComboHeaders()
 	createComboHandler := BindingMiddleware[CreateComboRequest](
@@ -39,7 +39,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/menu/combos", createComboHandler)
+	config.mux.Handle("POST /api/pos/combo/v1/combos", createComboHandler)
 
 	methodHeaders = getUpdateComboHeaders()
 	updateComboHandler := BindingMiddleware[UpdateComboRequest](
@@ -48,7 +48,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/menu/combos/{id}", updateComboHandler)
+	config.mux.Handle("PUT /api/pos/combo/v1/combos/{id}", updateComboHandler)
 
 	methodHeaders = getDeleteComboHeaders()
 	deleteComboHandler := BindingMiddleware[DeleteComboRequest](
@@ -57,7 +57,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /pos/menu/combos/{id}", deleteComboHandler)
+	config.mux.Handle("DELETE /api/pos/combo/v1/combos/{id}", deleteComboHandler)
 
 	return nil
 }

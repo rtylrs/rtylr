@@ -9,7 +9,7 @@ import "pos/settings/v1/update_pos_settings.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/settings/v1";
 
 service SettingsService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/settings/v1"};
 
   rpc GetPOSSettings(GetPOSSettingsRequest) returns (GetPOSSettingsResponse) {
     option (onekit.http.config) = {

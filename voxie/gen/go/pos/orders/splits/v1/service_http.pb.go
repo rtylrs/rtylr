@@ -27,7 +27,7 @@ func RegisterOrderSplitServiceServer(server OrderSplitServiceServer, opts ...Ser
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders/{order_id}/split", splitOrderHandler)
+	config.mux.Handle("POST /api/pos/orders/splits/v1/orders/{order_id}/split", splitOrderHandler)
 
 	return nil
 }

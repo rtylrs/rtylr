@@ -30,7 +30,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/tables", listTablesHandler)
+	config.mux.Handle("GET /api/pos/table/v1/tables", listTablesHandler)
 
 	methodHeaders = getCreateTableHeaders()
 	createTableHandler := BindingMiddleware[CreateTableRequest](
@@ -39,7 +39,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/tables", createTableHandler)
+	config.mux.Handle("POST /api/pos/table/v1/tables", createTableHandler)
 
 	methodHeaders = getUpdateTableHeaders()
 	updateTableHandler := BindingMiddleware[UpdateTableRequest](
@@ -48,7 +48,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/tables/{id}", updateTableHandler)
+	config.mux.Handle("PUT /api/pos/table/v1/tables/{id}", updateTableHandler)
 
 	methodHeaders = getDeleteTableHeaders()
 	deleteTableHandler := BindingMiddleware[DeleteTableRequest](
@@ -57,7 +57,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /pos/tables/{id}", deleteTableHandler)
+	config.mux.Handle("DELETE /api/pos/table/v1/tables/{id}", deleteTableHandler)
 
 	return nil
 }

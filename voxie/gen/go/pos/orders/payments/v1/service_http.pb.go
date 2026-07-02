@@ -27,7 +27,7 @@ func RegisterOrderPaymentServiceServer(server OrderPaymentServiceServer, opts ..
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders/{order_id}/payment", processPaymentHandler)
+	config.mux.Handle("POST /api/pos/orders/payments/v1/orders/{order_id}/payment", processPaymentHandler)
 
 	return nil
 }

@@ -10,7 +10,7 @@ import "pos/access/v1/remove_location.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/access/v1";
 
 service AccessService {
-  option (onekit.http.service_config) = {base_path: "/pos/access"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/access/v1"};
 
   rpc GetMyLocations(GetMyLocationsRequest) returns (GetMyLocationsResponse) {
     option (onekit.http.config) = {

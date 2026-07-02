@@ -25,7 +25,7 @@ var File_pos_stock_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/stock/v1/service.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/stock/v1/adjust_stock.proto\x1a!pos/stock/v1/list_inventory.proto\x1a'pos/stock/v1/list_stock_movements.proto\x1a\x1cpos/stock/v1/low_stock.proto\x1a pos/stock/v1/receive_stock.proto\x1a!pos/stock/v1/transfer_stock.proto\x1a\x1epos/stock/v1/waste_stock.proto2\x86\x06\n" +
+	"\x1apos/stock/v1/service.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/stock/v1/adjust_stock.proto\x1a!pos/stock/v1/list_inventory.proto\x1a'pos/stock/v1/list_stock_movements.proto\x1a\x1cpos/stock/v1/low_stock.proto\x1a pos/stock/v1/receive_stock.proto\x1a!pos/stock/v1/transfer_stock.proto\x1a\x1epos/stock/v1/waste_stock.proto2\x8d\x06\n" +
 	"\fStockService\x12{\n" +
 	"\x12ListStockMovements\x12'.pos.stock.v1.ListStockMovementsRequest\x1a(.pos.stock.v1.ListStockMovementsResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -45,9 +45,8 @@ const file_pos_stock_v1_service_proto_rawDesc = "" +
 	"/inventory\x10\x01\x12]\n" +
 	"\bLowStock\x12\x1d.pos.stock.v1.LowStockRequest\x1a\x1e.pos.stock.v1.LowStockResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/low-stock\x10\x01\x1a\x10\xa2\xb5\x18\f\n" +
-	"\n" +
-	"/pos/stockB-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
+	"/low-stock\x10\x01\x1a\x17\xa2\xb5\x18\x13\n" +
+	"\x11/api/pos/stock/v1B-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
 
 var file_pos_stock_v1_service_proto_goTypes = []any{
 	(*ListStockMovementsRequest)(nil),  // 0: pos.stock.v1.ListStockMovementsRequest

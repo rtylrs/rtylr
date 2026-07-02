@@ -25,14 +25,13 @@ var File_pos_settings_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_settings_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/settings/v1/service.proto\x12\x0fpos.settings.v1\x1a\x1donekit/http/annotations.proto\x1a&pos/settings/v1/get_pos_settings.proto\x1a)pos/settings/v1/update_pos_settings.proto2\x92\x02\n" +
+	"\x1dpos/settings/v1/service.proto\x12\x0fpos.settings.v1\x1a\x1donekit/http/annotations.proto\x1a&pos/settings/v1/get_pos_settings.proto\x1a)pos/settings/v1/update_pos_settings.proto2\xa2\x02\n" +
 	"\x0fSettingsService\x12t\n" +
 	"\x0eGetPOSSettings\x12&.pos.settings.v1.GetPOSSettingsRequest\x1a'.pos.settings.v1.GetPOSSettingsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/settings\x10\x01\x12}\n" +
 	"\x11UpdatePOSSettings\x12).pos.settings.v1.UpdatePOSSettingsRequest\x1a*.pos.settings.v1.UpdatePOSSettingsResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/settings\x10\x03\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB0Z.github.com/voxire/voxie/gen/go/pos/settings/v1b\x06proto3"
+	"\t/settings\x10\x03\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\x14/api/pos/settings/v1B0Z.github.com/voxire/voxie/gen/go/pos/settings/v1b\x06proto3"
 
 var file_pos_settings_v1_service_proto_goTypes = []any{
 	(*GetPOSSettingsRequest)(nil),     // 0: pos.settings.v1.GetPOSSettingsRequest

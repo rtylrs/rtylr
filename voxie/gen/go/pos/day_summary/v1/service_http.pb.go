@@ -27,7 +27,7 @@ func RegisterDaySummaryServiceServer(server DaySummaryServiceServer, opts ...Ser
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/day-summary", daySummaryHandler)
+	config.mux.Handle("GET /api/pos/day-summary/v1/day-summary", daySummaryHandler)
 
 	return nil
 }

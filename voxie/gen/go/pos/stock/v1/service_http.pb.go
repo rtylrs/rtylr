@@ -33,7 +33,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/stock/movements", listStockMovementsHandler)
+	config.mux.Handle("GET /api/pos/stock/v1/movements", listStockMovementsHandler)
 
 	methodHeaders = getReceiveStockHeaders()
 	receiveStockHandler := BindingMiddleware[ReceiveStockRequest](
@@ -42,7 +42,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/stock/receive", receiveStockHandler)
+	config.mux.Handle("POST /api/pos/stock/v1/receive", receiveStockHandler)
 
 	methodHeaders = getAdjustStockHeaders()
 	adjustStockHandler := BindingMiddleware[AdjustStockRequest](
@@ -51,7 +51,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/stock/adjust", adjustStockHandler)
+	config.mux.Handle("POST /api/pos/stock/v1/adjust", adjustStockHandler)
 
 	methodHeaders = getWasteStockHeaders()
 	wasteStockHandler := BindingMiddleware[WasteStockRequest](
@@ -60,7 +60,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/stock/waste", wasteStockHandler)
+	config.mux.Handle("POST /api/pos/stock/v1/waste", wasteStockHandler)
 
 	methodHeaders = getTransferStockHeaders()
 	transferStockHandler := BindingMiddleware[TransferStockRequest](
@@ -69,7 +69,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/stock/transfer", transferStockHandler)
+	config.mux.Handle("POST /api/pos/stock/v1/transfer", transferStockHandler)
 
 	methodHeaders = getListInventoryHeaders()
 	listInventoryHandler := BindingMiddleware[ListInventoryRequest](
@@ -78,7 +78,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/stock/inventory", listInventoryHandler)
+	config.mux.Handle("GET /api/pos/stock/v1/inventory", listInventoryHandler)
 
 	methodHeaders = getLowStockHeaders()
 	lowStockHandler := BindingMiddleware[LowStockRequest](
@@ -87,7 +87,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/stock/low-stock", lowStockHandler)
+	config.mux.Handle("GET /api/pos/stock/v1/low-stock", lowStockHandler)
 
 	return nil
 }

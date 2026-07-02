@@ -34,7 +34,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/register", registerHandler)
+	config.mux.Handle("POST /api/common/auth/v1/register", registerHandler)
 
 	methodHeaders = getLoginHeaders()
 	loginHandler := BindingMiddleware[LoginRequest](
@@ -43,7 +43,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/login", loginHandler)
+	config.mux.Handle("POST /api/common/auth/v1/login", loginHandler)
 
 	methodHeaders = getGoogleAuthHeaders()
 	googleAuthHandler := BindingMiddleware[GoogleAuthRequest](
@@ -52,7 +52,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/register/google", googleAuthHandler)
+	config.mux.Handle("POST /api/common/auth/v1/register/google", googleAuthHandler)
 
 	methodHeaders = getResetPasswordHeaders()
 	resetPasswordHandler := BindingMiddleware[ResetPasswordRequest](
@@ -61,7 +61,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/password-reset/request", resetPasswordHandler)
+	config.mux.Handle("POST /api/common/auth/v1/password-reset/request", resetPasswordHandler)
 
 	methodHeaders = getResetPasswordConfirmHeaders()
 	resetPasswordConfirmHandler := BindingMiddleware[ResetPasswordConfirmRequest](
@@ -70,7 +70,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/password-reset/confirm", resetPasswordConfirmHandler)
+	config.mux.Handle("POST /api/common/auth/v1/password-reset/confirm", resetPasswordConfirmHandler)
 
 	methodHeaders = getVerifyEmailHeaders()
 	verifyEmailHandler := BindingMiddleware[VerifyEmailRequest](
@@ -79,7 +79,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/verify-email", verifyEmailHandler)
+	config.mux.Handle("POST /api/common/auth/v1/verify-email", verifyEmailHandler)
 
 	methodHeaders = getResendVerificationHeaders()
 	resendVerificationHandler := BindingMiddleware[ResendVerificationRequest](
@@ -88,7 +88,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/resend-verification", resendVerificationHandler)
+	config.mux.Handle("POST /api/common/auth/v1/resend-verification", resendVerificationHandler)
 
 	methodHeaders = getInviteAcceptHeaders()
 	inviteAcceptHandler := BindingMiddleware[InviteAcceptRequest](
@@ -97,7 +97,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/invite/accept", inviteAcceptHandler)
+	config.mux.Handle("POST /api/common/auth/v1/invite/accept", inviteAcceptHandler)
 
 	return nil
 }

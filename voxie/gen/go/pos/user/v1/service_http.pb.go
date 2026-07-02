@@ -31,7 +31,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/users", listPOSUsersHandler)
+	config.mux.Handle("GET /api/pos/user/v1/users", listPOSUsersHandler)
 
 	methodHeaders = getCreatePOSUserHeaders()
 	createPOSUserHandler := BindingMiddleware[CreatePOSUserRequest](
@@ -40,7 +40,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/users", createPOSUserHandler)
+	config.mux.Handle("POST /api/pos/user/v1/users", createPOSUserHandler)
 
 	methodHeaders = getUpdatePOSUserHeaders()
 	updatePOSUserHandler := BindingMiddleware[UpdatePOSUserRequest](
@@ -49,7 +49,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"PATCH", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /pos/users/update", updatePOSUserHandler)
+	config.mux.Handle("PATCH /api/pos/user/v1/users/update", updatePOSUserHandler)
 
 	methodHeaders = getDeactivatePOSUserHeaders()
 	deactivatePOSUserHandler := BindingMiddleware[DeactivatePOSUserRequest](
@@ -58,7 +58,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"PATCH", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /pos/users/deactivate", deactivatePOSUserHandler)
+	config.mux.Handle("PATCH /api/pos/user/v1/users/deactivate", deactivatePOSUserHandler)
 
 	methodHeaders = getVerifyPOSUserPINHeaders()
 	verifyPOSUserPINHandler := BindingMiddleware[VerifyPOSUserPINRequest](
@@ -67,7 +67,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/users/verify-pin", verifyPOSUserPINHandler)
+	config.mux.Handle("POST /api/pos/user/v1/users/verify-pin", verifyPOSUserPINHandler)
 
 	return nil
 }

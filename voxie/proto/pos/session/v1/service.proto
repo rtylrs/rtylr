@@ -10,7 +10,7 @@ import "pos/session/v1/open_session.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/session/v1";
 
 service SessionService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/session/v1"};
 
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option (onekit.http.config) = {

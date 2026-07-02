@@ -28,7 +28,7 @@ func RegisterAuditServiceServer(server AuditServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/audit", listAuditHandler)
+	config.mux.Handle("GET /api/pos/audit/v1/audit", listAuditHandler)
 
 	methodHeaders = getCreateAuditHeaders()
 	createAuditHandler := BindingMiddleware[CreateAuditRequest](
@@ -37,7 +37,7 @@ func RegisterAuditServiceServer(server AuditServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/audit", createAuditHandler)
+	config.mux.Handle("POST /api/pos/audit/v1/audit", createAuditHandler)
 
 	return nil
 }

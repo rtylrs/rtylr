@@ -25,13 +25,12 @@ var File_pos_dashboard_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_dashboard_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1epos/dashboard/v1/service.proto\x12\x10pos.dashboard.v1\x1a\x1donekit/http/annotations.proto\x1a pos/dashboard/v1/dashboard.proto2\x88\x01\n" +
+	"\x1epos/dashboard/v1/service.proto\x12\x10pos.dashboard.v1\x1a\x1donekit/http/annotations.proto\x1a pos/dashboard/v1/dashboard.proto2\x99\x01\n" +
 	"\x10DashboardService\x12h\n" +
 	"\tDashboard\x12\".pos.dashboard.v1.DashboardRequest\x1a#.pos.dashboard.v1.DashboardResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/dashboard\x10\x01\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB1Z/github.com/voxire/voxie/gen/go/pos/dashboard/v1b\x06proto3"
+	"/dashboard\x10\x01\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\x15/api/pos/dashboard/v1B1Z/github.com/voxire/voxie/gen/go/pos/dashboard/v1b\x06proto3"
 
 var file_pos_dashboard_v1_service_proto_goTypes = []any{
 	(*DashboardRequest)(nil),  // 0: pos.dashboard.v1.DashboardRequest

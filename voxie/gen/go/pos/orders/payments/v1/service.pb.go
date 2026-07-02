@@ -25,12 +25,11 @@ var File_pos_orders_payments_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_payments_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"$pos/orders/payments/v1/service.proto\x12\x16pos.orders.payments.v1\x1a\x1donekit/http/annotations.proto\x1a,pos/orders/payments/v1/process_payment.proto2\xb7\x01\n" +
+	"$pos/orders/payments/v1/service.proto\x12\x16pos.orders.payments.v1\x1a\x1donekit/http/annotations.proto\x1a,pos/orders/payments/v1/process_payment.proto2\xce\x01\n" +
 	"\x13OrderPaymentService\x12\x93\x01\n" +
 	"\x0eProcessPayment\x12-.pos.orders.payments.v1.ProcessPaymentRequest\x1a..pos.orders.payments.v1.ProcessPaymentResponse\"\"\x9a\xb5\x18\x1e\n" +
-	"\x1a/orders/{order_id}/payment\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB7Z5github.com/voxire/voxie/gen/go/pos/orders/payments/v1b\x06proto3"
+	"\x1a/orders/{order_id}/payment\x10\x02\x1a!\xa2\xb5\x18\x1d\n" +
+	"\x1b/api/pos/orders/payments/v1B7Z5github.com/voxire/voxie/gen/go/pos/orders/payments/v1b\x06proto3"
 
 var file_pos_orders_payments_v1_service_proto_goTypes = []any{
 	(*ProcessPaymentRequest)(nil),  // 0: pos.orders.payments.v1.ProcessPaymentRequest

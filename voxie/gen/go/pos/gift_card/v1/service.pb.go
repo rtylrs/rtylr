@@ -25,16 +25,15 @@ var File_pos_gift_card_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1epos/gift_card/v1/service.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/gift_card/v1/create_gift_card.proto\x1a&pos/gift_card/v1/list_gift_cards.proto\x1a'pos/gift_card/v1/redeem_gift_card.proto2\x97\x03\n" +
+	"\x1epos/gift_card/v1/service.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/gift_card/v1/create_gift_card.proto\x1a&pos/gift_card/v1/list_gift_cards.proto\x1a'pos/gift_card/v1/redeem_gift_card.proto2\xa8\x03\n" +
 	"\x0fGiftCardService\x12u\n" +
 	"\rListGiftCards\x12&.pos.gift_card.v1.ListGiftCardsRequest\x1a'.pos.gift_card.v1.ListGiftCardsResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/gift-cards\x10\x01\x12x\n" +
 	"\x0eCreateGiftCard\x12'.pos.gift_card.v1.CreateGiftCardRequest\x1a(.pos.gift_card.v1.CreateGiftCardResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/gift-cards\x10\x02\x12\x86\x01\n" +
 	"\x0eRedeemGiftCard\x12'.pos.gift_card.v1.RedeemGiftCardRequest\x1a(.pos.gift_card.v1.RedeemGiftCardResponse\"!\x9a\xb5\x18\x1d\n" +
-	"\x19/gift-cards/{code}/redeem\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
+	"\x19/gift-cards/{code}/redeem\x10\x02\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\x15/api/pos/gift-card/v1B1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
 
 var file_pos_gift_card_v1_service_proto_goTypes = []any{
 	(*ListGiftCardsRequest)(nil),   // 0: pos.gift_card.v1.ListGiftCardsRequest

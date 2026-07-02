@@ -11,7 +11,7 @@ import "pos/terminal/v1/update_terminal.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
 
 service TerminalService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/terminal/v1"};
 
   rpc ListTerminals(ListTerminalsRequest) returns (ListTerminalsResponse) {
     option (onekit.http.config) = {

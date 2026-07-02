@@ -8,7 +8,7 @@ import "pos/receipt/v1/list_receipts.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/receipt/v1";
 
 service ReceiptService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/receipt/v1"};
 
   rpc ListReceipts(ListReceiptsRequest) returns (ListReceiptsResponse) {
     option (onekit.http.config) = {

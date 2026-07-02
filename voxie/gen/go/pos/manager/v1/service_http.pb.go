@@ -27,7 +27,7 @@ func RegisterManagerServiceServer(server ManagerServiceServer, opts ...ServerOpt
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/manager/verify", verifyPINHandler)
+	config.mux.Handle("POST /api/pos/manager/v1/verify", verifyPINHandler)
 
 	return nil
 }

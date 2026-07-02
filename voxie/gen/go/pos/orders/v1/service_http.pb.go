@@ -31,7 +31,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/orders", listOrdersHandler)
+	config.mux.Handle("GET /api/pos/orders/v1/orders", listOrdersHandler)
 
 	methodHeaders = getCreateOrderHeaders()
 	createOrderHandler := BindingMiddleware[CreateOrderRequest](
@@ -40,7 +40,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders", createOrderHandler)
+	config.mux.Handle("POST /api/pos/orders/v1/orders", createOrderHandler)
 
 	methodHeaders = getGetOrderDetailHeaders()
 	getOrderDetailHandler := BindingMiddleware[GetOrderDetailRequest](
@@ -49,7 +49,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/orders/{order_id}", getOrderDetailHandler)
+	config.mux.Handle("GET /api/pos/orders/v1/orders/{order_id}", getOrderDetailHandler)
 
 	methodHeaders = getUpdateOrderStatusHeaders()
 	updateOrderStatusHandler := BindingMiddleware[UpdateOrderStatusRequest](
@@ -58,7 +58,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/orders/{order_id}/status", updateOrderStatusHandler)
+	config.mux.Handle("PUT /api/pos/orders/v1/orders/{order_id}/status", updateOrderStatusHandler)
 
 	methodHeaders = getVoidOrderHeaders()
 	voidOrderHandler := BindingMiddleware[VoidOrderRequest](
@@ -67,7 +67,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders/{order_id}/void", voidOrderHandler)
+	config.mux.Handle("POST /api/pos/orders/v1/orders/{order_id}/void", voidOrderHandler)
 
 	return nil
 }

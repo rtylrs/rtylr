@@ -28,7 +28,7 @@ func RegisterMenuItemServiceServer(server MenuItemServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/menu-items", listMenuItemsHandler)
+	config.mux.Handle("GET /api/pos/menu-item/v1/menu-items", listMenuItemsHandler)
 
 	methodHeaders = getCreateMenuItemHeaders()
 	createMenuItemHandler := BindingMiddleware[CreateMenuItemRequest](
@@ -37,7 +37,7 @@ func RegisterMenuItemServiceServer(server MenuItemServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/menu-items", createMenuItemHandler)
+	config.mux.Handle("POST /api/pos/menu-item/v1/menu-items", createMenuItemHandler)
 
 	return nil
 }

@@ -30,7 +30,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/floors", listFloorsHandler)
+	config.mux.Handle("GET /api/pos/floor/v1/floors", listFloorsHandler)
 
 	methodHeaders = getCreateFloorHeaders()
 	createFloorHandler := BindingMiddleware[CreateFloorRequest](
@@ -39,7 +39,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/floors", createFloorHandler)
+	config.mux.Handle("POST /api/pos/floor/v1/floors", createFloorHandler)
 
 	methodHeaders = getUpdateFloorHeaders()
 	updateFloorHandler := BindingMiddleware[UpdateFloorRequest](
@@ -48,7 +48,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/floors/{id}", updateFloorHandler)
+	config.mux.Handle("PUT /api/pos/floor/v1/floors/{id}", updateFloorHandler)
 
 	methodHeaders = getDeleteFloorHeaders()
 	deleteFloorHandler := BindingMiddleware[DeleteFloorRequest](
@@ -57,7 +57,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /pos/floors/{id}", deleteFloorHandler)
+	config.mux.Handle("DELETE /api/pos/floor/v1/floors/{id}", deleteFloorHandler)
 
 	return nil
 }

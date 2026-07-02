@@ -25,7 +25,7 @@ var File_pos_combo_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_combo_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/combo/v1/service.proto\x12\fpos.combo.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/combo/v1/create_combo.proto\x1a\x1fpos/combo/v1/delete_combo.proto\x1a\x1epos/combo/v1/list_combos.proto\x1a\x1fpos/combo/v1/update_combo.proto2\xba\x03\n" +
+	"\x1apos/combo/v1/service.proto\x12\fpos.combo.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/combo/v1/create_combo.proto\x1a\x1fpos/combo/v1/delete_combo.proto\x1a\x1epos/combo/v1/list_combos.proto\x1a\x1fpos/combo/v1/update_combo.proto2\xc2\x03\n" +
 	"\fComboService\x12`\n" +
 	"\n" +
 	"ListCombos\x12\x1f.pos.combo.v1.ListCombosRequest\x1a .pos.combo.v1.ListCombosResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -35,8 +35,8 @@ const file_pos_combo_v1_service_proto_rawDesc = "" +
 	"\vUpdateCombo\x12 .pos.combo.v1.UpdateComboRequest\x1a!.pos.combo.v1.UpdateComboResponse\"\x14\x9a\xb5\x18\x10\n" +
 	"\f/combos/{id}\x10\x03\x12h\n" +
 	"\vDeleteCombo\x12 .pos.combo.v1.DeleteComboRequest\x1a!.pos.combo.v1.DeleteComboResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/combos/{id}\x10\x04\x1a\x0f\xa2\xb5\x18\v\n" +
-	"\t/pos/menuB-Z+github.com/voxire/voxie/gen/go/pos/combo/v1b\x06proto3"
+	"\f/combos/{id}\x10\x04\x1a\x17\xa2\xb5\x18\x13\n" +
+	"\x11/api/pos/combo/v1B-Z+github.com/voxire/voxie/gen/go/pos/combo/v1b\x06proto3"
 
 var file_pos_combo_v1_service_proto_goTypes = []any{
 	(*ListCombosRequest)(nil),   // 0: pos.combo.v1.ListCombosRequest

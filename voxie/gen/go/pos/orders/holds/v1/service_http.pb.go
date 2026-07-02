@@ -28,7 +28,7 @@ func RegisterOrderHoldServiceServer(server OrderHoldServiceServer, opts ...Serve
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders/{order_id}/hold", holdOrderHandler)
+	config.mux.Handle("POST /api/pos/orders/holds/v1/orders/{order_id}/hold", holdOrderHandler)
 
 	methodHeaders = getListHeldOrdersHeaders()
 	listHeldOrdersHandler := BindingMiddleware[ListHeldOrdersRequest](
@@ -37,7 +37,7 @@ func RegisterOrderHoldServiceServer(server OrderHoldServiceServer, opts ...Serve
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/orders/held", listHeldOrdersHandler)
+	config.mux.Handle("GET /api/pos/orders/holds/v1/orders/held", listHeldOrdersHandler)
 
 	return nil
 }

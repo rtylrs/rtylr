@@ -30,7 +30,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/menu/modifiers", listModifiersHandler)
+	config.mux.Handle("GET /api/pos/modifier/v1/modifiers", listModifiersHandler)
 
 	methodHeaders = getCreateModifierHeaders()
 	createModifierHandler := BindingMiddleware[CreateModifierRequest](
@@ -39,7 +39,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/menu/modifiers", createModifierHandler)
+	config.mux.Handle("POST /api/pos/modifier/v1/modifiers", createModifierHandler)
 
 	methodHeaders = getUpdateModifierHeaders()
 	updateModifierHandler := BindingMiddleware[UpdateModifierRequest](
@@ -48,7 +48,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/menu/modifiers/{id}", updateModifierHandler)
+	config.mux.Handle("PUT /api/pos/modifier/v1/modifiers/{id}", updateModifierHandler)
 
 	methodHeaders = getDeleteModifierHeaders()
 	deleteModifierHandler := BindingMiddleware[DeleteModifierRequest](
@@ -57,7 +57,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /pos/menu/modifiers/{id}", deleteModifierHandler)
+	config.mux.Handle("DELETE /api/pos/modifier/v1/modifiers/{id}", deleteModifierHandler)
 
 	return nil
 }

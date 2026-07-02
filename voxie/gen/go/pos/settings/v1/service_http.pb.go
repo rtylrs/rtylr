@@ -28,7 +28,7 @@ func RegisterSettingsServiceServer(server SettingsServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/settings", getPOSSettingsHandler)
+	config.mux.Handle("GET /api/pos/settings/v1/settings", getPOSSettingsHandler)
 
 	methodHeaders = getUpdatePOSSettingsHeaders()
 	updatePOSSettingsHandler := BindingMiddleware[UpdatePOSSettingsRequest](
@@ -37,7 +37,7 @@ func RegisterSettingsServiceServer(server SettingsServiceServer, opts ...ServerO
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/settings", updatePOSSettingsHandler)
+	config.mux.Handle("PUT /api/pos/settings/v1/settings", updatePOSSettingsHandler)
 
 	return nil
 }

@@ -25,7 +25,7 @@ var File_pos_cash_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_cash_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19pos/cash/v1/service.proto\x12\vpos.cash.v1\x1a\x1donekit/http/annotations.proto\x1a\x1dpos/cash/v1/cash_adjust.proto\x1a\x1bpos/cash/v1/cash_drop.proto\x1a\x1dpos/cash/v1/cash_pickup.proto\x1a%pos/cash/v1/list_cash_movements.proto2\xae\x03\n" +
+	"\x19pos/cash/v1/service.proto\x12\vpos.cash.v1\x1a\x1donekit/http/annotations.proto\x1a\x1dpos/cash/v1/cash_adjust.proto\x1a\x1bpos/cash/v1/cash_drop.proto\x1a\x1dpos/cash/v1/cash_pickup.proto\x1a%pos/cash/v1/list_cash_movements.proto2\xb5\x03\n" +
 	"\vCashService\x12v\n" +
 	"\x11ListCashMovements\x12%.pos.cash.v1.ListCashMovementsRequest\x1a&.pos.cash.v1.ListCashMovementsResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -37,8 +37,8 @@ const file_pos_cash_v1_service_proto_rawDesc = "" +
 	"\a/pickup\x10\x02\x12^\n" +
 	"\n" +
 	"CashAdjust\x12\x1e.pos.cash.v1.CashAdjustRequest\x1a\x1f.pos.cash.v1.CashAdjustResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/adjust\x10\x02\x1a\x0f\xa2\xb5\x18\v\n" +
-	"\t/pos/cashB,Z*github.com/voxire/voxie/gen/go/pos/cash/v1b\x06proto3"
+	"\a/adjust\x10\x02\x1a\x16\xa2\xb5\x18\x12\n" +
+	"\x10/api/pos/cash/v1B,Z*github.com/voxire/voxie/gen/go/pos/cash/v1b\x06proto3"
 
 var file_pos_cash_v1_service_proto_goTypes = []any{
 	(*ListCashMovementsRequest)(nil),  // 0: pos.cash.v1.ListCashMovementsRequest

@@ -29,7 +29,7 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/sessions", listSessionsHandler)
+	config.mux.Handle("GET /api/pos/session/v1/sessions", listSessionsHandler)
 
 	methodHeaders = getOpenSessionHeaders()
 	openSessionHandler := BindingMiddleware[OpenSessionRequest](
@@ -38,7 +38,7 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/sessions/open", openSessionHandler)
+	config.mux.Handle("POST /api/pos/session/v1/sessions/open", openSessionHandler)
 
 	methodHeaders = getCloseSessionHeaders()
 	closeSessionHandler := BindingMiddleware[CloseSessionRequest](
@@ -47,7 +47,7 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/sessions/{id}/close", closeSessionHandler)
+	config.mux.Handle("POST /api/pos/session/v1/sessions/{id}/close", closeSessionHandler)
 
 	return nil
 }

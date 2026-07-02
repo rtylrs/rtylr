@@ -25,14 +25,13 @@ var File_pos_orders_holds_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_holds_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!pos/orders/holds/v1/service.proto\x12\x13pos.orders.holds.v1\x1a\x1donekit/http/annotations.proto\x1a$pos/orders/holds/v1/hold_order.proto\x1a*pos/orders/holds/v1/list_held_orders.proto2\x9c\x02\n" +
+	"!pos/orders/holds/v1/service.proto\x12\x13pos.orders.holds.v1\x1a\x1donekit/http/annotations.proto\x1a$pos/orders/holds/v1/hold_order.proto\x1a*pos/orders/holds/v1/list_held_orders.proto2\xb0\x02\n" +
 	"\x10OrderHoldService\x12{\n" +
 	"\tHoldOrder\x12%.pos.orders.holds.v1.HoldOrderRequest\x1a&.pos.orders.holds.v1.HoldOrderResponse\"\x1f\x9a\xb5\x18\x1b\n" +
 	"\x17/orders/{order_id}/hold\x10\x02\x12\x7f\n" +
 	"\x0eListHeldOrders\x12*.pos.orders.holds.v1.ListHeldOrdersRequest\x1a+.pos.orders.holds.v1.ListHeldOrdersResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/orders/held\x10\x01\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB4Z2github.com/voxire/voxie/gen/go/pos/orders/holds/v1b\x06proto3"
+	"\f/orders/held\x10\x01\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"\x18/api/pos/orders/holds/v1B4Z2github.com/voxire/voxie/gen/go/pos/orders/holds/v1b\x06proto3"
 
 var file_pos_orders_holds_v1_service_proto_goTypes = []any{
 	(*HoldOrderRequest)(nil),       // 0: pos.orders.holds.v1.HoldOrderRequest

@@ -11,7 +11,7 @@ import "pos/table/v1/update_table.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
 
 service TableService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/table/v1"};
 
   rpc ListTables(ListTablesRequest) returns (ListTablesResponse) {
     option (onekit.http.config) = {

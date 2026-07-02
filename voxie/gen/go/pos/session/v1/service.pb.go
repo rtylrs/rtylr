@@ -25,16 +25,15 @@ var File_pos_session_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_session_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/session/v1/service.proto\x12\x0epos.session.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/session/v1/close_session.proto\x1a\"pos/session/v1/list_sessions.proto\x1a!pos/session/v1/open_session.proto2\xf3\x02\n" +
+	"\x1cpos/session/v1/service.proto\x12\x0epos.session.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/session/v1/close_session.proto\x1a\"pos/session/v1/list_sessions.proto\x1a!pos/session/v1/open_session.proto2\x82\x03\n" +
 	"\x0eSessionService\x12l\n" +
 	"\fListSessions\x12#.pos.session.v1.ListSessionsRequest\x1a$.pos.session.v1.ListSessionsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/sessions\x10\x01\x12n\n" +
 	"\vOpenSession\x12\".pos.session.v1.OpenSessionRequest\x1a#.pos.session.v1.OpenSessionResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/sessions/open\x10\x02\x12w\n" +
 	"\fCloseSession\x12#.pos.session.v1.CloseSessionRequest\x1a$.pos.session.v1.CloseSessionResponse\"\x1c\x9a\xb5\x18\x18\n" +
-	"\x14/sessions/{id}/close\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB/Z-github.com/voxire/voxie/gen/go/pos/session/v1b\x06proto3"
+	"\x14/sessions/{id}/close\x10\x02\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x13/api/pos/session/v1B/Z-github.com/voxire/voxie/gen/go/pos/session/v1b\x06proto3"
 
 var file_pos_session_v1_service_proto_goTypes = []any{
 	(*ListSessionsRequest)(nil),  // 0: pos.session.v1.ListSessionsRequest

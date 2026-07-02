@@ -27,7 +27,7 @@ func RegisterDashboardServiceServer(server DashboardServiceServer, opts ...Serve
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/dashboard", dashboardHandler)
+	config.mux.Handle("GET /api/pos/dashboard/v1/dashboard", dashboardHandler)
 
 	return nil
 }

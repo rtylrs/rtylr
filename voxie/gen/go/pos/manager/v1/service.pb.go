@@ -25,11 +25,11 @@ var File_pos_manager_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_manager_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/manager/v1/service.proto\x12\x0epos.manager.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/manager/v1/verify_pin.proto2\x87\x01\n" +
+	"\x1cpos/manager/v1/service.proto\x12\x0epos.manager.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/manager/v1/verify_pin.proto2\x8e\x01\n" +
 	"\x0eManagerService\x12a\n" +
 	"\tVerifyPIN\x12 .pos.manager.v1.VerifyPINRequest\x1a!.pos.manager.v1.VerifyPINResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/verify\x10\x02\x1a\x12\xa2\xb5\x18\x0e\n" +
-	"\f/pos/managerB/Z-github.com/voxire/voxie/gen/go/pos/manager/v1b\x06proto3"
+	"\a/verify\x10\x02\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x13/api/pos/manager/v1B/Z-github.com/voxire/voxie/gen/go/pos/manager/v1b\x06proto3"
 
 var file_pos_manager_v1_service_proto_goTypes = []any{
 	(*VerifyPINRequest)(nil),  // 0: pos.manager.v1.VerifyPINRequest

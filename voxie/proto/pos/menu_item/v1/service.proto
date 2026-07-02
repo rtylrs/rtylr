@@ -9,7 +9,7 @@ import "pos/menu_item/v1/list_menu_items.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
 
 service MenuItemService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/menu-item/v1"};
 
   rpc ListMenuItems(ListMenuItemsRequest) returns (ListMenuItemsResponse) {
     option (onekit.http.config) = {

@@ -25,7 +25,7 @@ var File_pos_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19pos/user/v1/service.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\x1a!pos/user/v1/create_pos_user.proto\x1a%pos/user/v1/deactivate_pos_user.proto\x1a pos/user/v1/list_pos_users.proto\x1a!pos/user/v1/update_pos_user.proto\x1a%pos/user/v1/verify_pos_user_pin.proto2\xd0\x04\n" +
+	"\x19pos/user/v1/service.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\x1a!pos/user/v1/create_pos_user.proto\x1a%pos/user/v1/deactivate_pos_user.proto\x1a pos/user/v1/list_pos_users.proto\x1a!pos/user/v1/update_pos_user.proto\x1a%pos/user/v1/verify_pos_user_pin.proto2\xdc\x04\n" +
 	"\vUserService\x12c\n" +
 	"\fListPOSUsers\x12 .pos.user.v1.ListPOSUsersRequest\x1a!.pos.user.v1.ListPOSUsersResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
@@ -38,9 +38,8 @@ const file_pos_user_v1_service_proto_rawDesc = "" +
 	"\x11DeactivatePOSUser\x12%.pos.user.v1.DeactivatePOSUserRequest\x1a&.pos.user.v1.DeactivatePOSUserResponse\"\x19\x9a\xb5\x18\x15\n" +
 	"\x11/users/deactivate\x10\x05\x12z\n" +
 	"\x10VerifyPOSUserPIN\x12$.pos.user.v1.VerifyPOSUserPINRequest\x1a%.pos.user.v1.VerifyPOSUserPINResponse\"\x19\x9a\xb5\x18\x15\n" +
-	"\x11/users/verify-pin\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"
+	"\x11/users/verify-pin\x10\x02\x1a\x16\xa2\xb5\x18\x12\n" +
+	"\x10/api/pos/user/v1B,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"
 
 var file_pos_user_v1_service_proto_goTypes = []any{
 	(*ListPOSUsersRequest)(nil),       // 0: pos.user.v1.ListPOSUsersRequest

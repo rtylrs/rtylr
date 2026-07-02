@@ -14,7 +14,7 @@ import "pos/stock/v1/waste_stock.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
 
 service StockService {
-  option (onekit.http.service_config) = {base_path: "/pos/stock"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/stock/v1"};
 
   rpc ListStockMovements(ListStockMovementsRequest) returns (ListStockMovementsResponse) {
     option (onekit.http.config) = {

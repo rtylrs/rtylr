@@ -11,7 +11,7 @@ import "pos/floor/v1/update_floor.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/floor/v1";
 
 service FloorService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/floor/v1"};
 
   rpc ListFloors(ListFloorsRequest) returns (ListFloorsResponse) {
     option (onekit.http.config) = {

@@ -11,7 +11,7 @@ import "pos/modifier/v1/update_modifier.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/modifier/v1";
 
 service ModifierService {
-  option (onekit.http.service_config) = {base_path: "/pos/menu"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/modifier/v1"};
 
   rpc ListModifiers(ListModifiersRequest) returns (ListModifiersResponse) {
     option (onekit.http.config) = {

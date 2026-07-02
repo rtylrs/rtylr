@@ -25,13 +25,12 @@ var File_pos_orders_splits_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_splits_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"pos/orders/splits/v1/service.proto\x12\x14pos.orders.splits.v1\x1a\x1donekit/http/annotations.proto\x1a&pos/orders/splits/v1/split_order.proto2\xa3\x01\n" +
+	"\"pos/orders/splits/v1/service.proto\x12\x14pos.orders.splits.v1\x1a\x1donekit/http/annotations.proto\x1a&pos/orders/splits/v1/split_order.proto2\xb8\x01\n" +
 	"\x11OrderSplitService\x12\x81\x01\n" +
 	"\n" +
 	"SplitOrder\x12'.pos.orders.splits.v1.SplitOrderRequest\x1a(.pos.orders.splits.v1.SplitOrderResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/orders/{order_id}/split\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB5Z3github.com/voxire/voxie/gen/go/pos/orders/splits/v1b\x06proto3"
+	"\x18/orders/{order_id}/split\x10\x02\x1a\x1f\xa2\xb5\x18\x1b\n" +
+	"\x19/api/pos/orders/splits/v1B5Z3github.com/voxire/voxie/gen/go/pos/orders/splits/v1b\x06proto3"
 
 var file_pos_orders_splits_v1_service_proto_goTypes = []any{
 	(*SplitOrderRequest)(nil),  // 0: pos.orders.splits.v1.SplitOrderRequest

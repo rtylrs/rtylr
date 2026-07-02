@@ -27,7 +27,7 @@ func RegisterReceiptServiceServer(server ReceiptServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/receipts", listReceiptsHandler)
+	config.mux.Handle("GET /api/pos/receipt/v1/receipts", listReceiptsHandler)
 
 	return nil
 }

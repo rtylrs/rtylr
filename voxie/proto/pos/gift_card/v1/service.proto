@@ -10,7 +10,7 @@ import "pos/gift_card/v1/redeem_gift_card.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
 
 service GiftCardService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/gift-card/v1"};
 
   rpc ListGiftCards(ListGiftCardsRequest) returns (ListGiftCardsResponse) {
     option (onekit.http.config) = {

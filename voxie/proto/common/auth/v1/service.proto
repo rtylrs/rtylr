@@ -16,7 +16,7 @@ option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
 // AuthService defines the public authentication endpoints.
 service AuthService {
-  option (onekit.http.service_config) = {base_path: "/auth"};
+  option (onekit.http.service_config) = {base_path: "/api/common/auth/v1"};
 
   // Register creates a new owner account and optional first business.
   rpc Register(RegisterRequest) returns (RegisterResponse) {

@@ -27,7 +27,7 @@ func RegisterOrderRefundServiceServer(server OrderRefundServiceServer, opts ...S
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders/{order_id}/refund", processRefundHandler)
+	config.mux.Handle("POST /api/pos/orders/refunds/v1/orders/{order_id}/refund", processRefundHandler)
 
 	return nil
 }

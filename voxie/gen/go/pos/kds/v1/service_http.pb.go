@@ -28,7 +28,7 @@ func RegisterKDSServiceServer(server KDSServiceServer, opts ...ServerOption) err
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/kds/orders", listKDSOrdersHandler)
+	config.mux.Handle("GET /api/pos/kds/v1/orders", listKDSOrdersHandler)
 
 	methodHeaders = getUpdateKDSItemStatusHeaders()
 	updateKDSItemStatusHandler := BindingMiddleware[UpdateKDSItemStatusRequest](
@@ -37,7 +37,7 @@ func RegisterKDSServiceServer(server KDSServiceServer, opts ...ServerOption) err
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/kds/{order_id}/items/{item_id}", updateKDSItemStatusHandler)
+	config.mux.Handle("PUT /api/pos/kds/v1/{order_id}/items/{item_id}", updateKDSItemStatusHandler)
 
 	return nil
 }

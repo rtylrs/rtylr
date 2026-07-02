@@ -25,12 +25,11 @@ var File_pos_orders_refunds_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_refunds_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"#pos/orders/refunds/v1/service.proto\x12\x15pos.orders.refunds.v1\x1a\x1donekit/http/annotations.proto\x1a*pos/orders/refunds/v1/process_refund.proto2\xb0\x01\n" +
+	"#pos/orders/refunds/v1/service.proto\x12\x15pos.orders.refunds.v1\x1a\x1donekit/http/annotations.proto\x1a*pos/orders/refunds/v1/process_refund.proto2\xc6\x01\n" +
 	"\x12OrderRefundService\x12\x8d\x01\n" +
 	"\rProcessRefund\x12+.pos.orders.refunds.v1.ProcessRefundRequest\x1a,.pos.orders.refunds.v1.ProcessRefundResponse\"!\x9a\xb5\x18\x1d\n" +
-	"\x19/orders/{order_id}/refund\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB6Z4github.com/voxire/voxie/gen/go/pos/orders/refunds/v1b\x06proto3"
+	"\x19/orders/{order_id}/refund\x10\x02\x1a \xa2\xb5\x18\x1c\n" +
+	"\x1a/api/pos/orders/refunds/v1B6Z4github.com/voxire/voxie/gen/go/pos/orders/refunds/v1b\x06proto3"
 
 var file_pos_orders_refunds_v1_service_proto_goTypes = []any{
 	(*ProcessRefundRequest)(nil),  // 0: pos.orders.refunds.v1.ProcessRefundRequest

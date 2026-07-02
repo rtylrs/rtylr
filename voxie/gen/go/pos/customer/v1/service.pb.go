@@ -25,13 +25,12 @@ var File_pos_customer_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_customer_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/customer/v1/service.proto\x12\x0fpos.customer.v1\x1a\x1donekit/http/annotations.proto\x1a&pos/customer/v1/search_customers.proto2\x97\x01\n" +
+	"\x1dpos/customer/v1/service.proto\x12\x0fpos.customer.v1\x1a\x1donekit/http/annotations.proto\x1a&pos/customer/v1/search_customers.proto2\xa7\x01\n" +
 	"\x0fCustomerService\x12x\n" +
 	"\x0fSearchCustomers\x12'.pos.customer.v1.SearchCustomersRequest\x1a(.pos.customer.v1.SearchCustomersResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/customers\x10\x01\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB0Z.github.com/voxire/voxie/gen/go/pos/customer/v1b\x06proto3"
+	"/customers\x10\x01\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\x14/api/pos/customer/v1B0Z.github.com/voxire/voxie/gen/go/pos/customer/v1b\x06proto3"
 
 var file_pos_customer_v1_service_proto_goTypes = []any{
 	(*SearchCustomersRequest)(nil),  // 0: pos.customer.v1.SearchCustomersRequest

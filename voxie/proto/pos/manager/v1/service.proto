@@ -8,7 +8,7 @@ import "pos/manager/v1/verify_pin.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/manager/v1";
 
 service ManagerService {
-  option (onekit.http.service_config) = {base_path: "/pos/manager"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/manager/v1"};
 
   rpc VerifyPIN(VerifyPINRequest) returns (VerifyPINResponse) {
     option (onekit.http.config) = {

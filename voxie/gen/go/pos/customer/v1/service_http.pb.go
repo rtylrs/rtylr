@@ -27,7 +27,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/customers", searchCustomersHandler)
+	config.mux.Handle("GET /api/pos/customer/v1/customers", searchCustomersHandler)
 
 	return nil
 }

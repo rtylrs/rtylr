@@ -12,7 +12,7 @@ import "pos/user/v1/verify_pos_user_pin.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
 
 service UserService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/user/v1"};
 
   rpc ListPOSUsers(ListPOSUsersRequest) returns (ListPOSUsersResponse) {
     option (onekit.http.config) = {

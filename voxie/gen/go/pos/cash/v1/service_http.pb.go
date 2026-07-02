@@ -30,7 +30,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/cash/movements", listCashMovementsHandler)
+	config.mux.Handle("GET /api/pos/cash/v1/movements", listCashMovementsHandler)
 
 	methodHeaders = getCashDropHeaders()
 	cashDropHandler := BindingMiddleware[CashDropRequest](
@@ -39,7 +39,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/cash/drop", cashDropHandler)
+	config.mux.Handle("POST /api/pos/cash/v1/drop", cashDropHandler)
 
 	methodHeaders = getCashPickupHeaders()
 	cashPickupHandler := BindingMiddleware[CashPickupRequest](
@@ -48,7 +48,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/cash/pickup", cashPickupHandler)
+	config.mux.Handle("POST /api/pos/cash/v1/pickup", cashPickupHandler)
 
 	methodHeaders = getCashAdjustHeaders()
 	cashAdjustHandler := BindingMiddleware[CashAdjustRequest](
@@ -57,7 +57,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/cash/adjust", cashAdjustHandler)
+	config.mux.Handle("POST /api/pos/cash/v1/adjust", cashAdjustHandler)
 
 	return nil
 }

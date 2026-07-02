@@ -11,7 +11,7 @@ import "pos/combo/v1/update_combo.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/combo/v1";
 
 service ComboService {
-  option (onekit.http.service_config) = {base_path: "/pos/menu"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/combo/v1"};
 
   rpc ListCombos(ListCombosRequest) returns (ListCombosResponse) {
     option (onekit.http.config) = {

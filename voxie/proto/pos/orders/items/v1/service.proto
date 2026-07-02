@@ -8,7 +8,7 @@ import "pos/orders/items/v1/update_order_item_status.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/orders/items/v1";
 
 service OrderItemService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/orders/items/v1"};
 
   rpc UpdateOrderItemStatus(UpdateOrderItemStatusRequest) returns (UpdateOrderItemStatusResponse) {
     option (onekit.http.config) = {

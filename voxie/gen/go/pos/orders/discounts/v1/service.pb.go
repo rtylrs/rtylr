@@ -25,12 +25,11 @@ var File_pos_orders_discounts_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_discounts_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%pos/orders/discounts/v1/service.proto\x12\x17pos.orders.discounts.v1\x1a\x1donekit/http/annotations.proto\x1a,pos/orders/discounts/v1/discount_order.proto2\xb8\x01\n" +
+	"%pos/orders/discounts/v1/service.proto\x12\x17pos.orders.discounts.v1\x1a\x1donekit/http/annotations.proto\x1a,pos/orders/discounts/v1/discount_order.proto2\xd0\x01\n" +
 	"\x14OrderDiscountService\x12\x93\x01\n" +
 	"\rDiscountOrder\x12-.pos.orders.discounts.v1.DiscountOrderRequest\x1a..pos.orders.discounts.v1.DiscountOrderResponse\"#\x9a\xb5\x18\x1f\n" +
-	"\x1b/orders/{order_id}/discount\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB8Z6github.com/voxire/voxie/gen/go/pos/orders/discounts/v1b\x06proto3"
+	"\x1b/orders/{order_id}/discount\x10\x02\x1a\"\xa2\xb5\x18\x1e\n" +
+	"\x1c/api/pos/orders/discounts/v1B8Z6github.com/voxire/voxie/gen/go/pos/orders/discounts/v1b\x06proto3"
 
 var file_pos_orders_discounts_v1_service_proto_goTypes = []any{
 	(*DiscountOrderRequest)(nil),  // 0: pos.orders.discounts.v1.DiscountOrderRequest

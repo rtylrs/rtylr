@@ -25,7 +25,7 @@ var File_pos_loyalty_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/loyalty/v1/service.proto\x12\x0epos.loyalty.v1\x1a\x1donekit/http/annotations.proto\x1a pos/loyalty/v1/earn_points.proto\x1a(pos/loyalty/v1/get_loyalty_balance.proto\x1a'pos/loyalty/v1/get_loyalty_config.proto\x1a.pos/loyalty/v1/list_loyalty_transactions.proto\x1a\"pos/loyalty/v1/redeem_points.proto\x1a*pos/loyalty/v1/update_loyalty_config.proto2\xfd\x05\n" +
+	"\x1cpos/loyalty/v1/service.proto\x12\x0epos.loyalty.v1\x1a\x1donekit/http/annotations.proto\x1a pos/loyalty/v1/earn_points.proto\x1a(pos/loyalty/v1/get_loyalty_balance.proto\x1a'pos/loyalty/v1/get_loyalty_config.proto\x1a.pos/loyalty/v1/list_loyalty_transactions.proto\x1a\"pos/loyalty/v1/redeem_points.proto\x1a*pos/loyalty/v1/update_loyalty_config.proto2\x84\x06\n" +
 	"\x0eLoyaltyService\x12v\n" +
 	"\x10GetLoyaltyConfig\x12'.pos.loyalty.v1.GetLoyaltyConfigRequest\x1a(.pos.loyalty.v1.GetLoyaltyConfigResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/config\x10\x01\x12\x7f\n" +
@@ -39,8 +39,8 @@ const file_pos_loyalty_v1_service_proto_rawDesc = "" +
 	"\fRedeemPoints\x12#.pos.loyalty.v1.RedeemPointsRequest\x1a$.pos.loyalty.v1.RedeemPointsResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/redeem\x10\x02\x12z\n" +
 	"\x11GetLoyaltyBalance\x12(.pos.loyalty.v1.GetLoyaltyBalanceRequest\x1a).pos.loyalty.v1.GetLoyaltyBalanceResponse\"\x10\x9a\xb5\x18\f\n" +
-	"\b/balance\x10\x01\x1a\x12\xa2\xb5\x18\x0e\n" +
-	"\f/pos/loyaltyB/Z-github.com/voxire/voxie/gen/go/pos/loyalty/v1b\x06proto3"
+	"\b/balance\x10\x01\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x13/api/pos/loyalty/v1B/Z-github.com/voxire/voxie/gen/go/pos/loyalty/v1b\x06proto3"
 
 var file_pos_loyalty_v1_service_proto_goTypes = []any{
 	(*GetLoyaltyConfigRequest)(nil),         // 0: pos.loyalty.v1.GetLoyaltyConfigRequest

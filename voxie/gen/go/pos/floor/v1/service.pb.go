@@ -25,7 +25,7 @@ var File_pos_floor_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_floor_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/floor/v1/service.proto\x12\fpos.floor.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/floor/v1/create_floor.proto\x1a\x1fpos/floor/v1/delete_floor.proto\x1a\x1epos/floor/v1/list_floors.proto\x1a\x1fpos/floor/v1/update_floor.proto2\xb5\x03\n" +
+	"\x1apos/floor/v1/service.proto\x12\fpos.floor.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/floor/v1/create_floor.proto\x1a\x1fpos/floor/v1/delete_floor.proto\x1a\x1epos/floor/v1/list_floors.proto\x1a\x1fpos/floor/v1/update_floor.proto2\xc2\x03\n" +
 	"\fFloorService\x12`\n" +
 	"\n" +
 	"ListFloors\x12\x1f.pos.floor.v1.ListFloorsRequest\x1a .pos.floor.v1.ListFloorsResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -35,9 +35,8 @@ const file_pos_floor_v1_service_proto_rawDesc = "" +
 	"\vUpdateFloor\x12 .pos.floor.v1.UpdateFloorRequest\x1a!.pos.floor.v1.UpdateFloorResponse\"\x14\x9a\xb5\x18\x10\n" +
 	"\f/floors/{id}\x10\x03\x12h\n" +
 	"\vDeleteFloor\x12 .pos.floor.v1.DeleteFloorRequest\x1a!.pos.floor.v1.DeleteFloorResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/floors/{id}\x10\x04\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB-Z+github.com/voxire/voxie/gen/go/pos/floor/v1b\x06proto3"
+	"\f/floors/{id}\x10\x04\x1a\x17\xa2\xb5\x18\x13\n" +
+	"\x11/api/pos/floor/v1B-Z+github.com/voxire/voxie/gen/go/pos/floor/v1b\x06proto3"
 
 var file_pos_floor_v1_service_proto_goTypes = []any{
 	(*ListFloorsRequest)(nil),   // 0: pos.floor.v1.ListFloorsRequest

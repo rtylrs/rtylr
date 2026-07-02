@@ -25,16 +25,15 @@ var File_pos_audit_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_audit_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/audit/v1/service.proto\x12\fpos.audit.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/audit/v1/create_audit.proto\x1a\x1dpos/audit/v1/list_audit.proto2\xdc\x01\n" +
+	"\x1apos/audit/v1/service.proto\x12\fpos.audit.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/audit/v1/create_audit.proto\x1a\x1dpos/audit/v1/list_audit.proto2\xe9\x01\n" +
 	"\fAuditService\x12\\\n" +
 	"\tListAudit\x12\x1e.pos.audit.v1.ListAuditRequest\x1a\x1f.pos.audit.v1.ListAuditResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
 	"\x06/audit\x10\x01\x12b\n" +
 	"\vCreateAudit\x12 .pos.audit.v1.CreateAuditRequest\x1a!.pos.audit.v1.CreateAuditResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/audit\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB-Z+github.com/voxire/voxie/gen/go/pos/audit/v1b\x06proto3"
+	"\x06/audit\x10\x02\x1a\x17\xa2\xb5\x18\x13\n" +
+	"\x11/api/pos/audit/v1B-Z+github.com/voxire/voxie/gen/go/pos/audit/v1b\x06proto3"
 
 var file_pos_audit_v1_service_proto_goTypes = []any{
 	(*ListAuditRequest)(nil),    // 0: pos.audit.v1.ListAuditRequest

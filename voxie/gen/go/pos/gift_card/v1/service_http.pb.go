@@ -29,7 +29,7 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/gift-cards", listGiftCardsHandler)
+	config.mux.Handle("GET /api/pos/gift-card/v1/gift-cards", listGiftCardsHandler)
 
 	methodHeaders = getCreateGiftCardHeaders()
 	createGiftCardHandler := BindingMiddleware[CreateGiftCardRequest](
@@ -38,7 +38,7 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/gift-cards", createGiftCardHandler)
+	config.mux.Handle("POST /api/pos/gift-card/v1/gift-cards", createGiftCardHandler)
 
 	methodHeaders = getRedeemGiftCardHeaders()
 	redeemGiftCardHandler := BindingMiddleware[RedeemGiftCardRequest](
@@ -47,7 +47,7 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/gift-cards/{code}/redeem", redeemGiftCardHandler)
+	config.mux.Handle("POST /api/pos/gift-card/v1/gift-cards/{code}/redeem", redeemGiftCardHandler)
 
 	return nil
 }

@@ -13,7 +13,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
 
 // OrderService defines the POS order endpoints.
 service OrderService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/orders/v1"};
 
   // ListOrders returns POS orders for the active business and filters.
   rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {

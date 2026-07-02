@@ -25,12 +25,11 @@ var File_pos_receipt_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_receipt_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/receipt/v1/service.proto\x12\x0epos.receipt.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/receipt/v1/list_receipts.proto2\x8a\x01\n" +
+	"\x1cpos/receipt/v1/service.proto\x12\x0epos.receipt.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/receipt/v1/list_receipts.proto2\x99\x01\n" +
 	"\x0eReceiptService\x12l\n" +
 	"\fListReceipts\x12#.pos.receipt.v1.ListReceiptsRequest\x1a$.pos.receipt.v1.ListReceiptsResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/receipts\x10\x01\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB/Z-github.com/voxire/voxie/gen/go/pos/receipt/v1b\x06proto3"
+	"\t/receipts\x10\x01\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x13/api/pos/receipt/v1B/Z-github.com/voxire/voxie/gen/go/pos/receipt/v1b\x06proto3"
 
 var file_pos_receipt_v1_service_proto_goTypes = []any{
 	(*ListReceiptsRequest)(nil),  // 0: pos.receipt.v1.ListReceiptsRequest

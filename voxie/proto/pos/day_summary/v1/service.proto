@@ -8,7 +8,7 @@ import "pos/day_summary/v1/day_summary.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/day_summary/v1";
 
 service DaySummaryService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/day-summary/v1"};
 
   rpc DaySummary(DaySummaryRequest) returns (DaySummaryResponse) {
     option (onekit.http.config) = {

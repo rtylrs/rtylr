@@ -29,7 +29,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/access/my-locations", getMyLocationsHandler)
+	config.mux.Handle("GET /api/pos/access/v1/my-locations", getMyLocationsHandler)
 
 	methodHeaders = getAssignLocationHeaders()
 	assignLocationHandler := BindingMiddleware[AssignLocationRequest](
@@ -38,7 +38,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/access/assign", assignLocationHandler)
+	config.mux.Handle("POST /api/pos/access/v1/assign", assignLocationHandler)
 
 	methodHeaders = getRemoveLocationHeaders()
 	removeLocationHandler := BindingMiddleware[RemoveLocationRequest](
@@ -47,7 +47,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/access/remove", removeLocationHandler)
+	config.mux.Handle("POST /api/pos/access/v1/remove", removeLocationHandler)
 
 	return nil
 }

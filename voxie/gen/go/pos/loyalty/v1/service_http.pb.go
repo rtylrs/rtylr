@@ -32,7 +32,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/loyalty/config", getLoyaltyConfigHandler)
+	config.mux.Handle("GET /api/pos/loyalty/v1/config", getLoyaltyConfigHandler)
 
 	methodHeaders = getUpdateLoyaltyConfigHeaders()
 	updateLoyaltyConfigHandler := BindingMiddleware[UpdateLoyaltyConfigRequest](
@@ -41,7 +41,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/loyalty/config", updateLoyaltyConfigHandler)
+	config.mux.Handle("PUT /api/pos/loyalty/v1/config", updateLoyaltyConfigHandler)
 
 	methodHeaders = getListLoyaltyTransactionsHeaders()
 	listLoyaltyTransactionsHandler := BindingMiddleware[ListLoyaltyTransactionsRequest](
@@ -50,7 +50,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/loyalty/transactions", listLoyaltyTransactionsHandler)
+	config.mux.Handle("GET /api/pos/loyalty/v1/transactions", listLoyaltyTransactionsHandler)
 
 	methodHeaders = getEarnPointsHeaders()
 	earnPointsHandler := BindingMiddleware[EarnPointsRequest](
@@ -59,7 +59,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/loyalty/earn", earnPointsHandler)
+	config.mux.Handle("POST /api/pos/loyalty/v1/earn", earnPointsHandler)
 
 	methodHeaders = getRedeemPointsHeaders()
 	redeemPointsHandler := BindingMiddleware[RedeemPointsRequest](
@@ -68,7 +68,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/loyalty/redeem", redeemPointsHandler)
+	config.mux.Handle("POST /api/pos/loyalty/v1/redeem", redeemPointsHandler)
 
 	methodHeaders = getGetLoyaltyBalanceHeaders()
 	getLoyaltyBalanceHandler := BindingMiddleware[GetLoyaltyBalanceRequest](
@@ -77,7 +77,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/loyalty/balance", getLoyaltyBalanceHandler)
+	config.mux.Handle("GET /api/pos/loyalty/v1/balance", getLoyaltyBalanceHandler)
 
 	return nil
 }

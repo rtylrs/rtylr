@@ -25,7 +25,7 @@ var File_common_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccommon/auth/v1/service.proto\x12\x0ecommon.auth.v1\x1a common/auth/v1/google_auth.proto\x1a\"common/auth/v1/invite_accept.proto\x1a\x1acommon/auth/v1/login.proto\x1a\x1dcommon/auth/v1/register.proto\x1a(common/auth/v1/resend_verification.proto\x1a#common/auth/v1/reset_password.proto\x1a+common/auth/v1/reset_password_confirm.proto\x1a!common/auth/v1/verify_email.proto\x1a\x1donekit/http/annotations.proto2\xc3\a\n" +
+	"\x1ccommon/auth/v1/service.proto\x12\x0ecommon.auth.v1\x1a common/auth/v1/google_auth.proto\x1a\"common/auth/v1/invite_accept.proto\x1a\x1acommon/auth/v1/login.proto\x1a\x1dcommon/auth/v1/register.proto\x1a(common/auth/v1/resend_verification.proto\x1a#common/auth/v1/reset_password.proto\x1a+common/auth/v1/reset_password_confirm.proto\x1a!common/auth/v1/verify_email.proto\x1a\x1donekit/http/annotations.proto2\xd1\a\n" +
 	"\vAuthService\x12`\n" +
 	"\bRegister\x12\x1f.common.auth.v1.RegisterRequest\x1a .common.auth.v1.RegisterResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/register\x10\x02\x12T\n" +
@@ -44,8 +44,8 @@ const file_common_auth_v1_service_proto_rawDesc = "" +
 	"\x12ResendVerification\x12).common.auth.v1.ResendVerificationRequest\x1a*.common.auth.v1.ResendVerificationResponse\"\x1c\x9a\xb5\x18\x18\n" +
 	"\x14/resend-verification\x10\x02\x12q\n" +
 	"\fInviteAccept\x12#.common.auth.v1.InviteAcceptRequest\x1a$.common.auth.v1.InviteAcceptResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/invite/accept\x10\x02\x1a\v\xa2\xb5\x18\a\n" +
-	"\x05/authB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
+	"\x0e/invite/accept\x10\x02\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x13/api/common/auth/v1B/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
 
 var file_common_auth_v1_service_proto_goTypes = []any{
 	(*RegisterRequest)(nil),              // 0: common.auth.v1.RegisterRequest

@@ -25,13 +25,12 @@ var File_pos_day_summary_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_day_summary_v1_service_proto_rawDesc = "" +
 	"\n" +
-	" pos/day_summary/v1/service.proto\x12\x12pos.day_summary.v1\x1a\x1donekit/http/annotations.proto\x1a$pos/day_summary/v1/day_summary.proto2\x92\x01\n" +
+	" pos/day_summary/v1/service.proto\x12\x12pos.day_summary.v1\x1a\x1donekit/http/annotations.proto\x1a$pos/day_summary/v1/day_summary.proto2\xa5\x01\n" +
 	"\x11DaySummaryService\x12q\n" +
 	"\n" +
 	"DaySummary\x12%.pos.day_summary.v1.DaySummaryRequest\x1a&.pos.day_summary.v1.DaySummaryResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/day-summary\x10\x01\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB3Z1github.com/voxire/voxie/gen/go/pos/day_summary/v1b\x06proto3"
+	"\f/day-summary\x10\x01\x1a\x1d\xa2\xb5\x18\x19\n" +
+	"\x17/api/pos/day-summary/v1B3Z1github.com/voxire/voxie/gen/go/pos/day_summary/v1b\x06proto3"
 
 var file_pos_day_summary_v1_service_proto_goTypes = []any{
 	(*DaySummaryRequest)(nil),  // 0: pos.day_summary.v1.DaySummaryRequest

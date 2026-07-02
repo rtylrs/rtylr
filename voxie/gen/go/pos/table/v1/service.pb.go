@@ -25,7 +25,7 @@ var File_pos_table_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_table_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/table/v1/service.proto\x12\fpos.table.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/table/v1/create_table.proto\x1a\x1fpos/table/v1/delete_table.proto\x1a\x1epos/table/v1/list_tables.proto\x1a\x1fpos/table/v1/update_table.proto2\xb5\x03\n" +
+	"\x1apos/table/v1/service.proto\x12\fpos.table.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/table/v1/create_table.proto\x1a\x1fpos/table/v1/delete_table.proto\x1a\x1epos/table/v1/list_tables.proto\x1a\x1fpos/table/v1/update_table.proto2\xc2\x03\n" +
 	"\fTableService\x12`\n" +
 	"\n" +
 	"ListTables\x12\x1f.pos.table.v1.ListTablesRequest\x1a .pos.table.v1.ListTablesResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -35,9 +35,8 @@ const file_pos_table_v1_service_proto_rawDesc = "" +
 	"\vUpdateTable\x12 .pos.table.v1.UpdateTableRequest\x1a!.pos.table.v1.UpdateTableResponse\"\x14\x9a\xb5\x18\x10\n" +
 	"\f/tables/{id}\x10\x03\x12h\n" +
 	"\vDeleteTable\x12 .pos.table.v1.DeleteTableRequest\x1a!.pos.table.v1.DeleteTableResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/tables/{id}\x10\x04\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB-Z+github.com/voxire/voxie/gen/go/pos/table/v1b\x06proto3"
+	"\f/tables/{id}\x10\x04\x1a\x17\xa2\xb5\x18\x13\n" +
+	"\x11/api/pos/table/v1B-Z+github.com/voxire/voxie/gen/go/pos/table/v1b\x06proto3"
 
 var file_pos_table_v1_service_proto_goTypes = []any{
 	(*ListTablesRequest)(nil),   // 0: pos.table.v1.ListTablesRequest

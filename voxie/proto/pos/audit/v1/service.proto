@@ -9,7 +9,7 @@ import "pos/audit/v1/list_audit.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
 
 service AuditService {
-  option (onekit.http.service_config) = {base_path: "/pos"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/audit/v1"};
 
   rpc ListAudit(ListAuditRequest) returns (ListAuditResponse) {
     option (onekit.http.config) = {

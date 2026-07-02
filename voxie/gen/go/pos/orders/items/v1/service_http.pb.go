@@ -27,7 +27,7 @@ func RegisterOrderItemServiceServer(server OrderItemServiceServer, opts ...Serve
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/orders/{order_id}/items/{item_id}/status", updateOrderItemStatusHandler)
+	config.mux.Handle("PUT /api/pos/orders/items/v1/orders/{order_id}/items/{item_id}/status", updateOrderItemStatusHandler)
 
 	return nil
 }

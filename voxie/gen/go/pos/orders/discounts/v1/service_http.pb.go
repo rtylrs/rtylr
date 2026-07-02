@@ -27,7 +27,7 @@ func RegisterOrderDiscountServiceServer(server OrderDiscountServiceServer, opts 
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/orders/{order_id}/discount", discountOrderHandler)
+	config.mux.Handle("POST /api/pos/orders/discounts/v1/orders/{order_id}/discount", discountOrderHandler)
 
 	return nil
 }

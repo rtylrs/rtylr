@@ -11,7 +11,7 @@ import "pos/cash/v1/list_cash_movements.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/cash/v1";
 
 service CashService {
-  option (onekit.http.service_config) = {base_path: "/pos/cash"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/cash/v1"};
 
   rpc ListCashMovements(ListCashMovementsRequest) returns (ListCashMovementsResponse) {
     option (onekit.http.config) = {

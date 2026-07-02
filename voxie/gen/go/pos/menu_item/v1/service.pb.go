@@ -25,14 +25,13 @@ var File_pos_menu_item_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_menu_item_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1epos/menu_item/v1/service.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/menu_item/v1/create_menu_item.proto\x1a&pos/menu_item/v1/list_menu_items.proto2\x8e\x02\n" +
+	"\x1epos/menu_item/v1/service.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/menu_item/v1/create_menu_item.proto\x1a&pos/menu_item/v1/list_menu_items.proto2\x9f\x02\n" +
 	"\x0fMenuItemService\x12u\n" +
 	"\rListMenuItems\x12&.pos.menu_item.v1.ListMenuItemsRequest\x1a'.pos.menu_item.v1.ListMenuItemsResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/menu-items\x10\x01\x12x\n" +
 	"\x0eCreateMenuItem\x12'.pos.menu_item.v1.CreateMenuItemRequest\x1a(.pos.menu_item.v1.CreateMenuItemResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/menu-items\x10\x02\x1a\n" +
-	"\xa2\xb5\x18\x06\n" +
-	"\x04/posB1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
+	"\v/menu-items\x10\x02\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\x15/api/pos/menu-item/v1B1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
 
 var file_pos_menu_item_v1_service_proto_goTypes = []any{
 	(*ListMenuItemsRequest)(nil),   // 0: pos.menu_item.v1.ListMenuItemsRequest

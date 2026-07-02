@@ -25,15 +25,15 @@ var File_pos_access_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_access_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1bpos/access/v1/service.proto\x12\rpos.access.v1\x1a\x1donekit/http/annotations.proto\x1a#pos/access/v1/assign_location.proto\x1a$pos/access/v1/get_my_locations.proto\x1a#pos/access/v1/remove_location.proto2\xf8\x02\n" +
+	"\x1bpos/access/v1/service.proto\x12\rpos.access.v1\x1a\x1donekit/http/annotations.proto\x1a#pos/access/v1/assign_location.proto\x1a$pos/access/v1/get_my_locations.proto\x1a#pos/access/v1/remove_location.proto2\xff\x02\n" +
 	"\rAccessService\x12t\n" +
 	"\x0eGetMyLocations\x12$.pos.access.v1.GetMyLocationsRequest\x1a%.pos.access.v1.GetMyLocationsResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\r/my-locations\x10\x01\x12n\n" +
 	"\x0eAssignLocation\x12$.pos.access.v1.AssignLocationRequest\x1a%.pos.access.v1.AssignLocationResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/assign\x10\x02\x12n\n" +
 	"\x0eRemoveLocation\x12$.pos.access.v1.RemoveLocationRequest\x1a%.pos.access.v1.RemoveLocationResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/remove\x10\x02\x1a\x11\xa2\xb5\x18\r\n" +
-	"\v/pos/accessB.Z,github.com/voxire/voxie/gen/go/pos/access/v1b\x06proto3"
+	"\a/remove\x10\x02\x1a\x18\xa2\xb5\x18\x14\n" +
+	"\x12/api/pos/access/v1B.Z,github.com/voxire/voxie/gen/go/pos/access/v1b\x06proto3"
 
 var file_pos_access_v1_service_proto_goTypes = []any{
 	(*GetMyLocationsRequest)(nil),  // 0: pos.access.v1.GetMyLocationsRequest

@@ -30,7 +30,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/terminals", listTerminalsHandler)
+	config.mux.Handle("GET /api/pos/terminal/v1/terminals", listTerminalsHandler)
 
 	methodHeaders = getCreateTerminalHeaders()
 	createTerminalHandler := BindingMiddleware[CreateTerminalRequest](
@@ -39,7 +39,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/terminals", createTerminalHandler)
+	config.mux.Handle("POST /api/pos/terminal/v1/terminals", createTerminalHandler)
 
 	methodHeaders = getUpdateTerminalHeaders()
 	updateTerminalHandler := BindingMiddleware[UpdateTerminalRequest](
@@ -48,7 +48,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /pos/terminals/{id}", updateTerminalHandler)
+	config.mux.Handle("PUT /api/pos/terminal/v1/terminals/{id}", updateTerminalHandler)
 
 	methodHeaders = getHeartbeatTerminalHeaders()
 	heartbeatTerminalHandler := BindingMiddleware[HeartbeatTerminalRequest](
@@ -57,7 +57,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /pos/terminals/heartbeat", heartbeatTerminalHandler)
+	config.mux.Handle("POST /api/pos/terminal/v1/terminals/heartbeat", heartbeatTerminalHandler)
 
 	return nil
 }

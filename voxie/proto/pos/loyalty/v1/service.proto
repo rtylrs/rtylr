@@ -13,7 +13,7 @@ import "pos/loyalty/v1/update_loyalty_config.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
 
 service LoyaltyService {
-  option (onekit.http.service_config) = {base_path: "/pos/loyalty"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/loyalty/v1"};
 
   rpc GetLoyaltyConfig(GetLoyaltyConfigRequest) returns (GetLoyaltyConfigResponse) {
     option (onekit.http.config) = {

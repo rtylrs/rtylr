@@ -9,7 +9,7 @@ import "pos/kds/v1/update_kds_item_status.proto";
 option go_package = "github.com/voxire/voxie/gen/go/pos/kds/v1";
 
 service KDSService {
-  option (onekit.http.service_config) = {base_path: "/pos/kds"};
+  option (onekit.http.service_config) = {base_path: "/api/pos/kds/v1"};
 
   rpc ListKDSOrders(ListKDSOrdersRequest) returns (ListKDSOrdersResponse) {
     option (onekit.http.config) = {
