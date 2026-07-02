@@ -166,9 +166,10 @@ type AppConfig struct {
 	CDNMediaEnginePath string // path to the C++ media-engine binary
 	CDNAPIKey          string // bearer key for write endpoints; empty disables auth
 
-	// CDN image moderation (nudity filter on stored uploads). Disabled by
-	// default; provider "openai" uses the free moderation endpoint (needs
-	// OPENAI_API_KEY), "local" uses an in-process skin-tone heuristic.
+	// CDN image moderation (nudity filter on stored uploads). Enabled by
+	// default (set CDN_MODERATION_ENABLED=false to opt out); provider "openai"
+	// uses the free moderation endpoint (needs OPENAI_API_KEY), "local" uses
+	// an in-process skin-tone heuristic.
 	CDNModerationEnabled    bool
 	CDNModerationProvider   string // "openai" | "local"
 	CDNModerationFailClosed bool   // reject uploads when the moderation check errors
@@ -354,7 +355,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
 
-		CDNModerationEnabled:    strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_ENABLED")), "true"),
+		CDNModerationEnabled:    !strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_ENABLED")), "false"),
 		CDNModerationProvider:   strings.ToLower(envOrDefault("CDN_MODERATION_PROVIDER", "openai")),
 		CDNModerationFailClosed: strings.EqualFold(strings.TrimSpace(os.Getenv("CDN_MODERATION_FAIL_CLOSED")), "true"),
 
