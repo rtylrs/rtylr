@@ -153,23 +153,18 @@ main() {
     # Parse command line arguments
     case "${1:-unit}" in
         "unit")
-            ./scripts/generate_contracts.sh
             run_unit_tests
             ;;
         "coverage")
-            ./scripts/generate_contracts.sh
             run_coverage_tests
             ;;
         "race")
-            ./scripts/generate_contracts.sh
             run_race_tests
             ;;
         "bench")
-            ./scripts/generate_contracts.sh
             run_benchmarks
             ;;
         "all")
-            ./scripts/generate_contracts.sh
             run_all_tests
             ;;
         "clean")

@@ -12,9 +12,6 @@ RUN apk add --no-cache curl bash
 RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
     | tar -xz -C /usr/local/bin sqlc
 
-RUN go install github.com/bufbuild/buf/cmd/buf@v1.65.0 && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
-
 # Layer 3: deps — only reruns when go.mod / go.sum change
 COPY go.mod go.sum ./
 COPY voxie/go.mod voxie/go.sum* ./voxie/
@@ -28,7 +25,6 @@ COPY voxie ./voxie
 
 RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
-RUN bash scripts/generate_contracts.sh
 
 ARG VERSION=dev
 ARG COMMIT=unknown

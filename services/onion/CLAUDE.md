@@ -157,7 +157,7 @@ onion/
 │       └── wsbus/            WebSocket realtime bus
 ├── media-engine/             Native image/video transform engine used by the CDN runmode
 ├── local-env/                Local development environment (docker compose etc. — see make local-env-up)
-├── scripts/                  migrate.sh, reset-db.sh, generate_sqlc.sh, generate_contracts.sh, goose.sh, check_schema_drift.py, ...
+├── scripts/                  migrate.sh, reset-db.sh, generate_sqlc.sh, goose.sh, check_schema_drift.py, ...
 ├── docs/                     backend.md, database.md — authoritative architecture references
 ├── voxie/                    Git submodule — proto contracts + generated Go types
 ├── app.yaml                  App Engine / deployment config (see note below)
@@ -1080,7 +1080,6 @@ R2_BUCKET_NAME=
 ```bash
 make build         # build the API binary
 make build-all     # build api + worker + upload
-make contracts     # regenerate Go types from the voxie submodule
 make generate      # regenerate sqlc code
 make test          # run tests
 make lint          # run linters

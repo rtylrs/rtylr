@@ -17,14 +17,12 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --parallel "$(nproc)"
 
 # ── Stage 2: Go binary ──────────────────────────────────────────────────────
-# Build on the native runner arch and cross-compile to TARGETARCH so the
-# contract codegen (buf) runs natively instead of under arm64 emulation. The
-# media-engine stage above still builds for the target arch (emulated for arm64).
+# Build on the native runner arch and cross-compile to TARGETARCH — faster than
+# building under arm64 emulation. The media-engine stage above still builds for
+# the target arch (emulated for arm64).
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS go-builder
 WORKDIR /app
 RUN apk add --no-cache ca-certificates bash
-RUN go install github.com/bufbuild/buf/cmd/buf@v1.65.0 && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
 # Layer cache: deps only re-download when go.mod/go.sum change. voxie is a
 # local `replace` target, so its module file must be present for resolution.
 COPY go.mod go.sum ./
@@ -32,9 +30,7 @@ COPY voxie/go.mod voxie/go.sum* ./voxie/
 RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
-COPY scripts ./scripts
 COPY voxie ./voxie
-RUN chmod +x scripts/*.sh && bash scripts/generate_contracts.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
