@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+import "erp/product/v1/create_product.proto";
+import "erp/product/v1/delete_product.proto";
+import "erp/product/v1/list_products.proto";
+import "erp/product/v1/update_product.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+// ProductService defines ERP product endpoints.
+service ProductService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/product/v1"};
+
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {
+    option (onekit.http.config) = {
+      path: "/products"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

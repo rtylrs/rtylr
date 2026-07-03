@@ -3,16 +3,16 @@ syntax = "proto3";
 package finance.report.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/report/v1";
 
-// -- Tax Report --
-
 message GetTaxReportRequest {
-  // period is the period value for this contract.
-  string period = 1;
-  // date is the date value for this contract.
+  // period is the reporting period label.
+  string period = 1 [(onekit.http.query).name = "period"];
+  // date is the report anchor date.
   string date = 2 [
+    (onekit.http.query).name = "date",
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];

@@ -4,16 +4,17 @@ package finance.journal.v1;
 
 import "common/pagination/v1/pagination.proto";
 import "finance/journal/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/journal/v1";
 
 message ListJournalEntriesRequest {
   // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1;
-  // from_date is the from date value for this contract.
-  string from_date = 2;
-  // to_date is the to date value for this contract.
-  string to_date = 3;
+  common.pagination.v1.PaginationRequest pagination = 1 [(onekit.http.flatten) = true];
+  // from_date is the inclusive start date filter.
+  string from_date = 2 [(onekit.http.query).name = "from_date"];
+  // to_date is the inclusive end date filter.
+  string to_date = 3 [(onekit.http.query).name = "to_date"];
 }
 
 message ListJournalEntriesResponse {

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package erp.purchase_order.v1;
+
+import "erp/purchase_order/v1/create_purchase_order.proto";
+import "erp/purchase_order/v1/list_purchase_orders.proto";
+import "erp/purchase_order/v1/update_purchase_order_status.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
+
+// PurchaseOrderService defines ERP purchase order endpoints.
+service PurchaseOrderService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/purchase-order/v1"};
+
+  rpc ListPurchaseOrders(ListPurchaseOrdersRequest) returns (ListPurchaseOrdersResponse) {
+    option (onekit.http.config) = {
+      path: "/purchase-orders"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreatePurchaseOrder(CreatePurchaseOrderRequest) returns (CreatePurchaseOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/purchase-orders"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdatePurchaseOrderStatus(UpdatePurchaseOrderStatusRequest) returns (UpdatePurchaseOrderStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/purchase-orders/{id}/status"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+}

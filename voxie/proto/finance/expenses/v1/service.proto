@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package finance.expenses.v1;
+
+import "finance/expenses/v1/create_expense.proto";
+import "finance/expenses/v1/delete_expense.proto";
+import "finance/expenses/v1/list_expense_categories.proto";
+import "finance/expenses/v1/list_expenses.proto";
+import "finance/expenses/v1/update_expense.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/expenses/v1";
+
+// ExpensesService defines expense tracking endpoints.
+service ExpensesService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/expenses/v1"};
+
+  rpc ListExpenses(ListExpensesRequest) returns (ListExpensesResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateExpense(CreateExpenseRequest) returns (CreateExpenseResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateExpense(UpdateExpenseRequest) returns (UpdateExpenseResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  rpc DeleteExpense(DeleteExpenseRequest) returns (DeleteExpenseResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc ListExpenseCategories(ListExpenseCategoriesRequest) returns (ListExpenseCategoriesResponse) {
+    option (onekit.http.config) = {
+      path: "/categories"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

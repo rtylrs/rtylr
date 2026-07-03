@@ -4,12 +4,13 @@ package finance.bank_account.v1;
 
 import "common/pagination/v1/pagination.proto";
 import "finance/bank_account/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/bank_account/v1";
 
 message ListBankAccountsRequest {
   // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1;
+  common.pagination.v1.PaginationRequest pagination = 1 [(onekit.http.flatten) = true];
 }
 
 message ListBankAccountsResponse {

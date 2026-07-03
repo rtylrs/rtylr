@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package erp.inventory.v1;
+
+import "erp/inventory/v1/adjust_inventory.proto";
+import "erp/inventory/v1/get_inventory_report.proto";
+import "erp/inventory/v1/get_low_stock.proto";
+import "erp/inventory/v1/get_valuation.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/inventory/v1";
+
+// InventoryService defines ERP inventory endpoints.
+service InventoryService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/inventory/v1"};
+
+  rpc GetInventoryReport(GetInventoryReportRequest) returns (GetInventoryReportResponse) {
+    option (onekit.http.config) = {
+      path: "/report"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetLowStock(GetLowStockRequest) returns (GetLowStockResponse) {
+    option (onekit.http.config) = {
+      path: "/low-stock"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetValuation(GetValuationRequest) returns (GetValuationResponse) {
+    option (onekit.http.config) = {
+      path: "/valuation"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc AdjustInventory(AdjustInventoryRequest) returns (AdjustInventoryResponse) {
+    option (onekit.http.config) = {
+      path: "/adjust"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

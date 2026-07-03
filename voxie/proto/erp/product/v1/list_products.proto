@@ -3,18 +3,19 @@ syntax = "proto3";
 package erp.product.v1;
 
 import "erp/product/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
 
 message ListProductsRequest {
-  // search is the search value for this contract.
-  string search = 1;
-  // category_id is the category id value for this contract.
-  int64 category_id = 2;
-  // limit is the maximum number of records to return.
-  int64 limit = 3;
+  // search filters products by name or SKU.
+  string search = 1 [(onekit.http.query).name = "search"];
+  // category_id filters products by category.
+  int64 category_id = 2 [(onekit.http.query).name = "category_id"];
+  // limit is the maximum number of products to return.
+  int64 limit = 3 [(onekit.http.query).name = "limit"];
   // offset is the number of records to skip.
-  int64 offset = 4;
+  int64 offset = 4 [(onekit.http.query).name = "offset"];
 }
 
 message ListProductsResponse {
