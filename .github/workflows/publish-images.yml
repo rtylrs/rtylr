@@ -39,12 +39,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Setup Buf
-        uses: bufbuild/buf-setup-action@v1
-
-      - name: Generate contracts
-        run: pnpm contracts:sync
-
       - name: Build
         run: pnpm turbo build
 
