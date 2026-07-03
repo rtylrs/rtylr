@@ -4,6 +4,7 @@ package flow.task.v1;
 
 import "buf/validate/validate.proto";
 import "flow/task/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
@@ -17,15 +18,15 @@ message ListTasksRequest {
   };
 
   // project_id is the project id value for this contract.
-  int64 project_id = 1;
+  int64 project_id = 1 [(onekit.http.query).name = "project_id"];
   // status is the current lifecycle state.
-  string status = 2;
+  string status = 2 [(onekit.http.query).name = "status"];
   // assignee_id is the assignee id value for this contract.
-  optional int64 assignee_id = 3;
+  optional int64 assignee_id = 3 [(onekit.http.query).name = "assignee_id"];
   // priority is the priority value for this contract.
-  string priority = 4;
+  string priority = 4 [(onekit.http.query).name = "priority"];
   // workspace_id filters tasks by workspace when project_id is absent.
-  string workspace_id = 5;
+  string workspace_id = 5 [(onekit.http.query).name = "workspace_id"];
 }
 
 message ListTasksResponse {

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package flow.project.v1;
+
+import "flow/project/v1/create_project.proto";
+import "flow/project/v1/delete_project.proto";
+import "flow/project/v1/list_projects.proto";
+import "flow/project/v1/update_project.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
+
+service ProjectService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/project/v1"};
+
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {
+    option (onekit.http.config) = {
+      path: "/projects"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse) {
+    option (onekit.http.config) = {
+      path: "/projects"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse) {
+    option (onekit.http.config) = {
+      path: "/projects/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse) {
+    option (onekit.http.config) = {
+      path: "/projects/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}
