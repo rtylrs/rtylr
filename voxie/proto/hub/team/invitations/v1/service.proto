@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package hub.team.invitations.v1;
+
+import "hub/team/invitations/v1/accept_invite.proto";
+import "hub/team/invitations/v1/invite_user.proto";
+import "hub/team/invitations/v1/verify_invite.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/team/invitations/v1";
+
+// InvitationsService defines hub team invitation endpoints.
+service InvitationsService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/team/invitations/v1"};
+
+  // InviteUser sends a team invitation.
+  rpc InviteUser(InviteUserRequest) returns (InviteUserResponse) {
+    option (onekit.http.config) = {
+      path: "/invitations"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // VerifyInvite validates an invitation token.
+  rpc VerifyInvite(VerifyInviteRequest) returns (VerifyInviteResponse) {
+    option (onekit.http.config) = {
+      path: "/invitations/verify"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // AcceptInvite accepts a team invitation.
+  rpc AcceptInvite(AcceptInviteRequest) returns (AcceptInviteResponse) {
+    option (onekit.http.config) = {
+      path: "/invitations/accept"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

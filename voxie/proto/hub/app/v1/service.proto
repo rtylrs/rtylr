@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package hub.app.v1;
+
+import "hub/app/v1/addon_status.proto";
+import "hub/app/v1/disable_addon.proto";
+import "hub/app/v1/enable_addon.proto";
+import "hub/app/v1/list_addons.proto";
+import "hub/app/v1/list_apps.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/app/v1";
+
+// AppService defines hub app and addon endpoints.
+service AppService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/app/v1"};
+
+  // ListApps returns installed apps for the active business.
+  rpc ListApps(ListAppsRequest) returns (ListAppsResponse) {
+    option (onekit.http.config) = {
+      path: "/apps"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // ListAddons returns available addons.
+  rpc ListAddons(ListAddonsRequest) returns (ListAddonsResponse) {
+    option (onekit.http.config) = {
+      path: "/addons"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // AddonStatus returns the enabled state of an addon.
+  rpc AddonStatus(AddonStatusRequest) returns (AddonStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/addons/{addon_id}/status"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // EnableAddon enables an addon for the active business.
+  rpc EnableAddon(EnableAddonRequest) returns (EnableAddonResponse) {
+    option (onekit.http.config) = {
+      path: "/addons/{addon_id}/enable"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  // DisableAddon disables an addon for the active business.
+  rpc DisableAddon(DisableAddonRequest) returns (DisableAddonResponse) {
+    option (onekit.http.config) = {
+      path: "/addons/{addon_id}/disable"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hub.activity.v1;
+
+import "hub/activity/v1/list_activity.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/activity/v1";
+
+// ActivityService defines hub activity feed endpoints.
+service ActivityService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/activity/v1"};
+
+  // ListActivity returns recent activity events.
+  rpc ListActivity(ListActivityRequest) returns (ListActivityResponse) {
+    option (onekit.http.config) = {
+      path: "/activity"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

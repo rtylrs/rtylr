@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package insights.report.v1;
+
+import "insights/report/v1/create_report_template.proto";
+import "insights/report/v1/create_scheduled_report.proto";
+import "insights/report/v1/get_report_template.proto";
+import "insights/report/v1/list_report_templates.proto";
+import "insights/report/v1/list_scheduled_reports.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
+
+// ReportService defines insights report template endpoints.
+service ReportService {
+  option (onekit.http.service_config) = {base_path: "/api/insights/report/v1"};
+
+  // ListReportTemplates returns saved report templates.
+  rpc ListReportTemplates(ListReportTemplatesRequest) returns (ListReportTemplatesResponse) {
+    option (onekit.http.config) = {
+      path: "/templates"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateReportTemplate creates a report template.
+  rpc CreateReportTemplate(CreateReportTemplateRequest) returns (CreateReportTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // GetReportTemplate returns a report template by ID.
+  rpc GetReportTemplate(GetReportTemplateRequest) returns (GetReportTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // ListScheduledReports returns scheduled reports.
+  rpc ListScheduledReports(ListScheduledReportsRequest) returns (ListScheduledReportsResponse) {
+    option (onekit.http.config) = {
+      path: "/scheduled"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateScheduledReport creates a scheduled report.
+  rpc CreateScheduledReport(CreateScheduledReportRequest) returns (CreateScheduledReportResponse) {
+    option (onekit.http.config) = {
+      path: "/scheduled"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

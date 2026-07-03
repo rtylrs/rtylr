@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hub.config.v1;
+
+import "hub/config/v1/get_config.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/config/v1";
+
+// ConfigService defines hub configuration endpoints.
+service ConfigService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/config/v1"};
+
+  // GetConfig returns the active business configuration.
+  rpc GetConfig(GetConfigRequest) returns (GetConfigResponse) {
+    option (onekit.http.config) = {
+      path: "/config"
+      method: HTTP_METHOD_GET
+    };
+  }
+}
