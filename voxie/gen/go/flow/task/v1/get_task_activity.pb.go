@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_flow_task_v1_get_task_activity_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_get_task_activity_proto_rawDesc = "" +
 	"\n" +
-	"$flow/task/v1/get_task_activity.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"=\n" +
-	"\x16GetTaskActivityRequest\x12#\n" +
-	"\atask_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06taskId\"Q\n" +
+	"$flow/task/v1/get_task_activity.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\x1a\x1donekit/http/annotations.proto\"A\n" +
+	"\x16GetTaskActivityRequest\x12'\n" +
+	"\atask_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06taskId\"Q\n" +
 	"\x17GetTaskActivityResponse\x126\n" +
 	"\bactivity\x18\x01 \x03(\v2\x1a.flow.task.v1.TaskActivityR\bactivityB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 

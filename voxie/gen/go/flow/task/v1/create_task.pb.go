@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -206,29 +207,27 @@ var File_flow_task_v1_create_task_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_create_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1eflow/task/v1/create_task.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"\x8f\x04\n" +
-	"\x11CreateTaskRequest\x12)\n" +
+	"\x1eflow/task/v1/create_task.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb1\x04\n" +
+	"\x11CreateTaskRequest\x12-\n" +
 	"\n" +
-	"project_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tprojectId\x12-\n" +
-	"\fworkspace_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vworkspaceId\x12)\n" +
-	"\x0eparent_task_id\x18\x03 \x01(\x03H\x00R\fparentTaskId\x88\x01\x01\x12 \n" +
+	"project_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tprojectId\x121\n" +
+	"\fworkspace_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\vworkspaceId\x123\n" +
+	"\x0eparent_task_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\fparentTaskId\x88\x01\x01\x12 \n" +
 	"\x05title\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05title\x12,\n" +
 	"\vdescription\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12&\n" +
 	"\bpriority\x18\x06 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpriority\x12$\n" +
-	"\vassignee_id\x18\a \x01(\x03H\x01R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpriority\x12.\n" +
+	"\vassignee_id\x18\a \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\n" +
 	"assigneeId\x88\x01\x01\x12%\n" +
 	"\bdue_date\x18\b \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\x12)\n" +
 	"\n" +
 	"start_date\x18\t \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x12,\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x122\n" +
 	"\x0festimated_hours\x18\n" +
-	" \x01(\x01H\x02R\x0eestimatedHours\x88\x01\x01\x12 \n" +
+	" \x01(\x01B\x04\xe8\xb5\x18\x01H\x02R\x0eestimatedHours\x88\x01\x01\x12 \n" +
 	"\x06labels\x18\v \x03(\x03B\b\xbaH\x05\x92\x01\x02\b\x01R\x06labelsB\x11\n" +
 	"\x0f_parent_task_idB\x0e\n" +
 	"\f_assignee_idB\x12\n" +

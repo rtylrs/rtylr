@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,12 +135,10 @@ var File_flow_workspace_v1_add_workspace_member_proto protoreflect.FileDescripto
 
 const file_flow_workspace_v1_add_workspace_member_proto_rawDesc = "" +
 	"\n" +
-	",flow/workspace/v1/add_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\"\x8f\x01\n" +
-	"\x19AddWorkspaceMemberRequest\x12-\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vworkspaceId\x12#\n" +
-	"\auser_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06userId\x12\x1e\n" +
+	",flow/workspace/v1/add_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x97\x01\n" +
+	"\x19AddWorkspaceMemberRequest\x121\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\vworkspaceId\x12'\n" +
+	"\auser_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\x12\x1e\n" +
 	"\x04role\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04role\"6\n" +
 	"\x1aAddWorkspaceMemberResponse\x12\x18\n" +

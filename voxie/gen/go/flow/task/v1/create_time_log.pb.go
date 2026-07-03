@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,16 +144,15 @@ var File_flow_task_v1_create_time_log_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_create_time_log_proto_rawDesc = "" +
 	"\n" +
-	"\"flow/task/v1/create_time_log.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"\xa0\x01\n" +
+	"\"flow/task/v1/create_time_log.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa4\x01\n" +
 	"\x14CreateTimeLogRequest\x125\n" +
 	"\x10duration_minutes\x18\x01 \x01(\x03B\n" +
 	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x0fdurationMinutes\x12,\n" +
 	"\vdescription\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12#\n" +
-	"\atask_id\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06taskId\"Q\n" +
-	"\x15CreateTimeLogResponse\x12\x1e\n" +
-	"\vtime_log_id\x18\x01 \x01(\x03R\ttimeLogId\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12'\n" +
+	"\atask_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06taskId\"W\n" +
+	"\x15CreateTimeLogResponse\x12$\n" +
+	"\vtime_log_id\x18\x01 \x01(\x03B\x04е\x18\x01R\ttimeLogId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 
 var (

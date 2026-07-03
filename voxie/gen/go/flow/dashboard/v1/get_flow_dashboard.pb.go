@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -153,10 +154,10 @@ var File_flow_dashboard_v1_get_flow_dashboard_proto protoreflect.FileDescriptor
 
 const file_flow_dashboard_v1_get_flow_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"*flow/dashboard/v1/get_flow_dashboard.proto\x12\x11flow.dashboard.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"H\n" +
-	"\x17GetFlowDashboardRequest\x12-\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vworkspaceId\"\xe9\x01\n" +
+	"*flow/dashboard/v1/get_flow_dashboard.proto\x12\x11flow.dashboard.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\x1a\x1donekit/http/annotations.proto\"^\n" +
+	"\x17GetFlowDashboardRequest\x12C\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B \xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\x0e\n" +
+	"\fworkspace_idе\x18\x01R\vworkspaceId\"\xe9\x01\n" +
 	"\x18GetFlowDashboardResponse\x12\x1d\n" +
 	"\n" +
 	"open_tasks\x18\x01 \x01(\x03R\topenTasks\x12*\n" +

@@ -2,21 +2,23 @@ syntax = "proto3";
 
 package flow.task.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 // ── Tasks ───────────────────────────────────────────────────────────
 
 message Task {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // project_id is the project id value for this contract.
-  int64 project_id = 2;
+  int64 project_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // workspace_id is the workspace id value for this contract.
-  int64 workspace_id = 3;
+  int64 workspace_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 4;
+  int64 owner_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // parent_task_id is the parent task id value for this contract.
-  optional int64 parent_task_id = 5;
+  optional int64 parent_task_id = 5 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // title is the title value for this contract.
   string title = 6;
   // description is the description value for this contract.
@@ -26,19 +28,19 @@ message Task {
   // priority is the priority value for this contract.
   string priority = 9;
   // assignee_id is the assignee id value for this contract.
-  optional int64 assignee_id = 10;
+  optional int64 assignee_id = 10 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // reporter_id is the reporter id value for this contract.
-  int64 reporter_id = 11;
+  int64 reporter_id = 11 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // due_date is the due date value for this contract.
-  optional string due_date = 12;
+  optional string due_date = 12 [(onekit.http.nullable) = true];
   // start_date is the start date value for this contract.
-  optional string start_date = 13;
+  optional string start_date = 13 [(onekit.http.nullable) = true];
   // completed_at is the completed at value for this contract.
-  optional string completed_at = 14;
+  optional string completed_at = 14 [(onekit.http.nullable) = true];
   // estimated_hours is the estimated hours value for this contract.
-  optional double estimated_hours = 15;
+  optional double estimated_hours = 15 [(onekit.http.nullable) = true];
   // actual_hours is the actual hours value for this contract.
-  optional double actual_hours = 16;
+  optional double actual_hours = 16 [(onekit.http.nullable) = true];
   // sort_order is the sort order value for this contract.
   int64 sort_order = 17;
   // labels is the labels value for this contract.
@@ -65,20 +67,20 @@ message Task {
   // Number of direct subtasks. Powers the "N subtasks" pill on task rows.
   int32 subtask_count = 26;
   // Section bucket within a project (e.g. "Backlog", "Sprint 5"). 0 if unbucketed.
-  optional int64 section_id = 27;
+  optional int64 section_id = 27 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // Cycle (sprint) this task belongs to, if any.
-  optional int64 cycle_id = 28;
+  optional int64 cycle_id = 28 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // Milestone this task rolls up to, if any.
-  optional int64 milestone_id = 29;
+  optional int64 milestone_id = 29 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
 }
 
 message TaskComment {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // task_id is the task id value for this contract.
-  int64 task_id = 2;
+  int64 task_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // user_id identifies the user associated with this request.
-  int64 user_id = 3;
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // content is the content value for this contract.
   string content = 4;
   // is_edited is the is edited value for this contract.
@@ -91,11 +93,11 @@ message TaskComment {
 
 message TaskActivity {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // task_id is the task id value for this contract.
-  int64 task_id = 2;
+  int64 task_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // user_id identifies the user associated with this request.
-  int64 user_id = 3;
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // action is the action value for this contract.
   string action = 4;
   // old_value is the old value value for this contract.
@@ -110,7 +112,7 @@ message TaskActivity {
 
 message TaskPayloadCompact {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // title is the title value for this contract.
   string title = 2;
   // status is the current lifecycle state.
@@ -125,9 +127,9 @@ message TaskPayloadCompact {
 
 message Attachment {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // task_id is the task id value for this contract.
-  int64 task_id = 2;
+  int64 task_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 3;
   // url is the url value for this contract.
@@ -142,11 +144,11 @@ message Attachment {
 
 message TimeLog {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // task_id is the task id value for this contract.
-  int64 task_id = 2;
+  int64 task_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // user_id identifies the user associated with this request.
-  int64 user_id = 3;
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // duration_minutes is the duration minutes value for this contract.
   int64 duration_minutes = 4;
   // description is the description value for this contract.

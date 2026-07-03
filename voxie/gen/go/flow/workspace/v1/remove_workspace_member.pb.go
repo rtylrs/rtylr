@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,12 +126,12 @@ var File_flow_workspace_v1_remove_workspace_member_proto protoreflect.FileDescri
 
 const file_flow_workspace_v1_remove_workspace_member_proto_rawDesc = "" +
 	"\n" +
-	"/flow/workspace/v1/remove_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\"r\n" +
-	"\x1cRemoveWorkspaceMemberRequest\x12-\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vworkspaceId\x12#\n" +
-	"\auser_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06userId\"9\n" +
+	"/flow/workspace/v1/remove_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x99\x01\n" +
+	"\x1cRemoveWorkspaceMemberRequest\x12C\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B \xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\x0e\n" +
+	"\fworkspace_idе\x18\x01R\vworkspaceId\x124\n" +
+	"\auser_id\x18\x02 \x01(\x03B\x1b\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\t\n" +
+	"\auser_idе\x18\x01R\x06userId\"9\n" +
 	"\x1dRemoveWorkspaceMemberResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
 

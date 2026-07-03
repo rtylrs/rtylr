@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_flow_workspace_v1_delete_workspace_proto protoreflect.FileDescriptor
 
 const file_flow_workspace_v1_delete_workspace_proto_rawDesc = "" +
 	"\n" +
-	"(flow/workspace/v1/delete_workspace.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\"4\n" +
-	"\x16DeleteWorkspaceRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"3\n" +
+	"(flow/workspace/v1/delete_workspace.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"8\n" +
+	"\x16DeleteWorkspaceRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"3\n" +
 	"\x17DeleteWorkspaceResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
 

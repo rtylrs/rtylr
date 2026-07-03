@@ -3,6 +3,7 @@ syntax = "proto3";
 package flow.task.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
@@ -11,6 +12,8 @@ message UpdateTaskRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // title is the title value for this contract.
   string title = 2 [
@@ -33,7 +36,7 @@ message UpdateTaskRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // assignee_id is the assignee id value for this contract.
-  optional int64 assignee_id = 6;
+  optional int64 assignee_id = 6 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // due_date is the due date value for this contract.
   string due_date = 7 [
     (buf.validate.field).required = true,

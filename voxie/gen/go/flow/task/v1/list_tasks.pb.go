@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -152,15 +153,22 @@ var File_flow_task_v1_list_tasks_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_list_tasks_proto_rawDesc = "" +
 	"\n" +
-	"\x1dflow/task/v1/list_tasks.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"\xe1\x01\n" +
-	"\x10ListTasksRequest\x12\x1d\n" +
+	"\x1dflow/task/v1/list_tasks.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xc4\x02\n" +
+	"\x10ListTasksRequest\x123\n" +
 	"\n" +
-	"project_id\x18\x01 \x01(\x03R\tprojectId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12$\n" +
-	"\vassignee_id\x18\x03 \x01(\x03H\x00R\n" +
-	"assigneeId\x88\x01\x01\x12\x1a\n" +
-	"\bpriority\x18\x04 \x01(\tR\bpriority\x12!\n" +
-	"\fworkspace_id\x18\x05 \x01(\tR\vworkspaceId:!\xbaH\x1e\"\x1c\n" +
+	"project_id\x18\x01 \x01(\x03B\x14µ\x18\f\n" +
+	"\n" +
+	"project_idе\x18\x01R\tprojectId\x12$\n" +
+	"\x06status\x18\x02 \x01(\tB\fµ\x18\b\n" +
+	"\x06statusR\x06status\x12?\n" +
+	"\vassignee_id\x18\x03 \x01(\x03B\x19µ\x18\r\n" +
+	"\vassignee_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"assigneeId\x88\x01\x01\x12*\n" +
+	"\bpriority\x18\x04 \x01(\tB\x0eµ\x18\n" +
+	"\n" +
+	"\bpriorityR\bpriority\x125\n" +
+	"\fworkspace_id\x18\x05 \x01(\tB\x12µ\x18\x0e\n" +
+	"\fworkspace_idR\vworkspaceId:!\xbaH\x1e\"\x1c\n" +
 	"\n" +
 	"project_id\n" +
 	"\fworkspace_id\x10\x01B\x0e\n" +

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_flow_project_v1_list_projects_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_list_projects_proto_rawDesc = "" +
 	"\n" +
-	"#flow/project/v1/list_projects.proto\x12\x0fflow.project.v1\x1a\x1bflow/project/v1/types.proto\"8\n" +
-	"\x13ListProjectsRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"L\n" +
+	"#flow/project/v1/list_projects.proto\x12\x0fflow.project.v1\x1a\x1bflow/project/v1/types.proto\x1a\x1donekit/http/annotations.proto\"P\n" +
+	"\x13ListProjectsRequest\x129\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B\x16µ\x18\x0e\n" +
+	"\fworkspace_idе\x18\x01R\vworkspaceId\"L\n" +
 	"\x14ListProjectsResponse\x124\n" +
 	"\bprojects\x18\x01 \x03(\v2\x18.flow.project.v1.ProjectR\bprojectsB0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -214,11 +215,11 @@ var File_flow_project_v1_types_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bflow/project/v1/types.proto\x12\x0fflow.project.v1\"\xe5\x03\n" +
-	"\aProject\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
-	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x19\n" +
-	"\bowner_id\x18\x03 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x1bflow/project/v1/types.proto\x12\x0fflow.project.v1\x1a\x1donekit/http/annotations.proto\"\xf7\x03\n" +
+	"\aProject\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12'\n" +
+	"\fworkspace_id\x18\x02 \x01(\x03B\x04е\x18\x01R\vworkspaceId\x12\x1f\n" +
+	"\bowner_id\x18\x03 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04icon\x18\x06 \x01(\tR\x04icon\x12\x14\n" +

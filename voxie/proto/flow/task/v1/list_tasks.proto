@@ -18,11 +18,16 @@ message ListTasksRequest {
   };
 
   // project_id is the project id value for this contract.
-  int64 project_id = 1 [(onekit.http.query).name = "project_id"];
+  int64 project_id = 1 [(onekit.http.query).name = "project_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // status is the current lifecycle state.
   string status = 2 [(onekit.http.query).name = "status"];
   // assignee_id is the assignee id value for this contract.
-  optional int64 assignee_id = 3 [(onekit.http.query).name = "assignee_id"];
+  optional int64 assignee_id = 3 [(onekit.http.query).name = "assignee_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // priority is the priority value for this contract.
   string priority = 4 [(onekit.http.query).name = "priority"];
   // workspace_id filters tasks by workspace when project_id is absent.

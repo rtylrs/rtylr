@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_flow_label_v1_list_labels_proto protoreflect.FileDescriptor
 
 const file_flow_label_v1_list_labels_proto_rawDesc = "" +
 	"\n" +
-	"\x1fflow/label/v1/list_labels.proto\x12\rflow.label.v1\x1a\x19flow/label/v1/types.proto\"6\n" +
-	"\x11ListLabelsRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"B\n" +
+	"\x1fflow/label/v1/list_labels.proto\x12\rflow.label.v1\x1a\x19flow/label/v1/types.proto\x1a\x1donekit/http/annotations.proto\"N\n" +
+	"\x11ListLabelsRequest\x129\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B\x16µ\x18\x0e\n" +
+	"\fworkspace_idе\x18\x01R\vworkspaceId\"B\n" +
 	"\x12ListLabelsResponse\x12,\n" +
 	"\x06labels\x18\x01 \x03(\v2\x14.flow.label.v1.LabelR\x06labelsB.Z,github.com/voxire/voxie/gen/go/flow/label/v1b\x06proto3"
 

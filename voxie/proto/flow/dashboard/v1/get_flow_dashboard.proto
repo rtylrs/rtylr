@@ -4,6 +4,7 @@ package flow.dashboard.v1;
 
 import "buf/validate/validate.proto";
 import "flow/task/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/dashboard/v1";
 
@@ -13,7 +14,9 @@ message GetFlowDashboardRequest {
   // workspace_id is the workspace id value for this contract.
   int64 workspace_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "workspace_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
 }
 

@@ -4,6 +4,7 @@ package flow.project.v1;
 
 import "buf/validate/validate.proto";
 import "flow/project/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
 
@@ -12,6 +13,8 @@ message CreateProjectRequest {
   int64 workspace_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // name is the name value for this contract.
   string name = 2 [

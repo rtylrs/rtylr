@@ -3,6 +3,7 @@ syntax = "proto3";
 package flow.workspace.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/workspace/v1";
 
@@ -10,12 +11,16 @@ message RemoveWorkspaceMemberRequest {
   // workspace_id is the workspace id value for this contract.
   int64 workspace_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "workspace_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // user_id identifies the user associated with this request.
   int64 user_id = 2 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "user_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
 }
 
