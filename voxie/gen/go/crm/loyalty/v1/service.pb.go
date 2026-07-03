@@ -25,7 +25,7 @@ var File_crm_loyalty_v1_service_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccrm/loyalty/v1/service.proto\x12\x0ecrm.loyalty.v1\x1a!crm/loyalty/v1/award_points.proto\x1a(crm/loyalty/v1/create_loyalty_tier.proto\x1a'crm/loyalty/v1/get_loyalty_config.proto\x1a'crm/loyalty/v1/list_loyalty_tiers.proto\x1a.crm/loyalty/v1/list_loyalty_transactions.proto\x1a\"crm/loyalty/v1/redeem_points.proto\x1a*crm/loyalty/v1/update_loyalty_config.proto\x1a(crm/loyalty/v1/update_loyalty_tier.proto\x1a\x1donekit/http/annotations.proto2\xfc\a\n" +
+	"\x1ccrm/loyalty/v1/service.proto\x12\x0ecrm.loyalty.v1\x1a!crm/loyalty/v1/award_points.proto\x1a(crm/loyalty/v1/create_loyalty_tier.proto\x1a'crm/loyalty/v1/get_loyalty_config.proto\x1a'crm/loyalty/v1/list_loyalty_tiers.proto\x1a.crm/loyalty/v1/list_loyalty_transactions.proto\x1a\"crm/loyalty/v1/redeem_points.proto\x1a*crm/loyalty/v1/update_loyalty_config.proto\x1a(crm/loyalty/v1/update_loyalty_tier.proto\x1a\x1donekit/http/annotations.proto2\x83\b\n" +
 	"\x0eLoyaltyService\x12v\n" +
 	"\x10GetLoyaltyConfig\x12'.crm.loyalty.v1.GetLoyaltyConfigRequest\x1a(.crm.loyalty.v1.GetLoyaltyConfigResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/config\x10\x01\x12\x7f\n" +
@@ -36,9 +36,9 @@ const file_crm_loyalty_v1_service_proto_rawDesc = "" +
 	"\x06/tiers\x10\x01\x12x\n" +
 	"\x11CreateLoyaltyTier\x12(.crm.loyalty.v1.CreateLoyaltyTierRequest\x1a).crm.loyalty.v1.CreateLoyaltyTierResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/tiers\x10\x02\x12}\n" +
-	"\x11UpdateLoyaltyTier\x12(.crm.loyalty.v1.UpdateLoyaltyTierRequest\x1a).crm.loyalty.v1.UpdateLoyaltyTierResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/tiers/{id}\x10\x03\x12\x91\x01\n" +
+	"\x06/tiers\x10\x02\x12\x83\x01\n" +
+	"\x11UpdateLoyaltyTier\x12(.crm.loyalty.v1.UpdateLoyaltyTierRequest\x1a).crm.loyalty.v1.UpdateLoyaltyTierResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/tiers/{id}\x10\x03\"\x04body\x12\x91\x01\n" +
 	"\x17ListLoyaltyTransactions\x12..crm.loyalty.v1.ListLoyaltyTransactionsRequest\x1a/.crm.loyalty.v1.ListLoyaltyTransactionsResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\r/transactions\x10\x01\x12f\n" +
 	"\vAwardPoints\x12\".crm.loyalty.v1.AwardPointsRequest\x1a#.crm.loyalty.v1.AwardPointsResponse\"\x0e\x9a\xb5\x18\n" +

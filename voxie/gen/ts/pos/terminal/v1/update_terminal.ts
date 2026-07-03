@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateTerminalRequest {
+export interface UpdateTerminalBody {
   /** branch_id is the branch id value for this contract. */
   branchId: number;
   /** name is the name value for this contract. */
@@ -15,8 +15,13 @@ export interface UpdateTerminalRequest {
   deviceId: string;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
+}
+
+export interface UpdateTerminalRequest {
   /** id is the unique identifier for the terminal. */
   id: number;
+  /** body carries updatable terminal fields bound from the HTTP payload. */
+  body: UpdateTerminalBody | undefined;
 }
 
 export interface UpdateTerminalResponse {

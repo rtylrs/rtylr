@@ -53,6 +53,10 @@ export interface GetCustomerResponse {
 
 export interface UpdateCustomerRequest {
   id: string;
+  body?: UpdateCustomerBody;
+}
+
+export interface UpdateCustomerBody {
   firstName: string;
   lastName: string;
   email: string;
@@ -233,7 +237,7 @@ export class CustomerServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

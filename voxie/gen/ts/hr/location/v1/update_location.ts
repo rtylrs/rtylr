@@ -7,9 +7,7 @@
 /* eslint-disable */
 import type { LocationPayload } from "./types";
 
-export interface UpdateLocationRequest {
-  /** ID of the location to update. */
-  id: number;
+export interface UpdateLocationBody {
   /** New name; absent to keep current. */
   name?:
     | string
@@ -28,6 +26,13 @@ export interface UpdateLocationRequest {
     | undefined;
   /** New slug; absent to keep current. */
   slug?: string | undefined;
+}
+
+export interface UpdateLocationRequest {
+  /** ID of the location to update. */
+  id: number;
+  /** body carries updatable location fields bound from the HTTP payload. */
+  body: UpdateLocationBody | undefined;
 }
 
 export interface UpdateLocationResponse {

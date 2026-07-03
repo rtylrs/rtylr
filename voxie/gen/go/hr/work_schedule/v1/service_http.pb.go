@@ -34,7 +34,7 @@ func RegisterWorkScheduleServiceServer(server WorkScheduleServiceServer, opts ..
 	updateWorkScheduleHandler := BindingMiddleware[UpdateWorkScheduleRequest](
 		genericHandler(server.UpdateWorkSchedule, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateWorkSchedulePathParams, updateWorkScheduleQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/work-schedule/v1/work-schedules/{id}", updateWorkScheduleHandler)

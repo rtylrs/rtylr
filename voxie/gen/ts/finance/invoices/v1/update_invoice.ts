@@ -7,9 +7,7 @@
 /* eslint-disable */
 import type { InvoiceDetail, InvoiceItem } from "./types";
 
-export interface UpdateInvoiceRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateInvoiceBody {
   /** client_name is the client name value for this contract. */
   clientName: string;
   /** client_email is the client email value for this contract. */
@@ -36,6 +34,13 @@ export interface UpdateInvoiceRequest {
   terms: string;
   /** items is the items value for this contract. */
   items: InvoiceItem[];
+}
+
+export interface UpdateInvoiceRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable invoice fields bound from the HTTP payload. */
+  body: UpdateInvoiceBody | undefined;
 }
 
 export interface UpdateInvoiceResponse {

@@ -11,6 +11,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
 
 // ── Update ─────────────────────────────────────────────────────────
 
+message UpdateRoleBody {
+  // New name; absent to keep current.
+  optional string name = 1 [
+    (onekit.http.nullable) = true
+  ];
+  // New permission set; if provided, replaces all existing permissions.
+  repeated PermissionPayload permissions = 2 [(buf.validate.field).repeated.min_items = 1];
+}
+
 message UpdateRoleRequest {
   // ID of the role to update.
   int64 id = 1 [
@@ -18,12 +27,8 @@ message UpdateRoleRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // New name; absent to keep current.
-  optional string name = 2 [
-    (onekit.http.nullable) = true
-  ];
-  // New permission set; if provided, replaces all existing permissions.
-  repeated PermissionPayload permissions = 3 [(buf.validate.field).repeated.min_items = 1];
+  // body carries updatable role fields bound from the HTTP payload.
+  UpdateRoleBody body = 2;
 }
 
 message UpdateRoleResponse {

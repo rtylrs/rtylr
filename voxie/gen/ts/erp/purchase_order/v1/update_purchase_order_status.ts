@@ -6,11 +6,16 @@
 
 /* eslint-disable */
 
+export interface UpdatePurchaseOrderStatusBody {
+  /** status is the current lifecycle state. */
+  status: string;
+}
+
 export interface UpdatePurchaseOrderStatusRequest {
   /** id is the unique identifier for the resource. */
   id: number;
-  /** status is the current lifecycle state. */
-  status: string;
+  /** body carries status update fields bound from the HTTP payload. */
+  body: UpdatePurchaseOrderStatusBody | undefined;
 }
 
 export interface UpdatePurchaseOrderStatusResponse {

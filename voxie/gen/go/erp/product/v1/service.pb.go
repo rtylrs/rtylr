@@ -25,14 +25,14 @@ var File_erp_product_v1_service_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cerp/product/v1/service.proto\x12\x0eerp.product.v1\x1a#erp/product/v1/create_product.proto\x1a#erp/product/v1/delete_product.proto\x1a\"erp/product/v1/list_products.proto\x1a#erp/product/v1/update_product.proto\x1a\x1donekit/http/annotations.proto2\xf6\x03\n" +
+	"\x1cerp/product/v1/service.proto\x12\x0eerp.product.v1\x1a#erp/product/v1/create_product.proto\x1a#erp/product/v1/delete_product.proto\x1a\"erp/product/v1/list_products.proto\x1a#erp/product/v1/update_product.proto\x1a\x1donekit/http/annotations.proto2\xfc\x03\n" +
 	"\x0eProductService\x12l\n" +
 	"\fListProducts\x12#.erp.product.v1.ListProductsRequest\x1a$.erp.product.v1.ListProductsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/products\x10\x01\x12o\n" +
 	"\rCreateProduct\x12$.erp.product.v1.CreateProductRequest\x1a%.erp.product.v1.CreateProductResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/products\x10\x02\x12t\n" +
-	"\rUpdateProduct\x12$.erp.product.v1.UpdateProductRequest\x1a%.erp.product.v1.UpdateProductResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/products/{id}\x10\x03\x12t\n" +
+	"\t/products\x10\x02\x12z\n" +
+	"\rUpdateProduct\x12$.erp.product.v1.UpdateProductRequest\x1a%.erp.product.v1.UpdateProductResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/products/{id}\x10\x03\"\x04body\x12t\n" +
 	"\rDeleteProduct\x12$.erp.product.v1.DeleteProductRequest\x1a%.erp.product.v1.DeleteProductResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/products/{id}\x10\x04\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/erp/product/v1B/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"

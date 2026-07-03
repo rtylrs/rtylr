@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateLocationRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateLocationBody.
 // This method handles nullable fields: name, address, timezone, is_active, slug
-func (x *UpdateLocationRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateLocationBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -61,14 +61,14 @@ func (x *UpdateLocationRequest) MarshalJSONOnekit(opts protojson.MarshalOptions)
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateLocationRequest.
-func (x *UpdateLocationRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateLocationBody.
+func (x *UpdateLocationBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateLocationRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateLocationBody.
 // This method handles nullable fields: name, address, timezone, is_active, slug
-func (x *UpdateLocationRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateLocationBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

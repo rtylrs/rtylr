@@ -37,6 +37,10 @@ export interface CreateBillResponse {
 
 export interface UpdateBillRequest {
   id: string;
+  body?: UpdateBillBody;
+}
+
+export interface UpdateBillBody {
   supplierId: string;
   amount: number;
   currency: string;
@@ -173,7 +177,7 @@ export class BillServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

@@ -104,6 +104,10 @@ export interface GetOrderDetailResponse {
 
 export interface UpdateOrderStatusRequest {
   orderId: string;
+  body?: UpdateOrderStatusBody;
+}
+
+export interface UpdateOrderStatusBody {
   status: string;
 }
 
@@ -276,7 +280,7 @@ export class OrderServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

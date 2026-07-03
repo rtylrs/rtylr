@@ -45,7 +45,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 	updateModifierHandler := BindingMiddleware[UpdateModifierRequest](
 		genericHandler(server.UpdateModifier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateModifierPathParams, updateModifierQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/modifier/v1/modifiers/{id}", updateModifierHandler)

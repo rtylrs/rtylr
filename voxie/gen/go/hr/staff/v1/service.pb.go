@@ -25,7 +25,7 @@ var File_hr_staff_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19hr/staff/v1/service.proto\x12\vhr.staff.v1\x1a\x1ahr/staff/v1/clock_in.proto\x1a\x1bhr/staff/v1/clock_out.proto\x1a\x1ehr/staff/v1/create_staff.proto\x1a\x1ehr/staff/v1/delete_staff.proto\x1a\x1bhr/staff/v1/get_staff.proto\x1a\x1chr/staff/v1/list_staff.proto\x1a\x1ehr/staff/v1/update_staff.proto\x1a\x1donekit/http/annotations.proto2\xd2\x05\n" +
+	"\x19hr/staff/v1/service.proto\x12\vhr.staff.v1\x1a\x1ahr/staff/v1/clock_in.proto\x1a\x1bhr/staff/v1/clock_out.proto\x1a\x1ehr/staff/v1/create_staff.proto\x1a\x1ehr/staff/v1/delete_staff.proto\x1a\x1bhr/staff/v1/get_staff.proto\x1a\x1chr/staff/v1/list_staff.proto\x1a\x1ehr/staff/v1/update_staff.proto\x1a\x1donekit/http/annotations.proto2\xd8\x05\n" +
 	"\fStaffService\x12Z\n" +
 	"\tListStaff\x12\x1d.hr.staff.v1.ListStaffRequest\x1a\x1e.hr.staff.v1.ListStaffResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
@@ -34,9 +34,9 @@ const file_hr_staff_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x06/staff\x10\x02\x12\\\n" +
 	"\bGetStaff\x12\x1c.hr.staff.v1.GetStaffRequest\x1a\x1d.hr.staff.v1.GetStaffResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/staff/{id}\x10\x01\x12e\n" +
-	"\vUpdateStaff\x12\x1f.hr.staff.v1.UpdateStaffRequest\x1a .hr.staff.v1.UpdateStaffResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/staff/{id}\x10\x03\x12e\n" +
+	"\v/staff/{id}\x10\x01\x12k\n" +
+	"\vUpdateStaff\x12\x1f.hr.staff.v1.UpdateStaffRequest\x1a .hr.staff.v1.UpdateStaffResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/staff/{id}\x10\x03\"\x04body\x12e\n" +
 	"\vDeleteStaff\x12\x1f.hr.staff.v1.DeleteStaffRequest\x1a .hr.staff.v1.DeleteStaffResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/staff/{id}\x10\x04\x12]\n" +
 	"\aClockIn\x12\x1b.hr.staff.v1.ClockInRequest\x1a\x1c.hr.staff.v1.ClockInResponse\"\x17\x9a\xb5\x18\x13\n" +

@@ -40,6 +40,10 @@ export interface CreateExpenseResponse {
 
 export interface UpdateExpenseRequest {
   id: string;
+  body?: UpdateExpenseBody;
+}
+
+export interface UpdateExpenseBody {
   categoryId: string | null;
   amount: number;
   currency: string;
@@ -200,7 +204,7 @@ export class ExpensesServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

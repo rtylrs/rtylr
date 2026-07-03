@@ -33,6 +33,10 @@ export interface WorkSchedulePayload {
 
 export interface UpdateWorkScheduleRequest {
   id: string;
+  body?: UpdateWorkScheduleBody;
+}
+
+export interface UpdateWorkScheduleBody {
   name: string | null;
   workingDays: string[];
   startTime: string | null;
@@ -148,7 +152,7 @@ export class WorkScheduleServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

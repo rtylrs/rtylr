@@ -41,6 +41,7 @@ service InvoicesService {
     option (onekit.http.config) = {
       path: "/invoices/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 
@@ -48,6 +49,7 @@ service InvoicesService {
     option (onekit.http.config) = {
       path: "/invoices/{id}/status"
       method: HTTP_METHOD_PATCH
+      body: "body"
     };
   }
 

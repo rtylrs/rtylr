@@ -25,12 +25,12 @@ var File_hr_work_schedule_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_work_schedule_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!hr/work_schedule/v1/service.proto\x12\x13hr.work_schedule.v1\x1a.hr/work_schedule/v1/create_work_schedule.proto\x1a.hr/work_schedule/v1/update_work_schedule.proto\x1a\x1donekit/http/annotations.proto2\xdc\x02\n" +
+	"!hr/work_schedule/v1/service.proto\x12\x13hr.work_schedule.v1\x1a.hr/work_schedule/v1/create_work_schedule.proto\x1a.hr/work_schedule/v1/update_work_schedule.proto\x1a\x1donekit/http/annotations.proto2\xe2\x02\n" +
 	"\x13WorkScheduleService\x12\x8e\x01\n" +
 	"\x12CreateWorkSchedule\x12..hr.work_schedule.v1.CreateWorkScheduleRequest\x1a/.hr.work_schedule.v1.CreateWorkScheduleResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/work-schedules\x10\x02\x12\x93\x01\n" +
-	"\x12UpdateWorkSchedule\x12..hr.work_schedule.v1.UpdateWorkScheduleRequest\x1a/.hr.work_schedule.v1.UpdateWorkScheduleResponse\"\x1c\x9a\xb5\x18\x18\n" +
-	"\x14/work-schedules/{id}\x10\x03\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"\x0f/work-schedules\x10\x02\x12\x99\x01\n" +
+	"\x12UpdateWorkSchedule\x12..hr.work_schedule.v1.UpdateWorkScheduleRequest\x1a/.hr.work_schedule.v1.UpdateWorkScheduleResponse\"\"\x9a\xb5\x18\x1e\n" +
+	"\x14/work-schedules/{id}\x10\x03\"\x04body\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/hr/work-schedule/v1B4Z2github.com/voxire/voxie/gen/go/hr/work_schedule/v1b\x06proto3"
 
 var file_hr_work_schedule_v1_service_proto_goTypes = []any{

@@ -45,7 +45,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 	updateComboHandler := BindingMiddleware[UpdateComboRequest](
 		genericHandler(server.UpdateCombo, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateComboPathParams, updateComboQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/combo/v1/combos/{id}", updateComboHandler)

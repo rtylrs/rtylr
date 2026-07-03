@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateProjectRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateProjectBody {
   /** name is the name value for this contract. */
   name: string;
   /** description is the description value for this contract. */
@@ -23,6 +21,13 @@ export interface UpdateProjectRequest {
   startDate: string;
   /** due_date is the due date value for this contract. */
   dueDate: string;
+}
+
+export interface UpdateProjectRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable project fields bound from the HTTP payload. */
+  body: UpdateProjectBody | undefined;
 }
 
 export interface UpdateProjectResponse {

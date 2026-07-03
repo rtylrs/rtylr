@@ -176,11 +176,11 @@ const file_insights_report_v1_list_report_templates_proto_rawDesc = "" +
 	"\bsort_dirR\asortDir\x12\x1e\n" +
 	"\x04type\x18\x05 \x01(\tB\n" +
 	"µ\x18\x06\n" +
-	"\x04typeR\x04type\"\xa9\x01\n" +
+	"\x04typeR\x04type\"\xaf\x01\n" +
 	"\x1bListReportTemplatesResponse\x12@\n" +
-	"\ttemplates\x18\x01 \x03(\v2\".insights.report.v1.ReportTemplateR\ttemplates\x12H\n" +
+	"\ttemplates\x18\x01 \x03(\v2\".insights.report.v1.ReportTemplateR\ttemplates\x12N\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
 	"paginationB3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 
 var (

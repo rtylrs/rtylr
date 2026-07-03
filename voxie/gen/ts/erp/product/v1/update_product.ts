@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateProductRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateProductBody {
   /** category_id is the category id value for this contract. */
   categoryId: number;
   /** supplier_id is the supplier id value for this contract. */
@@ -35,6 +33,13 @@ export interface UpdateProductRequest {
   isActive: boolean;
   /** track_inventory is the track inventory value for this contract. */
   trackInventory: boolean;
+}
+
+export interface UpdateProductRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable product fields bound from the HTTP payload. */
+  body: UpdateProductBody | undefined;
 }
 
 export interface UpdateProductResponse {

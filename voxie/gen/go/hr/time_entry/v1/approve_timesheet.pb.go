@@ -23,21 +23,73 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ApproveTimesheetRequest struct {
+type ApproveTimesheetBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the timesheet being reviewed.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// True to approve, false to reject.
-	Approved bool `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
+	Approved bool `protobuf:"varint,1,opt,name=approved,proto3" json:"approved,omitempty"`
 	// Reason for rejection; absent if approving.
-	RejectionReason *string `protobuf:"bytes,3,opt,name=rejection_reason,json=rejectionReason,proto3,oneof" json:"rejection_reason,omitempty"`
+	RejectionReason *string `protobuf:"bytes,2,opt,name=rejection_reason,json=rejectionReason,proto3,oneof" json:"rejection_reason,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
+func (x *ApproveTimesheetBody) Reset() {
+	*x = ApproveTimesheetBody{}
+	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveTimesheetBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveTimesheetBody) ProtoMessage() {}
+
+func (x *ApproveTimesheetBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveTimesheetBody.ProtoReflect.Descriptor instead.
+func (*ApproveTimesheetBody) Descriptor() ([]byte, []int) {
+	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ApproveTimesheetBody) GetApproved() bool {
+	if x != nil {
+		return x.Approved
+	}
+	return false
+}
+
+func (x *ApproveTimesheetBody) GetRejectionReason() string {
+	if x != nil && x.RejectionReason != nil {
+		return *x.RejectionReason
+	}
+	return ""
+}
+
+type ApproveTimesheetRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the timesheet being reviewed.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries approval decision fields bound from the HTTP payload.
+	Body          *ApproveTimesheetBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *ApproveTimesheetRequest) Reset() {
 	*x = ApproveTimesheetRequest{}
-	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[0]
+	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +101,7 @@ func (x *ApproveTimesheetRequest) String() string {
 func (*ApproveTimesheetRequest) ProtoMessage() {}
 
 func (x *ApproveTimesheetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[0]
+	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +114,7 @@ func (x *ApproveTimesheetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveTimesheetRequest.ProtoReflect.Descriptor instead.
 func (*ApproveTimesheetRequest) Descriptor() ([]byte, []int) {
-	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP(), []int{0}
+	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ApproveTimesheetRequest) GetId() int64 {
@@ -72,18 +124,11 @@ func (x *ApproveTimesheetRequest) GetId() int64 {
 	return 0
 }
 
-func (x *ApproveTimesheetRequest) GetApproved() bool {
+func (x *ApproveTimesheetRequest) GetBody() *ApproveTimesheetBody {
 	if x != nil {
-		return x.Approved
+		return x.Body
 	}
-	return false
-}
-
-func (x *ApproveTimesheetRequest) GetRejectionReason() string {
-	if x != nil && x.RejectionReason != nil {
-		return *x.RejectionReason
-	}
-	return ""
+	return nil
 }
 
 type ApproveTimesheetResponse struct {
@@ -96,7 +141,7 @@ type ApproveTimesheetResponse struct {
 
 func (x *ApproveTimesheetResponse) Reset() {
 	*x = ApproveTimesheetResponse{}
-	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[1]
+	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -108,7 +153,7 @@ func (x *ApproveTimesheetResponse) String() string {
 func (*ApproveTimesheetResponse) ProtoMessage() {}
 
 func (x *ApproveTimesheetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[1]
+	mi := &file_hr_time_entry_v1_approve_timesheet_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +166,7 @@ func (x *ApproveTimesheetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveTimesheetResponse.ProtoReflect.Descriptor instead.
 func (*ApproveTimesheetResponse) Descriptor() ([]byte, []int) {
-	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP(), []int{1}
+	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ApproveTimesheetResponse) GetSuccess() bool {
@@ -135,12 +180,14 @@ var File_hr_time_entry_v1_approve_timesheet_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_approve_timesheet_proto_rawDesc = "" +
 	"\n" +
-	"(hr/time_entry/v1/approve_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa0\x01\n" +
+	"(hr/time_entry/v1/approve_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"}\n" +
+	"\x14ApproveTimesheetBody\x12\x1a\n" +
+	"\bapproved\x18\x01 \x01(\bR\bapproved\x124\n" +
+	"\x10rejection_reason\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
+	"\x11_rejection_reason\"u\n" +
 	"\x17ApproveTimesheetRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\x124\n" +
-	"\x10rejection_reason\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
-	"\x11_rejection_reason\"4\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12:\n" +
+	"\x04body\x18\x02 \x01(\v2&.hr.time_entry.v1.ApproveTimesheetBodyR\x04body\"4\n" +
 	"\x18ApproveTimesheetResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB1Z/github.com/voxire/voxie/gen/go/hr/time_entry/v1b\x06proto3"
 
@@ -156,17 +203,19 @@ func file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP() []byte {
 	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescData
 }
 
-var file_hr_time_entry_v1_approve_timesheet_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hr_time_entry_v1_approve_timesheet_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hr_time_entry_v1_approve_timesheet_proto_goTypes = []any{
-	(*ApproveTimesheetRequest)(nil),  // 0: hr.time_entry.v1.ApproveTimesheetRequest
-	(*ApproveTimesheetResponse)(nil), // 1: hr.time_entry.v1.ApproveTimesheetResponse
+	(*ApproveTimesheetBody)(nil),     // 0: hr.time_entry.v1.ApproveTimesheetBody
+	(*ApproveTimesheetRequest)(nil),  // 1: hr.time_entry.v1.ApproveTimesheetRequest
+	(*ApproveTimesheetResponse)(nil), // 2: hr.time_entry.v1.ApproveTimesheetResponse
 }
 var file_hr_time_entry_v1_approve_timesheet_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: hr.time_entry.v1.ApproveTimesheetRequest.body:type_name -> hr.time_entry.v1.ApproveTimesheetBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_time_entry_v1_approve_timesheet_proto_init() }
@@ -181,7 +230,7 @@ func file_hr_time_entry_v1_approve_timesheet_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_time_entry_v1_approve_timesheet_proto_rawDesc), len(file_hr_time_entry_v1_approve_timesheet_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

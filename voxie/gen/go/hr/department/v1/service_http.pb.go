@@ -34,7 +34,7 @@ func RegisterDepartmentServiceServer(server DepartmentServiceServer, opts ...Ser
 	updateDepartmentHandler := BindingMiddleware[UpdateDepartmentRequest](
 		genericHandler(server.UpdateDepartment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateDepartmentPathParams, updateDepartmentQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/department/v1/departments/{id}", updateDepartmentHandler)

@@ -39,6 +39,7 @@ service OnboardingService {
     option (onekit.http.config) = {
       path: "/templates/{role_id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

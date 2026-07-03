@@ -23,33 +23,127 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateWorkScheduleRequest struct {
+type UpdateWorkScheduleBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the schedule to update.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// New name; absent to keep current.
-	Name *string `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Name *string `protobuf:"bytes,1,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	// New working days; if provided, replaces all existing days.
-	WorkingDays []string `protobuf:"bytes,3,rep,name=working_days,json=workingDays,proto3" json:"working_days,omitempty"`
+	WorkingDays []string `protobuf:"bytes,2,rep,name=working_days,json=workingDays,proto3" json:"working_days,omitempty"`
 	// New start time; absent to keep current.
-	StartTime *string `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
+	StartTime *string `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
 	// New end time; absent to keep current.
-	EndTime *string `protobuf:"bytes,5,opt,name=end_time,json=endTime,proto3,oneof" json:"end_time,omitempty"`
+	EndTime *string `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3,oneof" json:"end_time,omitempty"`
 	// New break duration in minutes; absent to keep current.
-	BreakMinutes *int32 `protobuf:"varint,6,opt,name=break_minutes,json=breakMinutes,proto3,oneof" json:"break_minutes,omitempty"`
+	BreakMinutes *int32 `protobuf:"varint,5,opt,name=break_minutes,json=breakMinutes,proto3,oneof" json:"break_minutes,omitempty"`
 	// New contracted hours per week; absent to keep current.
-	ContractedHoursPerWeek *float64 `protobuf:"fixed64,7,opt,name=contracted_hours_per_week,json=contractedHoursPerWeek,proto3,oneof" json:"contracted_hours_per_week,omitempty"`
+	ContractedHoursPerWeek *float64 `protobuf:"fixed64,6,opt,name=contracted_hours_per_week,json=contractedHoursPerWeek,proto3,oneof" json:"contracted_hours_per_week,omitempty"`
 	// New daily OT threshold; absent to keep current.
-	DailyOtThresholdMinutes *int32 `protobuf:"varint,8,opt,name=daily_ot_threshold_minutes,json=dailyOtThresholdMinutes,proto3,oneof" json:"daily_ot_threshold_minutes,omitempty"`
+	DailyOtThresholdMinutes *int32 `protobuf:"varint,7,opt,name=daily_ot_threshold_minutes,json=dailyOtThresholdMinutes,proto3,oneof" json:"daily_ot_threshold_minutes,omitempty"`
 	// New weekly OT threshold; absent to keep current.
-	WeeklyOtThresholdMinutes *int32 `protobuf:"varint,9,opt,name=weekly_ot_threshold_minutes,json=weeklyOtThresholdMinutes,proto3,oneof" json:"weekly_ot_threshold_minutes,omitempty"`
+	WeeklyOtThresholdMinutes *int32 `protobuf:"varint,8,opt,name=weekly_ot_threshold_minutes,json=weeklyOtThresholdMinutes,proto3,oneof" json:"weekly_ot_threshold_minutes,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
 
+func (x *UpdateWorkScheduleBody) Reset() {
+	*x = UpdateWorkScheduleBody{}
+	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkScheduleBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkScheduleBody) ProtoMessage() {}
+
+func (x *UpdateWorkScheduleBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkScheduleBody.ProtoReflect.Descriptor instead.
+func (*UpdateWorkScheduleBody) Descriptor() ([]byte, []int) {
+	return file_hr_work_schedule_v1_update_work_schedule_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateWorkScheduleBody) GetName() string {
+	if x != nil && x.Name != nil {
+		return *x.Name
+	}
+	return ""
+}
+
+func (x *UpdateWorkScheduleBody) GetWorkingDays() []string {
+	if x != nil {
+		return x.WorkingDays
+	}
+	return nil
+}
+
+func (x *UpdateWorkScheduleBody) GetStartTime() string {
+	if x != nil && x.StartTime != nil {
+		return *x.StartTime
+	}
+	return ""
+}
+
+func (x *UpdateWorkScheduleBody) GetEndTime() string {
+	if x != nil && x.EndTime != nil {
+		return *x.EndTime
+	}
+	return ""
+}
+
+func (x *UpdateWorkScheduleBody) GetBreakMinutes() int32 {
+	if x != nil && x.BreakMinutes != nil {
+		return *x.BreakMinutes
+	}
+	return 0
+}
+
+func (x *UpdateWorkScheduleBody) GetContractedHoursPerWeek() float64 {
+	if x != nil && x.ContractedHoursPerWeek != nil {
+		return *x.ContractedHoursPerWeek
+	}
+	return 0
+}
+
+func (x *UpdateWorkScheduleBody) GetDailyOtThresholdMinutes() int32 {
+	if x != nil && x.DailyOtThresholdMinutes != nil {
+		return *x.DailyOtThresholdMinutes
+	}
+	return 0
+}
+
+func (x *UpdateWorkScheduleBody) GetWeeklyOtThresholdMinutes() int32 {
+	if x != nil && x.WeeklyOtThresholdMinutes != nil {
+		return *x.WeeklyOtThresholdMinutes
+	}
+	return 0
+}
+
+type UpdateWorkScheduleRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the schedule to update.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable work schedule fields bound from the HTTP payload.
+	Body          *UpdateWorkScheduleBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *UpdateWorkScheduleRequest) Reset() {
 	*x = UpdateWorkScheduleRequest{}
-	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[0]
+	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -61,7 +155,7 @@ func (x *UpdateWorkScheduleRequest) String() string {
 func (*UpdateWorkScheduleRequest) ProtoMessage() {}
 
 func (x *UpdateWorkScheduleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[0]
+	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -74,7 +168,7 @@ func (x *UpdateWorkScheduleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWorkScheduleRequest.ProtoReflect.Descriptor instead.
 func (*UpdateWorkScheduleRequest) Descriptor() ([]byte, []int) {
-	return file_hr_work_schedule_v1_update_work_schedule_proto_rawDescGZIP(), []int{0}
+	return file_hr_work_schedule_v1_update_work_schedule_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateWorkScheduleRequest) GetId() int64 {
@@ -84,60 +178,11 @@ func (x *UpdateWorkScheduleRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateWorkScheduleRequest) GetName() string {
-	if x != nil && x.Name != nil {
-		return *x.Name
-	}
-	return ""
-}
-
-func (x *UpdateWorkScheduleRequest) GetWorkingDays() []string {
+func (x *UpdateWorkScheduleRequest) GetBody() *UpdateWorkScheduleBody {
 	if x != nil {
-		return x.WorkingDays
+		return x.Body
 	}
 	return nil
-}
-
-func (x *UpdateWorkScheduleRequest) GetStartTime() string {
-	if x != nil && x.StartTime != nil {
-		return *x.StartTime
-	}
-	return ""
-}
-
-func (x *UpdateWorkScheduleRequest) GetEndTime() string {
-	if x != nil && x.EndTime != nil {
-		return *x.EndTime
-	}
-	return ""
-}
-
-func (x *UpdateWorkScheduleRequest) GetBreakMinutes() int32 {
-	if x != nil && x.BreakMinutes != nil {
-		return *x.BreakMinutes
-	}
-	return 0
-}
-
-func (x *UpdateWorkScheduleRequest) GetContractedHoursPerWeek() float64 {
-	if x != nil && x.ContractedHoursPerWeek != nil {
-		return *x.ContractedHoursPerWeek
-	}
-	return 0
-}
-
-func (x *UpdateWorkScheduleRequest) GetDailyOtThresholdMinutes() int32 {
-	if x != nil && x.DailyOtThresholdMinutes != nil {
-		return *x.DailyOtThresholdMinutes
-	}
-	return 0
-}
-
-func (x *UpdateWorkScheduleRequest) GetWeeklyOtThresholdMinutes() int32 {
-	if x != nil && x.WeeklyOtThresholdMinutes != nil {
-		return *x.WeeklyOtThresholdMinutes
-	}
-	return 0
 }
 
 type UpdateWorkScheduleResponse struct {
@@ -150,7 +195,7 @@ type UpdateWorkScheduleResponse struct {
 
 func (x *UpdateWorkScheduleResponse) Reset() {
 	*x = UpdateWorkScheduleResponse{}
-	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[1]
+	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -162,7 +207,7 @@ func (x *UpdateWorkScheduleResponse) String() string {
 func (*UpdateWorkScheduleResponse) ProtoMessage() {}
 
 func (x *UpdateWorkScheduleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[1]
+	mi := &file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +220,7 @@ func (x *UpdateWorkScheduleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWorkScheduleResponse.ProtoReflect.Descriptor instead.
 func (*UpdateWorkScheduleResponse) Descriptor() ([]byte, []int) {
-	return file_hr_work_schedule_v1_update_work_schedule_proto_rawDescGZIP(), []int{1}
+	return file_hr_work_schedule_v1_update_work_schedule_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateWorkScheduleResponse) GetSchedule() *WorkSchedulePayload {
@@ -189,25 +234,27 @@ var File_hr_work_schedule_v1_update_work_schedule_proto protoreflect.FileDescrip
 
 const file_hr_work_schedule_v1_update_work_schedule_proto_rawDesc = "" +
 	"\n" +
-	".hr/work_schedule/v1/update_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xf3\x04\n" +
-	"\x19UpdateWorkScheduleRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1d\n" +
-	"\x04name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04name\x88\x01\x01\x12+\n" +
-	"\fworking_days\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\vworkingDays\x12(\n" +
+	".hr/work_schedule/v1/update_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xd0\x04\n" +
+	"\x16UpdateWorkScheduleBody\x12\x1d\n" +
+	"\x04name\x18\x01 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04name\x88\x01\x01\x12+\n" +
+	"\fworking_days\x18\x02 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\vworkingDays\x12(\n" +
 	"\n" +
-	"start_time\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\tstartTime\x88\x01\x01\x12$\n" +
-	"\bend_time\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\aendTime\x88\x01\x01\x12.\n" +
-	"\rbreak_minutes\x18\x06 \x01(\x05B\x04\xe8\xb5\x18\x01H\x03R\fbreakMinutes\x88\x01\x01\x12D\n" +
-	"\x19contracted_hours_per_week\x18\a \x01(\x01B\x04\xe8\xb5\x18\x01H\x04R\x16contractedHoursPerWeek\x88\x01\x01\x12F\n" +
-	"\x1adaily_ot_threshold_minutes\x18\b \x01(\x05B\x04\xe8\xb5\x18\x01H\x05R\x17dailyOtThresholdMinutes\x88\x01\x01\x12H\n" +
-	"\x1bweekly_ot_threshold_minutes\x18\t \x01(\x05B\x04\xe8\xb5\x18\x01H\x06R\x18weeklyOtThresholdMinutes\x88\x01\x01B\a\n" +
+	"start_time\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\tstartTime\x88\x01\x01\x12$\n" +
+	"\bend_time\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\aendTime\x88\x01\x01\x12.\n" +
+	"\rbreak_minutes\x18\x05 \x01(\x05B\x04\xe8\xb5\x18\x01H\x03R\fbreakMinutes\x88\x01\x01\x12D\n" +
+	"\x19contracted_hours_per_week\x18\x06 \x01(\x01B\x04\xe8\xb5\x18\x01H\x04R\x16contractedHoursPerWeek\x88\x01\x01\x12F\n" +
+	"\x1adaily_ot_threshold_minutes\x18\a \x01(\x05B\x04\xe8\xb5\x18\x01H\x05R\x17dailyOtThresholdMinutes\x88\x01\x01\x12H\n" +
+	"\x1bweekly_ot_threshold_minutes\x18\b \x01(\x05B\x04\xe8\xb5\x18\x01H\x06R\x18weeklyOtThresholdMinutes\x88\x01\x01B\a\n" +
 	"\x05_nameB\r\n" +
 	"\v_start_timeB\v\n" +
 	"\t_end_timeB\x10\n" +
 	"\x0e_break_minutesB\x1c\n" +
 	"\x1a_contracted_hours_per_weekB\x1d\n" +
 	"\x1b_daily_ot_threshold_minutesB\x1e\n" +
-	"\x1c_weekly_ot_threshold_minutes\"b\n" +
+	"\x1c_weekly_ot_threshold_minutes\"|\n" +
+	"\x19UpdateWorkScheduleRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12?\n" +
+	"\x04body\x18\x02 \x01(\v2+.hr.work_schedule.v1.UpdateWorkScheduleBodyR\x04body\"b\n" +
 	"\x1aUpdateWorkScheduleResponse\x12D\n" +
 	"\bschedule\x18\x01 \x01(\v2(.hr.work_schedule.v1.WorkSchedulePayloadR\bscheduleB4Z2github.com/voxire/voxie/gen/go/hr/work_schedule/v1b\x06proto3"
 
@@ -223,19 +270,21 @@ func file_hr_work_schedule_v1_update_work_schedule_proto_rawDescGZIP() []byte {
 	return file_hr_work_schedule_v1_update_work_schedule_proto_rawDescData
 }
 
-var file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hr_work_schedule_v1_update_work_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hr_work_schedule_v1_update_work_schedule_proto_goTypes = []any{
-	(*UpdateWorkScheduleRequest)(nil),  // 0: hr.work_schedule.v1.UpdateWorkScheduleRequest
-	(*UpdateWorkScheduleResponse)(nil), // 1: hr.work_schedule.v1.UpdateWorkScheduleResponse
-	(*WorkSchedulePayload)(nil),        // 2: hr.work_schedule.v1.WorkSchedulePayload
+	(*UpdateWorkScheduleBody)(nil),     // 0: hr.work_schedule.v1.UpdateWorkScheduleBody
+	(*UpdateWorkScheduleRequest)(nil),  // 1: hr.work_schedule.v1.UpdateWorkScheduleRequest
+	(*UpdateWorkScheduleResponse)(nil), // 2: hr.work_schedule.v1.UpdateWorkScheduleResponse
+	(*WorkSchedulePayload)(nil),        // 3: hr.work_schedule.v1.WorkSchedulePayload
 }
 var file_hr_work_schedule_v1_update_work_schedule_proto_depIdxs = []int32{
-	2, // 0: hr.work_schedule.v1.UpdateWorkScheduleResponse.schedule:type_name -> hr.work_schedule.v1.WorkSchedulePayload
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: hr.work_schedule.v1.UpdateWorkScheduleRequest.body:type_name -> hr.work_schedule.v1.UpdateWorkScheduleBody
+	3, // 1: hr.work_schedule.v1.UpdateWorkScheduleResponse.schedule:type_name -> hr.work_schedule.v1.WorkSchedulePayload
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_hr_work_schedule_v1_update_work_schedule_proto_init() }
@@ -251,7 +300,7 @@ func file_hr_work_schedule_v1_update_work_schedule_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_work_schedule_v1_update_work_schedule_proto_rawDesc), len(file_hr_work_schedule_v1_update_work_schedule_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

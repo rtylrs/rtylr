@@ -25,7 +25,7 @@ var File_pos_orders_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1bpos/orders/v1/service.proto\x12\rpos.orders.v1\x1a\x1donekit/http/annotations.proto\x1a pos/orders/v1/create_order.proto\x1a$pos/orders/v1/get_order_detail.proto\x1a\x1fpos/orders/v1/list_orders.proto\x1a'pos/orders/v1/update_order_status.proto\x1a\x1epos/orders/v1/void_order.proto2\xeb\x04\n" +
+	"\x1bpos/orders/v1/service.proto\x12\rpos.orders.v1\x1a\x1donekit/http/annotations.proto\x1a pos/orders/v1/create_order.proto\x1a$pos/orders/v1/get_order_detail.proto\x1a\x1fpos/orders/v1/list_orders.proto\x1a'pos/orders/v1/update_order_status.proto\x1a\x1epos/orders/v1/void_order.proto2\xf1\x04\n" +
 	"\fOrderService\x12b\n" +
 	"\n" +
 	"ListOrders\x12 .pos.orders.v1.ListOrdersRequest\x1a!.pos.orders.v1.ListOrdersResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -33,9 +33,9 @@ const file_pos_orders_v1_service_proto_rawDesc = "" +
 	"\vCreateOrder\x12!.pos.orders.v1.CreateOrderRequest\x1a\".pos.orders.v1.CreateOrderResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/orders\x10\x02\x12y\n" +
 	"\x0eGetOrderDetail\x12$.pos.orders.v1.GetOrderDetailRequest\x1a%.pos.orders.v1.GetOrderDetailResponse\"\x1a\x9a\xb5\x18\x16\n" +
-	"\x12/orders/{order_id}\x10\x01\x12\x89\x01\n" +
-	"\x11UpdateOrderStatus\x12'.pos.orders.v1.UpdateOrderStatusRequest\x1a(.pos.orders.v1.UpdateOrderStatusResponse\"!\x9a\xb5\x18\x1d\n" +
-	"\x19/orders/{order_id}/status\x10\x03\x12o\n" +
+	"\x12/orders/{order_id}\x10\x01\x12\x8f\x01\n" +
+	"\x11UpdateOrderStatus\x12'.pos.orders.v1.UpdateOrderStatusRequest\x1a(.pos.orders.v1.UpdateOrderStatusResponse\"'\x9a\xb5\x18#\n" +
+	"\x19/orders/{order_id}/status\x10\x03\"\x04body\x12o\n" +
 	"\tVoidOrder\x12\x1f.pos.orders.v1.VoidOrderRequest\x1a .pos.orders.v1.VoidOrderResponse\"\x1f\x9a\xb5\x18\x1b\n" +
 	"\x17/orders/{order_id}/void\x10\x02\x1a\x18\xa2\xb5\x18\x14\n" +
 	"\x12/api/pos/orders/v1B.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"

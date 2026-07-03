@@ -25,16 +25,16 @@ var File_hr_onboarding_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_onboarding_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/onboarding/v1/service.proto\x12\x10hr.onboarding.v1\x1a5hr/onboarding/v1/add_item_to_checklist_template.proto\x1a.hr/onboarding/v1/complete_checklist_item.proto\x1a0hr/onboarding/v1/create_checklist_template.proto\x1a-hr/onboarding/v1/get_employee_checklist.proto\x1a/hr/onboarding/v1/list_checklist_templates.proto\x1a/hr/onboarding/v1/list_employee_checklists.proto\x1a(hr/onboarding/v1/trigger_checklist.proto\x1a0hr/onboarding/v1/update_checklist_template.proto\x1a\x1donekit/http/annotations.proto2\xf9\t\n" +
+	"\x1ehr/onboarding/v1/service.proto\x12\x10hr.onboarding.v1\x1a5hr/onboarding/v1/add_item_to_checklist_template.proto\x1a.hr/onboarding/v1/complete_checklist_item.proto\x1a0hr/onboarding/v1/create_checklist_template.proto\x1a-hr/onboarding/v1/get_employee_checklist.proto\x1a/hr/onboarding/v1/list_checklist_templates.proto\x1a/hr/onboarding/v1/list_employee_checklists.proto\x1a(hr/onboarding/v1/trigger_checklist.proto\x1a0hr/onboarding/v1/update_checklist_template.proto\x1a\x1donekit/http/annotations.proto2\xff\t\n" +
 	"\x11OnboardingService\x12\x8f\x01\n" +
 	"\x16ListChecklistTemplates\x12/.hr.onboarding.v1.ListChecklistTemplatesRequest\x1a0.hr.onboarding.v1.ListChecklistTemplatesResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
 	"/templates\x10\x01\x12\x92\x01\n" +
 	"\x17CreateChecklistTemplate\x120.hr.onboarding.v1.CreateChecklistTemplateRequest\x1a1.hr.onboarding.v1.CreateChecklistTemplateResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/templates\x10\x02\x12\x9c\x01\n" +
-	"\x17UpdateChecklistTemplate\x120.hr.onboarding.v1.UpdateChecklistTemplateRequest\x1a1.hr.onboarding.v1.UpdateChecklistTemplateResponse\"\x1c\x9a\xb5\x18\x18\n" +
-	"\x14/templates/{role_id}\x10\x03\x12\xab\x01\n" +
+	"/templates\x10\x02\x12\xa2\x01\n" +
+	"\x17UpdateChecklistTemplate\x120.hr.onboarding.v1.UpdateChecklistTemplateRequest\x1a1.hr.onboarding.v1.UpdateChecklistTemplateResponse\"\"\x9a\xb5\x18\x1e\n" +
+	"\x14/templates/{role_id}\x10\x03\"\x04body\x12\xab\x01\n" +
 	"\x1aAddItemToChecklistTemplate\x123.hr.onboarding.v1.AddItemToChecklistTemplateRequest\x1a4.hr.onboarding.v1.AddItemToChecklistTemplateResponse\"\"\x9a\xb5\x18\x1e\n" +
 	"\x1a/templates/{role_id}/items\x10\x02\x12\x90\x01\n" +
 	"\x16ListEmployeeChecklists\x12/.hr.onboarding.v1.ListEmployeeChecklistsRequest\x1a0.hr.onboarding.v1.ListEmployeeChecklistsResponse\"\x13\x9a\xb5\x18\x0f\n" +

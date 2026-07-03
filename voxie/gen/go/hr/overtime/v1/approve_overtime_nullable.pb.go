@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for ApproveOvertimeRequest.
+// MarshalJSONOnekit implements onekitMarshaler for ApproveOvertimeBody.
 // This method handles nullable fields: multiplier_applied, rejection_reason
-func (x *ApproveOvertimeRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *ApproveOvertimeBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -43,14 +43,14 @@ func (x *ApproveOvertimeRequest) MarshalJSONOnekit(opts protojson.MarshalOptions
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for ApproveOvertimeRequest.
-func (x *ApproveOvertimeRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for ApproveOvertimeBody.
+func (x *ApproveOvertimeBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for ApproveOvertimeRequest.
+// UnmarshalJSON implements json.Unmarshaler for ApproveOvertimeBody.
 // This method handles nullable fields: multiplier_applied, rejection_reason
-func (x *ApproveOvertimeRequest) UnmarshalJSON(data []byte) error {
+func (x *ApproveOvertimeBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

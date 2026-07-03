@@ -23,31 +23,118 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateProjectBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// name is the name value for this contract.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// description is the description value for this contract.
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color string `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
+	// status is the current lifecycle state.
+	Status string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	// start_date is the start date value for this contract.
+	StartDate string `protobuf:"bytes,6,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate       string `protobuf:"bytes,7,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateProjectBody) Reset() {
+	*x = UpdateProjectBody{}
+	mi := &file_flow_project_v1_update_project_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProjectBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProjectBody) ProtoMessage() {}
+
+func (x *UpdateProjectBody) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_project_v1_update_project_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProjectBody.ProtoReflect.Descriptor instead.
+func (*UpdateProjectBody) Descriptor() ([]byte, []int) {
+	return file_flow_project_v1_update_project_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateProjectBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateProjectBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateProjectBody) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+func (x *UpdateProjectBody) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *UpdateProjectBody) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateProjectBody) GetStartDate() string {
+	if x != nil {
+		return x.StartDate
+	}
+	return ""
+}
+
+func (x *UpdateProjectBody) GetDueDate() string {
+	if x != nil {
+		return x.DueDate
+	}
+	return ""
+}
+
 type UpdateProjectRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// name is the name value for this contract.
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// description is the description value for this contract.
-	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// icon is the icon value for this contract.
-	Icon string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
-	// color is the color value for this contract.
-	Color string `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
-	// status is the current lifecycle state.
-	Status string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	// start_date is the start date value for this contract.
-	StartDate string `protobuf:"bytes,7,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	// due_date is the due date value for this contract.
-	DueDate       string `protobuf:"bytes,8,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	// body carries updatable project fields bound from the HTTP payload.
+	Body          *UpdateProjectBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateProjectRequest) Reset() {
 	*x = UpdateProjectRequest{}
-	mi := &file_flow_project_v1_update_project_proto_msgTypes[0]
+	mi := &file_flow_project_v1_update_project_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -59,7 +146,7 @@ func (x *UpdateProjectRequest) String() string {
 func (*UpdateProjectRequest) ProtoMessage() {}
 
 func (x *UpdateProjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_project_v1_update_project_proto_msgTypes[0]
+	mi := &file_flow_project_v1_update_project_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -72,7 +159,7 @@ func (x *UpdateProjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProjectRequest.ProtoReflect.Descriptor instead.
 func (*UpdateProjectRequest) Descriptor() ([]byte, []int) {
-	return file_flow_project_v1_update_project_proto_rawDescGZIP(), []int{0}
+	return file_flow_project_v1_update_project_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateProjectRequest) GetId() int64 {
@@ -82,53 +169,11 @@ func (x *UpdateProjectRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateProjectRequest) GetName() string {
+func (x *UpdateProjectRequest) GetBody() *UpdateProjectBody {
 	if x != nil {
-		return x.Name
+		return x.Body
 	}
-	return ""
-}
-
-func (x *UpdateProjectRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateProjectRequest) GetIcon() string {
-	if x != nil {
-		return x.Icon
-	}
-	return ""
-}
-
-func (x *UpdateProjectRequest) GetColor() string {
-	if x != nil {
-		return x.Color
-	}
-	return ""
-}
-
-func (x *UpdateProjectRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *UpdateProjectRequest) GetStartDate() string {
-	if x != nil {
-		return x.StartDate
-	}
-	return ""
-}
-
-func (x *UpdateProjectRequest) GetDueDate() string {
-	if x != nil {
-		return x.DueDate
-	}
-	return ""
+	return nil
 }
 
 type UpdateProjectResponse struct {
@@ -141,7 +186,7 @@ type UpdateProjectResponse struct {
 
 func (x *UpdateProjectResponse) Reset() {
 	*x = UpdateProjectResponse{}
-	mi := &file_flow_project_v1_update_project_proto_msgTypes[1]
+	mi := &file_flow_project_v1_update_project_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -153,7 +198,7 @@ func (x *UpdateProjectResponse) String() string {
 func (*UpdateProjectResponse) ProtoMessage() {}
 
 func (x *UpdateProjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_project_v1_update_project_proto_msgTypes[1]
+	mi := &file_flow_project_v1_update_project_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -166,7 +211,7 @@ func (x *UpdateProjectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProjectResponse.ProtoReflect.Descriptor instead.
 func (*UpdateProjectResponse) Descriptor() ([]byte, []int) {
-	return file_flow_project_v1_update_project_proto_rawDescGZIP(), []int{1}
+	return file_flow_project_v1_update_project_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateProjectResponse) GetMessage() string {
@@ -180,24 +225,26 @@ var File_flow_project_v1_update_project_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_update_project_proto_rawDesc = "" +
 	"\n" +
-	"$flow/project/v1/update_project.proto\x12\x0fflow.project.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xbc\x02\n" +
-	"\x14UpdateProjectRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1e\n" +
-	"\x04name\x18\x02 \x01(\tB\n" +
+	"$flow/project/v1/update_project.proto\x12\x0fflow.project.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x99\x02\n" +
+	"\x11UpdateProjectBody\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
-	"\vdescription\x18\x03 \x01(\tB\n" +
+	"\vdescription\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12\x1e\n" +
-	"\x04icon\x18\x04 \x01(\tB\n" +
+	"\x04icon\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04icon\x12 \n" +
-	"\x05color\x18\x05 \x01(\tB\n" +
+	"\x05color\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05color\x12\"\n" +
-	"\x06status\x18\x06 \x01(\tB\n" +
+	"\x06status\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\x12)\n" +
 	"\n" +
-	"start_date\x18\a \x01(\tB\n" +
+	"start_date\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x12%\n" +
-	"\bdue_date\x18\b \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\"1\n" +
+	"\bdue_date\x18\a \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\"n\n" +
+	"\x14UpdateProjectRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x126\n" +
+	"\x04body\x18\x02 \x01(\v2\".flow.project.v1.UpdateProjectBodyR\x04body\"1\n" +
 	"\x15UpdateProjectResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"
 
@@ -213,17 +260,19 @@ func file_flow_project_v1_update_project_proto_rawDescGZIP() []byte {
 	return file_flow_project_v1_update_project_proto_rawDescData
 }
 
-var file_flow_project_v1_update_project_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_flow_project_v1_update_project_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_flow_project_v1_update_project_proto_goTypes = []any{
-	(*UpdateProjectRequest)(nil),  // 0: flow.project.v1.UpdateProjectRequest
-	(*UpdateProjectResponse)(nil), // 1: flow.project.v1.UpdateProjectResponse
+	(*UpdateProjectBody)(nil),     // 0: flow.project.v1.UpdateProjectBody
+	(*UpdateProjectRequest)(nil),  // 1: flow.project.v1.UpdateProjectRequest
+	(*UpdateProjectResponse)(nil), // 2: flow.project.v1.UpdateProjectResponse
 }
 var file_flow_project_v1_update_project_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: flow.project.v1.UpdateProjectRequest.body:type_name -> flow.project.v1.UpdateProjectBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_flow_project_v1_update_project_proto_init() }
@@ -237,7 +286,7 @@ func file_flow_project_v1_update_project_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_project_v1_update_project_proto_rawDesc), len(file_flow_project_v1_update_project_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

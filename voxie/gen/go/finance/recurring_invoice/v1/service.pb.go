@@ -25,16 +25,16 @@ var File_finance_recurring_invoice_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_recurring_invoice_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"*finance/recurring_invoice/v1/service.proto\x12\x1cfinance.recurring_invoice.v1\x1a;finance/recurring_invoice/v1/create_recurring_invoice.proto\x1a8finance/recurring_invoice/v1/get_recurring_invoice.proto\x1a:finance/recurring_invoice/v1/list_recurring_invoices.proto\x1a:finance/recurring_invoice/v1/pause_recurring_invoice.proto\x1a;finance/recurring_invoice/v1/resume_recurring_invoice.proto\x1a;finance/recurring_invoice/v1/update_recurring_invoice.proto\x1a\x1donekit/http/annotations.proto2\x86\t\n" +
+	"*finance/recurring_invoice/v1/service.proto\x12\x1cfinance.recurring_invoice.v1\x1a;finance/recurring_invoice/v1/create_recurring_invoice.proto\x1a8finance/recurring_invoice/v1/get_recurring_invoice.proto\x1a:finance/recurring_invoice/v1/list_recurring_invoices.proto\x1a:finance/recurring_invoice/v1/pause_recurring_invoice.proto\x1a;finance/recurring_invoice/v1/resume_recurring_invoice.proto\x1a;finance/recurring_invoice/v1/update_recurring_invoice.proto\x1a\x1donekit/http/annotations.proto2\x8c\t\n" +
 	"\x17RecurringInvoiceService\x12\xad\x01\n" +
 	"\x15ListRecurringInvoices\x12:.finance.recurring_invoice.v1.ListRecurringInvoicesRequest\x1a;.finance.recurring_invoice.v1.ListRecurringInvoicesResponse\"\x1b\x9a\xb5\x18\x17\n" +
 	"\x13/recurring-invoices\x10\x01\x12\xb0\x01\n" +
 	"\x16CreateRecurringInvoice\x12;.finance.recurring_invoice.v1.CreateRecurringInvoiceRequest\x1a<.finance.recurring_invoice.v1.CreateRecurringInvoiceResponse\"\x1b\x9a\xb5\x18\x17\n" +
 	"\x13/recurring-invoices\x10\x02\x12\xac\x01\n" +
 	"\x13GetRecurringInvoice\x128.finance.recurring_invoice.v1.GetRecurringInvoiceRequest\x1a9.finance.recurring_invoice.v1.GetRecurringInvoiceResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/recurring-invoices/{id}\x10\x01\x12\xb5\x01\n" +
-	"\x16UpdateRecurringInvoice\x12;.finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest\x1a<.finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/recurring-invoices/{id}\x10\x03\x12\xb8\x01\n" +
+	"\x18/recurring-invoices/{id}\x10\x01\x12\xbb\x01\n" +
+	"\x16UpdateRecurringInvoice\x12;.finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest\x1a<.finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse\"&\x9a\xb5\x18\"\n" +
+	"\x18/recurring-invoices/{id}\x10\x03\"\x04body\x12\xb8\x01\n" +
 	"\x15PauseRecurringInvoice\x12:.finance.recurring_invoice.v1.PauseRecurringInvoiceRequest\x1a;.finance.recurring_invoice.v1.PauseRecurringInvoiceResponse\"&\x9a\xb5\x18\"\n" +
 	"\x1e/recurring-invoices/{id}/pause\x10\x05\x12\xbc\x01\n" +
 	"\x16ResumeRecurringInvoice\x12;.finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest\x1a<.finance.recurring_invoice.v1.ResumeRecurringInvoiceResponse\"'\x9a\xb5\x18#\n" +

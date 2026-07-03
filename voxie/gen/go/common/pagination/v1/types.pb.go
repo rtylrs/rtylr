@@ -7,8 +7,10 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,15 +23,10 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Standard timestamp wrapper
+// Standard timestamp wrapper for explicit RFC 3339 JSON encoding.
 type Timestamp struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// iso is the iso value for this contract.
-	// ISO 8601 string
-	Iso string `protobuf:"bytes,1,opt,name=iso,proto3" json:"iso,omitempty"`
-	// unix is the unix value for this contract.
-	// Unix timestamp in seconds
-	Unix          int64 `protobuf:"varint,2,opt,name=unix,proto3" json:"unix,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -64,28 +61,20 @@ func (*Timestamp) Descriptor() ([]byte, []int) {
 	return file_common_pagination_v1_types_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Timestamp) GetIso() string {
+func (x *Timestamp) GetValue() *timestamppb.Timestamp {
 	if x != nil {
-		return x.Iso
+		return x.Value
 	}
-	return ""
-}
-
-func (x *Timestamp) GetUnix() int64 {
-	if x != nil {
-		return x.Unix
-	}
-	return 0
+	return nil
 }
 
 var File_common_pagination_v1_types_proto protoreflect.FileDescriptor
 
 const file_common_pagination_v1_types_proto_rawDesc = "" +
 	"\n" +
-	" common/pagination/v1/types.proto\x12\x14common.pagination.v1\"1\n" +
-	"\tTimestamp\x12\x10\n" +
-	"\x03iso\x18\x01 \x01(\tR\x03iso\x12\x12\n" +
-	"\x04unix\x18\x02 \x01(\x03R\x04unixB5Z3github.com/voxire/voxie/gen/go/common/pagination/v1b\x06proto3"
+	" common/pagination/v1/types.proto\x12\x14common.pagination.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1donekit/http/annotations.proto\"C\n" +
+	"\tTimestamp\x126\n" +
+	"\x05value\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampB\x04\xf8\xb5\x18\x01R\x05valueB5Z3github.com/voxire/voxie/gen/go/common/pagination/v1b\x06proto3"
 
 var (
 	file_common_pagination_v1_types_proto_rawDescOnce sync.Once
@@ -101,14 +90,16 @@ func file_common_pagination_v1_types_proto_rawDescGZIP() []byte {
 
 var file_common_pagination_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_common_pagination_v1_types_proto_goTypes = []any{
-	(*Timestamp)(nil), // 0: common.pagination.v1.Timestamp
+	(*Timestamp)(nil),             // 0: common.pagination.v1.Timestamp
+	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
 }
 var file_common_pagination_v1_types_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: common.pagination.v1.Timestamp.value:type_name -> google.protobuf.Timestamp
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_common_pagination_v1_types_proto_init() }

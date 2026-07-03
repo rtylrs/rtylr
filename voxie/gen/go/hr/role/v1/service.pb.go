@@ -26,15 +26,15 @@ var File_hr_role_v1_service_proto protoreflect.FileDescriptor
 const file_hr_role_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x18hr/role/v1/service.proto\x12\n" +
-	"hr.role.v1\x1a\x1chr/role/v1/assign_role.proto\x1a\x1chr/role/v1/create_role.proto\x1a\x1chr/role/v1/update_role.proto\x1a\x1donekit/http/annotations.proto2\xc7\x02\n" +
+	"hr.role.v1\x1a\x1chr/role/v1/assign_role.proto\x1a\x1chr/role/v1/create_role.proto\x1a\x1chr/role/v1/update_role.proto\x1a\x1donekit/http/annotations.proto2\xcd\x02\n" +
 	"\vRoleService\x12[\n" +
 	"\n" +
 	"CreateRole\x12\x1d.hr.role.v1.CreateRoleRequest\x1a\x1e.hr.role.v1.CreateRoleResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/roles\x10\x02\x12`\n" +
+	"\x06/roles\x10\x02\x12f\n" +
 	"\n" +
-	"UpdateRole\x12\x1d.hr.role.v1.UpdateRoleRequest\x1a\x1e.hr.role.v1.UpdateRoleResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/roles/{id}\x10\x03\x12b\n" +
+	"UpdateRole\x12\x1d.hr.role.v1.UpdateRoleRequest\x1a\x1e.hr.role.v1.UpdateRoleResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/roles/{id}\x10\x03\"\x04body\x12b\n" +
 	"\n" +
 	"AssignRole\x12\x1d.hr.role.v1.AssignRoleRequest\x1a\x1e.hr.role.v1.AssignRoleResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\r/roles/assign\x10\x02\x1a\x15\xa2\xb5\x18\x11\n" +

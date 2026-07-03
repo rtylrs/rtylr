@@ -22,6 +22,7 @@ service KDSService {
     option (onekit.http.config) = {
       path: "/{order_id}/items/{item_id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 }

@@ -23,21 +23,73 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateFloorRequest struct {
+type UpdateFloorBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// name is the name value for this contract.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// sort_order is the sort order value for this contract.
-	SortOrder int32 `protobuf:"varint,2,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	SortOrder     int32 `protobuf:"varint,2,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateFloorBody) Reset() {
+	*x = UpdateFloorBody{}
+	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateFloorBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateFloorBody) ProtoMessage() {}
+
+func (x *UpdateFloorBody) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateFloorBody.ProtoReflect.Descriptor instead.
+func (*UpdateFloorBody) Descriptor() ([]byte, []int) {
+	return file_pos_floor_v1_update_floor_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateFloorBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateFloorBody) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
+type UpdateFloorRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the floor.
-	Id            int64 `protobuf:"varint,3,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable floor fields bound from the HTTP payload.
+	Body          *UpdateFloorBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateFloorRequest) Reset() {
 	*x = UpdateFloorRequest{}
-	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[0]
+	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +101,7 @@ func (x *UpdateFloorRequest) String() string {
 func (*UpdateFloorRequest) ProtoMessage() {}
 
 func (x *UpdateFloorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[0]
+	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,21 +114,7 @@ func (x *UpdateFloorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateFloorRequest.ProtoReflect.Descriptor instead.
 func (*UpdateFloorRequest) Descriptor() ([]byte, []int) {
-	return file_pos_floor_v1_update_floor_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *UpdateFloorRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateFloorRequest) GetSortOrder() int32 {
-	if x != nil {
-		return x.SortOrder
-	}
-	return 0
+	return file_pos_floor_v1_update_floor_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateFloorRequest) GetId() int64 {
@@ -84,6 +122,13 @@ func (x *UpdateFloorRequest) GetId() int64 {
 		return x.Id
 	}
 	return 0
+}
+
+func (x *UpdateFloorRequest) GetBody() *UpdateFloorBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
 }
 
 type UpdateFloorResponse struct {
@@ -96,7 +141,7 @@ type UpdateFloorResponse struct {
 
 func (x *UpdateFloorResponse) Reset() {
 	*x = UpdateFloorResponse{}
-	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[1]
+	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -108,7 +153,7 @@ func (x *UpdateFloorResponse) String() string {
 func (*UpdateFloorResponse) ProtoMessage() {}
 
 func (x *UpdateFloorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[1]
+	mi := &file_pos_floor_v1_update_floor_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +166,7 @@ func (x *UpdateFloorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateFloorResponse.ProtoReflect.Descriptor instead.
 func (*UpdateFloorResponse) Descriptor() ([]byte, []int) {
-	return file_pos_floor_v1_update_floor_proto_rawDescGZIP(), []int{1}
+	return file_pos_floor_v1_update_floor_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateFloorResponse) GetMessage() string {
@@ -135,14 +180,16 @@ var File_pos_floor_v1_update_floor_proto protoreflect.FileDescriptor
 
 const file_pos_floor_v1_update_floor_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/floor/v1/update_floor.proto\x12\fpos.floor.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x7f\n" +
-	"\x12UpdateFloorRequest\x12\x1e\n" +
+	"\x1fpos/floor/v1/update_floor.proto\x12\fpos.floor.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\\\n" +
+	"\x0fUpdateFloorBody\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12)\n" +
 	"\n" +
 	"sort_order\x18\x02 \x01(\x05B\n" +
-	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\tsortOrder\x12\x1e\n" +
-	"\x02id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"/\n" +
+	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\tsortOrder\"g\n" +
+	"\x12UpdateFloorRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x121\n" +
+	"\x04body\x18\x02 \x01(\v2\x1d.pos.floor.v1.UpdateFloorBodyR\x04body\"/\n" +
 	"\x13UpdateFloorResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/floor/v1b\x06proto3"
 
@@ -158,17 +205,19 @@ func file_pos_floor_v1_update_floor_proto_rawDescGZIP() []byte {
 	return file_pos_floor_v1_update_floor_proto_rawDescData
 }
 
-var file_pos_floor_v1_update_floor_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_pos_floor_v1_update_floor_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_floor_v1_update_floor_proto_goTypes = []any{
-	(*UpdateFloorRequest)(nil),  // 0: pos.floor.v1.UpdateFloorRequest
-	(*UpdateFloorResponse)(nil), // 1: pos.floor.v1.UpdateFloorResponse
+	(*UpdateFloorBody)(nil),     // 0: pos.floor.v1.UpdateFloorBody
+	(*UpdateFloorRequest)(nil),  // 1: pos.floor.v1.UpdateFloorRequest
+	(*UpdateFloorResponse)(nil), // 2: pos.floor.v1.UpdateFloorResponse
 }
 var file_pos_floor_v1_update_floor_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: pos.floor.v1.UpdateFloorRequest.body:type_name -> pos.floor.v1.UpdateFloorBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_floor_v1_update_floor_proto_init() }
@@ -182,7 +231,7 @@ func file_pos_floor_v1_update_floor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_floor_v1_update_floor_proto_rawDesc), len(file_pos_floor_v1_update_floor_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

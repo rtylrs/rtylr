@@ -25,14 +25,14 @@ var File_flow_project_v1_service_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dflow/project/v1/service.proto\x12\x0fflow.project.v1\x1a$flow/project/v1/create_project.proto\x1a$flow/project/v1/delete_project.proto\x1a#flow/project/v1/list_projects.proto\x1a$flow/project/v1/update_project.proto\x1a\x1donekit/http/annotations.proto2\xff\x03\n" +
+	"\x1dflow/project/v1/service.proto\x12\x0fflow.project.v1\x1a$flow/project/v1/create_project.proto\x1a$flow/project/v1/delete_project.proto\x1a#flow/project/v1/list_projects.proto\x1a$flow/project/v1/update_project.proto\x1a\x1donekit/http/annotations.proto2\x85\x04\n" +
 	"\x0eProjectService\x12n\n" +
 	"\fListProjects\x12$.flow.project.v1.ListProjectsRequest\x1a%.flow.project.v1.ListProjectsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/projects\x10\x01\x12q\n" +
 	"\rCreateProject\x12%.flow.project.v1.CreateProjectRequest\x1a&.flow.project.v1.CreateProjectResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/projects\x10\x02\x12v\n" +
-	"\rUpdateProject\x12%.flow.project.v1.UpdateProjectRequest\x1a&.flow.project.v1.UpdateProjectResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/projects/{id}\x10\x03\x12v\n" +
+	"\t/projects\x10\x02\x12|\n" +
+	"\rUpdateProject\x12%.flow.project.v1.UpdateProjectRequest\x1a&.flow.project.v1.UpdateProjectResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/projects/{id}\x10\x03\"\x04body\x12v\n" +
 	"\rDeleteProject\x12%.flow.project.v1.DeleteProjectRequest\x1a&.flow.project.v1.DeleteProjectResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/projects/{id}\x10\x04\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/flow/project/v1B0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"

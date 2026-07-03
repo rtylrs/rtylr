@@ -43,6 +43,7 @@ service EquipmentService {
     option (onekit.http.config) = {
       path: "/requests/{equipment_request_id}/approve"
       method: HTTP_METHOD_PATCH
+      body: "body"
     };
   }
 }

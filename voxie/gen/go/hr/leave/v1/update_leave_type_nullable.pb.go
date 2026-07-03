@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateLeaveTypeRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateLeaveTypeBody.
 // This method handles nullable fields: name, is_paid, requires_approval, accrual_rule, max_carryover_days, min_notice_days, requires_documentation_after_days, is_active
-func (x *UpdateLeaveTypeRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateLeaveTypeBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -79,14 +79,14 @@ func (x *UpdateLeaveTypeRequest) MarshalJSONOnekit(opts protojson.MarshalOptions
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateLeaveTypeRequest.
-func (x *UpdateLeaveTypeRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateLeaveTypeBody.
+func (x *UpdateLeaveTypeBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateLeaveTypeRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateLeaveTypeBody.
 // This method handles nullable fields: name, is_paid, requires_approval, accrual_rule, max_carryover_days, min_notice_days, requires_documentation_after_days, is_active
-func (x *UpdateLeaveTypeRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateLeaveTypeBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

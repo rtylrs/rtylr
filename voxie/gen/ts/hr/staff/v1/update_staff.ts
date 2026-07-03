@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateStaffRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateStaffBody {
   /** department_id is the department id value for this contract. */
   departmentId: number;
   /** first_name is the first name value for this contract. */
@@ -43,6 +41,13 @@ export interface UpdateStaffRequest {
   apps: string;
   /** notes is the notes value for this contract. */
   notes: string;
+}
+
+export interface UpdateStaffRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable staff fields bound from the HTTP payload. */
+  body: UpdateStaffBody | undefined;
 }
 
 export interface UpdateStaffResponse {

@@ -164,11 +164,11 @@ const file_finance_bank_account_v1_list_bank_accounts_proto_rawDesc = "" +
 	"\asort_byR\x06sortBy\x12)\n" +
 	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
 	"\n" +
-	"\bsort_dirR\asortDir\"\xa6\x01\n" +
+	"\bsort_dirR\asortDir\"\xac\x01\n" +
 	"\x18ListBankAccountsResponse\x12@\n" +
-	"\baccounts\x18\x01 \x03(\v2$.finance.bank_account.v1.BankAccountR\baccounts\x12H\n" +
+	"\baccounts\x18\x01 \x03(\v2$.finance.bank_account.v1.BankAccountR\baccounts\x12N\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
 	"paginationB8Z6github.com/voxire/voxie/gen/go/finance/bank_account/v1b\x06proto3"
 
 var (

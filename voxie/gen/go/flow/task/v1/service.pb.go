@@ -25,7 +25,7 @@ var File_flow_task_v1_service_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aflow/task/v1/service.proto\x12\fflow.task.v1\x1a\x1eflow/task/v1/add_comment.proto\x1a$flow/task/v1/create_attachment.proto\x1a!flow/task/v1/create_subtask.proto\x1a\x1eflow/task/v1/create_task.proto\x1a\"flow/task/v1/create_time_log.proto\x1a$flow/task/v1/delete_attachment.proto\x1a!flow/task/v1/delete_comment.proto\x1a\x1eflow/task/v1/delete_task.proto\x1a\"flow/task/v1/get_attachments.proto\x1a\x1fflow/task/v1/get_my_tasks.proto\x1a\x1fflow/task/v1/get_subtasks.proto\x1a$flow/task/v1/get_task_activity.proto\x1a\"flow/task/v1/get_task_detail.proto\x1a flow/task/v1/get_time_logs.proto\x1a\x1dflow/task/v1/list_tasks.proto\x1a\x1eflow/task/v1/update_task.proto\x1a%flow/task/v1/update_task_status.proto\x1a\x1donekit/http/annotations.proto2\xdb\x0f\n" +
+	"\x1aflow/task/v1/service.proto\x12\fflow.task.v1\x1a\x1eflow/task/v1/add_comment.proto\x1a$flow/task/v1/create_attachment.proto\x1a!flow/task/v1/create_subtask.proto\x1a\x1eflow/task/v1/create_task.proto\x1a\"flow/task/v1/create_time_log.proto\x1a$flow/task/v1/delete_attachment.proto\x1a!flow/task/v1/delete_comment.proto\x1a\x1eflow/task/v1/delete_task.proto\x1a\"flow/task/v1/get_attachments.proto\x1a\x1fflow/task/v1/get_my_tasks.proto\x1a\x1fflow/task/v1/get_subtasks.proto\x1a$flow/task/v1/get_task_activity.proto\x1a\"flow/task/v1/get_task_detail.proto\x1a flow/task/v1/get_time_logs.proto\x1a\x1dflow/task/v1/list_tasks.proto\x1a\x1eflow/task/v1/update_task.proto\x1a%flow/task/v1/update_task_status.proto\x1a\x1donekit/http/annotations.proto2\xe8\x0f\n" +
 	"\vTaskService\x12\\\n" +
 	"\tListTasks\x12\x1e.flow.task.v1.ListTasksRequest\x1a\x1f.flow.task.v1.ListTasksResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
@@ -38,12 +38,12 @@ const file_flow_task_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x06/tasks\x10\x02\x12m\n" +
 	"\rGetTaskDetail\x12\".flow.task.v1.GetTaskDetailRequest\x1a#.flow.task.v1.GetTaskDetailResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/tasks/{id}\x10\x01\x12d\n" +
+	"\v/tasks/{id}\x10\x01\x12j\n" +
 	"\n" +
-	"UpdateTask\x12\x1f.flow.task.v1.UpdateTaskRequest\x1a .flow.task.v1.UpdateTaskResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/tasks/{id}\x10\x03\x12}\n" +
-	"\x10UpdateTaskStatus\x12%.flow.task.v1.UpdateTaskStatusRequest\x1a&.flow.task.v1.UpdateTaskStatusResponse\"\x1a\x9a\xb5\x18\x16\n" +
-	"\x12/tasks/{id}/status\x10\x05\x12d\n" +
+	"UpdateTask\x12\x1f.flow.task.v1.UpdateTaskRequest\x1a .flow.task.v1.UpdateTaskResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/tasks/{id}\x10\x03\"\x04body\x12\x83\x01\n" +
+	"\x10UpdateTaskStatus\x12%.flow.task.v1.UpdateTaskStatusRequest\x1a&.flow.task.v1.UpdateTaskStatusResponse\" \x9a\xb5\x18\x1c\n" +
+	"\x12/tasks/{id}/status\x10\x05\"\x04body\x12d\n" +
 	"\n" +
 	"DeleteTask\x12\x1f.flow.task.v1.DeleteTaskRequest\x1a .flow.task.v1.DeleteTaskResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/tasks/{id}\x10\x04\x12q\n" +

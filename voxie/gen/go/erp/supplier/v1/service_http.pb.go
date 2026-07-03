@@ -44,7 +44,7 @@ func RegisterSupplierServiceServer(server SupplierServiceServer, opts ...ServerO
 	updateSupplierHandler := BindingMiddleware[UpdateSupplierRequest](
 		genericHandler(server.UpdateSupplier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateSupplierPathParams, updateSupplierQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/erp/supplier/v1/suppliers/{id}", updateSupplierHandler)

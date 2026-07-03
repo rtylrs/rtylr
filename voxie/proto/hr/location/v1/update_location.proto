@@ -11,6 +11,29 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/location/v1";
 
 // ── Update ─────────────────────────────────────────────────────────
 
+message UpdateLocationBody {
+  // New name; absent to keep current.
+  optional string name = 1 [
+    (onekit.http.nullable) = true
+  ];
+  // New address; absent to keep current.
+  optional string address = 2 [
+    (onekit.http.nullable) = true
+  ];
+  // New timezone; absent to keep current.
+  optional string timezone = 3 [
+    (onekit.http.nullable) = true
+  ];
+  // New active status; absent to keep current.
+  optional bool is_active = 4 [
+    (onekit.http.nullable) = true
+  ];
+  // New slug; absent to keep current.
+  optional string slug = 5 [
+    (onekit.http.nullable) = true
+  ];
+}
+
 message UpdateLocationRequest {
   // ID of the location to update.
   int64 id = 1 [
@@ -18,26 +41,8 @@ message UpdateLocationRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // New name; absent to keep current.
-  optional string name = 2 [
-    (onekit.http.nullable) = true
-  ];
-  // New address; absent to keep current.
-  optional string address = 3 [
-    (onekit.http.nullable) = true
-  ];
-  // New timezone; absent to keep current.
-  optional string timezone = 4 [
-    (onekit.http.nullable) = true
-  ];
-  // New active status; absent to keep current.
-  optional bool is_active = 5 [
-    (onekit.http.nullable) = true
-  ];
-  // New slug; absent to keep current.
-  optional string slug = 6 [
-    (onekit.http.nullable) = true
-  ];
+  // body carries updatable location fields bound from the HTTP payload.
+  UpdateLocationBody body = 2;
 }
 
 message UpdateLocationResponse {

@@ -67,7 +67,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	updateLoyaltyTierHandler := BindingMiddleware[UpdateLoyaltyTierRequest](
 		genericHandler(server.UpdateLoyaltyTier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLoyaltyTierPathParams, updateLoyaltyTierQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/loyalty/v1/tiers/{id}", updateLoyaltyTierHandler)

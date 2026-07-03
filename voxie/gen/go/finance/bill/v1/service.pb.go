@@ -25,7 +25,7 @@ var File_finance_bill_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_bill_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dfinance/bill/v1/service.proto\x12\x0ffinance.bill.v1\x1a!finance/bill/v1/create_bill.proto\x1a finance/bill/v1/list_bills.proto\x1a!finance/bill/v1/update_bill.proto\x1a\x1donekit/http/annotations.proto2\xe0\x02\n" +
+	"\x1dfinance/bill/v1/service.proto\x12\x0ffinance.bill.v1\x1a!finance/bill/v1/create_bill.proto\x1a finance/bill/v1/list_bills.proto\x1a!finance/bill/v1/update_bill.proto\x1a\x1donekit/http/annotations.proto2\xe6\x02\n" +
 	"\vBillService\x12b\n" +
 	"\tListBills\x12!.finance.bill.v1.ListBillsRequest\x1a\".finance.bill.v1.ListBillsResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
@@ -33,10 +33,10 @@ const file_finance_bill_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"CreateBill\x12\".finance.bill.v1.CreateBillRequest\x1a#.finance.bill.v1.CreateBillResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/bills\x10\x02\x12j\n" +
+	"\x06/bills\x10\x02\x12p\n" +
 	"\n" +
-	"UpdateBill\x12\".finance.bill.v1.UpdateBillRequest\x1a#.finance.bill.v1.UpdateBillResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/bills/{id}\x10\x03\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"UpdateBill\x12\".finance.bill.v1.UpdateBillRequest\x1a#.finance.bill.v1.UpdateBillResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/bills/{id}\x10\x03\"\x04body\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/finance/bill/v1B0Z.github.com/voxire/voxie/gen/go/finance/bill/v1b\x06proto3"
 
 var file_finance_bill_v1_service_proto_goTypes = []any{

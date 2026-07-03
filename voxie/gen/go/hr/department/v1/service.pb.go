@@ -25,12 +25,12 @@ var File_hr_department_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/department/v1/service.proto\x12\x10hr.department.v1\x1a(hr/department/v1/create_department.proto\x1a(hr/department/v1/update_department.proto\x1a\x1donekit/http/annotations.proto2\xb8\x02\n" +
+	"\x1ehr/department/v1/service.proto\x12\x10hr.department.v1\x1a(hr/department/v1/create_department.proto\x1a(hr/department/v1/update_department.proto\x1a\x1donekit/http/annotations.proto2\xbe\x02\n" +
 	"\x11DepartmentService\x12\x7f\n" +
 	"\x10CreateDepartment\x12).hr.department.v1.CreateDepartmentRequest\x1a*.hr.department.v1.CreateDepartmentResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/departments\x10\x02\x12\x84\x01\n" +
-	"\x10UpdateDepartment\x12).hr.department.v1.UpdateDepartmentRequest\x1a*.hr.department.v1.UpdateDepartmentResponse\"\x19\x9a\xb5\x18\x15\n" +
-	"\x11/departments/{id}\x10\x03\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\f/departments\x10\x02\x12\x8a\x01\n" +
+	"\x10UpdateDepartment\x12).hr.department.v1.UpdateDepartmentRequest\x1a*.hr.department.v1.UpdateDepartmentResponse\"\x1f\x9a\xb5\x18\x1b\n" +
+	"\x11/departments/{id}\x10\x03\"\x04body\x1a\x1b\xa2\xb5\x18\x17\n" +
 	"\x15/api/hr/department/v1B1Z/github.com/voxire/voxie/gen/go/hr/department/v1b\x06proto3"
 
 var file_hr_department_v1_service_proto_goTypes = []any{

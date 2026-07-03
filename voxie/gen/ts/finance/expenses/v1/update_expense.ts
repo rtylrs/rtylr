@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateExpenseRequest {
-  /** id is the unique identifier for the expense. */
-  id: number;
+export interface UpdateExpenseBody {
   /** category_id is the category id value for this contract. */
   categoryId?:
     | number
@@ -25,6 +23,13 @@ export interface UpdateExpenseRequest {
   receiptUrl: string;
   /** expense_date is the expense date value for this contract. */
   expenseDate: string;
+}
+
+export interface UpdateExpenseRequest {
+  /** id is the unique identifier for the expense. */
+  id: number;
+  /** body carries updatable expense fields bound from the HTTP payload. */
+  body: UpdateExpenseBody | undefined;
 }
 
 export interface UpdateExpenseResponse {

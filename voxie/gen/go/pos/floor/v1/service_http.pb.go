@@ -45,7 +45,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 	updateFloorHandler := BindingMiddleware[UpdateFloorRequest](
 		genericHandler(server.UpdateFloor, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateFloorPathParams, updateFloorQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/floor/v1/floors/{id}", updateFloorHandler)

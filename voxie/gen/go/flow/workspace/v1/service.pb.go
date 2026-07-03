@@ -25,14 +25,14 @@ var File_flow_workspace_v1_service_proto protoreflect.FileDescriptor
 
 const file_flow_workspace_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1fflow/workspace/v1/service.proto\x12\x11flow.workspace.v1\x1a,flow/workspace/v1/add_workspace_member.proto\x1a(flow/workspace/v1/create_workspace.proto\x1a(flow/workspace/v1/delete_workspace.proto\x1a'flow/workspace/v1/list_workspaces.proto\x1a/flow/workspace/v1/remove_workspace_member.proto\x1a(flow/workspace/v1/update_workspace.proto\x1a\x1donekit/http/annotations.proto2\xe0\x06\n" +
+	"\x1fflow/workspace/v1/service.proto\x12\x11flow.workspace.v1\x1a,flow/workspace/v1/add_workspace_member.proto\x1a(flow/workspace/v1/create_workspace.proto\x1a(flow/workspace/v1/delete_workspace.proto\x1a'flow/workspace/v1/list_workspaces.proto\x1a/flow/workspace/v1/remove_workspace_member.proto\x1a(flow/workspace/v1/update_workspace.proto\x1a\x1donekit/http/annotations.proto2\xe6\x06\n" +
 	"\x10WorkspaceService\x12z\n" +
 	"\x0eListWorkspaces\x12(.flow.workspace.v1.ListWorkspacesRequest\x1a).flow.workspace.v1.ListWorkspacesResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/workspaces\x10\x01\x12}\n" +
 	"\x0fCreateWorkspace\x12).flow.workspace.v1.CreateWorkspaceRequest\x1a*.flow.workspace.v1.CreateWorkspaceResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/workspaces\x10\x02\x12\x82\x01\n" +
-	"\x0fUpdateWorkspace\x12).flow.workspace.v1.UpdateWorkspaceRequest\x1a*.flow.workspace.v1.UpdateWorkspaceResponse\"\x18\x9a\xb5\x18\x14\n" +
-	"\x10/workspaces/{id}\x10\x03\x12\x82\x01\n" +
+	"\v/workspaces\x10\x02\x12\x88\x01\n" +
+	"\x0fUpdateWorkspace\x12).flow.workspace.v1.UpdateWorkspaceRequest\x1a*.flow.workspace.v1.UpdateWorkspaceResponse\"\x1e\x9a\xb5\x18\x1a\n" +
+	"\x10/workspaces/{id}\x10\x03\"\x04body\x12\x82\x01\n" +
 	"\x0fDeleteWorkspace\x12).flow.workspace.v1.DeleteWorkspaceRequest\x1a*.flow.workspace.v1.DeleteWorkspaceResponse\"\x18\x9a\xb5\x18\x14\n" +
 	"\x10/workspaces/{id}\x10\x04\x12\x8e\x01\n" +
 	"\x12AddWorkspaceMember\x12,.flow.workspace.v1.AddWorkspaceMemberRequest\x1a-.flow.workspace.v1.AddWorkspaceMemberResponse\"\x1b\x9a\xb5\x18\x17\n" +

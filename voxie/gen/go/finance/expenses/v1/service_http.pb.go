@@ -46,7 +46,7 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 	updateExpenseHandler := BindingMiddleware[UpdateExpenseRequest](
 		genericHandler(server.UpdateExpense, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateExpensePathParams, updateExpenseQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/expenses/v1/expenses/{id}", updateExpenseHandler)

@@ -175,11 +175,11 @@ const file_insights_customer_v1_get_top_customers_proto_rawDesc = "" +
 	"\n" +
 	"\bsort_dirR\asortDir\x12$\n" +
 	"\x06period\x18\x05 \x01(\tB\fµ\x18\b\n" +
-	"\x06periodR\x06period\"\xa9\x01\n" +
+	"\x06periodR\x06period\"\xaf\x01\n" +
 	"\x17GetTopCustomersResponse\x12D\n" +
-	"\tcustomers\x18\x01 \x03(\v2&.insights.customer.v1.TopCustomerEntryR\tcustomers\x12H\n" +
+	"\tcustomers\x18\x01 \x03(\v2&.insights.customer.v1.TopCustomerEntryR\tcustomers\x12N\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
 	"paginationB5Z3github.com/voxire/voxie/gen/go/insights/customer/v1b\x06proto3"
 
 var (

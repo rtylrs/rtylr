@@ -35,7 +35,7 @@ func RegisterRoleServiceServer(server RoleServiceServer, opts ...ServerOption) e
 	updateRoleHandler := BindingMiddleware[UpdateRoleRequest](
 		genericHandler(server.UpdateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateRolePathParams, updateRoleQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/role/v1/roles/{id}", updateRoleHandler)

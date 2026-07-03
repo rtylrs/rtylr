@@ -65,7 +65,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	updateSegmentHandler := BindingMiddleware[UpdateSegmentRequest](
 		genericHandler(server.UpdateSegment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateSegmentPathParams, updateSegmentQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/segment/v1/segments/{id}", updateSegmentHandler)

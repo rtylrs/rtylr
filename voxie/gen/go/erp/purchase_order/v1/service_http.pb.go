@@ -44,7 +44,7 @@ func RegisterPurchaseOrderServiceServer(server PurchaseOrderServiceServer, opts 
 	updatePurchaseOrderStatusHandler := BindingMiddleware[UpdatePurchaseOrderStatusRequest](
 		genericHandler(server.UpdatePurchaseOrderStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updatePurchaseOrderStatusPathParams, updatePurchaseOrderStatusQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/erp/purchase-order/v1/purchase-orders/{id}/status", updatePurchaseOrderStatusHandler)

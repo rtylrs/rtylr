@@ -89,6 +89,10 @@ export interface SubmitTimesheetResponse {
 
 export interface ApproveTimesheetRequest {
   id: string;
+  body?: ApproveTimesheetBody;
+}
+
+export interface ApproveTimesheetBody {
   approved: boolean;
   rejectionReason: string | null;
 }
@@ -274,7 +278,7 @@ export class TimeEntryServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

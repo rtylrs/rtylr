@@ -25,14 +25,14 @@ var File_erp_purchase_order_v1_service_proto protoreflect.FileDescriptor
 
 const file_erp_purchase_order_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"#erp/purchase_order/v1/service.proto\x12\x15erp.purchase_order.v1\x1a1erp/purchase_order/v1/create_purchase_order.proto\x1a0erp/purchase_order/v1/list_purchase_orders.proto\x1a8erp/purchase_order/v1/update_purchase_order_status.proto\x1a\x1donekit/http/annotations.proto2\x9e\x04\n" +
+	"#erp/purchase_order/v1/service.proto\x12\x15erp.purchase_order.v1\x1a1erp/purchase_order/v1/create_purchase_order.proto\x1a0erp/purchase_order/v1/list_purchase_orders.proto\x1a8erp/purchase_order/v1/update_purchase_order_status.proto\x1a\x1donekit/http/annotations.proto2\xa4\x04\n" +
 	"\x14PurchaseOrderService\x12\x93\x01\n" +
 	"\x12ListPurchaseOrders\x120.erp.purchase_order.v1.ListPurchaseOrdersRequest\x1a1.erp.purchase_order.v1.ListPurchaseOrdersResponse\"\x18\x9a\xb5\x18\x14\n" +
 	"\x10/purchase-orders\x10\x01\x12\x96\x01\n" +
 	"\x13CreatePurchaseOrder\x121.erp.purchase_order.v1.CreatePurchaseOrderRequest\x1a2.erp.purchase_order.v1.CreatePurchaseOrderResponse\"\x18\x9a\xb5\x18\x14\n" +
-	"\x10/purchase-orders\x10\x02\x12\xb4\x01\n" +
-	"\x19UpdatePurchaseOrderStatus\x127.erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest\x1a8.erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse\"$\x9a\xb5\x18 \n" +
-	"\x1c/purchase-orders/{id}/status\x10\x05\x1a \xa2\xb5\x18\x1c\n" +
+	"\x10/purchase-orders\x10\x02\x12\xba\x01\n" +
+	"\x19UpdatePurchaseOrderStatus\x127.erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest\x1a8.erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse\"*\x9a\xb5\x18&\n" +
+	"\x1c/purchase-orders/{id}/status\x10\x05\"\x04body\x1a \xa2\xb5\x18\x1c\n" +
 	"\x1a/api/erp/purchase-order/v1B6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 
 var file_erp_purchase_order_v1_service_proto_goTypes = []any{

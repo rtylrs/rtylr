@@ -57,7 +57,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	updateStaffHandler := BindingMiddleware[UpdateStaffRequest](
 		genericHandler(server.UpdateStaff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateStaffPathParams, updateStaffQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/staff/v1/staff/{id}", updateStaffHandler)

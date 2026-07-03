@@ -23,29 +23,109 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateBillBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// supplier_id is the supplier id value for this contract.
+	SupplierId int64 `protobuf:"varint,1,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	// due_date is the due date value for this contract.
+	DueDate string `protobuf:"bytes,4,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	// status is the current lifecycle state.
+	Status string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	// description is the description value for this contract.
+	Description   string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateBillBody) Reset() {
+	*x = UpdateBillBody{}
+	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateBillBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateBillBody) ProtoMessage() {}
+
+func (x *UpdateBillBody) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateBillBody.ProtoReflect.Descriptor instead.
+func (*UpdateBillBody) Descriptor() ([]byte, []int) {
+	return file_finance_bill_v1_update_bill_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateBillBody) GetSupplierId() int64 {
+	if x != nil {
+		return x.SupplierId
+	}
+	return 0
+}
+
+func (x *UpdateBillBody) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+func (x *UpdateBillBody) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *UpdateBillBody) GetDueDate() string {
+	if x != nil {
+		return x.DueDate
+	}
+	return ""
+}
+
+func (x *UpdateBillBody) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *UpdateBillBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
 type UpdateBillRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// supplier_id is the supplier id value for this contract.
-	SupplierId int64 `protobuf:"varint,2,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
-	// amount is the amount value for this contract.
-	Amount float64 `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
-	// currency is the currency value for this contract.
-	Currency string `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
-	// due_date is the due date value for this contract.
-	DueDate string `protobuf:"bytes,5,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
-	// status is the current lifecycle state.
-	Status string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	// description is the description value for this contract.
-	Description   string `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	// body carries updatable bill fields bound from the HTTP payload.
+	Body          *UpdateBillBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateBillRequest) Reset() {
 	*x = UpdateBillRequest{}
-	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[0]
+	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -57,7 +137,7 @@ func (x *UpdateBillRequest) String() string {
 func (*UpdateBillRequest) ProtoMessage() {}
 
 func (x *UpdateBillRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[0]
+	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -70,7 +150,7 @@ func (x *UpdateBillRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBillRequest.ProtoReflect.Descriptor instead.
 func (*UpdateBillRequest) Descriptor() ([]byte, []int) {
-	return file_finance_bill_v1_update_bill_proto_rawDescGZIP(), []int{0}
+	return file_finance_bill_v1_update_bill_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateBillRequest) GetId() int64 {
@@ -80,46 +160,11 @@ func (x *UpdateBillRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateBillRequest) GetSupplierId() int64 {
+func (x *UpdateBillRequest) GetBody() *UpdateBillBody {
 	if x != nil {
-		return x.SupplierId
+		return x.Body
 	}
-	return 0
-}
-
-func (x *UpdateBillRequest) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-func (x *UpdateBillRequest) GetCurrency() string {
-	if x != nil {
-		return x.Currency
-	}
-	return ""
-}
-
-func (x *UpdateBillRequest) GetDueDate() string {
-	if x != nil {
-		return x.DueDate
-	}
-	return ""
-}
-
-func (x *UpdateBillRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *UpdateBillRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
+	return nil
 }
 
 type UpdateBillResponse struct {
@@ -132,7 +177,7 @@ type UpdateBillResponse struct {
 
 func (x *UpdateBillResponse) Reset() {
 	*x = UpdateBillResponse{}
-	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[1]
+	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -144,7 +189,7 @@ func (x *UpdateBillResponse) String() string {
 func (*UpdateBillResponse) ProtoMessage() {}
 
 func (x *UpdateBillResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[1]
+	mi := &file_finance_bill_v1_update_bill_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -157,7 +202,7 @@ func (x *UpdateBillResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBillResponse.ProtoReflect.Descriptor instead.
 func (*UpdateBillResponse) Descriptor() ([]byte, []int) {
-	return file_finance_bill_v1_update_bill_proto_rawDescGZIP(), []int{1}
+	return file_finance_bill_v1_update_bill_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateBillResponse) GetMessage() string {
@@ -171,20 +216,22 @@ var File_finance_bill_v1_update_bill_proto protoreflect.FileDescriptor
 
 const file_finance_bill_v1_update_bill_proto_rawDesc = "" +
 	"\n" +
-	"!finance/bill/v1/update_bill.proto\x12\x0ffinance.bill.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xad\x02\n" +
-	"\x11UpdateBillRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12/\n" +
-	"\vsupplier_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"!finance/bill/v1/update_bill.proto\x12\x0ffinance.bill.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x8a\x02\n" +
+	"\x0eUpdateBillBody\x12/\n" +
+	"\vsupplier_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"supplierId\x12&\n" +
-	"\x06amount\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
-	"\bcurrency\x18\x04 \x01(\tB\n" +
+	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
+	"\bcurrency\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12%\n" +
-	"\bdue_date\x18\x05 \x01(\tB\n" +
+	"\bdue_date\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\x12\"\n" +
-	"\x06status\x18\x06 \x01(\tB\n" +
+	"\x06status\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\x12,\n" +
-	"\vdescription\x18\a \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\".\n" +
+	"\vdescription\x18\x06 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\"h\n" +
+	"\x11UpdateBillRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x123\n" +
+	"\x04body\x18\x02 \x01(\v2\x1f.finance.bill.v1.UpdateBillBodyR\x04body\".\n" +
 	"\x12UpdateBillResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/finance/bill/v1b\x06proto3"
 
@@ -200,17 +247,19 @@ func file_finance_bill_v1_update_bill_proto_rawDescGZIP() []byte {
 	return file_finance_bill_v1_update_bill_proto_rawDescData
 }
 
-var file_finance_bill_v1_update_bill_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_finance_bill_v1_update_bill_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_finance_bill_v1_update_bill_proto_goTypes = []any{
-	(*UpdateBillRequest)(nil),  // 0: finance.bill.v1.UpdateBillRequest
-	(*UpdateBillResponse)(nil), // 1: finance.bill.v1.UpdateBillResponse
+	(*UpdateBillBody)(nil),     // 0: finance.bill.v1.UpdateBillBody
+	(*UpdateBillRequest)(nil),  // 1: finance.bill.v1.UpdateBillRequest
+	(*UpdateBillResponse)(nil), // 2: finance.bill.v1.UpdateBillResponse
 }
 var file_finance_bill_v1_update_bill_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: finance.bill.v1.UpdateBillRequest.body:type_name -> finance.bill.v1.UpdateBillBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_finance_bill_v1_update_bill_proto_init() }
@@ -224,7 +273,7 @@ func file_finance_bill_v1_update_bill_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_finance_bill_v1_update_bill_proto_rawDesc), len(file_finance_bill_v1_update_bill_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

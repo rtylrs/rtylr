@@ -25,22 +25,22 @@ var File_hr_leave_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19hr/leave/v1/service.proto\x12\vhr.leave.v1\x1a\x1fhr/leave/v1/approve_leave.proto\x1a&hr/leave/v1/create_leave_request.proto\x1a#hr/leave/v1/create_leave_type.proto\x1a%hr/leave/v1/list_leave_balances.proto\x1a%hr/leave/v1/list_leave_requests.proto\x1a\"hr/leave/v1/list_leave_types.proto\x1a#hr/leave/v1/update_leave_type.proto\x1a\x1donekit/http/annotations.proto2\xd7\x06\n" +
+	"\x19hr/leave/v1/service.proto\x12\vhr.leave.v1\x1a\x1fhr/leave/v1/approve_leave.proto\x1a&hr/leave/v1/create_leave_request.proto\x1a#hr/leave/v1/create_leave_type.proto\x1a%hr/leave/v1/list_leave_balances.proto\x1a%hr/leave/v1/list_leave_requests.proto\x1a\"hr/leave/v1/list_leave_types.proto\x1a#hr/leave/v1/update_leave_type.proto\x1a\x1donekit/http/annotations.proto2\xe4\x06\n" +
 	"\fLeaveService\x12u\n" +
 	"\x11ListLeaveRequests\x12%.hr.leave.v1.ListLeaveRequestsRequest\x1a&.hr.leave.v1.ListLeaveRequestsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/requests\x10\x01\x12x\n" +
 	"\x12CreateLeaveRequest\x12&.hr.leave.v1.CreateLeaveRequestRequest\x1a'.hr.leave.v1.CreateLeaveRequestResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/requests\x10\x02\x12{\n" +
-	"\fApproveLeave\x12 .hr.leave.v1.ApproveLeaveRequest\x1a!.hr.leave.v1.ApproveLeaveResponse\"&\x9a\xb5\x18\"\n" +
-	"\x1e/requests/{request_id}/approve\x10\x05\x12i\n" +
+	"\t/requests\x10\x02\x12\x81\x01\n" +
+	"\fApproveLeave\x12 .hr.leave.v1.ApproveLeaveRequest\x1a!.hr.leave.v1.ApproveLeaveResponse\",\x9a\xb5\x18(\n" +
+	"\x1e/requests/{request_id}/approve\x10\x05\"\x04body\x12i\n" +
 	"\x0eListLeaveTypes\x12\".hr.leave.v1.ListLeaveTypesRequest\x1a#.hr.leave.v1.ListLeaveTypesResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
 	"\x06/types\x10\x01\x12l\n" +
 	"\x0fCreateLeaveType\x12#.hr.leave.v1.CreateLeaveTypeRequest\x1a$.hr.leave.v1.CreateLeaveTypeResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/types\x10\x02\x12q\n" +
-	"\x0fUpdateLeaveType\x12#.hr.leave.v1.UpdateLeaveTypeRequest\x1a$.hr.leave.v1.UpdateLeaveTypeResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/types/{id}\x10\x03\x12u\n" +
+	"\x06/types\x10\x02\x12w\n" +
+	"\x0fUpdateLeaveType\x12#.hr.leave.v1.UpdateLeaveTypeRequest\x1a$.hr.leave.v1.UpdateLeaveTypeResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/types/{id}\x10\x03\"\x04body\x12u\n" +
 	"\x11ListLeaveBalances\x12%.hr.leave.v1.ListLeaveBalancesRequest\x1a&.hr.leave.v1.ListLeaveBalancesResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/balances\x10\x01\x1a\x16\xa2\xb5\x18\x12\n" +
 	"\x10/api/hr/leave/v1B,Z*github.com/voxire/voxie/gen/go/hr/leave/v1b\x06proto3"

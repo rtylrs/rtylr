@@ -56,6 +56,10 @@ export interface CreateProductResponse {
 
 export interface UpdateProductRequest {
   id: string;
+  body?: UpdateProductBody;
+}
+
+export interface UpdateProductBody {
   categoryId: string;
   supplierId: string;
   name: string;
@@ -212,7 +216,7 @@ export class ProductServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

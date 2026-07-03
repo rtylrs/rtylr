@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateCustomerRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateCustomerBody {
   /** first_name is the first name value for this contract. */
   firstName: string;
   /** last_name is the last name value for this contract. */
@@ -33,6 +31,13 @@ export interface UpdateCustomerRequest {
   notes: string;
   /** is_active is the is active value for this contract. */
   isActive?: boolean | undefined;
+}
+
+export interface UpdateCustomerRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable customer fields bound from the HTTP payload. */
+  body: UpdateCustomerBody | undefined;
 }
 
 export interface UpdateCustomerResponse {

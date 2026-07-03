@@ -25,14 +25,14 @@ var File_finance_expenses_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!finance/expenses/v1/service.proto\x12\x13finance.expenses.v1\x1a(finance/expenses/v1/create_expense.proto\x1a(finance/expenses/v1/delete_expense.proto\x1a1finance/expenses/v1/list_expense_categories.proto\x1a'finance/expenses/v1/list_expenses.proto\x1a(finance/expenses/v1/update_expense.proto\x1a\x1donekit/http/annotations.proto2\xba\x05\n" +
+	"!finance/expenses/v1/service.proto\x12\x13finance.expenses.v1\x1a(finance/expenses/v1/create_expense.proto\x1a(finance/expenses/v1/delete_expense.proto\x1a1finance/expenses/v1/list_expense_categories.proto\x1a'finance/expenses/v1/list_expenses.proto\x1a(finance/expenses/v1/update_expense.proto\x1a\x1donekit/http/annotations.proto2\xc1\x05\n" +
 	"\x0fExpensesService\x12v\n" +
 	"\fListExpenses\x12(.finance.expenses.v1.ListExpensesRequest\x1a).finance.expenses.v1.ListExpensesResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/expenses\x10\x01\x12y\n" +
 	"\rCreateExpense\x12).finance.expenses.v1.CreateExpenseRequest\x1a*.finance.expenses.v1.CreateExpenseResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/expenses\x10\x02\x12~\n" +
-	"\rUpdateExpense\x12).finance.expenses.v1.UpdateExpenseRequest\x1a*.finance.expenses.v1.UpdateExpenseResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/expenses/{id}\x10\x03\x12~\n" +
+	"\t/expenses\x10\x02\x12\x84\x01\n" +
+	"\rUpdateExpense\x12).finance.expenses.v1.UpdateExpenseRequest\x1a*.finance.expenses.v1.UpdateExpenseResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/expenses/{id}\x10\x03\"\x04body\x12~\n" +
 	"\rDeleteExpense\x12).finance.expenses.v1.DeleteExpenseRequest\x1a*.finance.expenses.v1.DeleteExpenseResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/expenses/{id}\x10\x04\x12\x93\x01\n" +
 	"\x15ListExpenseCategories\x121.finance.expenses.v1.ListExpenseCategoriesRequest\x1a2.finance.expenses.v1.ListExpenseCategoriesResponse\"\x13\x9a\xb5\x18\x0f\n" +

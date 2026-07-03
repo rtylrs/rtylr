@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateCampaignRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateCampaignBody.
 // This method handles nullable fields: segment_id
-func (x *UpdateCampaignRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateCampaignBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -37,14 +37,14 @@ func (x *UpdateCampaignRequest) MarshalJSONOnekit(opts protojson.MarshalOptions)
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateCampaignRequest.
-func (x *UpdateCampaignRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateCampaignBody.
+func (x *UpdateCampaignBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateCampaignRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateCampaignBody.
 // This method handles nullable fields: segment_id
-func (x *UpdateCampaignRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateCampaignBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

@@ -56,7 +56,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	updateRecurringInvoiceHandler := BindingMiddleware[UpdateRecurringInvoiceRequest](
 		genericHandler(server.UpdateRecurringInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateRecurringInvoicePathParams, updateRecurringInvoiceQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/recurring-invoice/v1/recurring-invoices/{id}", updateRecurringInvoiceHandler)

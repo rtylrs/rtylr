@@ -72,6 +72,10 @@ export interface CreateLoyaltyTierResponse {
 
 export interface UpdateLoyaltyTierRequest {
   id: string;
+  body?: UpdateLoyaltyTierBody;
+}
+
+export interface UpdateLoyaltyTierBody {
   name: string;
   minPoints: string;
   discountPct: number;
@@ -303,7 +307,7 @@ export class LoyaltyServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

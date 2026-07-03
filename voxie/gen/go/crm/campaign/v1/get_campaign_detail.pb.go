@@ -128,10 +128,10 @@ const file_crm_campaign_v1_get_campaign_detail_proto_rawDesc = "" +
 	"\n" +
 	")crm/campaign/v1/get_campaign_detail.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bcrm/campaign/v1/types.proto\x1a\x1donekit/http/annotations.proto\":\n" +
 	"\x18GetCampaignDetailRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"\x88\x01\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"\x8e\x01\n" +
 	"\x19GetCampaignDetailResponse\x125\n" +
-	"\bcampaign\x18\x01 \x01(\v2\x19.crm.campaign.v1.CampaignR\bcampaign\x124\n" +
-	"\x05stats\x18\x02 \x01(\v2\x1e.crm.campaign.v1.CampaignStatsR\x05statsB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"
+	"\bcampaign\x18\x01 \x01(\v2\x19.crm.campaign.v1.CampaignR\bcampaign\x12:\n" +
+	"\x05stats\x18\x02 \x01(\v2\x1e.crm.campaign.v1.CampaignStatsB\x04\xf0\xb5\x18\x03R\x05statsB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"
 
 var (
 	file_crm_campaign_v1_get_campaign_detail_proto_rawDescOnce sync.Once

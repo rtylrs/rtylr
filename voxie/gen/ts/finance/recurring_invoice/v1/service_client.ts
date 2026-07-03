@@ -42,6 +42,10 @@ export interface GetRecurringInvoiceResponse {
 
 export interface UpdateRecurringInvoiceRequest {
   id: string;
+  body?: UpdateRecurringInvoiceBody;
+}
+
+export interface UpdateRecurringInvoiceBody {
   templateInvoiceId: string | null;
   frequency: string;
   nextInvoiceDate: string;
@@ -217,7 +221,7 @@ export class RecurringInvoiceServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

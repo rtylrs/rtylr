@@ -76,7 +76,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	updateTaskHandler := BindingMiddleware[UpdateTaskRequest](
 		genericHandler(server.UpdateTask, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTaskPathParams, updateTaskQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/flow/task/v1/tasks/{id}", updateTaskHandler)
@@ -85,7 +85,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	updateTaskStatusHandler := BindingMiddleware[UpdateTaskStatusRequest](
 		genericHandler(server.UpdateTaskStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTaskStatusPathParams, updateTaskStatusQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/flow/task/v1/tasks/{id}/status", updateTaskStatusHandler)

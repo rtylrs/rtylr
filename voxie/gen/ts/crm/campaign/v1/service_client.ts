@@ -75,6 +75,10 @@ export interface GetCampaignStatsResponse {
 
 export interface UpdateCampaignRequest {
   id: string;
+  body?: UpdateCampaignBody;
+}
+
+export interface UpdateCampaignBody {
   name: string;
   description: string;
   channel: string;
@@ -271,7 +275,7 @@ export class CampaignServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

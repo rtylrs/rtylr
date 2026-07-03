@@ -36,6 +36,10 @@ export interface CreateWorkspaceResponse {
 
 export interface UpdateWorkspaceRequest {
   id: string;
+  body?: UpdateWorkspaceBody;
+}
+
+export interface UpdateWorkspaceBody {
   name: string;
   description: string;
   icon: string;
@@ -197,7 +201,7 @@ export class WorkspaceServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

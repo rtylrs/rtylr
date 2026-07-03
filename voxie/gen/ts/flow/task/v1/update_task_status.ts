@@ -6,11 +6,16 @@
 
 /* eslint-disable */
 
+export interface UpdateTaskStatusBody {
+  /** status is the current lifecycle state. */
+  status: string;
+}
+
 export interface UpdateTaskStatusRequest {
   /** id is the unique identifier for the resource. */
   id: number;
-  /** status is the current lifecycle state. */
-  status: string;
+  /** body carries the new task status bound from the HTTP payload. */
+  body: UpdateTaskStatusBody | undefined;
 }
 
 export interface UpdateTaskStatusResponse {

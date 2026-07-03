@@ -56,7 +56,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	updateInvoiceHandler := BindingMiddleware[UpdateInvoiceRequest](
 		genericHandler(server.UpdateInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateInvoicePathParams, updateInvoiceQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/invoices/v1/invoices/{id}", updateInvoiceHandler)
@@ -65,7 +65,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	updateInvoiceStatusHandler := BindingMiddleware[UpdateInvoiceStatusRequest](
 		genericHandler(server.UpdateInvoiceStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateInvoiceStatusPathParams, updateInvoiceStatusQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/finance/invoices/v1/invoices/{id}/status", updateInvoiceStatusHandler)

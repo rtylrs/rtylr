@@ -48,7 +48,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	approveLeaveHandler := BindingMiddleware[ApproveLeaveRequest](
 		genericHandler(server.ApproveLeave, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveLeavePathParams, approveLeaveQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/leave/v1/requests/{request_id}/approve", approveLeaveHandler)
@@ -75,7 +75,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	updateLeaveTypeHandler := BindingMiddleware[UpdateLeaveTypeRequest](
 		genericHandler(server.UpdateLeaveType, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLeaveTypePathParams, updateLeaveTypeQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/leave/v1/types/{id}", updateLeaveTypeHandler)

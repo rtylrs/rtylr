@@ -45,7 +45,7 @@ func RegisterProjectServiceServer(server ProjectServiceServer, opts ...ServerOpt
 	updateProjectHandler := BindingMiddleware[UpdateProjectRequest](
 		genericHandler(server.UpdateProject, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateProjectPathParams, updateProjectQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/flow/project/v1/projects/{id}", updateProjectHandler)

@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateWorkspaceRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateWorkspaceBody {
   /** name is the name value for this contract. */
   name: string;
   /** description is the description value for this contract. */
@@ -17,6 +15,13 @@ export interface UpdateWorkspaceRequest {
   icon: string;
   /** color is the color value for this contract. */
   color: string;
+}
+
+export interface UpdateWorkspaceRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable workspace fields bound from the HTTP payload. */
+  body: UpdateWorkspaceBody | undefined;
 }
 
 export interface UpdateWorkspaceResponse {

@@ -34,12 +34,16 @@ export interface CreateComboResponse {
 }
 
 export interface UpdateComboRequest {
+  id: string;
+  body?: UpdateComboBody;
+}
+
+export interface UpdateComboBody {
   name: string;
   description: string;
   price: number;
   items: string;
   isActive: boolean;
-  id: string;
 }
 
 export interface UpdateComboResponse {
@@ -178,7 +182,7 @@ export class ComboServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

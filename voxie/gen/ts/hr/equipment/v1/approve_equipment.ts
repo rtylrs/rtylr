@@ -6,11 +6,16 @@
 
 /* eslint-disable */
 
+export interface ApproveEquipmentBody {
+  /** True to approve, false to reject. */
+  approved: boolean;
+}
+
 export interface ApproveEquipmentRequest {
   /** ID of the equipment request being reviewed. */
   equipmentRequestId: number;
-  /** True to approve, false to reject. */
-  approved: boolean;
+  /** body carries approval decision fields bound from the HTTP payload. */
+  body: ApproveEquipmentBody | undefined;
 }
 
 export interface ApproveEquipmentResponse {

@@ -41,6 +41,10 @@ export interface CreateOvertimeRequestResponse {
 
 export interface ApproveOvertimeRequest {
   overtimeRequestId: string;
+  body?: ApproveOvertimeBody;
+}
+
+export interface ApproveOvertimeBody {
   approved: boolean;
   multiplierApplied: number | null;
   rejectionReason: string | null;
@@ -177,7 +181,7 @@ export class OvertimeServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

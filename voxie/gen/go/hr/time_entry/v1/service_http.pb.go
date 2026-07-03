@@ -64,7 +64,7 @@ func RegisterTimeEntryServiceServer(server TimeEntryServiceServer, opts ...Serve
 	approveTimesheetHandler := BindingMiddleware[ApproveTimesheetRequest](
 		genericHandler(server.ApproveTimesheet, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveTimesheetPathParams, approveTimesheetQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/time-entry/v1/timesheets/{id}/approve", approveTimesheetHandler)

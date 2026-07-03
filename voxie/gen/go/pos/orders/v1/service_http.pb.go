@@ -55,7 +55,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 	updateOrderStatusHandler := BindingMiddleware[UpdateOrderStatusRequest](
 		genericHandler(server.UpdateOrderStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateOrderStatusPathParams, updateOrderStatusQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/orders/v1/orders/{order_id}/status", updateOrderStatusHandler)

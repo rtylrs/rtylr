@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateSupplierRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateSupplierBody {
   /** name is the name value for this contract. */
   name: string;
   /** email is the email address used for lookup or contact. */
@@ -29,6 +27,13 @@ export interface UpdateSupplierRequest {
   notes: string;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
+}
+
+export interface UpdateSupplierRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable supplier fields bound from the HTTP payload. */
+  body: UpdateSupplierBody | undefined;
 }
 
 export interface UpdateSupplierResponse {

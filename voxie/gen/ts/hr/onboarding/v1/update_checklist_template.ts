@@ -6,13 +6,18 @@
 
 /* eslint-disable */
 
-export interface UpdateChecklistTemplateRequest {
-  /** role_id is the checklist template role identifier from the path. */
-  roleId: number;
+export interface UpdateChecklistTemplateBody {
   /** name is the human-readable name for the template. */
   name: string;
   /** trigger_type is the event that triggers this checklist (onboarding | offboarding). */
   triggerType?: string | undefined;
+}
+
+export interface UpdateChecklistTemplateRequest {
+  /** role_id is the checklist template role identifier from the path. */
+  roleId: number;
+  /** body carries updatable checklist template fields bound from the HTTP payload. */
+  body: UpdateChecklistTemplateBody | undefined;
 }
 
 export interface UpdateChecklistTemplateResponse {

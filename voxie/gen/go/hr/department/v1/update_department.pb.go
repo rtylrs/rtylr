@@ -23,25 +23,91 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateDepartmentRequest struct {
+type UpdateDepartmentBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the department to update.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// New location; absent to keep current.
-	LocationId *int64 `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
+	LocationId *int64 `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
 	// New parent department; absent to keep current.
-	ParentDepartmentId *int64 `protobuf:"varint,3,opt,name=parent_department_id,json=parentDepartmentId,proto3,oneof" json:"parent_department_id,omitempty"`
+	ParentDepartmentId *int64 `protobuf:"varint,2,opt,name=parent_department_id,json=parentDepartmentId,proto3,oneof" json:"parent_department_id,omitempty"`
 	// name is the updated department name.
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	// New default work schedule; absent to keep current.
-	DefaultWorkScheduleId *int64 `protobuf:"varint,5,opt,name=default_work_schedule_id,json=defaultWorkScheduleId,proto3,oneof" json:"default_work_schedule_id,omitempty"`
+	DefaultWorkScheduleId *int64 `protobuf:"varint,4,opt,name=default_work_schedule_id,json=defaultWorkScheduleId,proto3,oneof" json:"default_work_schedule_id,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
 
+func (x *UpdateDepartmentBody) Reset() {
+	*x = UpdateDepartmentBody{}
+	mi := &file_hr_department_v1_update_department_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDepartmentBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDepartmentBody) ProtoMessage() {}
+
+func (x *UpdateDepartmentBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_department_v1_update_department_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDepartmentBody.ProtoReflect.Descriptor instead.
+func (*UpdateDepartmentBody) Descriptor() ([]byte, []int) {
+	return file_hr_department_v1_update_department_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateDepartmentBody) GetLocationId() int64 {
+	if x != nil && x.LocationId != nil {
+		return *x.LocationId
+	}
+	return 0
+}
+
+func (x *UpdateDepartmentBody) GetParentDepartmentId() int64 {
+	if x != nil && x.ParentDepartmentId != nil {
+		return *x.ParentDepartmentId
+	}
+	return 0
+}
+
+func (x *UpdateDepartmentBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateDepartmentBody) GetDefaultWorkScheduleId() int64 {
+	if x != nil && x.DefaultWorkScheduleId != nil {
+		return *x.DefaultWorkScheduleId
+	}
+	return 0
+}
+
+type UpdateDepartmentRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the department to update.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable department fields bound from the HTTP payload.
+	Body          *UpdateDepartmentBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *UpdateDepartmentRequest) Reset() {
 	*x = UpdateDepartmentRequest{}
-	mi := &file_hr_department_v1_update_department_proto_msgTypes[0]
+	mi := &file_hr_department_v1_update_department_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -53,7 +119,7 @@ func (x *UpdateDepartmentRequest) String() string {
 func (*UpdateDepartmentRequest) ProtoMessage() {}
 
 func (x *UpdateDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_department_v1_update_department_proto_msgTypes[0]
+	mi := &file_hr_department_v1_update_department_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -66,7 +132,7 @@ func (x *UpdateDepartmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDepartmentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_hr_department_v1_update_department_proto_rawDescGZIP(), []int{0}
+	return file_hr_department_v1_update_department_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateDepartmentRequest) GetId() int64 {
@@ -76,32 +142,11 @@ func (x *UpdateDepartmentRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateDepartmentRequest) GetLocationId() int64 {
-	if x != nil && x.LocationId != nil {
-		return *x.LocationId
-	}
-	return 0
-}
-
-func (x *UpdateDepartmentRequest) GetParentDepartmentId() int64 {
-	if x != nil && x.ParentDepartmentId != nil {
-		return *x.ParentDepartmentId
-	}
-	return 0
-}
-
-func (x *UpdateDepartmentRequest) GetName() string {
+func (x *UpdateDepartmentRequest) GetBody() *UpdateDepartmentBody {
 	if x != nil {
-		return x.Name
+		return x.Body
 	}
-	return ""
-}
-
-func (x *UpdateDepartmentRequest) GetDefaultWorkScheduleId() int64 {
-	if x != nil && x.DefaultWorkScheduleId != nil {
-		return *x.DefaultWorkScheduleId
-	}
-	return 0
+	return nil
 }
 
 type UpdateDepartmentResponse struct {
@@ -114,7 +159,7 @@ type UpdateDepartmentResponse struct {
 
 func (x *UpdateDepartmentResponse) Reset() {
 	*x = UpdateDepartmentResponse{}
-	mi := &file_hr_department_v1_update_department_proto_msgTypes[1]
+	mi := &file_hr_department_v1_update_department_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +171,7 @@ func (x *UpdateDepartmentResponse) String() string {
 func (*UpdateDepartmentResponse) ProtoMessage() {}
 
 func (x *UpdateDepartmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_department_v1_update_department_proto_msgTypes[1]
+	mi := &file_hr_department_v1_update_department_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +184,7 @@ func (x *UpdateDepartmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDepartmentResponse.ProtoReflect.Descriptor instead.
 func (*UpdateDepartmentResponse) Descriptor() ([]byte, []int) {
-	return file_hr_department_v1_update_department_proto_rawDescGZIP(), []int{1}
+	return file_hr_department_v1_update_department_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateDepartmentResponse) GetDepartment() *DepartmentPayload {
@@ -153,18 +198,20 @@ var File_hr_department_v1_update_department_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_update_department_proto_rawDesc = "" +
 	"\n" +
-	"(hr/department/v1/update_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xd8\x02\n" +
-	"\x17UpdateDepartmentRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12.\n" +
-	"\vlocation_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"(hr/department/v1/update_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb5\x02\n" +
+	"\x14UpdateDepartmentBody\x12.\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"locationId\x88\x01\x01\x12?\n" +
-	"\x14parent_department_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
-	"\x04name\x18\x04 \x01(\tB\n" +
+	"\x14parent_department_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
+	"\x04name\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12F\n" +
-	"\x18default_work_schedule_id\x18\x05 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x02R\x15defaultWorkScheduleId\x88\x01\x01B\x0e\n" +
+	"\x18default_work_schedule_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x02R\x15defaultWorkScheduleId\x88\x01\x01B\x0e\n" +
 	"\f_location_idB\x17\n" +
 	"\x15_parent_department_idB\x1b\n" +
-	"\x19_default_work_schedule_id\"_\n" +
+	"\x19_default_work_schedule_id\"u\n" +
+	"\x17UpdateDepartmentRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12:\n" +
+	"\x04body\x18\x02 \x01(\v2&.hr.department.v1.UpdateDepartmentBodyR\x04body\"_\n" +
 	"\x18UpdateDepartmentResponse\x12C\n" +
 	"\n" +
 	"department\x18\x01 \x01(\v2#.hr.department.v1.DepartmentPayloadR\n" +
@@ -182,19 +229,21 @@ func file_hr_department_v1_update_department_proto_rawDescGZIP() []byte {
 	return file_hr_department_v1_update_department_proto_rawDescData
 }
 
-var file_hr_department_v1_update_department_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hr_department_v1_update_department_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hr_department_v1_update_department_proto_goTypes = []any{
-	(*UpdateDepartmentRequest)(nil),  // 0: hr.department.v1.UpdateDepartmentRequest
-	(*UpdateDepartmentResponse)(nil), // 1: hr.department.v1.UpdateDepartmentResponse
-	(*DepartmentPayload)(nil),        // 2: hr.department.v1.DepartmentPayload
+	(*UpdateDepartmentBody)(nil),     // 0: hr.department.v1.UpdateDepartmentBody
+	(*UpdateDepartmentRequest)(nil),  // 1: hr.department.v1.UpdateDepartmentRequest
+	(*UpdateDepartmentResponse)(nil), // 2: hr.department.v1.UpdateDepartmentResponse
+	(*DepartmentPayload)(nil),        // 3: hr.department.v1.DepartmentPayload
 }
 var file_hr_department_v1_update_department_proto_depIdxs = []int32{
-	2, // 0: hr.department.v1.UpdateDepartmentResponse.department:type_name -> hr.department.v1.DepartmentPayload
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: hr.department.v1.UpdateDepartmentRequest.body:type_name -> hr.department.v1.UpdateDepartmentBody
+	3, // 1: hr.department.v1.UpdateDepartmentResponse.department:type_name -> hr.department.v1.DepartmentPayload
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_hr_department_v1_update_department_proto_init() }
@@ -210,7 +259,7 @@ func file_hr_department_v1_update_department_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_department_v1_update_department_proto_rawDesc), len(file_hr_department_v1_update_department_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -25,7 +25,7 @@ var File_crm_customer_v1_service_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcrm/customer/v1/service.proto\x12\x0fcrm.customer.v1\x1a%crm/customer/v1/create_customer.proto\x1a%crm/customer/v1/delete_customer.proto\x1a\"crm/customer/v1/get_customer.proto\x1a$crm/customer/v1/list_customers.proto\x1a%crm/customer/v1/update_customer.proto\x1a\x1donekit/http/annotations.proto2\x83\x05\n" +
+	"\x1dcrm/customer/v1/service.proto\x12\x0fcrm.customer.v1\x1a%crm/customer/v1/create_customer.proto\x1a%crm/customer/v1/delete_customer.proto\x1a\"crm/customer/v1/get_customer.proto\x1a$crm/customer/v1/list_customers.proto\x1a%crm/customer/v1/update_customer.proto\x1a\x1donekit/http/annotations.proto2\x8a\x05\n" +
 	"\x0fCustomerService\x12r\n" +
 	"\rListCustomers\x12%.crm.customer.v1.ListCustomersRequest\x1a&.crm.customer.v1.ListCustomersResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -34,9 +34,9 @@ const file_crm_customer_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"/customers\x10\x02\x12q\n" +
 	"\vGetCustomer\x12#.crm.customer.v1.GetCustomerRequest\x1a$.crm.customer.v1.GetCustomerResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/customers/{id}\x10\x01\x12z\n" +
-	"\x0eUpdateCustomer\x12&.crm.customer.v1.UpdateCustomerRequest\x1a'.crm.customer.v1.UpdateCustomerResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/customers/{id}\x10\x03\x12z\n" +
+	"\x0f/customers/{id}\x10\x01\x12\x80\x01\n" +
+	"\x0eUpdateCustomer\x12&.crm.customer.v1.UpdateCustomerRequest\x1a'.crm.customer.v1.UpdateCustomerResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x0f/customers/{id}\x10\x03\"\x04body\x12z\n" +
 	"\x0eDeleteCustomer\x12&.crm.customer.v1.DeleteCustomerRequest\x1a'.crm.customer.v1.DeleteCustomerResponse\"\x17\x9a\xb5\x18\x13\n" +
 	"\x0f/customers/{id}\x10\x04\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/crm/customer/v1B0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"

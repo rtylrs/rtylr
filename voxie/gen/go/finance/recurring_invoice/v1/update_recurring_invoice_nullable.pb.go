@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateRecurringInvoiceRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateRecurringInvoiceBody.
 // This method handles nullable fields: template_invoice_id, end_date, is_active
-func (x *UpdateRecurringInvoiceRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateRecurringInvoiceBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -49,14 +49,14 @@ func (x *UpdateRecurringInvoiceRequest) MarshalJSONOnekit(opts protojson.Marshal
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateRecurringInvoiceRequest.
-func (x *UpdateRecurringInvoiceRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateRecurringInvoiceBody.
+func (x *UpdateRecurringInvoiceBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateRecurringInvoiceRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateRecurringInvoiceBody.
 // This method handles nullable fields: template_invoice_id, end_date, is_active
-func (x *UpdateRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateRecurringInvoiceBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

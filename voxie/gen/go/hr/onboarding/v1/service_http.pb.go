@@ -49,7 +49,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	updateChecklistTemplateHandler := BindingMiddleware[UpdateChecklistTemplateRequest](
 		genericHandler(server.UpdateChecklistTemplate, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateChecklistTemplatePathParams, updateChecklistTemplateQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/onboarding/v1/templates/{role_id}", updateChecklistTemplateHandler)

@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateRecurringInvoiceRequest {
-  /** id is the recurring invoice to update. */
-  id: number;
+export interface UpdateRecurringInvoiceBody {
   /** template_invoice_id is the invoice used as the recurring invoice template. */
   templateInvoiceId?:
     | number
@@ -23,6 +21,13 @@ export interface UpdateRecurringInvoiceRequest {
     | undefined;
   /** is_active indicates whether the recurring invoice is active. */
   isActive?: boolean | undefined;
+}
+
+export interface UpdateRecurringInvoiceRequest {
+  /** id is the recurring invoice to update. */
+  id: number;
+  /** body carries updatable recurring invoice fields bound from the HTTP payload. */
+  body: UpdateRecurringInvoiceBody | undefined;
 }
 
 export interface UpdateRecurringInvoiceResponse {

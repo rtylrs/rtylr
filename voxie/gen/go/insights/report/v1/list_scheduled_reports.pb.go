@@ -164,11 +164,11 @@ const file_insights_report_v1_list_scheduled_reports_proto_rawDesc = "" +
 	"\asort_byR\x06sortBy\x12)\n" +
 	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
 	"\n" +
-	"\bsort_dirR\asortDir\"\xa7\x01\n" +
+	"\bsort_dirR\asortDir\"\xad\x01\n" +
 	"\x1cListScheduledReportsResponse\x12=\n" +
-	"\areports\x18\x01 \x03(\v2#.insights.report.v1.ScheduledReportR\areports\x12H\n" +
+	"\areports\x18\x01 \x03(\v2#.insights.report.v1.ScheduledReportR\areports\x12N\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
 	"paginationB3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 
 var (

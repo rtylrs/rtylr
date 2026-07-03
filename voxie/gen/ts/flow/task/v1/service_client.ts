@@ -103,6 +103,10 @@ export interface TaskActivity {
 
 export interface UpdateTaskRequest {
   id: string;
+  body?: UpdateTaskBody;
+}
+
+export interface UpdateTaskBody {
   title: string;
   description: string;
   status: string;
@@ -119,6 +123,10 @@ export interface UpdateTaskResponse {
 
 export interface UpdateTaskStatusRequest {
   id: string;
+  body?: UpdateTaskStatusBody;
+}
+
+export interface UpdateTaskStatusBody {
   status: string;
 }
 
@@ -436,7 +444,7 @@ export class TaskServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
@@ -461,7 +469,7 @@ export class TaskServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

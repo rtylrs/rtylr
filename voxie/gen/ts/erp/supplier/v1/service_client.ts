@@ -45,6 +45,10 @@ export interface CreateSupplierResponse {
 
 export interface UpdateSupplierRequest {
   id: string;
+  body?: UpdateSupplierBody;
+}
+
+export interface UpdateSupplierBody {
   name: string;
   email: string;
   phone: string;
@@ -185,7 +189,7 @@ export class SupplierServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

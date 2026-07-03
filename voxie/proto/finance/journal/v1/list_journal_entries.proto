@@ -27,5 +27,5 @@ message ListJournalEntriesResponse {
   // entries is the entries value for this contract.
   repeated JournalEntry entries = 1;
   // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationResponse pagination = 2;
+  common.pagination.v1.PaginationResponse pagination = 2 [(onekit.http.empty_behavior) = EMPTY_BEHAVIOR_OMIT];
 }

@@ -25,6 +25,10 @@ export interface DepartmentPayload {
 
 export interface UpdateDepartmentRequest {
   id: string;
+  body?: UpdateDepartmentBody;
+}
+
+export interface UpdateDepartmentBody {
   locationId: string | null;
   parentDepartmentId: string | null;
   name: string;
@@ -136,7 +140,7 @@ export class DepartmentServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

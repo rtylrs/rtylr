@@ -6,13 +6,18 @@
 
 /* eslint-disable */
 
-export interface UpdateFloorRequest {
+export interface UpdateFloorBody {
   /** name is the name value for this contract. */
   name: string;
   /** sort_order is the sort order value for this contract. */
   sortOrder: number;
+}
+
+export interface UpdateFloorRequest {
   /** id is the unique identifier for the floor. */
   id: number;
+  /** body carries updatable floor fields bound from the HTTP payload. */
+  body: UpdateFloorBody | undefined;
 }
 
 export interface UpdateFloorResponse {

@@ -10,6 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 // ── Approve Leave Request ─────────────────────────────────────────
 
+message ApproveLeaveBody {
+  // True to approve, false to reject.
+  bool approved = 1;
+  // Reason for rejection; absent if approving.
+  optional string rejection_reason = 2 [
+    (onekit.http.nullable) = true
+  ];
+}
+
 message ApproveLeaveRequest {
   // request_id is the leave request being reviewed.
   int64 request_id = 1 [
@@ -17,12 +26,8 @@ message ApproveLeaveRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // True to approve, false to reject.
-  bool approved = 2;
-  // Reason for rejection; absent if approving.
-  optional string rejection_reason = 3 [
-    (onekit.http.nullable) = true
-  ];
+  // body carries approval decision fields bound from the HTTP payload.
+  ApproveLeaveBody body = 2;
 }
 
 message ApproveLeaveResponse {

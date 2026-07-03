@@ -23,25 +23,91 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateWorkspaceBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// name is the name value for this contract.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// description is the description value for this contract.
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// icon is the icon value for this contract.
+	Icon string `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
+	// color is the color value for this contract.
+	Color         string `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWorkspaceBody) Reset() {
+	*x = UpdateWorkspaceBody{}
+	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkspaceBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkspaceBody) ProtoMessage() {}
+
+func (x *UpdateWorkspaceBody) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkspaceBody.ProtoReflect.Descriptor instead.
+func (*UpdateWorkspaceBody) Descriptor() ([]byte, []int) {
+	return file_flow_workspace_v1_update_workspace_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateWorkspaceBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateWorkspaceBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateWorkspaceBody) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+func (x *UpdateWorkspaceBody) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
 type UpdateWorkspaceRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// name is the name value for this contract.
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// description is the description value for this contract.
-	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// icon is the icon value for this contract.
-	Icon string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
-	// color is the color value for this contract.
-	Color         string `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
+	// body carries updatable workspace fields bound from the HTTP payload.
+	Body          *UpdateWorkspaceBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateWorkspaceRequest) Reset() {
 	*x = UpdateWorkspaceRequest{}
-	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[0]
+	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -53,7 +119,7 @@ func (x *UpdateWorkspaceRequest) String() string {
 func (*UpdateWorkspaceRequest) ProtoMessage() {}
 
 func (x *UpdateWorkspaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[0]
+	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -66,7 +132,7 @@ func (x *UpdateWorkspaceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWorkspaceRequest.ProtoReflect.Descriptor instead.
 func (*UpdateWorkspaceRequest) Descriptor() ([]byte, []int) {
-	return file_flow_workspace_v1_update_workspace_proto_rawDescGZIP(), []int{0}
+	return file_flow_workspace_v1_update_workspace_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateWorkspaceRequest) GetId() int64 {
@@ -76,32 +142,11 @@ func (x *UpdateWorkspaceRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateWorkspaceRequest) GetName() string {
+func (x *UpdateWorkspaceRequest) GetBody() *UpdateWorkspaceBody {
 	if x != nil {
-		return x.Name
+		return x.Body
 	}
-	return ""
-}
-
-func (x *UpdateWorkspaceRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateWorkspaceRequest) GetIcon() string {
-	if x != nil {
-		return x.Icon
-	}
-	return ""
-}
-
-func (x *UpdateWorkspaceRequest) GetColor() string {
-	if x != nil {
-		return x.Color
-	}
-	return ""
+	return nil
 }
 
 type UpdateWorkspaceResponse struct {
@@ -114,7 +159,7 @@ type UpdateWorkspaceResponse struct {
 
 func (x *UpdateWorkspaceResponse) Reset() {
 	*x = UpdateWorkspaceResponse{}
-	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[1]
+	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +171,7 @@ func (x *UpdateWorkspaceResponse) String() string {
 func (*UpdateWorkspaceResponse) ProtoMessage() {}
 
 func (x *UpdateWorkspaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[1]
+	mi := &file_flow_workspace_v1_update_workspace_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +184,7 @@ func (x *UpdateWorkspaceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWorkspaceResponse.ProtoReflect.Descriptor instead.
 func (*UpdateWorkspaceResponse) Descriptor() ([]byte, []int) {
-	return file_flow_workspace_v1_update_workspace_proto_rawDescGZIP(), []int{1}
+	return file_flow_workspace_v1_update_workspace_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateWorkspaceResponse) GetMessage() string {
@@ -153,17 +198,19 @@ var File_flow_workspace_v1_update_workspace_proto protoreflect.FileDescriptor
 
 const file_flow_workspace_v1_update_workspace_proto_rawDesc = "" +
 	"\n" +
-	"(flow/workspace/v1/update_workspace.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc8\x01\n" +
-	"\x16UpdateWorkspaceRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1e\n" +
-	"\x04name\x18\x02 \x01(\tB\n" +
+	"(flow/workspace/v1/update_workspace.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa5\x01\n" +
+	"\x13UpdateWorkspaceBody\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
-	"\vdescription\x18\x03 \x01(\tB\n" +
+	"\vdescription\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12\x1e\n" +
-	"\x04icon\x18\x04 \x01(\tB\n" +
+	"\x04icon\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04icon\x12 \n" +
-	"\x05color\x18\x05 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05color\"3\n" +
+	"\x05color\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05color\"t\n" +
+	"\x16UpdateWorkspaceRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12:\n" +
+	"\x04body\x18\x02 \x01(\v2&.flow.workspace.v1.UpdateWorkspaceBodyR\x04body\"3\n" +
 	"\x17UpdateWorkspaceResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
 
@@ -179,17 +226,19 @@ func file_flow_workspace_v1_update_workspace_proto_rawDescGZIP() []byte {
 	return file_flow_workspace_v1_update_workspace_proto_rawDescData
 }
 
-var file_flow_workspace_v1_update_workspace_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_flow_workspace_v1_update_workspace_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_flow_workspace_v1_update_workspace_proto_goTypes = []any{
-	(*UpdateWorkspaceRequest)(nil),  // 0: flow.workspace.v1.UpdateWorkspaceRequest
-	(*UpdateWorkspaceResponse)(nil), // 1: flow.workspace.v1.UpdateWorkspaceResponse
+	(*UpdateWorkspaceBody)(nil),     // 0: flow.workspace.v1.UpdateWorkspaceBody
+	(*UpdateWorkspaceRequest)(nil),  // 1: flow.workspace.v1.UpdateWorkspaceRequest
+	(*UpdateWorkspaceResponse)(nil), // 2: flow.workspace.v1.UpdateWorkspaceResponse
 }
 var file_flow_workspace_v1_update_workspace_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: flow.workspace.v1.UpdateWorkspaceRequest.body:type_name -> flow.workspace.v1.UpdateWorkspaceBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_flow_workspace_v1_update_workspace_proto_init() }
@@ -203,7 +252,7 @@ func file_flow_workspace_v1_update_workspace_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_workspace_v1_update_workspace_proto_rawDesc), len(file_flow_workspace_v1_update_workspace_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -25,10 +25,10 @@ var File_pos_orders_items_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_items_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!pos/orders/items/v1/service.proto\x12\x13pos.orders.items.v1\x1a\x1donekit/http/annotations.proto\x1a2pos/orders/items/v1/update_order_item_status.proto2\xe6\x01\n" +
-	"\x10OrderItemService\x12\xb1\x01\n" +
-	"\x15UpdateOrderItemStatus\x121.pos.orders.items.v1.UpdateOrderItemStatusRequest\x1a2.pos.orders.items.v1.UpdateOrderItemStatusResponse\"1\x9a\xb5\x18-\n" +
-	")/orders/{order_id}/items/{item_id}/status\x10\x03\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"!pos/orders/items/v1/service.proto\x12\x13pos.orders.items.v1\x1a\x1donekit/http/annotations.proto\x1a2pos/orders/items/v1/update_order_item_status.proto2\xec\x01\n" +
+	"\x10OrderItemService\x12\xb7\x01\n" +
+	"\x15UpdateOrderItemStatus\x121.pos.orders.items.v1.UpdateOrderItemStatusRequest\x1a2.pos.orders.items.v1.UpdateOrderItemStatusResponse\"7\x9a\xb5\x183\n" +
+	")/orders/{order_id}/items/{item_id}/status\x10\x03\"\x04body\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/pos/orders/items/v1B4Z2github.com/voxire/voxie/gen/go/pos/orders/items/v1b\x06proto3"
 
 var file_pos_orders_items_v1_service_proto_goTypes = []any{

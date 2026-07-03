@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateModifierRequest {
+export interface UpdateModifierBody {
   /** name is the name value for this contract. */
   name: string;
   /** price_delta is the price delta value for this contract. */
@@ -15,8 +15,13 @@ export interface UpdateModifierRequest {
   groupName: string;
   /** is_required is the is required value for this contract. */
   isRequired: boolean;
+}
+
+export interface UpdateModifierRequest {
   /** id is the unique identifier for the modifier. */
   id: number;
+  /** body carries updatable modifier fields bound from the HTTP payload. */
+  body: UpdateModifierBody | undefined;
 }
 
 export interface UpdateModifierResponse {

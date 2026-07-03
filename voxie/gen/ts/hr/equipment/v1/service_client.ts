@@ -68,6 +68,10 @@ export interface CreateEquipmentRequestResponse {
 
 export interface ApproveEquipmentRequest {
   equipmentRequestId: string;
+  body?: ApproveEquipmentBody;
+}
+
+export interface ApproveEquipmentBody {
   approved: boolean;
 }
 
@@ -228,7 +232,7 @@ export class EquipmentServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

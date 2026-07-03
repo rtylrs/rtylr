@@ -6,11 +6,16 @@
 
 /* eslint-disable */
 
+export interface UpdateOrderStatusBody {
+  /** status is the current lifecycle state. */
+  status: string;
+}
+
 export interface UpdateOrderStatusRequest {
   /** order_id is the order id value for this contract. */
   orderId: number;
-  /** status is the current lifecycle state. */
-  status: string;
+  /** body carries the new order status bound from the HTTP payload. */
+  body: UpdateOrderStatusBody | undefined;
 }
 
 export interface UpdateOrderStatusResponse {

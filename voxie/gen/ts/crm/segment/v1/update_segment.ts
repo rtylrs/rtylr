@@ -6,15 +6,20 @@
 
 /* eslint-disable */
 
-export interface UpdateSegmentRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateSegmentBody {
   /** name is the name value for this contract. */
   name: string;
   /** description is the description value for this contract. */
   description: string;
   /** rules is the rules value for this contract. */
   rules: string;
+}
+
+export interface UpdateSegmentRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable segment fields bound from the HTTP payload. */
+  body: UpdateSegmentBody | undefined;
 }
 
 export interface UpdateSegmentResponse {

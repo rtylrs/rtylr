@@ -25,6 +25,7 @@ service DepartmentService {
     option (onekit.http.config) = {
       path: "/departments/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 }

@@ -73,6 +73,10 @@ export interface GetStaffResponse {
 
 export interface UpdateStaffRequest {
   id: string;
+  body?: UpdateStaffBody;
+}
+
+export interface UpdateStaffBody {
   departmentId: string;
   firstName: string;
   lastName: string;
@@ -272,7 +276,7 @@ export class StaffServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

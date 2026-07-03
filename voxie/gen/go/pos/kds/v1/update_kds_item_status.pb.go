@@ -23,21 +23,66 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateKDSItemStatusRequest struct {
+type UpdateKDSItemStatusBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// status is the current lifecycle state.
-	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Status        string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateKDSItemStatusBody) Reset() {
+	*x = UpdateKDSItemStatusBody{}
+	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateKDSItemStatusBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateKDSItemStatusBody) ProtoMessage() {}
+
+func (x *UpdateKDSItemStatusBody) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateKDSItemStatusBody.ProtoReflect.Descriptor instead.
+func (*UpdateKDSItemStatusBody) Descriptor() ([]byte, []int) {
+	return file_pos_kds_v1_update_kds_item_status_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateKDSItemStatusBody) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateKDSItemStatusRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
 	// order_id is the unique identifier for the order.
-	OrderId int64 `protobuf:"varint,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	OrderId int64 `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	// item_id is the unique identifier for the order item.
-	ItemId        int64 `protobuf:"varint,3,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	ItemId int64 `protobuf:"varint,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	// body carries the new KDS item status bound from the HTTP payload.
+	Body          *UpdateKDSItemStatusBody `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateKDSItemStatusRequest) Reset() {
 	*x = UpdateKDSItemStatusRequest{}
-	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[0]
+	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +94,7 @@ func (x *UpdateKDSItemStatusRequest) String() string {
 func (*UpdateKDSItemStatusRequest) ProtoMessage() {}
 
 func (x *UpdateKDSItemStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[0]
+	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,14 +107,7 @@ func (x *UpdateKDSItemStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateKDSItemStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateKDSItemStatusRequest) Descriptor() ([]byte, []int) {
-	return file_pos_kds_v1_update_kds_item_status_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *UpdateKDSItemStatusRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
+	return file_pos_kds_v1_update_kds_item_status_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateKDSItemStatusRequest) GetOrderId() int64 {
@@ -86,6 +124,13 @@ func (x *UpdateKDSItemStatusRequest) GetItemId() int64 {
 	return 0
 }
 
+func (x *UpdateKDSItemStatusRequest) GetBody() *UpdateKDSItemStatusBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
 type UpdateKDSItemStatusResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// message is a human-readable result message.
@@ -96,7 +141,7 @@ type UpdateKDSItemStatusResponse struct {
 
 func (x *UpdateKDSItemStatusResponse) Reset() {
 	*x = UpdateKDSItemStatusResponse{}
-	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[1]
+	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -108,7 +153,7 @@ func (x *UpdateKDSItemStatusResponse) String() string {
 func (*UpdateKDSItemStatusResponse) ProtoMessage() {}
 
 func (x *UpdateKDSItemStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[1]
+	mi := &file_pos_kds_v1_update_kds_item_status_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +166,7 @@ func (x *UpdateKDSItemStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateKDSItemStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateKDSItemStatusResponse) Descriptor() ([]byte, []int) {
-	return file_pos_kds_v1_update_kds_item_status_proto_rawDescGZIP(), []int{1}
+	return file_pos_kds_v1_update_kds_item_status_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateKDSItemStatusResponse) GetMessage() string {
@@ -136,12 +181,14 @@ var File_pos_kds_v1_update_kds_item_status_proto protoreflect.FileDescriptor
 const file_pos_kds_v1_update_kds_item_status_proto_rawDesc = "" +
 	"\n" +
 	"'pos/kds/v1/update_kds_item_status.proto\x12\n" +
-	"pos.kds.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x91\x01\n" +
-	"\x1aUpdateKDSItemStatusRequest\x12\"\n" +
+	"pos.kds.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"=\n" +
+	"\x17UpdateKDSItemStatusBody\x12\"\n" +
 	"\x06status\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\x12&\n" +
-	"\border_id\x18\x02 \x01(\x03B\v\xbaH\x04\"\x02 \x00е\x18\x01R\aorderId\x12'\n" +
-	"\aitem_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06itemId\"7\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"\xa6\x01\n" +
+	"\x1aUpdateKDSItemStatusRequest\x12&\n" +
+	"\border_id\x18\x01 \x01(\x03B\v\xbaH\x04\"\x02 \x00е\x18\x01R\aorderId\x12'\n" +
+	"\aitem_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06itemId\x127\n" +
+	"\x04body\x18\x03 \x01(\v2#.pos.kds.v1.UpdateKDSItemStatusBodyR\x04body\"7\n" +
 	"\x1bUpdateKDSItemStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB+Z)github.com/voxire/voxie/gen/go/pos/kds/v1b\x06proto3"
 
@@ -157,17 +204,19 @@ func file_pos_kds_v1_update_kds_item_status_proto_rawDescGZIP() []byte {
 	return file_pos_kds_v1_update_kds_item_status_proto_rawDescData
 }
 
-var file_pos_kds_v1_update_kds_item_status_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_pos_kds_v1_update_kds_item_status_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_kds_v1_update_kds_item_status_proto_goTypes = []any{
-	(*UpdateKDSItemStatusRequest)(nil),  // 0: pos.kds.v1.UpdateKDSItemStatusRequest
-	(*UpdateKDSItemStatusResponse)(nil), // 1: pos.kds.v1.UpdateKDSItemStatusResponse
+	(*UpdateKDSItemStatusBody)(nil),     // 0: pos.kds.v1.UpdateKDSItemStatusBody
+	(*UpdateKDSItemStatusRequest)(nil),  // 1: pos.kds.v1.UpdateKDSItemStatusRequest
+	(*UpdateKDSItemStatusResponse)(nil), // 2: pos.kds.v1.UpdateKDSItemStatusResponse
 }
 var file_pos_kds_v1_update_kds_item_status_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: pos.kds.v1.UpdateKDSItemStatusRequest.body:type_name -> pos.kds.v1.UpdateKDSItemStatusBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_kds_v1_update_kds_item_status_proto_init() }
@@ -181,7 +230,7 @@ func file_pos_kds_v1_update_kds_item_status_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_kds_v1_update_kds_item_status_proto_rawDesc), len(file_pos_kds_v1_update_kds_item_status_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -23,31 +23,118 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateCampaignBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// name is the name value for this contract.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// description is the description value for this contract.
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// channel is the channel value for this contract.
+	Channel string `protobuf:"bytes,3,opt,name=channel,proto3" json:"channel,omitempty"`
+	// segment_id is the segment id value for this contract.
+	SegmentId *int64 `protobuf:"varint,4,opt,name=segment_id,json=segmentId,proto3,oneof" json:"segment_id,omitempty"`
+	// subject is the subject value for this contract.
+	Subject string `protobuf:"bytes,5,opt,name=subject,proto3" json:"subject,omitempty"`
+	// content is the content value for this contract.
+	Content string `protobuf:"bytes,6,opt,name=content,proto3" json:"content,omitempty"`
+	// scheduled_at is the scheduled at value for this contract.
+	ScheduledAt   string `protobuf:"bytes,7,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCampaignBody) Reset() {
+	*x = UpdateCampaignBody{}
+	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCampaignBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCampaignBody) ProtoMessage() {}
+
+func (x *UpdateCampaignBody) ProtoReflect() protoreflect.Message {
+	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCampaignBody.ProtoReflect.Descriptor instead.
+func (*UpdateCampaignBody) Descriptor() ([]byte, []int) {
+	return file_crm_campaign_v1_update_campaign_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateCampaignBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateCampaignBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateCampaignBody) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
+func (x *UpdateCampaignBody) GetSegmentId() int64 {
+	if x != nil && x.SegmentId != nil {
+		return *x.SegmentId
+	}
+	return 0
+}
+
+func (x *UpdateCampaignBody) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *UpdateCampaignBody) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *UpdateCampaignBody) GetScheduledAt() string {
+	if x != nil {
+		return x.ScheduledAt
+	}
+	return ""
+}
+
 type UpdateCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// name is the name value for this contract.
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// description is the description value for this contract.
-	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// channel is the channel value for this contract.
-	Channel string `protobuf:"bytes,4,opt,name=channel,proto3" json:"channel,omitempty"`
-	// segment_id is the segment id value for this contract.
-	SegmentId *int64 `protobuf:"varint,5,opt,name=segment_id,json=segmentId,proto3,oneof" json:"segment_id,omitempty"`
-	// subject is the subject value for this contract.
-	Subject string `protobuf:"bytes,6,opt,name=subject,proto3" json:"subject,omitempty"`
-	// content is the content value for this contract.
-	Content string `protobuf:"bytes,7,opt,name=content,proto3" json:"content,omitempty"`
-	// scheduled_at is the scheduled at value for this contract.
-	ScheduledAt   string `protobuf:"bytes,8,opt,name=scheduled_at,json=scheduledAt,proto3" json:"scheduled_at,omitempty"`
+	// body carries updatable campaign fields bound from the HTTP payload.
+	Body          *UpdateCampaignBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateCampaignRequest) Reset() {
 	*x = UpdateCampaignRequest{}
-	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[0]
+	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -59,7 +146,7 @@ func (x *UpdateCampaignRequest) String() string {
 func (*UpdateCampaignRequest) ProtoMessage() {}
 
 func (x *UpdateCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[0]
+	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -72,7 +159,7 @@ func (x *UpdateCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_crm_campaign_v1_update_campaign_proto_rawDescGZIP(), []int{0}
+	return file_crm_campaign_v1_update_campaign_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateCampaignRequest) GetId() int64 {
@@ -82,53 +169,11 @@ func (x *UpdateCampaignRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateCampaignRequest) GetName() string {
+func (x *UpdateCampaignRequest) GetBody() *UpdateCampaignBody {
 	if x != nil {
-		return x.Name
+		return x.Body
 	}
-	return ""
-}
-
-func (x *UpdateCampaignRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateCampaignRequest) GetChannel() string {
-	if x != nil {
-		return x.Channel
-	}
-	return ""
-}
-
-func (x *UpdateCampaignRequest) GetSegmentId() int64 {
-	if x != nil && x.SegmentId != nil {
-		return *x.SegmentId
-	}
-	return 0
-}
-
-func (x *UpdateCampaignRequest) GetSubject() string {
-	if x != nil {
-		return x.Subject
-	}
-	return ""
-}
-
-func (x *UpdateCampaignRequest) GetContent() string {
-	if x != nil {
-		return x.Content
-	}
-	return ""
-}
-
-func (x *UpdateCampaignRequest) GetScheduledAt() string {
-	if x != nil {
-		return x.ScheduledAt
-	}
-	return ""
+	return nil
 }
 
 type UpdateCampaignResponse struct {
@@ -141,7 +186,7 @@ type UpdateCampaignResponse struct {
 
 func (x *UpdateCampaignResponse) Reset() {
 	*x = UpdateCampaignResponse{}
-	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[1]
+	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -153,7 +198,7 @@ func (x *UpdateCampaignResponse) String() string {
 func (*UpdateCampaignResponse) ProtoMessage() {}
 
 func (x *UpdateCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[1]
+	mi := &file_crm_campaign_v1_update_campaign_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -166,7 +211,7 @@ func (x *UpdateCampaignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignResponse.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_crm_campaign_v1_update_campaign_proto_rawDescGZIP(), []int{1}
+	return file_crm_campaign_v1_update_campaign_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateCampaignResponse) GetMessage() string {
@@ -180,24 +225,26 @@ var File_crm_campaign_v1_update_campaign_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_update_campaign_proto_rawDesc = "" +
 	"\n" +
-	"%crm/campaign/v1/update_campaign.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xe3\x02\n" +
-	"\x15UpdateCampaignRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1e\n" +
-	"\x04name\x18\x02 \x01(\tB\n" +
+	"%crm/campaign/v1/update_campaign.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc0\x02\n" +
+	"\x12UpdateCampaignBody\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
-	"\vdescription\x18\x03 \x01(\tB\n" +
+	"\vdescription\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12$\n" +
-	"\achannel\x18\x04 \x01(\tB\n" +
+	"\achannel\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\achannel\x12,\n" +
 	"\n" +
-	"segment_id\x18\x05 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\tsegmentId\x88\x01\x01\x12$\n" +
-	"\asubject\x18\x06 \x01(\tB\n" +
+	"segment_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\tsegmentId\x88\x01\x01\x12$\n" +
+	"\asubject\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\asubject\x12$\n" +
-	"\acontent\x18\a \x01(\tB\n" +
+	"\acontent\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\acontent\x12-\n" +
-	"\fscheduled_at\x18\b \x01(\tB\n" +
+	"\fscheduled_at\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vscheduledAtB\r\n" +
-	"\v_segment_id\"2\n" +
+	"\v_segment_id\"p\n" +
+	"\x15UpdateCampaignRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x127\n" +
+	"\x04body\x18\x02 \x01(\v2#.crm.campaign.v1.UpdateCampaignBodyR\x04body\"2\n" +
 	"\x16UpdateCampaignResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"
 
@@ -213,17 +260,19 @@ func file_crm_campaign_v1_update_campaign_proto_rawDescGZIP() []byte {
 	return file_crm_campaign_v1_update_campaign_proto_rawDescData
 }
 
-var file_crm_campaign_v1_update_campaign_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_crm_campaign_v1_update_campaign_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_crm_campaign_v1_update_campaign_proto_goTypes = []any{
-	(*UpdateCampaignRequest)(nil),  // 0: crm.campaign.v1.UpdateCampaignRequest
-	(*UpdateCampaignResponse)(nil), // 1: crm.campaign.v1.UpdateCampaignResponse
+	(*UpdateCampaignBody)(nil),     // 0: crm.campaign.v1.UpdateCampaignBody
+	(*UpdateCampaignRequest)(nil),  // 1: crm.campaign.v1.UpdateCampaignRequest
+	(*UpdateCampaignResponse)(nil), // 2: crm.campaign.v1.UpdateCampaignResponse
 }
 var file_crm_campaign_v1_update_campaign_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: crm.campaign.v1.UpdateCampaignRequest.body:type_name -> crm.campaign.v1.UpdateCampaignBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_crm_campaign_v1_update_campaign_proto_init() }
@@ -238,7 +287,7 @@ func file_crm_campaign_v1_update_campaign_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_campaign_v1_update_campaign_proto_rawDesc), len(file_crm_campaign_v1_update_campaign_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -45,7 +45,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 	updateTableHandler := BindingMiddleware[UpdateTableRequest](
 		genericHandler(server.UpdateTable, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTablePathParams, updateTableQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/table/v1/tables/{id}", updateTableHandler)

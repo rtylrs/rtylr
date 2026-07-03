@@ -6,13 +6,18 @@
 
 /* eslint-disable */
 
-export interface ApproveTimesheetRequest {
-  /** ID of the timesheet being reviewed. */
-  id: number;
+export interface ApproveTimesheetBody {
   /** True to approve, false to reject. */
   approved: boolean;
   /** Reason for rejection; absent if approving. */
   rejectionReason?: string | undefined;
+}
+
+export interface ApproveTimesheetRequest {
+  /** ID of the timesheet being reviewed. */
+  id: number;
+  /** body carries approval decision fields bound from the HTTP payload. */
+  body: ApproveTimesheetBody | undefined;
 }
 
 export interface ApproveTimesheetResponse {

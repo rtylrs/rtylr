@@ -23,7 +23,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateTerminalRequest struct {
+type UpdateTerminalBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// branch_id is the branch id value for this contract.
 	BranchId int64 `protobuf:"varint,1,opt,name=branch_id,json=branchId,proto3" json:"branch_id,omitempty"`
@@ -32,16 +32,82 @@ type UpdateTerminalRequest struct {
 	// device_id is the device id value for this contract.
 	DeviceId string `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	// is_active is the is active value for this contract.
-	IsActive bool `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	IsActive      bool `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTerminalBody) Reset() {
+	*x = UpdateTerminalBody{}
+	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTerminalBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTerminalBody) ProtoMessage() {}
+
+func (x *UpdateTerminalBody) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTerminalBody.ProtoReflect.Descriptor instead.
+func (*UpdateTerminalBody) Descriptor() ([]byte, []int) {
+	return file_pos_terminal_v1_update_terminal_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateTerminalBody) GetBranchId() int64 {
+	if x != nil {
+		return x.BranchId
+	}
+	return 0
+}
+
+func (x *UpdateTerminalBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateTerminalBody) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *UpdateTerminalBody) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+type UpdateTerminalRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the terminal.
-	Id            int64 `protobuf:"varint,5,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable terminal fields bound from the HTTP payload.
+	Body          *UpdateTerminalBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateTerminalRequest) Reset() {
 	*x = UpdateTerminalRequest{}
-	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[0]
+	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -53,7 +119,7 @@ func (x *UpdateTerminalRequest) String() string {
 func (*UpdateTerminalRequest) ProtoMessage() {}
 
 func (x *UpdateTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[0]
+	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -66,35 +132,7 @@ func (x *UpdateTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTerminalRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_pos_terminal_v1_update_terminal_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *UpdateTerminalRequest) GetBranchId() int64 {
-	if x != nil {
-		return x.BranchId
-	}
-	return 0
-}
-
-func (x *UpdateTerminalRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateTerminalRequest) GetDeviceId() string {
-	if x != nil {
-		return x.DeviceId
-	}
-	return ""
-}
-
-func (x *UpdateTerminalRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
+	return file_pos_terminal_v1_update_terminal_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateTerminalRequest) GetId() int64 {
@@ -102,6 +140,13 @@ func (x *UpdateTerminalRequest) GetId() int64 {
 		return x.Id
 	}
 	return 0
+}
+
+func (x *UpdateTerminalRequest) GetBody() *UpdateTerminalBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
 }
 
 type UpdateTerminalResponse struct {
@@ -114,7 +159,7 @@ type UpdateTerminalResponse struct {
 
 func (x *UpdateTerminalResponse) Reset() {
 	*x = UpdateTerminalResponse{}
-	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[1]
+	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +171,7 @@ func (x *UpdateTerminalResponse) String() string {
 func (*UpdateTerminalResponse) ProtoMessage() {}
 
 func (x *UpdateTerminalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[1]
+	mi := &file_pos_terminal_v1_update_terminal_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +184,7 @@ func (x *UpdateTerminalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTerminalResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTerminalResponse) Descriptor() ([]byte, []int) {
-	return file_pos_terminal_v1_update_terminal_proto_rawDescGZIP(), []int{1}
+	return file_pos_terminal_v1_update_terminal_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateTerminalResponse) GetMessage() string {
@@ -153,15 +198,17 @@ var File_pos_terminal_v1_update_terminal_proto protoreflect.FileDescriptor
 
 const file_pos_terminal_v1_update_terminal_proto_rawDesc = "" +
 	"\n" +
-	"%pos/terminal/v1/update_terminal.proto\x12\x0fpos.terminal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xca\x01\n" +
-	"\x15UpdateTerminalRequest\x12+\n" +
+	"%pos/terminal/v1/update_terminal.proto\x12\x0fpos.terminal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa7\x01\n" +
+	"\x12UpdateTerminalBody\x12+\n" +
 	"\tbranch_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\bbranchId\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12'\n" +
 	"\tdevice_id\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bdeviceId\x12\x1b\n" +
-	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x1e\n" +
-	"\x02id\x18\x05 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"2\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\"p\n" +
+	"\x15UpdateTerminalRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x127\n" +
+	"\x04body\x18\x02 \x01(\v2#.pos.terminal.v1.UpdateTerminalBodyR\x04body\"2\n" +
 	"\x16UpdateTerminalResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/pos/terminal/v1b\x06proto3"
 
@@ -177,17 +224,19 @@ func file_pos_terminal_v1_update_terminal_proto_rawDescGZIP() []byte {
 	return file_pos_terminal_v1_update_terminal_proto_rawDescData
 }
 
-var file_pos_terminal_v1_update_terminal_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_pos_terminal_v1_update_terminal_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_terminal_v1_update_terminal_proto_goTypes = []any{
-	(*UpdateTerminalRequest)(nil),  // 0: pos.terminal.v1.UpdateTerminalRequest
-	(*UpdateTerminalResponse)(nil), // 1: pos.terminal.v1.UpdateTerminalResponse
+	(*UpdateTerminalBody)(nil),     // 0: pos.terminal.v1.UpdateTerminalBody
+	(*UpdateTerminalRequest)(nil),  // 1: pos.terminal.v1.UpdateTerminalRequest
+	(*UpdateTerminalResponse)(nil), // 2: pos.terminal.v1.UpdateTerminalResponse
 }
 var file_pos_terminal_v1_update_terminal_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: pos.terminal.v1.UpdateTerminalRequest.body:type_name -> pos.terminal.v1.UpdateTerminalBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_terminal_v1_update_terminal_proto_init() }
@@ -201,7 +250,7 @@ func file_pos_terminal_v1_update_terminal_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_terminal_v1_update_terminal_proto_rawDesc), len(file_pos_terminal_v1_update_terminal_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

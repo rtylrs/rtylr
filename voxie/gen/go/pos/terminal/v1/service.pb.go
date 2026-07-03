@@ -25,16 +25,16 @@ var File_pos_terminal_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_terminal_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/terminal/v1/service.proto\x12\x0fpos.terminal.v1\x1a\x1donekit/http/annotations.proto\x1a%pos/terminal/v1/create_terminal.proto\x1a(pos/terminal/v1/heartbeat_terminal.proto\x1a$pos/terminal/v1/list_terminals.proto\x1a%pos/terminal/v1/update_terminal.proto2\x9f\x04\n" +
+	"\x1dpos/terminal/v1/service.proto\x12\x0fpos.terminal.v1\x1a\x1donekit/http/annotations.proto\x1a%pos/terminal/v1/create_terminal.proto\x1a(pos/terminal/v1/heartbeat_terminal.proto\x1a$pos/terminal/v1/list_terminals.proto\x1a%pos/terminal/v1/update_terminal.proto2\xa6\x04\n" +
 	"\x0fTerminalService\x12r\n" +
 	"\rListTerminals\x12%.pos.terminal.v1.ListTerminalsRequest\x1a&.pos.terminal.v1.ListTerminalsResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
 	"/terminals\x10\x01\x12u\n" +
 	"\x0eCreateTerminal\x12&.pos.terminal.v1.CreateTerminalRequest\x1a'.pos.terminal.v1.CreateTerminalResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/terminals\x10\x02\x12z\n" +
-	"\x0eUpdateTerminal\x12&.pos.terminal.v1.UpdateTerminalRequest\x1a'.pos.terminal.v1.UpdateTerminalResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/terminals/{id}\x10\x03\x12\x88\x01\n" +
+	"/terminals\x10\x02\x12\x80\x01\n" +
+	"\x0eUpdateTerminal\x12&.pos.terminal.v1.UpdateTerminalRequest\x1a'.pos.terminal.v1.UpdateTerminalResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x0f/terminals/{id}\x10\x03\"\x04body\x12\x88\x01\n" +
 	"\x11HeartbeatTerminal\x12).pos.terminal.v1.HeartbeatTerminalRequest\x1a*.pos.terminal.v1.HeartbeatTerminalResponse\"\x1c\x9a\xb5\x18\x18\n" +
 	"\x14/terminals/heartbeat\x10\x02\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/pos/terminal/v1B0Z.github.com/voxire/voxie/gen/go/pos/terminal/v1b\x06proto3"

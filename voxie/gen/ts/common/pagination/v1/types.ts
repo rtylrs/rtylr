@@ -6,16 +6,7 @@
 
 /* eslint-disable */
 
-/** Standard timestamp wrapper */
+/** Standard timestamp wrapper for explicit RFC 3339 JSON encoding. */
 export interface Timestamp {
-  /**
-   * iso is the iso value for this contract.
-   * ISO 8601 string
-   */
-  iso: string;
-  /**
-   * unix is the unix value for this contract.
-   * Unix timestamp in seconds
-   */
-  unix: number;
+  value: Date | undefined;
 }

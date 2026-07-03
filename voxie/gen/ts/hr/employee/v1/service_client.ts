@@ -86,6 +86,10 @@ export interface Staff {
 
 export interface UpdateEmployeeRequest {
   id: string;
+  body?: UpdateEmployeeBody;
+}
+
+export interface UpdateEmployeeBody {
   departmentId: string;
   locationId: string;
   workScheduleId: string;
@@ -259,7 +263,7 @@ export class EmployeeServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

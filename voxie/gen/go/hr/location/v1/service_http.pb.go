@@ -34,7 +34,7 @@ func RegisterLocationServiceServer(server LocationServiceServer, opts ...ServerO
 	updateLocationHandler := BindingMiddleware[UpdateLocationRequest](
 		genericHandler(server.UpdateLocation, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLocationPathParams, updateLocationQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/location/v1/locations/{id}", updateLocationHandler)

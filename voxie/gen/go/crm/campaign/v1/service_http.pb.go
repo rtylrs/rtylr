@@ -65,7 +65,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	updateCampaignHandler := BindingMiddleware[UpdateCampaignRequest](
 		genericHandler(server.UpdateCampaign, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateCampaignPathParams, updateCampaignQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/campaign/v1/campaigns/{id}", updateCampaignHandler)

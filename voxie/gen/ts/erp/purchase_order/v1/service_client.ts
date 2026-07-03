@@ -59,6 +59,10 @@ export interface CreatePurchaseOrderResponse {
 
 export interface UpdatePurchaseOrderStatusRequest {
   id: string;
+  body?: UpdatePurchaseOrderStatusBody;
+}
+
+export interface UpdatePurchaseOrderStatusBody {
   status: string;
 }
 
@@ -192,7 +196,7 @@ export class PurchaseOrderServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

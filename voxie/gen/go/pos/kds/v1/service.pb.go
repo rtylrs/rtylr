@@ -26,13 +26,13 @@ var File_pos_kds_v1_service_proto protoreflect.FileDescriptor
 const file_pos_kds_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x18pos/kds/v1/service.proto\x12\n" +
-	"pos.kds.v1\x1a\x1donekit/http/annotations.proto\x1a pos/kds/v1/list_kds_orders.proto\x1a'pos/kds/v1/update_kds_item_status.proto2\x98\x02\n" +
+	"pos.kds.v1\x1a\x1donekit/http/annotations.proto\x1a pos/kds/v1/list_kds_orders.proto\x1a'pos/kds/v1/update_kds_item_status.proto2\x9e\x02\n" +
 	"\n" +
 	"KDSService\x12e\n" +
 	"\rListKDSOrders\x12 .pos.kds.v1.ListKDSOrdersRequest\x1a!.pos.kds.v1.ListKDSOrdersResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/orders\x10\x01\x12\x8b\x01\n" +
-	"\x13UpdateKDSItemStatus\x12&.pos.kds.v1.UpdateKDSItemStatusRequest\x1a'.pos.kds.v1.UpdateKDSItemStatusResponse\"#\x9a\xb5\x18\x1f\n" +
-	"\x1b/{order_id}/items/{item_id}\x10\x03\x1a\x15\xa2\xb5\x18\x11\n" +
+	"\a/orders\x10\x01\x12\x91\x01\n" +
+	"\x13UpdateKDSItemStatus\x12&.pos.kds.v1.UpdateKDSItemStatusRequest\x1a'.pos.kds.v1.UpdateKDSItemStatusResponse\")\x9a\xb5\x18%\n" +
+	"\x1b/{order_id}/items/{item_id}\x10\x03\"\x04body\x1a\x15\xa2\xb5\x18\x11\n" +
 	"\x0f/api/pos/kds/v1B+Z)github.com/voxire/voxie/gen/go/pos/kds/v1b\x06proto3"
 
 var file_pos_kds_v1_service_proto_goTypes = []any{

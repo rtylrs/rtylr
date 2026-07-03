@@ -9,12 +9,13 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
 
 // ── Update ────────────────────────────────────────────────────────
 
-message UpdateTerminalRequest {
+message UpdateTerminalBody {
   // branch_id is the branch id value for this contract.
   int64 branch_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // name is the name value for this contract.
   string name = 2 [
     (buf.validate.field).required = true,
@@ -27,11 +28,17 @@ message UpdateTerminalRequest {
   ];
   // is_active is the is active value for this contract.
   bool is_active = 4;
+}
+
+message UpdateTerminalRequest {
   // id is the unique identifier for the terminal.
-  int64 id = 5 [
+  int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries updatable terminal fields bound from the HTTP payload.
+  UpdateTerminalBody body = 2;
 }
 
 message UpdateTerminalResponse {

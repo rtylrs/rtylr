@@ -25,16 +25,16 @@ var File_hr_employee_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/employee/v1/service.proto\x12\x0ehr.employee.v1\x1a\"hr/employee/v1/accept_invite.proto\x1a$hr/employee/v1/create_employee.proto\x1a$hr/employee/v1/invite_employee.proto\x1a#hr/employee/v1/list_employees.proto\x1a$hr/employee/v1/update_employee.proto\x1a\x1donekit/http/annotations.proto2\x86\x05\n" +
+	"\x1chr/employee/v1/service.proto\x12\x0ehr.employee.v1\x1a\"hr/employee/v1/accept_invite.proto\x1a$hr/employee/v1/create_employee.proto\x1a$hr/employee/v1/invite_employee.proto\x1a#hr/employee/v1/list_employees.proto\x1a$hr/employee/v1/update_employee.proto\x1a\x1donekit/http/annotations.proto2\x8c\x05\n" +
 	"\x0fEmployeeService\x12p\n" +
 	"\rListEmployees\x12$.hr.employee.v1.ListEmployeesRequest\x1a%.hr.employee.v1.ListEmployeesResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
 	"/employees\x10\x01\x12s\n" +
 	"\x0eCreateEmployee\x12%.hr.employee.v1.CreateEmployeeRequest\x1a&.hr.employee.v1.CreateEmployeeResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/employees\x10\x02\x12x\n" +
-	"\x0eUpdateEmployee\x12%.hr.employee.v1.UpdateEmployeeRequest\x1a&.hr.employee.v1.UpdateEmployeeResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/employees/{id}\x10\x03\x12z\n" +
+	"/employees\x10\x02\x12~\n" +
+	"\x0eUpdateEmployee\x12%.hr.employee.v1.UpdateEmployeeRequest\x1a&.hr.employee.v1.UpdateEmployeeResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x0f/employees/{id}\x10\x03\"\x04body\x12z\n" +
 	"\x0eInviteEmployee\x12%.hr.employee.v1.InviteEmployeeRequest\x1a&.hr.employee.v1.InviteEmployeeResponse\"\x19\x9a\xb5\x18\x15\n" +
 	"\x11/employees/invite\x10\x02\x12{\n" +
 	"\fAcceptInvite\x12#.hr.employee.v1.AcceptInviteRequest\x1a$.hr.employee.v1.AcceptInviteResponse\" \x9a\xb5\x18\x1c\n" +

@@ -30,9 +30,13 @@ export interface KDSItem {
 }
 
 export interface UpdateKDSItemStatusRequest {
-  status: string;
   orderId: string;
   itemId: string;
+  body?: UpdateKDSItemStatusBody;
+}
+
+export interface UpdateKDSItemStatusBody {
+  status: string;
 }
 
 export interface UpdateKDSItemStatusResponse {
@@ -140,7 +144,7 @@ export class KDSServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

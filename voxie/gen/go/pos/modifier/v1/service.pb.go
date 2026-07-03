@@ -25,16 +25,16 @@ var File_pos_modifier_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_modifier_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/modifier/v1/service.proto\x12\x0fpos.modifier.v1\x1a\x1donekit/http/annotations.proto\x1a%pos/modifier/v1/create_modifier.proto\x1a%pos/modifier/v1/delete_modifier.proto\x1a$pos/modifier/v1/list_modifiers.proto\x1a%pos/modifier/v1/update_modifier.proto2\x90\x04\n" +
+	"\x1dpos/modifier/v1/service.proto\x12\x0fpos.modifier.v1\x1a\x1donekit/http/annotations.proto\x1a%pos/modifier/v1/create_modifier.proto\x1a%pos/modifier/v1/delete_modifier.proto\x1a$pos/modifier/v1/list_modifiers.proto\x1a%pos/modifier/v1/update_modifier.proto2\x97\x04\n" +
 	"\x0fModifierService\x12r\n" +
 	"\rListModifiers\x12%.pos.modifier.v1.ListModifiersRequest\x1a&.pos.modifier.v1.ListModifiersResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
 	"/modifiers\x10\x01\x12u\n" +
 	"\x0eCreateModifier\x12&.pos.modifier.v1.CreateModifierRequest\x1a'.pos.modifier.v1.CreateModifierResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/modifiers\x10\x02\x12z\n" +
-	"\x0eUpdateModifier\x12&.pos.modifier.v1.UpdateModifierRequest\x1a'.pos.modifier.v1.UpdateModifierResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/modifiers/{id}\x10\x03\x12z\n" +
+	"/modifiers\x10\x02\x12\x80\x01\n" +
+	"\x0eUpdateModifier\x12&.pos.modifier.v1.UpdateModifierRequest\x1a'.pos.modifier.v1.UpdateModifierResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x0f/modifiers/{id}\x10\x03\"\x04body\x12z\n" +
 	"\x0eDeleteModifier\x12&.pos.modifier.v1.DeleteModifierRequest\x1a'.pos.modifier.v1.DeleteModifierResponse\"\x17\x9a\xb5\x18\x13\n" +
 	"\x0f/modifiers/{id}\x10\x04\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/pos/modifier/v1B0Z.github.com/voxire/voxie/gen/go/pos/modifier/v1b\x06proto3"

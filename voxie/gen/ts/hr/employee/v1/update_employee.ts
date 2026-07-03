@@ -7,9 +7,7 @@
 /* eslint-disable */
 import type { Staff } from "../../staff/v1/types";
 
-export interface UpdateEmployeeRequest {
-  /** id is the employee ID from the route. */
-  id: number;
+export interface UpdateEmployeeBody {
   /** department_id is the department assignment; zero leaves it unset. */
   departmentId: number;
   /** location_id is the work location assignment; zero leaves it unset. */
@@ -46,6 +44,13 @@ export interface UpdateEmployeeRequest {
   emergencyContactPhone: string;
   /** notes are internal employee notes. */
   notes: string;
+}
+
+export interface UpdateEmployeeRequest {
+  /** id is the employee ID from the route. */
+  id: number;
+  /** body carries updatable employee fields bound from the HTTP payload. */
+  body: UpdateEmployeeBody | undefined;
 }
 
 export interface UpdateEmployeeResponse {

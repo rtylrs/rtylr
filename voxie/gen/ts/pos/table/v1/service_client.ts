@@ -31,11 +31,15 @@ export interface CreateTableResponse {
 }
 
 export interface UpdateTableRequest {
+  id: string;
+  body?: UpdateTableBody;
+}
+
+export interface UpdateTableBody {
   locationId: string | null;
   label: string;
   seats: number;
   status: string;
-  id: string;
 }
 
 export interface UpdateTableResponse {
@@ -174,7 +178,7 @@ export class TableServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

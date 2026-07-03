@@ -53,6 +53,7 @@ service CampaignService {
     option (onekit.http.config) = {
       path: "/campaigns/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

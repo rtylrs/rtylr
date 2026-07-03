@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateCampaignRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateCampaignBody {
   /** name is the name value for this contract. */
   name: string;
   /** description is the description value for this contract. */
@@ -25,6 +23,13 @@ export interface UpdateCampaignRequest {
   content: string;
   /** scheduled_at is the scheduled at value for this contract. */
   scheduledAt: string;
+}
+
+export interface UpdateCampaignRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable campaign fields bound from the HTTP payload. */
+  body: UpdateCampaignBody | undefined;
 }
 
 export interface UpdateCampaignResponse {

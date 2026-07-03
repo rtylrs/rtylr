@@ -7,9 +7,7 @@
 /* eslint-disable */
 import type { DepartmentPayload } from "./types";
 
-export interface UpdateDepartmentRequest {
-  /** ID of the department to update. */
-  id: number;
+export interface UpdateDepartmentBody {
   /** New location; absent to keep current. */
   locationId?:
     | number
@@ -22,6 +20,13 @@ export interface UpdateDepartmentRequest {
   name: string;
   /** New default work schedule; absent to keep current. */
   defaultWorkScheduleId?: number | undefined;
+}
+
+export interface UpdateDepartmentRequest {
+  /** ID of the department to update. */
+  id: number;
+  /** body carries updatable department fields bound from the HTTP payload. */
+  body: UpdateDepartmentBody | undefined;
 }
 
 export interface UpdateDepartmentResponse {

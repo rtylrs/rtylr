@@ -23,7 +23,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateComboRequest struct {
+type UpdateComboBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// name is the name value for this contract.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -34,16 +34,89 @@ type UpdateComboRequest struct {
 	// items is the items value for this contract.
 	Items string `protobuf:"bytes,4,opt,name=items,proto3" json:"items,omitempty"`
 	// is_active is the is active value for this contract.
-	IsActive bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	IsActive      bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateComboBody) Reset() {
+	*x = UpdateComboBody{}
+	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateComboBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateComboBody) ProtoMessage() {}
+
+func (x *UpdateComboBody) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateComboBody.ProtoReflect.Descriptor instead.
+func (*UpdateComboBody) Descriptor() ([]byte, []int) {
+	return file_pos_combo_v1_update_combo_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateComboBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateComboBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateComboBody) GetPrice() float64 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
+}
+
+func (x *UpdateComboBody) GetItems() string {
+	if x != nil {
+		return x.Items
+	}
+	return ""
+}
+
+func (x *UpdateComboBody) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+type UpdateComboRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the combo.
-	Id            int64 `protobuf:"varint,6,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable combo fields bound from the HTTP payload.
+	Body          *UpdateComboBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateComboRequest) Reset() {
 	*x = UpdateComboRequest{}
-	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[0]
+	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -55,7 +128,7 @@ func (x *UpdateComboRequest) String() string {
 func (*UpdateComboRequest) ProtoMessage() {}
 
 func (x *UpdateComboRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[0]
+	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -68,42 +141,7 @@ func (x *UpdateComboRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateComboRequest.ProtoReflect.Descriptor instead.
 func (*UpdateComboRequest) Descriptor() ([]byte, []int) {
-	return file_pos_combo_v1_update_combo_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *UpdateComboRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateComboRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateComboRequest) GetPrice() float64 {
-	if x != nil {
-		return x.Price
-	}
-	return 0
-}
-
-func (x *UpdateComboRequest) GetItems() string {
-	if x != nil {
-		return x.Items
-	}
-	return ""
-}
-
-func (x *UpdateComboRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
+	return file_pos_combo_v1_update_combo_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateComboRequest) GetId() int64 {
@@ -111,6 +149,13 @@ func (x *UpdateComboRequest) GetId() int64 {
 		return x.Id
 	}
 	return 0
+}
+
+func (x *UpdateComboRequest) GetBody() *UpdateComboBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
 }
 
 type UpdateComboResponse struct {
@@ -123,7 +168,7 @@ type UpdateComboResponse struct {
 
 func (x *UpdateComboResponse) Reset() {
 	*x = UpdateComboResponse{}
-	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[1]
+	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -135,7 +180,7 @@ func (x *UpdateComboResponse) String() string {
 func (*UpdateComboResponse) ProtoMessage() {}
 
 func (x *UpdateComboResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[1]
+	mi := &file_pos_combo_v1_update_combo_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -148,7 +193,7 @@ func (x *UpdateComboResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateComboResponse.ProtoReflect.Descriptor instead.
 func (*UpdateComboResponse) Descriptor() ([]byte, []int) {
-	return file_pos_combo_v1_update_combo_proto_rawDescGZIP(), []int{1}
+	return file_pos_combo_v1_update_combo_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateComboResponse) GetMessage() string {
@@ -162,8 +207,8 @@ var File_pos_combo_v1_update_combo_proto protoreflect.FileDescriptor
 
 const file_pos_combo_v1_update_combo_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/combo/v1/update_combo.proto\x12\fpos.combo.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xe7\x01\n" +
-	"\x12UpdateComboRequest\x12\x1e\n" +
+	"\x1fpos/combo/v1/update_combo.proto\x12\fpos.combo.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc4\x01\n" +
+	"\x0fUpdateComboBody\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
 	"\vdescription\x18\x02 \x01(\tB\n" +
@@ -171,8 +216,10 @@ const file_pos_combo_v1_update_combo_proto_rawDesc = "" +
 	"\x05price\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x05price\x12 \n" +
 	"\x05items\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05items\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x1e\n" +
-	"\x02id\x18\x06 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"/\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"g\n" +
+	"\x12UpdateComboRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x121\n" +
+	"\x04body\x18\x02 \x01(\v2\x1d.pos.combo.v1.UpdateComboBodyR\x04body\"/\n" +
 	"\x13UpdateComboResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/combo/v1b\x06proto3"
 
@@ -188,17 +235,19 @@ func file_pos_combo_v1_update_combo_proto_rawDescGZIP() []byte {
 	return file_pos_combo_v1_update_combo_proto_rawDescData
 }
 
-var file_pos_combo_v1_update_combo_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_pos_combo_v1_update_combo_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_combo_v1_update_combo_proto_goTypes = []any{
-	(*UpdateComboRequest)(nil),  // 0: pos.combo.v1.UpdateComboRequest
-	(*UpdateComboResponse)(nil), // 1: pos.combo.v1.UpdateComboResponse
+	(*UpdateComboBody)(nil),     // 0: pos.combo.v1.UpdateComboBody
+	(*UpdateComboRequest)(nil),  // 1: pos.combo.v1.UpdateComboRequest
+	(*UpdateComboResponse)(nil), // 2: pos.combo.v1.UpdateComboResponse
 }
 var file_pos_combo_v1_update_combo_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: pos.combo.v1.UpdateComboRequest.body:type_name -> pos.combo.v1.UpdateComboBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_combo_v1_update_combo_proto_init() }
@@ -212,7 +261,7 @@ func file_pos_combo_v1_update_combo_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_combo_v1_update_combo_proto_rawDesc), len(file_pos_combo_v1_update_combo_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateBillRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateBillBody {
   /** supplier_id is the supplier id value for this contract. */
   supplierId: number;
   /** amount is the amount value for this contract. */
@@ -21,6 +19,13 @@ export interface UpdateBillRequest {
   status: string;
   /** description is the description value for this contract. */
   description: string;
+}
+
+export interface UpdateBillRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable bill fields bound from the HTTP payload. */
+  body: UpdateBillBody | undefined;
 }
 
 export interface UpdateBillResponse {

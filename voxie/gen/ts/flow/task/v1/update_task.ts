@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateTaskRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateTaskBody {
   /** title is the title value for this contract. */
   title: string;
   /** description is the description value for this contract. */
@@ -27,6 +25,13 @@ export interface UpdateTaskRequest {
   startDate: string;
   /** labels is the labels value for this contract. */
   labels: number[];
+}
+
+export interface UpdateTaskRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable task fields bound from the HTTP payload. */
+  body: UpdateTaskBody | undefined;
 }
 
 export interface UpdateTaskResponse {

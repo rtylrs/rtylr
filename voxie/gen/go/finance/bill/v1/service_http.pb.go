@@ -44,7 +44,7 @@ func RegisterBillServiceServer(server BillServiceServer, opts ...ServerOption) e
 	updateBillHandler := BindingMiddleware[UpdateBillRequest](
 		genericHandler(server.UpdateBill, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateBillPathParams, updateBillQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/bill/v1/bills/{id}", updateBillHandler)

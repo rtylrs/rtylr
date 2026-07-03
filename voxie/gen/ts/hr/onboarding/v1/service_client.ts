@@ -48,6 +48,10 @@ export interface CreateChecklistTemplateResponse {
 
 export interface UpdateChecklistTemplateRequest {
   roleId: string;
+  body?: UpdateChecklistTemplateBody;
+}
+
+export interface UpdateChecklistTemplateBody {
   name: string;
   triggerType: string | null;
 }
@@ -258,7 +262,7 @@ export class OnboardingServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

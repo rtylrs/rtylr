@@ -9,7 +9,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/floor/v1";
 
 // ── Update ────────────────────────────────────────────────────────
 
-message UpdateFloorRequest {
+message UpdateFloorBody {
   // name is the name value for this contract.
   string name = 1 [
     (buf.validate.field).required = true,
@@ -20,11 +20,17 @@ message UpdateFloorRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).int32.gt = 0
   ];
+}
+
+message UpdateFloorRequest {
   // id is the unique identifier for the floor.
-  int64 id = 3 [
+  int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries updatable floor fields bound from the HTTP payload.
+  UpdateFloorBody body = 2;
 }
 
 message UpdateFloorResponse {

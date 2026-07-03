@@ -52,6 +52,7 @@ service TimeEntryService {
     option (onekit.http.config) = {
       path: "/timesheets/{id}/approve"
       method: HTTP_METHOD_PATCH
+      body: "body"
     };
   }
 }

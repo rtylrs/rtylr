@@ -46,7 +46,7 @@ func RegisterEmployeeServiceServer(server EmployeeServiceServer, opts ...ServerO
 	updateEmployeeHandler := BindingMiddleware[UpdateEmployeeRequest](
 		genericHandler(server.UpdateEmployee, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateEmployeePathParams, updateEmployeeQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/employee/v1/employees/{id}", updateEmployeeHandler)

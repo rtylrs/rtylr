@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface ApproveOvertimeRequest {
-  /** ID of the overtime request being reviewed. */
-  overtimeRequestId: number;
+export interface ApproveOvertimeBody {
   /** True to approve, false to reject. */
   approved: boolean;
   /** Pay multiplier to apply (e.g. 1.5); absent to use the default rate. */
@@ -17,6 +15,13 @@ export interface ApproveOvertimeRequest {
     | undefined;
   /** Reason for rejection; absent if approving. */
   rejectionReason?: string | undefined;
+}
+
+export interface ApproveOvertimeRequest {
+  /** ID of the overtime request being reviewed. */
+  overtimeRequestId: number;
+  /** body carries approval decision fields bound from the HTTP payload. */
+  body: ApproveOvertimeBody | undefined;
 }
 
 export interface ApproveOvertimeResponse {

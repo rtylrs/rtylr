@@ -186,11 +186,11 @@ const file_finance_journal_v1_list_journal_entries_proto_rawDesc = "" +
 	"\tfrom_date\x18\x05 \x01(\tB\x0fµ\x18\v\n" +
 	"\tfrom_dateR\bfromDate\x12&\n" +
 	"\ato_date\x18\x06 \x01(\tB\rµ\x18\t\n" +
-	"\ato_dateR\x06toDate\"\xa2\x01\n" +
+	"\ato_dateR\x06toDate\"\xa8\x01\n" +
 	"\x1aListJournalEntriesResponse\x12:\n" +
-	"\aentries\x18\x01 \x03(\v2 .finance.journal.v1.JournalEntryR\aentries\x12H\n" +
+	"\aentries\x18\x01 \x03(\v2 .finance.journal.v1.JournalEntryR\aentries\x12N\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
 	"paginationB3Z1github.com/voxire/voxie/gen/go/finance/journal/v1b\x06proto3"
 
 var (

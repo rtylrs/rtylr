@@ -2,14 +2,14 @@ syntax = "proto3";
 
 package common.pagination.v1;
 
+import "google/protobuf/timestamp.proto";
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/common/pagination/v1";
 
-// Standard timestamp wrapper
+// Standard timestamp wrapper for explicit RFC 3339 JSON encoding.
 message Timestamp {
-  // iso is the iso value for this contract.
-  // ISO 8601 string
-  string iso = 1;
-  // unix is the unix value for this contract.
-  // Unix timestamp in seconds
-  int64 unix = 2;
+  google.protobuf.Timestamp value = 1 [
+    (onekit.http.timestamp_format) = TIMESTAMP_FORMAT_RFC3339
+  ];
 }

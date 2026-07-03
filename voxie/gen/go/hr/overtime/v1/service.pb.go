@@ -25,14 +25,14 @@ var File_hr_overtime_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_overtime_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/overtime/v1/service.proto\x12\x0ehr.overtime.v1\x1a%hr/overtime/v1/approve_overtime.proto\x1a,hr/overtime/v1/create_overtime_request.proto\x1a+hr/overtime/v1/list_overtime_requests.proto\x1a\x1donekit/http/annotations.proto2\xd3\x03\n" +
+	"\x1chr/overtime/v1/service.proto\x12\x0ehr.overtime.v1\x1a%hr/overtime/v1/approve_overtime.proto\x1a,hr/overtime/v1/create_overtime_request.proto\x1a+hr/overtime/v1/list_overtime_requests.proto\x1a\x1donekit/http/annotations.proto2\xd9\x03\n" +
 	"\x0fOvertimeService\x12\x84\x01\n" +
 	"\x14ListOvertimeRequests\x12+.hr.overtime.v1.ListOvertimeRequestsRequest\x1a,.hr.overtime.v1.ListOvertimeRequestsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/requests\x10\x01\x12\x87\x01\n" +
 	"\x15CreateOvertimeRequest\x12,.hr.overtime.v1.CreateOvertimeRequestRequest\x1a-.hr.overtime.v1.CreateOvertimeRequestResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/requests\x10\x02\x12\x93\x01\n" +
-	"\x0fApproveOvertime\x12&.hr.overtime.v1.ApproveOvertimeRequest\x1a'.hr.overtime.v1.ApproveOvertimeResponse\"/\x9a\xb5\x18+\n" +
-	"'/requests/{overtime_request_id}/approve\x10\x05\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\t/requests\x10\x02\x12\x99\x01\n" +
+	"\x0fApproveOvertime\x12&.hr.overtime.v1.ApproveOvertimeRequest\x1a'.hr.overtime.v1.ApproveOvertimeResponse\"5\x9a\xb5\x181\n" +
+	"'/requests/{overtime_request_id}/approve\x10\x05\"\x04body\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/hr/overtime/v1B/Z-github.com/voxire/voxie/gen/go/hr/overtime/v1b\x06proto3"
 
 var file_hr_overtime_v1_service_proto_goTypes = []any{

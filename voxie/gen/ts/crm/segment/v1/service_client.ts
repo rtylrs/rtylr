@@ -63,6 +63,10 @@ export interface GetSegmentCustomersResponse {
 
 export interface UpdateSegmentRequest {
   id: string;
+  body?: UpdateSegmentBody;
+}
+
+export interface UpdateSegmentBody {
   name: string;
   description: string;
   rules: string;
@@ -255,7 +259,7 @@ export class SegmentServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

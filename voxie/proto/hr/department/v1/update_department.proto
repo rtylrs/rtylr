@@ -11,6 +11,29 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
 
 // ── Update ─────────────────────────────────────────────────────────
 
+message UpdateDepartmentBody {
+  // New location; absent to keep current.
+  optional int64 location_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // New parent department; absent to keep current.
+  optional int64 parent_department_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // name is the updated department name.
+  string name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // New default work schedule; absent to keep current.
+  optional int64 default_work_schedule_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+}
+
 message UpdateDepartmentRequest {
   // ID of the department to update.
   int64 id = 1 [
@@ -18,26 +41,8 @@ message UpdateDepartmentRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // New location; absent to keep current.
-  optional int64 location_id = 2 [
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
-    (onekit.http.nullable) = true
-  ];
-  // New parent department; absent to keep current.
-  optional int64 parent_department_id = 3 [
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
-    (onekit.http.nullable) = true
-  ];
-  // name is the updated department name.
-  string name = 4 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // New default work schedule; absent to keep current.
-  optional int64 default_work_schedule_id = 5 [
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
-    (onekit.http.nullable) = true
-  ];
+  // body carries updatable department fields bound from the HTTP payload.
+  UpdateDepartmentBody body = 2;
 }
 
 message UpdateDepartmentResponse {

@@ -25,7 +25,7 @@ var File_hr_equipment_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_equipment_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhr/equipment/v1/service.proto\x12\x0fhr.equipment.v1\x1a'hr/equipment/v1/approve_equipment.proto\x1a.hr/equipment/v1/create_equipment_request.proto\x1a!hr/equipment/v1/list_assets.proto\x1a-hr/equipment/v1/list_equipment_requests.proto\x1a\x1donekit/http/annotations.proto2\xcd\x04\n" +
+	"\x1dhr/equipment/v1/service.proto\x12\x0fhr.equipment.v1\x1a'hr/equipment/v1/approve_equipment.proto\x1a.hr/equipment/v1/create_equipment_request.proto\x1a!hr/equipment/v1/list_assets.proto\x1a-hr/equipment/v1/list_equipment_requests.proto\x1a\x1donekit/http/annotations.proto2\xd3\x04\n" +
 	"\x10EquipmentService\x12f\n" +
 	"\n" +
 	"ListAssets\x12\".hr.equipment.v1.ListAssetsRequest\x1a#.hr.equipment.v1.ListAssetsResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -33,9 +33,9 @@ const file_hr_equipment_v1_service_proto_rawDesc = "" +
 	"\x15ListEquipmentRequests\x12-.hr.equipment.v1.ListEquipmentRequestsRequest\x1a..hr.equipment.v1.ListEquipmentRequestsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/requests\x10\x01\x12\x8c\x01\n" +
 	"\x16CreateEquipmentRequest\x12..hr.equipment.v1.CreateEquipmentRequestRequest\x1a/.hr.equipment.v1.CreateEquipmentRequestResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/requests\x10\x02\x12\x99\x01\n" +
-	"\x10ApproveEquipment\x12(.hr.equipment.v1.ApproveEquipmentRequest\x1a).hr.equipment.v1.ApproveEquipmentResponse\"0\x9a\xb5\x18,\n" +
-	"(/requests/{equipment_request_id}/approve\x10\x05\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\t/requests\x10\x02\x12\x9f\x01\n" +
+	"\x10ApproveEquipment\x12(.hr.equipment.v1.ApproveEquipmentRequest\x1a).hr.equipment.v1.ApproveEquipmentResponse\"6\x9a\xb5\x182\n" +
+	"(/requests/{equipment_request_id}/approve\x10\x05\"\x04body\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/hr/equipment/v1B0Z.github.com/voxire/voxie/gen/go/hr/equipment/v1b\x06proto3"
 
 var file_hr_equipment_v1_service_proto_goTypes = []any{

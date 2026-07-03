@@ -6,9 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateLoyaltyTierRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateLoyaltyTierBody {
   /** name is the name value for this contract. */
   name: string;
   /** min_points is the min points value for this contract. */
@@ -19,6 +17,13 @@ export interface UpdateLoyaltyTierRequest {
   perks: string;
   /** sort_order is the sort order value for this contract. */
   sortOrder: number;
+}
+
+export interface UpdateLoyaltyTierRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable loyalty tier fields bound from the HTTP payload. */
+  body: UpdateLoyaltyTierBody | undefined;
 }
 
 export interface UpdateLoyaltyTierResponse {

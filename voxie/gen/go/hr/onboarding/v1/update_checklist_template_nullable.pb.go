@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateChecklistTemplateRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateChecklistTemplateBody.
 // This method handles nullable fields: trigger_type
-func (x *UpdateChecklistTemplateRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateChecklistTemplateBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -37,14 +37,14 @@ func (x *UpdateChecklistTemplateRequest) MarshalJSONOnekit(opts protojson.Marsha
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateChecklistTemplateRequest.
-func (x *UpdateChecklistTemplateRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateChecklistTemplateBody.
+func (x *UpdateChecklistTemplateBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateChecklistTemplateRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateChecklistTemplateBody.
 // This method handles nullable fields: trigger_type
-func (x *UpdateChecklistTemplateRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateChecklistTemplateBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

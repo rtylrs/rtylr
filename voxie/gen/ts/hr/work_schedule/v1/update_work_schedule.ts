@@ -7,9 +7,7 @@
 /* eslint-disable */
 import type { WorkSchedulePayload } from "./types";
 
-export interface UpdateWorkScheduleRequest {
-  /** ID of the schedule to update. */
-  id: number;
+export interface UpdateWorkScheduleBody {
   /** New name; absent to keep current. */
   name?:
     | string
@@ -38,6 +36,13 @@ export interface UpdateWorkScheduleRequest {
     | undefined;
   /** New weekly OT threshold; absent to keep current. */
   weeklyOtThresholdMinutes?: number | undefined;
+}
+
+export interface UpdateWorkScheduleRequest {
+  /** ID of the schedule to update. */
+  id: number;
+  /** body carries updatable work schedule fields bound from the HTTP payload. */
+  body: UpdateWorkScheduleBody | undefined;
 }
 
 export interface UpdateWorkScheduleResponse {

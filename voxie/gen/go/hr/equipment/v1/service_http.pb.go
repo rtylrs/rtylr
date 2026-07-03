@@ -54,7 +54,7 @@ func RegisterEquipmentServiceServer(server EquipmentServiceServer, opts ...Serve
 	approveEquipmentHandler := BindingMiddleware[ApproveEquipmentRequest](
 		genericHandler(server.ApproveEquipment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveEquipmentPathParams, approveEquipmentQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/equipment/v1/requests/{equipment_request_id}/approve", approveEquipmentHandler)

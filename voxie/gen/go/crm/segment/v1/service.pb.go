@@ -25,7 +25,7 @@ var File_crm_segment_v1_service_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccrm/segment/v1/service.proto\x12\x0ecrm.segment.v1\x1a#crm/segment/v1/create_segment.proto\x1a#crm/segment/v1/delete_segment.proto\x1a*crm/segment/v1/get_segment_customers.proto\x1a'crm/segment/v1/get_segment_detail.proto\x1a\"crm/segment/v1/list_segments.proto\x1a#crm/segment/v1/update_segment.proto\x1a\x1donekit/http/annotations.proto2\x90\x06\n" +
+	"\x1ccrm/segment/v1/service.proto\x12\x0ecrm.segment.v1\x1a#crm/segment/v1/create_segment.proto\x1a#crm/segment/v1/delete_segment.proto\x1a*crm/segment/v1/get_segment_customers.proto\x1a'crm/segment/v1/get_segment_detail.proto\x1a\"crm/segment/v1/list_segments.proto\x1a#crm/segment/v1/update_segment.proto\x1a\x1donekit/http/annotations.proto2\x96\x06\n" +
 	"\x0eSegmentService\x12l\n" +
 	"\fListSegments\x12#.crm.segment.v1.ListSegmentsRequest\x1a$.crm.segment.v1.ListSegmentsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/segments\x10\x01\x12o\n" +
@@ -34,9 +34,9 @@ const file_crm_segment_v1_service_proto_rawDesc = "" +
 	"\x10GetSegmentDetail\x12'.crm.segment.v1.GetSegmentDetailRequest\x1a(.crm.segment.v1.GetSegmentDetailResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/segments/{id}\x10\x01\x12\x98\x01\n" +
 	"\x13GetSegmentCustomers\x12*.crm.segment.v1.GetSegmentCustomersRequest\x1a+.crm.segment.v1.GetSegmentCustomersResponse\"(\x9a\xb5\x18$\n" +
-	" /segments/{segment_id}/customers\x10\x01\x12t\n" +
-	"\rUpdateSegment\x12$.crm.segment.v1.UpdateSegmentRequest\x1a%.crm.segment.v1.UpdateSegmentResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/segments/{id}\x10\x03\x12t\n" +
+	" /segments/{segment_id}/customers\x10\x01\x12z\n" +
+	"\rUpdateSegment\x12$.crm.segment.v1.UpdateSegmentRequest\x1a%.crm.segment.v1.UpdateSegmentResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/segments/{id}\x10\x03\"\x04body\x12t\n" +
 	"\rDeleteSegment\x12$.crm.segment.v1.DeleteSegmentRequest\x1a%.crm.segment.v1.DeleteSegmentResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/segments/{id}\x10\x04\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/crm/segment/v1B/Z-github.com/voxire/voxie/gen/go/crm/segment/v1b\x06proto3"

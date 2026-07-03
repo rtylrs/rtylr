@@ -32,11 +32,15 @@ export interface CreateModifierResponse {
 }
 
 export interface UpdateModifierRequest {
+  id: string;
+  body?: UpdateModifierBody;
+}
+
+export interface UpdateModifierBody {
   name: string;
   priceDelta: number;
   groupName: string;
   isRequired: boolean;
-  id: string;
 }
 
 export interface UpdateModifierResponse {
@@ -175,7 +179,7 @@ export class ModifierServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

@@ -45,7 +45,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	updateProductHandler := BindingMiddleware[UpdateProductRequest](
 		genericHandler(server.UpdateProduct, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateProductPathParams, updateProductQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/erp/product/v1/products/{id}", updateProductHandler)

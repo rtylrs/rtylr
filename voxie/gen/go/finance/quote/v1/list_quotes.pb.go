@@ -187,11 +187,11 @@ const file_finance_quote_v1_list_quotes_proto_rawDesc = "" +
 	"\x06statusR\x06status\x126\n" +
 	"\vcustomer_id\x18\x06 \x01(\x03B\x15µ\x18\r\n" +
 	"\vcustomer_idе\x18\x01R\n" +
-	"customerId\"\x8f\x01\n" +
+	"customerId\"\x95\x01\n" +
 	"\x12ListQuotesResponse\x12/\n" +
-	"\x06quotes\x18\x01 \x03(\v2\x17.finance.quote.v1.QuoteR\x06quotes\x12H\n" +
+	"\x06quotes\x18\x01 \x03(\v2\x17.finance.quote.v1.QuoteR\x06quotes\x12N\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
 	"paginationB1Z/github.com/voxire/voxie/gen/go/finance/quote/v1b\x06proto3"
 
 var (

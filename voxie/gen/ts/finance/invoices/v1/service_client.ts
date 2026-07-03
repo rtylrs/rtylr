@@ -108,6 +108,10 @@ export interface Payment {
 
 export interface UpdateInvoiceRequest {
   id: string;
+  body?: UpdateInvoiceBody;
+}
+
+export interface UpdateInvoiceBody {
   clientName: string;
   clientEmail: string;
   clientAddress: string;
@@ -129,6 +133,10 @@ export interface UpdateInvoiceResponse {
 
 export interface UpdateInvoiceStatusRequest {
   id: string;
+  body?: UpdateInvoiceStatusBody;
+}
+
+export interface UpdateInvoiceStatusBody {
   status: string;
 }
 
@@ -297,7 +305,7 @@ export class InvoicesServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
@@ -322,7 +330,7 @@ export class InvoicesServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

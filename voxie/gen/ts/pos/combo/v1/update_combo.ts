@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateComboRequest {
+export interface UpdateComboBody {
   /** name is the name value for this contract. */
   name: string;
   /** description is the description value for this contract. */
@@ -17,8 +17,13 @@ export interface UpdateComboRequest {
   items: string;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
+}
+
+export interface UpdateComboRequest {
   /** id is the unique identifier for the combo. */
   id: number;
+  /** body carries updatable combo fields bound from the HTTP payload. */
+  body: UpdateComboBody | undefined;
 }
 
 export interface UpdateComboResponse {

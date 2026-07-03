@@ -36,6 +36,7 @@ service EmployeeService {
     option (onekit.http.config) = {
       path: "/employees/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

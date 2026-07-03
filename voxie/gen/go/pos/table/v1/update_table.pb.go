@@ -23,7 +23,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateTableRequest struct {
+type UpdateTableBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// location_id is the location id value for this contract.
 	LocationId *int64 `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
@@ -32,16 +32,82 @@ type UpdateTableRequest struct {
 	// seats is the seats value for this contract.
 	Seats int32 `protobuf:"varint,3,opt,name=seats,proto3" json:"seats,omitempty"`
 	// status is the current lifecycle state.
-	Status string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Status        string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTableBody) Reset() {
+	*x = UpdateTableBody{}
+	mi := &file_pos_table_v1_update_table_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTableBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTableBody) ProtoMessage() {}
+
+func (x *UpdateTableBody) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_table_v1_update_table_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTableBody.ProtoReflect.Descriptor instead.
+func (*UpdateTableBody) Descriptor() ([]byte, []int) {
+	return file_pos_table_v1_update_table_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateTableBody) GetLocationId() int64 {
+	if x != nil && x.LocationId != nil {
+		return *x.LocationId
+	}
+	return 0
+}
+
+func (x *UpdateTableBody) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *UpdateTableBody) GetSeats() int32 {
+	if x != nil {
+		return x.Seats
+	}
+	return 0
+}
+
+func (x *UpdateTableBody) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateTableRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the table.
-	Id            int64 `protobuf:"varint,5,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable table fields bound from the HTTP payload.
+	Body          *UpdateTableBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateTableRequest) Reset() {
 	*x = UpdateTableRequest{}
-	mi := &file_pos_table_v1_update_table_proto_msgTypes[0]
+	mi := &file_pos_table_v1_update_table_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -53,7 +119,7 @@ func (x *UpdateTableRequest) String() string {
 func (*UpdateTableRequest) ProtoMessage() {}
 
 func (x *UpdateTableRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_table_v1_update_table_proto_msgTypes[0]
+	mi := &file_pos_table_v1_update_table_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -66,35 +132,7 @@ func (x *UpdateTableRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTableRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTableRequest) Descriptor() ([]byte, []int) {
-	return file_pos_table_v1_update_table_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *UpdateTableRequest) GetLocationId() int64 {
-	if x != nil && x.LocationId != nil {
-		return *x.LocationId
-	}
-	return 0
-}
-
-func (x *UpdateTableRequest) GetLabel() string {
-	if x != nil {
-		return x.Label
-	}
-	return ""
-}
-
-func (x *UpdateTableRequest) GetSeats() int32 {
-	if x != nil {
-		return x.Seats
-	}
-	return 0
-}
-
-func (x *UpdateTableRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
+	return file_pos_table_v1_update_table_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateTableRequest) GetId() int64 {
@@ -102,6 +140,13 @@ func (x *UpdateTableRequest) GetId() int64 {
 		return x.Id
 	}
 	return 0
+}
+
+func (x *UpdateTableRequest) GetBody() *UpdateTableBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
 }
 
 type UpdateTableResponse struct {
@@ -114,7 +159,7 @@ type UpdateTableResponse struct {
 
 func (x *UpdateTableResponse) Reset() {
 	*x = UpdateTableResponse{}
-	mi := &file_pos_table_v1_update_table_proto_msgTypes[1]
+	mi := &file_pos_table_v1_update_table_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +171,7 @@ func (x *UpdateTableResponse) String() string {
 func (*UpdateTableResponse) ProtoMessage() {}
 
 func (x *UpdateTableResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pos_table_v1_update_table_proto_msgTypes[1]
+	mi := &file_pos_table_v1_update_table_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +184,7 @@ func (x *UpdateTableResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTableResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTableResponse) Descriptor() ([]byte, []int) {
-	return file_pos_table_v1_update_table_proto_rawDescGZIP(), []int{1}
+	return file_pos_table_v1_update_table_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateTableResponse) GetMessage() string {
@@ -153,8 +198,8 @@ var File_pos_table_v1_update_table_proto protoreflect.FileDescriptor
 
 const file_pos_table_v1_update_table_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/table/v1/update_table.proto\x12\fpos.table.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xdc\x01\n" +
-	"\x12UpdateTableRequest\x12.\n" +
+	"\x1fpos/table/v1/update_table.proto\x12\fpos.table.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xb9\x01\n" +
+	"\x0fUpdateTableBody\x12.\n" +
 	"\vlocation_id\x18\x01 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"locationId\x88\x01\x01\x12 \n" +
 	"\x05label\x18\x02 \x01(\tB\n" +
@@ -162,9 +207,11 @@ const file_pos_table_v1_update_table_proto_rawDesc = "" +
 	"\x05seats\x18\x03 \x01(\x05B\n" +
 	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x05seats\x12\"\n" +
 	"\x06status\x18\x04 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\x12\x1e\n" +
-	"\x02id\x18\x05 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02idB\x0e\n" +
-	"\f_location_id\"/\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06statusB\x0e\n" +
+	"\f_location_id\"g\n" +
+	"\x12UpdateTableRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x121\n" +
+	"\x04body\x18\x02 \x01(\v2\x1d.pos.table.v1.UpdateTableBodyR\x04body\"/\n" +
 	"\x13UpdateTableResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/table/v1b\x06proto3"
 
@@ -180,17 +227,19 @@ func file_pos_table_v1_update_table_proto_rawDescGZIP() []byte {
 	return file_pos_table_v1_update_table_proto_rawDescData
 }
 
-var file_pos_table_v1_update_table_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_pos_table_v1_update_table_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_table_v1_update_table_proto_goTypes = []any{
-	(*UpdateTableRequest)(nil),  // 0: pos.table.v1.UpdateTableRequest
-	(*UpdateTableResponse)(nil), // 1: pos.table.v1.UpdateTableResponse
+	(*UpdateTableBody)(nil),     // 0: pos.table.v1.UpdateTableBody
+	(*UpdateTableRequest)(nil),  // 1: pos.table.v1.UpdateTableRequest
+	(*UpdateTableResponse)(nil), // 2: pos.table.v1.UpdateTableResponse
 }
 var file_pos_table_v1_update_table_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: pos.table.v1.UpdateTableRequest.body:type_name -> pos.table.v1.UpdateTableBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_pos_table_v1_update_table_proto_init() }
@@ -205,7 +254,7 @@ func file_pos_table_v1_update_table_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_table_v1_update_table_proto_rawDesc), len(file_pos_table_v1_update_table_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

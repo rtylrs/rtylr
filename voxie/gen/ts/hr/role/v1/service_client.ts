@@ -28,6 +28,10 @@ export interface RolePayload {
 
 export interface UpdateRoleRequest {
   id: string;
+  body?: UpdateRoleBody;
+}
+
+export interface UpdateRoleBody {
   name: string | null;
   permissions: PermissionPayload[];
 }
@@ -146,7 +150,7 @@ export class RoleServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

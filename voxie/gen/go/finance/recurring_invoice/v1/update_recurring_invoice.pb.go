@@ -23,27 +23,100 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateRecurringInvoiceBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// template_invoice_id is the invoice used as the recurring invoice template.
+	TemplateInvoiceId *int64 `protobuf:"varint,1,opt,name=template_invoice_id,json=templateInvoiceId,proto3,oneof" json:"template_invoice_id,omitempty"`
+	// frequency is how often the recurring invoice should be generated.
+	Frequency string `protobuf:"bytes,2,opt,name=frequency,proto3" json:"frequency,omitempty"`
+	// next_invoice_date is the next generation date, formatted as YYYY-MM-DD.
+	NextInvoiceDate string `protobuf:"bytes,3,opt,name=next_invoice_date,json=nextInvoiceDate,proto3" json:"next_invoice_date,omitempty"`
+	// end_date is when recurring generation should stop; absent when open-ended.
+	EndDate *string `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3,oneof" json:"end_date,omitempty"`
+	// is_active indicates whether the recurring invoice is active.
+	IsActive      *bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateRecurringInvoiceBody) Reset() {
+	*x = UpdateRecurringInvoiceBody{}
+	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRecurringInvoiceBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRecurringInvoiceBody) ProtoMessage() {}
+
+func (x *UpdateRecurringInvoiceBody) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRecurringInvoiceBody.ProtoReflect.Descriptor instead.
+func (*UpdateRecurringInvoiceBody) Descriptor() ([]byte, []int) {
+	return file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateRecurringInvoiceBody) GetTemplateInvoiceId() int64 {
+	if x != nil && x.TemplateInvoiceId != nil {
+		return *x.TemplateInvoiceId
+	}
+	return 0
+}
+
+func (x *UpdateRecurringInvoiceBody) GetFrequency() string {
+	if x != nil {
+		return x.Frequency
+	}
+	return ""
+}
+
+func (x *UpdateRecurringInvoiceBody) GetNextInvoiceDate() string {
+	if x != nil {
+		return x.NextInvoiceDate
+	}
+	return ""
+}
+
+func (x *UpdateRecurringInvoiceBody) GetEndDate() string {
+	if x != nil && x.EndDate != nil {
+		return *x.EndDate
+	}
+	return ""
+}
+
+func (x *UpdateRecurringInvoiceBody) GetIsActive() bool {
+	if x != nil && x.IsActive != nil {
+		return *x.IsActive
+	}
+	return false
+}
+
 type UpdateRecurringInvoiceRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the recurring invoice to update.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// template_invoice_id is the invoice used as the recurring invoice template.
-	TemplateInvoiceId *int64 `protobuf:"varint,2,opt,name=template_invoice_id,json=templateInvoiceId,proto3,oneof" json:"template_invoice_id,omitempty"`
-	// frequency is how often the recurring invoice should be generated.
-	Frequency string `protobuf:"bytes,3,opt,name=frequency,proto3" json:"frequency,omitempty"`
-	// next_invoice_date is the next generation date, formatted as YYYY-MM-DD.
-	NextInvoiceDate string `protobuf:"bytes,4,opt,name=next_invoice_date,json=nextInvoiceDate,proto3" json:"next_invoice_date,omitempty"`
-	// end_date is when recurring generation should stop; absent when open-ended.
-	EndDate *string `protobuf:"bytes,5,opt,name=end_date,json=endDate,proto3,oneof" json:"end_date,omitempty"`
-	// is_active indicates whether the recurring invoice is active.
-	IsActive      *bool `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
+	// body carries updatable recurring invoice fields bound from the HTTP payload.
+	Body          *UpdateRecurringInvoiceBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateRecurringInvoiceRequest) Reset() {
 	*x = UpdateRecurringInvoiceRequest{}
-	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[0]
+	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -55,7 +128,7 @@ func (x *UpdateRecurringInvoiceRequest) String() string {
 func (*UpdateRecurringInvoiceRequest) ProtoMessage() {}
 
 func (x *UpdateRecurringInvoiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[0]
+	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -68,7 +141,7 @@ func (x *UpdateRecurringInvoiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRecurringInvoiceRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRecurringInvoiceRequest) Descriptor() ([]byte, []int) {
-	return file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescGZIP(), []int{0}
+	return file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateRecurringInvoiceRequest) GetId() int64 {
@@ -78,39 +151,11 @@ func (x *UpdateRecurringInvoiceRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateRecurringInvoiceRequest) GetTemplateInvoiceId() int64 {
-	if x != nil && x.TemplateInvoiceId != nil {
-		return *x.TemplateInvoiceId
-	}
-	return 0
-}
-
-func (x *UpdateRecurringInvoiceRequest) GetFrequency() string {
+func (x *UpdateRecurringInvoiceRequest) GetBody() *UpdateRecurringInvoiceBody {
 	if x != nil {
-		return x.Frequency
+		return x.Body
 	}
-	return ""
-}
-
-func (x *UpdateRecurringInvoiceRequest) GetNextInvoiceDate() string {
-	if x != nil {
-		return x.NextInvoiceDate
-	}
-	return ""
-}
-
-func (x *UpdateRecurringInvoiceRequest) GetEndDate() string {
-	if x != nil && x.EndDate != nil {
-		return *x.EndDate
-	}
-	return ""
-}
-
-func (x *UpdateRecurringInvoiceRequest) GetIsActive() bool {
-	if x != nil && x.IsActive != nil {
-		return *x.IsActive
-	}
-	return false
+	return nil
 }
 
 type UpdateRecurringInvoiceResponse struct {
@@ -123,7 +168,7 @@ type UpdateRecurringInvoiceResponse struct {
 
 func (x *UpdateRecurringInvoiceResponse) Reset() {
 	*x = UpdateRecurringInvoiceResponse{}
-	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[1]
+	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -135,7 +180,7 @@ func (x *UpdateRecurringInvoiceResponse) String() string {
 func (*UpdateRecurringInvoiceResponse) ProtoMessage() {}
 
 func (x *UpdateRecurringInvoiceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[1]
+	mi := &file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -148,7 +193,7 @@ func (x *UpdateRecurringInvoiceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRecurringInvoiceResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRecurringInvoiceResponse) Descriptor() ([]byte, []int) {
-	return file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescGZIP(), []int{1}
+	return file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateRecurringInvoiceResponse) GetMessage() string {
@@ -162,19 +207,21 @@ var File_finance_recurring_invoice_v1_update_recurring_invoice_proto protoreflec
 
 const file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDesc = "" +
 	"\n" +
-	";finance/recurring_invoice/v1/update_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xf6\x02\n" +
-	"\x1dUpdateRecurringInvoiceRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12=\n" +
-	"\x13template_invoice_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\x11templateInvoiceId\x88\x01\x01\x12(\n" +
-	"\tfrequency\x18\x03 \x01(\tB\n" +
+	";finance/recurring_invoice/v1/update_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xd3\x02\n" +
+	"\x1aUpdateRecurringInvoiceBody\x12=\n" +
+	"\x13template_invoice_id\x18\x01 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\x11templateInvoiceId\x88\x01\x01\x12(\n" +
+	"\tfrequency\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x12K\n" +
-	"\x11next_invoice_date\x18\x04 \x01(\tB\x1f\xbaH\x1c\xc8\x01\x01r\x17\x10\x012\x13^\\d{4}-\\d{2}-\\d{2}$R\x0fnextInvoiceDate\x12$\n" +
-	"\bend_date\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\aendDate\x88\x01\x01\x12&\n" +
-	"\tis_active\x18\x06 \x01(\bB\x04\xe8\xb5\x18\x01H\x02R\bisActive\x88\x01\x01B\x16\n" +
+	"\x11next_invoice_date\x18\x03 \x01(\tB\x1f\xbaH\x1c\xc8\x01\x01r\x17\x10\x012\x13^\\d{4}-\\d{2}-\\d{2}$R\x0fnextInvoiceDate\x12$\n" +
+	"\bend_date\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\aendDate\x88\x01\x01\x12&\n" +
+	"\tis_active\x18\x05 \x01(\bB\x04\xe8\xb5\x18\x01H\x02R\bisActive\x88\x01\x01B\x16\n" +
 	"\x14_template_invoice_idB\v\n" +
 	"\t_end_dateB\f\n" +
 	"\n" +
-	"_is_active\":\n" +
+	"_is_active\"\x8d\x01\n" +
+	"\x1dUpdateRecurringInvoiceRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12L\n" +
+	"\x04body\x18\x02 \x01(\v28.finance.recurring_invoice.v1.UpdateRecurringInvoiceBodyR\x04body\":\n" +
 	"\x1eUpdateRecurringInvoiceResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB=Z;github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1b\x06proto3"
 
@@ -190,17 +237,19 @@ func file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescGZI
 	return file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDescData
 }
 
-var file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_finance_recurring_invoice_v1_update_recurring_invoice_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_finance_recurring_invoice_v1_update_recurring_invoice_proto_goTypes = []any{
-	(*UpdateRecurringInvoiceRequest)(nil),  // 0: finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest
-	(*UpdateRecurringInvoiceResponse)(nil), // 1: finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse
+	(*UpdateRecurringInvoiceBody)(nil),     // 0: finance.recurring_invoice.v1.UpdateRecurringInvoiceBody
+	(*UpdateRecurringInvoiceRequest)(nil),  // 1: finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest
+	(*UpdateRecurringInvoiceResponse)(nil), // 2: finance.recurring_invoice.v1.UpdateRecurringInvoiceResponse
 }
 var file_finance_recurring_invoice_v1_update_recurring_invoice_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest.body:type_name -> finance.recurring_invoice.v1.UpdateRecurringInvoiceBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_finance_recurring_invoice_v1_update_recurring_invoice_proto_init() }
@@ -215,7 +264,7 @@ func file_finance_recurring_invoice_v1_update_recurring_invoice_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDesc), len(file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateDepartmentRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateDepartmentBody.
 // This method handles nullable fields: location_id, parent_department_id, default_work_schedule_id
-func (x *UpdateDepartmentRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateDepartmentBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -49,14 +49,14 @@ func (x *UpdateDepartmentRequest) MarshalJSONOnekit(opts protojson.MarshalOption
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateDepartmentRequest.
-func (x *UpdateDepartmentRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateDepartmentBody.
+func (x *UpdateDepartmentBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateDepartmentRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateDepartmentBody.
 // This method handles nullable fields: location_id, parent_department_id, default_work_schedule_id
-func (x *UpdateDepartmentRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateDepartmentBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

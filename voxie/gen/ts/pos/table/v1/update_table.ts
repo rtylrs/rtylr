@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 
-export interface UpdateTableRequest {
+export interface UpdateTableBody {
   /** location_id is the location id value for this contract. */
   locationId?:
     | number
@@ -17,8 +17,13 @@ export interface UpdateTableRequest {
   seats: number;
   /** status is the current lifecycle state. */
   status: string;
+}
+
+export interface UpdateTableRequest {
   /** id is the unique identifier for the table. */
   id: number;
+  /** body carries updatable table fields bound from the HTTP payload. */
+  body: UpdateTableBody | undefined;
 }
 
 export interface UpdateTableResponse {

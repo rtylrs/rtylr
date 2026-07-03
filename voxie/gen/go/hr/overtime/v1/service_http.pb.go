@@ -44,7 +44,7 @@ func RegisterOvertimeServiceServer(server OvertimeServiceServer, opts ...ServerO
 	approveOvertimeHandler := BindingMiddleware[ApproveOvertimeRequest](
 		genericHandler(server.ApproveOvertime, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveOvertimePathParams, approveOvertimeQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/overtime/v1/requests/{overtime_request_id}/approve", approveOvertimeHandler)

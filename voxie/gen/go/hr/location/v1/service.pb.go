@@ -25,13 +25,13 @@ var File_hr_location_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_location_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/location/v1/service.proto\x12\x0ehr.location.v1\x1a$hr/location/v1/create_location.proto\x1a$hr/location/v1/update_location.proto\x1a\x1donekit/http/annotations.proto2\x9b\x02\n" +
+	"\x1chr/location/v1/service.proto\x12\x0ehr.location.v1\x1a$hr/location/v1/create_location.proto\x1a$hr/location/v1/update_location.proto\x1a\x1donekit/http/annotations.proto2\xa1\x02\n" +
 	"\x0fLocationService\x12s\n" +
 	"\x0eCreateLocation\x12%.hr.location.v1.CreateLocationRequest\x1a&.hr.location.v1.CreateLocationResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/locations\x10\x02\x12x\n" +
-	"\x0eUpdateLocation\x12%.hr.location.v1.UpdateLocationRequest\x1a&.hr.location.v1.UpdateLocationResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/locations/{id}\x10\x03\x1a\x19\xa2\xb5\x18\x15\n" +
+	"/locations\x10\x02\x12~\n" +
+	"\x0eUpdateLocation\x12%.hr.location.v1.UpdateLocationRequest\x1a&.hr.location.v1.UpdateLocationResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x0f/locations/{id}\x10\x03\"\x04body\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/hr/location/v1B/Z-github.com/voxire/voxie/gen/go/hr/location/v1b\x06proto3"
 
 var file_hr_location_v1_service_proto_goTypes = []any{

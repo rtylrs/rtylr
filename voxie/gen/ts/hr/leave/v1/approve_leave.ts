@@ -6,13 +6,18 @@
 
 /* eslint-disable */
 
-export interface ApproveLeaveRequest {
-  /** request_id is the leave request being reviewed. */
-  requestId: number;
+export interface ApproveLeaveBody {
   /** True to approve, false to reject. */
   approved: boolean;
   /** Reason for rejection; absent if approving. */
   rejectionReason?: string | undefined;
+}
+
+export interface ApproveLeaveRequest {
+  /** request_id is the leave request being reviewed. */
+  requestId: number;
+  /** body carries approval decision fields bound from the HTTP payload. */
+  body: ApproveLeaveBody | undefined;
 }
 
 export interface ApproveLeaveResponse {

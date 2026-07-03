@@ -23,19 +23,64 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateTaskStatusBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// status is the current lifecycle state.
+	Status        string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTaskStatusBody) Reset() {
+	*x = UpdateTaskStatusBody{}
+	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskStatusBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskStatusBody) ProtoMessage() {}
+
+func (x *UpdateTaskStatusBody) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskStatusBody.ProtoReflect.Descriptor instead.
+func (*UpdateTaskStatusBody) Descriptor() ([]byte, []int) {
+	return file_flow_task_v1_update_task_status_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateTaskStatusBody) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 type UpdateTaskStatusRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// status is the current lifecycle state.
-	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	// body carries the new task status bound from the HTTP payload.
+	Body          *UpdateTaskStatusBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateTaskStatusRequest) Reset() {
 	*x = UpdateTaskStatusRequest{}
-	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[0]
+	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +92,7 @@ func (x *UpdateTaskStatusRequest) String() string {
 func (*UpdateTaskStatusRequest) ProtoMessage() {}
 
 func (x *UpdateTaskStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[0]
+	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +105,7 @@ func (x *UpdateTaskStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTaskStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTaskStatusRequest) Descriptor() ([]byte, []int) {
-	return file_flow_task_v1_update_task_status_proto_rawDescGZIP(), []int{0}
+	return file_flow_task_v1_update_task_status_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateTaskStatusRequest) GetId() int64 {
@@ -70,11 +115,11 @@ func (x *UpdateTaskStatusRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateTaskStatusRequest) GetStatus() string {
+func (x *UpdateTaskStatusRequest) GetBody() *UpdateTaskStatusBody {
 	if x != nil {
-		return x.Status
+		return x.Body
 	}
-	return ""
+	return nil
 }
 
 type UpdateTaskStatusResponse struct {
@@ -87,7 +132,7 @@ type UpdateTaskStatusResponse struct {
 
 func (x *UpdateTaskStatusResponse) Reset() {
 	*x = UpdateTaskStatusResponse{}
-	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[1]
+	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -99,7 +144,7 @@ func (x *UpdateTaskStatusResponse) String() string {
 func (*UpdateTaskStatusResponse) ProtoMessage() {}
 
 func (x *UpdateTaskStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[1]
+	mi := &file_flow_task_v1_update_task_status_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -112,7 +157,7 @@ func (x *UpdateTaskStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTaskStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTaskStatusResponse) Descriptor() ([]byte, []int) {
-	return file_flow_task_v1_update_task_status_proto_rawDescGZIP(), []int{1}
+	return file_flow_task_v1_update_task_status_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateTaskStatusResponse) GetMessage() string {
@@ -126,11 +171,13 @@ var File_flow_task_v1_update_task_status_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_update_task_status_proto_rawDesc = "" +
 	"\n" +
-	"%flow/task/v1/update_task_status.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"]\n" +
+	"%flow/task/v1/update_task_status.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\":\n" +
+	"\x14UpdateTaskStatusBody\x12\"\n" +
+	"\x06status\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"q\n" +
 	"\x17UpdateTaskStatusRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\"\n" +
-	"\x06status\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"4\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x126\n" +
+	"\x04body\x18\x02 \x01(\v2\".flow.task.v1.UpdateTaskStatusBodyR\x04body\"4\n" +
 	"\x18UpdateTaskStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 
@@ -146,17 +193,19 @@ func file_flow_task_v1_update_task_status_proto_rawDescGZIP() []byte {
 	return file_flow_task_v1_update_task_status_proto_rawDescData
 }
 
-var file_flow_task_v1_update_task_status_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_flow_task_v1_update_task_status_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_flow_task_v1_update_task_status_proto_goTypes = []any{
-	(*UpdateTaskStatusRequest)(nil),  // 0: flow.task.v1.UpdateTaskStatusRequest
-	(*UpdateTaskStatusResponse)(nil), // 1: flow.task.v1.UpdateTaskStatusResponse
+	(*UpdateTaskStatusBody)(nil),     // 0: flow.task.v1.UpdateTaskStatusBody
+	(*UpdateTaskStatusRequest)(nil),  // 1: flow.task.v1.UpdateTaskStatusRequest
+	(*UpdateTaskStatusResponse)(nil), // 2: flow.task.v1.UpdateTaskStatusResponse
 }
 var file_flow_task_v1_update_task_status_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: flow.task.v1.UpdateTaskStatusRequest.body:type_name -> flow.task.v1.UpdateTaskStatusBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_flow_task_v1_update_task_status_proto_init() }
@@ -170,7 +219,7 @@ func file_flow_task_v1_update_task_status_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_task_v1_update_task_status_proto_rawDesc), len(file_flow_task_v1_update_task_status_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -44,6 +44,7 @@ service CustomerService {
     option (onekit.http.config) = {
       path: "/customers/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

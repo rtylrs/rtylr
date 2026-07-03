@@ -7,6 +7,24 @@ import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
 
+message UpdateSegmentBody {
+  // name is the name value for this contract.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // description is the description value for this contract.
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // rules is the rules value for this contract.
+  string rules = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
 message UpdateSegmentRequest {
   // id is the unique identifier for the resource.
   int64 id = 1 [
@@ -15,21 +33,8 @@ message UpdateSegmentRequest {
   ,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // name is the name value for this contract.
-  string name = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // description is the description value for this contract.
-  string description = 3 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // rules is the rules value for this contract.
-  string rules = 4 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
+  // body carries updatable segment fields bound from the HTTP payload.
+  UpdateSegmentBody body = 2;
 }
 
 message UpdateSegmentResponse {

@@ -26,6 +26,10 @@ export interface LocationPayload {
 
 export interface UpdateLocationRequest {
   id: string;
+  body?: UpdateLocationBody;
+}
+
+export interface UpdateLocationBody {
   name: string | null;
   address: string | null;
   timezone: string | null;
@@ -138,7 +142,7 @@ export class LocationServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

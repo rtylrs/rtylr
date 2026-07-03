@@ -6,11 +6,16 @@
 
 /* eslint-disable */
 
+export interface UpdateInvoiceStatusBody {
+  /** status is the current lifecycle state. */
+  status: string;
+}
+
 export interface UpdateInvoiceStatusRequest {
   /** id is the unique identifier for the resource. */
   id: number;
-  /** status is the current lifecycle state. */
-  status: string;
+  /** body carries status update fields bound from the HTTP payload. */
+  body: UpdateInvoiceStatusBody | undefined;
 }
 
 export interface UpdateInvoiceStatusResponse {

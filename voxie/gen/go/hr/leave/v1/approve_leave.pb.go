@@ -23,21 +23,73 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ApproveLeaveRequest struct {
+type ApproveLeaveBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// request_id is the leave request being reviewed.
-	RequestId int64 `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// True to approve, false to reject.
-	Approved bool `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
+	Approved bool `protobuf:"varint,1,opt,name=approved,proto3" json:"approved,omitempty"`
 	// Reason for rejection; absent if approving.
-	RejectionReason *string `protobuf:"bytes,3,opt,name=rejection_reason,json=rejectionReason,proto3,oneof" json:"rejection_reason,omitempty"`
+	RejectionReason *string `protobuf:"bytes,2,opt,name=rejection_reason,json=rejectionReason,proto3,oneof" json:"rejection_reason,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
+func (x *ApproveLeaveBody) Reset() {
+	*x = ApproveLeaveBody{}
+	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveLeaveBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveLeaveBody) ProtoMessage() {}
+
+func (x *ApproveLeaveBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveLeaveBody.ProtoReflect.Descriptor instead.
+func (*ApproveLeaveBody) Descriptor() ([]byte, []int) {
+	return file_hr_leave_v1_approve_leave_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ApproveLeaveBody) GetApproved() bool {
+	if x != nil {
+		return x.Approved
+	}
+	return false
+}
+
+func (x *ApproveLeaveBody) GetRejectionReason() string {
+	if x != nil && x.RejectionReason != nil {
+		return *x.RejectionReason
+	}
+	return ""
+}
+
+type ApproveLeaveRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// request_id is the leave request being reviewed.
+	RequestId int64 `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// body carries approval decision fields bound from the HTTP payload.
+	Body          *ApproveLeaveBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *ApproveLeaveRequest) Reset() {
 	*x = ApproveLeaveRequest{}
-	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[0]
+	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +101,7 @@ func (x *ApproveLeaveRequest) String() string {
 func (*ApproveLeaveRequest) ProtoMessage() {}
 
 func (x *ApproveLeaveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[0]
+	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +114,7 @@ func (x *ApproveLeaveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveLeaveRequest.ProtoReflect.Descriptor instead.
 func (*ApproveLeaveRequest) Descriptor() ([]byte, []int) {
-	return file_hr_leave_v1_approve_leave_proto_rawDescGZIP(), []int{0}
+	return file_hr_leave_v1_approve_leave_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ApproveLeaveRequest) GetRequestId() int64 {
@@ -72,18 +124,11 @@ func (x *ApproveLeaveRequest) GetRequestId() int64 {
 	return 0
 }
 
-func (x *ApproveLeaveRequest) GetApproved() bool {
+func (x *ApproveLeaveRequest) GetBody() *ApproveLeaveBody {
 	if x != nil {
-		return x.Approved
+		return x.Body
 	}
-	return false
-}
-
-func (x *ApproveLeaveRequest) GetRejectionReason() string {
-	if x != nil && x.RejectionReason != nil {
-		return *x.RejectionReason
-	}
-	return ""
+	return nil
 }
 
 type ApproveLeaveResponse struct {
@@ -96,7 +141,7 @@ type ApproveLeaveResponse struct {
 
 func (x *ApproveLeaveResponse) Reset() {
 	*x = ApproveLeaveResponse{}
-	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[1]
+	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -108,7 +153,7 @@ func (x *ApproveLeaveResponse) String() string {
 func (*ApproveLeaveResponse) ProtoMessage() {}
 
 func (x *ApproveLeaveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[1]
+	mi := &file_hr_leave_v1_approve_leave_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +166,7 @@ func (x *ApproveLeaveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveLeaveResponse.ProtoReflect.Descriptor instead.
 func (*ApproveLeaveResponse) Descriptor() ([]byte, []int) {
-	return file_hr_leave_v1_approve_leave_proto_rawDescGZIP(), []int{1}
+	return file_hr_leave_v1_approve_leave_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ApproveLeaveResponse) GetSuccess() bool {
@@ -135,13 +180,15 @@ var File_hr_leave_v1_approve_leave_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_approve_leave_proto_rawDesc = "" +
 	"\n" +
-	"\x1fhr/leave/v1/approve_leave.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xab\x01\n" +
+	"\x1fhr/leave/v1/approve_leave.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"y\n" +
+	"\x10ApproveLeaveBody\x12\x1a\n" +
+	"\bapproved\x18\x01 \x01(\bR\bapproved\x124\n" +
+	"\x10rejection_reason\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
+	"\x11_rejection_reason\"w\n" +
 	"\x13ApproveLeaveRequest\x12-\n" +
 	"\n" +
-	"request_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\trequestId\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\x124\n" +
-	"\x10rejection_reason\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
-	"\x11_rejection_reason\"0\n" +
+	"request_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\trequestId\x121\n" +
+	"\x04body\x18\x02 \x01(\v2\x1d.hr.leave.v1.ApproveLeaveBodyR\x04body\"0\n" +
 	"\x14ApproveLeaveResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB,Z*github.com/voxire/voxie/gen/go/hr/leave/v1b\x06proto3"
 
@@ -157,17 +204,19 @@ func file_hr_leave_v1_approve_leave_proto_rawDescGZIP() []byte {
 	return file_hr_leave_v1_approve_leave_proto_rawDescData
 }
 
-var file_hr_leave_v1_approve_leave_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hr_leave_v1_approve_leave_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hr_leave_v1_approve_leave_proto_goTypes = []any{
-	(*ApproveLeaveRequest)(nil),  // 0: hr.leave.v1.ApproveLeaveRequest
-	(*ApproveLeaveResponse)(nil), // 1: hr.leave.v1.ApproveLeaveResponse
+	(*ApproveLeaveBody)(nil),     // 0: hr.leave.v1.ApproveLeaveBody
+	(*ApproveLeaveRequest)(nil),  // 1: hr.leave.v1.ApproveLeaveRequest
+	(*ApproveLeaveResponse)(nil), // 2: hr.leave.v1.ApproveLeaveResponse
 }
 var file_hr_leave_v1_approve_leave_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: hr.leave.v1.ApproveLeaveRequest.body:type_name -> hr.leave.v1.ApproveLeaveBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_leave_v1_approve_leave_proto_init() }
@@ -182,7 +231,7 @@ func file_hr_leave_v1_approve_leave_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_leave_v1_approve_leave_proto_rawDesc), len(file_hr_leave_v1_approve_leave_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

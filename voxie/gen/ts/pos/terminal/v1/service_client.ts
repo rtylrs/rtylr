@@ -31,11 +31,15 @@ export interface CreateTerminalResponse {
 }
 
 export interface UpdateTerminalRequest {
+  id: string;
+  body?: UpdateTerminalBody;
+}
+
+export interface UpdateTerminalBody {
   branchId: string;
   name: string;
   deviceId: string;
   isActive: boolean;
-  id: string;
 }
 
 export interface UpdateTerminalResponse {
@@ -174,7 +178,7 @@ export class TerminalServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

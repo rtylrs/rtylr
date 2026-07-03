@@ -55,7 +55,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	updateCustomerHandler := BindingMiddleware[UpdateCustomerRequest](
 		genericHandler(server.UpdateCustomer, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateCustomerPathParams, updateCustomerQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/customer/v1/customers/{id}", updateCustomerHandler)

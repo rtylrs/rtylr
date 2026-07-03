@@ -25,7 +25,7 @@ var File_hr_time_entry_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/time_entry/v1/service.proto\x12\x10hr.time_entry.v1\x1a(hr/time_entry/v1/approve_timesheet.proto\x1a(hr/time_entry/v1/create_time_entry.proto\x1a(hr/time_entry/v1/list_time_entries.proto\x1a&hr/time_entry/v1/list_timesheets.proto\x1a'hr/time_entry/v1/submit_timesheet.proto\x1a\x1donekit/http/annotations.proto2\xb2\x05\n" +
+	"\x1ehr/time_entry/v1/service.proto\x12\x10hr.time_entry.v1\x1a(hr/time_entry/v1/approve_timesheet.proto\x1a(hr/time_entry/v1/create_time_entry.proto\x1a(hr/time_entry/v1/list_time_entries.proto\x1a&hr/time_entry/v1/list_timesheets.proto\x1a'hr/time_entry/v1/submit_timesheet.proto\x1a\x1donekit/http/annotations.proto2\xb8\x05\n" +
 	"\x10TimeEntryService\x12}\n" +
 	"\x0fListTimeEntries\x12(.hr.time_entry.v1.ListTimeEntriesRequest\x1a).hr.time_entry.v1.ListTimeEntriesResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\r/time-entries\x10\x01\x12}\n" +
@@ -34,9 +34,9 @@ const file_hr_time_entry_v1_service_proto_rawDesc = "" +
 	"\x0eListTimesheets\x12'.hr.time_entry.v1.ListTimesheetsRequest\x1a(.hr.time_entry.v1.ListTimesheetsResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/timesheets\x10\x01\x12{\n" +
 	"\x0fSubmitTimesheet\x12(.hr.time_entry.v1.SubmitTimesheetRequest\x1a).hr.time_entry.v1.SubmitTimesheetResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/timesheets\x10\x02\x12\x8b\x01\n" +
-	"\x10ApproveTimesheet\x12).hr.time_entry.v1.ApproveTimesheetRequest\x1a*.hr.time_entry.v1.ApproveTimesheetResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/timesheets/{id}/approve\x10\x05\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\v/timesheets\x10\x02\x12\x91\x01\n" +
+	"\x10ApproveTimesheet\x12).hr.time_entry.v1.ApproveTimesheetRequest\x1a*.hr.time_entry.v1.ApproveTimesheetResponse\"&\x9a\xb5\x18\"\n" +
+	"\x18/timesheets/{id}/approve\x10\x05\"\x04body\x1a\x1b\xa2\xb5\x18\x17\n" +
 	"\x15/api/hr/time-entry/v1B1Z/github.com/voxire/voxie/gen/go/hr/time_entry/v1b\x06proto3"
 
 var file_hr_time_entry_v1_service_proto_goTypes = []any{

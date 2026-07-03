@@ -38,6 +38,7 @@ service LeaveService {
     option (onekit.http.config) = {
       path: "/requests/{request_id}/approve"
       method: HTTP_METHOD_PATCH
+      body: "body"
     };
   }
 
@@ -62,6 +63,7 @@ service LeaveService {
     option (onekit.http.config) = {
       path: "/types/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

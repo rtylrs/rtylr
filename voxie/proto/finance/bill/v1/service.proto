@@ -31,6 +31,7 @@ service BillService {
     option (onekit.http.config) = {
       path: "/bills/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 }

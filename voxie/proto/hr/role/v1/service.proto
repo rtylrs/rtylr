@@ -26,6 +26,7 @@ service RoleService {
     option (onekit.http.config) = {
       path: "/roles/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

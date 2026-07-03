@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// MarshalJSONOnekit implements onekitMarshaler for UpdateWorkScheduleRequest.
+// MarshalJSONOnekit implements onekitMarshaler for UpdateWorkScheduleBody.
 // This method handles nullable fields: name, start_time, end_time, break_minutes, contracted_hours_per_week, daily_ot_threshold_minutes, weekly_ot_threshold_minutes
-func (x *UpdateWorkScheduleRequest) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+func (x *UpdateWorkScheduleBody) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
 	if x == nil {
 		return []byte("null"), nil
 	}
@@ -73,14 +73,14 @@ func (x *UpdateWorkScheduleRequest) MarshalJSONOnekit(opts protojson.MarshalOpti
 	return json.Marshal(raw)
 }
 
-// MarshalJSON implements json.Marshaler for UpdateWorkScheduleRequest.
-func (x *UpdateWorkScheduleRequest) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements json.Marshaler for UpdateWorkScheduleBody.
+func (x *UpdateWorkScheduleBody) MarshalJSON() ([]byte, error) {
 	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
 }
 
-// UnmarshalJSON implements json.Unmarshaler for UpdateWorkScheduleRequest.
+// UnmarshalJSON implements json.Unmarshaler for UpdateWorkScheduleBody.
 // This method handles nullable fields: name, start_time, end_time, break_minutes, contracted_hours_per_week, daily_ot_threshold_minutes, weekly_ot_threshold_minutes
-func (x *UpdateWorkScheduleRequest) UnmarshalJSON(data []byte) error {
+func (x *UpdateWorkScheduleBody) UnmarshalJSON(data []byte) error {
 	// Parse to check for explicit null values on nullable fields
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {

@@ -7,9 +7,7 @@
 /* eslint-disable */
 import type { LeaveTypePayload } from "./types";
 
-export interface UpdateLeaveTypeRequest {
-  /** ID of the leave type to update. */
-  id: number;
+export interface UpdateLeaveTypeBody {
   /** Updated name; absent to keep current value. */
   name?:
     | string
@@ -40,6 +38,13 @@ export interface UpdateLeaveTypeRequest {
     | undefined;
   /** Updated active status; absent to keep current value. */
   isActive?: boolean | undefined;
+}
+
+export interface UpdateLeaveTypeRequest {
+  /** ID of the leave type to update. */
+  id: number;
+  /** body carries updatable leave type fields bound from the HTTP payload. */
+  body: UpdateLeaveTypeBody | undefined;
 }
 
 export interface UpdateLeaveTypeResponse {

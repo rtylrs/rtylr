@@ -45,7 +45,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 	updateTerminalHandler := BindingMiddleware[UpdateTerminalRequest](
 		genericHandler(server.UpdateTerminal, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTerminalPathParams, updateTerminalQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/terminal/v1/terminals/{id}", updateTerminalHandler)

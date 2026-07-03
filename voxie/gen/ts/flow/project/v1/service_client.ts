@@ -45,6 +45,10 @@ export interface CreateProjectResponse {
 
 export interface UpdateProjectRequest {
   id: string;
+  body?: UpdateProjectBody;
+}
+
+export interface UpdateProjectBody {
   name: string;
   description: string;
   icon: string;
@@ -192,7 +196,7 @@ export class ProjectServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

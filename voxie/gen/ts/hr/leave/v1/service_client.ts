@@ -44,6 +44,10 @@ export interface CreateLeaveRequestResponse {
 
 export interface ApproveLeaveRequest {
   requestId: string;
+  body?: ApproveLeaveBody;
+}
+
+export interface ApproveLeaveBody {
   approved: boolean;
   rejectionReason: string | null;
 }
@@ -93,6 +97,10 @@ export interface CreateLeaveTypeResponse {
 
 export interface UpdateLeaveTypeRequest {
   id: string;
+  body?: UpdateLeaveTypeBody;
+}
+
+export interface UpdateLeaveTypeBody {
   name: string | null;
   isPaid: boolean | null;
   requiresApproval: boolean | null;
@@ -260,7 +268,7 @@ export class LeaveServiceClient {
     const resp = await this.doFetch(url, {
       method: "PATCH",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
@@ -332,7 +340,7 @@ export class LeaveServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

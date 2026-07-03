@@ -44,6 +44,7 @@ service OrderService {
     option (onekit.http.config) = {
       path: "/orders/{order_id}/status"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

@@ -7,6 +7,14 @@ import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
+message UpdateTaskStatusBody {
+  // status is the current lifecycle state.
+  string status = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
 message UpdateTaskStatusRequest {
   // id is the unique identifier for the resource.
   int64 id = 1 [
@@ -15,11 +23,8 @@ message UpdateTaskStatusRequest {
   ,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // status is the current lifecycle state.
-  string status = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
+  // body carries the new task status bound from the HTTP payload.
+  UpdateTaskStatusBody body = 2;
 }
 
 message UpdateTaskStatusResponse {

@@ -23,31 +23,118 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateExpenseBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// category_id is the category id value for this contract.
+	CategoryId *int64 `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
+	// amount is the amount value for this contract.
+	Amount float64 `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// currency is the currency value for this contract.
+	Currency string `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	// description is the description value for this contract.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// vendor is the vendor value for this contract.
+	Vendor string `protobuf:"bytes,5,opt,name=vendor,proto3" json:"vendor,omitempty"`
+	// receipt_url is the receipt url value for this contract.
+	ReceiptUrl string `protobuf:"bytes,6,opt,name=receipt_url,json=receiptUrl,proto3" json:"receipt_url,omitempty"`
+	// expense_date is the expense date value for this contract.
+	ExpenseDate   string `protobuf:"bytes,7,opt,name=expense_date,json=expenseDate,proto3" json:"expense_date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateExpenseBody) Reset() {
+	*x = UpdateExpenseBody{}
+	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateExpenseBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateExpenseBody) ProtoMessage() {}
+
+func (x *UpdateExpenseBody) ProtoReflect() protoreflect.Message {
+	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateExpenseBody.ProtoReflect.Descriptor instead.
+func (*UpdateExpenseBody) Descriptor() ([]byte, []int) {
+	return file_finance_expenses_v1_update_expense_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateExpenseBody) GetCategoryId() int64 {
+	if x != nil && x.CategoryId != nil {
+		return *x.CategoryId
+	}
+	return 0
+}
+
+func (x *UpdateExpenseBody) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+func (x *UpdateExpenseBody) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *UpdateExpenseBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateExpenseBody) GetVendor() string {
+	if x != nil {
+		return x.Vendor
+	}
+	return ""
+}
+
+func (x *UpdateExpenseBody) GetReceiptUrl() string {
+	if x != nil {
+		return x.ReceiptUrl
+	}
+	return ""
+}
+
+func (x *UpdateExpenseBody) GetExpenseDate() string {
+	if x != nil {
+		return x.ExpenseDate
+	}
+	return ""
+}
+
 type UpdateExpenseRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the expense.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// category_id is the category id value for this contract.
-	CategoryId *int64 `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
-	// amount is the amount value for this contract.
-	Amount float64 `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
-	// currency is the currency value for this contract.
-	Currency string `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
-	// description is the description value for this contract.
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// vendor is the vendor value for this contract.
-	Vendor string `protobuf:"bytes,6,opt,name=vendor,proto3" json:"vendor,omitempty"`
-	// receipt_url is the receipt url value for this contract.
-	ReceiptUrl string `protobuf:"bytes,7,opt,name=receipt_url,json=receiptUrl,proto3" json:"receipt_url,omitempty"`
-	// expense_date is the expense date value for this contract.
-	ExpenseDate   string `protobuf:"bytes,8,opt,name=expense_date,json=expenseDate,proto3" json:"expense_date,omitempty"`
+	// body carries updatable expense fields bound from the HTTP payload.
+	Body          *UpdateExpenseBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateExpenseRequest) Reset() {
 	*x = UpdateExpenseRequest{}
-	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[0]
+	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -59,7 +146,7 @@ func (x *UpdateExpenseRequest) String() string {
 func (*UpdateExpenseRequest) ProtoMessage() {}
 
 func (x *UpdateExpenseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[0]
+	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -72,7 +159,7 @@ func (x *UpdateExpenseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateExpenseRequest.ProtoReflect.Descriptor instead.
 func (*UpdateExpenseRequest) Descriptor() ([]byte, []int) {
-	return file_finance_expenses_v1_update_expense_proto_rawDescGZIP(), []int{0}
+	return file_finance_expenses_v1_update_expense_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateExpenseRequest) GetId() int64 {
@@ -82,53 +169,11 @@ func (x *UpdateExpenseRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateExpenseRequest) GetCategoryId() int64 {
-	if x != nil && x.CategoryId != nil {
-		return *x.CategoryId
-	}
-	return 0
-}
-
-func (x *UpdateExpenseRequest) GetAmount() float64 {
+func (x *UpdateExpenseRequest) GetBody() *UpdateExpenseBody {
 	if x != nil {
-		return x.Amount
+		return x.Body
 	}
-	return 0
-}
-
-func (x *UpdateExpenseRequest) GetCurrency() string {
-	if x != nil {
-		return x.Currency
-	}
-	return ""
-}
-
-func (x *UpdateExpenseRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateExpenseRequest) GetVendor() string {
-	if x != nil {
-		return x.Vendor
-	}
-	return ""
-}
-
-func (x *UpdateExpenseRequest) GetReceiptUrl() string {
-	if x != nil {
-		return x.ReceiptUrl
-	}
-	return ""
-}
-
-func (x *UpdateExpenseRequest) GetExpenseDate() string {
-	if x != nil {
-		return x.ExpenseDate
-	}
-	return ""
+	return nil
 }
 
 type UpdateExpenseResponse struct {
@@ -141,7 +186,7 @@ type UpdateExpenseResponse struct {
 
 func (x *UpdateExpenseResponse) Reset() {
 	*x = UpdateExpenseResponse{}
-	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[1]
+	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -153,7 +198,7 @@ func (x *UpdateExpenseResponse) String() string {
 func (*UpdateExpenseResponse) ProtoMessage() {}
 
 func (x *UpdateExpenseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[1]
+	mi := &file_finance_expenses_v1_update_expense_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -166,7 +211,7 @@ func (x *UpdateExpenseResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateExpenseResponse.ProtoReflect.Descriptor instead.
 func (*UpdateExpenseResponse) Descriptor() ([]byte, []int) {
-	return file_finance_expenses_v1_update_expense_proto_rawDescGZIP(), []int{1}
+	return file_finance_expenses_v1_update_expense_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateExpenseResponse) GetMessage() string {
@@ -180,24 +225,26 @@ var File_finance_expenses_v1_update_expense_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_update_expense_proto_rawDesc = "" +
 	"\n" +
-	"(finance/expenses/v1/update_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xf4\x02\n" +
-	"\x14UpdateExpenseRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12.\n" +
-	"\vcategory_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"(finance/expenses/v1/update_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xd1\x02\n" +
+	"\x11UpdateExpenseBody\x12.\n" +
+	"\vcategory_id\x18\x01 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"categoryId\x88\x01\x01\x12&\n" +
-	"\x06amount\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
-	"\bcurrency\x18\x04 \x01(\tB\n" +
+	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
+	"\bcurrency\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12,\n" +
-	"\vdescription\x18\x05 \x01(\tB\n" +
+	"\vdescription\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12\"\n" +
-	"\x06vendor\x18\x06 \x01(\tB\n" +
+	"\x06vendor\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06vendor\x12+\n" +
-	"\vreceipt_url\x18\a \x01(\tB\n" +
+	"\vreceipt_url\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
 	"receiptUrl\x12-\n" +
-	"\fexpense_date\x18\b \x01(\tB\n" +
+	"\fexpense_date\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vexpenseDateB\x0e\n" +
-	"\f_category_id\"1\n" +
+	"\f_category_id\"r\n" +
+	"\x14UpdateExpenseRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12:\n" +
+	"\x04body\x18\x02 \x01(\v2&.finance.expenses.v1.UpdateExpenseBodyR\x04body\"1\n" +
 	"\x15UpdateExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/finance/expenses/v1b\x06proto3"
 
@@ -213,17 +260,19 @@ func file_finance_expenses_v1_update_expense_proto_rawDescGZIP() []byte {
 	return file_finance_expenses_v1_update_expense_proto_rawDescData
 }
 
-var file_finance_expenses_v1_update_expense_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_finance_expenses_v1_update_expense_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_finance_expenses_v1_update_expense_proto_goTypes = []any{
-	(*UpdateExpenseRequest)(nil),  // 0: finance.expenses.v1.UpdateExpenseRequest
-	(*UpdateExpenseResponse)(nil), // 1: finance.expenses.v1.UpdateExpenseResponse
+	(*UpdateExpenseBody)(nil),     // 0: finance.expenses.v1.UpdateExpenseBody
+	(*UpdateExpenseRequest)(nil),  // 1: finance.expenses.v1.UpdateExpenseRequest
+	(*UpdateExpenseResponse)(nil), // 2: finance.expenses.v1.UpdateExpenseResponse
 }
 var file_finance_expenses_v1_update_expense_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: finance.expenses.v1.UpdateExpenseRequest.body:type_name -> finance.expenses.v1.UpdateExpenseBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_finance_expenses_v1_update_expense_proto_init() }
@@ -238,7 +287,7 @@ func file_finance_expenses_v1_update_expense_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_finance_expenses_v1_update_expense_proto_rawDesc), len(file_finance_expenses_v1_update_expense_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

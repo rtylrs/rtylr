@@ -22,5 +22,5 @@ message GetCampaignDetailResponse {
   // campaign is the campaign value for this contract.
   Campaign campaign = 1;
   // stats is the stats value for this contract.
-  CampaignStats stats = 2;
+  CampaignStats stats = 2 [(onekit.http.empty_behavior) = EMPTY_BEHAVIOR_OMIT];
 }

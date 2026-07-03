@@ -7,15 +7,20 @@
 /* eslint-disable */
 import type { PermissionPayload, RolePayload } from "./types";
 
-export interface UpdateRoleRequest {
-  /** ID of the role to update. */
-  id: number;
+export interface UpdateRoleBody {
   /** New name; absent to keep current. */
   name?:
     | string
     | undefined;
   /** New permission set; if provided, replaces all existing permissions. */
   permissions: PermissionPayload[];
+}
+
+export interface UpdateRoleRequest {
+  /** ID of the role to update. */
+  id: number;
+  /** body carries updatable role fields bound from the HTTP payload. */
+  body: UpdateRoleBody | undefined;
 }
 
 export interface UpdateRoleResponse {

@@ -25,7 +25,7 @@ var File_finance_invoices_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!finance/invoices/v1/service.proto\x12\x13finance.invoices.v1\x1a(finance/invoices/v1/create_invoice.proto\x1a(finance/invoices/v1/delete_invoice.proto\x1a%finance/invoices/v1/get_invoice.proto\x1a'finance/invoices/v1/list_invoices.proto\x1a(finance/invoices/v1/update_invoice.proto\x1a/finance/invoices/v1/update_invoice_status.proto\x1a\x1donekit/http/annotations.proto2\xb5\x06\n" +
+	"!finance/invoices/v1/service.proto\x12\x13finance.invoices.v1\x1a(finance/invoices/v1/create_invoice.proto\x1a(finance/invoices/v1/delete_invoice.proto\x1a%finance/invoices/v1/get_invoice.proto\x1a'finance/invoices/v1/list_invoices.proto\x1a(finance/invoices/v1/update_invoice.proto\x1a/finance/invoices/v1/update_invoice_status.proto\x1a\x1donekit/http/annotations.proto2\xc2\x06\n" +
 	"\x0fInvoicesService\x12v\n" +
 	"\fListInvoices\x12(.finance.invoices.v1.ListInvoicesRequest\x1a).finance.invoices.v1.ListInvoicesResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/invoices\x10\x01\x12y\n" +
@@ -33,11 +33,11 @@ const file_finance_invoices_v1_service_proto_rawDesc = "" +
 	"\t/invoices\x10\x02\x12u\n" +
 	"\n" +
 	"GetInvoice\x12&.finance.invoices.v1.GetInvoiceRequest\x1a'.finance.invoices.v1.GetInvoiceResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/invoices/{id}\x10\x01\x12~\n" +
-	"\rUpdateInvoice\x12).finance.invoices.v1.UpdateInvoiceRequest\x1a*.finance.invoices.v1.UpdateInvoiceResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/invoices/{id}\x10\x03\x12\x97\x01\n" +
-	"\x13UpdateInvoiceStatus\x12/.finance.invoices.v1.UpdateInvoiceStatusRequest\x1a0.finance.invoices.v1.UpdateInvoiceStatusResponse\"\x1d\x9a\xb5\x18\x19\n" +
-	"\x15/invoices/{id}/status\x10\x05\x12~\n" +
+	"\x0e/invoices/{id}\x10\x01\x12\x84\x01\n" +
+	"\rUpdateInvoice\x12).finance.invoices.v1.UpdateInvoiceRequest\x1a*.finance.invoices.v1.UpdateInvoiceResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/invoices/{id}\x10\x03\"\x04body\x12\x9d\x01\n" +
+	"\x13UpdateInvoiceStatus\x12/.finance.invoices.v1.UpdateInvoiceStatusRequest\x1a0.finance.invoices.v1.UpdateInvoiceStatusResponse\"#\x9a\xb5\x18\x1f\n" +
+	"\x15/invoices/{id}/status\x10\x05\"\x04body\x12~\n" +
 	"\rDeleteInvoice\x12).finance.invoices.v1.DeleteInvoiceRequest\x1a*.finance.invoices.v1.DeleteInvoiceResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/invoices/{id}\x10\x04\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/finance/invoices/v1B4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"

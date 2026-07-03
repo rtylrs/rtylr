@@ -47,7 +47,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	updateWorkspaceHandler := BindingMiddleware[UpdateWorkspaceRequest](
 		genericHandler(server.UpdateWorkspace, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateWorkspacePathParams, updateWorkspaceQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/flow/workspace/v1/workspaces/{id}", updateWorkspaceHandler)

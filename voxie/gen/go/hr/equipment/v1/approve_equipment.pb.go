@@ -23,19 +23,64 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ApproveEquipmentBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// True to approve, false to reject.
+	Approved      bool `protobuf:"varint,1,opt,name=approved,proto3" json:"approved,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApproveEquipmentBody) Reset() {
+	*x = ApproveEquipmentBody{}
+	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveEquipmentBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveEquipmentBody) ProtoMessage() {}
+
+func (x *ApproveEquipmentBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveEquipmentBody.ProtoReflect.Descriptor instead.
+func (*ApproveEquipmentBody) Descriptor() ([]byte, []int) {
+	return file_hr_equipment_v1_approve_equipment_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ApproveEquipmentBody) GetApproved() bool {
+	if x != nil {
+		return x.Approved
+	}
+	return false
+}
+
 type ApproveEquipmentRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the equipment request being reviewed.
 	EquipmentRequestId int64 `protobuf:"varint,1,opt,name=equipment_request_id,json=equipmentRequestId,proto3" json:"equipment_request_id,omitempty"`
-	// True to approve, false to reject.
-	Approved      bool `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
+	// body carries approval decision fields bound from the HTTP payload.
+	Body          *ApproveEquipmentBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ApproveEquipmentRequest) Reset() {
 	*x = ApproveEquipmentRequest{}
-	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[0]
+	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +92,7 @@ func (x *ApproveEquipmentRequest) String() string {
 func (*ApproveEquipmentRequest) ProtoMessage() {}
 
 func (x *ApproveEquipmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[0]
+	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +105,7 @@ func (x *ApproveEquipmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveEquipmentRequest.ProtoReflect.Descriptor instead.
 func (*ApproveEquipmentRequest) Descriptor() ([]byte, []int) {
-	return file_hr_equipment_v1_approve_equipment_proto_rawDescGZIP(), []int{0}
+	return file_hr_equipment_v1_approve_equipment_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ApproveEquipmentRequest) GetEquipmentRequestId() int64 {
@@ -70,11 +115,11 @@ func (x *ApproveEquipmentRequest) GetEquipmentRequestId() int64 {
 	return 0
 }
 
-func (x *ApproveEquipmentRequest) GetApproved() bool {
+func (x *ApproveEquipmentRequest) GetBody() *ApproveEquipmentBody {
 	if x != nil {
-		return x.Approved
+		return x.Body
 	}
-	return false
+	return nil
 }
 
 type ApproveEquipmentResponse struct {
@@ -87,7 +132,7 @@ type ApproveEquipmentResponse struct {
 
 func (x *ApproveEquipmentResponse) Reset() {
 	*x = ApproveEquipmentResponse{}
-	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[1]
+	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -99,7 +144,7 @@ func (x *ApproveEquipmentResponse) String() string {
 func (*ApproveEquipmentResponse) ProtoMessage() {}
 
 func (x *ApproveEquipmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[1]
+	mi := &file_hr_equipment_v1_approve_equipment_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -112,7 +157,7 @@ func (x *ApproveEquipmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApproveEquipmentResponse.ProtoReflect.Descriptor instead.
 func (*ApproveEquipmentResponse) Descriptor() ([]byte, []int) {
-	return file_hr_equipment_v1_approve_equipment_proto_rawDescGZIP(), []int{1}
+	return file_hr_equipment_v1_approve_equipment_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ApproveEquipmentResponse) GetSuccess() bool {
@@ -126,10 +171,12 @@ var File_hr_equipment_v1_approve_equipment_proto protoreflect.FileDescriptor
 
 const file_hr_equipment_v1_approve_equipment_proto_rawDesc = "" +
 	"\n" +
-	"'hr/equipment/v1/approve_equipment.proto\x12\x0fhr.equipment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"w\n" +
+	"'hr/equipment/v1/approve_equipment.proto\x12\x0fhr.equipment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"2\n" +
+	"\x14ApproveEquipmentBody\x12\x1a\n" +
+	"\bapproved\x18\x01 \x01(\bR\bapproved\"\x96\x01\n" +
 	"\x17ApproveEquipmentRequest\x12@\n" +
-	"\x14equipment_request_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x12equipmentRequestId\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\"4\n" +
+	"\x14equipment_request_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x12equipmentRequestId\x129\n" +
+	"\x04body\x18\x02 \x01(\v2%.hr.equipment.v1.ApproveEquipmentBodyR\x04body\"4\n" +
 	"\x18ApproveEquipmentResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB0Z.github.com/voxire/voxie/gen/go/hr/equipment/v1b\x06proto3"
 
@@ -145,17 +192,19 @@ func file_hr_equipment_v1_approve_equipment_proto_rawDescGZIP() []byte {
 	return file_hr_equipment_v1_approve_equipment_proto_rawDescData
 }
 
-var file_hr_equipment_v1_approve_equipment_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hr_equipment_v1_approve_equipment_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hr_equipment_v1_approve_equipment_proto_goTypes = []any{
-	(*ApproveEquipmentRequest)(nil),  // 0: hr.equipment.v1.ApproveEquipmentRequest
-	(*ApproveEquipmentResponse)(nil), // 1: hr.equipment.v1.ApproveEquipmentResponse
+	(*ApproveEquipmentBody)(nil),     // 0: hr.equipment.v1.ApproveEquipmentBody
+	(*ApproveEquipmentRequest)(nil),  // 1: hr.equipment.v1.ApproveEquipmentRequest
+	(*ApproveEquipmentResponse)(nil), // 2: hr.equipment.v1.ApproveEquipmentResponse
 }
 var file_hr_equipment_v1_approve_equipment_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: hr.equipment.v1.ApproveEquipmentRequest.body:type_name -> hr.equipment.v1.ApproveEquipmentBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hr_equipment_v1_approve_equipment_proto_init() }
@@ -169,7 +218,7 @@ func file_hr_equipment_v1_approve_equipment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_equipment_v1_approve_equipment_proto_rawDesc), len(file_hr_equipment_v1_approve_equipment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

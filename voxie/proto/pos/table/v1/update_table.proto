@@ -9,7 +9,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
 
 // ── Update ────────────────────────────────────────────────────────
 
-message UpdateTableRequest {
+message UpdateTableBody {
   // location_id is the location id value for this contract.
   optional int64 location_id = 1 [(onekit.http.nullable) = true, (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // label is the label value for this contract.
@@ -27,11 +27,17 @@ message UpdateTableRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
+}
+
+message UpdateTableRequest {
   // id is the unique identifier for the table.
-  int64 id = 5 [
+  int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries updatable table fields bound from the HTTP payload.
+  UpdateTableBody body = 2;
 }
 
 message UpdateTableResponse {

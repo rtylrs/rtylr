@@ -4,6 +4,10 @@
 export interface UpdateOrderItemStatusRequest {
   orderId: string;
   itemId: string;
+  body?: UpdateOrderItemStatusBody;
+}
+
+export interface UpdateOrderItemStatusBody {
   status: string;
 }
 
@@ -89,7 +93,7 @@ export class OrderItemServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

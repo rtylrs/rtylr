@@ -6,13 +6,18 @@
 
 /* eslint-disable */
 
-export interface UpdateKDSItemStatusRequest {
+export interface UpdateKDSItemStatusBody {
   /** status is the current lifecycle state. */
   status: string;
+}
+
+export interface UpdateKDSItemStatusRequest {
   /** order_id is the unique identifier for the order. */
   orderId: number;
   /** item_id is the unique identifier for the order item. */
   itemId: number;
+  /** body carries the new KDS item status bound from the HTTP payload. */
+  body: UpdateKDSItemStatusBody | undefined;
 }
 
 export interface UpdateKDSItemStatusResponse {

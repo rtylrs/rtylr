@@ -9,7 +9,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/combo/v1";
 
 // ── Update ────────────────────────────────────────────────────────
 
-message UpdateComboRequest {
+message UpdateComboBody {
   // name is the name value for this contract.
   string name = 1 [
     (buf.validate.field).required = true,
@@ -29,11 +29,17 @@ message UpdateComboRequest {
   ];
   // is_active is the is active value for this contract.
   bool is_active = 5;
+}
+
+message UpdateComboRequest {
   // id is the unique identifier for the combo.
-  int64 id = 6 [
+  int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries updatable combo fields bound from the HTTP payload.
+  UpdateComboBody body = 2;
 }
 
 message UpdateComboResponse {

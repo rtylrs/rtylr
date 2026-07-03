@@ -23,43 +23,172 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UpdateProductRequest struct {
+type UpdateProductBody struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// id is the unique identifier for the resource.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// category_id is the category id value for this contract.
-	CategoryId int64 `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	CategoryId int64 `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
 	// supplier_id is the supplier id value for this contract.
-	SupplierId int64 `protobuf:"varint,3,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
+	SupplierId int64 `protobuf:"varint,2,opt,name=supplier_id,json=supplierId,proto3" json:"supplier_id,omitempty"`
 	// name is the name value for this contract.
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	// sku is the sku value for this contract.
-	Sku string `protobuf:"bytes,5,opt,name=sku,proto3" json:"sku,omitempty"`
+	Sku string `protobuf:"bytes,4,opt,name=sku,proto3" json:"sku,omitempty"`
 	// barcode is the barcode value for this contract.
-	Barcode string `protobuf:"bytes,6,opt,name=barcode,proto3" json:"barcode,omitempty"`
+	Barcode string `protobuf:"bytes,5,opt,name=barcode,proto3" json:"barcode,omitempty"`
 	// description is the description value for this contract.
-	Description string `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	// unit is the unit value for this contract.
-	Unit string `protobuf:"bytes,8,opt,name=unit,proto3" json:"unit,omitempty"`
+	Unit string `protobuf:"bytes,7,opt,name=unit,proto3" json:"unit,omitempty"`
 	// cost_price is the cost price value for this contract.
-	CostPrice float64 `protobuf:"fixed64,9,opt,name=cost_price,json=costPrice,proto3" json:"cost_price,omitempty"`
+	CostPrice float64 `protobuf:"fixed64,8,opt,name=cost_price,json=costPrice,proto3" json:"cost_price,omitempty"`
 	// sale_price is the sale price value for this contract.
-	SalePrice float64 `protobuf:"fixed64,10,opt,name=sale_price,json=salePrice,proto3" json:"sale_price,omitempty"`
+	SalePrice float64 `protobuf:"fixed64,9,opt,name=sale_price,json=salePrice,proto3" json:"sale_price,omitempty"`
 	// low_stock_threshold is the low stock threshold value for this contract.
-	LowStockThreshold float64 `protobuf:"fixed64,11,opt,name=low_stock_threshold,json=lowStockThreshold,proto3" json:"low_stock_threshold,omitempty"`
+	LowStockThreshold float64 `protobuf:"fixed64,10,opt,name=low_stock_threshold,json=lowStockThreshold,proto3" json:"low_stock_threshold,omitempty"`
 	// reorder_quantity is the reorder quantity value for this contract.
-	ReorderQuantity float64 `protobuf:"fixed64,12,opt,name=reorder_quantity,json=reorderQuantity,proto3" json:"reorder_quantity,omitempty"`
+	ReorderQuantity float64 `protobuf:"fixed64,11,opt,name=reorder_quantity,json=reorderQuantity,proto3" json:"reorder_quantity,omitempty"`
 	// is_active is the is active value for this contract.
-	IsActive bool `protobuf:"varint,13,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	IsActive bool `protobuf:"varint,12,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	// track_inventory is the track inventory value for this contract.
-	TrackInventory bool `protobuf:"varint,14,opt,name=track_inventory,json=trackInventory,proto3" json:"track_inventory,omitempty"`
+	TrackInventory bool `protobuf:"varint,13,opt,name=track_inventory,json=trackInventory,proto3" json:"track_inventory,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
+func (x *UpdateProductBody) Reset() {
+	*x = UpdateProductBody{}
+	mi := &file_erp_product_v1_update_product_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProductBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProductBody) ProtoMessage() {}
+
+func (x *UpdateProductBody) ProtoReflect() protoreflect.Message {
+	mi := &file_erp_product_v1_update_product_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProductBody.ProtoReflect.Descriptor instead.
+func (*UpdateProductBody) Descriptor() ([]byte, []int) {
+	return file_erp_product_v1_update_product_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateProductBody) GetCategoryId() int64 {
+	if x != nil {
+		return x.CategoryId
+	}
+	return 0
+}
+
+func (x *UpdateProductBody) GetSupplierId() int64 {
+	if x != nil {
+		return x.SupplierId
+	}
+	return 0
+}
+
+func (x *UpdateProductBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateProductBody) GetSku() string {
+	if x != nil {
+		return x.Sku
+	}
+	return ""
+}
+
+func (x *UpdateProductBody) GetBarcode() string {
+	if x != nil {
+		return x.Barcode
+	}
+	return ""
+}
+
+func (x *UpdateProductBody) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateProductBody) GetUnit() string {
+	if x != nil {
+		return x.Unit
+	}
+	return ""
+}
+
+func (x *UpdateProductBody) GetCostPrice() float64 {
+	if x != nil {
+		return x.CostPrice
+	}
+	return 0
+}
+
+func (x *UpdateProductBody) GetSalePrice() float64 {
+	if x != nil {
+		return x.SalePrice
+	}
+	return 0
+}
+
+func (x *UpdateProductBody) GetLowStockThreshold() float64 {
+	if x != nil {
+		return x.LowStockThreshold
+	}
+	return 0
+}
+
+func (x *UpdateProductBody) GetReorderQuantity() float64 {
+	if x != nil {
+		return x.ReorderQuantity
+	}
+	return 0
+}
+
+func (x *UpdateProductBody) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *UpdateProductBody) GetTrackInventory() bool {
+	if x != nil {
+		return x.TrackInventory
+	}
+	return false
+}
+
+type UpdateProductRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the resource.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// body carries updatable product fields bound from the HTTP payload.
+	Body          *UpdateProductBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *UpdateProductRequest) Reset() {
 	*x = UpdateProductRequest{}
-	mi := &file_erp_product_v1_update_product_proto_msgTypes[0]
+	mi := &file_erp_product_v1_update_product_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -71,7 +200,7 @@ func (x *UpdateProductRequest) String() string {
 func (*UpdateProductRequest) ProtoMessage() {}
 
 func (x *UpdateProductRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_product_v1_update_product_proto_msgTypes[0]
+	mi := &file_erp_product_v1_update_product_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -84,7 +213,7 @@ func (x *UpdateProductRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProductRequest.ProtoReflect.Descriptor instead.
 func (*UpdateProductRequest) Descriptor() ([]byte, []int) {
-	return file_erp_product_v1_update_product_proto_rawDescGZIP(), []int{0}
+	return file_erp_product_v1_update_product_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateProductRequest) GetId() int64 {
@@ -94,95 +223,11 @@ func (x *UpdateProductRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateProductRequest) GetCategoryId() int64 {
+func (x *UpdateProductRequest) GetBody() *UpdateProductBody {
 	if x != nil {
-		return x.CategoryId
+		return x.Body
 	}
-	return 0
-}
-
-func (x *UpdateProductRequest) GetSupplierId() int64 {
-	if x != nil {
-		return x.SupplierId
-	}
-	return 0
-}
-
-func (x *UpdateProductRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateProductRequest) GetSku() string {
-	if x != nil {
-		return x.Sku
-	}
-	return ""
-}
-
-func (x *UpdateProductRequest) GetBarcode() string {
-	if x != nil {
-		return x.Barcode
-	}
-	return ""
-}
-
-func (x *UpdateProductRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateProductRequest) GetUnit() string {
-	if x != nil {
-		return x.Unit
-	}
-	return ""
-}
-
-func (x *UpdateProductRequest) GetCostPrice() float64 {
-	if x != nil {
-		return x.CostPrice
-	}
-	return 0
-}
-
-func (x *UpdateProductRequest) GetSalePrice() float64 {
-	if x != nil {
-		return x.SalePrice
-	}
-	return 0
-}
-
-func (x *UpdateProductRequest) GetLowStockThreshold() float64 {
-	if x != nil {
-		return x.LowStockThreshold
-	}
-	return 0
-}
-
-func (x *UpdateProductRequest) GetReorderQuantity() float64 {
-	if x != nil {
-		return x.ReorderQuantity
-	}
-	return 0
-}
-
-func (x *UpdateProductRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *UpdateProductRequest) GetTrackInventory() bool {
-	if x != nil {
-		return x.TrackInventory
-	}
-	return false
+	return nil
 }
 
 type UpdateProductResponse struct {
@@ -195,7 +240,7 @@ type UpdateProductResponse struct {
 
 func (x *UpdateProductResponse) Reset() {
 	*x = UpdateProductResponse{}
-	mi := &file_erp_product_v1_update_product_proto_msgTypes[1]
+	mi := &file_erp_product_v1_update_product_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -207,7 +252,7 @@ func (x *UpdateProductResponse) String() string {
 func (*UpdateProductResponse) ProtoMessage() {}
 
 func (x *UpdateProductResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_erp_product_v1_update_product_proto_msgTypes[1]
+	mi := &file_erp_product_v1_update_product_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -220,7 +265,7 @@ func (x *UpdateProductResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProductResponse.ProtoReflect.Descriptor instead.
 func (*UpdateProductResponse) Descriptor() ([]byte, []int) {
-	return file_erp_product_v1_update_product_proto_rawDescGZIP(), []int{1}
+	return file_erp_product_v1_update_product_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateProductResponse) GetMessage() string {
@@ -234,32 +279,34 @@ var File_erp_product_v1_update_product_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_update_product_proto_rawDesc = "" +
 	"\n" +
-	"#erp/product/v1/update_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xe9\x04\n" +
-	"\x14UpdateProductRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12/\n" +
-	"\vcategory_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"#erp/product/v1/update_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc6\x04\n" +
+	"\x11UpdateProductBody\x12/\n" +
+	"\vcategory_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"categoryId\x12/\n" +
-	"\vsupplier_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"\vsupplier_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"supplierId\x12\x1e\n" +
-	"\x04name\x18\x04 \x01(\tB\n" +
+	"\x04name\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1c\n" +
-	"\x03sku\x18\x05 \x01(\tB\n" +
+	"\x03sku\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03sku\x12$\n" +
-	"\abarcode\x18\x06 \x01(\tB\n" +
+	"\abarcode\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\abarcode\x12,\n" +
-	"\vdescription\x18\a \x01(\tB\n" +
+	"\vdescription\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12\x1e\n" +
-	"\x04unit\x18\b \x01(\tB\n" +
+	"\x04unit\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04unit\x12-\n" +
 	"\n" +
-	"cost_price\x18\t \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tcostPrice\x12-\n" +
+	"cost_price\x18\b \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tcostPrice\x12-\n" +
 	"\n" +
-	"sale_price\x18\n" +
-	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tsalePrice\x12>\n" +
-	"\x13low_stock_threshold\x18\v \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x11lowStockThreshold\x129\n" +
-	"\x10reorder_quantity\x18\f \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0freorderQuantity\x12\x1b\n" +
-	"\tis_active\x18\r \x01(\bR\bisActive\x12'\n" +
-	"\x0ftrack_inventory\x18\x0e \x01(\bR\x0etrackInventory\"1\n" +
+	"sale_price\x18\t \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tsalePrice\x12>\n" +
+	"\x13low_stock_threshold\x18\n" +
+	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x11lowStockThreshold\x129\n" +
+	"\x10reorder_quantity\x18\v \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0freorderQuantity\x12\x1b\n" +
+	"\tis_active\x18\f \x01(\bR\bisActive\x12'\n" +
+	"\x0ftrack_inventory\x18\r \x01(\bR\x0etrackInventory\"m\n" +
+	"\x14UpdateProductRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x125\n" +
+	"\x04body\x18\x02 \x01(\v2!.erp.product.v1.UpdateProductBodyR\x04body\"1\n" +
 	"\x15UpdateProductResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"
 
@@ -275,17 +322,19 @@ func file_erp_product_v1_update_product_proto_rawDescGZIP() []byte {
 	return file_erp_product_v1_update_product_proto_rawDescData
 }
 
-var file_erp_product_v1_update_product_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_erp_product_v1_update_product_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_erp_product_v1_update_product_proto_goTypes = []any{
-	(*UpdateProductRequest)(nil),  // 0: erp.product.v1.UpdateProductRequest
-	(*UpdateProductResponse)(nil), // 1: erp.product.v1.UpdateProductResponse
+	(*UpdateProductBody)(nil),     // 0: erp.product.v1.UpdateProductBody
+	(*UpdateProductRequest)(nil),  // 1: erp.product.v1.UpdateProductRequest
+	(*UpdateProductResponse)(nil), // 2: erp.product.v1.UpdateProductResponse
 }
 var file_erp_product_v1_update_product_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: erp.product.v1.UpdateProductRequest.body:type_name -> erp.product.v1.UpdateProductBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_erp_product_v1_update_product_proto_init() }
@@ -299,7 +348,7 @@ func file_erp_product_v1_update_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_erp_product_v1_update_product_proto_rawDesc), len(file_erp_product_v1_update_product_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -25,7 +25,7 @@ var File_crm_campaign_v1_service_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcrm/campaign/v1/service.proto\x12\x0fcrm.campaign.v1\x1a%crm/campaign/v1/create_campaign.proto\x1a)crm/campaign/v1/get_campaign_detail.proto\x1a(crm/campaign/v1/get_campaign_stats.proto\x1a$crm/campaign/v1/list_campaigns.proto\x1a%crm/campaign/v1/update_campaign.proto\x1a,crm/campaign/v1/update_campaign_status.proto\x1a\x1donekit/http/annotations.proto2\xbd\x06\n" +
+	"\x1dcrm/campaign/v1/service.proto\x12\x0fcrm.campaign.v1\x1a%crm/campaign/v1/create_campaign.proto\x1a)crm/campaign/v1/get_campaign_detail.proto\x1a(crm/campaign/v1/get_campaign_stats.proto\x1a$crm/campaign/v1/list_campaigns.proto\x1a%crm/campaign/v1/update_campaign.proto\x1a,crm/campaign/v1/update_campaign_status.proto\x1a\x1donekit/http/annotations.proto2\xc4\x06\n" +
 	"\x0fCampaignService\x12r\n" +
 	"\rListCampaigns\x12%.crm.campaign.v1.ListCampaignsRequest\x1a&.crm.campaign.v1.ListCampaignsResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -36,9 +36,9 @@ const file_crm_campaign_v1_service_proto_rawDesc = "" +
 	"\x11GetCampaignDetail\x12).crm.campaign.v1.GetCampaignDetailRequest\x1a*.crm.campaign.v1.GetCampaignDetailResponse\"\x17\x9a\xb5\x18\x13\n" +
 	"\x0f/campaigns/{id}\x10\x01\x12\x8f\x01\n" +
 	"\x10GetCampaignStats\x12(.crm.campaign.v1.GetCampaignStatsRequest\x1a).crm.campaign.v1.GetCampaignStatsResponse\"&\x9a\xb5\x18\"\n" +
-	"\x1e/campaigns/{campaign_id}/stats\x10\x01\x12z\n" +
-	"\x0eUpdateCampaign\x12&.crm.campaign.v1.UpdateCampaignRequest\x1a'.crm.campaign.v1.UpdateCampaignResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/campaigns/{id}\x10\x03\x12\x8e\x01\n" +
+	"\x1e/campaigns/{campaign_id}/stats\x10\x01\x12\x80\x01\n" +
+	"\x0eUpdateCampaign\x12&.crm.campaign.v1.UpdateCampaignRequest\x1a'.crm.campaign.v1.UpdateCampaignResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x0f/campaigns/{id}\x10\x03\"\x04body\x12\x8e\x01\n" +
 	"\x14UpdateCampaignStatus\x12,.crm.campaign.v1.UpdateCampaignStatusRequest\x1a-.crm.campaign.v1.UpdateCampaignStatusResponse\"\x19\x9a\xb5\x18\x15\n" +
 	"\x11/campaigns/status\x10\x05\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/crm/campaign/v1B0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"

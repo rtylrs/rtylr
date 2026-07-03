@@ -31,9 +31,13 @@ export interface CreateFloorResponse {
 }
 
 export interface UpdateFloorRequest {
+  id: string;
+  body?: UpdateFloorBody;
+}
+
+export interface UpdateFloorBody {
   name: string;
   sortOrder: number;
-  id: string;
 }
 
 export interface UpdateFloorResponse {
@@ -174,7 +178,7 @@ export class FloorServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req),
+      body: JSON.stringify(req.body ?? {}),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
