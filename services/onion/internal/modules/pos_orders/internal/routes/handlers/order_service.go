@@ -10,7 +10,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -183,11 +182,11 @@ func (a *OrderAPI) VoidOrder(ctx context.Context, req *posordersv1.VoidOrderRequ
 }
 
 func orderAPIError(err *errorModels.ServerError) error {
-	return contractHttp.NewServiceError(err)
+	return err
 }
 
 func orderAPIStatusError(status int, message string) error {
-	return contractHttp.NewStatusError(status, message)
+	return &errorModels.ServerError{HTTPCode: status, Code: status, Message: message}
 }
 
 func validateOrderListDates(req *posordersv1.ListOrdersRequest) error {

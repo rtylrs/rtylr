@@ -11,7 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/routes/handlers"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 func RegisterRoutes(_ context.Context, router *chi.Mux, svc *application.Service) {
@@ -19,7 +19,7 @@ func RegisterRoutes(_ context.Context, router *chi.Mux, svc *application.Service
 	if err := poscashv1.RegisterCashServiceServer(
 		handlers.NewCashAPI(svc),
 		poscashv1.WithMux(mux),
-		poscashv1.WithErrorHandler(contractHttp.ErrorHandler),
+		poscashv1.WithErrorHandler(serverHttp.OneKitErrorHandler),
 		poscashv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS cash service: %w", err))

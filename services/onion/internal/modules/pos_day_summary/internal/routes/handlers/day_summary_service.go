@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_day_summary/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -23,21 +22,21 @@ func NewDaySummaryAPI(service *application.Service) *DaySummaryAPI {
 
 func (a *DaySummaryAPI) DaySummary(ctx context.Context, req *possummaryv1.DaySummaryRequest) (*possummaryv1.DaySummaryResponse, error) {
 	if !reDate.MatchString(req.GetDate()) {
-		return nil, contractHttp.NewStatusError(http.StatusBadRequest, "date must be in YYYY-MM-DD format")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
 	}
 
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return nil, contractHttp.NewServiceError(errorModels.PermissionDeniedServerError())
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return nil, contractHttp.NewServiceError(errorModels.PermissionDeniedServerError())
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 
 	summary, err := a.Service.GetDaySummary(ctx, businessID, req.GetDate())
 	if err != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to get day summary")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get day summary"}
 	}
 
 	return &possummaryv1.DaySummaryResponse{

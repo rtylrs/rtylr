@@ -10,7 +10,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -30,7 +29,7 @@ func (a *CashAPI) ListCashMovements(ctx context.Context, req *poscashv1.ListCash
 
 	movements, listErr := a.Service.ListBySession(ctx, user.BusinessID, req.GetSessionId())
 	if listErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to list cash movements")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list cash movements"}
 	}
 
 	payloads := make([]*poscashv1.CashMovement, 0, len(movements))
@@ -49,7 +48,7 @@ func (a *CashAPI) CashDrop(ctx context.Context, req *poscashv1.CashDropRequest) 
 
 	id, createErr := a.Service.CashDrop(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), req.GetEmployeeId(), req.GetAmount(), req.GetReason()))
 	if createErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to create cash drop")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create cash drop"}
 	}
 
 	return &poscashv1.CashDropResponse{MovementId: id, Message: "Cash drop recorded successfully"}, nil
@@ -63,7 +62,7 @@ func (a *CashAPI) CashPickup(ctx context.Context, req *poscashv1.CashPickupReque
 
 	id, createErr := a.Service.CashPickup(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), req.GetEmployeeId(), req.GetAmount(), req.GetReason()))
 	if createErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to create cash pickup")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create cash pickup"}
 	}
 
 	return &poscashv1.CashPickupResponse{MovementId: id, Message: "Cash pickup recorded successfully"}, nil
@@ -75,12 +74,12 @@ func (a *CashAPI) CashAdjust(ctx context.Context, req *poscashv1.CashAdjustReque
 		return nil, err
 	}
 	if strings.TrimSpace(req.GetReason()) == "" {
-		return nil, contractHttp.NewStatusError(http.StatusBadRequest, "reason is required for adjustments")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "reason is required for adjustments"}
 	}
 
 	id, createErr := a.Service.CashAdjust(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), req.GetEmployeeId(), req.GetAmount(), req.GetReason()))
 	if createErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to create cash adjustment")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create cash adjustment"}
 	}
 
 	return &poscashv1.CashAdjustResponse{MovementId: id, Message: "Cash adjustment recorded successfully"}, nil
@@ -89,7 +88,7 @@ func (a *CashAPI) CashAdjust(ctx context.Context, req *poscashv1.CashAdjustReque
 func authenticatedCashUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return nil, contractHttp.NewServiceError(errorModels.PermissionDeniedServerError())
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 	return device.User, nil
 }

@@ -128,6 +128,29 @@ header checks, and protovalidate validation. Module implementations should not
 redefine HTTP request structs for endpoints that have generated service
 contracts.
 
+### Errors from oneKit handlers
+
+Return `*errorModels.ServerError` directly from a generated `FooServiceServer`
+method — the same type every other Onion handler already returns, from the
+same `internal/platform/errors` package:
+
+```go
+return nil, &errorModels.ServerError{
+    HTTPCode: http.StatusBadRequest,
+    Code:     http.StatusBadRequest,
+    Message:  "Name is required",
+}
+```
+
+Wire `WithErrorHandler(serverHttp.OneKitErrorHandler)` (from
+`internal/platform/server/http`) when calling `RegisterFooServiceServer`.
+`OneKitErrorHandler` unwraps `*errorModels.ServerError` first, falls back to
+onekit's own `ValidationError`/`Error` types (protovalidate failures, etc.),
+and writes the response through the exact same `writeServerError` helper the
+non-oneKit `RegisterGET`/`RegisterPOST` handlers use — so oneKit-backed and
+hand-written routes return identical error envelopes. There is no separate
+error-wrapper package; don't reintroduce one.
+
 Contract generation is owned by the `voxie` repo, not `onion`. `gen/go` ships
 pre-committed in the `voxie` submodule — bump the submodule pointer to pick up
 new or changed contracts, there is nothing to run locally in `onion`.

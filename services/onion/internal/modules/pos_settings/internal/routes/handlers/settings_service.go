@@ -8,7 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type SettingsAPI struct {
@@ -22,12 +22,12 @@ func NewSettingsAPI(service *application.Service) *SettingsAPI {
 func (a *SettingsAPI) GetPOSSettings(ctx context.Context, _ *possettingsv1.GetPOSSettingsRequest) (*possettingsv1.GetPOSSettingsResponse, error) {
 	businessID, serverErr := businessIDFromContext(ctx)
 	if serverErr != nil {
-		return nil, contractHttp.NewServiceError(serverErr)
+		return nil, serverErr
 	}
 
 	settings, err := a.Service.GetSettings(ctx, businessID)
 	if err != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to get POS settings")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get POS settings"}
 	}
 
 	return &possettingsv1.GetPOSSettingsResponse{Settings: settingsToProto(settings)}, nil
@@ -36,18 +36,18 @@ func (a *SettingsAPI) GetPOSSettings(ctx context.Context, _ *possettingsv1.GetPO
 func (a *SettingsAPI) UpdatePOSSettings(ctx context.Context, req *possettingsv1.UpdatePOSSettingsRequest) (*possettingsv1.UpdatePOSSettingsResponse, error) {
 	businessID, serverErr := businessIDFromContext(ctx)
 	if serverErr != nil {
-		return nil, contractHttp.NewServiceError(serverErr)
+		return nil, serverErr
 	}
 	if req.GetBusinessProfile() != "" && domain.NormalizeProfile(req.GetBusinessProfile()) != req.GetBusinessProfile() {
-		return nil, contractHttp.NewStatusError(http.StatusBadRequest, "Unsupported POS business profile")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Unsupported POS business profile"}
 	}
 	if req.GetTheme() != "" && domain.NormalizeTheme(req.GetTheme()) != req.GetTheme() {
-		return nil, contractHttp.NewStatusError(http.StatusBadRequest, "Unsupported POS theme")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Unsupported POS theme"}
 	}
 
 	existing, err := a.Service.GetSettings(ctx, businessID)
 	if err != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to get existing POS settings")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get existing POS settings"}
 	}
 
 	profile := existing.Profile
@@ -81,7 +81,7 @@ func (a *SettingsAPI) UpdatePOSSettings(ctx context.Context, req *possettingsv1.
 		ReceiptFooter: receiptFooter,
 	})
 	if err != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to update POS settings")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update POS settings"}
 	}
 
 	return &possettingsv1.UpdatePOSSettingsResponse{Settings: settingsToProto(settings), Message: "POS settings updated successfully"}, nil

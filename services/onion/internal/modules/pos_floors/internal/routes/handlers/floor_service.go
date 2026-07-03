@@ -10,7 +10,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -30,7 +29,7 @@ func (a *FloorAPI) ListFloors(ctx context.Context, req *posfloorv1.ListFloorsReq
 
 	floors, listErr := a.Service.List(ctx, user.BusinessID, req.GetBranchId())
 	if listErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to list floors")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list floors"}
 	}
 
 	payloads := make([]*posfloorv1.Floor, 0, len(floors))
@@ -47,7 +46,7 @@ func (a *FloorAPI) CreateFloor(ctx context.Context, req *posfloorv1.CreateFloorR
 		return nil, err
 	}
 	if strings.TrimSpace(req.GetName()) == "" {
-		return nil, contractHttp.NewStatusError(http.StatusBadRequest, "Name is required")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Name is required"}
 	}
 
 	id, createErr := a.Service.Create(ctx, domain.FloorInput{
@@ -57,7 +56,7 @@ func (a *FloorAPI) CreateFloor(ctx context.Context, req *posfloorv1.CreateFloorR
 		SortOrder:  int(req.GetSortOrder()),
 	})
 	if createErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to create floor")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create floor"}
 	}
 
 	return &posfloorv1.CreateFloorResponse{FloorId: id, Message: "Floor created successfully"}, nil
@@ -69,7 +68,7 @@ func (a *FloorAPI) UpdateFloor(ctx context.Context, req *posfloorv1.UpdateFloorR
 		return nil, err
 	}
 	if strings.TrimSpace(req.GetName()) == "" {
-		return nil, contractHttp.NewStatusError(http.StatusBadRequest, "Name is required")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Name is required"}
 	}
 
 	if updateErr := a.Service.Update(ctx, domain.FloorUpdateInput{
@@ -78,7 +77,7 @@ func (a *FloorAPI) UpdateFloor(ctx context.Context, req *posfloorv1.UpdateFloorR
 		Name:       req.GetName(),
 		SortOrder:  int(req.GetSortOrder()),
 	}); updateErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to update floor")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update floor"}
 	}
 
 	return &posfloorv1.UpdateFloorResponse{Message: "Floor updated successfully"}, nil
@@ -91,7 +90,7 @@ func (a *FloorAPI) DeleteFloor(ctx context.Context, req *posfloorv1.DeleteFloorR
 	}
 
 	if deleteErr := a.Service.Delete(ctx, user.BusinessID, req.GetId()); deleteErr != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to delete floor")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to delete floor"}
 	}
 
 	return &posfloorv1.DeleteFloorResponse{Message: "Floor deleted successfully"}, nil
@@ -100,7 +99,7 @@ func (a *FloorAPI) DeleteFloor(ctx context.Context, req *posfloorv1.DeleteFloorR
 func authenticatedFloorUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return nil, contractHttp.NewServiceError(errorModels.PermissionDeniedServerError())
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 	return device.User, nil
 }

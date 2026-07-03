@@ -11,7 +11,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes/handlers"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
@@ -110,7 +109,7 @@ func registerOrderService(router *chi.Mux, service *application.Service) {
 	if err := posordersv1.RegisterOrderServiceServer(
 		handlers.NewOrderAPI(service),
 		posordersv1.WithMux(mux),
-		posordersv1.WithErrorHandler(contractHttp.ErrorHandler),
+		posordersv1.WithErrorHandler(serverHttp.OneKitErrorHandler),
 		posordersv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS order service: %w", err))

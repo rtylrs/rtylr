@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	contractHttp "github.com/voxire/onion/internal/platform/contracts"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -25,17 +24,17 @@ func NewCustomerAPI(service *application.Service) *CustomerAPI {
 func (a *CustomerAPI) SearchCustomers(ctx context.Context, req *poscustomerv1.SearchCustomersRequest) (*poscustomerv1.SearchCustomersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return nil, contractHttp.NewServiceError(errorModels.PermissionDeniedServerError())
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return nil, contractHttp.NewServiceError(errorModels.PermissionDeniedServerError())
+		return nil, errorModels.PermissionDeniedServerError()
 	}
 
 	customers, err := a.Service.Search(ctx, businessID, req.GetQuery())
 	if err != nil {
-		return nil, contractHttp.NewStatusError(http.StatusInternalServerError, "Failed to search customers")
+		return nil, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to search customers"}
 	}
 
 	payloads := make([]*poscustomerv1.Customer, 0, len(customers))
