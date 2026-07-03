@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package crm.campaign.v1;
+
+import "crm/campaign/v1/create_campaign.proto";
+import "crm/campaign/v1/get_campaign_detail.proto";
+import "crm/campaign/v1/get_campaign_stats.proto";
+import "crm/campaign/v1/list_campaigns.proto";
+import "crm/campaign/v1/update_campaign.proto";
+import "crm/campaign/v1/update_campaign_status.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
+
+// CampaignService defines CRM campaign endpoints.
+service CampaignService {
+  option (onekit.http.service_config) = {base_path: "/api/crm/campaign/v1"};
+
+  // ListCampaigns returns campaigns for the active business.
+  rpc ListCampaigns(ListCampaignsRequest) returns (ListCampaignsResponse) {
+    option (onekit.http.config) = {
+      path: "/campaigns"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateCampaign creates a new marketing campaign.
+  rpc CreateCampaign(CreateCampaignRequest) returns (CreateCampaignResponse) {
+    option (onekit.http.config) = {
+      path: "/campaigns"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // GetCampaignDetail returns a campaign and its stats.
+  rpc GetCampaignDetail(GetCampaignDetailRequest) returns (GetCampaignDetailResponse) {
+    option (onekit.http.config) = {
+      path: "/campaigns/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetCampaignStats returns stats for a single campaign.
+  rpc GetCampaignStats(GetCampaignStatsRequest) returns (GetCampaignStatsResponse) {
+    option (onekit.http.config) = {
+      path: "/campaigns/{campaign_id}/stats"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UpdateCampaign updates campaign fields.
+  rpc UpdateCampaign(UpdateCampaignRequest) returns (UpdateCampaignResponse) {
+    option (onekit.http.config) = {
+      path: "/campaigns/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  // UpdateCampaignStatus changes the campaign lifecycle status.
+  rpc UpdateCampaignStatus(UpdateCampaignStatusRequest) returns (UpdateCampaignStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/campaigns/status"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+}

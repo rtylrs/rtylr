@@ -2,17 +2,18 @@ syntax = "proto3";
 
 package crm.loyalty.v1;
 
+import "onekit/http/annotations.proto";
 import "pos/loyalty/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
 
 message ListLoyaltyTransactionsRequest {
-  // customer_id is the customer id value for this contract.
-  int64 customer_id = 1;
-  // page is the current result page.
-  int64 page = 2;
-  // page_size is the number of records requested per page.
-  int64 page_size = 3;
+  // customer_id filters transactions for a single customer.
+  int64 customer_id = 1 [(onekit.http.query).name = "customer_id"];
+  // page is the one-based page number to return.
+  int64 page = 2 [(onekit.http.query).name = "page"];
+  // page_size is the maximum number of transactions to return.
+  int64 page_size = 3 [(onekit.http.query).name = "page_size"];
 }
 
 message ListLoyaltyTransactionsResponse {

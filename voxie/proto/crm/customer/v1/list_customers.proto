@@ -2,21 +2,22 @@ syntax = "proto3";
 
 package crm.customer.v1;
 
+import "onekit/http/annotations.proto";
 import "pos/customer/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
 
 message ListCustomersRequest {
-  // search is the search value for this contract.
-  string search = 1;
-  // tier is the tier value for this contract.
-  string tier = 2;
-  // tag is the tag value for this contract.
-  string tag = 3;
-  // page is the current result page.
-  int64 page = 4;
-  // page_size is the number of records requested per page.
-  int64 page_size = 5;
+  // search filters customers by name, email, or phone.
+  string search = 1 [(onekit.http.query).name = "search"];
+  // tier filters by loyalty tier.
+  string tier = 2 [(onekit.http.query).name = "tier"];
+  // tag filters by customer tag.
+  string tag = 3 [(onekit.http.query).name = "tag"];
+  // page is the one-based page number to return.
+  int64 page = 4 [(onekit.http.query).name = "page"];
+  // page_size is the maximum number of customers to return.
+  int64 page_size = 5 [(onekit.http.query).name = "page_size"];
 }
 
 message ListCustomersResponse {

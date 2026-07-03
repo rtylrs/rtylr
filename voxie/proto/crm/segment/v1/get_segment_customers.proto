@@ -1,11 +1,12 @@
 syntax = "proto3";
 
-package crm.customer.v1;
+package crm.segment.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 import "pos/customer/v1/types.proto";
 
-option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
+option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
 
 message GetSegmentCustomersRequest {
   // segment_id is the segment id value for this contract.
@@ -13,13 +14,15 @@ message GetSegmentCustomersRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];
-  // page is the current result page.
+  // page is the one-based page number to return.
   int64 page = 2 [
+    (onekit.http.query).name = "page",
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];
-  // page_size is the number of records requested per page.
+  // page_size is the maximum number of customers to return.
   int64 page_size = 3 [
+    (onekit.http.query).name = "page_size",
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];

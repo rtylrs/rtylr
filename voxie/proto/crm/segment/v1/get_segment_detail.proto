@@ -1,14 +1,12 @@
 syntax = "proto3";
 
-package crm.customer.v1;
+package crm.segment.v1;
 
 import "buf/validate/validate.proto";
 import "crm/segment/v1/types.proto";
 import "pos/customer/v1/types.proto";
 
-option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
-
-// ── Segment Detail ─────────────────────────────────────────────────
+option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
 
 message GetSegmentDetailRequest {
   // id is the unique identifier for the resource.
@@ -20,7 +18,7 @@ message GetSegmentDetailRequest {
 
 message GetSegmentDetailResponse {
   // segment is the segment value for this contract.
-  .crm.segment.v1.Segment segment = 1;
+  Segment segment = 1;
   // customers is the customers value for this contract.
   repeated .pos.customer.v1.Customer customers = 2;
 }

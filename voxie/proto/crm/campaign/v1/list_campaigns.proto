@@ -3,12 +3,13 @@ syntax = "proto3";
 package crm.campaign.v1;
 
 import "crm/campaign/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
 
 message ListCampaignsRequest {
-  // status is the current lifecycle state.
-  string status = 1;
+  // status filters campaigns by lifecycle state.
+  string status = 1 [(onekit.http.query).name = "status"];
 }
 
 message ListCampaignsResponse {
