@@ -3,6 +3,7 @@ syntax = "proto3";
 package crm.campaign.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
 
@@ -11,6 +12,8 @@ message UpdateCampaignRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // name is the name value for this contract.
   string name = 2 [
@@ -28,7 +31,7 @@ message UpdateCampaignRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // segment_id is the segment id value for this contract.
-  optional int64 segment_id = 5;
+  optional int64 segment_id = 5 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // subject is the subject value for this contract.
   string subject = 6 [
     (buf.validate.field).required = true,

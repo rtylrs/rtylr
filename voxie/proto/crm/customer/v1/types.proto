@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package crm.customer.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
 
 // ── Customers ───────────────────────────────────────────────────────
 
 message Customer {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // first_name is the first name value for this contract.
   string first_name = 3;
   // last_name is the last name value for this contract.
@@ -20,7 +22,7 @@ message Customer {
   // phone is the phone value for this contract.
   string phone = 6;
   // date_of_birth is the date of birth value for this contract.
-  optional string date_of_birth = 7;
+  optional string date_of_birth = 7 [(onekit.http.nullable) = true];
   // gender is the gender value for this contract.
   string gender = 8;
   // address is the address value for this contract.
@@ -36,7 +38,7 @@ message Customer {
   // visit_count is the visit count value for this contract.
   int64 visit_count = 14;
   // last_visit_at is the last visit at value for this contract.
-  optional string last_visit_at = 15;
+  optional string last_visit_at = 15 [(onekit.http.nullable) = true];
   // loyalty_tier is the loyalty tier value for this contract.
   string loyalty_tier = 16;
   // tags is the tags value for this contract.

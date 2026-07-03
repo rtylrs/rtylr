@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -215,7 +216,7 @@ var File_crm_customer_v1_create_customer_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_create_customer_proto_rawDesc = "" +
 	"\n" +
-	"%crm/customer/v1/create_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\"\x8d\x03\n" +
+	"%crm/customer/v1/create_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x8d\x03\n" +
 	"\x15CreateCustomerRequest\x12)\n" +
 	"\n" +
 	"first_name\x18\x01 \x01(\tB\n" +
@@ -235,9 +236,9 @@ const file_crm_customer_v1_create_customer_proto_rawDesc = "" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\acountry\x12\x1c\n" +
 	"\x04tags\x18\n" +
 	" \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x04tags\x12\x14\n" +
-	"\x05notes\x18\v \x01(\tR\x05notes\"S\n" +
-	"\x16CreateCustomerResponse\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"\x05notes\x18\v \x01(\tR\x05notes\"Y\n" +
+	"\x16CreateCustomerResponse\x12%\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"customerId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"
 

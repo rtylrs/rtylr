@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package crm.dashboard.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/crm/dashboard/v1";
 
 // ── Dashboard ───────────────────────────────────────────────────────
 
 message TopCustomer {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // first_name is the first name value for this contract.
   string first_name = 2;
   // last_name is the last name value for this contract.

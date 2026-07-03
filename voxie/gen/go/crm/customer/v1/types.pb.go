@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -250,16 +251,16 @@ var File_crm_customer_v1_types_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bcrm/customer/v1/types.proto\x12\x0fcrm.customer.v1\"\x84\x05\n" +
-	"\bCustomer\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
+	"\x1bcrm/customer/v1/types.proto\x12\x0fcrm.customer.v1\x1a\x1donekit/http/annotations.proto\"\x9c\x05\n" +
+	"\bCustomer\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x14\n" +
 	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x06 \x01(\tR\x05phone\x12'\n" +
-	"\rdate_of_birth\x18\a \x01(\tH\x00R\vdateOfBirth\x88\x01\x01\x12\x16\n" +
+	"\x05phone\x18\x06 \x01(\tR\x05phone\x12-\n" +
+	"\rdate_of_birth\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\vdateOfBirth\x88\x01\x01\x12\x16\n" +
 	"\x06gender\x18\b \x01(\tR\x06gender\x12\x18\n" +
 	"\aaddress\x18\t \x01(\tR\aaddress\x12\x12\n" +
 	"\x04city\x18\n" +
@@ -269,8 +270,8 @@ const file_crm_customer_v1_types_proto_rawDesc = "" +
 	"\vtotal_spent\x18\r \x01(\x01R\n" +
 	"totalSpent\x12\x1f\n" +
 	"\vvisit_count\x18\x0e \x01(\x03R\n" +
-	"visitCount\x12'\n" +
-	"\rlast_visit_at\x18\x0f \x01(\tH\x01R\vlastVisitAt\x88\x01\x01\x12!\n" +
+	"visitCount\x12-\n" +
+	"\rlast_visit_at\x18\x0f \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\vlastVisitAt\x88\x01\x01\x12!\n" +
 	"\floyalty_tier\x18\x10 \x01(\tR\vloyaltyTier\x12\x12\n" +
 	"\x04tags\x18\x11 \x03(\tR\x04tags\x12\x14\n" +
 	"\x05notes\x18\x12 \x01(\tR\x05notes\x12\x1b\n" +

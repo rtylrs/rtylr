@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -117,10 +118,9 @@ var File_crm_customer_v1_get_customer_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_get_customer_proto_rawDesc = "" +
 	"\n" +
-	"\"crm/customer/v1/get_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bpos/customer/v1/types.proto\"0\n" +
-	"\x12GetCustomerRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"L\n" +
+	"\"crm/customer/v1/get_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bpos/customer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"4\n" +
+	"\x12GetCustomerRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"L\n" +
 	"\x13GetCustomerResponse\x125\n" +
 	"\bcustomer\x18\x01 \x01(\v2\x19.pos.customer.v1.CustomerR\bcustomerB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"
 

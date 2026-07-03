@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -179,25 +180,25 @@ var File_crm_campaign_v1_create_campaign_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_create_campaign_proto_rawDesc = "" +
 	"\n" +
-	"%crm/campaign/v1/create_campaign.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\"\xb9\x02\n" +
+	"%crm/campaign/v1/create_campaign.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc3\x02\n" +
 	"\x15CreateCampaignRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
 	"\vdescription\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12$\n" +
 	"\achannel\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\achannel\x12\"\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\achannel\x12,\n" +
 	"\n" +
-	"segment_id\x18\x04 \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12$\n" +
+	"segment_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\tsegmentId\x88\x01\x01\x12$\n" +
 	"\asubject\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\asubject\x12$\n" +
 	"\acontent\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\acontent\x12-\n" +
 	"\fscheduled_at\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vscheduledAtB\r\n" +
-	"\v_segment_id\"S\n" +
-	"\x16CreateCampaignResponse\x12\x1f\n" +
-	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
+	"\v_segment_id\"Y\n" +
+	"\x16CreateCampaignResponse\x12%\n" +
+	"\vcampaign_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"campaignId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"
 

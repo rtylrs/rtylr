@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package crm.loyalty.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
 
 // ── Loyalty Config ─────────────────────────────────────────────────
 
 message LoyaltyConfig {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // is_enabled is the is enabled value for this contract.
   bool is_enabled = 3;
   // points_per_currency_unit is the points per currency unit value for this contract.
@@ -43,11 +45,11 @@ message LoyaltyConfig {
 
 message LoyaltyTransaction {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // customer_id is the customer id value for this contract.
-  int64 customer_id = 3;
+  int64 customer_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // type is the type value for this contract.
   string type = 4;
   // points is the points value for this contract.
@@ -59,7 +61,7 @@ message LoyaltyTransaction {
   // description is the description value for this contract.
   string description = 8;
   // reference_id is the reference id value for this contract.
-  optional int64 reference_id = 9;
+  optional int64 reference_id = 9 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // reference_type is the reference type value for this contract.
   string reference_type = 10;
   // created_at is when the record was created.
@@ -70,9 +72,9 @@ message LoyaltyTransaction {
 
 message LoyaltyTier {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 3;
   // min_points is the min points value for this contract.

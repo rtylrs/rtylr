@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -448,10 +449,10 @@ var File_crm_loyalty_v1_types_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1acrm/loyalty/v1/types.proto\x12\x0ecrm.loyalty.v1\"\xc9\x04\n" +
-	"\rLoyaltyConfig\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
+	"\x1acrm/loyalty/v1/types.proto\x12\x0ecrm.loyalty.v1\x1a\x1donekit/http/annotations.proto\"\xd5\x04\n" +
+	"\rLoyaltyConfig\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x03 \x01(\bR\tisEnabled\x127\n" +
 	"\x18points_per_currency_unit\x18\x04 \x01(\x01R\x15pointsPerCurrencyUnit\x12,\n" +
@@ -469,26 +470,26 @@ const file_crm_loyalty_v1_types_proto_rawDesc = "" +
 	"\x15platinum_discount_pct\x18\r \x01(\x01R\x13platinumDiscountPct\x12,\n" +
 	"\x12points_expiry_days\x18\x0e \x01(\x03R\x10pointsExpiryDays\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"\xf9\x02\n" +
-	"\x12LoyaltyTransaction\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
+	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"\x95\x03\n" +
+	"\x12LoyaltyTransaction\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vcustomer_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"customerId\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x16\n" +
 	"\x06points\x18\x05 \x01(\x03R\x06points\x12%\n" +
 	"\x0ebalance_before\x18\x06 \x01(\x03R\rbalanceBefore\x12#\n" +
 	"\rbalance_after\x18\a \x01(\x03R\fbalanceAfter\x12 \n" +
-	"\vdescription\x18\b \x01(\tR\vdescription\x12&\n" +
-	"\freference_id\x18\t \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12%\n" +
+	"\vdescription\x18\b \x01(\tR\vdescription\x120\n" +
+	"\freference_id\x18\t \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\vreferenceId\x88\x01\x01\x12%\n" +
 	"\x0ereference_type\x18\n" +
 	" \x01(\tR\rreferenceType\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAtB\x0f\n" +
-	"\r_reference_id\"\x81\x02\n" +
-	"\vLoyaltyTier\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\r_reference_id\"\x8d\x02\n" +
+	"\vLoyaltyTier\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
 	"min_points\x18\x04 \x01(\x03R\tminPoints\x12!\n" +

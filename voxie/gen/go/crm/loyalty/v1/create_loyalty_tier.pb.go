@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,7 +162,7 @@ var File_crm_loyalty_v1_create_loyalty_tier_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_create_loyalty_tier_proto_rawDesc = "" +
 	"\n" +
-	"(crm/loyalty/v1/create_loyalty_tier.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\xe8\x01\n" +
+	"(crm/loyalty/v1/create_loyalty_tier.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xe8\x01\n" +
 	"\x18CreateLoyaltyTierRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12)\n" +
@@ -173,9 +174,9 @@ const file_crm_loyalty_v1_create_loyalty_tier_proto_rawDesc = "" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05perks\x12)\n" +
 	"\n" +
 	"sort_order\x18\x05 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tsortOrder\"N\n" +
-	"\x19CreateLoyaltyTierResponse\x12\x17\n" +
-	"\atier_id\x18\x01 \x01(\x03R\x06tierId\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tsortOrder\"T\n" +
+	"\x19CreateLoyaltyTierResponse\x12\x1d\n" +
+	"\atier_id\x18\x01 \x01(\x03B\x04е\x18\x01R\x06tierId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"
 
 var (

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,15 +143,15 @@ var File_crm_segment_v1_types_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1acrm/segment/v1/types.proto\x12\x0ecrm.segment.v1\"\xaf\x02\n" +
-	"\aSegment\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x1acrm/segment/v1/types.proto\x12\x0ecrm.segment.v1\x1a\x1donekit/http/annotations.proto\"\xc1\x02\n" +
+	"\aSegment\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x14\n" +
 	"\x05rules\x18\x05 \x01(\tR\x05rules\x12%\n" +
-	"\x0ecustomer_count\x18\x06 \x01(\x03R\rcustomerCount\x121\n" +
-	"\x12last_calculated_at\x18\a \x01(\tH\x00R\x10lastCalculatedAt\x88\x01\x01\x12\x1d\n" +
+	"\x0ecustomer_count\x18\x06 \x01(\x03R\rcustomerCount\x127\n" +
+	"\x12last_calculated_at\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x10lastCalculatedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +

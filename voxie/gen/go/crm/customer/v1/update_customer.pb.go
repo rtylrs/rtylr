@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -224,10 +225,9 @@ var File_crm_customer_v1_update_customer_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_update_customer_proto_rawDesc = "" +
 	"\n" +
-	"%crm/customer/v1/update_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\"\xd9\x03\n" +
-	"\x15UpdateCustomerRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12)\n" +
+	"%crm/customer/v1/update_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xe3\x03\n" +
+	"\x15UpdateCustomerRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12)\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfirstName\x12'\n" +
@@ -246,8 +246,8 @@ const file_crm_customer_v1_update_customer_proto_rawDesc = "" +
 	" \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\acountry\x12\x1c\n" +
 	"\x04tags\x18\v \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x04tags\x12\x14\n" +
-	"\x05notes\x18\f \x01(\tR\x05notes\x12 \n" +
-	"\tis_active\x18\r \x01(\bH\x00R\bisActive\x88\x01\x01B\f\n" +
+	"\x05notes\x18\f \x01(\tR\x05notes\x12&\n" +
+	"\tis_active\x18\r \x01(\bB\x04\xe8\xb5\x18\x01H\x00R\bisActive\x88\x01\x01B\f\n" +
 	"\n" +
 	"_is_active\"2\n" +
 	"\x16UpdateCustomerResponse\x12\x18\n" +

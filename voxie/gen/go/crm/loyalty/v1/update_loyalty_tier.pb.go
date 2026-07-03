@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,10 +162,9 @@ var File_crm_loyalty_v1_update_loyalty_tier_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_update_loyalty_tier_proto_rawDesc = "" +
 	"\n" +
-	"(crm/loyalty/v1/update_loyalty_tier.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\x84\x02\n" +
-	"\x18UpdateLoyaltyTierRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x1e\n" +
+	"(crm/loyalty/v1/update_loyalty_tier.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x88\x02\n" +
+	"\x18UpdateLoyaltyTierRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12)\n" +
 	"\n" +

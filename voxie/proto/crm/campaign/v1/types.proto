@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package crm.campaign.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
 
 // ── Campaigns ─────────────────────────────────────────────────────
 
 message Campaign {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 3;
   // description is the description value for this contract.
@@ -20,15 +22,15 @@ message Campaign {
   // status is the current lifecycle state.
   string status = 6;
   // segment_id is the segment id value for this contract.
-  optional int64 segment_id = 7;
+  optional int64 segment_id = 7 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // subject is the subject value for this contract.
   string subject = 8;
   // content is the content value for this contract.
   string content = 9;
   // scheduled_at is the scheduled at value for this contract.
-  optional string scheduled_at = 10;
+  optional string scheduled_at = 10 [(onekit.http.nullable) = true];
   // sent_at is the sent at value for this contract.
-  optional string sent_at = 11;
+  optional string sent_at = 11 [(onekit.http.nullable) = true];
   // audience_count is the audience count value for this contract.
   int64 audience_count = 12;
   // sent_count is the sent count value for this contract.
@@ -49,7 +51,7 @@ message Campaign {
 
 message CampaignStats {
   // campaign_id is the campaign id value for this contract.
-  int64 campaign_id = 1;
+  int64 campaign_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // audience_count is the audience count value for this contract.
   int64 audience_count = 2;
   // sent_count is the sent count value for this contract.

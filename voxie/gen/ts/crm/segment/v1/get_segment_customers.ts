@@ -2,7 +2,7 @@
 // versions:
 //   protoc-gen-ts_proto  v2.11.10
 //   protoc               unknown
-// source: crm/customer/v1/get_segment_customers.proto
+// source: crm/segment/v1/get_segment_customers.proto
 
 /* eslint-disable */
 import type { Customer } from "../../../pos/customer/v1/types";
@@ -10,9 +10,9 @@ import type { Customer } from "../../../pos/customer/v1/types";
 export interface GetSegmentCustomersRequest {
   /** segment_id is the segment id value for this contract. */
   segmentId: number;
-  /** page is the current result page. */
+  /** page is the one-based page number to return. */
   page: number;
-  /** page_size is the number of records requested per page. */
+  /** page_size is the maximum number of customers to return. */
   pageSize: number;
 }
 

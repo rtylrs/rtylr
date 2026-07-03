@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -24,15 +25,15 @@ const (
 
 type ListCustomersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// search is the search value for this contract.
+	// search filters customers by name, email, or phone.
 	Search string `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	// tier is the tier value for this contract.
+	// tier filters by loyalty tier.
 	Tier string `protobuf:"bytes,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	// tag is the tag value for this contract.
+	// tag filters by customer tag.
 	Tag string `protobuf:"bytes,3,opt,name=tag,proto3" json:"tag,omitempty"`
-	// page is the current result page.
+	// page is the one-based page number to return.
 	Page int64 `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
-	// page_size is the number of records requested per page.
+	// page_size is the maximum number of customers to return.
 	PageSize      int64 `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -179,18 +180,24 @@ var File_crm_customer_v1_list_customers_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_list_customers_proto_rawDesc = "" +
 	"\n" +
-	"$crm/customer/v1/list_customers.proto\x12\x0fcrm.customer.v1\x1a\x1bpos/customer/v1/types.proto\"\x85\x01\n" +
-	"\x14ListCustomersRequest\x12\x16\n" +
-	"\x06search\x18\x01 \x01(\tR\x06search\x12\x12\n" +
-	"\x04tier\x18\x02 \x01(\tR\x04tier\x12\x10\n" +
-	"\x03tag\x18\x03 \x01(\tR\x03tag\x12\x12\n" +
-	"\x04page\x18\x04 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x05 \x01(\x03R\bpageSize\"\x97\x01\n" +
+	"$crm/customer/v1/list_customers.proto\x12\x0fcrm.customer.v1\x1a\x1donekit/http/annotations.proto\x1a\x1bpos/customer/v1/types.proto\"\xcf\x01\n" +
+	"\x14ListCustomersRequest\x12$\n" +
+	"\x06search\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06searchR\x06search\x12\x1e\n" +
+	"\x04tier\x18\x02 \x01(\tB\n" +
+	"µ\x18\x06\n" +
+	"\x04tierR\x04tier\x12\x1b\n" +
+	"\x03tag\x18\x03 \x01(\tB\tµ\x18\x05\n" +
+	"\x03tagR\x03tag\x12\"\n" +
+	"\x04page\x18\x04 \x01(\x03B\x0eµ\x18\x06\n" +
+	"\x04pageе\x18\x02R\x04page\x120\n" +
+	"\tpage_size\x18\x05 \x01(\x03B\x13µ\x18\v\n" +
+	"\tpage_sizeе\x18\x02R\bpageSize\"\xa9\x01\n" +
 	"\x15ListCustomersResponse\x127\n" +
-	"\tcustomers\x18\x01 \x03(\v2\x19.pos.customer.v1.CustomerR\tcustomers\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x03R\bpageSizeB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"
+	"\tcustomers\x18\x01 \x03(\v2\x19.pos.customer.v1.CustomerR\tcustomers\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x18\n" +
+	"\x04page\x18\x03 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x04 \x01(\x03B\x04е\x18\x02R\bpageSizeB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"
 
 var (
 	file_crm_customer_v1_list_customers_proto_rawDescOnce sync.Once

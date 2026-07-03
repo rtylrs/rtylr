@@ -8,15 +8,15 @@
 import type { Customer } from "../../../pos/customer/v1/types";
 
 export interface ListCustomersRequest {
-  /** search is the search value for this contract. */
+  /** search filters customers by name, email, or phone. */
   search: string;
-  /** tier is the tier value for this contract. */
+  /** tier filters by loyalty tier. */
   tier: string;
-  /** tag is the tag value for this contract. */
+  /** tag filters by customer tag. */
   tag: string;
-  /** page is the current result page. */
+  /** page is the one-based page number to return. */
   page: number;
-  /** page_size is the number of records requested per page. */
+  /** page_size is the maximum number of customers to return. */
   pageSize: number;
 }
 

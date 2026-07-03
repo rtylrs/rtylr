@@ -8,7 +8,7 @@
 import type { Campaign } from "./types";
 
 export interface ListCampaignsRequest {
-  /** status is the current lifecycle state. */
+  /** status filters campaigns by lifecycle state. */
   status: string;
 }
 

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -152,16 +153,15 @@ var File_crm_loyalty_v1_award_points_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_award_points_proto_rawDesc = "" +
 	"\n" +
-	"!crm/loyalty/v1/award_points.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\xff\x01\n" +
-	"\x12AwardPointsRequest\x12+\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"!crm/loyalty/v1/award_points.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x8d\x02\n" +
+	"\x12AwardPointsRequest\x12/\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"customerId\x12\"\n" +
 	"\x06points\x18\x02 \x01(\x03B\n" +
 	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06points\x12,\n" +
 	"\vdescription\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12&\n" +
-	"\freference_id\x18\x04 \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x121\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x120\n" +
+	"\freference_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\vreferenceId\x88\x01\x01\x121\n" +
 	"\x0ereference_type\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\rreferenceTypeB\x0f\n" +
 	"\r_reference_id\"/\n" +

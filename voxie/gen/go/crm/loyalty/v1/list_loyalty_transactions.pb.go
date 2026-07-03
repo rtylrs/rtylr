@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -24,11 +25,11 @@ const (
 
 type ListLoyaltyTransactionsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// customer_id is the customer id value for this contract.
+	// customer_id filters transactions for a single customer.
 	CustomerId int64 `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	// page is the current result page.
+	// page is the one-based page number to return.
 	Page int64 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	// page_size is the number of records requested per page.
+	// page_size is the maximum number of transactions to return.
 	PageSize      int64 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -161,17 +162,20 @@ var File_crm_loyalty_v1_list_loyalty_transactions_proto protoreflect.FileDescrip
 
 const file_crm_loyalty_v1_list_loyalty_transactions_proto_rawDesc = "" +
 	"\n" +
-	".crm/loyalty/v1/list_loyalty_transactions.proto\x12\x0ecrm.loyalty.v1\x1a\x1apos/loyalty/v1/types.proto\"r\n" +
-	"\x1eListLoyaltyTransactionsRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\xb0\x01\n" +
+	".crm/loyalty/v1/list_loyalty_transactions.proto\x12\x0ecrm.loyalty.v1\x1a\x1donekit/http/annotations.proto\x1a\x1apos/loyalty/v1/types.proto\"\xae\x01\n" +
+	"\x1eListLoyaltyTransactionsRequest\x126\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\x15µ\x18\r\n" +
+	"\vcustomer_idе\x18\x01R\n" +
+	"customerId\x12\"\n" +
+	"\x04page\x18\x02 \x01(\x03B\x0eµ\x18\x06\n" +
+	"\x04pageе\x18\x02R\x04page\x120\n" +
+	"\tpage_size\x18\x03 \x01(\x03B\x13µ\x18\v\n" +
+	"\tpage_sizeе\x18\x02R\bpageSize\"\xc2\x01\n" +
 	"\x1fListLoyaltyTransactionsResponse\x12F\n" +
-	"\ftransactions\x18\x01 \x03(\v2\".pos.loyalty.v1.LoyaltyTransactionR\ftransactions\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x03R\bpageSizeB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"
+	"\ftransactions\x18\x01 \x03(\v2\".pos.loyalty.v1.LoyaltyTransactionR\ftransactions\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x18\n" +
+	"\x04page\x18\x03 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x04 \x01(\x03B\x04е\x18\x02R\bpageSizeB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"
 
 var (
 	file_crm_loyalty_v1_list_loyalty_transactions_proto_rawDescOnce sync.Once

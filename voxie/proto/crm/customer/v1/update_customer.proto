@@ -3,6 +3,7 @@ syntax = "proto3";
 package crm.customer.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
 
@@ -11,6 +12,8 @@ message UpdateCustomerRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // first_name is the first name value for this contract.
   string first_name = 2 [
@@ -59,7 +62,7 @@ message UpdateCustomerRequest {
   // notes is the notes value for this contract.
   string notes = 12;
   // is_active is the is active value for this contract.
-  optional bool is_active = 13;
+  optional bool is_active = 13 [(onekit.http.nullable) = true];
 }
 
 message UpdateCustomerResponse {

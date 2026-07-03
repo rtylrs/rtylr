@@ -2,12 +2,13 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        (unknown)
-// source: crm/customer/v1/get_segment_customers.proto
+// source: crm/segment/v1/get_segment_customers.proto
 
 package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -27,9 +28,9 @@ type GetSegmentCustomersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// segment_id is the segment id value for this contract.
 	SegmentId int64 `protobuf:"varint,1,opt,name=segment_id,json=segmentId,proto3" json:"segment_id,omitempty"`
-	// page is the current result page.
+	// page is the one-based page number to return.
 	Page int64 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	// page_size is the number of records requested per page.
+	// page_size is the maximum number of customers to return.
 	PageSize      int64 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -37,7 +38,7 @@ type GetSegmentCustomersRequest struct {
 
 func (x *GetSegmentCustomersRequest) Reset() {
 	*x = GetSegmentCustomersRequest{}
-	mi := &file_crm_customer_v1_get_segment_customers_proto_msgTypes[0]
+	mi := &file_crm_segment_v1_get_segment_customers_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +50,7 @@ func (x *GetSegmentCustomersRequest) String() string {
 func (*GetSegmentCustomersRequest) ProtoMessage() {}
 
 func (x *GetSegmentCustomersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_customer_v1_get_segment_customers_proto_msgTypes[0]
+	mi := &file_crm_segment_v1_get_segment_customers_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +63,7 @@ func (x *GetSegmentCustomersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSegmentCustomersRequest.ProtoReflect.Descriptor instead.
 func (*GetSegmentCustomersRequest) Descriptor() ([]byte, []int) {
-	return file_crm_customer_v1_get_segment_customers_proto_rawDescGZIP(), []int{0}
+	return file_crm_segment_v1_get_segment_customers_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *GetSegmentCustomersRequest) GetSegmentId() int64 {
@@ -102,7 +103,7 @@ type GetSegmentCustomersResponse struct {
 
 func (x *GetSegmentCustomersResponse) Reset() {
 	*x = GetSegmentCustomersResponse{}
-	mi := &file_crm_customer_v1_get_segment_customers_proto_msgTypes[1]
+	mi := &file_crm_segment_v1_get_segment_customers_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -114,7 +115,7 @@ func (x *GetSegmentCustomersResponse) String() string {
 func (*GetSegmentCustomersResponse) ProtoMessage() {}
 
 func (x *GetSegmentCustomersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_crm_customer_v1_get_segment_customers_proto_msgTypes[1]
+	mi := &file_crm_segment_v1_get_segment_customers_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -127,7 +128,7 @@ func (x *GetSegmentCustomersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSegmentCustomersResponse.ProtoReflect.Descriptor instead.
 func (*GetSegmentCustomersResponse) Descriptor() ([]byte, []int) {
-	return file_crm_customer_v1_get_segment_customers_proto_rawDescGZIP(), []int{1}
+	return file_crm_segment_v1_get_segment_customers_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetSegmentCustomersResponse) GetCustomers() []*v1.Customer {
@@ -158,45 +159,44 @@ func (x *GetSegmentCustomersResponse) GetPageSize() int64 {
 	return 0
 }
 
-var File_crm_customer_v1_get_segment_customers_proto protoreflect.FileDescriptor
+var File_crm_segment_v1_get_segment_customers_proto protoreflect.FileDescriptor
 
-const file_crm_customer_v1_get_segment_customers_proto_rawDesc = "" +
+const file_crm_segment_v1_get_segment_customers_proto_rawDesc = "" +
 	"\n" +
-	"+crm/customer/v1/get_segment_customers.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bpos/customer/v1/types.proto\"\x90\x01\n" +
-	"\x1aGetSegmentCustomersRequest\x12)\n" +
+	"*crm/segment/v1/get_segment_customers.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x1bpos/customer/v1/types.proto\"\xb5\x01\n" +
+	"\x1aGetSegmentCustomersRequest\x12-\n" +
 	"\n" +
-	"segment_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tsegmentId\x12\x1e\n" +
-	"\x04page\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x04page\x12'\n" +
-	"\tpage_size\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\bpageSize\"\x9d\x01\n" +
+	"segment_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tsegmentId\x12,\n" +
+	"\x04page\x18\x02 \x01(\x03B\x18\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\x06\n" +
+	"\x04pageе\x18\x02R\x04page\x12:\n" +
+	"\tpage_size\x18\x03 \x01(\x03B\x1d\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\v\n" +
+	"\tpage_sizeе\x18\x02R\bpageSize\"\xaf\x01\n" +
 	"\x1bGetSegmentCustomersResponse\x127\n" +
-	"\tcustomers\x18\x01 \x03(\v2\x19.pos.customer.v1.CustomerR\tcustomers\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x03R\bpageSizeB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"
+	"\tcustomers\x18\x01 \x03(\v2\x19.pos.customer.v1.CustomerR\tcustomers\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x18\n" +
+	"\x04page\x18\x03 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x04 \x01(\x03B\x04е\x18\x02R\bpageSizeB/Z-github.com/voxire/voxie/gen/go/crm/segment/v1b\x06proto3"
 
 var (
-	file_crm_customer_v1_get_segment_customers_proto_rawDescOnce sync.Once
-	file_crm_customer_v1_get_segment_customers_proto_rawDescData []byte
+	file_crm_segment_v1_get_segment_customers_proto_rawDescOnce sync.Once
+	file_crm_segment_v1_get_segment_customers_proto_rawDescData []byte
 )
 
-func file_crm_customer_v1_get_segment_customers_proto_rawDescGZIP() []byte {
-	file_crm_customer_v1_get_segment_customers_proto_rawDescOnce.Do(func() {
-		file_crm_customer_v1_get_segment_customers_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_crm_customer_v1_get_segment_customers_proto_rawDesc), len(file_crm_customer_v1_get_segment_customers_proto_rawDesc)))
+func file_crm_segment_v1_get_segment_customers_proto_rawDescGZIP() []byte {
+	file_crm_segment_v1_get_segment_customers_proto_rawDescOnce.Do(func() {
+		file_crm_segment_v1_get_segment_customers_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_crm_segment_v1_get_segment_customers_proto_rawDesc), len(file_crm_segment_v1_get_segment_customers_proto_rawDesc)))
 	})
-	return file_crm_customer_v1_get_segment_customers_proto_rawDescData
+	return file_crm_segment_v1_get_segment_customers_proto_rawDescData
 }
 
-var file_crm_customer_v1_get_segment_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_crm_customer_v1_get_segment_customers_proto_goTypes = []any{
-	(*GetSegmentCustomersRequest)(nil),  // 0: crm.customer.v1.GetSegmentCustomersRequest
-	(*GetSegmentCustomersResponse)(nil), // 1: crm.customer.v1.GetSegmentCustomersResponse
+var file_crm_segment_v1_get_segment_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_crm_segment_v1_get_segment_customers_proto_goTypes = []any{
+	(*GetSegmentCustomersRequest)(nil),  // 0: crm.segment.v1.GetSegmentCustomersRequest
+	(*GetSegmentCustomersResponse)(nil), // 1: crm.segment.v1.GetSegmentCustomersResponse
 	(*v1.Customer)(nil),                 // 2: pos.customer.v1.Customer
 }
-var file_crm_customer_v1_get_segment_customers_proto_depIdxs = []int32{
-	2, // 0: crm.customer.v1.GetSegmentCustomersResponse.customers:type_name -> pos.customer.v1.Customer
+var file_crm_segment_v1_get_segment_customers_proto_depIdxs = []int32{
+	2, // 0: crm.segment.v1.GetSegmentCustomersResponse.customers:type_name -> pos.customer.v1.Customer
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -204,26 +204,26 @@ var file_crm_customer_v1_get_segment_customers_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_crm_customer_v1_get_segment_customers_proto_init() }
-func file_crm_customer_v1_get_segment_customers_proto_init() {
-	if File_crm_customer_v1_get_segment_customers_proto != nil {
+func init() { file_crm_segment_v1_get_segment_customers_proto_init() }
+func file_crm_segment_v1_get_segment_customers_proto_init() {
+	if File_crm_segment_v1_get_segment_customers_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_customer_v1_get_segment_customers_proto_rawDesc), len(file_crm_customer_v1_get_segment_customers_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_crm_segment_v1_get_segment_customers_proto_rawDesc), len(file_crm_segment_v1_get_segment_customers_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_crm_customer_v1_get_segment_customers_proto_goTypes,
-		DependencyIndexes: file_crm_customer_v1_get_segment_customers_proto_depIdxs,
-		MessageInfos:      file_crm_customer_v1_get_segment_customers_proto_msgTypes,
+		GoTypes:           file_crm_segment_v1_get_segment_customers_proto_goTypes,
+		DependencyIndexes: file_crm_segment_v1_get_segment_customers_proto_depIdxs,
+		MessageInfos:      file_crm_segment_v1_get_segment_customers_proto_msgTypes,
 	}.Build()
-	File_crm_customer_v1_get_segment_customers_proto = out.File
-	file_crm_customer_v1_get_segment_customers_proto_goTypes = nil
-	file_crm_customer_v1_get_segment_customers_proto_depIdxs = nil
+	File_crm_segment_v1_get_segment_customers_proto = out.File
+	file_crm_segment_v1_get_segment_customers_proto_goTypes = nil
+	file_crm_segment_v1_get_segment_customers_proto_depIdxs = nil
 }

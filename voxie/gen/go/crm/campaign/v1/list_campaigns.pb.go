@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,7 +24,7 @@ const (
 
 type ListCampaignsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// status is the current lifecycle state.
+	// status filters campaigns by lifecycle state.
 	Status        string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -115,9 +116,10 @@ var File_crm_campaign_v1_list_campaigns_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_list_campaigns_proto_rawDesc = "" +
 	"\n" +
-	"$crm/campaign/v1/list_campaigns.proto\x12\x0fcrm.campaign.v1\x1a\x1bcrm/campaign/v1/types.proto\".\n" +
-	"\x14ListCampaignsRequest\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\"P\n" +
+	"$crm/campaign/v1/list_campaigns.proto\x12\x0fcrm.campaign.v1\x1a\x1bcrm/campaign/v1/types.proto\x1a\x1donekit/http/annotations.proto\"<\n" +
+	"\x14ListCampaignsRequest\x12$\n" +
+	"\x06status\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06statusR\x06status\"P\n" +
 	"\x15ListCampaignsResponse\x127\n" +
 	"\tcampaigns\x18\x01 \x03(\v2\x19.crm.campaign.v1.CampaignR\tcampaignsB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"
 

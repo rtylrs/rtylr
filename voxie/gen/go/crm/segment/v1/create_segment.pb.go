@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,17 +144,17 @@ var File_crm_segment_v1_create_segment_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_create_segment_proto_rawDesc = "" +
 	"\n" +
-	"#crm/segment/v1/create_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\"\x86\x01\n" +
+	"#crm/segment/v1/create_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x86\x01\n" +
 	"\x14CreateSegmentRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
 	"\vdescription\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12 \n" +
 	"\x05rules\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05rules\"P\n" +
-	"\x15CreateSegmentResponse\x12\x1d\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05rules\"V\n" +
+	"\x15CreateSegmentResponse\x12#\n" +
 	"\n" +
-	"segment_id\x18\x01 \x01(\x03R\tsegmentId\x12\x18\n" +
+	"segment_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tsegmentId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/crm/segment/v1b\x06proto3"
 
 var (

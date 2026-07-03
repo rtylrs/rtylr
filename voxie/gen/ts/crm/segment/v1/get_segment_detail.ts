@@ -2,11 +2,11 @@
 // versions:
 //   protoc-gen-ts_proto  v2.11.10
 //   protoc               unknown
-// source: crm/customer/v1/get_segment_detail.proto
+// source: crm/segment/v1/get_segment_detail.proto
 
 /* eslint-disable */
 import type { Customer } from "../../../pos/customer/v1/types";
-import type { Segment } from "../../segment/v1/types";
+import type { Segment } from "./types";
 
 export interface GetSegmentDetailRequest {
   /** id is the unique identifier for the resource. */

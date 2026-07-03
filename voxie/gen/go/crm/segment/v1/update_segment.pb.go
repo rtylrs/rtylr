@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,10 +144,9 @@ var File_crm_segment_v1_update_segment_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_update_segment_proto_rawDesc = "" +
 	"\n" +
-	"#crm/segment/v1/update_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\"\xa2\x01\n" +
-	"\x14UpdateSegmentRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x1e\n" +
+	"#crm/segment/v1/update_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa6\x01\n" +
+	"\x14UpdateSegmentRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
 	"\vdescription\x18\x03 \x01(\tB\n" +

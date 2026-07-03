@@ -8,11 +8,11 @@
 import type { LoyaltyTransaction } from "../../../pos/loyalty/v1/types";
 
 export interface ListLoyaltyTransactionsRequest {
-  /** customer_id is the customer id value for this contract. */
+  /** customer_id filters transactions for a single customer. */
   customerId: number;
-  /** page is the current result page. */
+  /** page is the one-based page number to return. */
   page: number;
-  /** page_size is the number of records requested per page. */
+  /** page_size is the maximum number of transactions to return. */
   pageSize: number;
 }
 

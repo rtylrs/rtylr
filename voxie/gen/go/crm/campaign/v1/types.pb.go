@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -331,21 +332,21 @@ var File_crm_campaign_v1_types_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bcrm/campaign/v1/types.proto\x12\x0fcrm.campaign.v1\"\xdc\x04\n" +
-	"\bCampaign\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x1bcrm/campaign/v1/types.proto\x12\x0fcrm.campaign.v1\x1a\x1donekit/http/annotations.proto\"\xfe\x04\n" +
+	"\bCampaign\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x18\n" +
 	"\achannel\x18\x05 \x01(\tR\achannel\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12\"\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12,\n" +
 	"\n" +
-	"segment_id\x18\a \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
+	"segment_id\x18\a \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
 	"\asubject\x18\b \x01(\tR\asubject\x12\x18\n" +
-	"\acontent\x18\t \x01(\tR\acontent\x12&\n" +
+	"\acontent\x18\t \x01(\tR\acontent\x12,\n" +
 	"\fscheduled_at\x18\n" +
-	" \x01(\tH\x01R\vscheduledAt\x88\x01\x01\x12\x1c\n" +
-	"\asent_at\x18\v \x01(\tH\x02R\x06sentAt\x88\x01\x01\x12%\n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\vscheduledAt\x88\x01\x01\x12\"\n" +
+	"\asent_at\x18\v \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\x06sentAt\x88\x01\x01\x12%\n" +
 	"\x0eaudience_count\x18\f \x01(\x03R\raudienceCount\x12\x1d\n" +
 	"\n" +
 	"sent_count\x18\r \x01(\x03R\tsentCount\x12'\n" +
@@ -359,9 +360,9 @@ const file_crm_campaign_v1_types_proto_rawDesc = "" +
 	"\v_segment_idB\x0f\n" +
 	"\r_scheduled_atB\n" +
 	"\n" +
-	"\b_sent_at\"\xaf\x02\n" +
-	"\rCampaignStats\x12\x1f\n" +
-	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
+	"\b_sent_at\"\xb5\x02\n" +
+	"\rCampaignStats\x12%\n" +
+	"\vcampaign_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"campaignId\x12%\n" +
 	"\x0eaudience_count\x18\x02 \x01(\x03R\raudienceCount\x12\x1d\n" +
 	"\n" +
