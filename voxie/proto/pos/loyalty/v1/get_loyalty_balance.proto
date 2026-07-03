@@ -15,12 +15,12 @@ message GetLoyaltyBalanceRequest {
     (onekit.http.query).name = "customer_id",
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
-  ];
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
 }
 
 message GetLoyaltyBalanceResponse {
   // customer_id is the customer id value for this contract.
-  int64 customer_id = 1;
+  int64 customer_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // balance is the balance value for this contract.
   int32 balance = 2;
 }

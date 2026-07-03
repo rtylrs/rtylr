@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,12 +161,12 @@ var File_pos_user_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x17pos/user/v1/types.proto\x12\vpos.user.v1\"\xda\x02\n" +
-	"\aPOSUser\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"\x17pos/user/v1/types.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\"\xec\x02\n" +
+	"\aPOSUser\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12%\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
 	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1b\n" +

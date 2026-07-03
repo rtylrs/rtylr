@@ -659,50 +659,6 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
-  "crm.customer.v1.GetSegmentCustomersRequest": {
-    "page": {
-      "gt": 0,
-      "name": "page",
-      "optional": false,
-      "protoName": "page",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "pageSize": {
-      "gt": 0,
-      "name": "pageSize",
-      "optional": false,
-      "protoName": "page_size",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "segmentId": {
-      "gt": 0,
-      "name": "segmentId",
-      "optional": false,
-      "protoName": "segment_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    }
-  },
-  "crm.customer.v1.GetSegmentDetailRequest": {
-    "id": {
-      "gt": 0,
-      "name": "id",
-      "optional": false,
-      "protoName": "id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    }
-  },
   "crm.customer.v1.ListCustomersRequest": {
     "page": {
       "name": "page",
@@ -1281,6 +1237,50 @@ export const contractValidationMetadata = {
     }
   },
   "crm.segment.v1.DeleteSegmentRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "crm.segment.v1.GetSegmentCustomersRequest": {
+    "page": {
+      "gt": 0,
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "pageSize": {
+      "gt": 0,
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "segmentId": {
+      "gt": 0,
+      "name": "segmentId",
+      "optional": false,
+      "protoName": "segment_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "crm.segment.v1.GetSegmentDetailRequest": {
     "id": {
       "gt": 0,
       "name": "id",
@@ -2166,14 +2166,41 @@ export const contractValidationMetadata = {
     }
   },
   "finance.bank_account.v1.ListBankAccountsRequest": {
-    "pagination": {
-      "name": "pagination",
+    "limit": {
+      "name": "limit",
       "optional": false,
-      "protoName": "pagination",
+      "protoName": "limit",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "common.pagination.v1.PaginationRequest"
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "finance.bill.v1.CreateBillRequest": {
@@ -2383,7 +2410,18 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
-  "finance.expenses.v1.DeleteExpenseRequest": {},
+  "finance.expenses.v1.DeleteExpenseRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.expenses.v1.ListExpenseCategoriesRequest": {},
   "finance.expenses.v1.ListExpensesRequest": {},
   "finance.expenses.v1.UpdateExpenseRequest": {
@@ -2435,6 +2473,16 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
     },
     "receiptUrl": {
       "minLen": 1,
@@ -2934,14 +2982,41 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
-    "pagination": {
-      "name": "pagination",
+    "limit": {
+      "name": "limit",
       "optional": false,
-      "protoName": "pagination",
+      "protoName": "limit",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "common.pagination.v1.PaginationRequest"
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     },
     "toDate": {
       "name": "toDate",
@@ -3026,14 +3101,41 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "int64"
     },
-    "pagination": {
-      "name": "pagination",
+    "limit": {
+      "name": "limit",
       "optional": false,
-      "protoName": "pagination",
+      "protoName": "limit",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "common.pagination.v1.PaginationRequest"
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     },
     "status": {
       "name": "status",
@@ -3108,8 +3210,30 @@ export const contractValidationMetadata = {
     }
   },
   "finance.recurring_invoice.v1.ListRecurringInvoicesRequest": {},
-  "finance.recurring_invoice.v1.PauseRecurringInvoiceRequest": {},
-  "finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest": {},
+  "finance.recurring_invoice.v1.PauseRecurringInvoiceRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "finance.recurring_invoice.v1.ResumeRecurringInvoiceRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest": {
     "endDate": {
       "name": "endDate",
@@ -4951,11 +5075,11 @@ export const contractValidationMetadata = {
     }
   },
   "hr.employees.payroll.runs.v1.ApprovePayrollRunRequest": {
-    "runId": {
+    "id": {
       "gt": 0,
-      "name": "runId",
+      "name": "id",
       "optional": false,
-      "protoName": "run_id",
+      "protoName": "id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -5526,6 +5650,16 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "bool"
     },
+    "roleId": {
+      "gt": 0,
+      "name": "roleId",
+      "optional": false,
+      "protoName": "role_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
     "title": {
       "minLen": 1,
       "name": "title",
@@ -5665,11 +5799,12 @@ export const contractValidationMetadata = {
       "type": "string"
     },
     "roleId": {
+      "gt": 0,
       "name": "roleId",
-      "optional": true,
+      "optional": false,
       "protoName": "role_id",
       "repeated": false,
-      "required": false,
+      "required": true,
       "scalar": true,
       "type": "int64"
     },
@@ -6585,6 +6720,16 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "bool"
     },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
     "rejectionReason": {
       "name": "rejectionReason",
       "optional": true,
@@ -6593,16 +6738,6 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "string"
-    },
-    "timesheetId": {
-      "gt": 0,
-      "name": "timesheetId",
-      "optional": false,
-      "protoName": "timesheet_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
     }
   },
   "hr.time_entry.v1.CreateTimeEntryRequest": {
@@ -7781,14 +7916,23 @@ export const contractValidationMetadata = {
   },
   "insights.customer.v1.GetLTVAnalysisRequest": {},
   "insights.customer.v1.GetTopCustomersRequest": {
-    "pagination": {
-      "name": "pagination",
+    "limit": {
+      "name": "limit",
       "optional": false,
-      "protoName": "pagination",
+      "protoName": "limit",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "common.pagination.v1.PaginationRequest"
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
     },
     "period": {
       "name": "period",
@@ -7803,6 +7947,15 @@ export const contractValidationMetadata = {
       "name": "sortBy",
       "optional": false,
       "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
       "repeated": false,
       "required": false,
       "scalar": true,
@@ -8002,14 +8155,41 @@ export const contractValidationMetadata = {
     }
   },
   "insights.report.v1.ListReportTemplatesRequest": {
-    "pagination": {
-      "name": "pagination",
+    "limit": {
+      "name": "limit",
       "optional": false,
-      "protoName": "pagination",
+      "protoName": "limit",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "common.pagination.v1.PaginationRequest"
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     },
     "type": {
       "name": "type",
@@ -8022,14 +8202,41 @@ export const contractValidationMetadata = {
     }
   },
   "insights.report.v1.ListScheduledReportsRequest": {
-    "pagination": {
-      "name": "pagination",
+    "limit": {
+      "name": "limit",
       "optional": false,
-      "protoName": "pagination",
+      "protoName": "limit",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "common.pagination.v1.PaginationRequest"
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "insights.revenue.v1.GetRevenueByAppRequest": {

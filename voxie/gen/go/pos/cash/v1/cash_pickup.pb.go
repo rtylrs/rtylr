@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -170,24 +171,20 @@ var File_pos_cash_v1_cash_pickup_proto protoreflect.FileDescriptor
 
 const file_pos_cash_v1_cash_pickup_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/cash/v1/cash_pickup.proto\x12\vpos.cash.v1\x1a\x1bbuf/validate/validate.proto\"\x90\x02\n" +
-	"\x11CashPickupRequest\x12'\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\bbranchId\x12+\n" +
-	"\vterminal_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"terminalId\x12)\n" +
+	"\x1dpos/cash/v1/cash_pickup.proto\x12\vpos.cash.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa0\x02\n" +
+	"\x11CashPickupRequest\x12+\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\bbranchId\x12/\n" +
+	"\vterminal_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"terminalId\x12-\n" +
 	"\n" +
-	"session_id\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tsessionId\x12+\n" +
-	"\vemployee_id\x18\x04 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"session_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tsessionId\x12/\n" +
+	"\vemployee_id\x18\x04 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"employeeId\x12)\n" +
 	"\x06amount\x18\x05 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12\"\n" +
 	"\x06reason\x18\x06 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06reason\"O\n" +
-	"\x12CashPickupResponse\x12\x1f\n" +
-	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06reason\"U\n" +
+	"\x12CashPickupResponse\x12%\n" +
+	"\vmovement_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"movementId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB,Z*github.com/voxire/voxie/gen/go/pos/cash/v1b\x06proto3"
 

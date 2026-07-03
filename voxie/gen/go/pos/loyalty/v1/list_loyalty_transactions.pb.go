@@ -116,10 +116,10 @@ var File_pos_loyalty_v1_list_loyalty_transactions_proto protoreflect.FileDescrip
 
 const file_pos_loyalty_v1_list_loyalty_transactions_proto_rawDesc = "" +
 	"\n" +
-	".pos/loyalty/v1/list_loyalty_transactions.proto\x12\x0epos.loyalty.v1\x1a\x1donekit/http/annotations.proto\x1a\x1apos/loyalty/v1/types.proto\"T\n" +
-	"\x1eListLoyaltyTransactionsRequest\x122\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\x11µ\x18\r\n" +
-	"\vcustomer_idR\n" +
+	".pos/loyalty/v1/list_loyalty_transactions.proto\x12\x0epos.loyalty.v1\x1a\x1donekit/http/annotations.proto\x1a\x1apos/loyalty/v1/types.proto\"X\n" +
+	"\x1eListLoyaltyTransactionsRequest\x126\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\x15µ\x18\r\n" +
+	"\vcustomer_idе\x18\x01R\n" +
 	"customerId\"i\n" +
 	"\x1fListLoyaltyTransactionsResponse\x12F\n" +
 	"\ftransactions\x18\x01 \x03(\v2\".pos.loyalty.v1.LoyaltyTransactionR\ftransactionsB/Z-github.com/voxire/voxie/gen/go/pos/loyalty/v1b\x06proto3"

@@ -17,13 +17,13 @@ export interface AuditLog {
   id: string;
   businessId: string;
   branchId: string;
-  terminalId?: string;
+  terminalId: string | null;
   employeeId: string;
   action: string;
   entityType: string;
-  entityId?: string;
-  details?: string;
-  ipAddress?: string;
+  entityId: string | null;
+  details: string | null;
+  ipAddress: string | null;
   createdAt: string;
 }
 

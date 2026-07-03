@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,11 @@ var File_pos_table_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_table_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x18pos/table/v1/types.proto\x12\fpos.table.v1\"\xea\x01\n" +
-	"\x05Table\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
-	"\vlocation_id\x18\x03 \x01(\x03H\x00R\n" +
+	"\x18pos/table/v1/types.proto\x12\fpos.table.v1\x1a\x1donekit/http/annotations.proto\"\x80\x02\n" +
+	"\x05Table\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12.\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"locationId\x88\x01\x01\x12\x14\n" +
 	"\x05label\x18\x04 \x01(\tR\x05label\x12\x14\n" +
 	"\x05seats\x18\x05 \x01(\x05R\x05seats\x12\x16\n" +

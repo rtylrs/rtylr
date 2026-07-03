@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -97,10 +98,10 @@ var File_pos_access_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_access_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x19pos/access/v1/types.proto\x12\rpos.access.v1\"q\n" +
+	"\x19pos/access/v1/types.proto\x12\rpos.access.v1\x1a\x1donekit/http/annotations.proto\"w\n" +
 	"\n" +
-	"MyLocation\x12\x1f\n" +
-	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"MyLocation\x12%\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
 	"\aaddress\x18\x03 \x01(\tR\aaddress\x12\x14\n" +

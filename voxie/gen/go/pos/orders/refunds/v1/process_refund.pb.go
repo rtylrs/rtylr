@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,15 +144,14 @@ var File_pos_orders_refunds_v1_process_refund_proto protoreflect.FileDescriptor
 
 const file_pos_orders_refunds_v1_process_refund_proto_rawDesc = "" +
 	"\n" +
-	"*pos/orders/refunds/v1/process_refund.proto\x12\x15pos.orders.refunds.v1\x1a\x1bbuf/validate/validate.proto\"\x8c\x01\n" +
-	"\x14ProcessRefundRequest\x12%\n" +
-	"\border_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12)\n" +
+	"*pos/orders/refunds/v1/process_refund.proto\x12\x15pos.orders.refunds.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x90\x01\n" +
+	"\x14ProcessRefundRequest\x12)\n" +
+	"\border_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\x12)\n" +
 	"\x06amount\x18\x02 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12\"\n" +
 	"\x06reason\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06reason\"N\n" +
-	"\x15ProcessRefundResponse\x12\x1b\n" +
-	"\trefund_id\x18\x01 \x01(\x03R\brefundId\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06reason\"T\n" +
+	"\x15ProcessRefundResponse\x12!\n" +
+	"\trefund_id\x18\x01 \x01(\x03B\x04е\x18\x01R\brefundId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB6Z4github.com/voxire/voxie/gen/go/pos/orders/refunds/v1b\x06proto3"
 
 var (

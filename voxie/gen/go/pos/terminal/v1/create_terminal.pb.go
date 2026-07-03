@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,16 +144,15 @@ var File_pos_terminal_v1_create_terminal_proto protoreflect.FileDescriptor
 
 const file_pos_terminal_v1_create_terminal_proto_rawDesc = "" +
 	"\n" +
-	"%pos/terminal/v1/create_terminal.proto\x12\x0fpos.terminal.v1\x1a\x1bbuf/validate/validate.proto\"\x89\x01\n" +
-	"\x15CreateTerminalRequest\x12'\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\bbranchId\x12\x1e\n" +
+	"%pos/terminal/v1/create_terminal.proto\x12\x0fpos.terminal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x8d\x01\n" +
+	"\x15CreateTerminalRequest\x12+\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\bbranchId\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12'\n" +
 	"\tdevice_id\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bdeviceId\"S\n" +
-	"\x16CreateTerminalResponse\x12\x1f\n" +
-	"\vterminal_id\x18\x01 \x01(\x03R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bdeviceId\"Y\n" +
+	"\x16CreateTerminalResponse\x12%\n" +
+	"\vterminal_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"terminalId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/pos/terminal/v1b\x06proto3"
 

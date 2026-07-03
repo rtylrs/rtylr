@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,17 +144,15 @@ var File_pos_loyalty_v1_earn_points_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_earn_points_proto_rawDesc = "" +
 	"\n" +
-	" pos/loyalty/v1/earn_points.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\x8b\x01\n" +
-	"\x11EarnPointsRequest\x12+\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"customerId\x12%\n" +
-	"\border_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12\"\n" +
+	" pos/loyalty/v1/earn_points.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x93\x01\n" +
+	"\x11EarnPointsRequest\x12/\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"customerId\x12)\n" +
+	"\border_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\x12\"\n" +
 	"\x06points\x18\x03 \x01(\x05B\n" +
-	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x06points\"U\n" +
-	"\x12EarnPointsResponse\x12%\n" +
-	"\x0etransaction_id\x18\x01 \x01(\x03R\rtransactionId\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x06points\"[\n" +
+	"\x12EarnPointsResponse\x12+\n" +
+	"\x0etransaction_id\x18\x01 \x01(\x03B\x04е\x18\x01R\rtransactionId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/pos/loyalty/v1b\x06proto3"
 
 var (

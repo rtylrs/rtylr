@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -135,10 +136,9 @@ var File_pos_orders_splits_v1_split_order_proto protoreflect.FileDescriptor
 
 const file_pos_orders_splits_v1_split_order_proto_rawDesc = "" +
 	"\n" +
-	"&pos/orders/splits/v1/split_order.proto\x12\x14pos.orders.splits.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19pos/orders/v1/types.proto\"w\n" +
-	"\x11SplitOrderRequest\x12%\n" +
-	"\border_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12;\n" +
+	"&pos/orders/splits/v1/split_order.proto\x12\x14pos.orders.splits.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19pos/orders/v1/types.proto\x1a\x1donekit/http/annotations.proto\"{\n" +
+	"\x11SplitOrderRequest\x12)\n" +
+	"\border_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\x12;\n" +
 	"\x06splits\x18\x02 \x03(\v2\x19.pos.orders.v1.SplitGroupB\b\xbaH\x05\x92\x01\x02\b\x01R\x06splits\"K\n" +
 	"\x12SplitOrderResponse\x12\x1b\n" +
 	"\torder_ids\x18\x01 \x03(\x03R\borderIds\x12\x18\n" +

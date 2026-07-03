@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -215,24 +216,24 @@ var File_pos_orders_v1_create_order_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_create_order_proto_rawDesc = "" +
 	"\n" +
-	" pos/orders/v1/create_order.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19pos/orders/v1/types.proto\"\xf0\x02\n" +
-	"\x12CreateOrderRequest\x12\x1d\n" +
+	" pos/orders/v1/create_order.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19pos/orders/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x88\x03\n" +
+	"\x12CreateOrderRequest\x12#\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x19\n" +
-	"\btable_id\x18\x02 \x01(\x03R\atableId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"session_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tsessionId\x12\x1f\n" +
+	"\btable_id\x18\x02 \x01(\x03B\x04е\x18\x01R\atableId\x12%\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1f\n" +
-	"\vcustomer_id\x18\x05 \x01(\x03R\n" +
+	"\x04type\x18\x04 \x01(\tR\x04type\x12%\n" +
+	"\vcustomer_id\x18\x05 \x01(\x03B\x04е\x18\x01R\n" +
 	"customerId\x12#\n" +
 	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12%\n" +
 	"\x0epayment_method\x18\a \x01(\tR\rpaymentMethod\x12\x14\n" +
 	"\x05notes\x18\b \x01(\tR\x05notes\x12#\n" +
 	"\rkitchen_notes\x18\t \x01(\tR\fkitchenNotes\x12C\n" +
 	"\x05items\x18\n" +
-	" \x03(\v2#.pos.orders.v1.CreateOrderItemInputB\b\xbaH\x05\x92\x01\x02\b\x01R\x05items\"m\n" +
-	"\x13CreateOrderResponse\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\x12!\n" +
+	" \x03(\v2#.pos.orders.v1.CreateOrderItemInputB\b\xbaH\x05\x92\x01\x02\b\x01R\x05items\"s\n" +
+	"\x13CreateOrderResponse\x12\x1f\n" +
+	"\border_id\x18\x01 \x01(\x03B\x04е\x18\x01R\aorderId\x12!\n" +
 	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessageB.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"
 

@@ -153,15 +153,15 @@ var File_pos_audit_v1_list_audit_proto protoreflect.FileDescriptor
 
 const file_pos_audit_v1_list_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/audit/v1/list_audit.proto\x12\fpos.audit.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x18pos/audit/v1/types.proto\"\x90\x02\n" +
+	"\x1dpos/audit/v1/list_audit.proto\x12\fpos.audit.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x18pos/audit/v1/types.proto\"\x94\x02\n" +
 	"\x10ListAuditRequest\x12$\n" +
 	"\x06action\x18\x01 \x01(\tB\fµ\x18\b\n" +
 	"\x06actionR\x06action\x122\n" +
 	"\ventity_type\x18\x02 \x01(\tB\x11µ\x18\r\n" +
 	"\ventity_typeR\n" +
-	"entityType\x122\n" +
-	"\vemployee_id\x18\x03 \x01(\x03B\x11µ\x18\r\n" +
-	"\vemployee_idR\n" +
+	"entityType\x126\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x15µ\x18\r\n" +
+	"\vemployee_idе\x18\x01R\n" +
 	"employeeId\x129\n" +
 	"\n" +
 	"start_date\x18\x04 \x01(\tB\x1a\xbaH\a\xc8\x01\x01r\x02\x10\x01µ\x18\f\n" +

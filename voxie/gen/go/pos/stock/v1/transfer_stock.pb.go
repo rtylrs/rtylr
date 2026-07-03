@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -170,24 +171,20 @@ var File_pos_stock_v1_transfer_stock_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_transfer_stock_proto_rawDesc = "" +
 	"\n" +
-	"!pos/stock/v1/transfer_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\"\x9d\x02\n" +
-	"\x14TransferStockRequest\x120\n" +
-	"\x0efrom_branch_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\ffromBranchId\x12,\n" +
-	"\fto_branch_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"toBranchId\x12)\n" +
+	"!pos/stock/v1/transfer_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xad\x02\n" +
+	"\x14TransferStockRequest\x124\n" +
+	"\x0efrom_branch_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\ffromBranchId\x120\n" +
+	"\fto_branch_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"toBranchId\x12-\n" +
 	"\n" +
-	"product_id\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tproductId\x12-\n" +
+	"product_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tproductId\x12-\n" +
 	"\bquantity\x18\x04 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\bquantity\x12\x1e\n" +
 	"\x04note\x18\x05 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04note\x12+\n" +
-	"\vemployee_id\x18\x06 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\"R\n" +
-	"\x15TransferStockResponse\x12\x1f\n" +
-	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04note\x12/\n" +
+	"\vemployee_id\x18\x06 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"employeeId\"X\n" +
+	"\x15TransferStockResponse\x12%\n" +
+	"\vmovement_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"movementId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
 

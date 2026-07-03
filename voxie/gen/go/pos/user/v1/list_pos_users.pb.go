@@ -116,10 +116,10 @@ var File_pos_user_v1_list_pos_users_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_list_pos_users_proto_rawDesc = "" +
 	"\n" +
-	" pos/user/v1/list_pos_users.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\x1a\x17pos/user/v1/types.proto\"I\n" +
-	"\x13ListPOSUsersRequest\x122\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\x11µ\x18\r\n" +
-	"\vlocation_idR\n" +
+	" pos/user/v1/list_pos_users.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\x1a\x17pos/user/v1/types.proto\"M\n" +
+	"\x13ListPOSUsersRequest\x126\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x15µ\x18\r\n" +
+	"\vlocation_idе\x18\x01R\n" +
 	"locationId\"B\n" +
 	"\x14ListPOSUsersResponse\x12*\n" +
 	"\x05users\x18\x01 \x03(\v2\x14.pos.user.v1.POSUserR\x05usersB,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"

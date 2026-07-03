@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -250,10 +251,10 @@ var File_pos_loyalty_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/loyalty/v1/types.proto\x12\x0epos.loyalty.v1\"\x9e\x02\n" +
-	"\rLoyaltyConfig\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"\x1apos/loyalty/v1/types.proto\x12\x0epos.loyalty.v1\x1a\x1donekit/http/annotations.proto\"\xaa\x02\n" +
+	"\rLoyaltyConfig\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
 	"businessId\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x03 \x01(\bR\tisEnabled\x12*\n" +
@@ -263,14 +264,14 @@ const file_pos_loyalty_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x85\x02\n" +
-	"\x12LoyaltyTransaction\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1f\n" +
-	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
-	"customerId\x12\x19\n" +
-	"\border_id\x18\x04 \x01(\x03R\aorderId\x12\x12\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x9d\x02\n" +
+	"\x12LoyaltyTransaction\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12%\n" +
+	"\vcustomer_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"customerId\x12\x1f\n" +
+	"\border_id\x18\x04 \x01(\x03B\x04е\x18\x01R\aorderId\x12\x12\n" +
 	"\x04type\x18\x05 \x01(\tR\x04type\x12\x16\n" +
 	"\x06points\x18\x06 \x01(\x05R\x06points\x12#\n" +
 	"\rbalance_after\x18\a \x01(\x05R\fbalanceAfter\x12\x12\n" +

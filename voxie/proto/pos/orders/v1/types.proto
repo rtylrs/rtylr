@@ -2,17 +2,19 @@ syntax = "proto3";
 
 package pos.orders.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
 
 // ── Shared Payloads ───────────────────────────────────────────────
 
 message OrderItem {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // order_id is the order id value for this contract.
-  int64 order_id = 2;
+  int64 order_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // menu_item_id is the menu item id value for this contract.
-  int64 menu_item_id = 3;
+  int64 menu_item_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 4;
   // sku is the sku value for this contract.
@@ -39,15 +41,15 @@ message OrderItem {
 
 message Order {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // session_id is the session id value for this contract.
-  int64 session_id = 3;
+  int64 session_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // table_id is the table id value for this contract.
-  int64 table_id = 4;
+  int64 table_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // location_id is the location id value for this contract.
-  int64 location_id = 5;
+  int64 location_id = 5 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // order_number is the order number value for this contract.
   string order_number = 6;
   // type is the type value for this contract.
@@ -55,11 +57,11 @@ message Order {
   // status is the current lifecycle state.
   string status = 8;
   // customer_id is the customer id value for this contract.
-  int64 customer_id = 9;
+  int64 customer_id = 9 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // customer_name is the customer name value for this contract.
   string customer_name = 10;
   // staff_id is the staff id value for this contract.
-  int64 staff_id = 11;
+  int64 staff_id = 11 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // subtotal is the subtotal value for this contract.
   double subtotal = 12;
   // discount_amount is the discount amount value for this contract.
@@ -94,7 +96,7 @@ message Order {
 
 message CreateOrderItemInput {
   // menu_item_id is the menu item id value for this contract.
-  int64 menu_item_id = 1;
+  int64 menu_item_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 2;
   // sku is the sku value for this contract.

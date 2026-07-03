@@ -116,10 +116,10 @@ var File_pos_stock_v1_list_inventory_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_list_inventory_proto_rawDesc = "" +
 	"\n" +
-	"!pos/stock/v1/list_inventory.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\x1a\x18pos/stock/v1/types.proto\"D\n" +
-	"\x14ListInventoryRequest\x12,\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\x0fµ\x18\v\n" +
-	"\tbranch_idR\bbranchId\"T\n" +
+	"!pos/stock/v1/list_inventory.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\x1a\x18pos/stock/v1/types.proto\"H\n" +
+	"\x14ListInventoryRequest\x120\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x13µ\x18\v\n" +
+	"\tbranch_idе\x18\x01R\bbranchId\"T\n" +
 	"\x15ListInventoryResponse\x12;\n" +
 	"\tinventory\x18\x01 \x03(\v2\x1d.pos.stock.v1.BranchInventoryR\tinventoryB-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
 

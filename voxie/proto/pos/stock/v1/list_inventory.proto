@@ -11,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
 
 message ListInventoryRequest {
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 1 [(onekit.http.query).name = "branch_id"];
+  int64 branch_id = 1 [(onekit.http.query).name = "branch_id", (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
 }
 
 message ListInventoryResponse {

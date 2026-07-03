@@ -117,12 +117,12 @@ var File_pos_cash_v1_list_cash_movements_proto protoreflect.FileDescriptor
 
 const file_pos_cash_v1_list_cash_movements_proto_rawDesc = "" +
 	"\n" +
-	"%pos/cash/v1/list_cash_movements.proto\x12\vpos.cash.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x17pos/cash/v1/types.proto\"U\n" +
-	"\x18ListCashMovementsRequest\x129\n" +
+	"%pos/cash/v1/list_cash_movements.proto\x12\vpos.cash.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x17pos/cash/v1/types.proto\"Y\n" +
+	"\x18ListCashMovementsRequest\x12=\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\x03B\x1a\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\f\n" +
+	"session_id\x18\x01 \x01(\x03B\x1e\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\f\n" +
 	"\n" +
-	"session_idR\tsessionId\"T\n" +
+	"session_idе\x18\x01R\tsessionId\"T\n" +
 	"\x19ListCashMovementsResponse\x127\n" +
 	"\tmovements\x18\x01 \x03(\v2\x19.pos.cash.v1.CashMovementR\tmovementsB,Z*github.com/voxire/voxie/gen/go/pos/cash/v1b\x06proto3"
 

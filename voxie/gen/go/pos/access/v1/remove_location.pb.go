@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_pos_access_v1_remove_location_proto protoreflect.FileDescriptor
 
 const file_pos_access_v1_remove_location_proto_rawDesc = "" +
 	"\n" +
-	"#pos/access/v1/remove_location.proto\x12\rpos.access.v1\x1a\x1bbuf/validate/validate.proto\"3\n" +
-	"\x15RemoveLocationRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"2\n" +
+	"#pos/access/v1/remove_location.proto\x12\rpos.access.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"7\n" +
+	"\x15RemoveLocationRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"2\n" +
 	"\x16RemoveLocationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB.Z,github.com/voxire/voxie/gen/go/pos/access/v1b\x06proto3"
 

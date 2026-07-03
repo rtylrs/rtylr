@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,12 +125,12 @@ var File_pos_floor_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_floor_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x18pos/floor/v1/types.proto\x12\fpos.floor.v1\"\xc4\x01\n" +
-	"\x05Floor\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x12\n" +
+	"\x18pos/floor/v1/types.proto\x12\fpos.floor.v1\x1a\x1donekit/http/annotations.proto\"\xd6\x01\n" +
+	"\x05Floor\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12!\n" +
+	"\tbranch_id\x18\x03 \x01(\x03B\x04е\x18\x01R\bbranchId\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
 	"sort_order\x18\x05 \x01(\x05R\tsortOrder\x12\x1b\n" +

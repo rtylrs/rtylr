@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,24 +161,24 @@ var File_pos_audit_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_audit_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x18pos/audit/v1/types.proto\x12\fpos.audit.v1\"\x95\x03\n" +
-	"\bAuditLog\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12$\n" +
-	"\vterminal_id\x18\x04 \x01(\x03H\x00R\n" +
-	"terminalId\x88\x01\x01\x12\x1f\n" +
-	"\vemployee_id\x18\x05 \x01(\x03R\n" +
+	"\x18pos/audit/v1/types.proto\x12\fpos.audit.v1\x1a\x1donekit/http/annotations.proto\"\xcd\x03\n" +
+	"\bAuditLog\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12!\n" +
+	"\tbranch_id\x18\x03 \x01(\x03B\x04е\x18\x01R\bbranchId\x12.\n" +
+	"\vterminal_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"terminalId\x88\x01\x01\x12%\n" +
+	"\vemployee_id\x18\x05 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12\x16\n" +
 	"\x06action\x18\x06 \x01(\tR\x06action\x12\x1f\n" +
 	"\ventity_type\x18\a \x01(\tR\n" +
-	"entityType\x12 \n" +
-	"\tentity_id\x18\b \x01(\x03H\x01R\bentityId\x88\x01\x01\x12\x1d\n" +
-	"\adetails\x18\t \x01(\tH\x02R\adetails\x88\x01\x01\x12\"\n" +
+	"entityType\x12*\n" +
+	"\tentity_id\x18\b \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\bentityId\x88\x01\x01\x12#\n" +
+	"\adetails\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\adetails\x88\x01\x01\x12(\n" +
 	"\n" +
 	"ip_address\x18\n" +
-	" \x01(\tH\x03R\tipAddress\x88\x01\x01\x12\x1d\n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x03R\tipAddress\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAtB\x0e\n" +
 	"\f_terminal_idB\f\n" +

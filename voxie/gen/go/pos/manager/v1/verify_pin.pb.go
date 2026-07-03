@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,13 +135,13 @@ var File_pos_manager_v1_verify_pin_proto protoreflect.FileDescriptor
 
 const file_pos_manager_v1_verify_pin_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/manager/v1/verify_pin.proto\x12\x0epos.manager.v1\x1a\x1bbuf/validate/validate.proto\"0\n" +
+	"\x1fpos/manager/v1/verify_pin.proto\x12\x0epos.manager.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"0\n" +
 	"\x10VerifyPINRequest\x12\x1c\n" +
 	"\x03pin\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03pin\"^\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03pin\"d\n" +
 	"\x11VerifyPINResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x19\n" +
-	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12\x18\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x1f\n" +
+	"\bstaff_id\x18\x02 \x01(\x03B\x04е\x18\x01R\astaffId\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/pos/manager/v1b\x06proto3"
 
 var (

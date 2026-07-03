@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,11 +126,10 @@ var File_pos_session_v1_close_session_proto protoreflect.FileDescriptor
 
 const file_pos_session_v1_close_session_proto_rawDesc = "" +
 	"\n" +
-	"\"pos/session/v1/close_session.proto\x12\x0epos.session.v1\x1a\x1bbuf/validate/validate.proto\"i\n" +
+	"\"pos/session/v1/close_session.proto\x12\x0epos.session.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"m\n" +
 	"\x13CloseSessionRequest\x126\n" +
-	"\rclosing_float\x18\x01 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\fclosingFloat\x12\x1a\n" +
-	"\x02id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"0\n" +
+	"\rclosing_float\x18\x01 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\fclosingFloat\x12\x1e\n" +
+	"\x02id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"0\n" +
 	"\x14CloseSessionResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/pos/session/v1b\x06proto3"
 

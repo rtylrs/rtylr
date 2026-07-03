@@ -7,16 +7,16 @@ export interface ListOrdersRequest {
   dateFrom: string;
   dateTo: string;
   search: string;
-  page: string;
-  pageSize: string;
+  page: number;
+  pageSize: number;
 }
 
 export interface ListOrdersResponse {
   orders: Order[];
-  total: string;
+  total: number;
   hasMore: boolean;
-  page: string;
-  pageSize: string;
+  page: number;
+  pageSize: number;
 }
 
 export interface Order {
@@ -191,8 +191,8 @@ export class OrderServiceClient {
     if (req.dateFrom != null && req.dateFrom !== "") params.set("date_from", String(req.dateFrom));
     if (req.dateTo != null && req.dateTo !== "") params.set("date_to", String(req.dateTo));
     if (req.search != null && req.search !== "") params.set("search", String(req.search));
-    if (req.page != null && req.page !== "0") params.set("page", String(req.page));
-    if (req.pageSize != null && req.pageSize !== "0") params.set("page_size", String(req.pageSize));
+    if (req.page != null && req.page !== 0) params.set("page", String(req.page));
+    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {

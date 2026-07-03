@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,21 +161,21 @@ var File_pos_session_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_session_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/session/v1/types.proto\x12\x0epos.session.v1\"\x86\x03\n" +
-	"\aSession\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
-	"\vlocation_id\x18\x03 \x01(\x03H\x00R\n" +
-	"locationId\x88\x01\x01\x12\x1e\n" +
-	"\bstaff_id\x18\x04 \x01(\x03H\x01R\astaffId\x88\x01\x01\x12#\n" +
+	"\x1apos/session/v1/types.proto\x12\x0epos.session.v1\x1a\x1donekit/http/annotations.proto\"\xac\x03\n" +
+	"\aSession\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12.\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"locationId\x88\x01\x01\x12(\n" +
+	"\bstaff_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\astaffId\x88\x01\x01\x12#\n" +
 	"\ropening_float\x18\x05 \x01(\x01R\fopeningFloat\x12#\n" +
 	"\rclosing_float\x18\x06 \x01(\x01R\fclosingFloat\x12\x1f\n" +
 	"\vtotal_sales\x18\a \x01(\x01R\n" +
 	"totalSales\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x12\x1b\n" +
-	"\topened_at\x18\t \x01(\tR\bopenedAt\x12 \n" +
+	"\topened_at\x18\t \x01(\tR\bopenedAt\x12&\n" +
 	"\tclosed_at\x18\n" +
-	" \x01(\tH\x02R\bclosedAt\x88\x01\x01\x12\x1d\n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\bclosedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAtB\x0e\n" +
 	"\f_location_idB\v\n" +

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -152,7 +153,7 @@ var File_pos_modifier_v1_create_modifier_proto protoreflect.FileDescriptor
 
 const file_pos_modifier_v1_create_modifier_proto_rawDesc = "" +
 	"\n" +
-	"%pos/modifier/v1/create_modifier.proto\x12\x0fpos.modifier.v1\x1a\x1bbuf/validate/validate.proto\"\xb4\x01\n" +
+	"%pos/modifier/v1/create_modifier.proto\x12\x0fpos.modifier.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xb4\x01\n" +
 	"\x15CreateModifierRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12/\n" +
@@ -162,9 +163,9 @@ const file_pos_modifier_v1_create_modifier_proto_rawDesc = "" +
 	"group_name\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tgroupName\x12\x1f\n" +
 	"\vis_required\x18\x04 \x01(\bR\n" +
-	"isRequired\"S\n" +
-	"\x16CreateModifierResponse\x12\x1f\n" +
-	"\vmodifier_id\x18\x01 \x01(\x03R\n" +
+	"isRequired\"Y\n" +
+	"\x16CreateModifierResponse\x12%\n" +
+	"\vmodifier_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"modifierId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/pos/modifier/v1b\x06proto3"
 

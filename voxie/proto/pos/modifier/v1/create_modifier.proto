@@ -3,6 +3,7 @@ syntax = "proto3";
 package pos.modifier.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/modifier/v1";
 
@@ -27,7 +28,7 @@ message CreateModifierRequest {
 
 message CreateModifierResponse {
   // modifier_id is the modifier id value for this contract.
-  int64 modifier_id = 1;
+  int64 modifier_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // message is a human-readable result message.
   string message = 2;
 }

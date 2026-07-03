@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,7 +162,7 @@ var File_pos_combo_v1_create_combo_proto protoreflect.FileDescriptor
 
 const file_pos_combo_v1_create_combo_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/combo/v1/create_combo.proto\x12\fpos.combo.v1\x1a\x1bbuf/validate/validate.proto\"\xc7\x01\n" +
+	"\x1fpos/combo/v1/create_combo.proto\x12\fpos.combo.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc7\x01\n" +
 	"\x12CreateComboRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
@@ -170,9 +171,9 @@ const file_pos_combo_v1_create_combo_proto_rawDesc = "" +
 	"\x05price\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x05price\x12 \n" +
 	"\x05items\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05items\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\"J\n" +
-	"\x13CreateComboResponse\x12\x19\n" +
-	"\bcombo_id\x18\x01 \x01(\x03R\acomboId\x12\x18\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"P\n" +
+	"\x13CreateComboResponse\x12\x1f\n" +
+	"\bcombo_id\x18\x01 \x01(\x03B\x04е\x18\x01R\acomboId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/combo/v1b\x06proto3"
 
 var (

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,20 +162,17 @@ var File_pos_stock_v1_adjust_stock_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_adjust_stock_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/stock/v1/adjust_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\"\xd8\x01\n" +
-	"\x12AdjustStockRequest\x12'\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\bbranchId\x12)\n" +
+	"\x1fpos/stock/v1/adjust_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xe4\x01\n" +
+	"\x12AdjustStockRequest\x12+\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\bbranchId\x12-\n" +
 	"\n" +
-	"product_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tproductId\x12-\n" +
+	"product_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tproductId\x12-\n" +
 	"\bquantity\x18\x03 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\bquantity\x12\x12\n" +
-	"\x04note\x18\x04 \x01(\tR\x04note\x12+\n" +
-	"\vemployee_id\x18\x05 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\"P\n" +
-	"\x13AdjustStockResponse\x12\x1f\n" +
-	"\vmovement_id\x18\x01 \x01(\x03R\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12/\n" +
+	"\vemployee_id\x18\x05 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"employeeId\"V\n" +
+	"\x13AdjustStockResponse\x12%\n" +
+	"\vmovement_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"movementId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
 

@@ -2,25 +2,27 @@ syntax = "proto3";
 
 package pos.terminal.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
 
 // ── Terminal ──────────────────────────────────────────────────────
 
 message Terminal {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // business_id is the business id value for this contract.
-  int64 business_id = 2;
+  int64 business_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 3;
+  int64 branch_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 4;
   // device_id is the device id value for this contract.
-  optional string device_id = 5;
+  optional string device_id = 5 [(onekit.http.nullable) = true];
   // is_active is the is active value for this contract.
   bool is_active = 6;
   // last_seen_at is the last seen at value for this contract.
-  optional string last_seen_at = 7;
+  optional string last_seen_at = 7 [(onekit.http.nullable) = true];
   // created_at is when the record was created.
   string created_at = 8;
 }

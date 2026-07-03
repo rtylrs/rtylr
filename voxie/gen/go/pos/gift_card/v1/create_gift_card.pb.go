@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,7 +162,7 @@ var File_pos_gift_card_v1_create_gift_card_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_create_gift_card_proto_rawDesc = "" +
 	"\n" +
-	"'pos/gift_card/v1/create_gift_card.proto\x12\x10pos.gift_card.v1\x1a\x1bbuf/validate/validate.proto\"\xff\x01\n" +
+	"'pos/gift_card/v1/create_gift_card.proto\x12\x10pos.gift_card.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xff\x01\n" +
 	"\x15CreateGiftCardRequest\x12\x1e\n" +
 	"\x04code\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04code\x125\n" +
@@ -171,9 +172,9 @@ const file_pos_gift_card_v1_create_gift_card_proto_rawDesc = "" +
 	"\x0ecustomer_email\x18\x04 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\rcustomerEmail\x12)\n" +
 	"\n" +
 	"expires_at\x18\x05 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\texpiresAt\"T\n" +
-	"\x16CreateGiftCardResponse\x12 \n" +
-	"\fgift_card_id\x18\x01 \x01(\x03R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\texpiresAt\"Z\n" +
+	"\x16CreateGiftCardResponse\x12&\n" +
+	"\fgift_card_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"giftCardId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
 

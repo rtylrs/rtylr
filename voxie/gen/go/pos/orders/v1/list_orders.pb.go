@@ -207,12 +207,12 @@ var File_pos_orders_v1_list_orders_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_list_orders_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/orders/v1/list_orders.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x19pos/orders/v1/types.proto\"\xbe\x02\n" +
-	"\x11ListOrdersRequest\x129\n" +
+	"\x1fpos/orders/v1/list_orders.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x19pos/orders/v1/types.proto\"\xca\x02\n" +
+	"\x11ListOrdersRequest\x12=\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\x03B\x1a\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\f\n" +
+	"session_id\x18\x01 \x01(\x03B\x1e\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\f\n" +
 	"\n" +
-	"session_idR\tsessionId\x12$\n" +
+	"session_idе\x18\x01R\tsessionId\x12$\n" +
 	"\x06status\x18\x02 \x01(\tB\fµ\x18\b\n" +
 	"\x06statusR\x06status\x12,\n" +
 	"\tdate_from\x18\x03 \x01(\tB\x0fµ\x18\v\n" +
@@ -220,18 +220,17 @@ const file_pos_orders_v1_list_orders_proto_rawDesc = "" +
 	"\adate_to\x18\x04 \x01(\tB\rµ\x18\t\n" +
 	"\adate_toR\x06dateTo\x12$\n" +
 	"\x06search\x18\x05 \x01(\tB\fµ\x18\b\n" +
-	"\x06searchR\x06search\x12\x1e\n" +
-	"\x04page\x18\x06 \x01(\x03B\n" +
-	"µ\x18\x06\n" +
-	"\x04pageR\x04page\x12,\n" +
-	"\tpage_size\x18\a \x01(\x03B\x0fµ\x18\v\n" +
-	"\tpage_sizeR\bpageSize\"\xa4\x01\n" +
+	"\x06searchR\x06search\x12\"\n" +
+	"\x04page\x18\x06 \x01(\x03B\x0eµ\x18\x06\n" +
+	"\x04pageе\x18\x02R\x04page\x120\n" +
+	"\tpage_size\x18\a \x01(\x03B\x13µ\x18\v\n" +
+	"\tpage_sizeе\x18\x02R\bpageSize\"\xb6\x01\n" +
 	"\x12ListOrdersResponse\x12,\n" +
-	"\x06orders\x18\x01 \x03(\v2\x14.pos.orders.v1.OrderR\x06orders\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x19\n" +
-	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12\x12\n" +
-	"\x04page\x18\x04 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x05 \x01(\x03R\bpageSizeB.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"
+	"\x06orders\x18\x01 \x03(\v2\x14.pos.orders.v1.OrderR\x06orders\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x19\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12\x18\n" +
+	"\x04page\x18\x04 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x05 \x01(\x03B\x04е\x18\x02R\bpageSizeB.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"
 
 var (
 	file_pos_orders_v1_list_orders_proto_rawDescOnce sync.Once

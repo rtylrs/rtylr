@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,10 +126,9 @@ var File_pos_orders_holds_v1_hold_order_proto protoreflect.FileDescriptor
 
 const file_pos_orders_holds_v1_hold_order_proto_rawDesc = "" +
 	"\n" +
-	"$pos/orders/holds/v1/hold_order.proto\x12\x13pos.orders.holds.v1\x1a\x1bbuf/validate/validate.proto\"]\n" +
-	"\x10HoldOrderRequest\x12%\n" +
-	"\border_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12\"\n" +
+	"$pos/orders/holds/v1/hold_order.proto\x12\x13pos.orders.holds.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"a\n" +
+	"\x10HoldOrderRequest\x12)\n" +
+	"\border_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\x12\"\n" +
 	"\x06reason\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06reason\"-\n" +
 	"\x11HoldOrderResponse\x12\x18\n" +

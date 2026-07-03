@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -322,41 +323,41 @@ var File_pos_stock_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x18pos/stock/v1/types.proto\x12\fpos.stock.v1\"\x9b\x03\n" +
-	"\rStockMovement\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1d\n" +
+	"\x18pos/stock/v1/types.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\"\xd3\x03\n" +
+	"\rStockMovement\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12!\n" +
+	"\tbranch_id\x18\x03 \x01(\x03B\x04е\x18\x01R\bbranchId\x12#\n" +
 	"\n" +
-	"product_id\x18\x04 \x01(\x03R\tproductId\x12\x12\n" +
+	"product_id\x18\x04 \x01(\x03B\x04е\x18\x01R\tproductId\x12\x12\n" +
 	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1a\n" +
-	"\bquantity\x18\x06 \x01(\x01R\bquantity\x12&\n" +
-	"\freference_id\x18\a \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12*\n" +
-	"\x0ereference_type\x18\b \x01(\tH\x01R\rreferenceType\x88\x01\x01\x12\x17\n" +
-	"\x04note\x18\t \x01(\tH\x02R\x04note\x88\x01\x01\x12$\n" +
+	"\bquantity\x18\x06 \x01(\x01R\bquantity\x120\n" +
+	"\freference_id\x18\a \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\vreferenceId\x88\x01\x01\x120\n" +
+	"\x0ereference_type\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\rreferenceType\x88\x01\x01\x12\x1d\n" +
+	"\x04note\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\x04note\x88\x01\x01\x12.\n" +
 	"\vemployee_id\x18\n" +
-	" \x01(\x03H\x03R\n" +
+	" \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x03R\n" +
 	"employeeId\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAtB\x0f\n" +
 	"\r_reference_idB\x11\n" +
 	"\x0f_reference_typeB\a\n" +
 	"\x05_noteB\x0e\n" +
-	"\f_employee_id\"\xad\x03\n" +
-	"\x0fBranchInventory\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x1d\n" +
+	"\f_employee_id\"\xcb\x03\n" +
+	"\x0fBranchInventory\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12!\n" +
+	"\tbranch_id\x18\x03 \x01(\x03B\x04е\x18\x01R\bbranchId\x12#\n" +
 	"\n" +
-	"product_id\x18\x04 \x01(\x03R\tproductId\x12\x1a\n" +
+	"product_id\x18\x04 \x01(\x03B\x04е\x18\x01R\tproductId\x12\x1a\n" +
 	"\bquantity\x18\x05 \x01(\x01R\bquantity\x12#\n" +
 	"\rreorder_point\x18\x06 \x01(\x01R\freorderPoint\x12)\n" +
 	"\x10reorder_quantity\x18\a \x01(\x01R\x0freorderQuantity\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\tR\tupdatedAt\x12\x17\n" +
-	"\aitem_id\x18\t \x01(\x03R\x06itemId\x12\x12\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\x12\x1d\n" +
+	"\aitem_id\x18\t \x01(\x03B\x04е\x18\x01R\x06itemId\x12\x12\n" +
 	"\x04name\x18\n" +
 	" \x01(\tR\x04name\x12\x10\n" +
 	"\x03sku\x18\v \x01(\tR\x03sku\x12\x12\n" +

@@ -116,10 +116,10 @@ var File_pos_floor_v1_list_floors_proto protoreflect.FileDescriptor
 
 const file_pos_floor_v1_list_floors_proto_rawDesc = "" +
 	"\n" +
-	"\x1epos/floor/v1/list_floors.proto\x12\fpos.floor.v1\x1a\x1donekit/http/annotations.proto\x1a\x18pos/floor/v1/types.proto\"A\n" +
-	"\x11ListFloorsRequest\x12,\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\x0fµ\x18\v\n" +
-	"\tbranch_idR\bbranchId\"A\n" +
+	"\x1epos/floor/v1/list_floors.proto\x12\fpos.floor.v1\x1a\x1donekit/http/annotations.proto\x1a\x18pos/floor/v1/types.proto\"E\n" +
+	"\x11ListFloorsRequest\x120\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x13µ\x18\v\n" +
+	"\tbranch_idе\x18\x01R\bbranchId\"A\n" +
 	"\x12ListFloorsResponse\x12+\n" +
 	"\x06floors\x18\x01 \x03(\v2\x13.pos.floor.v1.FloorR\x06floorsB-Z+github.com/voxire/voxie/gen/go/pos/floor/v1b\x06proto3"
 

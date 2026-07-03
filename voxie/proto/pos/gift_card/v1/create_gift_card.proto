@@ -3,6 +3,7 @@ syntax = "proto3";
 package pos.gift_card.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
 
@@ -38,7 +39,7 @@ message CreateGiftCardRequest {
 
 message CreateGiftCardResponse {
   // gift_card_id is the gift card id value for this contract.
-  int64 gift_card_id = 1;
+  int64 gift_card_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // message is a human-readable result message.
   string message = 2;
 }

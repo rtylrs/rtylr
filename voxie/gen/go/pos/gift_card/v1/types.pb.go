@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,10 +152,10 @@ var File_pos_gift_card_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/gift_card/v1/types.proto\x12\x10pos.gift_card.v1\"\xc0\x02\n" +
-	"\bGiftCard\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x1cpos/gift_card/v1/types.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\"\xcc\x02\n" +
+	"\bGiftCard\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x12%\n" +
 	"\x0einitial_amount\x18\x04 \x01(\x01R\rinitialAmount\x12'\n" +
 	"\x0fcurrent_balance\x18\x05 \x01(\x01R\x0ecurrentBalance\x12#\n" +

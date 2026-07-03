@@ -125,14 +125,14 @@ var File_pos_stock_v1_list_stock_movements_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_list_stock_movements_proto_rawDesc = "" +
 	"\n" +
-	"'pos/stock/v1/list_stock_movements.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\x1a\x18pos/stock/v1/types.proto\"z\n" +
-	"\x19ListStockMovementsRequest\x12,\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\x0fµ\x18\v\n" +
-	"\tbranch_idR\bbranchId\x12/\n" +
+	"'pos/stock/v1/list_stock_movements.proto\x12\fpos.stock.v1\x1a\x1donekit/http/annotations.proto\x1a\x18pos/stock/v1/types.proto\"\x82\x01\n" +
+	"\x19ListStockMovementsRequest\x120\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x13µ\x18\v\n" +
+	"\tbranch_idе\x18\x01R\bbranchId\x123\n" +
 	"\n" +
-	"product_id\x18\x02 \x01(\x03B\x10µ\x18\f\n" +
+	"product_id\x18\x02 \x01(\x03B\x14µ\x18\f\n" +
 	"\n" +
-	"product_idR\tproductId\"W\n" +
+	"product_idе\x18\x01R\tproductId\"W\n" +
 	"\x1aListStockMovementsResponse\x129\n" +
 	"\tmovements\x18\x01 \x03(\v2\x1b.pos.stock.v1.StockMovementR\tmovementsB-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
 

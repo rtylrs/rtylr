@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -601,11 +602,11 @@ var File_pos_orders_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x19pos/orders/v1/types.proto\x12\rpos.orders.v1\"\x83\x03\n" +
-	"\tOrderItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\x03R\aorderId\x12 \n" +
-	"\fmenu_item_id\x18\x03 \x01(\x03R\n" +
+	"\x19pos/orders/v1/types.proto\x12\rpos.orders.v1\x1a\x1donekit/http/annotations.proto\"\x95\x03\n" +
+	"\tOrderItem\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\border_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aorderId\x12&\n" +
+	"\fmenu_item_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"menuItemId\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x10\n" +
 	"\x03sku\x18\x05 \x01(\tR\x03sku\x12\x1a\n" +
@@ -620,23 +621,23 @@ const file_pos_orders_v1_types_proto_rawDesc = "" +
 	"\x05notes\x18\f \x01(\tR\x05notes\x12\x16\n" +
 	"\x06status\x18\r \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x0e \x01(\tR\tcreatedAt\"\x87\x06\n" +
-	"\x05Order\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
+	"created_at\x18\x0e \x01(\tR\tcreatedAt\"\xb1\x06\n" +
+	"\x05Order\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12#\n" +
 	"\n" +
-	"session_id\x18\x03 \x01(\x03R\tsessionId\x12\x19\n" +
-	"\btable_id\x18\x04 \x01(\x03R\atableId\x12\x1f\n" +
-	"\vlocation_id\x18\x05 \x01(\x03R\n" +
+	"session_id\x18\x03 \x01(\x03B\x04е\x18\x01R\tsessionId\x12\x1f\n" +
+	"\btable_id\x18\x04 \x01(\x03B\x04е\x18\x01R\atableId\x12%\n" +
+	"\vlocation_id\x18\x05 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12!\n" +
 	"\forder_number\x18\x06 \x01(\tR\vorderNumber\x12\x12\n" +
 	"\x04type\x18\a \x01(\tR\x04type\x12\x16\n" +
-	"\x06status\x18\b \x01(\tR\x06status\x12\x1f\n" +
-	"\vcustomer_id\x18\t \x01(\x03R\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x12%\n" +
+	"\vcustomer_id\x18\t \x01(\x03B\x04е\x18\x01R\n" +
 	"customerId\x12#\n" +
 	"\rcustomer_name\x18\n" +
-	" \x01(\tR\fcustomerName\x12\x19\n" +
-	"\bstaff_id\x18\v \x01(\x03R\astaffId\x12\x1a\n" +
+	" \x01(\tR\fcustomerName\x12\x1f\n" +
+	"\bstaff_id\x18\v \x01(\x03B\x04е\x18\x01R\astaffId\x12\x1a\n" +
 	"\bsubtotal\x18\f \x01(\x01R\bsubtotal\x12'\n" +
 	"\x0fdiscount_amount\x18\r \x01(\x01R\x0ediscountAmount\x12\x1d\n" +
 	"\n" +
@@ -655,9 +656,9 @@ const file_pos_orders_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\x17 \x01(\tR\tupdatedAt\x12\x17\n" +
 	"\apaid_at\x18\x18 \x01(\tR\x06paidAt\x12.\n" +
-	"\x05items\x18\x19 \x03(\v2\x18.pos.orders.v1.OrderItemR\x05items\"\xed\x01\n" +
-	"\x14CreateOrderItemInput\x12 \n" +
-	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
+	"\x05items\x18\x19 \x03(\v2\x18.pos.orders.v1.OrderItemR\x05items\"\xf3\x01\n" +
+	"\x14CreateOrderItemInput\x12&\n" +
+	"\fmenu_item_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"menuItemId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
 	"\x03sku\x18\x03 \x01(\tR\x03sku\x12\x1a\n" +

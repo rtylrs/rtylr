@@ -3,6 +3,7 @@ syntax = "proto3";
 package pos.orders.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
 
@@ -13,7 +14,7 @@ message VoidOrderRequest {
   int64 order_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
-  ];
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // reason is the reason value for this contract.
   string reason = 2 [
     (buf.validate.field).required = true,

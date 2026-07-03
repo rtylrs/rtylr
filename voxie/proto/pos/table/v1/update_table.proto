@@ -3,6 +3,7 @@ syntax = "proto3";
 package pos.table.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
 
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
 
 message UpdateTableRequest {
   // location_id is the location id value for this contract.
-  optional int64 location_id = 1;
+  optional int64 location_id = 1 [(onekit.http.nullable) = true, (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // label is the label value for this contract.
   string label = 2 [
     (buf.validate.field).required = true,
@@ -30,7 +31,7 @@ message UpdateTableRequest {
   int64 id = 5 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
-  ];
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
 }
 
 message UpdateTableResponse {

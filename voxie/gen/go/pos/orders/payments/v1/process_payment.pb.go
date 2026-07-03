@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,10 +135,9 @@ var File_pos_orders_payments_v1_process_payment_proto protoreflect.FileDescripto
 
 const file_pos_orders_payments_v1_process_payment_proto_rawDesc = "" +
 	"\n" +
-	",pos/orders/payments/v1/process_payment.proto\x12\x16pos.orders.payments.v1\x1a\x1bbuf/validate/validate.proto\"\xa5\x01\n" +
-	"\x15ProcessPaymentRequest\x12%\n" +
-	"\border_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x121\n" +
+	",pos/orders/payments/v1/process_payment.proto\x12\x16pos.orders.payments.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa9\x01\n" +
+	"\x15ProcessPaymentRequest\x12)\n" +
+	"\border_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\x121\n" +
 	"\x0epayment_method\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\rpaymentMethod\x122\n" +
 	"\vamount_paid\x18\x03 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\n" +

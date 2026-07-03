@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,15 +135,14 @@ var File_pos_floor_v1_update_floor_proto protoreflect.FileDescriptor
 
 const file_pos_floor_v1_update_floor_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/floor/v1/update_floor.proto\x12\fpos.floor.v1\x1a\x1bbuf/validate/validate.proto\"{\n" +
+	"\x1fpos/floor/v1/update_floor.proto\x12\fpos.floor.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x7f\n" +
 	"\x12UpdateFloorRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12)\n" +
 	"\n" +
 	"sort_order\x18\x02 \x01(\x05B\n" +
-	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\tsortOrder\x12\x1a\n" +
-	"\x02id\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"/\n" +
+	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\tsortOrder\x12\x1e\n" +
+	"\x02id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"/\n" +
 	"\x13UpdateFloorResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/floor/v1b\x06proto3"
 

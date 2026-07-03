@@ -2,17 +2,19 @@ syntax = "proto3";
 
 package pos.menu_item.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
 
 // ── MenuItem ──────────────────────────────────────────────────────
 
 message MenuItem {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // category_id is the category id value for this contract.
-  int64 category_id = 3;
+  int64 category_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // name is the name value for this contract.
   string name = 4;
   // sku is the sku value for this contract.

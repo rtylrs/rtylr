@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -252,7 +253,7 @@ var File_pos_settings_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_settings_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bpos/settings/v1/types.proto\x12\x0fpos.settings.v1\"\x9b\x02\n" +
+	"\x1bpos/settings/v1/types.proto\x12\x0fpos.settings.v1\x1a\x1donekit/http/annotations.proto\"\x9b\x02\n" +
 	"\x12POSFeatureSettings\x12\x16\n" +
 	"\x06tables\x18\x01 \x01(\bR\x06tables\x12'\n" +
 	"\x0fkitchen_display\x18\x02 \x01(\bR\x0ekitchenDisplay\x12\x1c\n" +
@@ -264,10 +265,10 @@ const file_pos_settings_v1_types_proto_rawDesc = "" +
 	"\tcustomers\x18\a \x01(\bR\tcustomers\x12\x1c\n" +
 	"\tinventory\x18\b \x01(\bR\tinventory\x12\x1f\n" +
 	"\vcash_drawer\x18\t \x01(\bR\n" +
-	"cashDrawer\"\xad\x02\n" +
-	"\x13POSBusinessSettings\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
+	"cashDrawer\"\xb9\x02\n" +
+	"\x13POSBusinessSettings\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
 	"businessId\x12)\n" +
 	"\x10business_profile\x18\x03 \x01(\tR\x0fbusinessProfile\x12\x14\n" +
 	"\x05theme\x18\x04 \x01(\tR\x05theme\x12?\n" +

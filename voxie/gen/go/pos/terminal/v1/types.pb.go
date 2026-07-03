@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,16 +134,16 @@ var File_pos_terminal_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_terminal_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bpos/terminal/v1/types.proto\x12\x0fpos.terminal.v1\"\x90\x02\n" +
-	"\bTerminal\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
-	"\tdevice_id\x18\x05 \x01(\tH\x00R\bdeviceId\x88\x01\x01\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\x12%\n" +
-	"\flast_seen_at\x18\a \x01(\tH\x01R\n" +
+	"\x1bpos/terminal/v1/types.proto\x12\x0fpos.terminal.v1\x1a\x1donekit/http/annotations.proto\"\xae\x02\n" +
+	"\bTerminal\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12!\n" +
+	"\tbranch_id\x18\x03 \x01(\x03B\x04е\x18\x01R\bbranchId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12&\n" +
+	"\tdevice_id\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\bdeviceId\x88\x01\x01\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\x12+\n" +
+	"\flast_seen_at\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\n" +
 	"lastSeenAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAtB\f\n" +

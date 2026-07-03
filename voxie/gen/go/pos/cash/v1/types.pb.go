@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,23 +161,23 @@ var File_pos_cash_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_cash_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x17pos/cash/v1/types.proto\x12\vpos.cash.v1\"\xfb\x02\n" +
-	"\fCashMovement\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
-	"businessId\x12\x1b\n" +
-	"\tbranch_id\x18\x03 \x01(\x03R\bbranchId\x12$\n" +
-	"\vterminal_id\x18\x04 \x01(\x03H\x00R\n" +
-	"terminalId\x88\x01\x01\x12\x1d\n" +
+	"\x17pos/cash/v1/types.proto\x12\vpos.cash.v1\x1a\x1donekit/http/annotations.proto\"\xaf\x03\n" +
+	"\fCashMovement\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12!\n" +
+	"\tbranch_id\x18\x03 \x01(\x03B\x04е\x18\x01R\bbranchId\x12.\n" +
+	"\vterminal_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"terminalId\x88\x01\x01\x12#\n" +
 	"\n" +
-	"session_id\x18\x05 \x01(\x03R\tsessionId\x12\x1f\n" +
-	"\vemployee_id\x18\x06 \x01(\x03R\n" +
+	"session_id\x18\x05 \x01(\x03B\x04е\x18\x01R\tsessionId\x12%\n" +
+	"\vemployee_id\x18\x06 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12\x12\n" +
 	"\x04type\x18\a \x01(\tR\x04type\x12\x16\n" +
-	"\x06amount\x18\b \x01(\x01R\x06amount\x12\x1b\n" +
-	"\x06reason\x18\t \x01(\tH\x01R\x06reason\x88\x01\x01\x12$\n" +
+	"\x06amount\x18\b \x01(\x01R\x06amount\x12!\n" +
+	"\x06reason\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\x06reason\x88\x01\x01\x12*\n" +
 	"\vapproved_by\x18\n" +
-	" \x01(\x03H\x02R\n" +
+	" \x01(\x03B\x04\xe8\xb5\x18\x01H\x02R\n" +
 	"approvedBy\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\tR\tcreatedAtB\x0e\n" +

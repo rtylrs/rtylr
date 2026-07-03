@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,17 +144,15 @@ var File_pos_session_v1_open_session_proto protoreflect.FileDescriptor
 
 const file_pos_session_v1_open_session_proto_rawDesc = "" +
 	"\n" +
-	"!pos/session/v1/open_session.proto\x12\x0epos.session.v1\x1a\x1bbuf/validate/validate.proto\"\xa0\x01\n" +
-	"\x12OpenSessionRequest\x12+\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"locationId\x12%\n" +
-	"\bstaff_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\astaffId\x126\n" +
-	"\ropening_float\x18\x03 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\fopeningFloat\"N\n" +
-	"\x13OpenSessionResponse\x12\x1d\n" +
+	"!pos/session/v1/open_session.proto\x12\x0epos.session.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa8\x01\n" +
+	"\x12OpenSessionRequest\x12/\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"locationId\x12)\n" +
+	"\bstaff_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\astaffId\x126\n" +
+	"\ropening_float\x18\x03 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\fopeningFloat\"T\n" +
+	"\x13OpenSessionResponse\x12#\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x18\n" +
+	"session_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tsessionId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/pos/session/v1b\x06proto3"
 
 var (

@@ -11,14 +11,14 @@ export interface ListSessionsResponse {
 export interface Session {
   id: string;
   ownerId: string;
-  locationId?: string;
-  staffId?: string;
+  locationId: string | null;
+  staffId: string | null;
   openingFloat: number;
   closingFloat: number;
   totalSales: number;
   status: string;
   openedAt: string;
-  closedAt?: string;
+  closedAt: string | null;
   createdAt: string;
 }
 

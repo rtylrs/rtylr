@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -233,20 +234,20 @@ var File_pos_kds_v1_types_proto protoreflect.FileDescriptor
 const file_pos_kds_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"\x16pos/kds/v1/types.proto\x12\n" +
-	"pos.kds.v1\"\x92\x01\n" +
-	"\aKDSItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\border_id\x18\x02 \x01(\x03R\aorderId\x12\x12\n" +
+	"pos.kds.v1\x1a\x1donekit/http/annotations.proto\"\x9e\x01\n" +
+	"\aKDSItem\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\border_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aorderId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1a\n" +
 	"\bquantity\x18\x04 \x01(\x01R\bquantity\x12\x14\n" +
 	"\x05notes\x18\x05 \x01(\tR\x05notes\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\"\x98\x02\n" +
-	"\bKDSOrder\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\"\xa4\x02\n" +
+	"\bKDSOrder\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12!\n" +
 	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x12\n" +
 	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x19\n" +
-	"\btable_id\x18\x05 \x01(\x03R\atableId\x12#\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1f\n" +
+	"\btable_id\x18\x05 \x01(\x03B\x04е\x18\x01R\atableId\x12#\n" +
 	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12#\n" +
 	"\rkitchen_notes\x18\a \x01(\tR\fkitchenNotes\x12\x1d\n" +
 	"\n" +

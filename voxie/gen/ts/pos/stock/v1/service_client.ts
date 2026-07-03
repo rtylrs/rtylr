@@ -17,10 +17,10 @@ export interface StockMovement {
   productId: string;
   type: string;
   quantity: number;
-  referenceId?: string;
-  referenceType?: string;
-  note?: string;
-  employeeId?: string;
+  referenceId: string | null;
+  referenceType: string | null;
+  note: string | null;
+  employeeId: string | null;
   createdAt: string;
 }
 

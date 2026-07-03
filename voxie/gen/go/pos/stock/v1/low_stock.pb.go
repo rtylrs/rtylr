@@ -117,10 +117,10 @@ var File_pos_stock_v1_low_stock_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_low_stock_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/stock/v1/low_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x18pos/stock/v1/types.proto\"I\n" +
-	"\x0fLowStockRequest\x126\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\x19\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\v\n" +
-	"\tbranch_idR\bbranchId\"G\n" +
+	"\x1cpos/stock/v1/low_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\x1a\x18pos/stock/v1/types.proto\"M\n" +
+	"\x0fLowStockRequest\x12:\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x1d\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\v\n" +
+	"\tbranch_idе\x18\x01R\bbranchId\"G\n" +
 	"\x10LowStockResponse\x123\n" +
 	"\x05items\x18\x01 \x03(\v2\x1d.pos.stock.v1.BranchInventoryR\x05itemsB-Z+github.com/voxire/voxie/gen/go/pos/stock/v1b\x06proto3"
 

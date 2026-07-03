@@ -11,7 +11,7 @@ export interface ListTablesResponse {
 export interface Table {
   id: string;
   ownerId: string;
-  locationId?: string;
+  locationId: string | null;
   label: string;
   seats: number;
   status: string;
@@ -20,7 +20,7 @@ export interface Table {
 }
 
 export interface CreateTableRequest {
-  locationId?: string;
+  locationId: string | null;
   label: string;
   seats: number;
 }
@@ -31,7 +31,7 @@ export interface CreateTableResponse {
 }
 
 export interface UpdateTableRequest {
-  locationId?: string;
+  locationId: string | null;
   label: string;
   seats: number;
   status: string;

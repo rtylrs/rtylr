@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -188,30 +189,26 @@ var File_pos_audit_v1_create_audit_proto protoreflect.FileDescriptor
 
 const file_pos_audit_v1_create_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/audit/v1/create_audit.proto\x12\fpos.audit.v1\x1a\x1bbuf/validate/validate.proto\"\xe2\x02\n" +
-	"\x12CreateAuditRequest\x12'\n" +
-	"\tbranch_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\bbranchId\x12+\n" +
-	"\vterminal_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"terminalId\x12+\n" +
-	"\vemployee_id\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"\x1fpos/audit/v1/create_audit.proto\x12\fpos.audit.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xf2\x02\n" +
+	"\x12CreateAuditRequest\x12+\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\bbranchId\x12/\n" +
+	"\vterminal_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"terminalId\x12/\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"employeeId\x12\"\n" +
 	"\x06action\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06action\x12+\n" +
 	"\ventity_type\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
-	"entityType\x12'\n" +
-	"\tentity_id\x18\x06 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\bentityId\x12$\n" +
+	"entityType\x12+\n" +
+	"\tentity_id\x18\x06 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\bentityId\x12$\n" +
 	"\adetails\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adetails\x12)\n" +
 	"\n" +
 	"ip_address\x18\b \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tipAddress\"Q\n" +
-	"\x13CreateAuditResponse\x12 \n" +
-	"\faudit_log_id\x18\x01 \x01(\x03R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tipAddress\"W\n" +
+	"\x13CreateAuditResponse\x12&\n" +
+	"\faudit_log_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"auditLogId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/pos/audit/v1b\x06proto3"
 
