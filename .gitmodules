@@ -1,6 +1,3 @@
-[submodule "voxie"]
-	path = voxie
-	url = ../voxie
 [submodule "packages"]
 	path = packages
 	url = https://github.com/tryrtylr/packages.git

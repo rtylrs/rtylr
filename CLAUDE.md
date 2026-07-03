@@ -96,14 +96,13 @@ rtylr/
 │   ├── components/   @voxire/components - Higher-level shared components (FullScreenLoader, etc.)
 │   ├── config/       @voxire/config   - APP_URLS, APP_CONFIG, AppFlagGuard, industries, themes
 │   ├── consent/      @voxire/consent  - Cookie/consent management
-│   ├── contracts/    @voxire/contracts - Generated TypeScript types from voxie protos
+│   ├── contracts/    @voxire/contracts - Re-exports gen/ts from packages/contracts/voxie (nested submodule)
 │   ├── i18n/         @voxire/i18n     - Shared i18next setup
 │   ├── observability/ @voxire/observability - Client-side error/log reporting
 │   ├── permissions/  @voxire/permissions - RBAC helpers
 │   ├── types/        @voxire/types    - Shared TypeScript interfaces (no runtime)
 │   ├── ui/           @voxire/ui       - Shared low-level components (incl. ErrorBoundary)
 │   ├── assets/, menu/, tailwind-config/, utils/   - as named
-├── voxie/            Git submodule - proto contracts
 ├── docs/             Architecture docs + ADRs (authoritative)
 ├── e2e/              Playwright e2e tests (one spec per app area)
 ├── test/             Shared test utilities
@@ -117,7 +116,7 @@ rtylr/
 
 > **Removed apps:** `landing` (marketing site) now lives in its own repo. `hub` was renamed to `dash`. `vbitez` (POS desktop) is not part of this monorepo. Empty `apps/hub`, `apps/vbitez`, or `apps/landing` folders on disk are untracked leftovers - safe to delete.
 >
-> **Submodules:** both `voxie/` (contracts) and `packages/` (voxire/packages) are git submodules. Run `git submodule update --init --recursive` after every pull, then `pnpm install`.
+> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here. It carries its own nested `voxie` submodule at `packages/contracts/voxie` (proto contracts + generated `gen/ts`, which `@voxire/contracts` re-exports directly) — there is no separate top-level `voxie/` anymore. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same `packages` submodule and gets contracts the same way.
 
 ### Tech Stack
 
@@ -696,7 +695,7 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 Run these steps at the start of every new session before touching any file:
 
 1. `git pull origin main` (or the relevant branch)
-2. `git submodule update --init --recursive` (keeps the voxie contracts AND the packages/ submodule in sync)
+2. `git submodule update --init --recursive` (keeps `packages/` and its nested `voxie` contracts submodule in sync)
 3. `git checkout -b feat/<task-name>` to create a feature branch
 4. `pnpm install` if `pnpm-lock.yaml` changed since last session
 5. Check `docs/` for any new files added since last session
@@ -776,18 +775,18 @@ pnpm test          # Vitest unit tests
 pnpm test:e2e      # Playwright e2e tests
 ```
 
-### Submodules (voxie contracts + packages)
+### Submodules (packages, and its nested voxie contracts)
 
-Both `voxie/` (proto contracts) and `packages/` (voxire/packages — all shared workspace packages) are git submodules. After cloning or pulling:
+`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it carries its own nested `voxie` submodule at `packages/contracts/voxie` (proto contracts + committed `gen/ts`). After cloning or pulling:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-To sync contracts after a voxie update:
+`gen/ts` is generated and committed by `voxie` itself — there is nothing to run locally to sync contracts. To pick up a newer voxie commit and audit usage:
 
 ```bash
-pnpm contracts:sync             # runs packages/contracts/scripts/sync.sh
+pnpm contracts:sync             # bumps the nested voxie submodule pointer to its latest commit
 pnpm contracts:audit-requests   # audits app request shapes against the contracts
 ```
 
