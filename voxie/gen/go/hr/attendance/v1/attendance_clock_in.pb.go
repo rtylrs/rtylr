@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,17 +162,16 @@ var File_hr_attendance_v1_attendance_clock_in_proto protoreflect.FileDescriptor
 
 const file_hr_attendance_v1_attendance_clock_in_proto_rawDesc = "" +
 	"\n" +
-	"*hr/attendance/v1/attendance_clock_in.proto\x12\x10hr.attendance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/attendance/v1/types.proto\"\xf5\x01\n" +
+	"*hr/attendance/v1/attendance_clock_in.proto\x12\x10hr.attendance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/attendance/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x91\x02\n" +
 	"\x18AttendanceClockInRequest\x12\"\n" +
 	"\x06method\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06method\x12+\n" +
-	"\vlocation_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"locationId\x12\x15\n" +
-	"\x03lat\x18\x03 \x01(\x01H\x00R\x03lat\x88\x01\x01\x12\x15\n" +
-	"\x03lng\x18\x04 \x01(\x01H\x01R\x03lng\x88\x01\x01\x12\x1e\n" +
-	"\bqr_token\x18\x05 \x01(\tH\x02R\aqrToken\x88\x01\x01\x12\x15\n" +
-	"\x03pin\x18\x06 \x01(\tH\x03R\x03pin\x88\x01\x01B\x06\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06method\x12/\n" +
+	"\vlocation_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"locationId\x12\x1b\n" +
+	"\x03lat\x18\x03 \x01(\x01B\x04\xe8\xb5\x18\x01H\x00R\x03lat\x88\x01\x01\x12\x1b\n" +
+	"\x03lng\x18\x04 \x01(\x01B\x04\xe8\xb5\x18\x01H\x01R\x03lng\x88\x01\x01\x12$\n" +
+	"\bqr_token\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\aqrToken\x88\x01\x01\x12\x1b\n" +
+	"\x03pin\x18\x06 \x01(\tB\x04\xe8\xb5\x18\x01H\x03R\x03pin\x88\x01\x01B\x06\n" +
 	"\x04_latB\x06\n" +
 	"\x04_lngB\v\n" +
 	"\t_qr_tokenB\x06\n" +

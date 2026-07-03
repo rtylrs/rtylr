@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -386,17 +387,17 @@ var File_hr_dashboard_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_dashboard_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhr/dashboard/v1/types.proto\x12\x0fhr.dashboard.v1\x1a\x1bbuf/validate/validate.proto\"\xa6\x01\n" +
+	"\x1bhr/dashboard/v1/types.proto\x12\x0fhr.dashboard.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa6\x01\n" +
 	"\x0eDashboardStats\x12\x1f\n" +
 	"\vtotal_staff\x18\x01 \x01(\x03R\n" +
 	"totalStaff\x12$\n" +
 	"\x0eon_shift_today\x18\x02 \x01(\x03R\fonShiftToday\x12(\n" +
 	"\x10pending_time_off\x18\x03 \x01(\x03R\x0ependingTimeOff\x12#\n" +
-	"\rpayroll_draft\x18\x04 \x01(\x03R\fpayrollDraft\"\xbf\x02\n" +
-	"\x16DashboardWidgetPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x17\n" +
-	"\arole_id\x18\x03 \x01(\x03R\x06roleId\x12\x1f\n" +
+	"\rpayroll_draft\x18\x04 \x01(\x03R\fpayrollDraft\"\xd7\x02\n" +
+	"\x16DashboardWidgetPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x1d\n" +
+	"\arole_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x06roleId\x12\x1f\n" +
 	"\vwidget_type\x18\x04 \x01(\tR\n" +
 	"widgetType\x12\x1d\n" +
 	"\n" +
@@ -404,17 +405,17 @@ const file_hr_dashboard_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"position_y\x18\x06 \x01(\x05R\tpositionY\x12\x14\n" +
 	"\x05width\x18\a \x01(\x05R\x05width\x12\x16\n" +
-	"\x06height\x18\b \x01(\x05R\x06height\x12\x16\n" +
-	"\x06config\x18\t \x01(\fR\x06config\x12\x1d\n" +
+	"\x06height\x18\b \x01(\x05R\x06height\x12\x1c\n" +
+	"\x06config\x18\t \x01(\fB\x04\x80\xb6\x18\x01R\x06config\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
 	" \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\x03R\tupdatedAt\"K\n" +
+	"updated_at\x18\v \x01(\x03R\tupdatedAt\"Q\n" +
 	"\x14DashboardDataPayload\x12\x1f\n" +
 	"\vwidget_type\x18\x01 \x01(\tR\n" +
-	"widgetType\x12\x12\n" +
-	"\x04data\x18\x02 \x01(\fR\x04data\"\xfe\x01\n" +
+	"widgetType\x12\x18\n" +
+	"\x04data\x18\x02 \x01(\fB\x04\x80\xb6\x18\x01R\x04data\"\xfe\x01\n" +
 	"\x14GetDashboardResponse\x12A\n" +
 	"\awidgets\x18\x01 \x03(\v2'.hr.dashboard.v1.DashboardWidgetPayloadR\awidgets\x12C\n" +
 	"\x04data\x18\x02 \x03(\v2/.hr.dashboard.v1.GetDashboardResponse.DataEntryR\x04data\x1a^\n" +

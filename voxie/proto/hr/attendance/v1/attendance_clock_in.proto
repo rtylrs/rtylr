@@ -4,6 +4,8 @@ package hr.attendance.v1;
 
 import "buf/validate/validate.proto";
 import "hr/attendance/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/attendance/v1";
 
@@ -18,16 +20,25 @@ message AttendanceClockInRequest {
   // Work location where the employee is clocking in.
   int64 location_id = 2 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // Latitude at clock-in; absent if location not available.
-  optional double lat = 3;
+  optional double lat = 3 [
+    (onekit.http.nullable) = true
+  ];
   // Longitude at clock-in; absent if location not available.
-  optional double lng = 4;
+  optional double lng = 4 [
+    (onekit.http.nullable) = true
+  ];
   // QR token scanned at a terminal; absent if not using QR method.
-  optional string qr_token = 5;
+  optional string qr_token = 5 [
+    (onekit.http.nullable) = true
+  ];
   // PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.
-  optional string pin = 6;
+  optional string pin = 6 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message AttendanceClockInResponse {

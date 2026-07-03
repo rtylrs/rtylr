@@ -11,11 +11,22 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 message ListEmployeesRequest {
   // Filter by department; absent to include all departments.
-  optional int64 department_id = 1 [(onekit.http.query).name = "department_id"];
+  optional int64 department_id = 1 [
+    (onekit.http.query).name = "department_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Filter by location; absent to include all locations.
-  optional int64 location_id = 2 [(onekit.http.query).name = "location_id"];
+  optional int64 location_id = 2 [
+    (onekit.http.query).name = "location_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Filter by employment status; absent to include all statuses.
-  optional string status = 3 [(onekit.http.query).name = "status"];
+  optional string status = 3 [
+    (onekit.http.query).name = "status",
+    (onekit.http.nullable) = true
+  ];
   // Maximum number of records to return.
   int32 limit = 4 [(onekit.http.query).name = "limit"];
   // Number of records to skip for pagination.
@@ -26,7 +37,9 @@ message ListEmployeesResponse {
   // Page of employee records matching the filters.
   repeated EmployeePayload employees = 1;
   // Total number of employees matching the filters.
-  int64 total = 2;
+  int64 total = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
   // Limit that was applied.
   int32 limit = 3;
   // Offset that was applied.

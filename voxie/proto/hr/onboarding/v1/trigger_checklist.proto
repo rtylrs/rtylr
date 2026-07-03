@@ -4,6 +4,8 @@ package hr.onboarding.v1;
 
 import "buf/validate/validate.proto";
 import "hr/onboarding/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
@@ -13,12 +15,14 @@ message TriggerChecklistRequest {
   // Employee to trigger the checklist for.
   int64 employee_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // template_id identifies the checklist template to trigger.
   int64 template_id = 2 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // trigger_date is the date the checklist starts, formatted as YYYY-MM-DD.
   string trigger_date = 3 [

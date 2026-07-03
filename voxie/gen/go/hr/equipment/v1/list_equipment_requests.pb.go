@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,16 +152,18 @@ var File_hr_equipment_v1_list_equipment_requests_proto protoreflect.FileDescript
 
 const file_hr_equipment_v1_list_equipment_requests_proto_rawDesc = "" +
 	"\n" +
-	"-hr/equipment/v1/list_equipment_requests.proto\x12\x0fhr.equipment.v1\x1a\x1bhr/equipment/v1/types.proto\"|\n" +
-	"\x1cListEquipmentRequestsRequest\x12$\n" +
-	"\vemployee_id\x18\x01 \x01(\x03H\x00R\n" +
-	"employeeId\x88\x01\x01\x12\x1b\n" +
-	"\x06status\x18\x02 \x01(\tH\x01R\x06status\x88\x01\x01B\x0e\n" +
+	"-hr/equipment/v1/list_equipment_requests.proto\x12\x0fhr.equipment.v1\x1a\x1bhr/equipment/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xa9\x01\n" +
+	"\x1cListEquipmentRequestsRequest\x12?\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x19µ\x18\r\n" +
+	"\vemployee_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"employeeId\x88\x01\x01\x12-\n" +
+	"\x06status\x18\x02 \x01(\tB\x10µ\x18\b\n" +
+	"\x06status\xe8\xb5\x18\x01H\x01R\x06status\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\t\n" +
-	"\a_status\"\xa9\x01\n" +
+	"\a_status\"\xaf\x01\n" +
 	"\x1dListEquipmentRequestsResponse\x12D\n" +
-	"\brequests\x18\x01 \x03(\v2(.hr.equipment.v1.EquipmentRequestPayloadR\brequests\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\brequests\x18\x01 \x03(\v2(.hr.equipment.v1.EquipmentRequestPayloadR\brequests\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB0Z.github.com/voxire/voxie/gen/go/hr/equipment/v1b\x06proto3"
 

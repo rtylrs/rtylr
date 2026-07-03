@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,14 +143,15 @@ var File_hr_shift_v1_list_shifts_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_list_shifts_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhr/shift/v1/list_shifts.proto\x12\vhr.shift.v1\x1a\x17hr/shift/v1/types.proto\"I\n" +
-	"\x11ListShiftsRequest\x12$\n" +
-	"\vlocation_id\x18\x01 \x01(\x03H\x00R\n" +
+	"\x1dhr/shift/v1/list_shifts.proto\x12\vhr.shift.v1\x1a\x17hr/shift/v1/types.proto\x1a\x1donekit/http/annotations.proto\"d\n" +
+	"\x11ListShiftsRequest\x12?\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x19µ\x18\r\n" +
+	"\vlocation_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"locationId\x88\x01\x01B\x0e\n" +
-	"\f_location_id\"\x8b\x01\n" +
+	"\f_location_id\"\x91\x01\n" +
 	"\x12ListShiftsResponse\x121\n" +
-	"\x06shifts\x18\x01 \x03(\v2\x19.hr.shift.v1.ShiftPayloadR\x06shifts\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x06shifts\x18\x01 \x03(\v2\x19.hr.shift.v1.ShiftPayloadR\x06shifts\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB,Z*github.com/voxire/voxie/gen/go/hr/shift/v1b\x06proto3"
 

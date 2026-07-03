@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -367,29 +368,29 @@ var File_hr_time_entry_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/time_entry/v1/types.proto\x12\x10hr.time_entry.v1\"\xbc\x05\n" +
-	"\x10TimeEntryPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\"\n" +
+	"\x1chr/time_entry/v1/types.proto\x12\x10hr.time_entry.v1\x1a\x1donekit/http/annotations.proto\"\x84\x06\n" +
+	"\x10TimeEntryPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12,\n" +
 	"\n" +
-	"project_id\x18\x04 \x01(\x03H\x00R\tprojectId\x88\x01\x01\x12\x1c\n" +
-	"\atask_id\x18\x05 \x01(\x03H\x01R\x06taskId\x88\x01\x01\x12$\n" +
-	"\vcategory_id\x18\x06 \x01(\x03H\x02R\n" +
+	"project_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\tprojectId\x88\x01\x01\x12&\n" +
+	"\atask_id\x18\x05 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x06taskId\x88\x01\x01\x12.\n" +
+	"\vcategory_id\x18\x06 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x02R\n" +
 	"categoryId\x88\x01\x01\x12\x12\n" +
 	"\x04date\x18\a \x01(\tR\x04date\x12)\n" +
-	"\x10duration_minutes\x18\b \x01(\x05R\x0fdurationMinutes\x12\"\n" +
+	"\x10duration_minutes\x18\b \x01(\x05R\x0fdurationMinutes\x12(\n" +
 	"\n" +
-	"start_time\x18\t \x01(\tH\x03R\tstartTime\x88\x01\x01\x12\x1e\n" +
+	"start_time\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x03R\tstartTime\x88\x01\x01\x12$\n" +
 	"\bend_time\x18\n" +
-	" \x01(\tH\x04R\aendTime\x88\x01\x01\x12 \n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x04R\aendTime\x88\x01\x01\x12 \n" +
 	"\vdescription\x18\v \x01(\tR\vdescription\x12\x1f\n" +
 	"\vis_billable\x18\f \x01(\bR\n" +
 	"isBillable\x12\x16\n" +
-	"\x06status\x18\r \x01(\tR\x06status\x12.\n" +
-	"\x10rejection_reason\x18\x0e \x01(\tH\x05R\x0frejectionReason\x88\x01\x01\x12$\n" +
-	"\vapproved_by\x18\x0f \x01(\x03H\x06R\n" +
+	"\x06status\x18\r \x01(\tR\x06status\x124\n" +
+	"\x10rejection_reason\x18\x0e \x01(\tB\x04\xe8\xb5\x18\x01H\x05R\x0frejectionReason\x88\x01\x01\x12*\n" +
+	"\vapproved_by\x18\x0f \x01(\x03B\x04\xe8\xb5\x18\x01H\x06R\n" +
 	"approvedBy\x88\x01\x01\x12\x16\n" +
 	"\x06source\x18\x10 \x01(\tR\x06source\x12\x1d\n" +
 	"\n" +
@@ -403,18 +404,18 @@ const file_hr_time_entry_v1_types_proto_rawDesc = "" +
 	"\v_start_timeB\v\n" +
 	"\t_end_timeB\x13\n" +
 	"\x11_rejection_reasonB\x0e\n" +
-	"\f_approved_by\"\xc8\x03\n" +
-	"\x10TimesheetPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"\f_approved_by\"\xe0\x03\n" +
+	"\x10TimesheetPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12!\n" +
 	"\fperiod_start\x18\x04 \x01(\tR\vperiodStart\x12\x1d\n" +
 	"\n" +
 	"period_end\x18\x05 \x01(\tR\tperiodEnd\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x124\n" +
-	"\x16current_approval_level\x18\a \x01(\x05R\x14currentApprovalLevel\x12&\n" +
-	"\fsubmitted_at\x18\b \x01(\x03H\x00R\vsubmittedAt\x88\x01\x01\x12#\n" +
+	"\x16current_approval_level\x18\a \x01(\x05R\x14currentApprovalLevel\x12,\n" +
+	"\fsubmitted_at\x18\b \x01(\x03B\x04\xe8\xb5\x18\x01H\x00R\vsubmittedAt\x88\x01\x01\x12#\n" +
 	"\rtotal_minutes\x18\t \x01(\x05R\ftotalMinutes\x12<\n" +
 	"\aentries\x18\n" +
 	" \x03(\v2\".hr.time_entry.v1.TimeEntryPayloadR\aentries\x12\x1d\n" +

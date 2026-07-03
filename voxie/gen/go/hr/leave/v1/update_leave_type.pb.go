@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -188,18 +189,17 @@ var File_hr_leave_v1_update_leave_type_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_update_leave_type_proto_rawDesc = "" +
 	"\n" +
-	"#hr/leave/v1/update_leave_type.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\"\xb2\x04\n" +
-	"\x16UpdateLeaveTypeRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1c\n" +
-	"\ais_paid\x18\x03 \x01(\bH\x01R\x06isPaid\x88\x01\x01\x120\n" +
-	"\x11requires_approval\x18\x04 \x01(\bH\x02R\x10requiresApproval\x88\x01\x01\x12&\n" +
-	"\faccrual_rule\x18\x05 \x01(\tH\x03R\vaccrualRule\x88\x01\x01\x121\n" +
-	"\x12max_carryover_days\x18\x06 \x01(\x05H\x04R\x10maxCarryoverDays\x88\x01\x01\x12+\n" +
-	"\x0fmin_notice_days\x18\a \x01(\x05H\x05R\rminNoticeDays\x88\x01\x01\x12N\n" +
-	"!requires_documentation_after_days\x18\b \x01(\x05H\x06R\x1erequiresDocumentationAfterDays\x88\x01\x01\x12 \n" +
-	"\tis_active\x18\t \x01(\bH\aR\bisActive\x88\x01\x01B\a\n" +
+	"#hr/leave/v1/update_leave_type.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xe6\x04\n" +
+	"\x16UpdateLeaveTypeRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04name\x88\x01\x01\x12\"\n" +
+	"\ais_paid\x18\x03 \x01(\bB\x04\xe8\xb5\x18\x01H\x01R\x06isPaid\x88\x01\x01\x126\n" +
+	"\x11requires_approval\x18\x04 \x01(\bB\x04\xe8\xb5\x18\x01H\x02R\x10requiresApproval\x88\x01\x01\x12,\n" +
+	"\faccrual_rule\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x03R\vaccrualRule\x88\x01\x01\x127\n" +
+	"\x12max_carryover_days\x18\x06 \x01(\x05B\x04\xe8\xb5\x18\x01H\x04R\x10maxCarryoverDays\x88\x01\x01\x121\n" +
+	"\x0fmin_notice_days\x18\a \x01(\x05B\x04\xe8\xb5\x18\x01H\x05R\rminNoticeDays\x88\x01\x01\x12T\n" +
+	"!requires_documentation_after_days\x18\b \x01(\x05B\x04\xe8\xb5\x18\x01H\x06R\x1erequiresDocumentationAfterDays\x88\x01\x01\x12&\n" +
+	"\tis_active\x18\t \x01(\bB\x04\xe8\xb5\x18\x01H\aR\bisActive\x88\x01\x01B\a\n" +
 	"\x05_nameB\n" +
 	"\n" +
 	"\b_is_paidB\x14\n" +

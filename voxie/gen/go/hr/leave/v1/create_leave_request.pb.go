@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,21 +162,19 @@ var File_hr_leave_v1_create_leave_request_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_create_leave_request_proto_rawDesc = "" +
 	"\n" +
-	"&hr/leave/v1/create_leave_request.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\"\xa1\x02\n" +
-	"\x19CreateLeaveRequestRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\x12.\n" +
-	"\rleave_type_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vleaveTypeId\x12)\n" +
+	"&hr/leave/v1/create_leave_request.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xaf\x02\n" +
+	"\x19CreateLeaveRequestRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"employeeId\x122\n" +
+	"\rleave_type_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\vleaveTypeId\x12)\n" +
 	"\n" +
 	"start_date\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x12%\n" +
 	"\bend_date\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\aendDate\x120\n" +
 	"\n" +
-	"total_days\x18\x05 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\ttotalDays\x12\x19\n" +
-	"\x05notes\x18\x06 \x01(\tH\x00R\x05notes\x88\x01\x01B\b\n" +
+	"total_days\x18\x05 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\ttotalDays\x12\x1f\n" +
+	"\x05notes\x18\x06 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x05notes\x88\x01\x01B\b\n" +
 	"\x06_notes\"X\n" +
 	"\x1aCreateLeaveRequestResponse\x12:\n" +
 	"\arequest\x18\x01 \x01(\v2 .hr.leave.v1.LeaveRequestPayloadR\arequestB,Z*github.com/voxire/voxie/gen/go/hr/leave/v1b\x06proto3"

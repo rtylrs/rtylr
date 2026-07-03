@@ -9,7 +9,7 @@ import type { PayrollRunPayload } from "./types";
 
 export interface ApprovePayrollRunRequest {
   /** ID of the payroll run to approve. */
-  runId: number;
+  id: number;
 }
 
 export interface ApprovePayrollRunResponse {

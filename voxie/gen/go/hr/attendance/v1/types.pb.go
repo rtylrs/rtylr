@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -205,24 +206,24 @@ var File_hr_attendance_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_attendance_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/attendance/v1/types.proto\x12\x10hr.attendance.v1\"\xe1\x04\n" +
-	"\x17AttendanceRecordPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\x1f\n" +
-	"\vlocation_id\x18\x04 \x01(\x03R\n" +
+	"\x1chr/attendance/v1/types.proto\x12\x10hr.attendance.v1\x1a\x1donekit/http/annotations.proto\"\x91\x05\n" +
+	"\x17AttendanceRecordPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12%\n" +
+	"\vlocation_id\x18\x04 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12\x12\n" +
 	"\x04date\x18\x05 \x01(\tR\x04date\x12\x1e\n" +
-	"\vclock_in_at\x18\x06 \x01(\x03R\tclockInAt\x12%\n" +
-	"\fclock_out_at\x18\a \x01(\x03H\x00R\n" +
-	"clockOutAt\x88\x01\x01\x12.\n" +
-	"\x10duration_minutes\x18\b \x01(\x05H\x01R\x0fdurationMinutes\x88\x01\x01\x12&\n" +
-	"\x0fclock_in_method\x18\t \x01(\tR\rclockInMethod\x12%\n" +
+	"\vclock_in_at\x18\x06 \x01(\x03R\tclockInAt\x12+\n" +
+	"\fclock_out_at\x18\a \x01(\x03B\x04\xe8\xb5\x18\x01H\x00R\n" +
+	"clockOutAt\x88\x01\x01\x124\n" +
+	"\x10duration_minutes\x18\b \x01(\x05B\x04\xe8\xb5\x18\x01H\x01R\x0fdurationMinutes\x88\x01\x01\x12&\n" +
+	"\x0fclock_in_method\x18\t \x01(\tR\rclockInMethod\x12+\n" +
 	"\fclock_in_lat\x18\n" +
-	" \x01(\x01H\x02R\n" +
-	"clockInLat\x88\x01\x01\x12%\n" +
-	"\fclock_in_lng\x18\v \x01(\x01H\x03R\n" +
+	" \x01(\x01B\x04\xe8\xb5\x18\x01H\x02R\n" +
+	"clockInLat\x88\x01\x01\x12+\n" +
+	"\fclock_in_lng\x18\v \x01(\x01B\x04\xe8\xb5\x18\x01H\x03R\n" +
 	"clockInLng\x88\x01\x01\x12\x17\n" +
 	"\ais_late\x18\f \x01(\bR\x06isLate\x12!\n" +
 	"\flate_minutes\x18\r \x01(\x05R\vlateMinutes\x12\x16\n" +

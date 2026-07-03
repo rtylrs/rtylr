@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -457,17 +458,17 @@ var File_hr_leave_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x17hr/leave/v1/types.proto\x12\vhr.leave.v1\"\xf7\x03\n" +
-	"\x10LeaveTypePayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x17hr/leave/v1/types.proto\x12\vhr.leave.v1\x1a\x1donekit/http/annotations.proto\"\x8f\x04\n" +
+	"\x10LeaveTypePayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x17\n" +
 	"\ais_paid\x18\x04 \x01(\bR\x06isPaid\x12+\n" +
-	"\x11requires_approval\x18\x05 \x01(\bR\x10requiresApproval\x12&\n" +
-	"\faccrual_rule\x18\x06 \x01(\tH\x00R\vaccrualRule\x88\x01\x01\x12,\n" +
+	"\x11requires_approval\x18\x05 \x01(\bR\x10requiresApproval\x12,\n" +
+	"\faccrual_rule\x18\x06 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\vaccrualRule\x88\x01\x01\x12,\n" +
 	"\x12max_carryover_days\x18\a \x01(\x05R\x10maxCarryoverDays\x12&\n" +
-	"\x0fmin_notice_days\x18\b \x01(\x05R\rminNoticeDays\x12N\n" +
-	"!requires_documentation_after_days\x18\t \x01(\x05H\x01R\x1erequiresDocumentationAfterDays\x88\x01\x01\x12\x1b\n" +
+	"\x0fmin_notice_days\x18\b \x01(\x05R\rminNoticeDays\x12T\n" +
+	"!requires_documentation_after_days\x18\t \x01(\x05B\x04\xe8\xb5\x18\x01H\x01R\x1erequiresDocumentationAfterDays\x88\x01\x01\x12\x1b\n" +
 	"\tis_active\x18\n" +
 	" \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
@@ -475,35 +476,35 @@ const file_hr_leave_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\f \x01(\x03R\tupdatedAtB\x0f\n" +
 	"\r_accrual_ruleB$\n" +
-	"\"_requires_documentation_after_days\"\xd4\x03\n" +
-	"\x13LeaveRequestPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\"\n" +
-	"\rleave_type_id\x18\x04 \x01(\x03R\vleaveTypeId\x12\x1d\n" +
+	"\"_requires_documentation_after_days\"\xf8\x03\n" +
+	"\x13LeaveRequestPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12(\n" +
+	"\rleave_type_id\x18\x04 \x01(\x03B\x04е\x18\x01R\vleaveTypeId\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x05 \x01(\tR\tstartDate\x12\x19\n" +
 	"\bend_date\x18\x06 \x01(\tR\aendDate\x12\x1d\n" +
 	"\n" +
-	"total_days\x18\a \x01(\x01R\ttotalDays\x12\x19\n" +
-	"\x05notes\x18\b \x01(\tH\x00R\x05notes\x88\x01\x01\x12\x16\n" +
+	"total_days\x18\a \x01(\x01R\ttotalDays\x12\x1f\n" +
+	"\x05notes\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x05notes\x88\x01\x01\x12\x16\n" +
 	"\x06status\x18\t \x01(\tR\x06status\x124\n" +
 	"\x16current_approval_level\x18\n" +
-	" \x01(\x05R\x14currentApprovalLevel\x12.\n" +
-	"\x10rejection_reason\x18\v \x01(\tH\x01R\x0frejectionReason\x88\x01\x01\x12\x1d\n" +
+	" \x01(\x05R\x14currentApprovalLevel\x124\n" +
+	"\x10rejection_reason\x18\v \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\x0frejectionReason\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\f \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\r \x01(\x03R\tupdatedAtB\b\n" +
 	"\x06_notesB\x13\n" +
-	"\x11_rejection_reason\"\xe3\x02\n" +
-	"\x13LeaveBalancePayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\"\n" +
-	"\rleave_type_id\x18\x04 \x01(\x03R\vleaveTypeId\x12\x12\n" +
+	"\x11_rejection_reason\"\xfb\x02\n" +
+	"\x13LeaveBalancePayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12(\n" +
+	"\rleave_type_id\x18\x04 \x01(\x03B\x04е\x18\x01R\vleaveTypeId\x12\x12\n" +
 	"\x04year\x18\x05 \x01(\x05R\x04year\x12#\n" +
 	"\rentitled_days\x18\x06 \x01(\x01R\fentitledDays\x12\x1b\n" +
 	"\tused_days\x18\a \x01(\x01R\busedDays\x12!\n" +

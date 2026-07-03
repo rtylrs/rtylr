@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -502,11 +503,11 @@ var File_hr_onboarding_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_onboarding_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/onboarding/v1/types.proto\x12\x10hr.onboarding.v1\"\xd6\x02\n" +
-	"\x14ChecklistItemPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vtemplate_id\x18\x03 \x01(\x03R\n" +
+	"\x1chr/onboarding/v1/types.proto\x12\x10hr.onboarding.v1\x1a\x1donekit/http/annotations.proto\"\xe8\x02\n" +
+	"\x14ChecklistItemPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vtemplate_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"templateId\x12\x14\n" +
 	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12#\n" +
@@ -517,43 +518,43 @@ const file_hr_onboarding_v1_types_proto_rawDesc = "" +
 	"created_at\x18\t \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\n" +
-	" \x01(\x03R\tupdatedAt\"\xa2\x02\n" +
-	"\x18ChecklistTemplatePayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	" \x01(\x03R\tupdatedAt\"\xb8\x02\n" +
+	"\x18ChecklistTemplatePayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12!\n" +
-	"\ftrigger_type\x18\x04 \x01(\tR\vtriggerType\x12\x1c\n" +
-	"\arole_id\x18\x05 \x01(\x03H\x00R\x06roleId\x88\x01\x01\x12<\n" +
+	"\ftrigger_type\x18\x04 \x01(\tR\vtriggerType\x12&\n" +
+	"\arole_id\x18\x05 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\x06roleId\x88\x01\x01\x12<\n" +
 	"\x05items\x18\x06 \x03(\v2&.hr.onboarding.v1.ChecklistItemPayloadR\x05items\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\a \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\x03R\tupdatedAtB\n" +
 	"\n" +
-	"\b_role_id\"\xc9\x03\n" +
-	"\x1cEmployeeChecklistItemPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x122\n" +
-	"\x15employee_checklist_id\x18\x03 \x01(\x03R\x13employeeChecklistId\x12*\n" +
-	"\x11checklist_item_id\x18\x04 \x01(\x03R\x0fchecklistItemId\x125\n" +
-	"\x17assigned_to_employee_id\x18\x05 \x01(\x03R\x14assignedToEmployeeId\x12\x19\n" +
+	"\b_role_id\"\xf3\x03\n" +
+	"\x1cEmployeeChecklistItemPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x128\n" +
+	"\x15employee_checklist_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x13employeeChecklistId\x120\n" +
+	"\x11checklist_item_id\x18\x04 \x01(\x03B\x04е\x18\x01R\x0fchecklistItemId\x12;\n" +
+	"\x17assigned_to_employee_id\x18\x05 \x01(\x03B\x04е\x18\x01R\x14assignedToEmployeeId\x12\x19\n" +
 	"\bdue_date\x18\x06 \x01(\tR\adueDate\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\x12&\n" +
-	"\fcompleted_at\x18\b \x01(\x03H\x00R\vcompletedAt\x88\x01\x01\x12*\n" +
-	"\x0eattachment_url\x18\t \x01(\tH\x01R\rattachmentUrl\x88\x01\x01\x12\x1d\n" +
+	"\x06status\x18\a \x01(\tR\x06status\x12,\n" +
+	"\fcompleted_at\x18\b \x01(\x03B\x04\xe8\xb5\x18\x01H\x00R\vcompletedAt\x88\x01\x01\x120\n" +
+	"\x0eattachment_url\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\rattachmentUrl\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
 	" \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\v \x01(\x03R\tupdatedAtB\x0f\n" +
 	"\r_completed_atB\x11\n" +
-	"\x0f_attachment_url\"\xae\x02\n" +
-	"\x18EmployeeChecklistPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\x1f\n" +
-	"\vtemplate_id\x18\x04 \x01(\x03R\n" +
+	"\x0f_attachment_url\"\xc6\x02\n" +
+	"\x18EmployeeChecklistPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12%\n" +
+	"\vtemplate_id\x18\x04 \x01(\x03B\x04е\x18\x01R\n" +
 	"templateId\x12!\n" +
 	"\ftriggered_at\x18\x05 \x01(\x03R\vtriggeredAt\x12D\n" +
 	"\x05items\x18\x06 \x03(\v2..hr.onboarding.v1.EmployeeChecklistItemPayloadR\x05items\x12\x1d\n" +

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_hr_employees_payroll_runs_v1_export_payroll_proto protoreflect.FileDesc
 
 const file_hr_employees_payroll_runs_v1_export_payroll_proto_rawDesc = "" +
 	"\n" +
-	"1hr/employees/payroll/runs/v1/export_payroll.proto\x12\x1chr.employees.payroll.runs.v1\x1a\x1bbuf/validate/validate.proto\"9\n" +
-	"\x14ExportPayrollRequest\x12!\n" +
-	"\x06run_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x05runId\"2\n" +
+	"1hr/employees/payroll/runs/v1/export_payroll.proto\x12\x1chr.employees.payroll.runs.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"=\n" +
+	"\x14ExportPayrollRequest\x12%\n" +
+	"\x06run_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x05runId\"2\n" +
 	"\x15ExportPayrollResponse\x12\x19\n" +
 	"\bbatch_id\x18\x01 \x01(\tR\abatchIdB=Z;github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1b\x06proto3"
 

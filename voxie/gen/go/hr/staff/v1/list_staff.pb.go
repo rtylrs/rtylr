@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,14 @@ var File_hr_staff_v1_list_staff_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_list_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/staff/v1/list_staff.proto\x12\vhr.staff.v1\x1a\x17hr/staff/v1/types.proto\"g\n" +
-	"\x10ListStaffRequest\x12\x16\n" +
-	"\x06search\x18\x01 \x01(\tR\x06search\x12#\n" +
-	"\rdepartment_id\x18\x02 \x01(\tR\fdepartmentId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"=\n" +
+	"\x1chr/staff/v1/list_staff.proto\x12\vhr.staff.v1\x1a\x17hr/staff/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x98\x01\n" +
+	"\x10ListStaffRequest\x12$\n" +
+	"\x06search\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06searchR\x06search\x128\n" +
+	"\rdepartment_id\x18\x02 \x01(\tB\x13µ\x18\x0f\n" +
+	"\rdepartment_idR\fdepartmentId\x12$\n" +
+	"\x06status\x18\x03 \x01(\tB\fµ\x18\b\n" +
+	"\x06statusR\x06status\"=\n" +
 	"\x11ListStaffResponse\x12(\n" +
 	"\x05staff\x18\x01 \x03(\v2\x12.hr.staff.v1.StaffR\x05staffB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
 

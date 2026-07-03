@@ -4,6 +4,8 @@ package hr.location.v1;
 
 import "buf/validate/validate.proto";
 import "hr/location/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/location/v1";
 
@@ -18,9 +20,13 @@ message CreateLocationRequest {
   // Full street address of the location.
   string address = 2;
   // IANA timezone identifier; absent to use tenant default.
-  optional string timezone = 3;
+  optional string timezone = 3 [
+    (onekit.http.nullable) = true
+  ];
   // Optional URL-safe slug; auto-generated from name if absent.
-  optional string slug = 4;
+  optional string slug = 4 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message CreateLocationResponse {

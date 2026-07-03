@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,12 +134,12 @@ var File_hr_leave_v1_list_leave_types_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_list_leave_types_proto_rawDesc = "" +
 	"\n" +
-	"\"hr/leave/v1/list_leave_types.proto\x12\vhr.leave.v1\x1a\x17hr/leave/v1/types.proto\"\x17\n" +
-	"\x15ListLeaveTypesRequest\"\x9c\x01\n" +
+	"\"hr/leave/v1/list_leave_types.proto\x12\vhr.leave.v1\x1a\x17hr/leave/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x17\n" +
+	"\x15ListLeaveTypesRequest\"\xa2\x01\n" +
 	"\x16ListLeaveTypesResponse\x12>\n" +
 	"\vleave_types\x18\x01 \x03(\v2\x1d.hr.leave.v1.LeaveTypePayloadR\n" +
-	"leaveTypes\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"leaveTypes\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB,Z*github.com/voxire/voxie/gen/go/hr/leave/v1b\x06proto3"
 

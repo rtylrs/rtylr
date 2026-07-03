@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hr.role.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
 
 // ── Permission ─────────────────────────────────────────────────────
@@ -19,9 +21,13 @@ message PermissionPayload {
 
 message RolePayload {
   // Unique identifier for the role.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Tenant owner this role belongs to.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Display name of the role.
   string name = 3;
   // Whether this role is the tenant default assigned to new employees.

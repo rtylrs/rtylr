@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,7 +26,7 @@ const (
 type ApproveTimesheetRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the timesheet being reviewed.
-	TimesheetId int64 `protobuf:"varint,1,opt,name=timesheet_id,json=timesheetId,proto3" json:"timesheet_id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// True to approve, false to reject.
 	Approved bool `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
 	// Reason for rejection; absent if approving.
@@ -64,9 +65,9 @@ func (*ApproveTimesheetRequest) Descriptor() ([]byte, []int) {
 	return file_hr_time_entry_v1_approve_timesheet_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApproveTimesheetRequest) GetTimesheetId() int64 {
+func (x *ApproveTimesheetRequest) GetId() int64 {
 	if x != nil {
-		return x.TimesheetId
+		return x.Id
 	}
 	return 0
 }
@@ -134,12 +135,11 @@ var File_hr_time_entry_v1_approve_timesheet_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_approve_timesheet_proto_rawDesc = "" +
 	"\n" +
-	"(hr/time_entry/v1/approve_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\"\xa9\x01\n" +
-	"\x17ApproveTimesheetRequest\x12-\n" +
-	"\ftimesheet_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vtimesheetId\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\x12.\n" +
-	"\x10rejection_reason\x18\x03 \x01(\tH\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
+	"(hr/time_entry/v1/approve_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa0\x01\n" +
+	"\x17ApproveTimesheetRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1a\n" +
+	"\bapproved\x18\x02 \x01(\bR\bapproved\x124\n" +
+	"\x10rejection_reason\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
 	"\x11_rejection_reason\"4\n" +
 	"\x18ApproveTimesheetResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB1Z/github.com/voxire/voxie/gen/go/hr/time_entry/v1b\x06proto3"

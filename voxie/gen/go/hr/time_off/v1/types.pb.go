@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -296,14 +297,11 @@ var File_hr_time_off_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_time_off_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahr/time_off/v1/types.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\"\xfc\x03\n" +
-	"\x0eTimeOffRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12%\n" +
-	"\bowner_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aownerId\x12%\n" +
-	"\bstaff_id\x18\x03 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\astaffId\x12\x1e\n" +
+	"\x1ahr/time_off/v1/types.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x88\x04\n" +
+	"\x0eTimeOffRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12)\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aownerId\x12)\n" +
+	"\bstaff_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\astaffId\x12\x1e\n" +
 	"\x04type\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04type\x12)\n" +
 	"\n" +
@@ -326,9 +324,9 @@ const file_hr_time_off_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\tR\tupdatedAt\"X\n" +
-	"\x18ApproveTimeOffRequestMsg\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
+	"updated_at\x18\x0e \x01(\tR\tupdatedAt\"^\n" +
+	"\x18ApproveTimeOffRequestMsg\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x14\n" +
 	"\x05notes\x18\x03 \x01(\tR\x05notes\"2\n" +
 	"\x16ApproveTimeOffResponse\x12\x18\n" +

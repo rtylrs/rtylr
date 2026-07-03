@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -316,25 +317,25 @@ var File_hr_setup_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_setup_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x17hr/setup/v1/types.proto\x12\vhr.setup.v1\"\xd5\x01\n" +
-	"\x16SetupWizardStepPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x19\n" +
-	"\bstep_key\x18\x03 \x01(\tR\astepKey\x12&\n" +
-	"\fcompleted_at\x18\x04 \x01(\x03H\x00R\vcompletedAt\x88\x01\x01\x12\x1d\n" +
+	"\x17hr/setup/v1/types.proto\x12\vhr.setup.v1\x1a\x1donekit/http/annotations.proto\"\xe7\x01\n" +
+	"\x16SetupWizardStepPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x19\n" +
+	"\bstep_key\x18\x03 \x01(\tR\astepKey\x12,\n" +
+	"\fcompleted_at\x18\x04 \x01(\x03B\x04\xe8\xb5\x18\x01H\x00R\vcompletedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\x03R\tupdatedAtB\x0f\n" +
-	"\r_completed_at\"\xd0\x03\n" +
-	"\x16HRCompanyConfigPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12.\n" +
+	"\r_completed_at\"\xe2\x03\n" +
+	"\x16HRCompanyConfigPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12.\n" +
 	"\x13time_tracking_model\x18\x03 \x01(\tR\x11timeTrackingModel\x12)\n" +
 	"\x10timesheet_period\x18\x04 \x01(\tR\x0ftimesheetPeriod\x12%\n" +
 	"\x0epayroll_period\x18\x05 \x01(\tR\rpayrollPeriod\x12.\n" +
-	"\x13payroll_gross_model\x18\x06 \x01(\tR\x11payrollGrossModel\x121\n" +
-	"\x12setup_completed_at\x18\a \x01(\x03H\x00R\x10setupCompletedAt\x88\x01\x01\x12\x1d\n" +
+	"\x13payroll_gross_model\x18\x06 \x01(\tR\x11payrollGrossModel\x127\n" +
+	"\x12setup_completed_at\x18\a \x01(\x03B\x04\xe8\xb5\x18\x01H\x00R\x10setupCompletedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +

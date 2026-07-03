@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -304,38 +305,38 @@ var File_hr_equipment_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_equipment_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhr/equipment/v1/types.proto\x12\x0fhr.equipment.v1\"\x81\x04\n" +
-	"\x17EquipmentRequestPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"\x1bhr/equipment/v1/types.proto\x12\x0fhr.equipment.v1\x1a\x1donekit/http/annotations.proto\"\xa5\x04\n" +
+	"\x17EquipmentRequestPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12%\n" +
 	"\x0eequipment_type\x18\x04 \x01(\tR\requipmentType\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x18\n" +
-	"\aurgency\x18\x06 \x01(\tR\aurgency\x12)\n" +
-	"\x0eneeded_by_date\x18\a \x01(\tH\x00R\fneededByDate\x88\x01\x01\x12\x16\n" +
+	"\aurgency\x18\x06 \x01(\tR\aurgency\x12/\n" +
+	"\x0eneeded_by_date\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\fneededByDate\x88\x01\x01\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x124\n" +
-	"\x16current_approval_level\x18\t \x01(\x05R\x14currentApprovalLevel\x12$\n" +
+	"\x16current_approval_level\x18\t \x01(\x05R\x14currentApprovalLevel\x12*\n" +
 	"\vapproved_by\x18\n" +
-	" \x01(\x03H\x01R\n" +
-	"approvedBy\x88\x01\x01\x12&\n" +
-	"\fdelivered_at\x18\v \x01(\x03H\x02R\vdeliveredAt\x88\x01\x01\x12\x1d\n" +
+	" \x01(\x03B\x04\xe8\xb5\x18\x01H\x01R\n" +
+	"approvedBy\x88\x01\x01\x12,\n" +
+	"\fdelivered_at\x18\v \x01(\x03B\x04\xe8\xb5\x18\x01H\x02R\vdeliveredAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\f \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\r \x01(\x03R\tupdatedAtB\x11\n" +
 	"\x0f_needed_by_dateB\x0e\n" +
 	"\f_approved_byB\x0f\n" +
-	"\r_delivered_at\"\xe7\x02\n" +
-	"\fAssetPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"\r_delivered_at\"\x85\x03\n" +
+	"\fAssetPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12(\n" +
-	"\rserial_number\x18\x05 \x01(\tH\x00R\fserialNumber\x88\x01\x01\x12#\n" +
-	"\rassigned_date\x18\x06 \x01(\tR\fassignedDate\x12(\n" +
-	"\rreturned_date\x18\a \x01(\tH\x01R\freturnedDate\x88\x01\x01\x12\x1c\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12.\n" +
+	"\rserial_number\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\fserialNumber\x88\x01\x01\x12#\n" +
+	"\rassigned_date\x18\x06 \x01(\tR\fassignedDate\x12.\n" +
+	"\rreturned_date\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\freturnedDate\x88\x01\x01\x12\x1c\n" +
 	"\tcondition\x18\b \x01(\tR\tcondition\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\t \x01(\x03R\tcreatedAt\x12\x1d\n" +

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,15 +162,14 @@ var File_hr_location_v1_update_location_proto protoreflect.FileDescriptor
 
 const file_hr_location_v1_update_location_proto_rawDesc = "" +
 	"\n" +
-	"$hr/location/v1/update_location.proto\x12\x0ehr.location.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/location/v1/types.proto\"\x80\x02\n" +
-	"\x15UpdateLocationRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1d\n" +
-	"\aaddress\x18\x03 \x01(\tH\x01R\aaddress\x88\x01\x01\x12\x1f\n" +
-	"\btimezone\x18\x04 \x01(\tH\x02R\btimezone\x88\x01\x01\x12 \n" +
-	"\tis_active\x18\x05 \x01(\bH\x03R\bisActive\x88\x01\x01\x12\x17\n" +
-	"\x04slug\x18\x06 \x01(\tH\x04R\x04slug\x88\x01\x01B\a\n" +
+	"$hr/location/v1/update_location.proto\x12\x0ehr.location.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/location/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xa2\x02\n" +
+	"\x15UpdateLocationRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04name\x88\x01\x01\x12#\n" +
+	"\aaddress\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\aaddress\x88\x01\x01\x12%\n" +
+	"\btimezone\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\btimezone\x88\x01\x01\x12&\n" +
+	"\tis_active\x18\x05 \x01(\bB\x04\xe8\xb5\x18\x01H\x03R\bisActive\x88\x01\x01\x12\x1d\n" +
+	"\x04slug\x18\x06 \x01(\tB\x04\xe8\xb5\x18\x01H\x04R\x04slug\x88\x01\x01B\a\n" +
 	"\x05_nameB\n" +
 	"\n" +
 	"\b_addressB\v\n" +

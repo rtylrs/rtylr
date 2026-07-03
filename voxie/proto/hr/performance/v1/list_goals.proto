@@ -11,16 +11,26 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
 message ListGoalsRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
+  optional int64 employee_id = 1 [
+    (onekit.http.query).name = "employee_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Filter by review cycle; absent to include all cycles.
-  optional int64 review_cycle_id = 2 [(onekit.http.query).name = "review_cycle_id"];
+  optional int64 review_cycle_id = 2 [
+    (onekit.http.query).name = "review_cycle_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
 }
 
 message ListGoalsResponse {
   // Page of review goals matching the filters.
   repeated ReviewGoalPayload goals = 1;
   // Total number of matching goals across all pages.
-  int64 total = 2;
+  int64 total = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
   // Page size used for this request.
   int32 limit = 3;
   // Offset used for this request.

@@ -4,6 +4,8 @@ package hr.role.v1;
 
 import "buf/validate/validate.proto";
 import "hr/role/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
 
@@ -13,10 +15,13 @@ message UpdateRoleRequest {
   // ID of the role to update.
   int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // New name; absent to keep current.
-  optional string name = 2;
+  optional string name = 2 [
+    (onekit.http.nullable) = true
+  ];
   // New permission set; if provided, replaces all existing permissions.
   repeated PermissionPayload permissions = 3 [(buf.validate.field).repeated.min_items = 1];
 }

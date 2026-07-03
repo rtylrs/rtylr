@@ -11,16 +11,25 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
 
 message ListEmployeeDocumentsRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
+  optional int64 employee_id = 1 [
+    (onekit.http.query).name = "employee_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Filter by document type; absent to include all types.
-  optional string document_type = 2 [(onekit.http.query).name = "document_type"];
+  optional string document_type = 2 [
+    (onekit.http.query).name = "document_type",
+    (onekit.http.nullable) = true
+  ];
 }
 
 message ListEmployeeDocumentsResponse {
   // Page of documents matching the filters.
   repeated EmployeeDocumentPayload documents = 1;
   // Total number of matching documents across all pages.
-  int64 total = 2;
+  int64 total = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
   // Page size used for this request.
   int32 limit = 3;
   // Offset used for this request.

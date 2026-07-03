@@ -3,6 +3,8 @@ syntax = "proto3";
 package hr.time_entry.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
@@ -10,14 +12,17 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
 message ApproveTimesheetRequest {
   // ID of the timesheet being reviewed.
-  int64 timesheet_id = 1 [
+  int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // True to approve, false to reject.
   bool approved = 2;
   // Reason for rejection; absent if approving.
-  optional string rejection_reason = 3;
+  optional string rejection_reason = 3 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message ApproveTimesheetResponse {

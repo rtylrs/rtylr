@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,13 +135,11 @@ var File_hr_shift_v1_create_shift_assignment_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_create_shift_assignment_proto_rawDesc = "" +
 	"\n" +
-	")hr/shift/v1/create_shift_assignment.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\"\x92\x01\n" +
-	"\x1cCreateShiftAssignmentRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\x12%\n" +
-	"\bshift_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\ashiftId\x12\x1e\n" +
+	")hr/shift/v1/create_shift_assignment.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x9a\x01\n" +
+	"\x1cCreateShiftAssignmentRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"employeeId\x12)\n" +
+	"\bshift_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\ashiftId\x12\x1e\n" +
 	"\x04date\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04date\"d\n" +
 	"\x1dCreateShiftAssignmentResponse\x12C\n" +

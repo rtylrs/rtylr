@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,10 +135,9 @@ var File_hr_employee_v1_invite_employee_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_invite_employee_proto_rawDesc = "" +
 	"\n" +
-	"$hr/employee/v1/invite_employee.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\"k\n" +
-	"\x15InviteEmployeeRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"$hr/employee/v1/invite_employee.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"o\n" +
+	"\x15InviteEmployeeRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"employeeId\x12%\n" +
 	"\bsend_via\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\asendVia\"Z\n" +

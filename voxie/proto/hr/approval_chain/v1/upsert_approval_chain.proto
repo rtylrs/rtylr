@@ -4,6 +4,8 @@ package hr.approval_chain.v1;
 
 import "buf/validate/validate.proto";
 import "hr/approval_chain/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/approval_chain/v1";
 
@@ -13,7 +15,8 @@ message UpsertApprovalChainRequest {
   // Chain ID for update; absent (zero) to create a new chain.
   int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
   string request_type = 2 [

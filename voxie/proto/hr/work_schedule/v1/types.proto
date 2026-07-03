@@ -2,15 +2,21 @@ syntax = "proto3";
 
 package hr.work_schedule.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/work_schedule/v1";
 
 // ── Work Schedule ──────────────────────────────────────────────────
 
 message WorkSchedulePayload {
   // Unique identifier for the work schedule.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Tenant owner this schedule belongs to.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Display name of the schedule (e.g. "Standard 9-5").
   string name = 3;
   // Days of the week this schedule applies to (e.g. ["monday", "tuesday"]).

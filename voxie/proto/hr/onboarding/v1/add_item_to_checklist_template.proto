@@ -4,25 +4,41 @@ package hr.onboarding.v1;
 
 import "buf/validate/validate.proto";
 import "hr/onboarding/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
 // ── Add Item To Checklist Template ───────────────────────────────
 
 message AddItemToChecklistTemplateRequest {
+  // role_id is the checklist template role identifier from the path.
+  int64 role_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // title is the checklist item title.
-  string title = 1 [
+  string title = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // description is the optional supporting text for the checklist item.
-  optional string description = 2;
+  optional string description = 3 [
+    (onekit.http.nullable) = true
+  ];
   // assignee_role is the role responsible for completing this item.
-  optional string assignee_role = 3;
+  optional string assignee_role = 4 [
+    (onekit.http.nullable) = true
+  ];
   // due_offset_days is the number of days after trigger date by which this item is due.
-  optional int32 due_offset_days = 4;
+  optional int32 due_offset_days = 5 [
+    (onekit.http.nullable) = true
+  ];
   // requires_attachment indicates whether completion needs an uploaded attachment.
-  optional bool requires_attachment = 5;
+  optional bool requires_attachment = 6 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message AddItemToChecklistTemplateResponse {

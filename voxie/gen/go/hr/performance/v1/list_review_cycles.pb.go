@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,11 @@ var File_hr_performance_v1_list_review_cycles_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_list_review_cycles_proto_rawDesc = "" +
 	"\n" +
-	"*hr/performance/v1/list_review_cycles.proto\x12\x11hr.performance.v1\x1a\x1dhr/performance/v1/types.proto\"\x19\n" +
-	"\x17ListReviewCyclesRequest\"\x9d\x01\n" +
+	"*hr/performance/v1/list_review_cycles.proto\x12\x11hr.performance.v1\x1a\x1dhr/performance/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x19\n" +
+	"\x17ListReviewCyclesRequest\"\xa3\x01\n" +
 	"\x18ListReviewCyclesResponse\x12=\n" +
-	"\x06cycles\x18\x01 \x03(\v2%.hr.performance.v1.ReviewCyclePayloadR\x06cycles\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x06cycles\x18\x01 \x03(\v2%.hr.performance.v1.ReviewCyclePayloadR\x06cycles\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB2Z0github.com/voxire/voxie/gen/go/hr/performance/v1b\x06proto3"
 

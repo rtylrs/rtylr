@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,16 +152,18 @@ var File_hr_time_entry_v1_list_time_entries_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_list_time_entries_proto_rawDesc = "" +
 	"\n" +
-	"(hr/time_entry/v1/list_time_entries.proto\x12\x10hr.time_entry.v1\x1a\x1chr/time_entry/v1/types.proto\"p\n" +
-	"\x16ListTimeEntriesRequest\x12$\n" +
-	"\vemployee_id\x18\x01 \x01(\x03H\x00R\n" +
-	"employeeId\x88\x01\x01\x12\x17\n" +
-	"\x04date\x18\x02 \x01(\tH\x01R\x04date\x88\x01\x01B\x0e\n" +
+	"(hr/time_entry/v1/list_time_entries.proto\x12\x10hr.time_entry.v1\x1a\x1chr/time_entry/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x9b\x01\n" +
+	"\x16ListTimeEntriesRequest\x12?\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x19µ\x18\r\n" +
+	"\vemployee_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"employeeId\x88\x01\x01\x12'\n" +
+	"\x04date\x18\x02 \x01(\tB\x0eµ\x18\x06\n" +
+	"\x04date\xe8\xb5\x18\x01H\x01R\x04date\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\a\n" +
-	"\x05_date\"\x9b\x01\n" +
+	"\x05_date\"\xa1\x01\n" +
 	"\x17ListTimeEntriesResponse\x12<\n" +
-	"\aentries\x18\x01 \x03(\v2\".hr.time_entry.v1.TimeEntryPayloadR\aentries\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\aentries\x18\x01 \x03(\v2\".hr.time_entry.v1.TimeEntryPayloadR\aentries\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB1Z/github.com/voxire/voxie/gen/go/hr/time_entry/v1b\x06proto3"
 

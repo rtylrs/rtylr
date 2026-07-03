@@ -4,6 +4,8 @@ package hr.overtime.v1;
 
 import "buf/validate/validate.proto";
 import "hr/overtime/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
 
@@ -13,7 +15,8 @@ message CreateOvertimeRequestRequest {
   // Employee requesting overtime.
   int64 employee_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // Date the overtime is planned for (ISO-8601 date).
   string date = 2 [

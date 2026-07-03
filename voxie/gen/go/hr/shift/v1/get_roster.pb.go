@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,14 +135,14 @@ var File_hr_shift_v1_get_roster_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_get_roster_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/shift/v1/get_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\"j\n" +
-	"\x10GetRosterRequest\x12+\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"locationId\x12)\n" +
+	"\x1chr/shift/v1/get_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\x1a\x1donekit/http/annotations.proto\"~\n" +
+	"\x10GetRosterRequest\x12/\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"locationId\x129\n" +
 	"\n" +
-	"week_start\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tweekStart\"x\n" +
+	"week_start\x18\x02 \x01(\tB\x1a\xbaH\a\xc8\x01\x01r\x02\x10\x01µ\x18\f\n" +
+	"\n" +
+	"week_startR\tweekStart\"x\n" +
 	"\x11GetRosterResponse\x12E\n" +
 	"\vassignments\x18\x01 \x03(\v2#.hr.shift.v1.ShiftAssignmentPayloadR\vassignments\x12\x1c\n" +
 	"\tconflicts\x18\x02 \x03(\tR\tconflictsB,Z*github.com/voxire/voxie/gen/go/hr/shift/v1b\x06proto3"

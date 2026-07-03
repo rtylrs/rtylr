@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -152,10 +153,9 @@ var File_hr_shift_v1_create_shift_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_create_shift_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/shift/v1/create_shift.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\"\xd5\x01\n" +
-	"\x12CreateShiftRequest\x12+\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"\x1ehr/shift/v1/create_shift.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xd9\x01\n" +
+	"\x12CreateShiftRequest\x12/\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"locationId\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12)\n" +

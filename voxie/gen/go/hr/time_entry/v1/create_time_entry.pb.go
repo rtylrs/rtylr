@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -206,23 +207,22 @@ var File_hr_time_entry_v1_create_time_entry_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_create_time_entry_proto_rawDesc = "" +
 	"\n" +
-	"(hr/time_entry/v1/create_time_entry.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/time_entry/v1/types.proto\"\x82\x04\n" +
-	"\x16CreateTimeEntryRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\x12\"\n" +
+	"(hr/time_entry/v1/create_time_entry.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/time_entry/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb0\x04\n" +
+	"\x16CreateTimeEntryRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"employeeId\x12,\n" +
 	"\n" +
-	"project_id\x18\x02 \x01(\x03H\x00R\tprojectId\x88\x01\x01\x12\x1c\n" +
-	"\atask_id\x18\x03 \x01(\x03H\x01R\x06taskId\x88\x01\x01\x12$\n" +
-	"\vcategory_id\x18\x04 \x01(\x03H\x02R\n" +
+	"project_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\tprojectId\x88\x01\x01\x12&\n" +
+	"\atask_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x06taskId\x88\x01\x01\x12.\n" +
+	"\vcategory_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x02R\n" +
 	"categoryId\x88\x01\x01\x12\x1e\n" +
 	"\x04date\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04date\x125\n" +
 	"\x10duration_minutes\x18\x06 \x01(\x05B\n" +
-	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x0fdurationMinutes\x12\"\n" +
+	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x0fdurationMinutes\x12(\n" +
 	"\n" +
-	"start_time\x18\a \x01(\tH\x03R\tstartTime\x88\x01\x01\x12\x1e\n" +
-	"\bend_time\x18\b \x01(\tH\x04R\aendTime\x88\x01\x01\x12,\n" +
+	"start_time\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x03R\tstartTime\x88\x01\x01\x12$\n" +
+	"\bend_time\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x04R\aendTime\x88\x01\x01\x12,\n" +
 	"\vdescription\x18\t \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12\x1f\n" +
 	"\vis_billable\x18\n" +

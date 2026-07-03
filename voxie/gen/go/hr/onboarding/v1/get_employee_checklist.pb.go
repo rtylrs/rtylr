@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_hr_onboarding_v1_get_employee_checklist_proto protoreflect.FileDescript
 
 const file_hr_onboarding_v1_get_employee_checklist_proto_rawDesc = "" +
 	"\n" +
-	"-hr/onboarding/v1/get_employee_checklist.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"J\n" +
-	"\x1bGetEmployeeChecklistRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"-hr/onboarding/v1/get_employee_checklist.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\x1a\x1donekit/http/annotations.proto\"N\n" +
+	"\x1bGetEmployeeChecklistRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"employeeId\"h\n" +
 	"\x1cGetEmployeeChecklistResponse\x12H\n" +
 	"\tchecklist\x18\x01 \x01(\v2*.hr.onboarding.v1.EmployeeChecklistPayloadR\tchecklistB1Z/github.com/voxire/voxie/gen/go/hr/onboarding/v1b\x06proto3"

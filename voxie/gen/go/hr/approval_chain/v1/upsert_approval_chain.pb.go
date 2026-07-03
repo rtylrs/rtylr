@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -152,10 +153,9 @@ var File_hr_approval_chain_v1_upsert_approval_chain_proto protoreflect.FileDescr
 
 const file_hr_approval_chain_v1_upsert_approval_chain_proto_rawDesc = "" +
 	"\n" +
-	"0hr/approval_chain/v1/upsert_approval_chain.proto\x12\x14hr.approval_chain.v1\x1a\x1bbuf/validate/validate.proto\x1a hr/approval_chain/v1/types.proto\"\x89\x02\n" +
-	"\x1aUpsertApprovalChainRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12-\n" +
+	"0hr/approval_chain/v1/upsert_approval_chain.proto\x12\x14hr.approval_chain.v1\x1a\x1bbuf/validate/validate.proto\x1a hr/approval_chain/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x8d\x02\n" +
+	"\x1aUpsertApprovalChainRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12-\n" +
 	"\frequest_type\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vrequestType\x12\x1e\n" +
 	"\x04name\x18\x03 \x01(\tB\n" +

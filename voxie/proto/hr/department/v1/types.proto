@@ -2,23 +2,37 @@ syntax = "proto3";
 
 package hr.department.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
 
 // ── Department ─────────────────────────────────────────────────────
 
 message DepartmentPayload {
   // Unique identifier for the department.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Tenant owner this department belongs to.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Location this department operates from.
-  int64 location_id = 3;
+  int64 location_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Parent department for org-chart hierarchy; absent if top-level.
-  optional int64 parent_department_id = 4;
+  optional int64 parent_department_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Display name of the department.
   string name = 5;
   // Work schedule applied to employees in this department by default; absent if none.
-  optional int64 default_work_schedule_id = 6;
+  optional int64 default_work_schedule_id = 6 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Unix timestamp when this department was created.
   int64 created_at = 7;
   // Unix timestamp when this department was last updated.

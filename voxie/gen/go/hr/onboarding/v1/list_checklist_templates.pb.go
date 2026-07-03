@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,13 +143,14 @@ var File_hr_onboarding_v1_list_checklist_templates_proto protoreflect.FileDescri
 
 const file_hr_onboarding_v1_list_checklist_templates_proto_rawDesc = "" +
 	"\n" +
-	"/hr/onboarding/v1/list_checklist_templates.proto\x12\x10hr.onboarding.v1\x1a\x1chr/onboarding/v1/types.proto\"X\n" +
-	"\x1dListChecklistTemplatesRequest\x12&\n" +
-	"\ftrigger_type\x18\x01 \x01(\tH\x00R\vtriggerType\x88\x01\x01B\x0f\n" +
-	"\r_trigger_type\"\xae\x01\n" +
+	"/hr/onboarding/v1/list_checklist_templates.proto\x12\x10hr.onboarding.v1\x1a\x1chr/onboarding/v1/types.proto\x1a\x1donekit/http/annotations.proto\"p\n" +
+	"\x1dListChecklistTemplatesRequest\x12>\n" +
+	"\ftrigger_type\x18\x01 \x01(\tB\x16µ\x18\x0e\n" +
+	"\ftrigger_type\xe8\xb5\x18\x01H\x00R\vtriggerType\x88\x01\x01B\x0f\n" +
+	"\r_trigger_type\"\xb4\x01\n" +
 	"\x1eListChecklistTemplatesResponse\x12H\n" +
-	"\ttemplates\x18\x01 \x03(\v2*.hr.onboarding.v1.ChecklistTemplatePayloadR\ttemplates\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\ttemplates\x18\x01 \x03(\v2*.hr.onboarding.v1.ChecklistTemplatePayloadR\ttemplates\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB1Z/github.com/voxire/voxie/gen/go/hr/onboarding/v1b\x06proto3"
 

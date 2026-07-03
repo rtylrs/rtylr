@@ -4,6 +4,8 @@ package hr.performance.v1;
 
 import "buf/validate/validate.proto";
 import "hr/performance/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
@@ -13,7 +15,8 @@ message SubmitReviewRequest {
   // ID of the performance review being submitted.
   int64 review_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // Overall rating assigned by the reviewer.
   string overall_rating = 2 [

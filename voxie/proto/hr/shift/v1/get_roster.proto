@@ -14,7 +14,8 @@ message GetRosterRequest {
   // Location to fetch the roster for.
   int64 location_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // Monday of the week to retrieve (ISO-8601 date).
   string week_start = 2 [

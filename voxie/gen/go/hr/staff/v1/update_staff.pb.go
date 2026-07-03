@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -269,12 +270,10 @@ var File_hr_staff_v1_update_staff_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_update_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/staff/v1/update_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"\xf3\x05\n" +
-	"\x12UpdateStaffRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12/\n" +
-	"\rdepartment_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\fdepartmentId\x12)\n" +
+	"\x1ehr/staff/v1/update_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xfb\x05\n" +
+	"\x12UpdateStaffRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x123\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\fdepartmentId\x12)\n" +
 	"\n" +
 	"first_name\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfirstName\x12'\n" +

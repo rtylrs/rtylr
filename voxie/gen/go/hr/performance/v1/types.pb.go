@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -421,17 +422,17 @@ var File_hr_performance_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhr/performance/v1/types.proto\x12\x11hr.performance.v1\"\x82\x03\n" +
-	"\x11ReviewGoalPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12&\n" +
-	"\x0freview_cycle_id\x18\x04 \x01(\x03R\rreviewCycleId\x12\x14\n" +
+	"\x1dhr/performance/v1/types.proto\x12\x11hr.performance.v1\x1a\x1donekit/http/annotations.proto\"\xa6\x03\n" +
+	"\x11ReviewGoalPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12,\n" +
+	"\x0freview_cycle_id\x18\x04 \x01(\x03B\x04е\x18\x01R\rreviewCycleId\x12\x14\n" +
 	"\x05title\x18\x05 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x1b\n" +
-	"\x06weight\x18\a \x01(\x01H\x00R\x06weight\x88\x01\x01\x12.\n" +
-	"\x10success_criteria\x18\b \x01(\tH\x01R\x0fsuccessCriteria\x88\x01\x01\x12\x16\n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12!\n" +
+	"\x06weight\x18\a \x01(\x01B\x04\xe8\xb5\x18\x01H\x00R\x06weight\x88\x01\x01\x124\n" +
+	"\x10success_criteria\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\x0fsuccessCriteria\x88\x01\x01\x12\x16\n" +
 	"\x06status\x18\t \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
@@ -439,21 +440,21 @@ const file_hr_performance_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\v \x01(\x03R\tupdatedAtB\t\n" +
 	"\a_weightB\x13\n" +
-	"\x11_success_criteria\"\xff\x03\n" +
-	"\x18PerformanceReviewPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12&\n" +
-	"\x0freview_cycle_id\x18\x04 \x01(\x03R\rreviewCycleId\x120\n" +
-	"\x14reviewer_employee_id\x18\x05 \x01(\x03R\x12reviewerEmployeeId\x12\x1f\n" +
+	"\x11_success_criteria\"\xaf\x04\n" +
+	"\x18PerformanceReviewPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12,\n" +
+	"\x0freview_cycle_id\x18\x04 \x01(\x03B\x04е\x18\x01R\rreviewCycleId\x126\n" +
+	"\x14reviewer_employee_id\x18\x05 \x01(\x03B\x04е\x18\x01R\x12reviewerEmployeeId\x12\x1f\n" +
 	"\vreview_type\x18\x06 \x01(\tR\n" +
-	"reviewType\x12*\n" +
-	"\x0eoverall_rating\x18\a \x01(\tH\x00R\roverallRating\x88\x01\x01\x12!\n" +
-	"\tnarrative\x18\b \x01(\tH\x01R\tnarrative\x88\x01\x01\x12\x16\n" +
-	"\x06status\x18\t \x01(\tR\x06status\x12:\n" +
+	"reviewType\x120\n" +
+	"\x0eoverall_rating\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\roverallRating\x88\x01\x01\x12'\n" +
+	"\tnarrative\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\tnarrative\x88\x01\x01\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12@\n" +
 	"\x17shared_with_employee_at\x18\n" +
-	" \x01(\x03H\x02R\x14sharedWithEmployeeAt\x88\x01\x01\x12\x1d\n" +
+	" \x01(\x03B\x04\xe8\xb5\x18\x01H\x02R\x14sharedWithEmployeeAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
@@ -461,10 +462,10 @@ const file_hr_performance_v1_types_proto_rawDesc = "" +
 	"\x0f_overall_ratingB\f\n" +
 	"\n" +
 	"_narrativeB\x1a\n" +
-	"\x18_shared_with_employee_at\"\xff\x01\n" +
-	"\x12ReviewCyclePayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x18_shared_with_employee_at\"\x8b\x02\n" +
+	"\x12ReviewCyclePayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12!\n" +
 	"\fperiod_start\x18\x05 \x01(\tR\vperiodStart\x12\x1d\n" +

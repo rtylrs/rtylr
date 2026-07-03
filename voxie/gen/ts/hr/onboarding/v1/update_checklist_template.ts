@@ -7,14 +7,12 @@
 /* eslint-disable */
 
 export interface UpdateChecklistTemplateRequest {
+  /** role_id is the checklist template role identifier from the path. */
+  roleId: number;
   /** name is the human-readable name for the template. */
   name: string;
   /** trigger_type is the event that triggers this checklist (onboarding | offboarding). */
-  triggerType?:
-    | string
-    | undefined;
-  /** role_id is the role this template applies to; absent if it applies to all roles. */
-  roleId?: number | undefined;
+  triggerType?: string | undefined;
 }
 
 export interface UpdateChecklistTemplateResponse {

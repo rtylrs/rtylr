@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,10 +126,9 @@ var File_hr_shift_v1_publish_roster_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_publish_roster_proto_rawDesc = "" +
 	"\n" +
-	" hr/shift/v1/publish_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\"n\n" +
-	"\x14PublishRosterRequest\x12+\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	" hr/shift/v1/publish_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"r\n" +
+	"\x14PublishRosterRequest\x12/\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"locationId\x12)\n" +
 	"\n" +
 	"week_start\x18\x02 \x01(\tB\n" +

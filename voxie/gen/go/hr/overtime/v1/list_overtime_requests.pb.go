@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,16 +152,18 @@ var File_hr_overtime_v1_list_overtime_requests_proto protoreflect.FileDescriptor
 
 const file_hr_overtime_v1_list_overtime_requests_proto_rawDesc = "" +
 	"\n" +
-	"+hr/overtime/v1/list_overtime_requests.proto\x12\x0ehr.overtime.v1\x1a\x1ahr/overtime/v1/types.proto\"{\n" +
-	"\x1bListOvertimeRequestsRequest\x12$\n" +
-	"\vemployee_id\x18\x01 \x01(\x03H\x00R\n" +
-	"employeeId\x88\x01\x01\x12\x1b\n" +
-	"\x06status\x18\x02 \x01(\tH\x01R\x06status\x88\x01\x01B\x0e\n" +
+	"+hr/overtime/v1/list_overtime_requests.proto\x12\x0ehr.overtime.v1\x1a\x1ahr/overtime/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xa8\x01\n" +
+	"\x1bListOvertimeRequestsRequest\x12?\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x19µ\x18\r\n" +
+	"\vemployee_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"employeeId\x88\x01\x01\x12-\n" +
+	"\x06status\x18\x02 \x01(\tB\x10µ\x18\b\n" +
+	"\x06status\xe8\xb5\x18\x01H\x01R\x06status\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\t\n" +
-	"\a_status\"\xa6\x01\n" +
+	"\a_status\"\xac\x01\n" +
 	"\x1cListOvertimeRequestsResponse\x12B\n" +
-	"\brequests\x18\x01 \x03(\v2&.hr.overtime.v1.OvertimeRequestPayloadR\brequests\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\brequests\x18\x01 \x03(\v2&.hr.overtime.v1.OvertimeRequestPayloadR\brequests\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB/Z-github.com/voxire/voxie/gen/go/hr/overtime/v1b\x06proto3"
 

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -152,16 +153,15 @@ var File_hr_department_v1_update_department_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_update_department_proto_rawDesc = "" +
 	"\n" +
-	"(hr/department/v1/update_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\"\xb6\x02\n" +
-	"\x17UpdateDepartmentRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12$\n" +
-	"\vlocation_id\x18\x02 \x01(\x03H\x00R\n" +
-	"locationId\x88\x01\x01\x125\n" +
-	"\x14parent_department_id\x18\x03 \x01(\x03H\x01R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
+	"(hr/department/v1/update_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xd8\x02\n" +
+	"\x17UpdateDepartmentRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12.\n" +
+	"\vlocation_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"locationId\x88\x01\x01\x12?\n" +
+	"\x14parent_department_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
 	"\x04name\x18\x04 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12<\n" +
-	"\x18default_work_schedule_id\x18\x05 \x01(\x03H\x02R\x15defaultWorkScheduleId\x88\x01\x01B\x0e\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12F\n" +
+	"\x18default_work_schedule_id\x18\x05 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x02R\x15defaultWorkScheduleId\x88\x01\x01B\x0e\n" +
 	"\f_location_idB\x17\n" +
 	"\x15_parent_department_idB\x1b\n" +
 	"\x19_default_work_schedule_id\"_\n" +

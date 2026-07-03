@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,16 +152,18 @@ var File_hr_leave_v1_list_leave_balances_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_list_leave_balances_proto_rawDesc = "" +
 	"\n" +
-	"%hr/leave/v1/list_leave_balances.proto\x12\vhr.leave.v1\x1a\x17hr/leave/v1/types.proto\"r\n" +
-	"\x18ListLeaveBalancesRequest\x12$\n" +
-	"\vemployee_id\x18\x01 \x01(\x03H\x00R\n" +
-	"employeeId\x88\x01\x01\x12\x17\n" +
-	"\x04year\x18\x02 \x01(\x05H\x01R\x04year\x88\x01\x01B\x0e\n" +
+	"%hr/leave/v1/list_leave_balances.proto\x12\vhr.leave.v1\x1a\x17hr/leave/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x9d\x01\n" +
+	"\x18ListLeaveBalancesRequest\x12?\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x19µ\x18\r\n" +
+	"\vemployee_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"employeeId\x88\x01\x01\x12'\n" +
+	"\x04year\x18\x02 \x01(\x05B\x0eµ\x18\x06\n" +
+	"\x04year\xe8\xb5\x18\x01H\x01R\x04year\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\a\n" +
-	"\x05_year\"\x9d\x01\n" +
+	"\x05_year\"\xa3\x01\n" +
 	"\x19ListLeaveBalancesResponse\x12<\n" +
-	"\bbalances\x18\x01 \x03(\v2 .hr.leave.v1.LeaveBalancePayloadR\bbalances\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\bbalances\x18\x01 \x03(\v2 .hr.leave.v1.LeaveBalancePayloadR\bbalances\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB,Z*github.com/voxire/voxie/gen/go/hr/leave/v1b\x06proto3"
 

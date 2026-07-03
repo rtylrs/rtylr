@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -286,18 +287,18 @@ var File_hr_approval_chain_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_approval_chain_v1_types_proto_rawDesc = "" +
 	"\n" +
-	" hr/approval_chain/v1/types.proto\x12\x14hr.approval_chain.v1\"\xdd\x04\n" +
-	"\x19ApprovalChainLevelPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x19\n" +
-	"\bchain_id\x18\x03 \x01(\x03R\achainId\x12\x1f\n" +
+	" hr/approval_chain/v1/types.proto\x12\x14hr.approval_chain.v1\x1a\x1donekit/http/annotations.proto\"\x8f\x05\n" +
+	"\x19ApprovalChainLevelPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x1f\n" +
+	"\bchain_id\x18\x03 \x01(\x03B\x04е\x18\x01R\achainId\x12\x1f\n" +
 	"\vlevel_order\x18\x04 \x01(\x05R\n" +
 	"levelOrder\x12#\n" +
-	"\rapprover_type\x18\x05 \x01(\tR\fapproverType\x12-\n" +
-	"\x10approver_role_id\x18\x06 \x01(\x03H\x00R\x0eapproverRoleId\x88\x01\x01\x125\n" +
-	"\x14approver_employee_id\x18\a \x01(\x03H\x01R\x12approverEmployeeId\x88\x01\x01\x123\n" +
-	"\x13threshold_min_value\x18\b \x01(\x01H\x02R\x11thresholdMinValue\x88\x01\x01\x123\n" +
-	"\x13threshold_max_value\x18\t \x01(\x01H\x03R\x11thresholdMaxValue\x88\x01\x01\x12!\n" +
+	"\rapprover_type\x18\x05 \x01(\tR\fapproverType\x127\n" +
+	"\x10approver_role_id\x18\x06 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\x0eapproverRoleId\x88\x01\x01\x12?\n" +
+	"\x14approver_employee_id\x18\a \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x12approverEmployeeId\x88\x01\x01\x129\n" +
+	"\x13threshold_min_value\x18\b \x01(\x01B\x04\xe8\xb5\x18\x01H\x02R\x11thresholdMinValue\x88\x01\x01\x129\n" +
+	"\x13threshold_max_value\x18\t \x01(\x01B\x04\xe8\xb5\x18\x01H\x03R\x11thresholdMaxValue\x88\x01\x01\x12!\n" +
 	"\ftimeout_days\x18\n" +
 	" \x01(\x05R\vtimeoutDays\x12%\n" +
 	"\x0etimeout_action\x18\v \x01(\tR\rtimeoutAction\x12\x1d\n" +
@@ -308,10 +309,10 @@ const file_hr_approval_chain_v1_types_proto_rawDesc = "" +
 	"\x11_approver_role_idB\x17\n" +
 	"\x15_approver_employee_idB\x16\n" +
 	"\x14_threshold_min_valueB\x16\n" +
-	"\x14_threshold_max_value\"\xae\x02\n" +
-	"\x14ApprovalChainPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12!\n" +
+	"\x14_threshold_max_value\"\xba\x02\n" +
+	"\x14ApprovalChainPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12!\n" +
 	"\frequest_type\x18\x03 \x01(\tR\vrequestType\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12-\n" +
 	"\x12delegation_enabled\x18\x05 \x01(\bR\x11delegationEnabled\x12G\n" +

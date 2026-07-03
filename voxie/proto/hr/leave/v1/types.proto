@@ -2,15 +2,21 @@ syntax = "proto3";
 
 package hr.leave.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 // ── Leave Type ────────────────────────────────────────────────────
 
 message LeaveTypePayload {
   // Unique identifier for the leave type.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Tenant owner this leave type belongs to.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Human-readable name (e.g. "Annual Leave", "Sick Leave").
   string name = 3;
   // Whether days taken under this type are paid.
@@ -18,13 +24,17 @@ message LeaveTypePayload {
   // Whether leave requests of this type require manager approval.
   bool requires_approval = 5;
   // Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed.
-  optional string accrual_rule = 6;
+  optional string accrual_rule = 6 [
+    (onekit.http.nullable) = true
+  ];
   // Maximum unused days that may carry over to the next year.
   int32 max_carryover_days = 7;
   // Minimum calendar days of notice required before the leave starts.
   int32 min_notice_days = 8;
   // Number of consecutive days after which supporting documentation is required; absent if never required.
-  optional int32 requires_documentation_after_days = 9;
+  optional int32 requires_documentation_after_days = 9 [
+    (onekit.http.nullable) = true
+  ];
   // Whether this leave type is currently available for new requests.
   bool is_active = 10;
   // Unix timestamp when this record was created.
@@ -37,13 +47,21 @@ message LeaveTypePayload {
 
 message LeaveRequestPayload {
   // Unique identifier for the leave request.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Tenant owner this request belongs to.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Employee who is requesting leave.
-  int64 employee_id = 3;
+  int64 employee_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Leave type being requested.
-  int64 leave_type_id = 4;
+  int64 leave_type_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // First day of leave (ISO-8601 date).
   string start_date = 5;
   // Last day of leave (ISO-8601 date).
@@ -51,13 +69,17 @@ message LeaveRequestPayload {
   // Total number of working days requested (may be fractional for half-days).
   double total_days = 7;
   // Additional context from the employee; absent if none provided.
-  optional string notes = 8;
+  optional string notes = 8 [
+    (onekit.http.nullable) = true
+  ];
   // Workflow status (pending | approved | rejected | cancelled).
   string status = 9;
   // Current step in a multi-level approval chain.
   int32 current_approval_level = 10;
   // Reason the request was rejected; absent unless status is rejected.
-  optional string rejection_reason = 11;
+  optional string rejection_reason = 11 [
+    (onekit.http.nullable) = true
+  ];
   // Unix timestamp when this record was created.
   int64 created_at = 12;
   // Unix timestamp when this record was last updated.
@@ -68,13 +90,21 @@ message LeaveRequestPayload {
 
 message LeaveBalancePayload {
   // Unique identifier for the balance record.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Tenant owner this balance belongs to.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Employee this balance is for.
-  int64 employee_id = 3;
+  int64 employee_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Leave type this balance tracks.
-  int64 leave_type_id = 4;
+  int64 leave_type_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // Calendar year this balance applies to.
   int32 year = 5;
   // Total entitled days for the year (including carryover).

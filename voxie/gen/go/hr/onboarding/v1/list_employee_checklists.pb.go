@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,20 +162,22 @@ var File_hr_onboarding_v1_list_employee_checklists_proto protoreflect.FileDescri
 
 const file_hr_onboarding_v1_list_employee_checklists_proto_rawDesc = "" +
 	"\n" +
-	"/hr/onboarding/v1/list_employee_checklists.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"\x99\x01\n" +
-	"\x1dListEmployeeChecklistsRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\x12\x19\n" +
-	"\x05limit\x18\x02 \x01(\x05H\x00R\x05limit\x88\x01\x01\x12\x1b\n" +
-	"\x06offset\x18\x03 \x01(\x05H\x01R\x06offset\x88\x01\x01B\b\n" +
+	"/hr/onboarding/v1/list_employee_checklists.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xd1\x01\n" +
+	"\x1dListEmployeeChecklistsRequest\x12@\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x1f\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\r\n" +
+	"\vemployee_idе\x18\x01R\n" +
+	"employeeId\x12*\n" +
+	"\x05limit\x18\x02 \x01(\x05B\x0fµ\x18\a\n" +
+	"\x05limit\xe8\xb5\x18\x01H\x00R\x05limit\x88\x01\x01\x12-\n" +
+	"\x06offset\x18\x03 \x01(\x05B\x10µ\x18\b\n" +
+	"\x06offset\xe8\xb5\x18\x01H\x01R\x06offset\x88\x01\x01B\b\n" +
 	"\x06_limitB\t\n" +
-	"\a_offset\"\xb0\x01\n" +
+	"\a_offset\"\xb6\x01\n" +
 	"\x1eListEmployeeChecklistsResponse\x12J\n" +
 	"\n" +
 	"checklists\x18\x01 \x03(\v2*.hr.onboarding.v1.EmployeeChecklistPayloadR\n" +
-	"checklists\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"checklists\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB1Z/github.com/voxire/voxie/gen/go/hr/onboarding/v1b\x06proto3"
 

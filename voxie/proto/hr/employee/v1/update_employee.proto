@@ -4,6 +4,8 @@ package hr.employee.v1;
 
 import "buf/validate/validate.proto";
 import "hr/staff/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
@@ -13,14 +15,21 @@ message UpdateEmployeeRequest {
   // id is the employee ID from the route.
   int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // department_id is the department assignment; zero leaves it unset.
-  int64 department_id = 2;
+  int64 department_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // location_id is the work location assignment; zero leaves it unset.
-  int64 location_id = 3;
+  int64 location_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // work_schedule_id is the work schedule assignment; zero leaves it unset.
-  int64 work_schedule_id = 4;
+  int64 work_schedule_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // first_name is the employee's given name.
   string first_name = 5 [
     (buf.validate.field).required = true,

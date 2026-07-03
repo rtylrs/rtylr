@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -278,12 +279,10 @@ var File_hr_staff_v1_create_staff_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_create_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/staff/v1/create_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"\xa7\x06\n" +
-	"\x12CreateStaffRequest\x12#\n" +
-	"\auser_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06userId\x12/\n" +
-	"\rdepartment_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\fdepartmentId\x12)\n" +
+	"\x1ehr/staff/v1/create_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xaf\x06\n" +
+	"\x12CreateStaffRequest\x12'\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\x123\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\fdepartmentId\x12)\n" +
 	"\n" +
 	"first_name\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfirstName\x12'\n" +
@@ -314,9 +313,9 @@ const file_hr_staff_v1_create_staff_proto_rawDesc = "" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x15emergencyContactPhone\x12\x1e\n" +
 	"\x04apps\x18\x12 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04apps\x12\x14\n" +
-	"\x05notes\x18\x13 \x01(\tR\x05notes\"%\n" +
-	"\x13CreateStaffResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02idB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
+	"\x05notes\x18\x13 \x01(\tR\x05notes\"+\n" +
+	"\x13CreateStaffResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02idB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
 
 var (
 	file_hr_staff_v1_create_staff_proto_rawDescOnce sync.Once

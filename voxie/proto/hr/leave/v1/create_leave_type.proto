@@ -4,6 +4,8 @@ package hr.leave.v1;
 
 import "buf/validate/validate.proto";
 import "hr/leave/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
@@ -20,7 +22,9 @@ message CreateLeaveTypeRequest {
   // Whether leave requests of this type require manager approval.
   bool requires_approval = 3;
   // Accrual rule; absent if entitlement is fixed.
-  optional string accrual_rule = 4;
+  optional string accrual_rule = 4 [
+    (onekit.http.nullable) = true
+  ];
   // Maximum unused days that may carry over to the next year.
   int32 max_carryover_days = 5 [
     (buf.validate.field).required = true,
@@ -32,7 +36,9 @@ message CreateLeaveTypeRequest {
     (buf.validate.field).int32.gt = 0
   ];
   // Consecutive days after which documentation is required; absent if never.
-  optional int32 requires_documentation_after_days = 7;
+  optional int32 requires_documentation_after_days = 7 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message CreateLeaveTypeResponse {

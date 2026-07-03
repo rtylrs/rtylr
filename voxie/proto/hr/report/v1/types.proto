@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hr.report.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/report/v1";
 
 // ── Report Request ──────────────────────────────────────────────────
@@ -18,11 +20,20 @@ message ReportRequestPayload {
   // End of the reporting period (ISO-8601 date).
   string date_to = 3;
   // Filter by location; absent to include all locations.
-  optional int64 location_id = 4;
+  optional int64 location_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Filter by department; absent to include all departments.
-  optional int64 department_id = 5;
+  optional int64 department_id = 5 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 6;
+  optional int64 employee_id = 6 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
   // Output format (json | csv | pdf).
   string format = 7;
 }
@@ -35,7 +46,9 @@ message ReportPayload {
   // Unix timestamp when the report was generated.
   int64 generated_at = 2;
   // Serialised report content (CSV, JSON, or PDF binary depending on format).
-  bytes data = 3;
+  bytes data = 3 [
+    (onekit.http.bytes_encoding) = BYTES_ENCODING_BASE64
+  ];
   // Format of the serialised data (json | csv | pdf).
   string format = 4;
 }

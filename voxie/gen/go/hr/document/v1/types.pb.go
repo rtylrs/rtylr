@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -169,17 +170,17 @@ var File_hr_document_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_document_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahr/document/v1/types.proto\x12\x0ehr.document.v1\"\x92\x03\n" +
-	"\x17EmployeeDocumentPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"\x1ahr/document/v1/types.proto\x12\x0ehr.document.v1\x1a\x1donekit/http/annotations.proto\"\xaa\x03\n" +
+	"\x17EmployeeDocumentPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12#\n" +
 	"\rdocument_type\x18\x04 \x01(\tR\fdocumentType\x12\x12\n" +
 	"\x04name\x18\x05 \x01(\tR\x04name\x12!\n" +
 	"\fstorage_mode\x18\x06 \x01(\tR\vstorageMode\x12\x19\n" +
-	"\bfile_url\x18\a \x01(\tR\afileUrl\x12$\n" +
-	"\vexpiry_date\x18\b \x01(\tH\x00R\n" +
+	"\bfile_url\x18\a \x01(\tR\afileUrl\x12*\n" +
+	"\vexpiry_date\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\n" +
 	"expiryDate\x88\x01\x01\x12\x1f\n" +
 	"\vuploaded_by\x18\t \x01(\x03R\n" +
 	"uploadedBy\x12\x1f\n" +

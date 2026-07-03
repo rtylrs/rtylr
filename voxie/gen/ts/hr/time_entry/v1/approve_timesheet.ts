@@ -8,7 +8,7 @@
 
 export interface ApproveTimesheetRequest {
   /** ID of the timesheet being reviewed. */
-  timesheetId: number;
+  id: number;
   /** True to approve, false to reject. */
   approved: boolean;
   /** Reason for rejection; absent if approving. */

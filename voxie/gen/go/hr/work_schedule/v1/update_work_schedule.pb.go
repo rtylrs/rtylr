@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -188,19 +189,18 @@ var File_hr_work_schedule_v1_update_work_schedule_proto protoreflect.FileDescrip
 
 const file_hr_work_schedule_v1_update_work_schedule_proto_rawDesc = "" +
 	"\n" +
-	".hr/work_schedule/v1/update_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\"\xc5\x04\n" +
-	"\x19UpdateWorkScheduleRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12+\n" +
-	"\fworking_days\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\vworkingDays\x12\"\n" +
+	".hr/work_schedule/v1/update_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xf3\x04\n" +
+	"\x19UpdateWorkScheduleRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04name\x88\x01\x01\x12+\n" +
+	"\fworking_days\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\vworkingDays\x12(\n" +
 	"\n" +
-	"start_time\x18\x04 \x01(\tH\x01R\tstartTime\x88\x01\x01\x12\x1e\n" +
-	"\bend_time\x18\x05 \x01(\tH\x02R\aendTime\x88\x01\x01\x12(\n" +
-	"\rbreak_minutes\x18\x06 \x01(\x05H\x03R\fbreakMinutes\x88\x01\x01\x12>\n" +
-	"\x19contracted_hours_per_week\x18\a \x01(\x01H\x04R\x16contractedHoursPerWeek\x88\x01\x01\x12@\n" +
-	"\x1adaily_ot_threshold_minutes\x18\b \x01(\x05H\x05R\x17dailyOtThresholdMinutes\x88\x01\x01\x12B\n" +
-	"\x1bweekly_ot_threshold_minutes\x18\t \x01(\x05H\x06R\x18weeklyOtThresholdMinutes\x88\x01\x01B\a\n" +
+	"start_time\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\tstartTime\x88\x01\x01\x12$\n" +
+	"\bend_time\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x02R\aendTime\x88\x01\x01\x12.\n" +
+	"\rbreak_minutes\x18\x06 \x01(\x05B\x04\xe8\xb5\x18\x01H\x03R\fbreakMinutes\x88\x01\x01\x12D\n" +
+	"\x19contracted_hours_per_week\x18\a \x01(\x01B\x04\xe8\xb5\x18\x01H\x04R\x16contractedHoursPerWeek\x88\x01\x01\x12F\n" +
+	"\x1adaily_ot_threshold_minutes\x18\b \x01(\x05B\x04\xe8\xb5\x18\x01H\x05R\x17dailyOtThresholdMinutes\x88\x01\x01\x12H\n" +
+	"\x1bweekly_ot_threshold_minutes\x18\t \x01(\x05B\x04\xe8\xb5\x18\x01H\x06R\x18weeklyOtThresholdMinutes\x88\x01\x01B\a\n" +
 	"\x05_nameB\r\n" +
 	"\v_start_timeB\v\n" +
 	"\t_end_timeB\x10\n" +

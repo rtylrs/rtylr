@@ -4,6 +4,8 @@ package hr.work_schedule.v1;
 
 import "buf/validate/validate.proto";
 import "hr/work_schedule/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/work_schedule/v1";
 
@@ -13,24 +15,39 @@ message UpdateWorkScheduleRequest {
   // ID of the schedule to update.
   int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // New name; absent to keep current.
-  optional string name = 2;
+  optional string name = 2 [
+    (onekit.http.nullable) = true
+  ];
   // New working days; if provided, replaces all existing days.
   repeated string working_days = 3 [(buf.validate.field).repeated.min_items = 1];
   // New start time; absent to keep current.
-  optional string start_time = 4;
+  optional string start_time = 4 [
+    (onekit.http.nullable) = true
+  ];
   // New end time; absent to keep current.
-  optional string end_time = 5;
+  optional string end_time = 5 [
+    (onekit.http.nullable) = true
+  ];
   // New break duration in minutes; absent to keep current.
-  optional int32 break_minutes = 6;
+  optional int32 break_minutes = 6 [
+    (onekit.http.nullable) = true
+  ];
   // New contracted hours per week; absent to keep current.
-  optional double contracted_hours_per_week = 7;
+  optional double contracted_hours_per_week = 7 [
+    (onekit.http.nullable) = true
+  ];
   // New daily OT threshold; absent to keep current.
-  optional int32 daily_ot_threshold_minutes = 8;
+  optional int32 daily_ot_threshold_minutes = 8 [
+    (onekit.http.nullable) = true
+  ];
   // New weekly OT threshold; absent to keep current.
-  optional int32 weekly_ot_threshold_minutes = 9;
+  optional int32 weekly_ot_threshold_minutes = 9 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message UpdateWorkScheduleResponse {

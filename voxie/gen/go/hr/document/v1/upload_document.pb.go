@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,10 +162,9 @@ var File_hr_document_v1_upload_document_proto protoreflect.FileDescriptor
 
 const file_hr_document_v1_upload_document_proto_rawDesc = "" +
 	"\n" +
-	"$hr/document/v1/upload_document.proto\x12\x0ehr.document.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/document/v1/types.proto\"\xa1\x02\n" +
-	"\x15UploadDocumentRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"$hr/document/v1/upload_document.proto\x12\x0ehr.document.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/document/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xab\x02\n" +
+	"\x15UploadDocumentRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"employeeId\x12/\n" +
 	"\rdocument_type\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\fdocumentType\x12\x1e\n" +
@@ -173,8 +173,8 @@ const file_hr_document_v1_upload_document_proto_rawDesc = "" +
 	"\fstorage_mode\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vstorageMode\x12%\n" +
 	"\bfile_url\x18\x05 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\afileUrl\x12$\n" +
-	"\vexpiry_date\x18\x06 \x01(\tH\x00R\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\afileUrl\x12*\n" +
+	"\vexpiry_date\x18\x06 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\n" +
 	"expiryDate\x88\x01\x01B\x0e\n" +
 	"\f_expiry_date\"]\n" +
 	"\x16UploadDocumentResponse\x12C\n" +

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,16 +152,18 @@ var File_hr_performance_v1_list_goals_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_list_goals_proto_rawDesc = "" +
 	"\n" +
-	"\"hr/performance/v1/list_goals.proto\x12\x11hr.performance.v1\x1a\x1dhr/performance/v1/types.proto\"\x89\x01\n" +
-	"\x10ListGoalsRequest\x12$\n" +
-	"\vemployee_id\x18\x01 \x01(\x03H\x00R\n" +
-	"employeeId\x88\x01\x01\x12+\n" +
-	"\x0freview_cycle_id\x18\x02 \x01(\x03H\x01R\rreviewCycleId\x88\x01\x01B\x0e\n" +
+	"\"hr/performance/v1/list_goals.proto\x12\x11hr.performance.v1\x1a\x1dhr/performance/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xc3\x01\n" +
+	"\x10ListGoalsRequest\x12?\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x19µ\x18\r\n" +
+	"\vemployee_idе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"employeeId\x88\x01\x01\x12J\n" +
+	"\x0freview_cycle_id\x18\x02 \x01(\x03B\x1dµ\x18\x11\n" +
+	"\x0freview_cycle_idе\x18\x01\xe8\xb5\x18\x01H\x01R\rreviewCycleId\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\x12\n" +
-	"\x10_review_cycle_id\"\x93\x01\n" +
+	"\x10_review_cycle_id\"\x99\x01\n" +
 	"\x11ListGoalsResponse\x12:\n" +
-	"\x05goals\x18\x01 \x03(\v2$.hr.performance.v1.ReviewGoalPayloadR\x05goals\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x05goals\x18\x01 \x03(\v2$.hr.performance.v1.ReviewGoalPayloadR\x05goals\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB2Z0github.com/voxire/voxie/gen/go/hr/performance/v1b\x06proto3"
 

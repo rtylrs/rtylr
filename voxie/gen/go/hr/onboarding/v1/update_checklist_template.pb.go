@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,12 +25,12 @@ const (
 
 type UpdateChecklistTemplateRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// role_id is the checklist template role identifier from the path.
+	RoleId int64 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	// name is the human-readable name for the template.
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// trigger_type is the event that triggers this checklist (onboarding | offboarding).
-	TriggerType *string `protobuf:"bytes,2,opt,name=trigger_type,json=triggerType,proto3,oneof" json:"trigger_type,omitempty"`
-	// role_id is the role this template applies to; absent if it applies to all roles.
-	RoleId        *int64 `protobuf:"varint,3,opt,name=role_id,json=roleId,proto3,oneof" json:"role_id,omitempty"`
+	TriggerType   *string `protobuf:"bytes,3,opt,name=trigger_type,json=triggerType,proto3,oneof" json:"trigger_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -64,6 +65,13 @@ func (*UpdateChecklistTemplateRequest) Descriptor() ([]byte, []int) {
 	return file_hr_onboarding_v1_update_checklist_template_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *UpdateChecklistTemplateRequest) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
 func (x *UpdateChecklistTemplateRequest) GetName() string {
 	if x != nil {
 		return x.Name
@@ -76,13 +84,6 @@ func (x *UpdateChecklistTemplateRequest) GetTriggerType() string {
 		return *x.TriggerType
 	}
 	return ""
-}
-
-func (x *UpdateChecklistTemplateRequest) GetRoleId() int64 {
-	if x != nil && x.RoleId != nil {
-		return *x.RoleId
-	}
-	return 0
 }
 
 type UpdateChecklistTemplateResponse struct {
@@ -134,15 +135,13 @@ var File_hr_onboarding_v1_update_checklist_template_proto protoreflect.FileDescr
 
 const file_hr_onboarding_v1_update_checklist_template_proto_rawDesc = "" +
 	"\n" +
-	"0hr/onboarding/v1/update_checklist_template.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\"\xa3\x01\n" +
-	"\x1eUpdateChecklistTemplateRequest\x12\x1e\n" +
-	"\x04name\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12&\n" +
-	"\ftrigger_type\x18\x02 \x01(\tH\x00R\vtriggerType\x88\x01\x01\x12\x1c\n" +
-	"\arole_id\x18\x03 \x01(\x03H\x01R\x06roleId\x88\x01\x01B\x0f\n" +
-	"\r_trigger_typeB\n" +
-	"\n" +
-	"\b_role_id\";\n" +
+	"0hr/onboarding/v1/update_checklist_template.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa8\x01\n" +
+	"\x1eUpdateChecklistTemplateRequest\x12'\n" +
+	"\arole_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06roleId\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
+	"\ftrigger_type\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\vtriggerType\x88\x01\x01B\x0f\n" +
+	"\r_trigger_type\";\n" +
 	"\x1fUpdateChecklistTemplateResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB1Z/github.com/voxire/voxie/gen/go/hr/onboarding/v1b\x06proto3"
 

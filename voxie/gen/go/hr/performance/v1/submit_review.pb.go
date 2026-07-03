@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,10 +135,9 @@ var File_hr_performance_v1_submit_review_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_submit_review_proto_rawDesc = "" +
 	"\n" +
-	"%hr/performance/v1/submit_review.proto\x12\x11hr.performance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhr/performance/v1/types.proto\"\x9b\x01\n" +
-	"\x13SubmitReviewRequest\x12'\n" +
-	"\treview_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\breviewId\x121\n" +
+	"%hr/performance/v1/submit_review.proto\x12\x11hr.performance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhr/performance/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x9f\x01\n" +
+	"\x13SubmitReviewRequest\x12+\n" +
+	"\treview_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\breviewId\x121\n" +
 	"\x0eoverall_rating\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\roverallRating\x12(\n" +
 	"\tnarrative\x18\x03 \x01(\tB\n" +

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -250,11 +251,11 @@ var File_hr_shift_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x17hr/shift/v1/types.proto\x12\vhr.shift.v1\"\xfc\x01\n" +
-	"\fShiftPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"\x17hr/shift/v1/types.proto\x12\vhr.shift.v1\x1a\x1donekit/http/annotations.proto\"\x8e\x02\n" +
+	"\fShiftPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
@@ -264,13 +265,13 @@ const file_hr_shift_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\x03R\tupdatedAt\"\xe9\x01\n" +
-	"\x16ShiftAssignmentPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\x19\n" +
-	"\bshift_id\x18\x04 \x01(\x03R\ashiftId\x12\x12\n" +
+	"updated_at\x18\t \x01(\x03R\tupdatedAt\"\x81\x02\n" +
+	"\x16ShiftAssignmentPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"employeeId\x12\x1f\n" +
+	"\bshift_id\x18\x04 \x01(\x03B\x04е\x18\x01R\ashiftId\x12\x12\n" +
 	"\x04date\x18\x05 \x01(\tR\x04date\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,13 +135,11 @@ var File_hr_onboarding_v1_trigger_checklist_proto protoreflect.FileDescriptor
 
 const file_hr_onboarding_v1_trigger_checklist_proto_rawDesc = "" +
 	"\n" +
-	"(hr/onboarding/v1/trigger_checklist.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"\xc0\x01\n" +
-	"\x17TriggerChecklistRequest\x12+\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"employeeId\x12+\n" +
-	"\vtemplate_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"(hr/onboarding/v1/trigger_checklist.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xc8\x01\n" +
+	"\x17TriggerChecklistRequest\x12/\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"employeeId\x12/\n" +
+	"\vtemplate_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"templateId\x12K\n" +
 	"\ftrigger_date\x18\x03 \x01(\tB(\xbaH%\xc8\x01\x01r \x10\x012\x1c^[0-9]{4}-[0-9]{2}-[0-9]{2}$R\vtriggerDate\"d\n" +
 	"\x18TriggerChecklistResponse\x12H\n" +

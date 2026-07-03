@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,16 +25,18 @@ const (
 
 type AddItemToChecklistTemplateRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// role_id is the checklist template role identifier from the path.
+	RoleId int64 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	// title is the checklist item title.
-	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	// description is the optional supporting text for the checklist item.
-	Description *string `protobuf:"bytes,2,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	Description *string `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	// assignee_role is the role responsible for completing this item.
-	AssigneeRole *string `protobuf:"bytes,3,opt,name=assignee_role,json=assigneeRole,proto3,oneof" json:"assignee_role,omitempty"`
+	AssigneeRole *string `protobuf:"bytes,4,opt,name=assignee_role,json=assigneeRole,proto3,oneof" json:"assignee_role,omitempty"`
 	// due_offset_days is the number of days after trigger date by which this item is due.
-	DueOffsetDays *int32 `protobuf:"varint,4,opt,name=due_offset_days,json=dueOffsetDays,proto3,oneof" json:"due_offset_days,omitempty"`
+	DueOffsetDays *int32 `protobuf:"varint,5,opt,name=due_offset_days,json=dueOffsetDays,proto3,oneof" json:"due_offset_days,omitempty"`
 	// requires_attachment indicates whether completion needs an uploaded attachment.
-	RequiresAttachment *bool `protobuf:"varint,5,opt,name=requires_attachment,json=requiresAttachment,proto3,oneof" json:"requires_attachment,omitempty"`
+	RequiresAttachment *bool `protobuf:"varint,6,opt,name=requires_attachment,json=requiresAttachment,proto3,oneof" json:"requires_attachment,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -66,6 +69,13 @@ func (x *AddItemToChecklistTemplateRequest) ProtoReflect() protoreflect.Message 
 // Deprecated: Use AddItemToChecklistTemplateRequest.ProtoReflect.Descriptor instead.
 func (*AddItemToChecklistTemplateRequest) Descriptor() ([]byte, []int) {
 	return file_hr_onboarding_v1_add_item_to_checklist_template_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *AddItemToChecklistTemplateRequest) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
 }
 
 func (x *AddItemToChecklistTemplateRequest) GetTitle() string {
@@ -152,14 +162,15 @@ var File_hr_onboarding_v1_add_item_to_checklist_template_proto protoreflect.File
 
 const file_hr_onboarding_v1_add_item_to_checklist_template_proto_rawDesc = "" +
 	"\n" +
-	"5hr/onboarding/v1/add_item_to_checklist_template.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"\xc7\x02\n" +
-	"!AddItemToChecklistTemplateRequest\x12 \n" +
-	"\x05title\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05title\x12%\n" +
-	"\vdescription\x18\x02 \x01(\tH\x00R\vdescription\x88\x01\x01\x12(\n" +
-	"\rassignee_role\x18\x03 \x01(\tH\x01R\fassigneeRole\x88\x01\x01\x12+\n" +
-	"\x0fdue_offset_days\x18\x04 \x01(\x05H\x02R\rdueOffsetDays\x88\x01\x01\x124\n" +
-	"\x13requires_attachment\x18\x05 \x01(\bH\x03R\x12requiresAttachment\x88\x01\x01B\x0e\n" +
+	"5hr/onboarding/v1/add_item_to_checklist_template.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x88\x03\n" +
+	"!AddItemToChecklistTemplateRequest\x12'\n" +
+	"\arole_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06roleId\x12 \n" +
+	"\x05title\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05title\x12+\n" +
+	"\vdescription\x18\x03 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\vdescription\x88\x01\x01\x12.\n" +
+	"\rassignee_role\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\fassigneeRole\x88\x01\x01\x121\n" +
+	"\x0fdue_offset_days\x18\x05 \x01(\x05B\x04\xe8\xb5\x18\x01H\x02R\rdueOffsetDays\x88\x01\x01\x12:\n" +
+	"\x13requires_attachment\x18\x06 \x01(\bB\x04\xe8\xb5\x18\x01H\x03R\x12requiresAttachment\x88\x01\x01B\x0e\n" +
 	"\f_descriptionB\x10\n" +
 	"\x0e_assignee_roleB\x12\n" +
 	"\x10_due_offset_daysB\x16\n" +

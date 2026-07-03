@@ -3,21 +3,29 @@ syntax = "proto3";
 package hr.onboarding.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
 // ── Update Checklist Template ────────────────────────────────────
 
 message UpdateChecklistTemplateRequest {
+  // role_id is the checklist template role identifier from the path.
+  int64 role_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // name is the human-readable name for the template.
-  string name = 1 [
+  string name = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // trigger_type is the event that triggers this checklist (onboarding | offboarding).
-  optional string trigger_type = 2;
-  // role_id is the role this template applies to; absent if it applies to all roles.
-  optional int64 role_id = 3;
+  optional string trigger_type = 3 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message UpdateChecklistTemplateResponse {

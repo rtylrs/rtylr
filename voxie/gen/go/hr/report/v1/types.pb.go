@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -196,26 +197,26 @@ var File_hr_report_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_report_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x18hr/report/v1/types.proto\x12\fhr.report.v1\"\xad\x02\n" +
+	"\x18hr/report/v1/types.proto\x12\fhr.report.v1\x1a\x1donekit/http/annotations.proto\"\xcb\x02\n" +
 	"\x14ReportRequestPayload\x12\x1f\n" +
 	"\vreport_type\x18\x01 \x01(\tR\n" +
 	"reportType\x12\x1b\n" +
 	"\tdate_from\x18\x02 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x03 \x01(\tR\x06dateTo\x12$\n" +
-	"\vlocation_id\x18\x04 \x01(\x03H\x00R\n" +
-	"locationId\x88\x01\x01\x12(\n" +
-	"\rdepartment_id\x18\x05 \x01(\x03H\x01R\fdepartmentId\x88\x01\x01\x12$\n" +
-	"\vemployee_id\x18\x06 \x01(\x03H\x02R\n" +
+	"\adate_to\x18\x03 \x01(\tR\x06dateTo\x12.\n" +
+	"\vlocation_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"locationId\x88\x01\x01\x122\n" +
+	"\rdepartment_id\x18\x05 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\fdepartmentId\x88\x01\x01\x12.\n" +
+	"\vemployee_id\x18\x06 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x02R\n" +
 	"employeeId\x88\x01\x01\x12\x16\n" +
 	"\x06format\x18\a \x01(\tR\x06formatB\x0e\n" +
 	"\f_location_idB\x10\n" +
 	"\x0e_department_idB\x0e\n" +
-	"\f_employee_id\"\x7f\n" +
+	"\f_employee_id\"\x85\x01\n" +
 	"\rReportPayload\x12\x1f\n" +
 	"\vreport_type\x18\x01 \x01(\tR\n" +
 	"reportType\x12!\n" +
-	"\fgenerated_at\x18\x02 \x01(\x03R\vgeneratedAt\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\fR\x04data\x12\x16\n" +
+	"\fgenerated_at\x18\x02 \x01(\x03R\vgeneratedAt\x12\x18\n" +
+	"\x04data\x18\x03 \x01(\fB\x04\x80\xb6\x18\x01R\x04data\x12\x16\n" +
 	"\x06format\x18\x04 \x01(\tR\x06formatB-Z+github.com/voxire/voxie/gen/go/hr/report/v1b\x06proto3"
 
 var (

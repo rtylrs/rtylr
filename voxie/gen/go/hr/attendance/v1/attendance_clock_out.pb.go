@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_hr_attendance_v1_attendance_clock_out_proto protoreflect.FileDescriptor
 
 const file_hr_attendance_v1_attendance_clock_out_proto_rawDesc = "" +
 	"\n" +
-	"+hr/attendance/v1/attendance_clock_out.proto\x12\x10hr.attendance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/attendance/v1/types.proto\"Y\n" +
-	"\x19AttendanceClockOutRequest\x12<\n" +
-	"\x14attendance_record_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x12attendanceRecordId\"_\n" +
+	"+hr/attendance/v1/attendance_clock_out.proto\x12\x10hr.attendance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/attendance/v1/types.proto\x1a\x1donekit/http/annotations.proto\"]\n" +
+	"\x19AttendanceClockOutRequest\x12@\n" +
+	"\x14attendance_record_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x12attendanceRecordId\"_\n" +
 	"\x1aAttendanceClockOutResponse\x12A\n" +
 	"\x06record\x18\x01 \x01(\v2).hr.attendance.v1.AttendanceRecordPayloadR\x06recordB1Z/github.com/voxire/voxie/gen/go/hr/attendance/v1b\x06proto3"
 

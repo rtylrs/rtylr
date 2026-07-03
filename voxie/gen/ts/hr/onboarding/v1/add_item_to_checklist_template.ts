@@ -8,6 +8,8 @@
 import type { ChecklistItemPayload } from "./types";
 
 export interface AddItemToChecklistTemplateRequest {
+  /** role_id is the checklist template role identifier from the path. */
+  roleId: number;
   /** title is the checklist item title. */
   title: string;
   /** description is the optional supporting text for the checklist item. */

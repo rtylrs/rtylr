@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -169,21 +170,21 @@ var File_hr_overtime_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_overtime_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahr/overtime/v1/types.proto\x12\x0ehr.overtime.v1\"\xd1\x03\n" +
-	"\x16OvertimeRequestPayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
+	"\x1ahr/overtime/v1/types.proto\x12\x0ehr.overtime.v1\x1a\x1donekit/http/annotations.proto\"\xef\x03\n" +
+	"\x16OvertimeRequestPayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"employeeId\x12\x12\n" +
 	"\x04date\x18\x04 \x01(\tR\x04date\x122\n" +
 	"\x15planned_extra_minutes\x18\x05 \x01(\x05R\x13plannedExtraMinutes\x12\x16\n" +
 	"\x06reason\x18\x06 \x01(\tR\x06reason\x12\x16\n" +
 	"\x06status\x18\a \x01(\tR\x06status\x124\n" +
-	"\x16current_approval_level\x18\b \x01(\x05R\x14currentApprovalLevel\x12$\n" +
-	"\vapproved_by\x18\t \x01(\x03H\x00R\n" +
-	"approvedBy\x88\x01\x01\x122\n" +
+	"\x16current_approval_level\x18\b \x01(\x05R\x14currentApprovalLevel\x12*\n" +
+	"\vapproved_by\x18\t \x01(\x03B\x04\xe8\xb5\x18\x01H\x00R\n" +
+	"approvedBy\x88\x01\x01\x128\n" +
 	"\x12multiplier_applied\x18\n" +
-	" \x01(\x01H\x01R\x11multiplierApplied\x88\x01\x01\x12\x1d\n" +
+	" \x01(\x01B\x04\xe8\xb5\x18\x01H\x01R\x11multiplierApplied\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\v \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +

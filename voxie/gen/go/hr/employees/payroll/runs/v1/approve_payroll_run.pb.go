@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,7 +26,7 @@ const (
 type ApprovePayrollRunRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// ID of the payroll run to approve.
-	RunId         int64 `protobuf:"varint,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
+	Id            int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,9 +61,9 @@ func (*ApprovePayrollRunRequest) Descriptor() ([]byte, []int) {
 	return file_hr_employees_payroll_runs_v1_approve_payroll_run_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApprovePayrollRunRequest) GetRunId() int64 {
+func (x *ApprovePayrollRunRequest) GetId() int64 {
 	if x != nil {
-		return x.RunId
+		return x.Id
 	}
 	return 0
 }
@@ -116,10 +117,9 @@ var File_hr_employees_payroll_runs_v1_approve_payroll_run_proto protoreflect.Fil
 
 const file_hr_employees_payroll_runs_v1_approve_payroll_run_proto_rawDesc = "" +
 	"\n" +
-	"6hr/employees/payroll/runs/v1/approve_payroll_run.proto\x12\x1chr.employees.payroll.runs.v1\x1a\x1bbuf/validate/validate.proto\x1a(hr/employees/payroll/runs/v1/types.proto\"=\n" +
-	"\x18ApprovePayrollRunRequest\x12!\n" +
-	"\x06run_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x05runId\"^\n" +
+	"6hr/employees/payroll/runs/v1/approve_payroll_run.proto\x12\x1chr.employees.payroll.runs.v1\x1a\x1bbuf/validate/validate.proto\x1a(hr/employees/payroll/runs/v1/types.proto\x1a\x1donekit/http/annotations.proto\":\n" +
+	"\x18ApprovePayrollRunRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"^\n" +
 	"\x19ApprovePayrollRunResponse\x12A\n" +
 	"\x03run\x18\x01 \x01(\v2/.hr.employees.payroll.runs.v1.PayrollRunPayloadR\x03runB=Z;github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1b\x06proto3"
 

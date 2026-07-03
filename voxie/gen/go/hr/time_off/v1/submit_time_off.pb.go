@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -170,10 +171,9 @@ var File_hr_time_off_v1_submit_time_off_proto protoreflect.FileDescriptor
 
 const file_hr_time_off_v1_submit_time_off_proto_rawDesc = "" +
 	"\n" +
-	"$hr/time_off/v1/submit_time_off.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\"\x9b\x02\n" +
-	"\x14SubmitTimeOffRequest\x12%\n" +
-	"\bstaff_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\astaffId\x12\x1e\n" +
+	"$hr/time_off/v1/submit_time_off.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x9f\x02\n" +
+	"\x14SubmitTimeOffRequest\x12)\n" +
+	"\bstaff_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\astaffId\x12\x1e\n" +
 	"\x04type\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04type\x12)\n" +
 	"\n" +
@@ -185,9 +185,9 @@ const file_hr_time_off_v1_submit_time_off_proto_rawDesc = "" +
 	"days_count\x18\x05 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t!\x00\x00\x00\x00\x00\x00\x00\x00R\tdaysCount\x12\"\n" +
 	"\x06reason\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06reason\x12\x14\n" +
-	"\x05notes\x18\a \x01(\tR\x05notes\"'\n" +
-	"\x15SubmitTimeOffResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02idB/Z-github.com/voxire/voxie/gen/go/hr/time_off/v1b\x06proto3"
+	"\x05notes\x18\a \x01(\tR\x05notes\"-\n" +
+	"\x15SubmitTimeOffResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02idB/Z-github.com/voxire/voxie/gen/go/hr/time_off/v1b\x06proto3"
 
 var (
 	file_hr_time_off_v1_submit_time_off_proto_rawDescOnce sync.Once

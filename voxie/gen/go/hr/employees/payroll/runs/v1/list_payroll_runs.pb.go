@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,11 @@ var File_hr_employees_payroll_runs_v1_list_payroll_runs_proto protoreflect.FileD
 
 const file_hr_employees_payroll_runs_v1_list_payroll_runs_proto_rawDesc = "" +
 	"\n" +
-	"4hr/employees/payroll/runs/v1/list_payroll_runs.proto\x12\x1chr.employees.payroll.runs.v1\x1a(hr/employees/payroll/runs/v1/types.proto\"\x18\n" +
-	"\x16ListPayrollRunsRequest\"\xa2\x01\n" +
+	"4hr/employees/payroll/runs/v1/list_payroll_runs.proto\x12\x1chr.employees.payroll.runs.v1\x1a(hr/employees/payroll/runs/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x18\n" +
+	"\x16ListPayrollRunsRequest\"\xa8\x01\n" +
 	"\x17ListPayrollRunsResponse\x12C\n" +
-	"\x04runs\x18\x01 \x03(\v2/.hr.employees.payroll.runs.v1.PayrollRunPayloadR\x04runs\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x14\n" +
+	"\x04runs\x18\x01 \x03(\v2/.hr.employees.payroll.runs.v1.PayrollRunPayloadR\x04runs\x12\x1a\n" +
+	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offsetB=Z;github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1b\x06proto3"
 

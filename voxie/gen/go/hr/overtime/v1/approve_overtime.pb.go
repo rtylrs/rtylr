@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,13 +144,12 @@ var File_hr_overtime_v1_approve_overtime_proto protoreflect.FileDescriptor
 
 const file_hr_overtime_v1_approve_overtime_proto_rawDesc = "" +
 	"\n" +
-	"%hr/overtime/v1/approve_overtime.proto\x12\x0ehr.overtime.v1\x1a\x1bbuf/validate/validate.proto\"\x80\x02\n" +
-	"\x16ApproveOvertimeRequest\x12:\n" +
-	"\x13overtime_request_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x11overtimeRequestId\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\x122\n" +
-	"\x12multiplier_applied\x18\x03 \x01(\x01H\x00R\x11multiplierApplied\x88\x01\x01\x12.\n" +
-	"\x10rejection_reason\x18\x04 \x01(\tH\x01R\x0frejectionReason\x88\x01\x01B\x15\n" +
+	"%hr/overtime/v1/approve_overtime.proto\x12\x0ehr.overtime.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x90\x02\n" +
+	"\x16ApproveOvertimeRequest\x12>\n" +
+	"\x13overtime_request_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x11overtimeRequestId\x12\x1a\n" +
+	"\bapproved\x18\x02 \x01(\bR\bapproved\x128\n" +
+	"\x12multiplier_applied\x18\x03 \x01(\x01B\x04\xe8\xb5\x18\x01H\x00R\x11multiplierApplied\x88\x01\x01\x124\n" +
+	"\x10rejection_reason\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\x0frejectionReason\x88\x01\x01B\x15\n" +
 	"\x13_multiplier_appliedB\x13\n" +
 	"\x11_rejection_reason\"3\n" +
 	"\x17ApproveOvertimeResponse\x12\x18\n" +

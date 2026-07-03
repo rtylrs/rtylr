@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -135,11 +136,10 @@ var File_hr_role_v1_update_role_proto protoreflect.FileDescriptor
 const file_hr_role_v1_update_role_proto_rawDesc = "" +
 	"\n" +
 	"\x1chr/role/v1/update_role.proto\x12\n" +
-	"hr.role.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16hr/role/v1/types.proto\"\x9c\x01\n" +
-	"\x11UpdateRoleRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12I\n" +
+	"hr.role.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16hr/role/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xa6\x01\n" +
+	"\x11UpdateRoleRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04name\x88\x01\x01\x12I\n" +
 	"\vpermissions\x18\x03 \x03(\v2\x1d.hr.role.v1.PermissionPayloadB\b\xbaH\x05\x92\x01\x02\b\x01R\vpermissionsB\a\n" +
 	"\x05_name\"A\n" +
 	"\x12UpdateRoleResponse\x12+\n" +
