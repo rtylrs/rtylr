@@ -11,6 +11,10 @@ export interface GiftCard {
   id: number;
   /** owner_id identifies the tenant that owns the resource. */
   ownerId: number;
+  /** business_id identifies the business that owns the resource. */
+  businessId: number;
+  /** customer_id is the customer id value for this contract. */
+  customerId: number;
   /** code is the code value for this contract. */
   code: string;
   /** initial_amount is the initial amount value for this contract. */
@@ -27,4 +31,6 @@ export interface GiftCard {
   expiresAt: string;
   /** created_at is when the record was created. */
   createdAt: string;
+  /** updated_at is when the record was last updated. */
+  updatedAt: string;
 }

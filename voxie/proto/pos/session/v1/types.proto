@@ -32,3 +32,46 @@ message Session {
   // created_at is when the record was created.
   string created_at = 11;
 }
+
+// ── CurrentSession ────────────────────────────────────────────────
+
+// CurrentSession mirrors the POS register session shape returned by
+// the current-session endpoint, which carries cash-drawer totals.
+message CurrentSession {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // location_id is the location id value for this contract.
+  int64 location_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // staff_id is the staff id value for this contract.
+  int64 staff_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // status is the current lifecycle state.
+  string status = 5;
+  // opening_cash is the opening cash value for this contract.
+  double opening_cash = 6;
+  // closing_cash is the closing cash value for this contract.
+  double closing_cash = 7;
+  // expected_cash is the expected cash value for this contract.
+  double expected_cash = 8;
+  // cash_difference is the cash difference value for this contract.
+  double cash_difference = 9;
+  // total_sales is the total sales value for this contract.
+  double total_sales = 10;
+  // total_orders is the total orders value for this contract.
+  int32 total_orders = 11;
+  // total_cash_sales is the total cash sales value for this contract.
+  double total_cash_sales = 12;
+  // total_card_sales is the total card sales value for this contract.
+  double total_card_sales = 13;
+  // total_online_sales is the total online sales value for this contract.
+  double total_online_sales = 14;
+  // total_refunds is the total refunds value for this contract.
+  double total_refunds = 15;
+  // opened_at is the opened at value for this contract.
+  string opened_at = 16;
+  // closed_at is the closed at value for this contract.
+  optional string closed_at = 17 [(onekit.http.nullable) = true];
+  // notes is the notes value for this contract.
+  string notes = 18;
+}

@@ -5,6 +5,7 @@ package hub.notification.v1;
 import "hub/notification/v1/list_notifications.proto";
 import "hub/notification/v1/mark_all_read.proto";
 import "hub/notification/v1/mark_notification_read.proto";
+import "hub/notification/v1/mark_notifications_read.proto";
 import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/notification/v1";
@@ -33,6 +34,14 @@ service NotificationService {
   rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {
     option (onekit.http.config) = {
       path: "/notifications/{id}/read"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  // MarkNotificationsRead marks a batch of notifications as read.
+  rpc MarkNotificationsRead(MarkNotificationsReadRequest) returns (MarkNotificationsReadResponse) {
+    option (onekit.http.config) = {
+      path: "/notifications/read"
       method: HTTP_METHOD_PATCH
     };
   }

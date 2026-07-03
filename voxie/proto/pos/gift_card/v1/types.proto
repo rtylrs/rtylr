@@ -13,6 +13,10 @@ message GiftCard {
   int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
   int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // business_id identifies the business that owns the resource.
+  int64 business_id = 11 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 12 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // code is the code value for this contract.
   string code = 3;
   // initial_amount is the initial amount value for this contract.
@@ -29,4 +33,6 @@ message GiftCard {
   string expires_at = 9;
   // created_at is when the record was created.
   string created_at = 10;
+  // updated_at is when the record was last updated.
+  string updated_at = 13;
 }

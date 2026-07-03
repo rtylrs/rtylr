@@ -3,6 +3,7 @@ syntax = "proto3";
 package hub.team.invitations.v1;
 
 import "hub/team/invitations/v1/accept_invite.proto";
+import "hub/team/invitations/v1/bulk_invite.proto";
 import "hub/team/invitations/v1/invite_user.proto";
 import "hub/team/invitations/v1/verify_invite.proto";
 import "onekit/http/annotations.proto";
@@ -17,6 +18,14 @@ service InvitationsService {
   rpc InviteUser(InviteUserRequest) returns (InviteUserResponse) {
     option (onekit.http.config) = {
       path: "/invitations"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // BulkInvite sends invitations to multiple email addresses.
+  rpc BulkInvite(BulkInviteRequest) returns (BulkInviteResponse) {
+    option (onekit.http.config) = {
+      path: "/invitations/bulk"
       method: HTTP_METHOD_POST
     };
   }

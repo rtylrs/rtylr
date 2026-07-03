@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pos.location.v1;
+
+import "pos/location/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/location/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListLocationsRequest {}
+
+message ListLocationsResponse {
+  // locations is the locations value for this contract.
+  repeated Location locations = 1;
+}

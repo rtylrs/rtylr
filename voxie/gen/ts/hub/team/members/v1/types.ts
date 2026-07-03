@@ -5,6 +5,7 @@
 // source: hub/team/members/v1/types.proto
 
 /* eslint-disable */
+import type { GroupSummary } from "../../groups/v1/types";
 
 export interface StaffUserPayload {
   /** id is the unique identifier for the resource. */
@@ -21,4 +22,28 @@ export interface StaffUserPayload {
   role: string;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
+}
+
+/**
+ * StaffUserWithGroups mirrors StaffUserPayload with the user's group
+ * summaries flattened alongside it (the legacy payload embeds the staff
+ * user fields at the top level).
+ */
+export interface StaffUserWithGroups {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** email is the email address used for lookup or contact. */
+  email: string;
+  /** full_name is the full name value for this contract. */
+  fullName: string;
+  /** created_at is when the record was created. */
+  createdAt: string;
+  /** apps is the apps value for this contract. */
+  apps: string[];
+  /** role is the role value for this contract. */
+  role: string;
+  /** is_active is the is active value for this contract. */
+  isActive: boolean;
+  /** groups is the groups value for this contract. */
+  groups: GroupSummary[];
 }

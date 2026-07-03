@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.gift_card.v1;
+
+import "buf/validate/validate.proto";
+import "pos/gift_card/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
+
+// ── Get By Code ───────────────────────────────────────────────────
+
+message GetGiftCardByCodeRequest {
+  // code is the code value for this contract.
+  string code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message GetGiftCardByCodeResponse {
+  // gift_card is the gift card value for this contract.
+  GiftCard gift_card = 1;
+}

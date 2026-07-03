@@ -14,6 +14,25 @@ export interface InviteUserResponse {
   message: string;
 }
 
+export interface BulkInviteRequest {
+  emails: string[];
+  role: string;
+  apps: string[];
+  groupId: string;
+}
+
+export interface BulkInviteResponse {
+  results: BulkInviteResult[];
+  message: string;
+}
+
+export interface BulkInviteResult {
+  email: string;
+  userId: string;
+  status: string;
+  message: string;
+}
+
 export interface VerifyInviteRequest {
   token: string;
 }
@@ -118,6 +137,30 @@ export class InvitationsServiceClient {
     }
 
     return await resp.json() as InviteUserResponse;
+  }
+
+  async bulkInvite(req: BulkInviteRequest, options?: InvitationsServiceCallOptions): Promise<BulkInviteResponse> {
+    let path = "/api/hub/team/invitations/v1/invitations/bulk";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as BulkInviteResponse;
   }
 
   async verifyInvite(req: VerifyInviteRequest, options?: InvitationsServiceCallOptions): Promise<VerifyInviteResponse> {

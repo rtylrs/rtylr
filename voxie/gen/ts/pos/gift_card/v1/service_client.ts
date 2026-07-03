@@ -11,6 +11,8 @@ export interface ListGiftCardsResponse {
 export interface GiftCard {
   id: string;
   ownerId: string;
+  businessId: string;
+  customerId: string;
   code: string;
   initialAmount: number;
   currentBalance: number;
@@ -19,6 +21,7 @@ export interface GiftCard {
   isActive: boolean;
   expiresAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateGiftCardRequest {
@@ -32,6 +35,14 @@ export interface CreateGiftCardRequest {
 export interface CreateGiftCardResponse {
   giftCardId: string;
   message: string;
+}
+
+export interface GetGiftCardByCodeRequest {
+  code: string;
+}
+
+export interface GetGiftCardByCodeResponse {
+  giftCard?: GiftCard;
 }
 
 export interface RedeemGiftCardRequest {
@@ -152,6 +163,30 @@ export class GiftCardServiceClient {
     }
 
     return await resp.json() as CreateGiftCardResponse;
+  }
+
+  async getGiftCardByCode(req: GetGiftCardByCodeRequest, options?: GiftCardServiceCallOptions): Promise<GetGiftCardByCodeResponse> {
+    let path = "/api/pos/gift-card/v1/gift-cards/{code}";
+    path = path.replace("{code}", encodeURIComponent(String(req.code)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetGiftCardByCodeResponse;
   }
 
   async redeemGiftCard(req: RedeemGiftCardRequest, options?: GiftCardServiceCallOptions): Promise<RedeemGiftCardResponse> {

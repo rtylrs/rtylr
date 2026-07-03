@@ -16,3 +16,29 @@ export interface MyLocation {
   /** phone is the phone value for this contract. */
   phone: string;
 }
+
+export interface RosterEntry {
+  /** user_id is the user id value for this contract. */
+  userId: number;
+  /** name is the name value for this contract. */
+  name: string;
+  /** has_pin is the has pin value for this contract. */
+  hasPin: boolean;
+  /** is_manager is the is manager value for this contract. */
+  isManager: boolean;
+  /** pos_role is the pos role value for this contract. */
+  posRole: string;
+}
+
+export interface MemberLocationEntry {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** location_id is the location id value for this contract. */
+  locationId: number;
+  /** can_manage_pos_users is the can manage pos users value for this contract. */
+  canManagePosUsers: boolean;
+  /** can_manage_terminals is the can manage terminals value for this contract. */
+  canManageTerminals: boolean;
+  /** can_view_reports is the can view reports value for this contract. */
+  canViewReports: boolean;
+}

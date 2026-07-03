@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hub.team.access.v1;
 
+import "hub/team/access/v1/approve_access_request.proto";
+import "hub/team/access/v1/list_access_requests.proto";
 import "hub/team/access/v1/request_access.proto";
 import "onekit/http/annotations.proto";
 
@@ -15,6 +17,22 @@ service AccessService {
   rpc RequestAccess(RequestAccessRequest) returns (RequestAccessResponse) {
     option (onekit.http.config) = {
       path: "/requests"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ListAccessRequests returns pending access requests.
+  rpc ListAccessRequests(ListAccessRequestsRequest) returns (ListAccessRequestsResponse) {
+    option (onekit.http.config) = {
+      path: "/requests"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // ApproveAccessRequest approves a pending access request.
+  rpc ApproveAccessRequest(ApproveAccessRequestRequest) returns (ApproveAccessRequestResponse) {
+    option (onekit.http.config) = {
+      path: "/requests/{id}/approve"
       method: HTTP_METHOD_POST
     };
   }

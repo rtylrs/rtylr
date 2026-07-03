@@ -3,9 +3,11 @@ syntax = "proto3";
 package hub.permission.v1;
 
 import "hub/permission/v1/create_role.proto";
+import "hub/permission/v1/delete_role.proto";
 import "hub/permission/v1/get_permissions.proto";
 import "hub/permission/v1/list_roles.proto";
 import "hub/permission/v1/update_permission_matrix.proto";
+import "hub/permission/v1/update_role.proto";
 import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/permission/v1";
@@ -35,6 +37,22 @@ service PermissionService {
     option (onekit.http.config) = {
       path: "/roles"
       method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateRole updates an existing role.
+  rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {
+    option (onekit.http.config) = {
+      path: "/roles/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  // DeleteRole deletes a role.
+  rpc DeleteRole(DeleteRoleRequest) returns (DeleteRoleResponse) {
+    option (onekit.http.config) = {
+      path: "/roles/{id}"
+      method: HTTP_METHOD_DELETE
     };
   }
 

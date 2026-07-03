@@ -4,6 +4,7 @@ package pos.orders.items.v1;
 
 import "onekit/http/annotations.proto";
 import "pos/orders/items/v1/update_order_item_status.proto";
+import "pos/orders/items/v1/void_order_item.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/orders/items/v1";
 
@@ -15,6 +16,13 @@ service OrderItemService {
       path: "/orders/{order_id}/items/{item_id}/status"
       method: HTTP_METHOD_PUT
       body: "body"
+    };
+  }
+
+  rpc VoidOrderItem(VoidOrderItemRequest) returns (VoidOrderItemResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/items/{item_id}"
+      method: HTTP_METHOD_DELETE
     };
   }
 }

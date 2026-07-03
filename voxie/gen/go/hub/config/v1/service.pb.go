@@ -25,21 +25,39 @@ var File_hub_config_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_config_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhub/config/v1/service.proto\x12\rhub.config.v1\x1a\x1ehub/config/v1/get_config.proto\x1a\x1donekit/http/annotations.proto2\x8a\x01\n" +
+	"\x1bhub/config/v1/service.proto\x12\rhub.config.v1\x1a!hub/config/v1/create_config.proto\x1a\x1ehub/config/v1/get_config.proto\x1a\"hub/config/v1/get_industries.proto\x1a!hub/config/v1/update_config.proto\x1a\x1donekit/http/annotations.proto2\xcf\x03\n" +
 	"\rConfigService\x12_\n" +
 	"\tGetConfig\x12\x1f.hub.config.v1.GetConfigRequest\x1a .hub.config.v1.GetConfigResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/config\x10\x01\x1a\x18\xa2\xb5\x18\x14\n" +
+	"\a/config\x10\x01\x12h\n" +
+	"\fCreateConfig\x12\".hub.config.v1.CreateConfigRequest\x1a#.hub.config.v1.CreateConfigResponse\"\x0f\x9a\xb5\x18\v\n" +
+	"\a/config\x10\x02\x12h\n" +
+	"\fUpdateConfig\x12\".hub.config.v1.UpdateConfigRequest\x1a#.hub.config.v1.UpdateConfigResponse\"\x0f\x9a\xb5\x18\v\n" +
+	"\a/config\x10\x03\x12o\n" +
+	"\rGetIndustries\x12#.hub.config.v1.GetIndustriesRequest\x1a$.hub.config.v1.GetIndustriesResponse\"\x13\x9a\xb5\x18\x0f\n" +
+	"\v/industries\x10\x01\x1a\x18\xa2\xb5\x18\x14\n" +
 	"\x12/api/hub/config/v1B.Z,github.com/voxire/voxie/gen/go/hub/config/v1b\x06proto3"
 
 var file_hub_config_v1_service_proto_goTypes = []any{
-	(*GetConfigRequest)(nil),  // 0: hub.config.v1.GetConfigRequest
-	(*GetConfigResponse)(nil), // 1: hub.config.v1.GetConfigResponse
+	(*GetConfigRequest)(nil),      // 0: hub.config.v1.GetConfigRequest
+	(*CreateConfigRequest)(nil),   // 1: hub.config.v1.CreateConfigRequest
+	(*UpdateConfigRequest)(nil),   // 2: hub.config.v1.UpdateConfigRequest
+	(*GetIndustriesRequest)(nil),  // 3: hub.config.v1.GetIndustriesRequest
+	(*GetConfigResponse)(nil),     // 4: hub.config.v1.GetConfigResponse
+	(*CreateConfigResponse)(nil),  // 5: hub.config.v1.CreateConfigResponse
+	(*UpdateConfigResponse)(nil),  // 6: hub.config.v1.UpdateConfigResponse
+	(*GetIndustriesResponse)(nil), // 7: hub.config.v1.GetIndustriesResponse
 }
 var file_hub_config_v1_service_proto_depIdxs = []int32{
 	0, // 0: hub.config.v1.ConfigService.GetConfig:input_type -> hub.config.v1.GetConfigRequest
-	1, // 1: hub.config.v1.ConfigService.GetConfig:output_type -> hub.config.v1.GetConfigResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: hub.config.v1.ConfigService.CreateConfig:input_type -> hub.config.v1.CreateConfigRequest
+	2, // 2: hub.config.v1.ConfigService.UpdateConfig:input_type -> hub.config.v1.UpdateConfigRequest
+	3, // 3: hub.config.v1.ConfigService.GetIndustries:input_type -> hub.config.v1.GetIndustriesRequest
+	4, // 4: hub.config.v1.ConfigService.GetConfig:output_type -> hub.config.v1.GetConfigResponse
+	5, // 5: hub.config.v1.ConfigService.CreateConfig:output_type -> hub.config.v1.CreateConfigResponse
+	6, // 6: hub.config.v1.ConfigService.UpdateConfig:output_type -> hub.config.v1.UpdateConfigResponse
+	7, // 7: hub.config.v1.ConfigService.GetIndustries:output_type -> hub.config.v1.GetIndustriesResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -50,7 +68,10 @@ func file_hub_config_v1_service_proto_init() {
 	if File_hub_config_v1_service_proto != nil {
 		return
 	}
+	file_hub_config_v1_create_config_proto_init()
 	file_hub_config_v1_get_config_proto_init()
+	file_hub_config_v1_get_industries_proto_init()
+	file_hub_config_v1_update_config_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

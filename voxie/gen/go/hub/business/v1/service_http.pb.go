@@ -11,6 +11,8 @@ import (
 
 // BusinessServiceServer is the server API for BusinessService service.
 type BusinessServiceServer interface {
+	ListMyBusinesses(context.Context, *ListMyBusinessesRequest) (*ListMyBusinessesResponse, error)
+	CreateSubBusiness(context.Context, *CreateSubBusinessRequest) (*CreateSubBusinessResponse, error)
 	GetBusiness(context.Context, *GetBusinessRequest) (*GetBusinessResponse, error)
 	LookupBusinessBySlug(context.Context, *LookupBusinessBySlugRequest) (*LookupBusinessBySlugResponse, error)
 	SetSlug(context.Context, *SetSlugRequest) (*SetSlugResponse, error)
@@ -23,7 +25,25 @@ func RegisterBusinessServiceServer(server BusinessServiceServer, opts ...ServerO
 
 	serviceHeaders := getBusinessServiceHeaders()
 
-	methodHeaders := getGetBusinessHeaders()
+	methodHeaders := getListMyBusinessesHeaders()
+	listMyBusinessesHandler := BindingMiddleware[ListMyBusinessesRequest](
+		genericHandler(server.ListMyBusinesses, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listMyBusinessesPathParams, listMyBusinessesQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hub/business/v1/businesses/mine", listMyBusinessesHandler)
+
+	methodHeaders = getCreateSubBusinessHeaders()
+	createSubBusinessHandler := BindingMiddleware[CreateSubBusinessRequest](
+		genericHandler(server.CreateSubBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		createSubBusinessPathParams, createSubBusinessQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/hub/business/v1/businesses", createSubBusinessHandler)
+
+	methodHeaders = getGetBusinessHeaders()
 	getBusinessHandler := BindingMiddleware[GetBusinessRequest](
 		genericHandler(server.GetBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getBusinessPathParams, getBusinessQueryParams,
@@ -67,6 +87,16 @@ func getBusinessServiceHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getListMyBusinessesHeaders returns the method-level required headers for ListMyBusinesses
+func getListMyBusinessesHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getCreateSubBusinessHeaders returns the method-level required headers for CreateSubBusiness
+func getCreateSubBusinessHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getGetBusinessHeaders returns the method-level required headers for GetBusiness
 func getGetBusinessHeaders() []*onekithttp.Header {
 	return nil
@@ -86,6 +116,18 @@ func getSetSlugHeaders() []*onekithttp.Header {
 func getUpdateBusinessHeaders() []*onekithttp.Header {
 	return nil
 }
+
+// listMyBusinessesPathParams contains path parameter configuration for ListMyBusinesses
+var listMyBusinessesPathParams = []PathParamConfig{}
+
+// listMyBusinessesQueryParams contains query parameter configuration for ListMyBusinesses
+var listMyBusinessesQueryParams = []QueryParamConfig{}
+
+// createSubBusinessPathParams contains path parameter configuration for CreateSubBusiness
+var createSubBusinessPathParams = []PathParamConfig{}
+
+// createSubBusinessQueryParams contains query parameter configuration for CreateSubBusiness
+var createSubBusinessQueryParams = []QueryParamConfig{}
 
 // getBusinessPathParams contains path parameter configuration for GetBusiness
 var getBusinessPathParams = []PathParamConfig{

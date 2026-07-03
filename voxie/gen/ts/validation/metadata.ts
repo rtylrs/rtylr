@@ -5887,6 +5887,28 @@ export const contractValidationMetadata = {
   "hub.app.v1.ListAppsRequest": {},
   "hub.billing.v1.GetBillingSummaryRequest": {},
   "hub.billing.v1.ListInvoicesRequest": {},
+  "hub.business.v1.CreateSubBusinessRequest": {
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "parentBusinessId": {
+      "gt": 0,
+      "name": "parentBusinessId",
+      "optional": false,
+      "protoName": "parent_business_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "hub.business.v1.GetBusinessRequest": {
     "businessId": {
       "gt": 0,
@@ -5899,6 +5921,7 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "hub.business.v1.ListMyBusinessesRequest": {},
   "hub.business.v1.LookupBusinessBySlugRequest": {
     "slug": {
       "minLen": 1,
@@ -6022,7 +6045,239 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "hub.config.v1.CreateConfigRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "key": {
+      "minLen": 1,
+      "name": "key",
+      "optional": false,
+      "protoName": "key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "owner": {
+      "name": "owner",
+      "optional": false,
+      "protoName": "owner",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "value": {
+      "minLen": 1,
+      "name": "value",
+      "optional": false,
+      "protoName": "value",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "hub.config.v1.GetConfigRequest": {},
+  "hub.config.v1.GetIndustriesRequest": {},
+  "hub.config.v1.UpdateConfigRequest": {
+    "aboutContent": {
+      "name": "aboutContent",
+      "optional": true,
+      "protoName": "about_content",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "addonsEnabled": {
+      "name": "addonsEnabled",
+      "optional": true,
+      "protoName": "addons_enabled",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "address": {
+      "name": "address",
+      "optional": true,
+      "protoName": "address",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "city": {
+      "name": "city",
+      "optional": true,
+      "protoName": "city",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "contactEmail": {
+      "name": "contactEmail",
+      "optional": true,
+      "protoName": "contact_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "contactNumber": {
+      "name": "contactNumber",
+      "optional": true,
+      "protoName": "contact_number",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "country": {
+      "name": "country",
+      "optional": true,
+      "protoName": "country",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "enableNewsletterSignup": {
+      "name": "enableNewsletterSignup",
+      "optional": true,
+      "protoName": "enable_newsletter_signup",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "enableReviews": {
+      "name": "enableReviews",
+      "optional": true,
+      "protoName": "enable_reviews",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "enableWishlist": {
+      "name": "enableWishlist",
+      "optional": true,
+      "protoName": "enable_wishlist",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "faviconUrl": {
+      "name": "faviconUrl",
+      "optional": true,
+      "protoName": "favicon_url",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "footerSubText": {
+      "name": "footerSubText",
+      "optional": true,
+      "protoName": "footer_sub_text",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "instagram": {
+      "name": "instagram",
+      "optional": true,
+      "protoName": "instagram",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "logoUrl": {
+      "name": "logoUrl",
+      "optional": true,
+      "protoName": "logo_url",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "maintenanceMode": {
+      "name": "maintenanceMode",
+      "optional": true,
+      "protoName": "maintenance_mode",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "maintenanceNotice": {
+      "name": "maintenanceNotice",
+      "optional": true,
+      "protoName": "maintenance_notice",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "mapsUrl": {
+      "name": "mapsUrl",
+      "optional": true,
+      "protoName": "maps_url",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "senderEmail": {
+      "name": "senderEmail",
+      "optional": true,
+      "protoName": "sender_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "siteName": {
+      "name": "siteName",
+      "optional": true,
+      "protoName": "site_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "website": {
+      "name": "website",
+      "optional": true,
+      "protoName": "website",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "zipcode": {
+      "name": "zipcode",
+      "optional": true,
+      "protoName": "zipcode",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "hub.dashboard.v1.GetKPIsRequest": {},
   "hub.developer.v1.CreateApiKeyRequest": {
     "name": {
@@ -6185,6 +6440,18 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "hub.notification.v1.MarkNotificationsReadRequest": {
+    "ids": {
+      "minItems": 1,
+      "name": "ids",
+      "optional": false,
+      "protoName": "ids",
+      "repeated": true,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "hub.permission.v1.CreateRoleRequest": {
     "description": {
       "minLen": 1,
@@ -6307,6 +6574,95 @@ export const contractValidationMetadata = {
       "type": "bool"
     }
   },
+  "hub.team.access.v1.AccessRequest": {
+    "app": {
+      "name": "app",
+      "optional": false,
+      "protoName": "app",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "createdAt": {
+      "name": "createdAt",
+      "optional": false,
+      "protoName": "created_at",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "requesterEmail": {
+      "name": "requesterEmail",
+      "optional": false,
+      "protoName": "requester_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "requesterName": {
+      "name": "requesterName",
+      "optional": false,
+      "protoName": "requester_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "userId": {
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.access.v1.ApproveAccessRequestRequest": {
+    "app": {
+      "minLen": 1,
+      "name": "app",
+      "optional": false,
+      "protoName": "app",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.access.v1.ListAccessRequestsRequest": {},
   "hub.team.access.v1.RequestAccessRequest": {
     "app": {
       "minLen": 1,
@@ -6317,6 +6673,175 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    }
+  },
+  "hub.team.groups.v1.AddGroupMembersRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "userIds": {
+      "minItems": 1,
+      "name": "userIds",
+      "optional": false,
+      "protoName": "user_ids",
+      "repeated": true,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.groups.v1.CreateGroupRequest": {
+    "color": {
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "resourcePermissions": {
+      "name": "resourcePermissions",
+      "optional": false,
+      "protoName": "resource_permissions",
+      "repeated": true,
+      "required": false,
+      "scalar": false,
+      "type": "ResourcePermission"
+    }
+  },
+  "hub.team.groups.v1.DeleteGroupRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.groups.v1.GetGroupDetailRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.groups.v1.GetUserGroupsRequest": {
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.groups.v1.ListGroupsRequest": {},
+  "hub.team.groups.v1.RemoveGroupMemberRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.team.groups.v1.UpdateGroupRequest": {
+    "color": {
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "resourcePermissions": {
+      "name": "resourcePermissions",
+      "optional": false,
+      "protoName": "resource_permissions",
+      "repeated": true,
+      "required": false,
+      "scalar": false,
+      "type": "ResourcePermission"
     }
   },
   "hub.team.invitations.v1.AcceptInviteRequest": {
@@ -6337,6 +6862,45 @@ export const contractValidationMetadata = {
       "protoName": "token",
       "repeated": false,
       "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.team.invitations.v1.BulkInviteRequest": {
+    "apps": {
+      "name": "apps",
+      "optional": false,
+      "protoName": "apps",
+      "repeated": true,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "emails": {
+      "minItems": 1,
+      "name": "emails",
+      "optional": false,
+      "protoName": "emails",
+      "repeated": true,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "groupId": {
+      "name": "groupId",
+      "optional": false,
+      "protoName": "group_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "role": {
+      "name": "role",
+      "optional": false,
+      "protoName": "role",
+      "repeated": false,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
@@ -6404,6 +6968,18 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    }
+  },
+  "hub.team.members.v1.GetMemberRequest": {
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
     }
   },
   "hub.team.members.v1.ListTeamRequest": {},
@@ -6937,6 +7513,30 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "int64"
     },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.access.v1.GetLocationRosterRequest": {
+    "locationId": {
+      "gt": 0,
+      "name": "locationId",
+      "optional": false,
+      "protoName": "location_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.access.v1.GetMemberLocationsRequest": {
     "userId": {
       "gt": 0,
       "name": "userId",
@@ -7529,6 +8129,18 @@ export const contractValidationMetadata = {
       "type": "double"
     }
   },
+  "pos.gift_card.v1.GetGiftCardByCodeRequest": {
+    "code": {
+      "minLen": 1,
+      "name": "code",
+      "optional": false,
+      "protoName": "code",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "pos.gift_card.v1.ListGiftCardsRequest": {},
   "pos.gift_card.v1.RedeemGiftCardRequest": {
     "amount": {
@@ -7553,6 +8165,27 @@ export const contractValidationMetadata = {
     }
   },
   "pos.kds.v1.ListKDSOrdersRequest": {},
+  "pos.kds.v1.UpdateKDSItemByIDRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateKDSItemByIDBody"
+    },
+    "itemId": {
+      "gt": 0,
+      "name": "itemId",
+      "optional": false,
+      "protoName": "item_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.kds.v1.UpdateKDSItemStatusRequest": {
     "body": {
       "name": "body",
@@ -7578,6 +8211,67 @@ export const contractValidationMetadata = {
       "name": "orderId",
       "optional": false,
       "protoName": "order_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.location.v1.CreateLocationRequest": {
+    "address": {
+      "name": "address",
+      "optional": false,
+      "protoName": "address",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": true,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "phone": {
+      "name": "phone",
+      "optional": false,
+      "protoName": "phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "pos.location.v1.ListLocationsRequest": {},
+  "pos.location.v1.UpdateLocationRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateLocationBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -7919,6 +8613,28 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "pos.orders.items.v1.VoidOrderItemRequest": {
+    "itemId": {
+      "gt": 0,
+      "name": "itemId",
+      "optional": false,
+      "protoName": "item_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "orderId": {
+      "gt": 0,
+      "name": "orderId",
+      "optional": false,
+      "protoName": "order_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.orders.payments.v1.ProcessPaymentRequest": {
     "amountPaid": {
       "gt": 0,
@@ -8166,6 +8882,40 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "pos.orders.v1.SendToKitchenRequest": {
+    "orderId": {
+      "gt": 0,
+      "name": "orderId",
+      "optional": false,
+      "protoName": "order_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.orders.v1.TransferTableRequest": {
+    "newTableId": {
+      "gt": 0,
+      "name": "newTableId",
+      "optional": false,
+      "protoName": "new_table_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "orderId": {
+      "gt": 0,
+      "name": "orderId",
+      "optional": false,
+      "protoName": "order_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.orders.v1.UpdateOrderStatusRequest": {
     "body": {
       "name": "body",
@@ -8209,6 +8959,28 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "pos.receipt.v1.EmailReceiptRequest": {
+    "email": {
+      "minLen": 1,
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.receipt.v1.ListReceiptsRequest": {
     "from": {
       "name": "from",
@@ -8240,6 +9012,19 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "double"
     },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.session.v1.GetCurrentSessionRequest": {},
+  "pos.session.v1.GetSessionRequest": {
     "id": {
       "gt": 0,
       "name": "id",
@@ -8648,6 +9433,27 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "pos.table.v1.UpdateTableStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateTableStatusBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.terminal.v1.CreateTerminalRequest": {
     "branchId": {
       "gt": 0,
@@ -8831,6 +9637,48 @@ export const contractValidationMetadata = {
       "protoName": "location_id",
       "repeated": false,
       "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.user.v1.SetPINRequest": {
+    "locationId": {
+      "gt": 0,
+      "name": "locationId",
+      "optional": false,
+      "protoName": "location_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "pin": {
+      "minLen": 1,
+      "name": "pin",
+      "optional": false,
+      "protoName": "pin",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
       "scalar": true,
       "type": "int64"
     }

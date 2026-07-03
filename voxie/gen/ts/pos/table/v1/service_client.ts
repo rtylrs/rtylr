@@ -46,6 +46,19 @@ export interface UpdateTableResponse {
   message: string;
 }
 
+export interface UpdateTableStatusRequest {
+  id: string;
+  body?: UpdateTableStatusBody;
+}
+
+export interface UpdateTableStatusBody {
+  status: string;
+}
+
+export interface UpdateTableStatusResponse {
+  message: string;
+}
+
 export interface DeleteTableRequest {
   id: string;
 }
@@ -187,6 +200,31 @@ export class TableServiceClient {
     }
 
     return await resp.json() as UpdateTableResponse;
+  }
+
+  async updateTableStatus(req: UpdateTableStatusRequest, options?: TableServiceCallOptions): Promise<UpdateTableStatusResponse> {
+    let path = "/api/pos/table/v1/tables/{id}/status";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req.body ?? {}),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateTableStatusResponse;
   }
 
   async deleteTable(req: DeleteTableRequest, options?: TableServiceCallOptions): Promise<DeleteTableResponse> {

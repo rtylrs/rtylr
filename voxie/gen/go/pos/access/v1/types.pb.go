@@ -94,6 +94,168 @@ func (x *MyLocation) GetPhone() string {
 	return ""
 }
 
+type RosterEntry struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// user_id is the user id value for this contract.
+	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// name is the name value for this contract.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// has_pin is the has pin value for this contract.
+	HasPin bool `protobuf:"varint,3,opt,name=has_pin,json=hasPin,proto3" json:"has_pin,omitempty"`
+	// is_manager is the is manager value for this contract.
+	IsManager bool `protobuf:"varint,4,opt,name=is_manager,json=isManager,proto3" json:"is_manager,omitempty"`
+	// pos_role is the pos role value for this contract.
+	PosRole       string `protobuf:"bytes,5,opt,name=pos_role,json=posRole,proto3" json:"pos_role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RosterEntry) Reset() {
+	*x = RosterEntry{}
+	mi := &file_pos_access_v1_types_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RosterEntry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RosterEntry) ProtoMessage() {}
+
+func (x *RosterEntry) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_access_v1_types_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RosterEntry.ProtoReflect.Descriptor instead.
+func (*RosterEntry) Descriptor() ([]byte, []int) {
+	return file_pos_access_v1_types_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RosterEntry) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *RosterEntry) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RosterEntry) GetHasPin() bool {
+	if x != nil {
+		return x.HasPin
+	}
+	return false
+}
+
+func (x *RosterEntry) GetIsManager() bool {
+	if x != nil {
+		return x.IsManager
+	}
+	return false
+}
+
+func (x *RosterEntry) GetPosRole() string {
+	if x != nil {
+		return x.PosRole
+	}
+	return ""
+}
+
+type MemberLocationEntry struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the resource.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// location_id is the location id value for this contract.
+	LocationId int64 `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	// can_manage_pos_users is the can manage pos users value for this contract.
+	CanManagePosUsers bool `protobuf:"varint,3,opt,name=can_manage_pos_users,json=canManagePosUsers,proto3" json:"can_manage_pos_users,omitempty"`
+	// can_manage_terminals is the can manage terminals value for this contract.
+	CanManageTerminals bool `protobuf:"varint,4,opt,name=can_manage_terminals,json=canManageTerminals,proto3" json:"can_manage_terminals,omitempty"`
+	// can_view_reports is the can view reports value for this contract.
+	CanViewReports bool `protobuf:"varint,5,opt,name=can_view_reports,json=canViewReports,proto3" json:"can_view_reports,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *MemberLocationEntry) Reset() {
+	*x = MemberLocationEntry{}
+	mi := &file_pos_access_v1_types_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MemberLocationEntry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MemberLocationEntry) ProtoMessage() {}
+
+func (x *MemberLocationEntry) ProtoReflect() protoreflect.Message {
+	mi := &file_pos_access_v1_types_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MemberLocationEntry.ProtoReflect.Descriptor instead.
+func (*MemberLocationEntry) Descriptor() ([]byte, []int) {
+	return file_pos_access_v1_types_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *MemberLocationEntry) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *MemberLocationEntry) GetLocationId() int64 {
+	if x != nil {
+		return x.LocationId
+	}
+	return 0
+}
+
+func (x *MemberLocationEntry) GetCanManagePosUsers() bool {
+	if x != nil {
+		return x.CanManagePosUsers
+	}
+	return false
+}
+
+func (x *MemberLocationEntry) GetCanManageTerminals() bool {
+	if x != nil {
+		return x.CanManageTerminals
+	}
+	return false
+}
+
+func (x *MemberLocationEntry) GetCanViewReports() bool {
+	if x != nil {
+		return x.CanViewReports
+	}
+	return false
+}
+
 var File_pos_access_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_access_v1_types_proto_rawDesc = "" +
@@ -105,7 +267,21 @@ const file_pos_access_v1_types_proto_rawDesc = "" +
 	"locationId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
 	"\aaddress\x18\x03 \x01(\tR\aaddress\x12\x14\n" +
-	"\x05phone\x18\x04 \x01(\tR\x05phoneB.Z,github.com/voxire/voxie/gen/go/pos/access/v1b\x06proto3"
+	"\x05phone\x18\x04 \x01(\tR\x05phone\"\x93\x01\n" +
+	"\vRosterEntry\x12\x1d\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x17\n" +
+	"\ahas_pin\x18\x03 \x01(\bR\x06hasPin\x12\x1d\n" +
+	"\n" +
+	"is_manager\x18\x04 \x01(\bR\tisManager\x12\x19\n" +
+	"\bpos_role\x18\x05 \x01(\tR\aposRole\"\xdf\x01\n" +
+	"\x13MemberLocationEntry\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vlocation_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
+	"locationId\x12/\n" +
+	"\x14can_manage_pos_users\x18\x03 \x01(\bR\x11canManagePosUsers\x120\n" +
+	"\x14can_manage_terminals\x18\x04 \x01(\bR\x12canManageTerminals\x12(\n" +
+	"\x10can_view_reports\x18\x05 \x01(\bR\x0ecanViewReportsB.Z,github.com/voxire/voxie/gen/go/pos/access/v1b\x06proto3"
 
 var (
 	file_pos_access_v1_types_proto_rawDescOnce sync.Once
@@ -119,9 +295,11 @@ func file_pos_access_v1_types_proto_rawDescGZIP() []byte {
 	return file_pos_access_v1_types_proto_rawDescData
 }
 
-var file_pos_access_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_pos_access_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_access_v1_types_proto_goTypes = []any{
-	(*MyLocation)(nil), // 0: pos.access.v1.MyLocation
+	(*MyLocation)(nil),          // 0: pos.access.v1.MyLocation
+	(*RosterEntry)(nil),         // 1: pos.access.v1.RosterEntry
+	(*MemberLocationEntry)(nil), // 2: pos.access.v1.MemberLocationEntry
 }
 var file_pos_access_v1_types_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -142,7 +320,7 @@ func file_pos_access_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pos_access_v1_types_proto_rawDesc), len(file_pos_access_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

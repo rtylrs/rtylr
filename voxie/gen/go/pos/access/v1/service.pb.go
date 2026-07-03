@@ -25,10 +25,14 @@ var File_pos_access_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_access_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1bpos/access/v1/service.proto\x12\rpos.access.v1\x1a\x1donekit/http/annotations.proto\x1a#pos/access/v1/assign_location.proto\x1a$pos/access/v1/get_my_locations.proto\x1a#pos/access/v1/remove_location.proto2\xff\x02\n" +
+	"\x1bpos/access/v1/service.proto\x12\rpos.access.v1\x1a\x1donekit/http/annotations.proto\x1a#pos/access/v1/assign_location.proto\x1a'pos/access/v1/get_location_roster.proto\x1a(pos/access/v1/get_member_locations.proto\x1a$pos/access/v1/get_my_locations.proto\x1a#pos/access/v1/remove_location.proto2\x89\x05\n" +
 	"\rAccessService\x12t\n" +
 	"\x0eGetMyLocations\x12$.pos.access.v1.GetMyLocationsRequest\x1a%.pos.access.v1.GetMyLocationsResponse\"\x15\x9a\xb5\x18\x11\n" +
-	"\r/my-locations\x10\x01\x12n\n" +
+	"\r/my-locations\x10\x01\x12\x80\x01\n" +
+	"\x11GetLocationRoster\x12'.pos.access.v1.GetLocationRosterRequest\x1a(.pos.access.v1.GetLocationRosterResponse\"\x18\x9a\xb5\x18\x14\n" +
+	"\x10/location-roster\x10\x01\x12\x84\x01\n" +
+	"\x12GetMemberLocations\x12(.pos.access.v1.GetMemberLocationsRequest\x1a).pos.access.v1.GetMemberLocationsResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/member-locations\x10\x01\x12n\n" +
 	"\x0eAssignLocation\x12$.pos.access.v1.AssignLocationRequest\x1a%.pos.access.v1.AssignLocationResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/assign\x10\x02\x12n\n" +
 	"\x0eRemoveLocation\x12$.pos.access.v1.RemoveLocationRequest\x1a%.pos.access.v1.RemoveLocationResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -36,22 +40,30 @@ const file_pos_access_v1_service_proto_rawDesc = "" +
 	"\x12/api/pos/access/v1B.Z,github.com/voxire/voxie/gen/go/pos/access/v1b\x06proto3"
 
 var file_pos_access_v1_service_proto_goTypes = []any{
-	(*GetMyLocationsRequest)(nil),  // 0: pos.access.v1.GetMyLocationsRequest
-	(*AssignLocationRequest)(nil),  // 1: pos.access.v1.AssignLocationRequest
-	(*RemoveLocationRequest)(nil),  // 2: pos.access.v1.RemoveLocationRequest
-	(*GetMyLocationsResponse)(nil), // 3: pos.access.v1.GetMyLocationsResponse
-	(*AssignLocationResponse)(nil), // 4: pos.access.v1.AssignLocationResponse
-	(*RemoveLocationResponse)(nil), // 5: pos.access.v1.RemoveLocationResponse
+	(*GetMyLocationsRequest)(nil),      // 0: pos.access.v1.GetMyLocationsRequest
+	(*GetLocationRosterRequest)(nil),   // 1: pos.access.v1.GetLocationRosterRequest
+	(*GetMemberLocationsRequest)(nil),  // 2: pos.access.v1.GetMemberLocationsRequest
+	(*AssignLocationRequest)(nil),      // 3: pos.access.v1.AssignLocationRequest
+	(*RemoveLocationRequest)(nil),      // 4: pos.access.v1.RemoveLocationRequest
+	(*GetMyLocationsResponse)(nil),     // 5: pos.access.v1.GetMyLocationsResponse
+	(*GetLocationRosterResponse)(nil),  // 6: pos.access.v1.GetLocationRosterResponse
+	(*GetMemberLocationsResponse)(nil), // 7: pos.access.v1.GetMemberLocationsResponse
+	(*AssignLocationResponse)(nil),     // 8: pos.access.v1.AssignLocationResponse
+	(*RemoveLocationResponse)(nil),     // 9: pos.access.v1.RemoveLocationResponse
 }
 var file_pos_access_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.access.v1.AccessService.GetMyLocations:input_type -> pos.access.v1.GetMyLocationsRequest
-	1, // 1: pos.access.v1.AccessService.AssignLocation:input_type -> pos.access.v1.AssignLocationRequest
-	2, // 2: pos.access.v1.AccessService.RemoveLocation:input_type -> pos.access.v1.RemoveLocationRequest
-	3, // 3: pos.access.v1.AccessService.GetMyLocations:output_type -> pos.access.v1.GetMyLocationsResponse
-	4, // 4: pos.access.v1.AccessService.AssignLocation:output_type -> pos.access.v1.AssignLocationResponse
-	5, // 5: pos.access.v1.AccessService.RemoveLocation:output_type -> pos.access.v1.RemoveLocationResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 1: pos.access.v1.AccessService.GetLocationRoster:input_type -> pos.access.v1.GetLocationRosterRequest
+	2, // 2: pos.access.v1.AccessService.GetMemberLocations:input_type -> pos.access.v1.GetMemberLocationsRequest
+	3, // 3: pos.access.v1.AccessService.AssignLocation:input_type -> pos.access.v1.AssignLocationRequest
+	4, // 4: pos.access.v1.AccessService.RemoveLocation:input_type -> pos.access.v1.RemoveLocationRequest
+	5, // 5: pos.access.v1.AccessService.GetMyLocations:output_type -> pos.access.v1.GetMyLocationsResponse
+	6, // 6: pos.access.v1.AccessService.GetLocationRoster:output_type -> pos.access.v1.GetLocationRosterResponse
+	7, // 7: pos.access.v1.AccessService.GetMemberLocations:output_type -> pos.access.v1.GetMemberLocationsResponse
+	8, // 8: pos.access.v1.AccessService.AssignLocation:output_type -> pos.access.v1.AssignLocationResponse
+	9, // 9: pos.access.v1.AccessService.RemoveLocation:output_type -> pos.access.v1.RemoveLocationResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -63,6 +75,8 @@ func file_pos_access_v1_service_proto_init() {
 		return
 	}
 	file_pos_access_v1_assign_location_proto_init()
+	file_pos_access_v1_get_location_roster_proto_init()
+	file_pos_access_v1_get_member_locations_proto_init()
 	file_pos_access_v1_get_my_locations_proto_init()
 	file_pos_access_v1_remove_location_proto_init()
 	type x struct{}

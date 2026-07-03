@@ -25,11 +25,14 @@ var File_hub_team_invitations_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_invitations_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%hub/team/invitations/v1/service.proto\x12\x17hub.team.invitations.v1\x1a+hub/team/invitations/v1/accept_invite.proto\x1a)hub/team/invitations/v1/invite_user.proto\x1a+hub/team/invitations/v1/verify_invite.proto\x1a\x1donekit/http/annotations.proto2\xcb\x03\n" +
+	"%hub/team/invitations/v1/service.proto\x12\x17hub.team.invitations.v1\x1a+hub/team/invitations/v1/accept_invite.proto\x1a)hub/team/invitations/v1/bulk_invite.proto\x1a)hub/team/invitations/v1/invite_user.proto\x1a+hub/team/invitations/v1/verify_invite.proto\x1a\x1donekit/http/annotations.proto2\xce\x04\n" +
 	"\x12InvitationsService\x12{\n" +
 	"\n" +
 	"InviteUser\x12*.hub.team.invitations.v1.InviteUserRequest\x1a+.hub.team.invitations.v1.InviteUserResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/invitations\x10\x02\x12\x88\x01\n" +
+	"\f/invitations\x10\x02\x12\x80\x01\n" +
+	"\n" +
+	"BulkInvite\x12*.hub.team.invitations.v1.BulkInviteRequest\x1a+.hub.team.invitations.v1.BulkInviteResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/invitations/bulk\x10\x02\x12\x88\x01\n" +
 	"\fVerifyInvite\x12,.hub.team.invitations.v1.VerifyInviteRequest\x1a-.hub.team.invitations.v1.VerifyInviteResponse\"\x1b\x9a\xb5\x18\x17\n" +
 	"\x13/invitations/verify\x10\x02\x12\x88\x01\n" +
 	"\fAcceptInvite\x12,.hub.team.invitations.v1.AcceptInviteRequest\x1a-.hub.team.invitations.v1.AcceptInviteResponse\"\x1b\x9a\xb5\x18\x17\n" +
@@ -38,21 +41,25 @@ const file_hub_team_invitations_v1_service_proto_rawDesc = "" +
 
 var file_hub_team_invitations_v1_service_proto_goTypes = []any{
 	(*InviteUserRequest)(nil),    // 0: hub.team.invitations.v1.InviteUserRequest
-	(*VerifyInviteRequest)(nil),  // 1: hub.team.invitations.v1.VerifyInviteRequest
-	(*AcceptInviteRequest)(nil),  // 2: hub.team.invitations.v1.AcceptInviteRequest
-	(*InviteUserResponse)(nil),   // 3: hub.team.invitations.v1.InviteUserResponse
-	(*VerifyInviteResponse)(nil), // 4: hub.team.invitations.v1.VerifyInviteResponse
-	(*AcceptInviteResponse)(nil), // 5: hub.team.invitations.v1.AcceptInviteResponse
+	(*BulkInviteRequest)(nil),    // 1: hub.team.invitations.v1.BulkInviteRequest
+	(*VerifyInviteRequest)(nil),  // 2: hub.team.invitations.v1.VerifyInviteRequest
+	(*AcceptInviteRequest)(nil),  // 3: hub.team.invitations.v1.AcceptInviteRequest
+	(*InviteUserResponse)(nil),   // 4: hub.team.invitations.v1.InviteUserResponse
+	(*BulkInviteResponse)(nil),   // 5: hub.team.invitations.v1.BulkInviteResponse
+	(*VerifyInviteResponse)(nil), // 6: hub.team.invitations.v1.VerifyInviteResponse
+	(*AcceptInviteResponse)(nil), // 7: hub.team.invitations.v1.AcceptInviteResponse
 }
 var file_hub_team_invitations_v1_service_proto_depIdxs = []int32{
 	0, // 0: hub.team.invitations.v1.InvitationsService.InviteUser:input_type -> hub.team.invitations.v1.InviteUserRequest
-	1, // 1: hub.team.invitations.v1.InvitationsService.VerifyInvite:input_type -> hub.team.invitations.v1.VerifyInviteRequest
-	2, // 2: hub.team.invitations.v1.InvitationsService.AcceptInvite:input_type -> hub.team.invitations.v1.AcceptInviteRequest
-	3, // 3: hub.team.invitations.v1.InvitationsService.InviteUser:output_type -> hub.team.invitations.v1.InviteUserResponse
-	4, // 4: hub.team.invitations.v1.InvitationsService.VerifyInvite:output_type -> hub.team.invitations.v1.VerifyInviteResponse
-	5, // 5: hub.team.invitations.v1.InvitationsService.AcceptInvite:output_type -> hub.team.invitations.v1.AcceptInviteResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 1: hub.team.invitations.v1.InvitationsService.BulkInvite:input_type -> hub.team.invitations.v1.BulkInviteRequest
+	2, // 2: hub.team.invitations.v1.InvitationsService.VerifyInvite:input_type -> hub.team.invitations.v1.VerifyInviteRequest
+	3, // 3: hub.team.invitations.v1.InvitationsService.AcceptInvite:input_type -> hub.team.invitations.v1.AcceptInviteRequest
+	4, // 4: hub.team.invitations.v1.InvitationsService.InviteUser:output_type -> hub.team.invitations.v1.InviteUserResponse
+	5, // 5: hub.team.invitations.v1.InvitationsService.BulkInvite:output_type -> hub.team.invitations.v1.BulkInviteResponse
+	6, // 6: hub.team.invitations.v1.InvitationsService.VerifyInvite:output_type -> hub.team.invitations.v1.VerifyInviteResponse
+	7, // 7: hub.team.invitations.v1.InvitationsService.AcceptInvite:output_type -> hub.team.invitations.v1.AcceptInviteResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -64,6 +71,7 @@ func file_hub_team_invitations_v1_service_proto_init() {
 		return
 	}
 	file_hub_team_invitations_v1_accept_invite_proto_init()
+	file_hub_team_invitations_v1_bulk_invite_proto_init()
 	file_hub_team_invitations_v1_invite_user_proto_init()
 	file_hub_team_invitations_v1_verify_invite_proto_init()
 	type x struct{}

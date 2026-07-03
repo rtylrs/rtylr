@@ -2,7 +2,9 @@ syntax = "proto3";
 
 package hub.business.v1;
 
+import "hub/business/v1/create_sub_business.proto";
 import "hub/business/v1/get_business.proto";
+import "hub/business/v1/list_my_businesses.proto";
 import "hub/business/v1/lookup_business_by_slug.proto";
 import "hub/business/v1/set_slug.proto";
 import "hub/business/v1/update_business.proto";
@@ -13,6 +15,22 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
 // BusinessService defines hub business endpoints.
 service BusinessService {
   option (onekit.http.service_config) = {base_path: "/api/hub/business/v1"};
+
+  // ListMyBusinesses returns the businesses owned by the current user.
+  rpc ListMyBusinesses(ListMyBusinessesRequest) returns (ListMyBusinessesResponse) {
+    option (onekit.http.config) = {
+      path: "/businesses/mine"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateSubBusiness creates a sub-business under a parent business.
+  rpc CreateSubBusiness(CreateSubBusinessRequest) returns (CreateSubBusinessResponse) {
+    option (onekit.http.config) = {
+      path: "/businesses"
+      method: HTTP_METHOD_POST
+    };
+  }
 
   // GetBusiness returns a business by ID.
   rpc GetBusiness(GetBusinessRequest) returns (GetBusinessResponse) {

@@ -12,6 +12,8 @@ import (
 // AccessServiceServer is the server API for AccessService service.
 type AccessServiceServer interface {
 	RequestAccess(context.Context, *RequestAccessRequest) (*RequestAccessResponse, error)
+	ListAccessRequests(context.Context, *ListAccessRequestsRequest) (*ListAccessRequestsResponse, error)
+	ApproveAccessRequest(context.Context, *ApproveAccessRequestRequest) (*ApproveAccessRequestResponse, error)
 }
 
 // RegisterAccessServiceServer registers the HTTP handlers for service AccessService to the given mux.
@@ -29,6 +31,24 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 
 	config.mux.Handle("POST /api/hub/team/access/v1/requests", requestAccessHandler)
 
+	methodHeaders = getListAccessRequestsHeaders()
+	listAccessRequestsHandler := BindingMiddleware[ListAccessRequestsRequest](
+		genericHandler(server.ListAccessRequests, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listAccessRequestsPathParams, listAccessRequestsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hub/team/access/v1/requests", listAccessRequestsHandler)
+
+	methodHeaders = getApproveAccessRequestHeaders()
+	approveAccessRequestHandler := BindingMiddleware[ApproveAccessRequestRequest](
+		genericHandler(server.ApproveAccessRequest, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		approveAccessRequestPathParams, approveAccessRequestQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/hub/team/access/v1/requests/{id}/approve", approveAccessRequestHandler)
+
 	return nil
 }
 
@@ -42,8 +62,32 @@ func getRequestAccessHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getListAccessRequestsHeaders returns the method-level required headers for ListAccessRequests
+func getListAccessRequestsHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getApproveAccessRequestHeaders returns the method-level required headers for ApproveAccessRequest
+func getApproveAccessRequestHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // requestAccessPathParams contains path parameter configuration for RequestAccess
 var requestAccessPathParams = []PathParamConfig{}
 
 // requestAccessQueryParams contains query parameter configuration for RequestAccess
 var requestAccessQueryParams = []QueryParamConfig{}
+
+// listAccessRequestsPathParams contains path parameter configuration for ListAccessRequests
+var listAccessRequestsPathParams = []PathParamConfig{}
+
+// listAccessRequestsQueryParams contains query parameter configuration for ListAccessRequests
+var listAccessRequestsQueryParams = []QueryParamConfig{}
+
+// approveAccessRequestPathParams contains path parameter configuration for ApproveAccessRequest
+var approveAccessRequestPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// approveAccessRequestQueryParams contains query parameter configuration for ApproveAccessRequest
+var approveAccessRequestQueryParams = []QueryParamConfig{}

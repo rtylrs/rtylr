@@ -4,6 +4,7 @@ package pos.kds.v1;
 
 import "onekit/http/annotations.proto";
 import "pos/kds/v1/list_kds_orders.proto";
+import "pos/kds/v1/update_kds_item_by_id.proto";
 import "pos/kds/v1/update_kds_item_status.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/kds/v1";
@@ -15,6 +16,14 @@ service KDSService {
     option (onekit.http.config) = {
       path: "/orders"
       method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdateKDSItemByID(UpdateKDSItemByIDRequest) returns (UpdateKDSItemByIDResponse) {
+    option (onekit.http.config) = {
+      path: "/items/{item_id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 

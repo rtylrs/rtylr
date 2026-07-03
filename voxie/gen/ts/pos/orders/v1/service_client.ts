@@ -124,6 +124,23 @@ export interface VoidOrderResponse {
   message: string;
 }
 
+export interface SendToKitchenRequest {
+  orderId: string;
+}
+
+export interface SendToKitchenResponse {
+  success: boolean;
+}
+
+export interface TransferTableRequest {
+  orderId: string;
+  newTableId: string;
+}
+
+export interface TransferTableResponse {
+  success: boolean;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -314,6 +331,56 @@ export class OrderServiceClient {
     }
 
     return await resp.json() as VoidOrderResponse;
+  }
+
+  async sendToKitchen(req: SendToKitchenRequest, options?: OrderServiceCallOptions): Promise<SendToKitchenResponse> {
+    let path = "/api/pos/orders/v1/orders/{order_id}/send-to-kitchen";
+    path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SendToKitchenResponse;
+  }
+
+  async transferTable(req: TransferTableRequest, options?: OrderServiceCallOptions): Promise<TransferTableResponse> {
+    let path = "/api/pos/orders/v1/orders/{order_id}/transfer-table";
+    path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as TransferTableResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

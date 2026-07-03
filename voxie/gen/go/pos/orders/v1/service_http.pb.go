@@ -16,6 +16,8 @@ type OrderServiceServer interface {
 	GetOrderDetail(context.Context, *GetOrderDetailRequest) (*GetOrderDetailResponse, error)
 	UpdateOrderStatus(context.Context, *UpdateOrderStatusRequest) (*UpdateOrderStatusResponse, error)
 	VoidOrder(context.Context, *VoidOrderRequest) (*VoidOrderResponse, error)
+	SendToKitchen(context.Context, *SendToKitchenRequest) (*SendToKitchenResponse, error)
+	TransferTable(context.Context, *TransferTableRequest) (*TransferTableResponse, error)
 }
 
 // RegisterOrderServiceServer registers the HTTP handlers for service OrderService to the given mux.
@@ -69,6 +71,24 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 
 	config.mux.Handle("POST /api/pos/orders/v1/orders/{order_id}/void", voidOrderHandler)
 
+	methodHeaders = getSendToKitchenHeaders()
+	sendToKitchenHandler := BindingMiddleware[SendToKitchenRequest](
+		genericHandler(server.SendToKitchen, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		sendToKitchenPathParams, sendToKitchenQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/pos/orders/v1/orders/{order_id}/send-to-kitchen", sendToKitchenHandler)
+
+	methodHeaders = getTransferTableHeaders()
+	transferTableHandler := BindingMiddleware[TransferTableRequest](
+		genericHandler(server.TransferTable, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		transferTablePathParams, transferTableQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/pos/orders/v1/orders/{order_id}/transfer-table", transferTableHandler)
+
 	return nil
 }
 
@@ -99,6 +119,16 @@ func getUpdateOrderStatusHeaders() []*onekithttp.Header {
 
 // getVoidOrderHeaders returns the method-level required headers for VoidOrder
 func getVoidOrderHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getSendToKitchenHeaders returns the method-level required headers for SendToKitchen
+func getSendToKitchenHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getTransferTableHeaders returns the method-level required headers for TransferTable
+func getTransferTableHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -145,3 +175,19 @@ var voidOrderPathParams = []PathParamConfig{
 
 // voidOrderQueryParams contains query parameter configuration for VoidOrder
 var voidOrderQueryParams = []QueryParamConfig{}
+
+// sendToKitchenPathParams contains path parameter configuration for SendToKitchen
+var sendToKitchenPathParams = []PathParamConfig{
+	{URLParam: "order_id", FieldName: "order_id"},
+}
+
+// sendToKitchenQueryParams contains query parameter configuration for SendToKitchen
+var sendToKitchenQueryParams = []QueryParamConfig{}
+
+// transferTablePathParams contains path parameter configuration for TransferTable
+var transferTablePathParams = []PathParamConfig{
+	{URLParam: "order_id", FieldName: "order_id"},
+}
+
+// transferTableQueryParams contains query parameter configuration for TransferTable
+var transferTableQueryParams = []QueryParamConfig{}

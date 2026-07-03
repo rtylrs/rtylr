@@ -26,6 +26,92 @@ export interface Business {
   slug: string;
 }
 
+export interface CreateConfigRequest {
+  owner: string;
+  key: string;
+  value: string;
+  description: string;
+}
+
+export interface CreateConfigResponse {
+  configId: string;
+  message: string;
+}
+
+export interface UpdateConfigRequest {
+  siteName: string | null;
+  logoUrl: string | null;
+  faviconUrl: string | null;
+  contactEmail: string | null;
+  contactNumber: string | null;
+  senderEmail: string | null;
+  website: string | null;
+  mapsUrl: string | null;
+  address: string | null;
+  city: string | null;
+  zipcode: string | null;
+  country: string | null;
+  instagram: string | null;
+  maintenanceMode: boolean | null;
+  maintenanceNotice: string | null;
+  addonsEnabled: boolean | null;
+  enableReviews: boolean | null;
+  enableWishlist: boolean | null;
+  enableNewsletterSignup: boolean | null;
+  aboutContent: string | null;
+  footerSubText: string | null;
+}
+
+export interface UpdateConfigResponse {
+  message: string;
+  config?: ConfigPayload;
+}
+
+export interface ConfigPayload {
+  ownerId: string;
+  siteName: string;
+  logoUrl: string;
+  faviconUrl: string;
+  metaTags: string[];
+  contactEmail: string;
+  contactNumber: string;
+  senderEmail: string;
+  website: string;
+  mapsUrl: string;
+  address: string;
+  city: string;
+  zipcode: string;
+  country: string;
+  instagram: string;
+  maintenanceMode: boolean;
+  maintenanceNotice: string;
+  addonsEnabled: boolean;
+  enableReviews: boolean;
+  enableWishlist: boolean;
+  enableNewsletterSignup: boolean;
+  aboutContent: string;
+  footerSubText: string;
+  slug: string;
+}
+
+export interface GetIndustriesRequest {
+}
+
+export interface GetIndustriesResponse {
+  groups: IndustryGroup[];
+}
+
+export interface IndustryGroup {
+  category: string;
+  types: IndustryType[];
+}
+
+export interface IndustryType {
+  slug: string;
+  label: string;
+  icon: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -110,6 +196,77 @@ export class ConfigServiceClient {
     }
 
     return await resp.json() as GetConfigResponse;
+  }
+
+  async createConfig(req: CreateConfigRequest, options?: ConfigServiceCallOptions): Promise<CreateConfigResponse> {
+    let path = "/api/hub/config/v1/config";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as CreateConfigResponse;
+  }
+
+  async updateConfig(req: UpdateConfigRequest, options?: ConfigServiceCallOptions): Promise<UpdateConfigResponse> {
+    let path = "/api/hub/config/v1/config";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateConfigResponse;
+  }
+
+  async getIndustries(_req: GetIndustriesRequest, options?: ConfigServiceCallOptions): Promise<GetIndustriesResponse> {
+    let path = "/api/hub/config/v1/industries";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetIndustriesResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

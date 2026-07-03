@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "github.com/stackxio/onekit/http"
+	v1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -121,11 +122,122 @@ func (x *StaffUserPayload) GetIsActive() bool {
 	return false
 }
 
+// StaffUserWithGroups mirrors StaffUserPayload with the user's group
+// summaries flattened alongside it (the legacy payload embeds the staff
+// user fields at the top level).
+type StaffUserWithGroups struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the resource.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// email is the email address used for lookup or contact.
+	Email string `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	// full_name is the full name value for this contract.
+	FullName string `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// apps is the apps value for this contract.
+	Apps []string `protobuf:"bytes,5,rep,name=apps,proto3" json:"apps,omitempty"`
+	// role is the role value for this contract.
+	Role string `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive bool `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	// groups is the groups value for this contract.
+	Groups        []*v1.GroupSummary `protobuf:"bytes,8,rep,name=groups,proto3" json:"groups,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StaffUserWithGroups) Reset() {
+	*x = StaffUserWithGroups{}
+	mi := &file_hub_team_members_v1_types_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StaffUserWithGroups) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StaffUserWithGroups) ProtoMessage() {}
+
+func (x *StaffUserWithGroups) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_team_members_v1_types_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StaffUserWithGroups.ProtoReflect.Descriptor instead.
+func (*StaffUserWithGroups) Descriptor() ([]byte, []int) {
+	return file_hub_team_members_v1_types_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *StaffUserWithGroups) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *StaffUserWithGroups) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *StaffUserWithGroups) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *StaffUserWithGroups) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *StaffUserWithGroups) GetApps() []string {
+	if x != nil {
+		return x.Apps
+	}
+	return nil
+}
+
+func (x *StaffUserWithGroups) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *StaffUserWithGroups) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *StaffUserWithGroups) GetGroups() []*v1.GroupSummary {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
 var File_hub_team_members_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_team_members_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1fhub/team/members/v1/types.proto\x12\x13hub.team.members.v1\x1a\x1donekit/http/annotations.proto\"\xbf\x01\n" +
+	"\x1fhub/team/members/v1/types.proto\x12\x13hub.team.members.v1\x1a\x1ehub/team/groups/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xbf\x01\n" +
 	"\x10StaffUserPayload\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
@@ -134,7 +246,17 @@ const file_hub_team_members_v1_types_proto_rawDesc = "" +
 	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x12\n" +
 	"\x04apps\x18\x05 \x03(\tR\x04apps\x12\x12\n" +
 	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1b\n" +
-	"\tis_active\x18\a \x01(\bR\bisActiveB4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
+	"\tis_active\x18\a \x01(\bR\bisActive\"\xfc\x01\n" +
+	"\x13StaffUserWithGroups\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x12\n" +
+	"\x04apps\x18\x05 \x03(\tR\x04apps\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x128\n" +
+	"\x06groups\x18\b \x03(\v2 .hub.team.groups.v1.GroupSummaryR\x06groupsB4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
 
 var (
 	file_hub_team_members_v1_types_proto_rawDescOnce sync.Once
@@ -148,16 +270,19 @@ func file_hub_team_members_v1_types_proto_rawDescGZIP() []byte {
 	return file_hub_team_members_v1_types_proto_rawDescData
 }
 
-var file_hub_team_members_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_hub_team_members_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_hub_team_members_v1_types_proto_goTypes = []any{
-	(*StaffUserPayload)(nil), // 0: hub.team.members.v1.StaffUserPayload
+	(*StaffUserPayload)(nil),    // 0: hub.team.members.v1.StaffUserPayload
+	(*StaffUserWithGroups)(nil), // 1: hub.team.members.v1.StaffUserWithGroups
+	(*v1.GroupSummary)(nil),     // 2: hub.team.groups.v1.GroupSummary
 }
 var file_hub_team_members_v1_types_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: hub.team.members.v1.StaffUserWithGroups.groups:type_name -> hub.team.groups.v1.GroupSummary
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hub_team_members_v1_types_proto_init() }
@@ -171,7 +296,7 @@ func file_hub_team_members_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_team_members_v1_types_proto_rawDesc), len(file_hub_team_members_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pos.session.v1;
+
+import "pos/session/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/session/v1";
+
+// ── Get Current ───────────────────────────────────────────────────
+
+message GetCurrentSessionRequest {}
+
+message GetCurrentSessionResponse {
+  // session is the current open register session; null when none is open.
+  CurrentSession session = 1;
+}

@@ -117,10 +117,9 @@ var File_hub_permission_v1_delete_role_proto protoreflect.FileDescriptor
 
 const file_hub_permission_v1_delete_role_proto_rawDesc = "" +
 	"\n" +
-	"#hub/permission/v1/delete_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\";\n" +
-	"\x11DeleteRoleRequest\x12&\n" +
-	"\x02id\x18\x01 \x01(\x03B\x16\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\x04\n" +
-	"\x02idе\x18\x01R\x02id\".\n" +
+	"#hub/permission/v1/delete_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"3\n" +
+	"\x11DeleteRoleRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\".\n" +
 	"\x12DeleteRoleResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/hub/permission/v1b\x06proto3"
 

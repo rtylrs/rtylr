@@ -185,6 +185,88 @@ func (x *Business) GetSlug() string {
 	return ""
 }
 
+// BusinessEntry is a compact business row for ownership listings.
+type BusinessEntry struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the resource.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// name is the name value for this contract.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// logo_url is the logo url value for this contract.
+	LogoUrl string `protobuf:"bytes,3,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
+	// parent_id identifies the parent business, zero for top-level businesses.
+	ParentId int64 `protobuf:"varint,4,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive      bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BusinessEntry) Reset() {
+	*x = BusinessEntry{}
+	mi := &file_hub_business_v1_types_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BusinessEntry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BusinessEntry) ProtoMessage() {}
+
+func (x *BusinessEntry) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_business_v1_types_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BusinessEntry.ProtoReflect.Descriptor instead.
+func (*BusinessEntry) Descriptor() ([]byte, []int) {
+	return file_hub_business_v1_types_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *BusinessEntry) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *BusinessEntry) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *BusinessEntry) GetLogoUrl() string {
+	if x != nil {
+		return x.LogoUrl
+	}
+	return ""
+}
+
+func (x *BusinessEntry) GetParentId() int64 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *BusinessEntry) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
 type PublicLocation struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
@@ -205,7 +287,7 @@ type PublicLocation struct {
 
 func (x *PublicLocation) Reset() {
 	*x = PublicLocation{}
-	mi := &file_hub_business_v1_types_proto_msgTypes[1]
+	mi := &file_hub_business_v1_types_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -217,7 +299,7 @@ func (x *PublicLocation) String() string {
 func (*PublicLocation) ProtoMessage() {}
 
 func (x *PublicLocation) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_business_v1_types_proto_msgTypes[1]
+	mi := &file_hub_business_v1_types_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -230,7 +312,7 @@ func (x *PublicLocation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublicLocation.ProtoReflect.Descriptor instead.
 func (*PublicLocation) Descriptor() ([]byte, []int) {
-	return file_hub_business_v1_types_proto_rawDescGZIP(), []int{1}
+	return file_hub_business_v1_types_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *PublicLocation) GetId() int64 {
@@ -295,7 +377,7 @@ type PublicBusinessSummary struct {
 
 func (x *PublicBusinessSummary) Reset() {
 	*x = PublicBusinessSummary{}
-	mi := &file_hub_business_v1_types_proto_msgTypes[2]
+	mi := &file_hub_business_v1_types_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -307,7 +389,7 @@ func (x *PublicBusinessSummary) String() string {
 func (*PublicBusinessSummary) ProtoMessage() {}
 
 func (x *PublicBusinessSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_business_v1_types_proto_msgTypes[2]
+	mi := &file_hub_business_v1_types_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -320,7 +402,7 @@ func (x *PublicBusinessSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublicBusinessSummary.ProtoReflect.Descriptor instead.
 func (*PublicBusinessSummary) Descriptor() ([]byte, []int) {
-	return file_hub_business_v1_types_proto_rawDescGZIP(), []int{2}
+	return file_hub_business_v1_types_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PublicBusinessSummary) GetId() int64 {
@@ -386,7 +468,13 @@ const file_hub_business_v1_types_proto_rawDesc = "" +
 	"\x04plan\x18\f \x01(\tR\x04plan\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x12\n" +
-	"\x04slug\x18\x0e \x01(\tR\x04slug\"\xa1\x01\n" +
+	"\x04slug\x18\x0e \x01(\tR\x04slug\"\x94\x01\n" +
+	"\rBusinessEntry\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x19\n" +
+	"\blogo_url\x18\x03 \x01(\tR\alogoUrl\x12!\n" +
+	"\tparent_id\x18\x04 \x01(\x03B\x04е\x18\x01R\bparentId\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"\xa1\x01\n" +
 	"\x0ePublicLocation\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -414,11 +502,12 @@ func file_hub_business_v1_types_proto_rawDescGZIP() []byte {
 	return file_hub_business_v1_types_proto_rawDescData
 }
 
-var file_hub_business_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_hub_business_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_hub_business_v1_types_proto_goTypes = []any{
 	(*Business)(nil),              // 0: hub.business.v1.Business
-	(*PublicLocation)(nil),        // 1: hub.business.v1.PublicLocation
-	(*PublicBusinessSummary)(nil), // 2: hub.business.v1.PublicBusinessSummary
+	(*BusinessEntry)(nil),         // 1: hub.business.v1.BusinessEntry
+	(*PublicLocation)(nil),        // 2: hub.business.v1.PublicLocation
+	(*PublicBusinessSummary)(nil), // 3: hub.business.v1.PublicBusinessSummary
 }
 var file_hub_business_v1_types_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -439,7 +528,7 @@ func file_hub_business_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_business_v1_types_proto_rawDesc), len(file_hub_business_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

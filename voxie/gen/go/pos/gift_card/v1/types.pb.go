@@ -28,6 +28,10 @@ type GiftCard struct {
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// owner_id identifies the tenant that owns the resource.
 	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	// business_id identifies the business that owns the resource.
+	BusinessId int64 `protobuf:"varint,11,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	// customer_id is the customer id value for this contract.
+	CustomerId int64 `protobuf:"varint,12,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
 	// code is the code value for this contract.
 	Code string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	// initial_amount is the initial amount value for this contract.
@@ -43,7 +47,9 @@ type GiftCard struct {
 	// expires_at is the expires at value for this contract.
 	ExpiresAt string `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	// created_at is when the record was created.
-	CreatedAt     string `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CreatedAt string `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt     string `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -88,6 +94,20 @@ func (x *GiftCard) GetId() int64 {
 func (x *GiftCard) GetOwnerId() int64 {
 	if x != nil {
 		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *GiftCard) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
+	}
+	return 0
+}
+
+func (x *GiftCard) GetCustomerId() int64 {
+	if x != nil {
+		return x.CustomerId
 	}
 	return 0
 }
@@ -148,14 +168,25 @@ func (x *GiftCard) GetCreatedAt() string {
 	return ""
 }
 
+func (x *GiftCard) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 var File_pos_gift_card_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/gift_card/v1/types.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\"\xcc\x02\n" +
+	"\x1cpos/gift_card/v1/types.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\"\xb9\x03\n" +
 	"\bGiftCard\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
-	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vbusiness_id\x18\v \x01(\x03B\x04е\x18\x01R\n" +
+	"businessId\x12%\n" +
+	"\vcustomer_id\x18\f \x01(\x03B\x04е\x18\x01R\n" +
+	"customerId\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x12%\n" +
 	"\x0einitial_amount\x18\x04 \x01(\x01R\rinitialAmount\x12'\n" +
 	"\x0fcurrent_balance\x18\x05 \x01(\x01R\x0ecurrentBalance\x12#\n" +
@@ -166,7 +197,9 @@ const file_pos_gift_card_v1_types_proto_rawDesc = "" +
 	"expires_at\x18\t \x01(\tR\texpiresAt\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAtB1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
+	" \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\r \x01(\tR\tupdatedAtB1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
 
 var (
 	file_pos_gift_card_v1_types_proto_rawDescOnce sync.Once

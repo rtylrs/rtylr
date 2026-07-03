@@ -40,6 +40,20 @@ export interface Business {
   slug: string;
 }
 
+/** BusinessEntry is a compact business row for ownership listings. */
+export interface BusinessEntry {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** name is the name value for this contract. */
+  name: string;
+  /** logo_url is the logo url value for this contract. */
+  logoUrl: string;
+  /** parent_id identifies the parent business, zero for top-level businesses. */
+  parentId: number;
+  /** is_active is the is active value for this contract. */
+  isActive: boolean;
+}
+
 export interface PublicLocation {
   /** id is the unique identifier for the resource. */
   id: number;

@@ -25,7 +25,7 @@ var File_pos_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19pos/user/v1/service.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\x1a!pos/user/v1/create_pos_user.proto\x1a%pos/user/v1/deactivate_pos_user.proto\x1a pos/user/v1/list_pos_users.proto\x1a!pos/user/v1/update_pos_user.proto\x1a%pos/user/v1/verify_pos_user_pin.proto2\xdc\x04\n" +
+	"\x19pos/user/v1/service.proto\x12\vpos.user.v1\x1a\x1donekit/http/annotations.proto\x1a!pos/user/v1/create_pos_user.proto\x1a%pos/user/v1/deactivate_pos_user.proto\x1a pos/user/v1/list_pos_users.proto\x1a\x19pos/user/v1/set_pin.proto\x1a!pos/user/v1/update_pos_user.proto\x1a%pos/user/v1/verify_pos_user_pin.proto2\xb7\x05\n" +
 	"\vUserService\x12c\n" +
 	"\fListPOSUsers\x12 .pos.user.v1.ListPOSUsersRequest\x1a!.pos.user.v1.ListPOSUsersResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
@@ -36,7 +36,9 @@ const file_pos_user_v1_service_proto_rawDesc = "" +
 	"\rUpdatePOSUser\x12!.pos.user.v1.UpdatePOSUserRequest\x1a\".pos.user.v1.UpdatePOSUserResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\r/users/update\x10\x05\x12}\n" +
 	"\x11DeactivatePOSUser\x12%.pos.user.v1.DeactivatePOSUserRequest\x1a&.pos.user.v1.DeactivatePOSUserResponse\"\x19\x9a\xb5\x18\x15\n" +
-	"\x11/users/deactivate\x10\x05\x12z\n" +
+	"\x11/users/deactivate\x10\x05\x12Y\n" +
+	"\x06SetPIN\x12\x1a.pos.user.v1.SetPINRequest\x1a\x1b.pos.user.v1.SetPINResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/users/set-pin\x10\x02\x12z\n" +
 	"\x10VerifyPOSUserPIN\x12$.pos.user.v1.VerifyPOSUserPINRequest\x1a%.pos.user.v1.VerifyPOSUserPINResponse\"\x19\x9a\xb5\x18\x15\n" +
 	"\x11/users/verify-pin\x10\x02\x1a\x16\xa2\xb5\x18\x12\n" +
 	"\x10/api/pos/user/v1B,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"
@@ -46,29 +48,33 @@ var file_pos_user_v1_service_proto_goTypes = []any{
 	(*CreatePOSUserRequest)(nil),      // 1: pos.user.v1.CreatePOSUserRequest
 	(*UpdatePOSUserRequest)(nil),      // 2: pos.user.v1.UpdatePOSUserRequest
 	(*DeactivatePOSUserRequest)(nil),  // 3: pos.user.v1.DeactivatePOSUserRequest
-	(*VerifyPOSUserPINRequest)(nil),   // 4: pos.user.v1.VerifyPOSUserPINRequest
-	(*ListPOSUsersResponse)(nil),      // 5: pos.user.v1.ListPOSUsersResponse
-	(*CreatePOSUserResponse)(nil),     // 6: pos.user.v1.CreatePOSUserResponse
-	(*UpdatePOSUserResponse)(nil),     // 7: pos.user.v1.UpdatePOSUserResponse
-	(*DeactivatePOSUserResponse)(nil), // 8: pos.user.v1.DeactivatePOSUserResponse
-	(*VerifyPOSUserPINResponse)(nil),  // 9: pos.user.v1.VerifyPOSUserPINResponse
+	(*SetPINRequest)(nil),             // 4: pos.user.v1.SetPINRequest
+	(*VerifyPOSUserPINRequest)(nil),   // 5: pos.user.v1.VerifyPOSUserPINRequest
+	(*ListPOSUsersResponse)(nil),      // 6: pos.user.v1.ListPOSUsersResponse
+	(*CreatePOSUserResponse)(nil),     // 7: pos.user.v1.CreatePOSUserResponse
+	(*UpdatePOSUserResponse)(nil),     // 8: pos.user.v1.UpdatePOSUserResponse
+	(*DeactivatePOSUserResponse)(nil), // 9: pos.user.v1.DeactivatePOSUserResponse
+	(*SetPINResponse)(nil),            // 10: pos.user.v1.SetPINResponse
+	(*VerifyPOSUserPINResponse)(nil),  // 11: pos.user.v1.VerifyPOSUserPINResponse
 }
 var file_pos_user_v1_service_proto_depIdxs = []int32{
-	0, // 0: pos.user.v1.UserService.ListPOSUsers:input_type -> pos.user.v1.ListPOSUsersRequest
-	1, // 1: pos.user.v1.UserService.CreatePOSUser:input_type -> pos.user.v1.CreatePOSUserRequest
-	2, // 2: pos.user.v1.UserService.UpdatePOSUser:input_type -> pos.user.v1.UpdatePOSUserRequest
-	3, // 3: pos.user.v1.UserService.DeactivatePOSUser:input_type -> pos.user.v1.DeactivatePOSUserRequest
-	4, // 4: pos.user.v1.UserService.VerifyPOSUserPIN:input_type -> pos.user.v1.VerifyPOSUserPINRequest
-	5, // 5: pos.user.v1.UserService.ListPOSUsers:output_type -> pos.user.v1.ListPOSUsersResponse
-	6, // 6: pos.user.v1.UserService.CreatePOSUser:output_type -> pos.user.v1.CreatePOSUserResponse
-	7, // 7: pos.user.v1.UserService.UpdatePOSUser:output_type -> pos.user.v1.UpdatePOSUserResponse
-	8, // 8: pos.user.v1.UserService.DeactivatePOSUser:output_type -> pos.user.v1.DeactivatePOSUserResponse
-	9, // 9: pos.user.v1.UserService.VerifyPOSUserPIN:output_type -> pos.user.v1.VerifyPOSUserPINResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: pos.user.v1.UserService.ListPOSUsers:input_type -> pos.user.v1.ListPOSUsersRequest
+	1,  // 1: pos.user.v1.UserService.CreatePOSUser:input_type -> pos.user.v1.CreatePOSUserRequest
+	2,  // 2: pos.user.v1.UserService.UpdatePOSUser:input_type -> pos.user.v1.UpdatePOSUserRequest
+	3,  // 3: pos.user.v1.UserService.DeactivatePOSUser:input_type -> pos.user.v1.DeactivatePOSUserRequest
+	4,  // 4: pos.user.v1.UserService.SetPIN:input_type -> pos.user.v1.SetPINRequest
+	5,  // 5: pos.user.v1.UserService.VerifyPOSUserPIN:input_type -> pos.user.v1.VerifyPOSUserPINRequest
+	6,  // 6: pos.user.v1.UserService.ListPOSUsers:output_type -> pos.user.v1.ListPOSUsersResponse
+	7,  // 7: pos.user.v1.UserService.CreatePOSUser:output_type -> pos.user.v1.CreatePOSUserResponse
+	8,  // 8: pos.user.v1.UserService.UpdatePOSUser:output_type -> pos.user.v1.UpdatePOSUserResponse
+	9,  // 9: pos.user.v1.UserService.DeactivatePOSUser:output_type -> pos.user.v1.DeactivatePOSUserResponse
+	10, // 10: pos.user.v1.UserService.SetPIN:output_type -> pos.user.v1.SetPINResponse
+	11, // 11: pos.user.v1.UserService.VerifyPOSUserPIN:output_type -> pos.user.v1.VerifyPOSUserPINResponse
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_pos_user_v1_service_proto_init() }
@@ -79,6 +85,7 @@ func file_pos_user_v1_service_proto_init() {
 	file_pos_user_v1_create_pos_user_proto_init()
 	file_pos_user_v1_deactivate_pos_user_proto_init()
 	file_pos_user_v1_list_pos_users_proto_init()
+	file_pos_user_v1_set_pin_proto_init()
 	file_pos_user_v1_update_pos_user_proto_init()
 	file_pos_user_v1_verify_pos_user_pin_proto_init()
 	type x struct{}

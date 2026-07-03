@@ -18,3 +18,33 @@ message MyLocation {
   // phone is the phone value for this contract.
   string phone = 4;
 }
+
+// ── RosterEntry ───────────────────────────────────────────────────
+
+message RosterEntry {
+  // user_id is the user id value for this contract.
+  int64 user_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the name value for this contract.
+  string name = 2;
+  // has_pin is the has pin value for this contract.
+  bool has_pin = 3;
+  // is_manager is the is manager value for this contract.
+  bool is_manager = 4;
+  // pos_role is the pos role value for this contract.
+  string pos_role = 5;
+}
+
+// ── MemberLocationEntry ───────────────────────────────────────────
+
+message MemberLocationEntry {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // location_id is the location id value for this contract.
+  int64 location_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // can_manage_pos_users is the can manage pos users value for this contract.
+  bool can_manage_pos_users = 3;
+  // can_manage_terminals is the can manage terminals value for this contract.
+  bool can_manage_terminals = 4;
+  // can_view_reports is the can view reports value for this contract.
+  bool can_view_reports = 5;
+}

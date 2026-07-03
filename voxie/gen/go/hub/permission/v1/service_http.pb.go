@@ -14,6 +14,8 @@ type PermissionServiceServer interface {
 	GetPermissions(context.Context, *GetPermissionsRequest) (*GetPermissionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error)
+	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
+	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error)
 	UpdatePermissionMatrix(context.Context, *UpdatePermissionMatrixRequest) (*UpdatePermissionMatrixResponse, error)
 }
 
@@ -50,6 +52,24 @@ func RegisterPermissionServiceServer(server PermissionServiceServer, opts ...Ser
 
 	config.mux.Handle("POST /api/hub/permission/v1/roles", createRoleHandler)
 
+	methodHeaders = getUpdateRoleHeaders()
+	updateRoleHandler := BindingMiddleware[UpdateRoleRequest](
+		genericHandler(server.UpdateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateRolePathParams, updateRoleQueryParams,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/hub/permission/v1/roles/{id}", updateRoleHandler)
+
+	methodHeaders = getDeleteRoleHeaders()
+	deleteRoleHandler := BindingMiddleware[DeleteRoleRequest](
+		genericHandler(server.DeleteRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteRolePathParams, deleteRoleQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/hub/permission/v1/roles/{id}", deleteRoleHandler)
+
 	methodHeaders = getUpdatePermissionMatrixHeaders()
 	updatePermissionMatrixHandler := BindingMiddleware[UpdatePermissionMatrixRequest](
 		genericHandler(server.UpdatePermissionMatrix, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -82,6 +102,16 @@ func getCreateRoleHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getUpdateRoleHeaders returns the method-level required headers for UpdateRole
+func getUpdateRoleHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getDeleteRoleHeaders returns the method-level required headers for DeleteRole
+func getDeleteRoleHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getUpdatePermissionMatrixHeaders returns the method-level required headers for UpdatePermissionMatrix
 func getUpdatePermissionMatrixHeaders() []*onekithttp.Header {
 	return nil
@@ -104,6 +134,22 @@ var createRolePathParams = []PathParamConfig{}
 
 // createRoleQueryParams contains query parameter configuration for CreateRole
 var createRoleQueryParams = []QueryParamConfig{}
+
+// updateRolePathParams contains path parameter configuration for UpdateRole
+var updateRolePathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateRoleQueryParams contains query parameter configuration for UpdateRole
+var updateRoleQueryParams = []QueryParamConfig{}
+
+// deleteRolePathParams contains path parameter configuration for DeleteRole
+var deleteRolePathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteRoleQueryParams contains query parameter configuration for DeleteRole
+var deleteRoleQueryParams = []QueryParamConfig{}
 
 // updatePermissionMatrixPathParams contains path parameter configuration for UpdatePermissionMatrix
 var updatePermissionMatrixPathParams = []PathParamConfig{}

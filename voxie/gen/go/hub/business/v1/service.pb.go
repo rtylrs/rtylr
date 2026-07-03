@@ -25,8 +25,12 @@ var File_hub_business_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_business_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhub/business/v1/service.proto\x12\x0fhub.business.v1\x1a\"hub/business/v1/get_business.proto\x1a-hub/business/v1/lookup_business_by_slug.proto\x1a\x1ehub/business/v1/set_slug.proto\x1a%hub/business/v1/update_business.proto\x1a\x1donekit/http/annotations.proto2\xac\x04\n" +
-	"\x0fBusinessService\x12{\n" +
+	"\x1dhub/business/v1/service.proto\x12\x0fhub.business.v1\x1a)hub/business/v1/create_sub_business.proto\x1a\"hub/business/v1/get_business.proto\x1a(hub/business/v1/list_my_businesses.proto\x1a-hub/business/v1/lookup_business_by_slug.proto\x1a\x1ehub/business/v1/set_slug.proto\x1a%hub/business/v1/update_business.proto\x1a\x1donekit/http/annotations.proto2\xb1\x06\n" +
+	"\x0fBusinessService\x12\x81\x01\n" +
+	"\x10ListMyBusinesses\x12(.hub.business.v1.ListMyBusinessesRequest\x1a).hub.business.v1.ListMyBusinessesResponse\"\x18\x9a\xb5\x18\x14\n" +
+	"\x10/businesses/mine\x10\x01\x12\x7f\n" +
+	"\x11CreateSubBusiness\x12).hub.business.v1.CreateSubBusinessRequest\x1a*.hub.business.v1.CreateSubBusinessResponse\"\x13\x9a\xb5\x18\x0f\n" +
+	"\v/businesses\x10\x02\x12{\n" +
 	"\vGetBusiness\x12#.hub.business.v1.GetBusinessRequest\x1a$.hub.business.v1.GetBusinessResponse\"!\x9a\xb5\x18\x1d\n" +
 	"\x19/businesses/{business_id}\x10\x01\x12\x90\x01\n" +
 	"\x14LookupBusinessBySlug\x12,.hub.business.v1.LookupBusinessBySlugRequest\x1a-.hub.business.v1.LookupBusinessBySlugResponse\"\x1b\x9a\xb5\x18\x17\n" +
@@ -38,29 +42,37 @@ const file_hub_business_v1_service_proto_rawDesc = "" +
 	"\x14/api/hub/business/v1B0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"
 
 var file_hub_business_v1_service_proto_goTypes = []any{
-	(*GetBusinessRequest)(nil),           // 0: hub.business.v1.GetBusinessRequest
-	(*LookupBusinessBySlugRequest)(nil),  // 1: hub.business.v1.LookupBusinessBySlugRequest
-	(*SetSlugRequest)(nil),               // 2: hub.business.v1.SetSlugRequest
-	(*UpdateBusinessRequest)(nil),        // 3: hub.business.v1.UpdateBusinessRequest
-	(*GetBusinessResponse)(nil),          // 4: hub.business.v1.GetBusinessResponse
-	(*LookupBusinessBySlugResponse)(nil), // 5: hub.business.v1.LookupBusinessBySlugResponse
-	(*SetSlugResponse)(nil),              // 6: hub.business.v1.SetSlugResponse
-	(*UpdateBusinessResponse)(nil),       // 7: hub.business.v1.UpdateBusinessResponse
+	(*ListMyBusinessesRequest)(nil),      // 0: hub.business.v1.ListMyBusinessesRequest
+	(*CreateSubBusinessRequest)(nil),     // 1: hub.business.v1.CreateSubBusinessRequest
+	(*GetBusinessRequest)(nil),           // 2: hub.business.v1.GetBusinessRequest
+	(*LookupBusinessBySlugRequest)(nil),  // 3: hub.business.v1.LookupBusinessBySlugRequest
+	(*SetSlugRequest)(nil),               // 4: hub.business.v1.SetSlugRequest
+	(*UpdateBusinessRequest)(nil),        // 5: hub.business.v1.UpdateBusinessRequest
+	(*ListMyBusinessesResponse)(nil),     // 6: hub.business.v1.ListMyBusinessesResponse
+	(*CreateSubBusinessResponse)(nil),    // 7: hub.business.v1.CreateSubBusinessResponse
+	(*GetBusinessResponse)(nil),          // 8: hub.business.v1.GetBusinessResponse
+	(*LookupBusinessBySlugResponse)(nil), // 9: hub.business.v1.LookupBusinessBySlugResponse
+	(*SetSlugResponse)(nil),              // 10: hub.business.v1.SetSlugResponse
+	(*UpdateBusinessResponse)(nil),       // 11: hub.business.v1.UpdateBusinessResponse
 }
 var file_hub_business_v1_service_proto_depIdxs = []int32{
-	0, // 0: hub.business.v1.BusinessService.GetBusiness:input_type -> hub.business.v1.GetBusinessRequest
-	1, // 1: hub.business.v1.BusinessService.LookupBusinessBySlug:input_type -> hub.business.v1.LookupBusinessBySlugRequest
-	2, // 2: hub.business.v1.BusinessService.SetSlug:input_type -> hub.business.v1.SetSlugRequest
-	3, // 3: hub.business.v1.BusinessService.UpdateBusiness:input_type -> hub.business.v1.UpdateBusinessRequest
-	4, // 4: hub.business.v1.BusinessService.GetBusiness:output_type -> hub.business.v1.GetBusinessResponse
-	5, // 5: hub.business.v1.BusinessService.LookupBusinessBySlug:output_type -> hub.business.v1.LookupBusinessBySlugResponse
-	6, // 6: hub.business.v1.BusinessService.SetSlug:output_type -> hub.business.v1.SetSlugResponse
-	7, // 7: hub.business.v1.BusinessService.UpdateBusiness:output_type -> hub.business.v1.UpdateBusinessResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: hub.business.v1.BusinessService.ListMyBusinesses:input_type -> hub.business.v1.ListMyBusinessesRequest
+	1,  // 1: hub.business.v1.BusinessService.CreateSubBusiness:input_type -> hub.business.v1.CreateSubBusinessRequest
+	2,  // 2: hub.business.v1.BusinessService.GetBusiness:input_type -> hub.business.v1.GetBusinessRequest
+	3,  // 3: hub.business.v1.BusinessService.LookupBusinessBySlug:input_type -> hub.business.v1.LookupBusinessBySlugRequest
+	4,  // 4: hub.business.v1.BusinessService.SetSlug:input_type -> hub.business.v1.SetSlugRequest
+	5,  // 5: hub.business.v1.BusinessService.UpdateBusiness:input_type -> hub.business.v1.UpdateBusinessRequest
+	6,  // 6: hub.business.v1.BusinessService.ListMyBusinesses:output_type -> hub.business.v1.ListMyBusinessesResponse
+	7,  // 7: hub.business.v1.BusinessService.CreateSubBusiness:output_type -> hub.business.v1.CreateSubBusinessResponse
+	8,  // 8: hub.business.v1.BusinessService.GetBusiness:output_type -> hub.business.v1.GetBusinessResponse
+	9,  // 9: hub.business.v1.BusinessService.LookupBusinessBySlug:output_type -> hub.business.v1.LookupBusinessBySlugResponse
+	10, // 10: hub.business.v1.BusinessService.SetSlug:output_type -> hub.business.v1.SetSlugResponse
+	11, // 11: hub.business.v1.BusinessService.UpdateBusiness:output_type -> hub.business.v1.UpdateBusinessResponse
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_hub_business_v1_service_proto_init() }
@@ -68,7 +80,9 @@ func file_hub_business_v1_service_proto_init() {
 	if File_hub_business_v1_service_proto != nil {
 		return
 	}
+	file_hub_business_v1_create_sub_business_proto_init()
 	file_hub_business_v1_get_business_proto_init()
+	file_hub_business_v1_list_my_businesses_proto_init()
 	file_hub_business_v1_lookup_business_by_slug_proto_init()
 	file_hub_business_v1_set_slug_proto_init()
 	file_hub_business_v1_update_business_proto_init()

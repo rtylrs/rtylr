@@ -12,6 +12,8 @@ import (
 // SessionServiceServer is the server API for SessionService service.
 type SessionServiceServer interface {
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	GetCurrentSession(context.Context, *GetCurrentSessionRequest) (*GetCurrentSessionResponse, error)
+	GetSession(context.Context, *GetSessionRequest) (*GetSessionResponse, error)
 	OpenSession(context.Context, *OpenSessionRequest) (*OpenSessionResponse, error)
 	CloseSession(context.Context, *CloseSessionRequest) (*CloseSessionResponse, error)
 }
@@ -30,6 +32,24 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 	)
 
 	config.mux.Handle("GET /api/pos/session/v1/sessions", listSessionsHandler)
+
+	methodHeaders = getGetCurrentSessionHeaders()
+	getCurrentSessionHandler := BindingMiddleware[GetCurrentSessionRequest](
+		genericHandler(server.GetCurrentSession, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getCurrentSessionPathParams, getCurrentSessionQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/pos/session/v1/sessions/current", getCurrentSessionHandler)
+
+	methodHeaders = getGetSessionHeaders()
+	getSessionHandler := BindingMiddleware[GetSessionRequest](
+		genericHandler(server.GetSession, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getSessionPathParams, getSessionQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/pos/session/v1/sessions/{id}", getSessionHandler)
 
 	methodHeaders = getOpenSessionHeaders()
 	openSessionHandler := BindingMiddleware[OpenSessionRequest](
@@ -62,6 +82,16 @@ func getListSessionsHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetCurrentSessionHeaders returns the method-level required headers for GetCurrentSession
+func getGetCurrentSessionHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetSessionHeaders returns the method-level required headers for GetSession
+func getGetSessionHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getOpenSessionHeaders returns the method-level required headers for OpenSession
 func getOpenSessionHeaders() []*onekithttp.Header {
 	return nil
@@ -77,6 +107,20 @@ var listSessionsPathParams = []PathParamConfig{}
 
 // listSessionsQueryParams contains query parameter configuration for ListSessions
 var listSessionsQueryParams = []QueryParamConfig{}
+
+// getCurrentSessionPathParams contains path parameter configuration for GetCurrentSession
+var getCurrentSessionPathParams = []PathParamConfig{}
+
+// getCurrentSessionQueryParams contains query parameter configuration for GetCurrentSession
+var getCurrentSessionQueryParams = []QueryParamConfig{}
+
+// getSessionPathParams contains path parameter configuration for GetSession
+var getSessionPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// getSessionQueryParams contains query parameter configuration for GetSession
+var getSessionQueryParams = []QueryParamConfig{}
 
 // openSessionPathParams contains path parameter configuration for OpenSession
 var openSessionPathParams = []PathParamConfig{}

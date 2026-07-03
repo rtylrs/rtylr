@@ -25,10 +25,15 @@ var File_pos_session_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_session_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/session/v1/service.proto\x12\x0epos.session.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/session/v1/close_session.proto\x1a\"pos/session/v1/list_sessions.proto\x1a!pos/session/v1/open_session.proto2\x82\x03\n" +
+	"\x1cpos/session/v1/service.proto\x12\x0epos.session.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/session/v1/close_session.proto\x1a(pos/session/v1/get_current_session.proto\x1a pos/session/v1/get_session.proto\x1a\"pos/session/v1/list_sessions.proto\x1a!pos/session/v1/open_session.proto2\xf5\x04\n" +
 	"\x0eSessionService\x12l\n" +
 	"\fListSessions\x12#.pos.session.v1.ListSessionsRequest\x1a$.pos.session.v1.ListSessionsResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/sessions\x10\x01\x12n\n" +
+	"\t/sessions\x10\x01\x12\x83\x01\n" +
+	"\x11GetCurrentSession\x12(.pos.session.v1.GetCurrentSessionRequest\x1a).pos.session.v1.GetCurrentSessionResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/sessions/current\x10\x01\x12k\n" +
+	"\n" +
+	"GetSession\x12!.pos.session.v1.GetSessionRequest\x1a\".pos.session.v1.GetSessionResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/sessions/{id}\x10\x01\x12n\n" +
 	"\vOpenSession\x12\".pos.session.v1.OpenSessionRequest\x1a#.pos.session.v1.OpenSessionResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/sessions/open\x10\x02\x12w\n" +
 	"\fCloseSession\x12#.pos.session.v1.CloseSessionRequest\x1a$.pos.session.v1.CloseSessionResponse\"\x1c\x9a\xb5\x18\x18\n" +
@@ -36,22 +41,30 @@ const file_pos_session_v1_service_proto_rawDesc = "" +
 	"\x13/api/pos/session/v1B/Z-github.com/voxire/voxie/gen/go/pos/session/v1b\x06proto3"
 
 var file_pos_session_v1_service_proto_goTypes = []any{
-	(*ListSessionsRequest)(nil),  // 0: pos.session.v1.ListSessionsRequest
-	(*OpenSessionRequest)(nil),   // 1: pos.session.v1.OpenSessionRequest
-	(*CloseSessionRequest)(nil),  // 2: pos.session.v1.CloseSessionRequest
-	(*ListSessionsResponse)(nil), // 3: pos.session.v1.ListSessionsResponse
-	(*OpenSessionResponse)(nil),  // 4: pos.session.v1.OpenSessionResponse
-	(*CloseSessionResponse)(nil), // 5: pos.session.v1.CloseSessionResponse
+	(*ListSessionsRequest)(nil),       // 0: pos.session.v1.ListSessionsRequest
+	(*GetCurrentSessionRequest)(nil),  // 1: pos.session.v1.GetCurrentSessionRequest
+	(*GetSessionRequest)(nil),         // 2: pos.session.v1.GetSessionRequest
+	(*OpenSessionRequest)(nil),        // 3: pos.session.v1.OpenSessionRequest
+	(*CloseSessionRequest)(nil),       // 4: pos.session.v1.CloseSessionRequest
+	(*ListSessionsResponse)(nil),      // 5: pos.session.v1.ListSessionsResponse
+	(*GetCurrentSessionResponse)(nil), // 6: pos.session.v1.GetCurrentSessionResponse
+	(*GetSessionResponse)(nil),        // 7: pos.session.v1.GetSessionResponse
+	(*OpenSessionResponse)(nil),       // 8: pos.session.v1.OpenSessionResponse
+	(*CloseSessionResponse)(nil),      // 9: pos.session.v1.CloseSessionResponse
 }
 var file_pos_session_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.session.v1.SessionService.ListSessions:input_type -> pos.session.v1.ListSessionsRequest
-	1, // 1: pos.session.v1.SessionService.OpenSession:input_type -> pos.session.v1.OpenSessionRequest
-	2, // 2: pos.session.v1.SessionService.CloseSession:input_type -> pos.session.v1.CloseSessionRequest
-	3, // 3: pos.session.v1.SessionService.ListSessions:output_type -> pos.session.v1.ListSessionsResponse
-	4, // 4: pos.session.v1.SessionService.OpenSession:output_type -> pos.session.v1.OpenSessionResponse
-	5, // 5: pos.session.v1.SessionService.CloseSession:output_type -> pos.session.v1.CloseSessionResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 1: pos.session.v1.SessionService.GetCurrentSession:input_type -> pos.session.v1.GetCurrentSessionRequest
+	2, // 2: pos.session.v1.SessionService.GetSession:input_type -> pos.session.v1.GetSessionRequest
+	3, // 3: pos.session.v1.SessionService.OpenSession:input_type -> pos.session.v1.OpenSessionRequest
+	4, // 4: pos.session.v1.SessionService.CloseSession:input_type -> pos.session.v1.CloseSessionRequest
+	5, // 5: pos.session.v1.SessionService.ListSessions:output_type -> pos.session.v1.ListSessionsResponse
+	6, // 6: pos.session.v1.SessionService.GetCurrentSession:output_type -> pos.session.v1.GetCurrentSessionResponse
+	7, // 7: pos.session.v1.SessionService.GetSession:output_type -> pos.session.v1.GetSessionResponse
+	8, // 8: pos.session.v1.SessionService.OpenSession:output_type -> pos.session.v1.OpenSessionResponse
+	9, // 9: pos.session.v1.SessionService.CloseSession:output_type -> pos.session.v1.CloseSessionResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -63,6 +76,8 @@ func file_pos_session_v1_service_proto_init() {
 		return
 	}
 	file_pos_session_v1_close_session_proto_init()
+	file_pos_session_v1_get_current_session_proto_init()
+	file_pos_session_v1_get_session_proto_init()
 	file_pos_session_v1_list_sessions_proto_init()
 	file_pos_session_v1_open_session_proto_init()
 	type x struct{}

@@ -4,6 +4,7 @@ package pos.gift_card.v1;
 
 import "onekit/http/annotations.proto";
 import "pos/gift_card/v1/create_gift_card.proto";
+import "pos/gift_card/v1/get_gift_card_by_code.proto";
 import "pos/gift_card/v1/list_gift_cards.proto";
 import "pos/gift_card/v1/redeem_gift_card.proto";
 
@@ -23,6 +24,13 @@ service GiftCardService {
     option (onekit.http.config) = {
       path: "/gift-cards"
       method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetGiftCardByCode(GetGiftCardByCodeRequest) returns (GetGiftCardByCodeResponse) {
+    option (onekit.http.config) = {
+      path: "/gift-cards/{code}"
+      method: HTTP_METHOD_GET
     };
   }
 

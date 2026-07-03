@@ -12,6 +12,7 @@ import (
 // InvitationsServiceServer is the server API for InvitationsService service.
 type InvitationsServiceServer interface {
 	InviteUser(context.Context, *InviteUserRequest) (*InviteUserResponse, error)
+	BulkInvite(context.Context, *BulkInviteRequest) (*BulkInviteResponse, error)
 	VerifyInvite(context.Context, *VerifyInviteRequest) (*VerifyInviteResponse, error)
 	AcceptInvite(context.Context, *AcceptInviteRequest) (*AcceptInviteResponse, error)
 }
@@ -30,6 +31,15 @@ func RegisterInvitationsServiceServer(server InvitationsServiceServer, opts ...S
 	)
 
 	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations", inviteUserHandler)
+
+	methodHeaders = getBulkInviteHeaders()
+	bulkInviteHandler := BindingMiddleware[BulkInviteRequest](
+		genericHandler(server.BulkInvite, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		bulkInvitePathParams, bulkInviteQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations/bulk", bulkInviteHandler)
 
 	methodHeaders = getVerifyInviteHeaders()
 	verifyInviteHandler := BindingMiddleware[VerifyInviteRequest](
@@ -62,6 +72,11 @@ func getInviteUserHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getBulkInviteHeaders returns the method-level required headers for BulkInvite
+func getBulkInviteHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getVerifyInviteHeaders returns the method-level required headers for VerifyInvite
 func getVerifyInviteHeaders() []*onekithttp.Header {
 	return nil
@@ -77,6 +92,12 @@ var inviteUserPathParams = []PathParamConfig{}
 
 // inviteUserQueryParams contains query parameter configuration for InviteUser
 var inviteUserQueryParams = []QueryParamConfig{}
+
+// bulkInvitePathParams contains path parameter configuration for BulkInvite
+var bulkInvitePathParams = []PathParamConfig{}
+
+// bulkInviteQueryParams contains query parameter configuration for BulkInvite
+var bulkInviteQueryParams = []QueryParamConfig{}
 
 // verifyInvitePathParams contains path parameter configuration for VerifyInvite
 var verifyInvitePathParams = []PathParamConfig{}

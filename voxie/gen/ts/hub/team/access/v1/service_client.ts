@@ -9,6 +9,32 @@ export interface RequestAccessResponse {
   message: string;
 }
 
+export interface ListAccessRequestsRequest {
+}
+
+export interface ListAccessRequestsResponse {
+  requests: AccessRequest[];
+}
+
+export interface AccessRequest {
+  id: string;
+  userId: string;
+  app: string;
+  requesterName: string;
+  requesterEmail: string;
+  createdAt: string;
+}
+
+export interface ApproveAccessRequestRequest {
+  id: string;
+  userId: string;
+  app: string;
+}
+
+export interface ApproveAccessRequestResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -94,6 +120,54 @@ export class AccessServiceClient {
     }
 
     return await resp.json() as RequestAccessResponse;
+  }
+
+  async listAccessRequests(_req: ListAccessRequestsRequest, options?: AccessServiceCallOptions): Promise<ListAccessRequestsResponse> {
+    let path = "/api/hub/team/access/v1/requests";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListAccessRequestsResponse;
+  }
+
+  async approveAccessRequest(req: ApproveAccessRequestRequest, options?: AccessServiceCallOptions): Promise<ApproveAccessRequestResponse> {
+    let path = "/api/hub/team/access/v1/requests/{id}/approve";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ApproveAccessRequestResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

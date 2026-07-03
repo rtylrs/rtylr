@@ -42,6 +42,24 @@ message Business {
   string slug = 14;
 }
 
+// BusinessEntry is a compact business row for ownership listings.
+message BusinessEntry {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the name value for this contract.
+  string name = 2;
+  // logo_url is the logo url value for this contract.
+  string logo_url = 3;
+  // parent_id identifies the parent business, zero for top-level businesses.
+  int64 parent_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // is_active is the is active value for this contract.
+  bool is_active = 5;
+}
+
 // ── Public lookup ───────────────────────────────────────────────────
 // Powers menu.rtylr.com/<slug>: resolves a public slug into a business
 // summary plus its visible locations so the menu app can render a

@@ -66,6 +66,17 @@ export interface DeactivatePOSUserResponse {
   success: boolean;
 }
 
+export interface SetPINRequest {
+  userId: string;
+  locationId: string;
+  name: string;
+  pin: string;
+}
+
+export interface SetPINResponse {
+  success: boolean;
+}
+
 export interface VerifyPOSUserPINRequest {
   pin: string;
 }
@@ -232,6 +243,30 @@ export class UserServiceClient {
     }
 
     return await resp.json() as DeactivatePOSUserResponse;
+  }
+
+  async setPIN(req: SetPINRequest, options?: UserServiceCallOptions): Promise<SetPINResponse> {
+    let path = "/api/pos/user/v1/users/set-pin";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SetPINResponse;
   }
 
   async verifyPOSUserPIN(req: VerifyPOSUserPINRequest, options?: UserServiceCallOptions): Promise<VerifyPOSUserPINResponse> {

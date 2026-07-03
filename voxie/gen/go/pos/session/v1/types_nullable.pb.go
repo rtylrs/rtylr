@@ -89,3 +89,60 @@ func (x *Session) UnmarshalJSON(data []byte) error {
 
 	return protojson.Unmarshal(modified, x)
 }
+
+// MarshalJSONOnekit implements onekitMarshaler for CurrentSession.
+// This method handles nullable fields: closed_at
+func (x *CurrentSession) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+	if x == nil {
+		return []byte("null"), nil
+	}
+
+	// Use protojson for base serialization
+	data, err := opts.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse into a map to handle nullable fields
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	// Handle nullable field: closed_at
+	// proto3 optional + nullable=true: emit null when not set
+	if x.ClosedAt == nil {
+		raw["closedAt"] = []byte("null")
+	}
+
+	return json.Marshal(raw)
+}
+
+// MarshalJSON implements json.Marshaler for CurrentSession.
+func (x *CurrentSession) MarshalJSON() ([]byte, error) {
+	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
+}
+
+// UnmarshalJSON implements json.Unmarshaler for CurrentSession.
+// This method handles nullable fields: closed_at
+func (x *CurrentSession) UnmarshalJSON(data []byte) error {
+	// Parse to check for explicit null values on nullable fields
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	// Handle nullable field: closed_at
+	// Remove explicit null so protojson leaves field unset
+	if rawVal, ok := raw["closedAt"]; ok && string(rawVal) == "null" {
+		delete(raw, "closedAt")
+	}
+
+	// Re-marshal without nulls for protojson
+	modified, err := json.Marshal(raw)
+	if err != nil {
+		return err
+	}
+
+	return protojson.Unmarshal(modified, x)
+}

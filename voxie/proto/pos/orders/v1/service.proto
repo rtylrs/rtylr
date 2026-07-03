@@ -6,6 +6,8 @@ import "onekit/http/annotations.proto";
 import "pos/orders/v1/create_order.proto";
 import "pos/orders/v1/get_order_detail.proto";
 import "pos/orders/v1/list_orders.proto";
+import "pos/orders/v1/send_to_kitchen.proto";
+import "pos/orders/v1/transfer_table.proto";
 import "pos/orders/v1/update_order_status.proto";
 import "pos/orders/v1/void_order.proto";
 
@@ -52,6 +54,22 @@ service OrderService {
   rpc VoidOrder(VoidOrderRequest) returns (VoidOrderResponse) {
     option (onekit.http.config) = {
       path: "/orders/{order_id}/void"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // SendToKitchen dispatches an order to the kitchen display.
+  rpc SendToKitchen(SendToKitchenRequest) returns (SendToKitchenResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/send-to-kitchen"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // TransferTable moves an open order to a different table.
+  rpc TransferTable(TransferTableRequest) returns (TransferTableResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/transfer-table"
       method: HTTP_METHOD_POST
     };
   }

@@ -25,7 +25,7 @@ var File_pos_orders_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1bpos/orders/v1/service.proto\x12\rpos.orders.v1\x1a\x1donekit/http/annotations.proto\x1a pos/orders/v1/create_order.proto\x1a$pos/orders/v1/get_order_detail.proto\x1a\x1fpos/orders/v1/list_orders.proto\x1a'pos/orders/v1/update_order_status.proto\x1a\x1epos/orders/v1/void_order.proto2\xf1\x04\n" +
+	"\x1bpos/orders/v1/service.proto\x12\rpos.orders.v1\x1a\x1donekit/http/annotations.proto\x1a pos/orders/v1/create_order.proto\x1a$pos/orders/v1/get_order_detail.proto\x1a\x1fpos/orders/v1/list_orders.proto\x1a#pos/orders/v1/send_to_kitchen.proto\x1a\"pos/orders/v1/transfer_table.proto\x1a'pos/orders/v1/update_order_status.proto\x1a\x1epos/orders/v1/void_order.proto2\x82\a\n" +
 	"\fOrderService\x12b\n" +
 	"\n" +
 	"ListOrders\x12 .pos.orders.v1.ListOrdersRequest\x1a!.pos.orders.v1.ListOrdersResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -37,7 +37,11 @@ const file_pos_orders_v1_service_proto_rawDesc = "" +
 	"\x11UpdateOrderStatus\x12'.pos.orders.v1.UpdateOrderStatusRequest\x1a(.pos.orders.v1.UpdateOrderStatusResponse\"'\x9a\xb5\x18#\n" +
 	"\x19/orders/{order_id}/status\x10\x03\"\x04body\x12o\n" +
 	"\tVoidOrder\x12\x1f.pos.orders.v1.VoidOrderRequest\x1a .pos.orders.v1.VoidOrderResponse\"\x1f\x9a\xb5\x18\x1b\n" +
-	"\x17/orders/{order_id}/void\x10\x02\x1a\x18\xa2\xb5\x18\x14\n" +
+	"\x17/orders/{order_id}/void\x10\x02\x12\x86\x01\n" +
+	"\rSendToKitchen\x12#.pos.orders.v1.SendToKitchenRequest\x1a$.pos.orders.v1.SendToKitchenResponse\"*\x9a\xb5\x18&\n" +
+	"\"/orders/{order_id}/send-to-kitchen\x10\x02\x12\x85\x01\n" +
+	"\rTransferTable\x12#.pos.orders.v1.TransferTableRequest\x1a$.pos.orders.v1.TransferTableResponse\")\x9a\xb5\x18%\n" +
+	"!/orders/{order_id}/transfer-table\x10\x02\x1a\x18\xa2\xb5\x18\x14\n" +
 	"\x12/api/pos/orders/v1B.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"
 
 var file_pos_orders_v1_service_proto_goTypes = []any{
@@ -46,28 +50,36 @@ var file_pos_orders_v1_service_proto_goTypes = []any{
 	(*GetOrderDetailRequest)(nil),     // 2: pos.orders.v1.GetOrderDetailRequest
 	(*UpdateOrderStatusRequest)(nil),  // 3: pos.orders.v1.UpdateOrderStatusRequest
 	(*VoidOrderRequest)(nil),          // 4: pos.orders.v1.VoidOrderRequest
-	(*ListOrdersResponse)(nil),        // 5: pos.orders.v1.ListOrdersResponse
-	(*CreateOrderResponse)(nil),       // 6: pos.orders.v1.CreateOrderResponse
-	(*GetOrderDetailResponse)(nil),    // 7: pos.orders.v1.GetOrderDetailResponse
-	(*UpdateOrderStatusResponse)(nil), // 8: pos.orders.v1.UpdateOrderStatusResponse
-	(*VoidOrderResponse)(nil),         // 9: pos.orders.v1.VoidOrderResponse
+	(*SendToKitchenRequest)(nil),      // 5: pos.orders.v1.SendToKitchenRequest
+	(*TransferTableRequest)(nil),      // 6: pos.orders.v1.TransferTableRequest
+	(*ListOrdersResponse)(nil),        // 7: pos.orders.v1.ListOrdersResponse
+	(*CreateOrderResponse)(nil),       // 8: pos.orders.v1.CreateOrderResponse
+	(*GetOrderDetailResponse)(nil),    // 9: pos.orders.v1.GetOrderDetailResponse
+	(*UpdateOrderStatusResponse)(nil), // 10: pos.orders.v1.UpdateOrderStatusResponse
+	(*VoidOrderResponse)(nil),         // 11: pos.orders.v1.VoidOrderResponse
+	(*SendToKitchenResponse)(nil),     // 12: pos.orders.v1.SendToKitchenResponse
+	(*TransferTableResponse)(nil),     // 13: pos.orders.v1.TransferTableResponse
 }
 var file_pos_orders_v1_service_proto_depIdxs = []int32{
-	0, // 0: pos.orders.v1.OrderService.ListOrders:input_type -> pos.orders.v1.ListOrdersRequest
-	1, // 1: pos.orders.v1.OrderService.CreateOrder:input_type -> pos.orders.v1.CreateOrderRequest
-	2, // 2: pos.orders.v1.OrderService.GetOrderDetail:input_type -> pos.orders.v1.GetOrderDetailRequest
-	3, // 3: pos.orders.v1.OrderService.UpdateOrderStatus:input_type -> pos.orders.v1.UpdateOrderStatusRequest
-	4, // 4: pos.orders.v1.OrderService.VoidOrder:input_type -> pos.orders.v1.VoidOrderRequest
-	5, // 5: pos.orders.v1.OrderService.ListOrders:output_type -> pos.orders.v1.ListOrdersResponse
-	6, // 6: pos.orders.v1.OrderService.CreateOrder:output_type -> pos.orders.v1.CreateOrderResponse
-	7, // 7: pos.orders.v1.OrderService.GetOrderDetail:output_type -> pos.orders.v1.GetOrderDetailResponse
-	8, // 8: pos.orders.v1.OrderService.UpdateOrderStatus:output_type -> pos.orders.v1.UpdateOrderStatusResponse
-	9, // 9: pos.orders.v1.OrderService.VoidOrder:output_type -> pos.orders.v1.VoidOrderResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: pos.orders.v1.OrderService.ListOrders:input_type -> pos.orders.v1.ListOrdersRequest
+	1,  // 1: pos.orders.v1.OrderService.CreateOrder:input_type -> pos.orders.v1.CreateOrderRequest
+	2,  // 2: pos.orders.v1.OrderService.GetOrderDetail:input_type -> pos.orders.v1.GetOrderDetailRequest
+	3,  // 3: pos.orders.v1.OrderService.UpdateOrderStatus:input_type -> pos.orders.v1.UpdateOrderStatusRequest
+	4,  // 4: pos.orders.v1.OrderService.VoidOrder:input_type -> pos.orders.v1.VoidOrderRequest
+	5,  // 5: pos.orders.v1.OrderService.SendToKitchen:input_type -> pos.orders.v1.SendToKitchenRequest
+	6,  // 6: pos.orders.v1.OrderService.TransferTable:input_type -> pos.orders.v1.TransferTableRequest
+	7,  // 7: pos.orders.v1.OrderService.ListOrders:output_type -> pos.orders.v1.ListOrdersResponse
+	8,  // 8: pos.orders.v1.OrderService.CreateOrder:output_type -> pos.orders.v1.CreateOrderResponse
+	9,  // 9: pos.orders.v1.OrderService.GetOrderDetail:output_type -> pos.orders.v1.GetOrderDetailResponse
+	10, // 10: pos.orders.v1.OrderService.UpdateOrderStatus:output_type -> pos.orders.v1.UpdateOrderStatusResponse
+	11, // 11: pos.orders.v1.OrderService.VoidOrder:output_type -> pos.orders.v1.VoidOrderResponse
+	12, // 12: pos.orders.v1.OrderService.SendToKitchen:output_type -> pos.orders.v1.SendToKitchenResponse
+	13, // 13: pos.orders.v1.OrderService.TransferTable:output_type -> pos.orders.v1.TransferTableResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_pos_orders_v1_service_proto_init() }
@@ -78,6 +90,8 @@ func file_pos_orders_v1_service_proto_init() {
 	file_pos_orders_v1_create_order_proto_init()
 	file_pos_orders_v1_get_order_detail_proto_init()
 	file_pos_orders_v1_list_orders_proto_init()
+	file_pos_orders_v1_send_to_kitchen_proto_init()
+	file_pos_orders_v1_transfer_table_proto_init()
 	file_pos_orders_v1_update_order_status_proto_init()
 	file_pos_orders_v1_void_order_proto_init()
 	type x struct{}
