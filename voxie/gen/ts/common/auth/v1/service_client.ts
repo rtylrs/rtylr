@@ -5,8 +5,8 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
-  businessName?: string;
-  planSlug?: string;
+  businessName: string | null;
+  planSlug: string | null;
 }
 
 export interface RegisterResponse {
@@ -32,7 +32,7 @@ export interface LoginResponse {
 }
 
 export interface GoogleAuthRequest {
-  businessName?: string;
+  businessName: string | null;
   code: string;
 }
 

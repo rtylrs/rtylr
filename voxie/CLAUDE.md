@@ -84,7 +84,6 @@ voxie/
 │   ├── common/                  Shared cross-app contracts
 │   │   ├── auth/v1/             login, register, verify_email, reset_password, google_auth, invite_accept, ...
 │   │   ├── oauth/v1/            OAuth token issuing
-│   │   ├── errors/v1/
 │   │   └── pagination/v1/
 │   ├── crm/{capability}/v1/
 │   ├── erp/{capability}/v1/
@@ -230,7 +229,7 @@ Order of operations when adding a new `.proto` file:
 
 | Domain | Package examples | Covers |
 |---|---|---|
-| `common` | `common.auth.v1`, `common.oauth.v1`, `common.errors.v1`, `common.pagination.v1` | Shared auth (login, register, verify email, reset password, Google auth, invite accept), OAuth token issuing, error envelope, pagination |
+| `common` | `common.auth.v1`, `common.oauth.v1`, `common.pagination.v1` | Shared auth (login, register, verify email, reset password, Google auth, invite accept), OAuth token issuing, pagination |
 | `hub` | `hub.team.members.v1`, `hub.business.v1` | Team, billing, config, permissions, API keys, webhooks, notifications, security |
 | `erp` | `erp.product.v1`, `erp.inventory.v1` | Products, inventory, suppliers, purchase orders |
 | `hr` | `hr.staff.v1`, `hr.employees.payroll.runs.v1` | Staff, departments, shifts, payroll, time off |

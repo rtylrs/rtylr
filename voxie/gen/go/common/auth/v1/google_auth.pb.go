@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,9 +135,9 @@ var File_common_auth_v1_google_auth_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_google_auth_proto_rawDesc = "" +
 	"\n" +
-	" common/auth/v1/google_auth.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"u\n" +
-	"\x11GoogleAuthRequest\x12(\n" +
-	"\rbusiness_name\x18\x02 \x01(\tH\x00R\fbusinessName\x88\x01\x01\x12\x1e\n" +
+	" common/auth/v1/google_auth.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"{\n" +
+	"\x11GoogleAuthRequest\x12.\n" +
+	"\rbusiness_name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\fbusinessName\x88\x01\x01\x12\x1e\n" +
 	"\x04code\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04codeB\x10\n" +
 	"\x0e_business_nameJ\x04\b\x01\x10\x02\"A\n" +

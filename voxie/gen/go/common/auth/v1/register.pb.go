@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -188,22 +189,22 @@ var File_common_auth_v1_register_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_register_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcommon/auth/v1/register.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"\xe9\x01\n" +
+	"\x1dcommon/auth/v1/register.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xf5\x01\n" +
 	"\x0fRegisterRequest\x12\"\n" +
 	"\x05email\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x05email\x12&\n" +
 	"\bpassword\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\x12\x1e\n" +
 	"\x04name\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12(\n" +
-	"\rbusiness_name\x18\x04 \x01(\tH\x00R\fbusinessName\x88\x01\x01\x12 \n" +
-	"\tplan_slug\x18\x05 \x01(\tH\x01R\bplanSlug\x88\x01\x01B\x10\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12.\n" +
+	"\rbusiness_name\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\fbusinessName\x88\x01\x01\x12&\n" +
+	"\tplan_slug\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\bplanSlug\x88\x01\x01B\x10\n" +
 	"\x0e_business_nameB\f\n" +
 	"\n" +
-	"_plan_slug\"\x85\x01\n" +
+	"_plan_slug\"\x8b\x01\n" +
 	"\x10RegisterResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\x03R\x06userId\x12\x14\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1d\n" +
+	"\auser_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x14\n" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x12\n" +
 	"\x04name\x18\x05 \x01(\tR\x04nameB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
 

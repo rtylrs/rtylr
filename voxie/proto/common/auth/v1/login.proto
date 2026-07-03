@@ -3,6 +3,7 @@ syntax = "proto3";
 package common.auth.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
@@ -30,7 +31,7 @@ message LoginResponse {
   // message is a human-readable result message.
   string message = 2;
   // user_id identifies the user associated with this request.
-  int64 user_id = 3;
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // email is the email address used for lookup or contact.
   string email = 4;
   // name is the name value for this contract.

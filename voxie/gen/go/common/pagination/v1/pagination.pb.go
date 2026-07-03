@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -190,12 +191,18 @@ var File_common_pagination_v1_pagination_proto protoreflect.FileDescriptor
 
 const file_common_pagination_v1_pagination_proto_rawDesc = "" +
 	"\n" +
-	"%common/pagination/v1/pagination.proto\x12\x14common.pagination.v1\"q\n" +
-	"\x11PaginationRequest\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x17\n" +
-	"\asort_by\x18\x03 \x01(\tR\x06sortBy\x12\x19\n" +
-	"\bsort_dir\x18\x04 \x01(\tR\asortDir\"\xab\x01\n" +
+	"%common/pagination/v1/pagination.proto\x12\x14common.pagination.v1\x1a\x1donekit/http/annotations.proto\"\xa9\x01\n" +
+	"\x11PaginationRequest\x12\x1e\n" +
+	"\x04page\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12!\n" +
+	"\x05limit\x18\x02 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\x12&\n" +
+	"\asort_by\x18\x03 \x01(\tB\rµ\x18\t\n" +
+	"\asort_byR\x06sortBy\x12)\n" +
+	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
+	"\n" +
+	"\bsort_dirR\asortDir\"\xab\x01\n" +
 	"\x12PaginationResponse\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x14\n" +

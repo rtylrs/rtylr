@@ -3,6 +3,7 @@ syntax = "proto3";
 package common.auth.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
@@ -26,9 +27,9 @@ message RegisterRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // business_name is the optional business name to create for the user.
-  optional string business_name = 4;
+  optional string business_name = 4 [(onekit.http.nullable) = true];
   // plan_slug optionally selects the subscription plan to assign after registration.
-  optional string plan_slug = 5;
+  optional string plan_slug = 5 [(onekit.http.nullable) = true];
 }
 
 message RegisterResponse {
@@ -37,7 +38,7 @@ message RegisterResponse {
   // message is a human-readable result message.
   string message = 2;
   // user_id identifies the user associated with this request.
-  int64 user_id = 3;
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // email is the email address used for lookup or contact.
   string email = 4;
   // name is the name value for this contract.

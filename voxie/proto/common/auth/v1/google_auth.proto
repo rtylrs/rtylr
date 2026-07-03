@@ -3,6 +3,7 @@ syntax = "proto3";
 package common.auth.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
@@ -10,7 +11,7 @@ message GoogleAuthRequest {
   reserved 1;
 
   // business_name is the optional business name to create for the user.
-  optional string business_name = 2;
+  optional string business_name = 2 [(onekit.http.nullable) = true];
   // code is the OAuth authorization code returned by the provider callback.
   string code = 3 [
     (buf.validate.field).required = true,

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -170,15 +171,15 @@ var File_common_auth_v1_login_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_login_proto_rawDesc = "" +
 	"\n" +
-	"\x1acommon/auth/v1/login.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"Z\n" +
+	"\x1acommon/auth/v1/login.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"Z\n" +
 	"\fLoginRequest\x12\"\n" +
 	"\x05email\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x05email\x12&\n" +
 	"\bpassword\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"\xac\x01\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"\xb2\x01\n" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\x03R\x06userId\x12\x14\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1d\n" +
+	"\auser_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x14\n" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x12\n" +
 	"\x04name\x18\x05 \x01(\tR\x04name\x12(\n" +
 	"\x10is_console_admin\x18\x06 \x01(\bR\x0eisConsoleAdminB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
