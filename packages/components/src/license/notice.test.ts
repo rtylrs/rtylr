@@ -52,9 +52,11 @@ describe('resolveLicenseNotice', () => {
 
   it('flags a license expiring within 14 days as a warning', () => {
     const expiresAt = '2026-06-10T00:00:00Z'; // 9 days out
-    expect(
-      resolveLicenseNotice(base({ status: 'valid', valid: true, expiresAt }), NOW)
-    ).toEqual({ kind: 'expiring', severity: 'warning', expiresAt });
+    expect(resolveLicenseNotice(base({ status: 'valid', valid: true, expiresAt }), NOW)).toEqual({
+      kind: 'expiring',
+      severity: 'warning',
+      expiresAt,
+    });
   });
 
   it('does not flag a license expiring beyond 14 days', () => {

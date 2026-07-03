@@ -40,9 +40,7 @@ function noticeMessage(
       return t('license.unreachable');
     case 'expiring':
       return t('license.expiring', {
-        date: notice.expiresAt
-          ? new Date(notice.expiresAt).toLocaleDateString()
-          : '',
+        date: notice.expiresAt ? new Date(notice.expiresAt).toLocaleDateString() : '',
       });
     case 'invalid':
     case 'missing':

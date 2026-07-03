@@ -19,7 +19,11 @@ const getCdnBaseUrl = (override?: string): string => {
   // Precedence: explicit override → runtime upload URL (self-host only) →
   // build-time VITE_CDN_URL → hosted default. Hosted is unchanged because
   // `resolveCdnBaseUrl()` only returns a runtime value when self-host is active.
-  const base = override || (isSelfHosted() ? resolveCdnBaseUrl() : '') || env?.VITE_CDN_URL || DEFAULT_CDN_BASE_URL;
+  const base =
+    override ||
+    (isSelfHosted() ? resolveCdnBaseUrl() : '') ||
+    env?.VITE_CDN_URL ||
+    DEFAULT_CDN_BASE_URL;
   return base.replace(/\/+$/, '');
 };
 

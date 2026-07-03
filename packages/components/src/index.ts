@@ -18,12 +18,7 @@ export { Alert } from './Alert';
 export { Chip } from './Chip';
 
 // Self-host license notice (admin-only; no-op for the hosted product)
-export {
-  LicenseBanner,
-  useLicenseState,
-  resolveLicenseNotice,
-  isLicenseAdmin,
-} from './license';
+export { LicenseBanner, useLicenseState, resolveLicenseNotice, isLicenseAdmin } from './license';
 export type {
   LicenseBannerProps,
   LicenseNotice,
