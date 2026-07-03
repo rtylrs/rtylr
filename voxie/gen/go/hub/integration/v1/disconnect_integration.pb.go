@@ -117,9 +117,10 @@ var File_hub_integration_v1_disconnect_integration_proto protoreflect.FileDescri
 
 const file_hub_integration_v1_disconnect_integration_proto_rawDesc = "" +
 	"\n" +
-	"/hub/integration/v1/disconnect_integration.proto\x12\x12hub.integration.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\">\n" +
-	"\x1cDisconnectIntegrationRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"9\n" +
+	"/hub/integration/v1/disconnect_integration.proto\x12\x12hub.integration.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"F\n" +
+	"\x1cDisconnectIntegrationRequest\x12&\n" +
+	"\x02id\x18\x01 \x01(\x03B\x16\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\x04\n" +
+	"\x02idе\x18\x01R\x02id\"9\n" +
 	"\x1dDisconnectIntegrationResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB3Z1github.com/voxire/voxie/gen/go/hub/integration/v1b\x06proto3"
 

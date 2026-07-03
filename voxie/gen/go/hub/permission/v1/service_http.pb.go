@@ -14,7 +14,8 @@ type PermissionServiceServer interface {
 	GetPermissions(context.Context, *GetPermissionsRequest) (*GetPermissionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error)
-	UpdatePermissionMatrix(context.Context, *UpdatePermissionMatrixRequest) (*UpdatePermissionMatrixResponse, error)
+	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
+	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error)
 }
 
 // RegisterPermissionServiceServer registers the HTTP handlers for service PermissionService to the given mux.
@@ -30,7 +31,7 @@ func RegisterPermissionServiceServer(server PermissionServiceServer, opts ...Ser
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/permission/v1/permissions", getPermissionsHandler)
+	config.mux.Handle("GET /permissions", getPermissionsHandler)
 
 	methodHeaders = getListRolesHeaders()
 	listRolesHandler := BindingMiddleware[ListRolesRequest](
@@ -39,7 +40,7 @@ func RegisterPermissionServiceServer(server PermissionServiceServer, opts ...Ser
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/permission/v1/roles", listRolesHandler)
+	config.mux.Handle("GET /roles", listRolesHandler)
 
 	methodHeaders = getCreateRoleHeaders()
 	createRoleHandler := BindingMiddleware[CreateRoleRequest](
@@ -48,16 +49,25 @@ func RegisterPermissionServiceServer(server PermissionServiceServer, opts ...Ser
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/permission/v1/roles", createRoleHandler)
+	config.mux.Handle("POST /roles", createRoleHandler)
 
-	methodHeaders = getUpdatePermissionMatrixHeaders()
-	updatePermissionMatrixHandler := BindingMiddleware[UpdatePermissionMatrixRequest](
-		genericHandler(server.UpdatePermissionMatrix, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		updatePermissionMatrixPathParams, updatePermissionMatrixQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+	methodHeaders = getUpdateRoleHeaders()
+	updateRoleHandler := BindingMiddleware[UpdateRoleRequest](
+		genericHandler(server.UpdateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateRolePathParams, updateRoleQueryParams,
+		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/permission/v1/matrix", updatePermissionMatrixHandler)
+	config.mux.Handle("PUT /roles", updateRoleHandler)
+
+	methodHeaders = getDeleteRoleHeaders()
+	deleteRoleHandler := BindingMiddleware[DeleteRoleRequest](
+		genericHandler(server.DeleteRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteRolePathParams, deleteRoleQueryParams,
+		"DELETE", "", config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /roles", deleteRoleHandler)
 
 	return nil
 }
@@ -82,8 +92,13 @@ func getCreateRoleHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getUpdatePermissionMatrixHeaders returns the method-level required headers for UpdatePermissionMatrix
-func getUpdatePermissionMatrixHeaders() []*onekithttp.Header {
+// getUpdateRoleHeaders returns the method-level required headers for UpdateRole
+func getUpdateRoleHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getDeleteRoleHeaders returns the method-level required headers for DeleteRole
+func getDeleteRoleHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -105,8 +120,16 @@ var createRolePathParams = []PathParamConfig{}
 // createRoleQueryParams contains query parameter configuration for CreateRole
 var createRoleQueryParams = []QueryParamConfig{}
 
-// updatePermissionMatrixPathParams contains path parameter configuration for UpdatePermissionMatrix
-var updatePermissionMatrixPathParams = []PathParamConfig{}
+// updateRolePathParams contains path parameter configuration for UpdateRole
+var updateRolePathParams = []PathParamConfig{}
 
-// updatePermissionMatrixQueryParams contains query parameter configuration for UpdatePermissionMatrix
-var updatePermissionMatrixQueryParams = []QueryParamConfig{}
+// updateRoleQueryParams contains query parameter configuration for UpdateRole
+var updateRoleQueryParams = []QueryParamConfig{}
+
+// deleteRolePathParams contains path parameter configuration for DeleteRole
+var deleteRolePathParams = []PathParamConfig{}
+
+// deleteRoleQueryParams contains query parameter configuration for DeleteRole
+var deleteRoleQueryParams = []QueryParamConfig{
+	{QueryName: "id", FieldName: "id", Required: false},
+}

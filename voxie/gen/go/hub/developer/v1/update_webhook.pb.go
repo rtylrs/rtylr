@@ -23,23 +23,82 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateWebhookBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// url is the url value for this contract.
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// events is the events value for this contract.
+	Events []string `protobuf:"bytes,2,rep,name=events,proto3" json:"events,omitempty"`
+	// is_active is the is active value for this contract.
+	IsActive      bool `protobuf:"varint,3,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWebhookBody) Reset() {
+	*x = UpdateWebhookBody{}
+	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWebhookBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWebhookBody) ProtoMessage() {}
+
+func (x *UpdateWebhookBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWebhookBody.ProtoReflect.Descriptor instead.
+func (*UpdateWebhookBody) Descriptor() ([]byte, []int) {
+	return file_hub_developer_v1_update_webhook_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateWebhookBody) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *UpdateWebhookBody) GetEvents() []string {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+func (x *UpdateWebhookBody) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
 type UpdateWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// url is the url value for this contract.
-	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	// events is the events value for this contract.
-	Events []string `protobuf:"bytes,3,rep,name=events,proto3" json:"events,omitempty"`
-	// is_active is the is active value for this contract.
-	IsActive      bool `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	// body carries updatable webhook fields bound from the HTTP payload.
+	Body          *UpdateWebhookBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateWebhookRequest) Reset() {
 	*x = UpdateWebhookRequest{}
-	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[0]
+	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -51,7 +110,7 @@ func (x *UpdateWebhookRequest) String() string {
 func (*UpdateWebhookRequest) ProtoMessage() {}
 
 func (x *UpdateWebhookRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[0]
+	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,7 +123,7 @@ func (x *UpdateWebhookRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWebhookRequest.ProtoReflect.Descriptor instead.
 func (*UpdateWebhookRequest) Descriptor() ([]byte, []int) {
-	return file_hub_developer_v1_update_webhook_proto_rawDescGZIP(), []int{0}
+	return file_hub_developer_v1_update_webhook_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateWebhookRequest) GetId() int64 {
@@ -74,25 +133,11 @@ func (x *UpdateWebhookRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateWebhookRequest) GetUrl() string {
+func (x *UpdateWebhookRequest) GetBody() *UpdateWebhookBody {
 	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-func (x *UpdateWebhookRequest) GetEvents() []string {
-	if x != nil {
-		return x.Events
+		return x.Body
 	}
 	return nil
-}
-
-func (x *UpdateWebhookRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
 }
 
 type UpdateWebhookResponse struct {
@@ -105,7 +150,7 @@ type UpdateWebhookResponse struct {
 
 func (x *UpdateWebhookResponse) Reset() {
 	*x = UpdateWebhookResponse{}
-	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[1]
+	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -117,7 +162,7 @@ func (x *UpdateWebhookResponse) String() string {
 func (*UpdateWebhookResponse) ProtoMessage() {}
 
 func (x *UpdateWebhookResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[1]
+	mi := &file_hub_developer_v1_update_webhook_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -130,7 +175,7 @@ func (x *UpdateWebhookResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWebhookResponse.ProtoReflect.Descriptor instead.
 func (*UpdateWebhookResponse) Descriptor() ([]byte, []int) {
-	return file_hub_developer_v1_update_webhook_proto_rawDescGZIP(), []int{1}
+	return file_hub_developer_v1_update_webhook_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateWebhookResponse) GetWebhook() *Webhook {
@@ -144,13 +189,15 @@ var File_hub_developer_v1_update_webhook_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_update_webhook_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/update_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chub/developer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x93\x01\n" +
-	"\x14UpdateWebhookRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1c\n" +
-	"\x03url\x18\x02 \x01(\tB\n" +
+	"%hub/developer/v1/update_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chub/developer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"p\n" +
+	"\x11UpdateWebhookBody\x12\x1c\n" +
+	"\x03url\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03url\x12 \n" +
-	"\x06events\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x06events\x12\x1b\n" +
-	"\tis_active\x18\x04 \x01(\bR\bisActive\"L\n" +
+	"\x06events\x18\x02 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x06events\x12\x1b\n" +
+	"\tis_active\x18\x03 \x01(\bR\bisActive\"o\n" +
+	"\x14UpdateWebhookRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x127\n" +
+	"\x04body\x18\x02 \x01(\v2#.hub.developer.v1.UpdateWebhookBodyR\x04body\"L\n" +
 	"\x15UpdateWebhookResponse\x123\n" +
 	"\awebhook\x18\x01 \x01(\v2\x19.hub.developer.v1.WebhookR\awebhookB1Z/github.com/voxire/voxie/gen/go/hub/developer/v1b\x06proto3"
 
@@ -166,19 +213,21 @@ func file_hub_developer_v1_update_webhook_proto_rawDescGZIP() []byte {
 	return file_hub_developer_v1_update_webhook_proto_rawDescData
 }
 
-var file_hub_developer_v1_update_webhook_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hub_developer_v1_update_webhook_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hub_developer_v1_update_webhook_proto_goTypes = []any{
-	(*UpdateWebhookRequest)(nil),  // 0: hub.developer.v1.UpdateWebhookRequest
-	(*UpdateWebhookResponse)(nil), // 1: hub.developer.v1.UpdateWebhookResponse
-	(*Webhook)(nil),               // 2: hub.developer.v1.Webhook
+	(*UpdateWebhookBody)(nil),     // 0: hub.developer.v1.UpdateWebhookBody
+	(*UpdateWebhookRequest)(nil),  // 1: hub.developer.v1.UpdateWebhookRequest
+	(*UpdateWebhookResponse)(nil), // 2: hub.developer.v1.UpdateWebhookResponse
+	(*Webhook)(nil),               // 3: hub.developer.v1.Webhook
 }
 var file_hub_developer_v1_update_webhook_proto_depIdxs = []int32{
-	2, // 0: hub.developer.v1.UpdateWebhookResponse.webhook:type_name -> hub.developer.v1.Webhook
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: hub.developer.v1.UpdateWebhookRequest.body:type_name -> hub.developer.v1.UpdateWebhookBody
+	3, // 1: hub.developer.v1.UpdateWebhookResponse.webhook:type_name -> hub.developer.v1.Webhook
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_hub_developer_v1_update_webhook_proto_init() }
@@ -193,7 +242,7 @@ func file_hub_developer_v1_update_webhook_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_developer_v1_update_webhook_proto_rawDesc), len(file_hub_developer_v1_update_webhook_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

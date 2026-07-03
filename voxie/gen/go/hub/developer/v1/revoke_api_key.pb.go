@@ -117,9 +117,10 @@ var File_hub_developer_v1_revoke_api_key_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_revoke_api_key_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/revoke_api_key.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"5\n" +
-	"\x13RevokeApiKeyRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"0\n" +
+	"%hub/developer/v1/revoke_api_key.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"=\n" +
+	"\x13RevokeApiKeyRequest\x12&\n" +
+	"\x02id\x18\x01 \x01(\x03B\x16\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\x04\n" +
+	"\x02idе\x18\x01R\x02id\"0\n" +
 	"\x14RevokeApiKeyResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB1Z/github.com/voxire/voxie/gen/go/hub/developer/v1b\x06proto3"
 

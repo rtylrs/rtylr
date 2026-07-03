@@ -11,12 +11,12 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/user/v1";
 
 // UserService defines hub user profile endpoints.
 service UserService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/user/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
   // GetMe returns the authenticated user profile.
   rpc GetMe(GetMeRequest) returns (GetMeResponse) {
     option (onekit.http.config) = {
-      path: "/users/me"
+      path: "/account"
       method: HTTP_METHOD_GET
     };
   }
@@ -24,7 +24,7 @@ service UserService {
   // UpdateProfile updates the authenticated user profile.
   rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {
     option (onekit.http.config) = {
-      path: "/users/me"
+      path: "/account/profile"
       method: HTTP_METHOD_PATCH
     };
   }
@@ -32,7 +32,7 @@ service UserService {
   // ChangePassword changes the authenticated user password.
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
     option (onekit.http.config) = {
-      path: "/users/password"
+      path: "/account/password"
       method: HTTP_METHOD_POST
     };
   }

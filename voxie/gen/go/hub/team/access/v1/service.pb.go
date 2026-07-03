@@ -25,11 +25,10 @@ var File_hub_team_access_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_access_v1_service_proto_rawDesc = "" +
 	"\n" +
-	" hub/team/access/v1/service.proto\x12\x12hub.team.access.v1\x1a'hub/team/access/v1/request_access.proto\x1a\x1donekit/http/annotations.proto2\xa7\x01\n" +
-	"\rAccessService\x12w\n" +
-	"\rRequestAccess\x12(.hub.team.access.v1.RequestAccessRequest\x1a).hub.team.access.v1.RequestAccessResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/requests\x10\x02\x1a\x1d\xa2\xb5\x18\x19\n" +
-	"\x17/api/hub/team/access/v1B3Z1github.com/voxire/voxie/gen/go/hub/team/access/v1b\x06proto3"
+	" hub/team/access/v1/service.proto\x12\x12hub.team.access.v1\x1a'hub/team/access/v1/request_access.proto\x1a\x1donekit/http/annotations.proto2\x9a\x01\n" +
+	"\rAccessService\x12\x82\x01\n" +
+	"\rRequestAccess\x12(.hub.team.access.v1.RequestAccessRequest\x1a).hub.team.access.v1.RequestAccessResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x14/team/request-access\x10\x02\x1a\x04\xa2\xb5\x18\x00B3Z1github.com/voxire/voxie/gen/go/hub/team/access/v1b\x06proto3"
 
 var file_hub_team_access_v1_service_proto_goTypes = []any{
 	(*RequestAccessRequest)(nil),  // 0: hub.team.access.v1.RequestAccessRequest

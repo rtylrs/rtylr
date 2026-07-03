@@ -7,15 +7,20 @@
 /* eslint-disable */
 import type { Webhook } from "./types";
 
-export interface UpdateWebhookRequest {
-  /** id is the unique identifier for the resource. */
-  id: number;
+export interface UpdateWebhookBody {
   /** url is the url value for this contract. */
   url: string;
   /** events is the events value for this contract. */
   events: string[];
   /** is_active is the is active value for this contract. */
   isActive: boolean;
+}
+
+export interface UpdateWebhookRequest {
+  /** id is the unique identifier for the resource. */
+  id: number;
+  /** body carries updatable webhook fields bound from the HTTP payload. */
+  body: UpdateWebhookBody | undefined;
 }
 
 export interface UpdateWebhookResponse {

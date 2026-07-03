@@ -27,7 +27,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/team/access/v1/requests", requestAccessHandler)
+	config.mux.Handle("POST /team/request-access", requestAccessHandler)
 
 	return nil
 }

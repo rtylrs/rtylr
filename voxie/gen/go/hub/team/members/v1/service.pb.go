@@ -25,13 +25,12 @@ var File_hub_team_members_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_members_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!hub/team/members/v1/service.proto\x12\x13hub.team.members.v1\x1a&hub/team/members/v1/list_members.proto\x1a'hub/team/members/v1/remove_member.proto\x1a\x1donekit/http/annotations.proto2\x9c\x02\n" +
-	"\x0eMembersService\x12i\n" +
-	"\bListTeam\x12$.hub.team.members.v1.ListTeamRequest\x1a%.hub.team.members.v1.ListTeamResponse\"\x10\x9a\xb5\x18\f\n" +
-	"\b/members\x10\x01\x12\x7f\n" +
-	"\fRemoveMember\x12(.hub.team.members.v1.RemoveMemberRequest\x1a).hub.team.members.v1.RemoveMemberResponse\"\x1a\x9a\xb5\x18\x16\n" +
-	"\x12/members/{user_id}\x10\x04\x1a\x1e\xa2\xb5\x18\x1a\n" +
-	"\x18/api/hub/team/members/v1B4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
+	"!hub/team/members/v1/service.proto\x12\x13hub.team.members.v1\x1a&hub/team/members/v1/list_members.proto\x1a'hub/team/members/v1/remove_member.proto\x1a\x1donekit/http/annotations.proto2\x93\x02\n" +
+	"\x0eMembersService\x12n\n" +
+	"\bListTeam\x12$.hub.team.members.v1.ListTeamRequest\x1a%.hub.team.members.v1.ListTeamResponse\"\x15\x9a\xb5\x18\x11\n" +
+	"\r/team/members\x10\x01\x12\x8a\x01\n" +
+	"\fRemoveMember\x12(.hub.team.members.v1.RemoveMemberRequest\x1a).hub.team.members.v1.RemoveMemberResponse\"%\x9a\xb5\x18!\n" +
+	"\x1d/team/members/{id}/deactivate\x10\x05\x1a\x04\xa2\xb5\x18\x00B4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
 
 var file_hub_team_members_v1_service_proto_goTypes = []any{
 	(*ListTeamRequest)(nil),      // 0: hub.team.members.v1.ListTeamRequest

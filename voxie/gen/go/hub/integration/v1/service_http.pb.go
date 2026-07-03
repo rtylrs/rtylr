@@ -29,7 +29,7 @@ func RegisterIntegrationServiceServer(server IntegrationServiceServer, opts ...S
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/integration/v1/integrations", listIntegrationsHandler)
+	config.mux.Handle("GET /integrations", listIntegrationsHandler)
 
 	methodHeaders = getConnectIntegrationHeaders()
 	connectIntegrationHandler := BindingMiddleware[ConnectIntegrationRequest](
@@ -38,16 +38,16 @@ func RegisterIntegrationServiceServer(server IntegrationServiceServer, opts ...S
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/integration/v1/integrations/connect", connectIntegrationHandler)
+	config.mux.Handle("POST /integrations", connectIntegrationHandler)
 
 	methodHeaders = getDisconnectIntegrationHeaders()
 	disconnectIntegrationHandler := BindingMiddleware[DisconnectIntegrationRequest](
 		genericHandler(server.DisconnectIntegration, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		disconnectIntegrationPathParams, disconnectIntegrationQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/integration/v1/integrations/disconnect", disconnectIntegrationHandler)
+	config.mux.Handle("DELETE /integrations", disconnectIntegrationHandler)
 
 	return nil
 }
@@ -88,4 +88,6 @@ var connectIntegrationQueryParams = []QueryParamConfig{}
 var disconnectIntegrationPathParams = []PathParamConfig{}
 
 // disconnectIntegrationQueryParams contains query parameter configuration for DisconnectIntegration
-var disconnectIntegrationQueryParams = []QueryParamConfig{}
+var disconnectIntegrationQueryParams = []QueryParamConfig{
+	{QueryName: "id", FieldName: "id", Required: false},
+}

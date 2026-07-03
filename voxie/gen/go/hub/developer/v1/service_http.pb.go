@@ -33,7 +33,7 @@ func RegisterDeveloperServiceServer(server DeveloperServiceServer, opts ...Serve
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/developer/v1/api-keys", listApiKeysHandler)
+	config.mux.Handle("GET /api-keys", listApiKeysHandler)
 
 	methodHeaders = getCreateApiKeyHeaders()
 	createApiKeyHandler := BindingMiddleware[CreateApiKeyRequest](
@@ -42,16 +42,16 @@ func RegisterDeveloperServiceServer(server DeveloperServiceServer, opts ...Serve
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/developer/v1/api-keys", createApiKeyHandler)
+	config.mux.Handle("POST /api-keys", createApiKeyHandler)
 
 	methodHeaders = getRevokeApiKeyHeaders()
 	revokeApiKeyHandler := BindingMiddleware[RevokeApiKeyRequest](
 		genericHandler(server.RevokeApiKey, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		revokeApiKeyPathParams, revokeApiKeyQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/developer/v1/api-keys/revoke", revokeApiKeyHandler)
+	config.mux.Handle("DELETE /api-keys", revokeApiKeyHandler)
 
 	methodHeaders = getListWebhooksHeaders()
 	listWebhooksHandler := BindingMiddleware[ListWebhooksRequest](
@@ -60,7 +60,7 @@ func RegisterDeveloperServiceServer(server DeveloperServiceServer, opts ...Serve
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/developer/v1/webhooks", listWebhooksHandler)
+	config.mux.Handle("GET /webhooks", listWebhooksHandler)
 
 	methodHeaders = getCreateWebhookHeaders()
 	createWebhookHandler := BindingMiddleware[CreateWebhookRequest](
@@ -69,16 +69,16 @@ func RegisterDeveloperServiceServer(server DeveloperServiceServer, opts ...Serve
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/developer/v1/webhooks", createWebhookHandler)
+	config.mux.Handle("POST /webhooks", createWebhookHandler)
 
 	methodHeaders = getUpdateWebhookHeaders()
 	updateWebhookHandler := BindingMiddleware[UpdateWebhookRequest](
 		genericHandler(server.UpdateWebhook, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateWebhookPathParams, updateWebhookQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /api/hub/developer/v1/webhooks/{id}", updateWebhookHandler)
+	config.mux.Handle("PUT /webhooks/{id}", updateWebhookHandler)
 
 	methodHeaders = getDeleteWebhookHeaders()
 	deleteWebhookHandler := BindingMiddleware[DeleteWebhookRequest](
@@ -87,7 +87,7 @@ func RegisterDeveloperServiceServer(server DeveloperServiceServer, opts ...Serve
 		"DELETE", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /api/hub/developer/v1/webhooks/{id}", deleteWebhookHandler)
+	config.mux.Handle("DELETE /webhooks", deleteWebhookHandler)
 
 	return nil
 }
@@ -148,7 +148,9 @@ var createApiKeyQueryParams = []QueryParamConfig{}
 var revokeApiKeyPathParams = []PathParamConfig{}
 
 // revokeApiKeyQueryParams contains query parameter configuration for RevokeApiKey
-var revokeApiKeyQueryParams = []QueryParamConfig{}
+var revokeApiKeyQueryParams = []QueryParamConfig{
+	{QueryName: "id", FieldName: "id", Required: false},
+}
 
 // listWebhooksPathParams contains path parameter configuration for ListWebhooks
 var listWebhooksPathParams = []PathParamConfig{}
@@ -171,9 +173,9 @@ var updateWebhookPathParams = []PathParamConfig{
 var updateWebhookQueryParams = []QueryParamConfig{}
 
 // deleteWebhookPathParams contains path parameter configuration for DeleteWebhook
-var deleteWebhookPathParams = []PathParamConfig{
-	{URLParam: "id", FieldName: "id"},
-}
+var deleteWebhookPathParams = []PathParamConfig{}
 
 // deleteWebhookQueryParams contains query parameter configuration for DeleteWebhook
-var deleteWebhookQueryParams = []QueryParamConfig{}
+var deleteWebhookQueryParams = []QueryParamConfig{
+	{QueryName: "id", FieldName: "id", Required: false},
+}

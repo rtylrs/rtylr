@@ -25,11 +25,10 @@ var File_hub_activity_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_activity_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhub/activity/v1/service.proto\x12\x0fhub.activity.v1\x1a#hub/activity/v1/list_activity.proto\x1a\x1donekit/http/annotations.proto2\x9d\x01\n" +
+	"\x1dhub/activity/v1/service.proto\x12\x0fhub.activity.v1\x1a#hub/activity/v1/list_activity.proto\x1a\x1donekit/http/annotations.proto2\x87\x01\n" +
 	"\x0fActivityService\x12n\n" +
 	"\fListActivity\x12$.hub.activity.v1.ListActivityRequest\x1a%.hub.activity.v1.ListActivityResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/activity\x10\x01\x1a\x1a\xa2\xb5\x18\x16\n" +
-	"\x14/api/hub/activity/v1B0Z.github.com/voxire/voxie/gen/go/hub/activity/v1b\x06proto3"
+	"\t/activity\x10\x01\x1a\x04\xa2\xb5\x18\x00B0Z.github.com/voxire/voxie/gen/go/hub/activity/v1b\x06proto3"
 
 var file_hub_activity_v1_service_proto_goTypes = []any{
 	(*ListActivityRequest)(nil),  // 0: hub.activity.v1.ListActivityRequest

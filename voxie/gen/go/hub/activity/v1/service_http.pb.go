@@ -27,7 +27,7 @@ func RegisterActivityServiceServer(server ActivityServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/activity/v1/activity", listActivityHandler)
+	config.mux.Handle("GET /activity", listActivityHandler)
 
 	return nil
 }

@@ -15,7 +15,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/developer/v1";
 
 // DeveloperService defines hub developer API endpoints.
 service DeveloperService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/developer/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
   // ListApiKeys returns API keys for the active business.
   rpc ListApiKeys(ListApiKeysRequest) returns (ListApiKeysResponse) {
@@ -36,8 +36,8 @@ service DeveloperService {
   // RevokeApiKey revokes an existing API key.
   rpc RevokeApiKey(RevokeApiKeyRequest) returns (RevokeApiKeyResponse) {
     option (onekit.http.config) = {
-      path: "/api-keys/revoke"
-      method: HTTP_METHOD_POST
+      path: "/api-keys"
+      method: HTTP_METHOD_DELETE
     };
   }
 
@@ -62,13 +62,14 @@ service DeveloperService {
     option (onekit.http.config) = {
       path: "/webhooks/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 
   // DeleteWebhook removes a webhook by ID.
   rpc DeleteWebhook(DeleteWebhookRequest) returns (DeleteWebhookResponse) {
     option (onekit.http.config) = {
-      path: "/webhooks/{id}"
+      path: "/webhooks"
       method: HTTP_METHOD_DELETE
     };
   }

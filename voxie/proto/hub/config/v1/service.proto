@@ -9,13 +9,13 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/config/v1";
 
 // ConfigService defines hub configuration endpoints.
 service ConfigService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/config/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
   // GetConfig returns the active business configuration.
   rpc GetConfig(GetConfigRequest) returns (GetConfigResponse) {
     option (onekit.http.config) = {
-      path: "/config"
-      method: HTTP_METHOD_GET
+      path: "/get-configs"
+      method: HTTP_METHOD_POST
     };
   }
 }

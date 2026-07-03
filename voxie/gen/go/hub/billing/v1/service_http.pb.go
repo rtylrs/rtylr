@@ -28,7 +28,7 @@ func RegisterBillingServiceServer(server BillingServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/billing/v1/summary", getBillingSummaryHandler)
+	config.mux.Handle("GET /billing/summary", getBillingSummaryHandler)
 
 	methodHeaders = getListInvoicesHeaders()
 	listInvoicesHandler := BindingMiddleware[ListInvoicesRequest](
@@ -37,7 +37,7 @@ func RegisterBillingServiceServer(server BillingServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/billing/v1/invoices", listInvoicesHandler)
+	config.mux.Handle("GET /billing/invoices", listInvoicesHandler)
 
 	return nil
 }

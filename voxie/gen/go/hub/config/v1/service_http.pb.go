@@ -24,10 +24,10 @@ func RegisterConfigServiceServer(server ConfigServiceServer, opts ...ServerOptio
 	getConfigHandler := BindingMiddleware[GetConfigRequest](
 		genericHandler(server.GetConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getConfigPathParams, getConfigQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/config/v1/config", getConfigHandler)
+	config.mux.Handle("POST /get-configs", getConfigHandler)
 
 	return nil
 }

@@ -16,6 +16,8 @@ export interface VerifyInviteResponse {
   email: string;
   /** full_name is the full name value for this contract. */
   fullName: string;
+  /** apps is the apps granted by the invitation. */
+  apps: string[];
   /** valid is the valid value for this contract. */
   valid: boolean;
 }

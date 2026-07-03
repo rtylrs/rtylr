@@ -29,16 +29,16 @@ func RegisterInvitationsServiceServer(server InvitationsServiceServer, opts ...S
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations", inviteUserHandler)
+	config.mux.Handle("POST /team/invite", inviteUserHandler)
 
 	methodHeaders = getVerifyInviteHeaders()
 	verifyInviteHandler := BindingMiddleware[VerifyInviteRequest](
 		genericHandler(server.VerifyInvite, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		verifyInvitePathParams, verifyInviteQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations/verify", verifyInviteHandler)
+	config.mux.Handle("GET /auth/invite/verify", verifyInviteHandler)
 
 	methodHeaders = getAcceptInviteHeaders()
 	acceptInviteHandler := BindingMiddleware[AcceptInviteRequest](
@@ -47,7 +47,7 @@ func RegisterInvitationsServiceServer(server InvitationsServiceServer, opts ...S
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations/accept", acceptInviteHandler)
+	config.mux.Handle("POST /auth/invite/accept", acceptInviteHandler)
 
 	return nil
 }
@@ -82,7 +82,9 @@ var inviteUserQueryParams = []QueryParamConfig{}
 var verifyInvitePathParams = []PathParamConfig{}
 
 // verifyInviteQueryParams contains query parameter configuration for VerifyInvite
-var verifyInviteQueryParams = []QueryParamConfig{}
+var verifyInviteQueryParams = []QueryParamConfig{
+	{QueryName: "token", FieldName: "token", Required: false},
+}
 
 // acceptInvitePathParams contains path parameter configuration for AcceptInvite
 var acceptInvitePathParams = []PathParamConfig{}

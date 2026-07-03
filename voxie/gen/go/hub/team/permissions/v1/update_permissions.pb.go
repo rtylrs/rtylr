@@ -25,12 +25,14 @@ const (
 
 type UpdatePermissionsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// user_id identifies the user associated with this request.
+	// user_id identifies the user whose permissions are being updated.
 	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// full_name optionally updates the member display name.
+	FullName *string `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3,oneof" json:"full_name,omitempty"`
 	// apps is the apps value for this contract.
-	Apps []string `protobuf:"bytes,2,rep,name=apps,proto3" json:"apps,omitempty"`
+	Apps []string `protobuf:"bytes,3,rep,name=apps,proto3" json:"apps,omitempty"`
 	// role is the role value for this contract.
-	Role          string `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	Role          string `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -72,6 +74,13 @@ func (x *UpdatePermissionsRequest) GetUserId() int64 {
 	return 0
 }
 
+func (x *UpdatePermissionsRequest) GetFullName() string {
+	if x != nil && x.FullName != nil {
+		return *x.FullName
+	}
+	return ""
+}
+
 func (x *UpdatePermissionsRequest) GetApps() []string {
 	if x != nil {
 		return x.Apps
@@ -87,7 +96,9 @@ func (x *UpdatePermissionsRequest) GetRole() string {
 }
 
 type UpdatePermissionsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// message is a human-readable result message.
+	Message       string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,17 +133,28 @@ func (*UpdatePermissionsResponse) Descriptor() ([]byte, []int) {
 	return file_hub_team_permissions_v1_update_permissions_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *UpdatePermissionsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_hub_team_permissions_v1_update_permissions_proto protoreflect.FileDescriptor
 
 const file_hub_team_permissions_v1_update_permissions_proto_rawDesc = "" +
 	"\n" +
-	"0hub/team/permissions/v1/update_permissions.proto\x12\x17hub.team.permissions.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x81\x01\n" +
+	"0hub/team/permissions/v1/update_permissions.proto\x12\x17hub.team.permissions.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xb7\x01\n" +
 	"\x18UpdatePermissionsRequest\x12'\n" +
-	"\auser_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\x12\x1c\n" +
-	"\x04apps\x18\x02 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x04apps\x12\x1e\n" +
-	"\x04role\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04role\"\x1b\n" +
-	"\x19UpdatePermissionsResponseB8Z6github.com/voxire/voxie/gen/go/hub/team/permissions/v1b\x06proto3"
+	"\auser_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\x12&\n" +
+	"\tfull_name\x18\x02 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\bfullName\x88\x01\x01\x12\x1c\n" +
+	"\x04apps\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x04apps\x12\x1e\n" +
+	"\x04role\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04roleB\f\n" +
+	"\n" +
+	"_full_name\"5\n" +
+	"\x19UpdatePermissionsResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB8Z6github.com/voxire/voxie/gen/go/hub/team/permissions/v1b\x06proto3"
 
 var (
 	file_hub_team_permissions_v1_update_permissions_proto_rawDescOnce sync.Once
@@ -164,6 +186,7 @@ func file_hub_team_permissions_v1_update_permissions_proto_init() {
 	if File_hub_team_permissions_v1_update_permissions_proto != nil {
 		return
 	}
+	file_hub_team_permissions_v1_update_permissions_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

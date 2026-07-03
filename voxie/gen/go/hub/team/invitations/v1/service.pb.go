@@ -25,16 +25,15 @@ var File_hub_team_invitations_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_invitations_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%hub/team/invitations/v1/service.proto\x12\x17hub.team.invitations.v1\x1a+hub/team/invitations/v1/accept_invite.proto\x1a)hub/team/invitations/v1/invite_user.proto\x1a+hub/team/invitations/v1/verify_invite.proto\x1a\x1donekit/http/annotations.proto2\xcb\x03\n" +
+	"%hub/team/invitations/v1/service.proto\x12\x17hub.team.invitations.v1\x1a+hub/team/invitations/v1/accept_invite.proto\x1a)hub/team/invitations/v1/invite_user.proto\x1a+hub/team/invitations/v1/verify_invite.proto\x1a\x1donekit/http/annotations.proto2\xad\x03\n" +
 	"\x12InvitationsService\x12{\n" +
 	"\n" +
 	"InviteUser\x12*.hub.team.invitations.v1.InviteUserRequest\x1a+.hub.team.invitations.v1.InviteUserResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/invitations\x10\x02\x12\x88\x01\n" +
+	"\f/team/invite\x10\x02\x12\x88\x01\n" +
 	"\fVerifyInvite\x12,.hub.team.invitations.v1.VerifyInviteRequest\x1a-.hub.team.invitations.v1.VerifyInviteResponse\"\x1b\x9a\xb5\x18\x17\n" +
-	"\x13/invitations/verify\x10\x02\x12\x88\x01\n" +
+	"\x13/auth/invite/verify\x10\x01\x12\x88\x01\n" +
 	"\fAcceptInvite\x12,.hub.team.invitations.v1.AcceptInviteRequest\x1a-.hub.team.invitations.v1.AcceptInviteResponse\"\x1b\x9a\xb5\x18\x17\n" +
-	"\x13/invitations/accept\x10\x02\x1a\"\xa2\xb5\x18\x1e\n" +
-	"\x1c/api/hub/team/invitations/v1B8Z6github.com/voxire/voxie/gen/go/hub/team/invitations/v1b\x06proto3"
+	"\x13/auth/invite/accept\x10\x02\x1a\x04\xa2\xb5\x18\x00B8Z6github.com/voxire/voxie/gen/go/hub/team/invitations/v1b\x06proto3"
 
 var file_hub_team_invitations_v1_service_proto_goTypes = []any{
 	(*InviteUserRequest)(nil),    // 0: hub.team.invitations.v1.InviteUserRequest

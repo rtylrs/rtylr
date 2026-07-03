@@ -86,7 +86,7 @@ export class ActivityServiceClient {
   }
 
   async listActivity(req: ListActivityRequest, options?: ActivityServiceCallOptions): Promise<ListActivityResponse> {
-    let path = "/api/hub/activity/v1/activity";
+    let path = "/activity";
     const params = new URLSearchParams();
     if (req.limit != null && req.limit !== 0) params.set("limit", String(req.limit));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");

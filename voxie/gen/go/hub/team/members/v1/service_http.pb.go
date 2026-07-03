@@ -28,16 +28,16 @@ func RegisterMembersServiceServer(server MembersServiceServer, opts ...ServerOpt
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/team/members/v1/members", listTeamHandler)
+	config.mux.Handle("GET /team/members", listTeamHandler)
 
 	methodHeaders = getRemoveMemberHeaders()
 	removeMemberHandler := BindingMiddleware[RemoveMemberRequest](
 		genericHandler(server.RemoveMember, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		removeMemberPathParams, removeMemberQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /api/hub/team/members/v1/members/{user_id}", removeMemberHandler)
+	config.mux.Handle("PATCH /team/members/{id}/deactivate", removeMemberHandler)
 
 	return nil
 }
@@ -65,7 +65,7 @@ var listTeamQueryParams = []QueryParamConfig{}
 
 // removeMemberPathParams contains path parameter configuration for RemoveMember
 var removeMemberPathParams = []PathParamConfig{
-	{URLParam: "user_id", FieldName: "user_id"},
+	{URLParam: "id", FieldName: "id"},
 }
 
 // removeMemberQueryParams contains query parameter configuration for RemoveMember

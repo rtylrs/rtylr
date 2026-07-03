@@ -11,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/notification/v1";
 
 // NotificationService defines hub notification endpoints.
 service NotificationService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/notification/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
   // ListNotifications returns notifications for the current user.
   rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse) {
@@ -25,7 +25,7 @@ service NotificationService {
   rpc MarkAllRead(MarkAllReadRequest) returns (MarkAllReadResponse) {
     option (onekit.http.config) = {
       path: "/notifications/read-all"
-      method: HTTP_METHOD_PATCH
+      method: HTTP_METHOD_POST
     };
   }
 
@@ -33,7 +33,7 @@ service NotificationService {
   rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {
     option (onekit.http.config) = {
       path: "/notifications/{id}/read"
-      method: HTTP_METHOD_PATCH
+      method: HTTP_METHOD_POST
     };
   }
 }

@@ -10,21 +10,21 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/team/members/v1";
 
 // MembersService defines hub team member endpoints.
 service MembersService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/team/members/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
   // ListTeam returns team members for the active business.
   rpc ListTeam(ListTeamRequest) returns (ListTeamResponse) {
     option (onekit.http.config) = {
-      path: "/members"
+      path: "/team/members"
       method: HTTP_METHOD_GET
     };
   }
 
-  // RemoveMember removes a member from the team.
+  // RemoveMember deactivates a member from the team.
   rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {
     option (onekit.http.config) = {
-      path: "/members/{user_id}"
-      method: HTTP_METHOD_DELETE
+      path: "/team/members/{id}/deactivate"
+      method: HTTP_METHOD_PATCH
     };
   }
 }

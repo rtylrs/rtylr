@@ -25,8 +25,8 @@ const (
 
 type RemoveMemberRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// user_id identifies the user associated with this request.
-	UserId        int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// id is the team member user id to deactivate.
+	Id            int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -61,9 +61,9 @@ func (*RemoveMemberRequest) Descriptor() ([]byte, []int) {
 	return file_hub_team_members_v1_remove_member_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *RemoveMemberRequest) GetUserId() int64 {
+func (x *RemoveMemberRequest) GetId() int64 {
 	if x != nil {
-		return x.UserId
+		return x.Id
 	}
 	return 0
 }
@@ -117,9 +117,9 @@ var File_hub_team_members_v1_remove_member_proto protoreflect.FileDescriptor
 
 const file_hub_team_members_v1_remove_member_proto_rawDesc = "" +
 	"\n" +
-	"'hub/team/members/v1/remove_member.proto\x12\x13hub.team.members.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\">\n" +
-	"\x13RemoveMemberRequest\x12'\n" +
-	"\auser_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\"0\n" +
+	"'hub/team/members/v1/remove_member.proto\x12\x13hub.team.members.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"5\n" +
+	"\x13RemoveMemberRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"0\n" +
 	"\x14RemoveMemberResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
 

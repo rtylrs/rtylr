@@ -96,7 +96,7 @@ export class BillingServiceClient {
   }
 
   async getBillingSummary(_req: GetBillingSummaryRequest, options?: BillingServiceCallOptions): Promise<GetBillingSummaryResponse> {
-    let path = "/api/hub/billing/v1/summary";
+    let path = "/billing/summary";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -119,7 +119,7 @@ export class BillingServiceClient {
   }
 
   async listInvoices(_req: ListInvoicesRequest, options?: BillingServiceCallOptions): Promise<ListInvoicesResponse> {
-    let path = "/api/hub/billing/v1/invoices";
+    let path = "/billing/invoices";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {

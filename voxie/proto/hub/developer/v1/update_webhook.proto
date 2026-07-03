@@ -9,6 +9,18 @@ import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/developer/v1";
 
+message UpdateWebhookBody {
+  // url is the url value for this contract.
+  string url = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // events is the events value for this contract.
+  repeated string events = 2 [(buf.validate.field).repeated.min_items = 1];
+  // is_active is the is active value for this contract.
+  bool is_active = 3;
+}
+
 message UpdateWebhookRequest {
   // id is the unique identifier for the resource.
   int64 id = 1 [
@@ -16,15 +28,8 @@ message UpdateWebhookRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // url is the url value for this contract.
-  string url = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // events is the events value for this contract.
-  repeated string events = 3 [(buf.validate.field).repeated.min_items = 1];
-  // is_active is the is active value for this contract.
-  bool is_active = 4;
+  // body carries updatable webhook fields bound from the HTTP payload.
+  UpdateWebhookBody body = 2;
 }
 
 message UpdateWebhookResponse {

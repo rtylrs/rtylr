@@ -29,7 +29,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/user/v1/users/me", getMeHandler)
+	config.mux.Handle("GET /account", getMeHandler)
 
 	methodHeaders = getUpdateProfileHeaders()
 	updateProfileHandler := BindingMiddleware[UpdateProfileRequest](
@@ -38,7 +38,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"PATCH", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/user/v1/users/me", updateProfileHandler)
+	config.mux.Handle("PATCH /account/profile", updateProfileHandler)
 
 	methodHeaders = getChangePasswordHeaders()
 	changePasswordHandler := BindingMiddleware[ChangePasswordRequest](
@@ -47,7 +47,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/user/v1/users/password", changePasswordHandler)
+	config.mux.Handle("POST /account/password", changePasswordHandler)
 
 	return nil
 }

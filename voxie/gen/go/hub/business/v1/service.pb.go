@@ -25,17 +25,16 @@ var File_hub_business_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_business_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhub/business/v1/service.proto\x12\x0fhub.business.v1\x1a\"hub/business/v1/get_business.proto\x1a-hub/business/v1/lookup_business_by_slug.proto\x1a\x1ehub/business/v1/set_slug.proto\x1a%hub/business/v1/update_business.proto\x1a\x1donekit/http/annotations.proto2\xac\x04\n" +
-	"\x0fBusinessService\x12{\n" +
-	"\vGetBusiness\x12#.hub.business.v1.GetBusinessRequest\x1a$.hub.business.v1.GetBusinessResponse\"!\x9a\xb5\x18\x1d\n" +
-	"\x19/businesses/{business_id}\x10\x01\x12\x90\x01\n" +
-	"\x14LookupBusinessBySlug\x12,.hub.business.v1.LookupBusinessBySlugRequest\x1a-.hub.business.v1.LookupBusinessBySlugResponse\"\x1b\x9a\xb5\x18\x17\n" +
-	"\x13/businesses/by-slug\x10\x01\x12f\n" +
-	"\aSetSlug\x12\x1f.hub.business.v1.SetSlugRequest\x1a .hub.business.v1.SetSlugResponse\"\x18\x9a\xb5\x18\x14\n" +
-	"\x10/businesses/slug\x10\x05\x12\x84\x01\n" +
-	"\x0eUpdateBusiness\x12&.hub.business.v1.UpdateBusinessRequest\x1a'.hub.business.v1.UpdateBusinessResponse\"!\x9a\xb5\x18\x1d\n" +
-	"\x19/businesses/{business_id}\x10\x03\x1a\x1a\xa2\xb5\x18\x16\n" +
-	"\x14/api/hub/business/v1B0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"
+	"\x1dhub/business/v1/service.proto\x12\x0fhub.business.v1\x1a\"hub/business/v1/get_business.proto\x1a-hub/business/v1/lookup_business_by_slug.proto\x1a\x1ehub/business/v1/set_slug.proto\x1a%hub/business/v1/update_business.proto\x1a\x1donekit/http/annotations.proto2\x99\x04\n" +
+	"\x0fBusinessService\x12n\n" +
+	"\vGetBusiness\x12#.hub.business.v1.GetBusinessRequest\x1a$.hub.business.v1.GetBusinessResponse\"\x14\x9a\xb5\x18\x10\n" +
+	"\f/business/me\x10\x01\x12\x99\x01\n" +
+	"\x14LookupBusinessBySlug\x12,.hub.business.v1.LookupBusinessBySlugRequest\x1a-.hub.business.v1.LookupBusinessBySlugResponse\"$\x9a\xb5\x18 \n" +
+	"\x1c/pos/public/business/by-slug\x10\x01\x12g\n" +
+	"\aSetSlug\x12\x1f.hub.business.v1.SetSlugRequest\x1a .hub.business.v1.SetSlugResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/business/me/slug\x10\x03\x12\x8a\x01\n" +
+	"\x0eUpdateBusiness\x12&.hub.business.v1.UpdateBusinessRequest\x1a'.hub.business.v1.UpdateBusinessResponse\"'\x9a\xb5\x18#\n" +
+	"\x19/businesses/{business_id}\x10\x03\"\x04body\x1a\x04\xa2\xb5\x18\x00B0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"
 
 var file_hub_business_v1_service_proto_goTypes = []any{
 	(*GetBusinessRequest)(nil),           // 0: hub.business.v1.GetBusinessRequest

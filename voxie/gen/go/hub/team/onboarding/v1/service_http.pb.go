@@ -24,10 +24,10 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	markOnboardedHandler := BindingMiddleware[MarkOnboardedRequest](
 		genericHandler(server.MarkOnboarded, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		markOnboardedPathParams, markOnboardedQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/team/onboarding/v1/onboarded", markOnboardedHandler)
+	config.mux.Handle("GET /user/onboarded", markOnboardedHandler)
 
 	return nil
 }

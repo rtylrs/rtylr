@@ -89,8 +89,8 @@ export class ConfigServiceClient {
     this.retry = options?.retry;
   }
 
-  async getConfig(_req: GetConfigRequest, options?: ConfigServiceCallOptions): Promise<GetConfigResponse> {
-    let path = "/api/hub/config/v1/config";
+  async getConfig(req: GetConfigRequest, options?: ConfigServiceCallOptions): Promise<GetConfigResponse> {
+    let path = "/get-configs";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -100,8 +100,9 @@ export class ConfigServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "GET",
+      method: "POST",
       headers,
+      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

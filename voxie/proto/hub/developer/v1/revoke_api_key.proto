@@ -13,7 +13,8 @@ message RevokeApiKeyRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0,
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.query).name = "id"
   ];
 }
 

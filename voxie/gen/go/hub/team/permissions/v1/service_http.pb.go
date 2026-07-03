@@ -27,7 +27,7 @@ func RegisterPermissionsServiceServer(server PermissionsServiceServer, opts ...S
 		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /api/hub/team/permissions/v1/permissions/{user_id}", updatePermissionsHandler)
+	config.mux.Handle("PUT /team/users/permissions", updatePermissionsHandler)
 
 	return nil
 }
@@ -43,9 +43,7 @@ func getUpdatePermissionsHeaders() []*onekithttp.Header {
 }
 
 // updatePermissionsPathParams contains path parameter configuration for UpdatePermissions
-var updatePermissionsPathParams = []PathParamConfig{
-	{URLParam: "user_id", FieldName: "user_id"},
-}
+var updatePermissionsPathParams = []PathParamConfig{}
 
 // updatePermissionsQueryParams contains query parameter configuration for UpdatePermissions
 var updatePermissionsQueryParams = []QueryParamConfig{}

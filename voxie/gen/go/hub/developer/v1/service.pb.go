@@ -25,23 +25,22 @@ var File_hub_developer_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehub/developer/v1/service.proto\x12\x10hub.developer.v1\x1a%hub/developer/v1/create_api_key.proto\x1a%hub/developer/v1/create_webhook.proto\x1a%hub/developer/v1/delete_webhook.proto\x1a$hub/developer/v1/list_api_keys.proto\x1a$hub/developer/v1/list_webhooks.proto\x1a%hub/developer/v1/revoke_api_key.proto\x1a%hub/developer/v1/update_webhook.proto\x1a\x1donekit/http/annotations.proto2\xe4\x06\n" +
+	"\x1ehub/developer/v1/service.proto\x12\x10hub.developer.v1\x1a%hub/developer/v1/create_api_key.proto\x1a%hub/developer/v1/create_webhook.proto\x1a%hub/developer/v1/delete_webhook.proto\x1a$hub/developer/v1/list_api_keys.proto\x1a$hub/developer/v1/list_webhooks.proto\x1a%hub/developer/v1/revoke_api_key.proto\x1a%hub/developer/v1/update_webhook.proto\x1a\x1donekit/http/annotations.proto2\xc7\x06\n" +
 	"\x10DeveloperService\x12m\n" +
 	"\vListApiKeys\x12$.hub.developer.v1.ListApiKeysRequest\x1a%.hub.developer.v1.ListApiKeysResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/api-keys\x10\x01\x12p\n" +
 	"\fCreateApiKey\x12%.hub.developer.v1.CreateApiKeyRequest\x1a&.hub.developer.v1.CreateApiKeyResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/api-keys\x10\x02\x12w\n" +
-	"\fRevokeApiKey\x12%.hub.developer.v1.RevokeApiKeyRequest\x1a&.hub.developer.v1.RevokeApiKeyResponse\"\x18\x9a\xb5\x18\x14\n" +
-	"\x10/api-keys/revoke\x10\x02\x12p\n" +
+	"\t/api-keys\x10\x02\x12p\n" +
+	"\fRevokeApiKey\x12%.hub.developer.v1.RevokeApiKeyRequest\x1a&.hub.developer.v1.RevokeApiKeyResponse\"\x11\x9a\xb5\x18\r\n" +
+	"\t/api-keys\x10\x04\x12p\n" +
 	"\fListWebhooks\x12%.hub.developer.v1.ListWebhooksRequest\x1a&.hub.developer.v1.ListWebhooksResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/webhooks\x10\x01\x12s\n" +
 	"\rCreateWebhook\x12&.hub.developer.v1.CreateWebhookRequest\x1a'.hub.developer.v1.CreateWebhookResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/webhooks\x10\x02\x12x\n" +
-	"\rUpdateWebhook\x12&.hub.developer.v1.UpdateWebhookRequest\x1a'.hub.developer.v1.UpdateWebhookResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/webhooks/{id}\x10\x03\x12x\n" +
-	"\rDeleteWebhook\x12&.hub.developer.v1.DeleteWebhookRequest\x1a'.hub.developer.v1.DeleteWebhookResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/webhooks/{id}\x10\x04\x1a\x1b\xa2\xb5\x18\x17\n" +
-	"\x15/api/hub/developer/v1B1Z/github.com/voxire/voxie/gen/go/hub/developer/v1b\x06proto3"
+	"\t/webhooks\x10\x02\x12~\n" +
+	"\rUpdateWebhook\x12&.hub.developer.v1.UpdateWebhookRequest\x1a'.hub.developer.v1.UpdateWebhookResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/webhooks/{id}\x10\x03\"\x04body\x12s\n" +
+	"\rDeleteWebhook\x12&.hub.developer.v1.DeleteWebhookRequest\x1a'.hub.developer.v1.DeleteWebhookResponse\"\x11\x9a\xb5\x18\r\n" +
+	"\t/webhooks\x10\x04\x1a\x04\xa2\xb5\x18\x00B1Z/github.com/voxire/voxie/gen/go/hub/developer/v1b\x06proto3"
 
 var file_hub_developer_v1_service_proto_goTypes = []any{
 	(*ListApiKeysRequest)(nil),    // 0: hub.developer.v1.ListApiKeysRequest

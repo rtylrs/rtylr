@@ -123,7 +123,7 @@ export class AppServiceClient {
   }
 
   async listApps(_req: ListAppsRequest, options?: AppServiceCallOptions): Promise<ListAppsResponse> {
-    let path = "/api/hub/app/v1/apps";
+    let path = "/apps";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -146,7 +146,7 @@ export class AppServiceClient {
   }
 
   async listAddons(_req: ListAddonsRequest, options?: AppServiceCallOptions): Promise<ListAddonsResponse> {
-    let path = "/api/hub/app/v1/addons";
+    let path = "/addons";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -169,9 +169,10 @@ export class AppServiceClient {
   }
 
   async addonStatus(req: AddonStatusRequest, options?: AppServiceCallOptions): Promise<AddonStatusResponse> {
-    let path = "/api/hub/app/v1/addons/{addon_id}/status";
-    path = path.replace("{addon_id}", encodeURIComponent(String(req.addonId)));
-    const url = this.baseURL + path;
+    let path = "/addons/status";
+    const params = new URLSearchParams();
+    if (req.addonId != null && req.addonId !== "") params.set("addon_id", String(req.addonId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -193,8 +194,7 @@ export class AppServiceClient {
   }
 
   async enableAddon(req: EnableAddonRequest, options?: AppServiceCallOptions): Promise<EnableAddonResponse> {
-    let path = "/api/hub/app/v1/addons/{addon_id}/enable";
-    path = path.replace("{addon_id}", encodeURIComponent(String(req.addonId)));
+    let path = "/addons/enable";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -204,7 +204,7 @@ export class AppServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "PATCH",
+      method: "POST",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,
@@ -218,8 +218,7 @@ export class AppServiceClient {
   }
 
   async disableAddon(req: DisableAddonRequest, options?: AppServiceCallOptions): Promise<DisableAddonResponse> {
-    let path = "/api/hub/app/v1/addons/{addon_id}/disable";
-    path = path.replace("{addon_id}", encodeURIComponent(String(req.addonId)));
+    let path = "/addons/disable";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -229,7 +228,7 @@ export class AppServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "PATCH",
+      method: "POST",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,

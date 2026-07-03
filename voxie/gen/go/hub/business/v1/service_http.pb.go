@@ -30,7 +30,7 @@ func RegisterBusinessServiceServer(server BusinessServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/business/v1/businesses/{business_id}", getBusinessHandler)
+	config.mux.Handle("GET /business/me", getBusinessHandler)
 
 	methodHeaders = getLookupBusinessBySlugHeaders()
 	lookupBusinessBySlugHandler := BindingMiddleware[LookupBusinessBySlugRequest](
@@ -39,25 +39,25 @@ func RegisterBusinessServiceServer(server BusinessServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/business/v1/businesses/by-slug", lookupBusinessBySlugHandler)
+	config.mux.Handle("GET /pos/public/business/by-slug", lookupBusinessBySlugHandler)
 
 	methodHeaders = getSetSlugHeaders()
 	setSlugHandler := BindingMiddleware[SetSlugRequest](
 		genericHandler(server.SetSlug, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		setSlugPathParams, setSlugQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/business/v1/businesses/slug", setSlugHandler)
+	config.mux.Handle("PUT /business/me/slug", setSlugHandler)
 
 	methodHeaders = getUpdateBusinessHeaders()
 	updateBusinessHandler := BindingMiddleware[UpdateBusinessRequest](
 		genericHandler(server.UpdateBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateBusinessPathParams, updateBusinessQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /api/hub/business/v1/businesses/{business_id}", updateBusinessHandler)
+	config.mux.Handle("PUT /businesses/{business_id}", updateBusinessHandler)
 
 	return nil
 }
@@ -88,9 +88,7 @@ func getUpdateBusinessHeaders() []*onekithttp.Header {
 }
 
 // getBusinessPathParams contains path parameter configuration for GetBusiness
-var getBusinessPathParams = []PathParamConfig{
-	{URLParam: "business_id", FieldName: "business_id"},
-}
+var getBusinessPathParams = []PathParamConfig{}
 
 // getBusinessQueryParams contains query parameter configuration for GetBusiness
 var getBusinessQueryParams = []QueryParamConfig{}

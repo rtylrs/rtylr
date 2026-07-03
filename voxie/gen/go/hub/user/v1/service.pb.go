@@ -25,15 +25,14 @@ var File_hub_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19hub/user/v1/service.proto\x12\vhub.user.v1\x1a!hub/user/v1/change_password.proto\x1a\x18hub/user/v1/get_me.proto\x1a hub/user/v1/update_profile.proto\x1a\x1donekit/http/annotations.proto2\xd7\x02\n" +
-	"\vUserService\x12Q\n" +
-	"\x05GetMe\x12\x19.hub.user.v1.GetMeRequest\x1a\x1a.hub.user.v1.GetMeResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/users/me\x10\x01\x12i\n" +
-	"\rUpdateProfile\x12!.hub.user.v1.UpdateProfileRequest\x1a\".hub.user.v1.UpdateProfileResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/users/me\x10\x05\x12r\n" +
-	"\x0eChangePassword\x12\".hub.user.v1.ChangePasswordRequest\x1a#.hub.user.v1.ChangePasswordResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/users/password\x10\x02\x1a\x16\xa2\xb5\x18\x12\n" +
-	"\x10/api/hub/user/v1B,Z*github.com/voxire/voxie/gen/go/hub/user/v1b\x06proto3"
+	"\x19hub/user/v1/service.proto\x12\vhub.user.v1\x1a!hub/user/v1/change_password.proto\x1a\x18hub/user/v1/get_me.proto\x1a hub/user/v1/update_profile.proto\x1a\x1donekit/http/annotations.proto2\xcd\x02\n" +
+	"\vUserService\x12P\n" +
+	"\x05GetMe\x12\x19.hub.user.v1.GetMeRequest\x1a\x1a.hub.user.v1.GetMeResponse\"\x10\x9a\xb5\x18\f\n" +
+	"\b/account\x10\x01\x12p\n" +
+	"\rUpdateProfile\x12!.hub.user.v1.UpdateProfileRequest\x1a\".hub.user.v1.UpdateProfileResponse\"\x18\x9a\xb5\x18\x14\n" +
+	"\x10/account/profile\x10\x05\x12t\n" +
+	"\x0eChangePassword\x12\".hub.user.v1.ChangePasswordRequest\x1a#.hub.user.v1.ChangePasswordResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/account/password\x10\x02\x1a\x04\xa2\xb5\x18\x00B,Z*github.com/voxire/voxie/gen/go/hub/user/v1b\x06proto3"
 
 var file_hub_user_v1_service_proto_goTypes = []any{
 	(*GetMeRequest)(nil),           // 0: hub.user.v1.GetMeRequest

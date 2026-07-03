@@ -29,25 +29,25 @@ func RegisterNotificationServiceServer(server NotificationServiceServer, opts ..
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/notification/v1/notifications", listNotificationsHandler)
+	config.mux.Handle("GET /notifications", listNotificationsHandler)
 
 	methodHeaders = getMarkAllReadHeaders()
 	markAllReadHandler := BindingMiddleware[MarkAllReadRequest](
 		genericHandler(server.MarkAllRead, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		markAllReadPathParams, markAllReadQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/notification/v1/notifications/read-all", markAllReadHandler)
+	config.mux.Handle("POST /notifications/read-all", markAllReadHandler)
 
 	methodHeaders = getMarkNotificationReadHeaders()
 	markNotificationReadHandler := BindingMiddleware[MarkNotificationReadRequest](
 		genericHandler(server.MarkNotificationRead, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		markNotificationReadPathParams, markNotificationReadQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/notification/v1/notifications/{id}/read", markNotificationReadHandler)
+	config.mux.Handle("POST /notifications/{id}/read", markNotificationReadHandler)
 
 	return nil
 }

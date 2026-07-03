@@ -12,12 +12,12 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
 
 // BusinessService defines hub business endpoints.
 service BusinessService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/business/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
-  // GetBusiness returns a business by ID.
+  // GetBusiness returns the authenticated user's active business profile.
   rpc GetBusiness(GetBusinessRequest) returns (GetBusinessResponse) {
     option (onekit.http.config) = {
-      path: "/businesses/{business_id}"
+      path: "/business/me"
       method: HTTP_METHOD_GET
     };
   }
@@ -25,7 +25,7 @@ service BusinessService {
   // LookupBusinessBySlug resolves a business by public slug.
   rpc LookupBusinessBySlug(LookupBusinessBySlugRequest) returns (LookupBusinessBySlugResponse) {
     option (onekit.http.config) = {
-      path: "/businesses/by-slug"
+      path: "/pos/public/business/by-slug"
       method: HTTP_METHOD_GET
     };
   }
@@ -33,8 +33,8 @@ service BusinessService {
   // SetSlug updates only the business slug.
   rpc SetSlug(SetSlugRequest) returns (SetSlugResponse) {
     option (onekit.http.config) = {
-      path: "/businesses/slug"
-      method: HTTP_METHOD_PATCH
+      path: "/business/me/slug"
+      method: HTTP_METHOD_PUT
     };
   }
 
@@ -43,6 +43,7 @@ service BusinessService {
     option (onekit.http.config) = {
       path: "/businesses/{business_id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 }

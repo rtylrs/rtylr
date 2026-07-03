@@ -30,7 +30,7 @@ func RegisterSecurityServiceServer(server SecurityServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/security/v1/state", getSecurityStateHandler)
+	config.mux.Handle("GET /security", getSecurityStateHandler)
 
 	methodHeaders = getLoginHistoryHeaders()
 	loginHistoryHandler := BindingMiddleware[LoginHistoryRequest](
@@ -39,7 +39,7 @@ func RegisterSecurityServiceServer(server SecurityServiceServer, opts ...ServerO
 		"GET", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hub/security/v1/login-history", loginHistoryHandler)
+	config.mux.Handle("GET /security/login-history", loginHistoryHandler)
 
 	methodHeaders = getInvalidateSessionsHeaders()
 	invalidateSessionsHandler := BindingMiddleware[InvalidateSessionsRequest](
@@ -48,16 +48,16 @@ func RegisterSecurityServiceServer(server SecurityServiceServer, opts ...ServerO
 		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hub/security/v1/invalidate-sessions", invalidateSessionsHandler)
+	config.mux.Handle("POST /security/invalidate-sessions", invalidateSessionsHandler)
 
 	methodHeaders = getUpdate2FAHeaders()
 	update2FAHandler := BindingMiddleware[Update2FARequest](
 		genericHandler(server.Update2FA, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		update2FAPathParams, update2FAQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /api/hub/security/v1/2fa", update2FAHandler)
+	config.mux.Handle("POST /security/2fa", update2FAHandler)
 
 	return nil
 }

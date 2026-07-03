@@ -19,7 +19,7 @@ export interface StaffUserPayload {
 }
 
 export interface RemoveMemberRequest {
-  userId: string;
+  id: string;
 }
 
 export interface RemoveMemberResponse {
@@ -90,7 +90,7 @@ export class MembersServiceClient {
   }
 
   async listTeam(_req: ListTeamRequest, options?: MembersServiceCallOptions): Promise<ListTeamResponse> {
-    let path = "/api/hub/team/members/v1/members";
+    let path = "/team/members";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -113,8 +113,8 @@ export class MembersServiceClient {
   }
 
   async removeMember(req: RemoveMemberRequest, options?: MembersServiceCallOptions): Promise<RemoveMemberResponse> {
-    let path = "/api/hub/team/members/v1/members/{user_id}";
-    path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
+    let path = "/team/members/{id}/deactivate";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -124,8 +124,9 @@ export class MembersServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "DELETE",
+      method: "PATCH",
       headers,
+      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

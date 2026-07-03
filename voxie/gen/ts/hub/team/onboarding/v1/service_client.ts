@@ -71,8 +71,8 @@ export class OnboardingServiceClient {
     this.retry = options?.retry;
   }
 
-  async markOnboarded(req: MarkOnboardedRequest, options?: OnboardingServiceCallOptions): Promise<MarkOnboardedResponse> {
-    let path = "/api/hub/team/onboarding/v1/onboarded";
+  async markOnboarded(_req: MarkOnboardedRequest, options?: OnboardingServiceCallOptions): Promise<MarkOnboardedResponse> {
+    let path = "/user/onboarded";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -82,9 +82,8 @@ export class OnboardingServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "PATCH",
+      method: "GET",
       headers,
-      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

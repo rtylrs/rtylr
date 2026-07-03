@@ -21,6 +21,7 @@ export interface VerifyInviteRequest {
 export interface VerifyInviteResponse {
   email: string;
   fullName: string;
+  apps: string[];
   valid: boolean;
 }
 
@@ -97,7 +98,7 @@ export class InvitationsServiceClient {
   }
 
   async inviteUser(req: InviteUserRequest, options?: InvitationsServiceCallOptions): Promise<InviteUserResponse> {
-    let path = "/api/hub/team/invitations/v1/invitations";
+    let path = "/team/invite";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -121,8 +122,10 @@ export class InvitationsServiceClient {
   }
 
   async verifyInvite(req: VerifyInviteRequest, options?: InvitationsServiceCallOptions): Promise<VerifyInviteResponse> {
-    let path = "/api/hub/team/invitations/v1/invitations/verify";
-    const url = this.baseURL + path;
+    let path = "/auth/invite/verify";
+    const params = new URLSearchParams();
+    if (req.token != null && req.token !== "") params.set("token", String(req.token));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -131,9 +134,8 @@ export class InvitationsServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "POST",
+      method: "GET",
       headers,
-      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
@@ -145,7 +147,7 @@ export class InvitationsServiceClient {
   }
 
   async acceptInvite(req: AcceptInviteRequest, options?: InvitationsServiceCallOptions): Promise<AcceptInviteResponse> {
-    let path = "/api/hub/team/invitations/v1/invitations/accept";
+    let path = "/auth/invite/accept";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {

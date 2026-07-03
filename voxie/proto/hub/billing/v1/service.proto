@@ -10,12 +10,12 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/billing/v1";
 
 // BillingService defines hub billing endpoints.
 service BillingService {
-  option (onekit.http.service_config) = {base_path: "/api/hub/billing/v1"};
+  option (onekit.http.service_config) = {base_path: ""};
 
   // GetBillingSummary returns billing summary for the active business.
   rpc GetBillingSummary(GetBillingSummaryRequest) returns (GetBillingSummaryResponse) {
     option (onekit.http.config) = {
-      path: "/summary"
+      path: "/billing/summary"
       method: HTTP_METHOD_GET
     };
   }
@@ -23,7 +23,7 @@ service BillingService {
   // ListInvoices returns billing invoices.
   rpc ListInvoices(ListInvoicesRequest) returns (ListInvoicesResponse) {
     option (onekit.http.config) = {
-      path: "/invoices"
+      path: "/billing/invoices"
       method: HTTP_METHOD_GET
     };
   }
