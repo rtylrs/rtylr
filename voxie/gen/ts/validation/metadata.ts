@@ -423,35 +423,14 @@ export const contractValidationMetadata = {
     }
   },
   "crm.campaign.v1.UpdateCampaignRequest": {
-    "channel": {
-      "minLen": 1,
-      "name": "channel",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "channel",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "content": {
-      "minLen": 1,
-      "name": "content",
-      "optional": false,
-      "protoName": "content",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateCampaignBody"
     },
     "id": {
       "gt": 0,
@@ -462,45 +441,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "scheduledAt": {
-      "minLen": 1,
-      "name": "scheduledAt",
-      "optional": false,
-      "protoName": "scheduled_at",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "segmentId": {
-      "name": "segmentId",
-      "optional": true,
-      "protoName": "segment_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "subject": {
-      "minLen": 1,
-      "name": "subject",
-      "optional": false,
-      "protoName": "subject",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "crm.campaign.v1.UpdateCampaignStatusRequest": {
@@ -707,75 +647,14 @@ export const contractValidationMetadata = {
     }
   },
   "crm.customer.v1.UpdateCustomerRequest": {
-    "address": {
-      "name": "address",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "address",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "city": {
-      "minLen": 1,
-      "name": "city",
-      "optional": false,
-      "protoName": "city",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "country": {
-      "minLen": 1,
-      "name": "country",
-      "optional": false,
-      "protoName": "country",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "dateOfBirth": {
-      "minLen": 1,
-      "name": "dateOfBirth",
-      "optional": false,
-      "protoName": "date_of_birth",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "email": {
-      "email": true,
-      "minLen": 1,
-      "name": "email",
-      "optional": false,
-      "protoName": "email",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "firstName": {
-      "minLen": 1,
-      "name": "firstName",
-      "optional": false,
-      "protoName": "first_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "gender": {
-      "minLen": 1,
-      "name": "gender",
-      "optional": false,
-      "protoName": "gender",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateCustomerBody"
     },
     "id": {
       "gt": 0,
@@ -786,53 +665,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": true,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "lastName": {
-      "minLen": 1,
-      "name": "lastName",
-      "optional": false,
-      "protoName": "last_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "notes": {
-      "name": "notes",
-      "optional": false,
-      "protoName": "notes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "phone": {
-      "name": "phone",
-      "optional": false,
-      "protoName": "phone",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "tags": {
-      "minItems": 1,
-      "name": "tags",
-      "optional": false,
-      "protoName": "tags",
-      "repeated": true,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "crm.dashboard.v1.GetDashboardRequest": {},
@@ -1143,61 +975,20 @@ export const contractValidationMetadata = {
     }
   },
   "crm.loyalty.v1.UpdateLoyaltyTierRequest": {
-    "discountPct": {
-      "gt": 0,
-      "name": "discountPct",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "discount_pct",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "double"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateLoyaltyTierBody"
     },
     "id": {
       "gt": 0,
       "name": "id",
       "optional": false,
       "protoName": "id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "minPoints": {
-      "gt": 0,
-      "name": "minPoints",
-      "optional": false,
-      "protoName": "min_points",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "perks": {
-      "minLen": 1,
-      "name": "perks",
-      "optional": false,
-      "protoName": "perks",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "sortOrder": {
-      "gt": 0,
-      "name": "sortOrder",
-      "optional": false,
-      "protoName": "sort_order",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -1294,15 +1085,14 @@ export const contractValidationMetadata = {
   },
   "crm.segment.v1.ListSegmentsRequest": {},
   "crm.segment.v1.UpdateSegmentRequest": {
-    "description": {
-      "minLen": 1,
-      "name": "description",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "description",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateSegmentBody"
     },
     "id": {
       "gt": 0,
@@ -1313,26 +1103,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "rules": {
-      "minLen": 1,
-      "name": "rules",
-      "optional": false,
-      "protoName": "rules",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "erp.inventory.v1.AdjustInventoryRequest": {
@@ -1560,45 +1330,14 @@ export const contractValidationMetadata = {
     }
   },
   "erp.product.v1.UpdateProductRequest": {
-    "barcode": {
-      "minLen": 1,
-      "name": "barcode",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "barcode",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "categoryId": {
-      "gt": 0,
-      "name": "categoryId",
-      "optional": false,
-      "protoName": "category_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "costPrice": {
-      "gte": 0,
-      "name": "costPrice",
-      "optional": false,
-      "protoName": "cost_price",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateProductBody"
     },
     "id": {
       "gt": 0,
@@ -1609,94 +1348,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": false,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "lowStockThreshold": {
-      "gte": 0,
-      "name": "lowStockThreshold",
-      "optional": false,
-      "protoName": "low_stock_threshold",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "reorderQuantity": {
-      "gte": 0,
-      "name": "reorderQuantity",
-      "optional": false,
-      "protoName": "reorder_quantity",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "salePrice": {
-      "gte": 0,
-      "name": "salePrice",
-      "optional": false,
-      "protoName": "sale_price",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "sku": {
-      "minLen": 1,
-      "name": "sku",
-      "optional": false,
-      "protoName": "sku",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "supplierId": {
-      "gt": 0,
-      "name": "supplierId",
-      "optional": false,
-      "protoName": "supplier_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "trackInventory": {
-      "name": "trackInventory",
-      "optional": false,
-      "protoName": "track_inventory",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "unit": {
-      "minLen": 1,
-      "name": "unit",
-      "optional": false,
-      "protoName": "unit",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "erp.purchase_order.v1.CreatePurchaseOrderItemRequest": {
@@ -1804,6 +1455,15 @@ export const contractValidationMetadata = {
     }
   },
   "erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdatePurchaseOrderStatusBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -1813,16 +1473,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "erp.supplier.v1.CreateSupplierRequest": {
@@ -1924,45 +1574,14 @@ export const contractValidationMetadata = {
   },
   "erp.supplier.v1.ListSuppliersRequest": {},
   "erp.supplier.v1.UpdateSupplierRequest": {
-    "address": {
-      "name": "address",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "address",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "city": {
-      "minLen": 1,
-      "name": "city",
-      "optional": false,
-      "protoName": "city",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "country": {
-      "minLen": 1,
-      "name": "country",
-      "optional": false,
-      "protoName": "country",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "email": {
-      "email": true,
-      "minLen": 1,
-      "name": "email",
-      "optional": false,
-      "protoName": "email",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateSupplierBody"
     },
     "id": {
       "gt": 0,
@@ -1973,61 +1592,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": false,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "notes": {
-      "name": "notes",
-      "optional": false,
-      "protoName": "notes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "paymentTerms": {
-      "name": "paymentTerms",
-      "optional": false,
-      "protoName": "payment_terms",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "phone": {
-      "name": "phone",
-      "optional": false,
-      "protoName": "phone",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "taxId": {
-      "name": "taxId",
-      "optional": false,
-      "protoName": "tax_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "finance.account.v1.CreateAccountRequest": {
@@ -2267,71 +1831,20 @@ export const contractValidationMetadata = {
   },
   "finance.bill.v1.ListBillsRequest": {},
   "finance.bill.v1.UpdateBillRequest": {
-    "amount": {
-      "gte": 0,
-      "name": "amount",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "amount",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "currency": {
-      "minLen": 1,
-      "name": "currency",
-      "optional": false,
-      "protoName": "currency",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "dueDate": {
-      "minLen": 1,
-      "name": "dueDate",
-      "optional": false,
-      "protoName": "due_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateBillBody"
     },
     "id": {
       "gt": 0,
       "name": "id",
       "optional": false,
       "protoName": "id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "supplierId": {
-      "gt": 0,
-      "name": "supplierId",
-      "optional": false,
-      "protoName": "supplier_id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -2425,54 +1938,14 @@ export const contractValidationMetadata = {
   "finance.expenses.v1.ListExpenseCategoriesRequest": {},
   "finance.expenses.v1.ListExpensesRequest": {},
   "finance.expenses.v1.UpdateExpenseRequest": {
-    "amount": {
-      "gte": 0,
-      "name": "amount",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "amount",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "categoryId": {
-      "name": "categoryId",
-      "optional": true,
-      "protoName": "category_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "currency": {
-      "minLen": 1,
-      "name": "currency",
-      "optional": false,
-      "protoName": "currency",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "expenseDate": {
-      "minLen": 1,
-      "name": "expenseDate",
-      "optional": false,
-      "protoName": "expense_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateExpenseBody"
     },
     "id": {
       "gt": 0,
@@ -2483,26 +1956,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "receiptUrl": {
-      "minLen": 1,
-      "name": "receiptUrl",
-      "optional": false,
-      "protoName": "receipt_url",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "vendor": {
-      "minLen": 1,
-      "name": "vendor",
-      "optional": false,
-      "protoName": "vendor",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "finance.invoices.payments.v1.RecordPaymentRequest": {
@@ -2768,84 +2221,14 @@ export const contractValidationMetadata = {
     }
   },
   "finance.invoices.v1.UpdateInvoiceRequest": {
-    "clientAddress": {
-      "name": "clientAddress",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "client_address",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "clientEmail": {
-      "email": true,
-      "minLen": 1,
-      "name": "clientEmail",
-      "optional": false,
-      "protoName": "client_email",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "clientName": {
-      "minLen": 1,
-      "name": "clientName",
-      "optional": false,
-      "protoName": "client_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "clientTaxId": {
-      "name": "clientTaxId",
-      "optional": false,
-      "protoName": "client_tax_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "currency": {
-      "minLen": 1,
-      "name": "currency",
-      "optional": false,
-      "protoName": "currency",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "discountType": {
-      "minLen": 1,
-      "name": "discountType",
-      "optional": false,
-      "protoName": "discount_type",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "discountValue": {
-      "gte": 0,
-      "name": "discountValue",
-      "optional": false,
-      "protoName": "discount_value",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "dueDate": {
-      "minLen": 1,
-      "name": "dueDate",
-      "optional": false,
-      "protoName": "due_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateInvoiceBody"
     },
     "id": {
       "gt": 0,
@@ -2856,57 +2239,18 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "issueDate": {
-      "minLen": 1,
-      "name": "issueDate",
-      "optional": false,
-      "protoName": "issue_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "items": {
-      "minItems": 1,
-      "name": "items",
-      "optional": false,
-      "protoName": "items",
-      "repeated": true,
-      "required": true,
-      "scalar": false,
-      "type": "InvoiceItem"
-    },
-    "notes": {
-      "name": "notes",
-      "optional": false,
-      "protoName": "notes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "taxRate": {
-      "gte": 0,
-      "name": "taxRate",
-      "optional": false,
-      "protoName": "tax_rate",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "terms": {
-      "name": "terms",
-      "optional": false,
-      "protoName": "terms",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "finance.invoices.v1.UpdateInvoiceStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateInvoiceStatusBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -2916,16 +2260,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "finance.journal.v1.CreateJournalEntryRequest": {
@@ -3235,24 +2569,14 @@ export const contractValidationMetadata = {
     }
   },
   "finance.recurring_invoice.v1.UpdateRecurringInvoiceRequest": {
-    "endDate": {
-      "name": "endDate",
-      "optional": true,
-      "protoName": "end_date",
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "frequency": {
-      "minLen": 1,
-      "name": "frequency",
-      "optional": false,
-      "protoName": "frequency",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateRecurringInvoiceBody"
     },
     "id": {
       "gt": 0,
@@ -3261,34 +2585,6 @@ export const contractValidationMetadata = {
       "protoName": "id",
       "repeated": false,
       "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": true,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "nextInvoiceDate": {
-      "minLen": 1,
-      "name": "nextInvoiceDate",
-      "optional": false,
-      "protoName": "next_invoice_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "templateInvoiceId": {
-      "name": "templateInvoiceId",
-      "optional": true,
-      "protoName": "template_invoice_id",
-      "repeated": false,
-      "required": false,
       "scalar": true,
       "type": "int64"
     }
@@ -3561,45 +2857,14 @@ export const contractValidationMetadata = {
     }
   },
   "flow.project.v1.UpdateProjectRequest": {
-    "color": {
-      "minLen": 1,
-      "name": "color",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "color",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "dueDate": {
-      "minLen": 1,
-      "name": "dueDate",
-      "optional": false,
-      "protoName": "due_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "icon": {
-      "minLen": 1,
-      "name": "icon",
-      "optional": false,
-      "protoName": "icon",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateProjectBody"
     },
     "id": {
       "gt": 0,
@@ -3610,36 +2875,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "startDate": {
-      "minLen": 1,
-      "name": "startDate",
-      "optional": false,
-      "protoName": "start_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "flow.task.v1.AddCommentRequest": {
@@ -4072,34 +3307,14 @@ export const contractValidationMetadata = {
     }
   },
   "flow.task.v1.UpdateTaskRequest": {
-    "assigneeId": {
-      "name": "assigneeId",
-      "optional": true,
-      "protoName": "assignee_id",
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "dueDate": {
-      "minLen": 1,
-      "name": "dueDate",
-      "optional": false,
-      "protoName": "due_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateTaskBody"
     },
     "id": {
       "gt": 0,
@@ -4110,59 +3325,18 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "labels": {
-      "minItems": 1,
-      "name": "labels",
-      "optional": false,
-      "protoName": "labels",
-      "repeated": true,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "priority": {
-      "minLen": 1,
-      "name": "priority",
-      "optional": false,
-      "protoName": "priority",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "startDate": {
-      "minLen": 1,
-      "name": "startDate",
-      "optional": false,
-      "protoName": "start_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "title": {
-      "minLen": 1,
-      "name": "title",
-      "optional": false,
-      "protoName": "title",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "flow.task.v1.UpdateTaskStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateTaskStatusBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -4172,16 +3346,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "flow.workspace.v1.AddWorkspaceMemberRequest": {
@@ -4294,35 +3458,14 @@ export const contractValidationMetadata = {
     }
   },
   "flow.workspace.v1.UpdateWorkspaceRequest": {
-    "color": {
-      "minLen": 1,
-      "name": "color",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "color",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "description": {
-      "minLen": 1,
-      "name": "description",
-      "optional": false,
-      "protoName": "description",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "icon": {
-      "minLen": 1,
-      "name": "icon",
-      "optional": false,
-      "protoName": "icon",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateWorkspaceBody"
     },
     "id": {
       "gt": 0,
@@ -4333,16 +3476,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hr.approval_chain.v1.UpsertApprovalChainRequest": {
@@ -4540,14 +3673,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.department.v1.UpdateDepartmentRequest": {
-    "defaultWorkScheduleId": {
-      "name": "defaultWorkScheduleId",
-      "optional": true,
-      "protoName": "default_work_schedule_id",
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "int64"
+      "scalar": false,
+      "type": "UpdateDepartmentBody"
     },
     "id": {
       "gt": 0,
@@ -4556,34 +3689,6 @@ export const contractValidationMetadata = {
       "protoName": "id",
       "repeated": false,
       "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "locationId": {
-      "name": "locationId",
-      "optional": true,
-      "protoName": "location_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "parentDepartmentId": {
-      "name": "parentDepartmentId",
-      "optional": true,
-      "protoName": "parent_department_id",
-      "repeated": false,
-      "required": false,
       "scalar": true,
       "type": "int64"
     }
@@ -4889,93 +3994,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.employee.v1.UpdateEmployeeRequest": {
-    "address": {
-      "name": "address",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "address",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "departmentId": {
-      "name": "departmentId",
-      "optional": false,
-      "protoName": "department_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "email": {
-      "minLen": 1,
-      "name": "email",
-      "optional": false,
-      "protoName": "email",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "emergencyContactName": {
-      "minLen": 1,
-      "name": "emergencyContactName",
-      "optional": false,
-      "protoName": "emergency_contact_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "emergencyContactPhone": {
-      "minLen": 1,
-      "name": "emergencyContactPhone",
-      "optional": false,
-      "protoName": "emergency_contact_phone",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "employmentType": {
-      "minLen": 1,
-      "name": "employmentType",
-      "optional": false,
-      "protoName": "employment_type",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "endDate": {
-      "minLen": 1,
-      "name": "endDate",
-      "optional": false,
-      "protoName": "end_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "firstName": {
-      "minLen": 1,
-      "name": "firstName",
-      "optional": false,
-      "protoName": "first_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "hourlyRate": {
-      "gte": 0,
-      "name": "hourlyRate",
-      "optional": false,
-      "protoName": "hourly_rate",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
+      "scalar": false,
+      "type": "UpdateEmployeeBody"
     },
     "id": {
       "gt": 0,
@@ -4984,92 +4010,6 @@ export const contractValidationMetadata = {
       "protoName": "id",
       "repeated": false,
       "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "lastName": {
-      "minLen": 1,
-      "name": "lastName",
-      "optional": false,
-      "protoName": "last_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "locationId": {
-      "name": "locationId",
-      "optional": false,
-      "protoName": "location_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "notes": {
-      "name": "notes",
-      "optional": false,
-      "protoName": "notes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "overtimeRate": {
-      "gte": 0,
-      "name": "overtimeRate",
-      "optional": false,
-      "protoName": "overtime_rate",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "phone": {
-      "name": "phone",
-      "optional": false,
-      "protoName": "phone",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "salary": {
-      "gte": 0,
-      "name": "salary",
-      "optional": false,
-      "protoName": "salary",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "startDate": {
-      "minLen": 1,
-      "name": "startDate",
-      "optional": false,
-      "protoName": "start_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "workScheduleId": {
-      "name": "workScheduleId",
-      "optional": false,
-      "protoName": "work_schedule_id",
-      "repeated": false,
-      "required": false,
       "scalar": true,
       "type": "int64"
     }
@@ -5122,14 +4062,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.equipment.v1.ApproveEquipmentRequest": {
-    "approved": {
-      "name": "approved",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "approved",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "bool"
+      "scalar": false,
+      "type": "ApproveEquipmentBody"
     },
     "equipmentRequestId": {
       "gt": 0,
@@ -5234,23 +4174,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.leave.v1.ApproveLeaveRequest": {
-    "approved": {
-      "name": "approved",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "approved",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "rejectionReason": {
-      "name": "rejectionReason",
-      "optional": true,
-      "protoName": "rejection_reason",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "ApproveLeaveBody"
     },
     "requestId": {
       "gt": 0,
@@ -5434,14 +4365,14 @@ export const contractValidationMetadata = {
   },
   "hr.leave.v1.ListLeaveTypesRequest": {},
   "hr.leave.v1.UpdateLeaveTypeRequest": {
-    "accrualRule": {
-      "name": "accrualRule",
-      "optional": true,
-      "protoName": "accrual_rule",
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateLeaveTypeBody"
     },
     "id": {
       "gt": 0,
@@ -5452,69 +4383,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": true,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "isPaid": {
-      "name": "isPaid",
-      "optional": true,
-      "protoName": "is_paid",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "maxCarryoverDays": {
-      "name": "maxCarryoverDays",
-      "optional": true,
-      "protoName": "max_carryover_days",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
-    "minNoticeDays": {
-      "name": "minNoticeDays",
-      "optional": true,
-      "protoName": "min_notice_days",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
-    "name": {
-      "name": "name",
-      "optional": true,
-      "protoName": "name",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "requiresApproval": {
-      "name": "requiresApproval",
-      "optional": true,
-      "protoName": "requires_approval",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "requiresDocumentationAfterDays": {
-      "name": "requiresDocumentationAfterDays",
-      "optional": true,
-      "protoName": "requires_documentation_after_days",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
     }
   },
   "hr.location.v1.CreateLocationRequest": {
@@ -5557,14 +4425,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.location.v1.UpdateLocationRequest": {
-    "address": {
-      "name": "address",
-      "optional": true,
-      "protoName": "address",
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateLocationBody"
     },
     "id": {
       "gt": 0,
@@ -5575,42 +4443,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": true,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "name": {
-      "name": "name",
-      "optional": true,
-      "protoName": "name",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "slug": {
-      "name": "slug",
-      "optional": true,
-      "protoName": "slug",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "timezone": {
-      "name": "timezone",
-      "optional": true,
-      "protoName": "timezone",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hr.onboarding.v1.AddItemToChecklistTemplateRequest": {
@@ -5788,15 +4620,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.onboarding.v1.UpdateChecklistTemplateRequest": {
-    "name": {
-      "minLen": 1,
-      "name": "name",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "name",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateChecklistTemplateBody"
     },
     "roleId": {
       "gt": 0,
@@ -5807,35 +4638,17 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "triggerType": {
-      "name": "triggerType",
-      "optional": true,
-      "protoName": "trigger_type",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hr.overtime.v1.ApproveOvertimeRequest": {
-    "approved": {
-      "name": "approved",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "approved",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "multiplierApplied": {
-      "name": "multiplierApplied",
-      "optional": true,
-      "protoName": "multiplier_applied",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
+      "scalar": false,
+      "type": "ApproveOvertimeBody"
     },
     "overtimeRequestId": {
       "gt": 0,
@@ -5846,15 +4659,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "rejectionReason": {
-      "name": "rejectionReason",
-      "optional": true,
-      "protoName": "rejection_reason",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hr.overtime.v1.CreateOvertimeRequestRequest": {
@@ -6082,6 +4886,15 @@ export const contractValidationMetadata = {
     }
   },
   "hr.role.v1.UpdateRoleRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateRoleBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -6091,25 +4904,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "name": "name",
-      "optional": true,
-      "protoName": "name",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "permissions": {
-      "minItems": 1,
-      "name": "permissions",
-      "optional": false,
-      "protoName": "permissions",
-      "repeated": true,
-      "required": true,
-      "scalar": false,
-      "type": "PermissionPayload"
     }
   },
   "hr.setup.v1.CompleteSetupStepRequest": {
@@ -6531,105 +5325,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.staff.v1.UpdateStaffRequest": {
-    "address": {
-      "name": "address",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "address",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "apps": {
-      "minLen": 1,
-      "name": "apps",
-      "optional": false,
-      "protoName": "apps",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "departmentId": {
-      "gt": 0,
-      "name": "departmentId",
-      "optional": false,
-      "protoName": "department_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "email": {
-      "email": true,
-      "minLen": 1,
-      "name": "email",
-      "optional": false,
-      "protoName": "email",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "emergencyContactName": {
-      "minLen": 1,
-      "name": "emergencyContactName",
-      "optional": false,
-      "protoName": "emergency_contact_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "emergencyContactPhone": {
-      "minLen": 1,
-      "name": "emergencyContactPhone",
-      "optional": false,
-      "protoName": "emergency_contact_phone",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "employmentType": {
-      "minLen": 1,
-      "name": "employmentType",
-      "optional": false,
-      "protoName": "employment_type",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "endDate": {
-      "minLen": 1,
-      "name": "endDate",
-      "optional": false,
-      "protoName": "end_date",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "firstName": {
-      "minLen": 1,
-      "name": "firstName",
-      "optional": false,
-      "protoName": "first_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "hourlyRate": {
-      "gte": 0,
-      "name": "hourlyRate",
-      "optional": false,
-      "protoName": "hourly_rate",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
+      "scalar": false,
+      "type": "UpdateStaffBody"
     },
     "id": {
       "gt": 0,
@@ -6640,85 +5343,17 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "lastName": {
-      "minLen": 1,
-      "name": "lastName",
-      "optional": false,
-      "protoName": "last_name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "notes": {
-      "name": "notes",
-      "optional": false,
-      "protoName": "notes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "overtimeRate": {
-      "gte": 0,
-      "name": "overtimeRate",
-      "optional": false,
-      "protoName": "overtime_rate",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "phone": {
-      "name": "phone",
-      "optional": false,
-      "protoName": "phone",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "role": {
-      "minLen": 1,
-      "name": "role",
-      "optional": false,
-      "protoName": "role",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "salary": {
-      "gte": 0,
-      "name": "salary",
-      "optional": false,
-      "protoName": "salary",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hr.time_entry.v1.ApproveTimesheetRequest": {
-    "approved": {
-      "name": "approved",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "approved",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "bool"
+      "scalar": false,
+      "type": "ApproveTimesheetBody"
     },
     "id": {
       "gt": 0,
@@ -6729,15 +5364,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "rejectionReason": {
-      "name": "rejectionReason",
-      "optional": true,
-      "protoName": "rejection_reason",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hr.time_entry.v1.CreateTimeEntryRequest": {
@@ -7190,41 +5816,14 @@ export const contractValidationMetadata = {
     }
   },
   "hr.work_schedule.v1.UpdateWorkScheduleRequest": {
-    "breakMinutes": {
-      "name": "breakMinutes",
-      "optional": true,
-      "protoName": "break_minutes",
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
-    "contractedHoursPerWeek": {
-      "name": "contractedHoursPerWeek",
-      "optional": true,
-      "protoName": "contracted_hours_per_week",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
-    },
-    "dailyOtThresholdMinutes": {
-      "name": "dailyOtThresholdMinutes",
-      "optional": true,
-      "protoName": "daily_ot_threshold_minutes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
-    "endTime": {
-      "name": "endTime",
-      "optional": true,
-      "protoName": "end_time",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateWorkScheduleBody"
     },
     "id": {
       "gt": 0,
@@ -7235,43 +5834,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "name": "name",
-      "optional": true,
-      "protoName": "name",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "startTime": {
-      "name": "startTime",
-      "optional": true,
-      "protoName": "start_time",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "weeklyOtThresholdMinutes": {
-      "name": "weeklyOtThresholdMinutes",
-      "optional": true,
-      "protoName": "weekly_ot_threshold_minutes",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
-    "workingDays": {
-      "minItems": 1,
-      "name": "workingDays",
-      "optional": false,
-      "protoName": "working_days",
-      "repeated": true,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hub.activity.v1.ListActivityRequest": {
@@ -7325,18 +5887,7 @@ export const contractValidationMetadata = {
   "hub.app.v1.ListAppsRequest": {},
   "hub.billing.v1.GetBillingSummaryRequest": {},
   "hub.billing.v1.ListInvoicesRequest": {},
-  "hub.business.v1.GetBusinessRequest": {
-    "businessId": {
-      "gt": 0,
-      "name": "businessId",
-      "optional": false,
-      "protoName": "business_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    }
-  },
+  "hub.business.v1.GetBusinessRequest": {},
   "hub.business.v1.LookupBusinessBySlugRequest": {
     "slug": {
       "minLen": 1,
@@ -7362,14 +5913,14 @@ export const contractValidationMetadata = {
     }
   },
   "hub.business.v1.UpdateBusinessRequest": {
-    "address": {
-      "name": "address",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "address",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateBusinessBody"
     },
     "businessId": {
       "gt": 0,
@@ -7380,84 +5931,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "currency": {
-      "minLen": 1,
-      "name": "currency",
-      "optional": false,
-      "protoName": "currency",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "email": {
-      "email": true,
-      "minLen": 1,
-      "name": "email",
-      "optional": false,
-      "protoName": "email",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "phone": {
-      "name": "phone",
-      "optional": false,
-      "protoName": "phone",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "slug": {
-      "name": "slug",
-      "optional": true,
-      "protoName": "slug",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "timezone": {
-      "minLen": 1,
-      "name": "timezone",
-      "optional": false,
-      "protoName": "timezone",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "type": {
-      "minLen": 1,
-      "name": "type",
-      "optional": false,
-      "protoName": "type",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "website": {
-      "name": "website",
-      "optional": false,
-      "protoName": "website",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hub.config.v1.GetConfigRequest": {},
@@ -7533,15 +6006,14 @@ export const contractValidationMetadata = {
     }
   },
   "hub.developer.v1.UpdateWebhookRequest": {
-    "events": {
-      "minItems": 1,
-      "name": "events",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "events",
-      "repeated": true,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateWebhookBody"
     },
     "id": {
       "gt": 0,
@@ -7552,25 +6024,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": false,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "url": {
-      "minLen": 1,
-      "name": "url",
-      "optional": false,
-      "protoName": "url",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hub.integration.v1.ConnectIntegrationRequest": {
@@ -7655,35 +6108,47 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "hub.permission.v1.DeleteRoleRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "hub.permission.v1.GetPermissionsRequest": {},
   "hub.permission.v1.ListRolesRequest": {},
-  "hub.permission.v1.UpdatePermissionMatrixRequest": {
-    "enabled": {
-      "name": "enabled",
+  "hub.permission.v1.UpdateRoleRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
       "optional": false,
-      "protoName": "enabled",
+      "protoName": "id",
       "repeated": false,
-      "required": false,
+      "required": true,
       "scalar": true,
-      "type": "bool"
+      "type": "int64"
     },
-    "permissionKey": {
+    "name": {
       "minLen": 1,
-      "name": "permissionKey",
+      "name": "name",
       "optional": false,
-      "protoName": "permission_key",
+      "protoName": "name",
       "repeated": false,
       "required": true,
       "scalar": true,
       "type": "string"
     },
-    "role": {
-      "minLen": 1,
-      "name": "role",
+    "permissions": {
+      "name": "permissions",
       "optional": false,
-      "protoName": "role",
-      "repeated": false,
-      "required": true,
+      "protoName": "permissions",
+      "repeated": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
@@ -7803,11 +6268,11 @@ export const contractValidationMetadata = {
   },
   "hub.team.members.v1.ListTeamRequest": {},
   "hub.team.members.v1.RemoveMemberRequest": {
-    "userId": {
+    "id": {
       "gt": 0,
-      "name": "userId",
+      "name": "id",
       "optional": false,
-      "protoName": "user_id",
+      "protoName": "id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -7823,6 +6288,15 @@ export const contractValidationMetadata = {
       "protoName": "apps",
       "repeated": true,
       "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "fullName": {
+      "name": "fullName",
+      "optional": true,
+      "protoName": "full_name",
+      "repeated": false,
+      "required": false,
       "scalar": true,
       "type": "string"
     },
@@ -8750,15 +7224,14 @@ export const contractValidationMetadata = {
   },
   "pos.combo.v1.ListCombosRequest": {},
   "pos.combo.v1.UpdateComboRequest": {
-    "description": {
-      "minLen": 1,
-      "name": "description",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "description",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateComboBody"
     },
     "id": {
       "gt": 0,
@@ -8769,45 +7242,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": false,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "items": {
-      "minLen": 1,
-      "name": "items",
-      "optional": false,
-      "protoName": "items",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "price": {
-      "gte": 0,
-      "name": "price",
-      "optional": false,
-      "protoName": "price",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
     }
   },
   "pos.customer.v1.SearchCustomersRequest": {
@@ -8891,6 +7325,15 @@ export const contractValidationMetadata = {
     }
   },
   "pos.floor.v1.UpdateFloorRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateFloorBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -8900,26 +7343,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "sortOrder": {
-      "gt": 0,
-      "name": "sortOrder",
-      "optional": false,
-      "protoName": "sort_order",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int32"
     }
   },
   "pos.gift_card.v1.CreateGiftCardRequest": {
@@ -9000,6 +7423,15 @@ export const contractValidationMetadata = {
   },
   "pos.kds.v1.ListKDSOrdersRequest": {},
   "pos.kds.v1.UpdateKDSItemStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateKDSItemStatusBody"
+    },
     "itemId": {
       "gt": 0,
       "name": "itemId",
@@ -9019,16 +7451,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "pos.loyalty.v1.EarnPointsRequest": {
@@ -9250,15 +7672,14 @@ export const contractValidationMetadata = {
   },
   "pos.modifier.v1.ListModifiersRequest": {},
   "pos.modifier.v1.UpdateModifierRequest": {
-    "groupName": {
-      "minLen": 1,
-      "name": "groupName",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "group_name",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateModifierBody"
     },
     "id": {
       "gt": 0,
@@ -9269,35 +7690,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isRequired": {
-      "name": "isRequired",
-      "optional": false,
-      "protoName": "is_required",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "priceDelta": {
-      "gte": 0,
-      "name": "priceDelta",
-      "optional": false,
-      "protoName": "price_delta",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "double"
     }
   },
   "pos.orders.discounts.v1.DiscountOrderRequest": {
@@ -9366,6 +7758,15 @@ export const contractValidationMetadata = {
   },
   "pos.orders.holds.v1.ListHeldOrdersRequest": {},
   "pos.orders.items.v1.UpdateOrderItemStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateOrderItemStatusBody"
+    },
     "itemId": {
       "gt": 0,
       "name": "itemId",
@@ -9385,16 +7786,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "pos.orders.payments.v1.ProcessPaymentRequest": {
@@ -9645,6 +8036,15 @@ export const contractValidationMetadata = {
     }
   },
   "pos.orders.v1.UpdateOrderStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateOrderStatusBody"
+    },
     "orderId": {
       "gt": 0,
       "name": "orderId",
@@ -9654,16 +8054,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "pos.orders.v1.VoidOrderRequest": {
@@ -10107,6 +8497,15 @@ export const contractValidationMetadata = {
   },
   "pos.table.v1.ListTablesRequest": {},
   "pos.table.v1.UpdateTableRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateTableBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -10116,45 +8515,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "label": {
-      "minLen": 1,
-      "name": "label",
-      "optional": false,
-      "protoName": "label",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "locationId": {
-      "name": "locationId",
-      "optional": true,
-      "protoName": "location_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "seats": {
-      "gt": 0,
-      "name": "seats",
-      "optional": false,
-      "protoName": "seats",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int32"
-    },
-    "status": {
-      "minLen": 1,
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "pos.terminal.v1.CreateTerminalRequest": {
@@ -10203,25 +8563,14 @@ export const contractValidationMetadata = {
   },
   "pos.terminal.v1.ListTerminalsRequest": {},
   "pos.terminal.v1.UpdateTerminalRequest": {
-    "branchId": {
-      "gt": 0,
-      "name": "branchId",
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "branch_id",
+      "protoName": "body",
       "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
-    "deviceId": {
-      "minLen": 1,
-      "name": "deviceId",
-      "optional": false,
-      "protoName": "device_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
+      "required": false,
+      "scalar": false,
+      "type": "UpdateTerminalBody"
     },
     "id": {
       "gt": 0,
@@ -10232,25 +8581,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "isActive": {
-      "name": "isActive",
-      "optional": false,
-      "protoName": "is_active",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "bool"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
     }
   },
   "pos.user.v1.CreatePOSUserRequest": {
