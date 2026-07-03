@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package hr.equipment.v1;
+
+import "hr/equipment/v1/approve_equipment.proto";
+import "hr/equipment/v1/create_equipment_request.proto";
+import "hr/equipment/v1/list_assets.proto";
+import "hr/equipment/v1/list_equipment_requests.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
+
+// EquipmentService defines HR equipment endpoints.
+service EquipmentService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/equipment/v1"};
+
+  // ListAssets returns equipment assets with optional filters.
+  rpc ListAssets(ListAssetsRequest) returns (ListAssetsResponse) {
+    option (onekit.http.config) = {
+      path: "/assets"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // ListEquipmentRequests returns equipment requests with optional filters.
+  rpc ListEquipmentRequests(ListEquipmentRequestsRequest) returns (ListEquipmentRequestsResponse) {
+    option (onekit.http.config) = {
+      path: "/requests"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateEquipmentRequest submits an equipment request.
+  rpc CreateEquipmentRequest(CreateEquipmentRequestRequest) returns (CreateEquipmentRequestResponse) {
+    option (onekit.http.config) = {
+      path: "/requests"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ApproveEquipment approves an equipment request.
+  rpc ApproveEquipment(ApproveEquipmentRequest) returns (ApproveEquipmentResponse) {
+    option (onekit.http.config) = {
+      path: "/requests/{equipment_request_id}/approve"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+}

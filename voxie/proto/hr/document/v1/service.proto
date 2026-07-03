@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package hr.document.v1;
+
+import "hr/document/v1/list_employee_documents.proto";
+import "hr/document/v1/upload_document.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
+
+// DocumentService defines HR employee document endpoints.
+service DocumentService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/document/v1"};
+
+  // ListEmployeeDocuments returns employee documents with optional filters.
+  rpc ListEmployeeDocuments(ListEmployeeDocumentsRequest) returns (ListEmployeeDocumentsResponse) {
+    option (onekit.http.config) = {
+      path: "/documents"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UploadDocument uploads an employee document.
+  rpc UploadDocument(UploadDocumentRequest) returns (UploadDocumentResponse) {
+    option (onekit.http.config) = {
+      path: "/documents"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

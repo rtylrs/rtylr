@@ -3,16 +3,17 @@ syntax = "proto3";
 package hr.staff.v1;
 
 import "hr/staff/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/staff/v1";
 
 message ListStaffRequest {
   // search is the search value for this contract.
-  string search = 1;
+  string search = 1 [(onekit.http.query).name = "search"];
   // department_id is the department id value for this contract.
-  string department_id = 2;
+  string department_id = 2 [(onekit.http.query).name = "department_id"];
   // status is the current lifecycle state.
-  string status = 3;
+  string status = 3 [(onekit.http.query).name = "status"];
 }
 
 message ListStaffResponse {

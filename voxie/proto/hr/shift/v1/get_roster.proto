@@ -4,6 +4,7 @@ package hr.shift.v1;
 
 import "buf/validate/validate.proto";
 import "hr/shift/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
 
@@ -18,7 +19,8 @@ message GetRosterRequest {
   // Monday of the week to retrieve (ISO-8601 date).
   string week_start = 2 [
     (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).string.min_len = 1,
+    (onekit.http.query).name = "week_start"
   ];
 }
 

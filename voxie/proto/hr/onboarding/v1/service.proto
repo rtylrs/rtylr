@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package hr.onboarding.v1;
+
+import "hr/onboarding/v1/add_item_to_checklist_template.proto";
+import "hr/onboarding/v1/complete_checklist_item.proto";
+import "hr/onboarding/v1/create_checklist_template.proto";
+import "hr/onboarding/v1/get_employee_checklist.proto";
+import "hr/onboarding/v1/list_checklist_templates.proto";
+import "hr/onboarding/v1/list_employee_checklists.proto";
+import "hr/onboarding/v1/trigger_checklist.proto";
+import "hr/onboarding/v1/update_checklist_template.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
+
+// OnboardingService defines HR onboarding checklist endpoints.
+service OnboardingService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/onboarding/v1"};
+
+  // ListChecklistTemplates returns checklist templates with optional filters.
+  rpc ListChecklistTemplates(ListChecklistTemplatesRequest) returns (ListChecklistTemplatesResponse) {
+    option (onekit.http.config) = {
+      path: "/templates"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateChecklistTemplate creates a checklist template.
+  rpc CreateChecklistTemplate(CreateChecklistTemplateRequest) returns (CreateChecklistTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateChecklistTemplate updates a checklist template.
+  rpc UpdateChecklistTemplate(UpdateChecklistTemplateRequest) returns (UpdateChecklistTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates/{role_id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  // AddItemToChecklistTemplate adds an item to a checklist template.
+  rpc AddItemToChecklistTemplate(AddItemToChecklistTemplateRequest) returns (AddItemToChecklistTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates/{role_id}/items"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ListEmployeeChecklists returns employee checklists with optional filters.
+  rpc ListEmployeeChecklists(ListEmployeeChecklistsRequest) returns (ListEmployeeChecklistsResponse) {
+    option (onekit.http.config) = {
+      path: "/checklists"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetEmployeeChecklist returns a single employee checklist.
+  rpc GetEmployeeChecklist(GetEmployeeChecklistRequest) returns (GetEmployeeChecklistResponse) {
+    option (onekit.http.config) = {
+      path: "/employees/{employee_id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // TriggerChecklist triggers onboarding for an employee.
+  rpc TriggerChecklist(TriggerChecklistRequest) returns (TriggerChecklistResponse) {
+    option (onekit.http.config) = {
+      path: "/checklists/trigger"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // CompleteChecklistItem marks a checklist item complete.
+  rpc CompleteChecklistItem(CompleteChecklistItemRequest) returns (CompleteChecklistItemResponse) {
+    option (onekit.http.config) = {
+      path: "/checklists/items/complete"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

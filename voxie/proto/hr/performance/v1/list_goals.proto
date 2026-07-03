@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.performance.v1;
 
 import "hr/performance/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
 message ListGoalsRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1;
+  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
   // Filter by review cycle; absent to include all cycles.
-  optional int64 review_cycle_id = 2;
+  optional int64 review_cycle_id = 2 [(onekit.http.query).name = "review_cycle_id"];
 }
 
 message ListGoalsResponse {

@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package hr.employee.v1;
+
+import "hr/employee/v1/accept_invite.proto";
+import "hr/employee/v1/create_employee.proto";
+import "hr/employee/v1/invite_employee.proto";
+import "hr/employee/v1/list_employees.proto";
+import "hr/employee/v1/update_employee.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
+
+// EmployeeService defines HR employee endpoints.
+service EmployeeService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/employee/v1"};
+
+  // ListEmployees returns employees with optional filters.
+  rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse) {
+    option (onekit.http.config) = {
+      path: "/employees"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateEmployee creates a new employee.
+  rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse) {
+    option (onekit.http.config) = {
+      path: "/employees"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateEmployee updates an existing employee.
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (UpdateEmployeeResponse) {
+    option (onekit.http.config) = {
+      path: "/employees/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  // InviteEmployee sends an employee invitation.
+  rpc InviteEmployee(InviteEmployeeRequest) returns (InviteEmployeeResponse) {
+    option (onekit.http.config) = {
+      path: "/employees/invite"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // AcceptInvite accepts an employee invitation.
+  rpc AcceptInvite(AcceptInviteRequest) returns (AcceptInviteResponse) {
+    option (onekit.http.config) = {
+      path: "/employees/invite/accept"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

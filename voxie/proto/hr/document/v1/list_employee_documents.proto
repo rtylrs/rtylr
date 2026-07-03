@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.document.v1;
 
 import "hr/document/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
 
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
 
 message ListEmployeeDocumentsRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1;
+  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
   // Filter by document type; absent to include all types.
-  optional string document_type = 2;
+  optional string document_type = 2 [(onekit.http.query).name = "document_type"];
 }
 
 message ListEmployeeDocumentsResponse {

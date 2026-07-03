@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.shift.v1;
 
 import "hr/shift/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
 
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
 
 message ListShiftsRequest {
   // Filter by location; absent to include all locations.
-  optional int64 location_id = 1;
+  optional int64 location_id = 1 [(onekit.http.query).name = "location_id"];
 }
 
 message ListShiftsResponse {

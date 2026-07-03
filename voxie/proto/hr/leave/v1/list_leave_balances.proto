@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.leave.v1;
 
 import "hr/leave/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 message ListLeaveBalancesRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1;
+  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
   // Filter by year; absent to return current year.
-  optional int32 year = 2;
+  optional int32 year = 2 [(onekit.http.query).name = "year"];
 }
 
 message ListLeaveBalancesResponse {

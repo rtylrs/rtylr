@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.onboarding.v1;
 
 import "hr/onboarding/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
 message ListChecklistTemplatesRequest {
   // Filter by trigger type; absent to include all types.
-  optional string trigger_type = 1;
+  optional string trigger_type = 1 [(onekit.http.query).name = "trigger_type"];
 }
 
 message ListChecklistTemplatesResponse {

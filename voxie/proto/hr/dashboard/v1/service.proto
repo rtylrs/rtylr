@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hr.dashboard.v1;
+
+import "hr/dashboard/v1/get_hr_dashboard.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/dashboard/v1";
+
+// DashboardService defines HR dashboard endpoints.
+service DashboardService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/dashboard/v1"};
+
+  // GetHRDashboard returns the HR dashboard summary.
+  rpc GetHRDashboard(GetHRDashboardRequest) returns (GetHRDashboardResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

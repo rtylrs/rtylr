@@ -4,6 +4,7 @@ package hr.onboarding.v1;
 
 import "buf/validate/validate.proto";
 import "hr/onboarding/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
@@ -13,12 +14,13 @@ message ListEmployeeChecklistsRequest {
   // employee_id is the employee whose checklists should be listed.
   int64 employee_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "employee_id"
   ];
   // limit is the maximum number of checklists to return.
-  optional int32 limit = 2;
+  optional int32 limit = 2 [(onekit.http.query).name = "limit"];
   // offset is the number of checklists to skip before returning results.
-  optional int32 offset = 3;
+  optional int32 offset = 3 [(onekit.http.query).name = "offset"];
 }
 
 message ListEmployeeChecklistsResponse {

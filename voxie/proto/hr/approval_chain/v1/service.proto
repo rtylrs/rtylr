@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hr.approval_chain.v1;
+
+import "hr/approval_chain/v1/upsert_approval_chain.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/approval_chain/v1";
+
+// ApprovalChainService defines HR approval chain endpoints.
+service ApprovalChainService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/approval-chain/v1"};
+
+  // UpsertApprovalChain creates or replaces the approval chain configuration.
+  rpc UpsertApprovalChain(UpsertApprovalChainRequest) returns (UpsertApprovalChainResponse) {
+    option (onekit.http.config) = {
+      path: "/approval-chains"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

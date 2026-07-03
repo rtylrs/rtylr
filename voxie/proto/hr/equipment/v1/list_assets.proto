@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.equipment.v1;
 
 import "hr/equipment/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
 
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
 
 message ListAssetsRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1;
+  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
   // Filter by condition; absent to include all conditions.
-  optional string condition = 2;
+  optional string condition = 2 [(onekit.http.query).name = "condition"];
 }
 
 message ListAssetsResponse {

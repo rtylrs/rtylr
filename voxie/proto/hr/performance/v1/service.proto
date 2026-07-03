@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package hr.performance.v1;
+
+import "hr/performance/v1/create_review_cycle.proto";
+import "hr/performance/v1/list_goals.proto";
+import "hr/performance/v1/list_review_cycles.proto";
+import "hr/performance/v1/open_review_cycle.proto";
+import "hr/performance/v1/submit_review.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
+
+// PerformanceService defines HR performance review endpoints.
+service PerformanceService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/performance/v1"};
+
+  // ListReviewCycles returns review cycles.
+  rpc ListReviewCycles(ListReviewCyclesRequest) returns (ListReviewCyclesResponse) {
+    option (onekit.http.config) = {
+      path: "/review-cycles"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateReviewCycle creates a review cycle.
+  rpc CreateReviewCycle(CreateReviewCycleRequest) returns (CreateReviewCycleResponse) {
+    option (onekit.http.config) = {
+      path: "/review-cycles"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // OpenReviewCycle opens a review cycle for submissions.
+  rpc OpenReviewCycle(OpenReviewCycleRequest) returns (OpenReviewCycleResponse) {
+    option (onekit.http.config) = {
+      path: "/review-cycles/open"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ListGoals returns performance goals with optional filters.
+  rpc ListGoals(ListGoalsRequest) returns (ListGoalsResponse) {
+    option (onekit.http.config) = {
+      path: "/goals"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // SubmitReview submits a performance review.
+  rpc SubmitReview(SubmitReviewRequest) returns (SubmitReviewResponse) {
+    option (onekit.http.config) = {
+      path: "/reviews"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

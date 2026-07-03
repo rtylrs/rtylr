@@ -3,6 +3,7 @@ syntax = "proto3";
 package hr.time_entry.v1;
 
 import "hr/time_entry/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
 message ListTimeEntriesRequest {
   // Filter by employee; absent to include all employees.
-  optional int64 employee_id = 1;
+  optional int64 employee_id = 1 [(onekit.http.query).name = "employee_id"];
   // Filter by date; absent to include all dates.
-  optional string date = 2;
+  optional string date = 2 [(onekit.http.query).name = "date"];
 }
 
 message ListTimeEntriesResponse {
