@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // TimeEntryServiceServer is the server API for TimeEntryService service.
@@ -28,7 +28,7 @@ func RegisterTimeEntryServiceServer(server TimeEntryServiceServer, opts ...Serve
 	listTimeEntriesHandler := BindingMiddleware[ListTimeEntriesRequest](
 		genericHandler(server.ListTimeEntries, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTimeEntriesPathParams, listTimeEntriesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/time-entry/v1/time-entries", listTimeEntriesHandler)
@@ -37,7 +37,7 @@ func RegisterTimeEntryServiceServer(server TimeEntryServiceServer, opts ...Serve
 	createTimeEntryHandler := BindingMiddleware[CreateTimeEntryRequest](
 		genericHandler(server.CreateTimeEntry, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createTimeEntryPathParams, createTimeEntryQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/time-entry/v1/time-entries", createTimeEntryHandler)
@@ -46,7 +46,7 @@ func RegisterTimeEntryServiceServer(server TimeEntryServiceServer, opts ...Serve
 	listTimesheetsHandler := BindingMiddleware[ListTimesheetsRequest](
 		genericHandler(server.ListTimesheets, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTimesheetsPathParams, listTimesheetsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/time-entry/v1/timesheets", listTimesheetsHandler)
@@ -55,7 +55,7 @@ func RegisterTimeEntryServiceServer(server TimeEntryServiceServer, opts ...Serve
 	submitTimesheetHandler := BindingMiddleware[SubmitTimesheetRequest](
 		genericHandler(server.SubmitTimesheet, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		submitTimesheetPathParams, submitTimesheetQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/time-entry/v1/timesheets", submitTimesheetHandler)
@@ -64,7 +64,7 @@ func RegisterTimeEntryServiceServer(server TimeEntryServiceServer, opts ...Serve
 	approveTimesheetHandler := BindingMiddleware[ApproveTimesheetRequest](
 		genericHandler(server.ApproveTimesheet, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveTimesheetPathParams, approveTimesheetQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/time-entry/v1/timesheets/{id}/approve", approveTimesheetHandler)

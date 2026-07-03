@@ -9,13 +9,13 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/team/onboarding/v1";
 
 // OnboardingService defines hub team onboarding endpoints.
 service OnboardingService {
-  option (onekit.http.service_config) = {base_path: ""};
+  option (onekit.http.service_config) = {base_path: "/api/hub/team/onboarding/v1"};
 
   // MarkOnboarded marks the current user as onboarded.
   rpc MarkOnboarded(MarkOnboardedRequest) returns (MarkOnboardedResponse) {
     option (onekit.http.config) = {
-      path: "/user/onboarded"
-      method: HTTP_METHOD_GET
+      path: "/onboarded"
+      method: HTTP_METHOD_PATCH
     };
   }
 }

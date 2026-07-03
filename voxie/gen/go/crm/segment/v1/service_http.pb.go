@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SegmentServiceServer is the server API for SegmentService service.
@@ -29,7 +29,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	listSegmentsHandler := BindingMiddleware[ListSegmentsRequest](
 		genericHandler(server.ListSegments, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listSegmentsPathParams, listSegmentsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/segment/v1/segments", listSegmentsHandler)
@@ -38,7 +38,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	createSegmentHandler := BindingMiddleware[CreateSegmentRequest](
 		genericHandler(server.CreateSegment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createSegmentPathParams, createSegmentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/crm/segment/v1/segments", createSegmentHandler)
@@ -47,7 +47,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	getSegmentDetailHandler := BindingMiddleware[GetSegmentDetailRequest](
 		genericHandler(server.GetSegmentDetail, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getSegmentDetailPathParams, getSegmentDetailQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/segment/v1/segments/{id}", getSegmentDetailHandler)
@@ -56,7 +56,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	getSegmentCustomersHandler := BindingMiddleware[GetSegmentCustomersRequest](
 		genericHandler(server.GetSegmentCustomers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getSegmentCustomersPathParams, getSegmentCustomersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/segment/v1/segments/{segment_id}/customers", getSegmentCustomersHandler)
@@ -65,7 +65,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	updateSegmentHandler := BindingMiddleware[UpdateSegmentRequest](
 		genericHandler(server.UpdateSegment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateSegmentPathParams, updateSegmentQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/segment/v1/segments/{id}", updateSegmentHandler)
@@ -74,7 +74,7 @@ func RegisterSegmentServiceServer(server SegmentServiceServer, opts ...ServerOpt
 	deleteSegmentHandler := BindingMiddleware[DeleteSegmentRequest](
 		genericHandler(server.DeleteSegment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteSegmentPathParams, deleteSegmentQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/crm/segment/v1/segments/{id}", deleteSegmentHandler)

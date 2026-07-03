@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SettingServiceServer is the server API for SettingService service.
@@ -25,7 +25,7 @@ func RegisterSettingServiceServer(server SettingServiceServer, opts ...ServerOpt
 	getInsightsSettingsHandler := BindingMiddleware[GetInsightsSettingsRequest](
 		genericHandler(server.GetInsightsSettings, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getInsightsSettingsPathParams, getInsightsSettingsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/setting/v1/settings", getInsightsSettingsHandler)
@@ -34,7 +34,7 @@ func RegisterSettingServiceServer(server SettingServiceServer, opts ...ServerOpt
 	updateInsightsSettingsHandler := BindingMiddleware[UpdateInsightsSettingsRequest](
 		genericHandler(server.UpdateInsightsSettings, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateInsightsSettingsPathParams, updateInsightsSettingsQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/insights/setting/v1/settings", updateInsightsSettingsHandler)

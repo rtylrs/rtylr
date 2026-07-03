@@ -3,13 +3,11 @@
 
 export interface UpdatePermissionsRequest {
   userId: string;
-  fullName: string | null;
   apps: string[];
   role: string;
 }
 
 export interface UpdatePermissionsResponse {
-  message: string;
 }
 
 export interface FieldViolation {
@@ -76,7 +74,8 @@ export class PermissionsServiceClient {
   }
 
   async updatePermissions(req: UpdatePermissionsRequest, options?: PermissionsServiceCallOptions): Promise<UpdatePermissionsResponse> {
-    let path = "/team/users/permissions";
+    let path = "/api/hub/team/permissions/v1/permissions/{user_id}";
+    path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {

@@ -7,12 +7,8 @@
 /* eslint-disable */
 
 export interface UpdatePermissionsRequest {
-  /** user_id identifies the user whose permissions are being updated. */
+  /** user_id identifies the user associated with this request. */
   userId: number;
-  /** full_name optionally updates the member display name. */
-  fullName?:
-    | string
-    | undefined;
   /** apps is the apps value for this contract. */
   apps: string[];
   /** role is the role value for this contract. */
@@ -20,6 +16,4 @@ export interface UpdatePermissionsRequest {
 }
 
 export interface UpdatePermissionsResponse {
-  /** message is a human-readable result message. */
-  message: string;
 }

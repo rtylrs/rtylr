@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // WorkspaceServiceServer is the server API for WorkspaceService service.
@@ -29,7 +29,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	listWorkspacesHandler := BindingMiddleware[ListWorkspacesRequest](
 		genericHandler(server.ListWorkspaces, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listWorkspacesPathParams, listWorkspacesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/workspace/v1/workspaces", listWorkspacesHandler)
@@ -38,7 +38,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	createWorkspaceHandler := BindingMiddleware[CreateWorkspaceRequest](
 		genericHandler(server.CreateWorkspace, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createWorkspacePathParams, createWorkspaceQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/workspace/v1/workspaces", createWorkspaceHandler)
@@ -47,7 +47,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	updateWorkspaceHandler := BindingMiddleware[UpdateWorkspaceRequest](
 		genericHandler(server.UpdateWorkspace, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateWorkspacePathParams, updateWorkspaceQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/flow/workspace/v1/workspaces/{id}", updateWorkspaceHandler)
@@ -56,7 +56,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	deleteWorkspaceHandler := BindingMiddleware[DeleteWorkspaceRequest](
 		genericHandler(server.DeleteWorkspace, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteWorkspacePathParams, deleteWorkspaceQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/flow/workspace/v1/workspaces/{id}", deleteWorkspaceHandler)
@@ -65,7 +65,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	addWorkspaceMemberHandler := BindingMiddleware[AddWorkspaceMemberRequest](
 		genericHandler(server.AddWorkspaceMember, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		addWorkspaceMemberPathParams, addWorkspaceMemberQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/workspace/v1/workspaces/members", addWorkspaceMemberHandler)
@@ -74,7 +74,7 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	removeWorkspaceMemberHandler := BindingMiddleware[RemoveWorkspaceMemberRequest](
 		genericHandler(server.RemoveWorkspaceMember, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		removeWorkspaceMemberPathParams, removeWorkspaceMemberQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/flow/workspace/v1/workspaces/members", removeWorkspaceMemberHandler)

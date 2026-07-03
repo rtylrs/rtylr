@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // LocationServiceServer is the server API for LocationService service.
@@ -25,7 +25,7 @@ func RegisterLocationServiceServer(server LocationServiceServer, opts ...ServerO
 	createLocationHandler := BindingMiddleware[CreateLocationRequest](
 		genericHandler(server.CreateLocation, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createLocationPathParams, createLocationQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/location/v1/locations", createLocationHandler)
@@ -34,7 +34,7 @@ func RegisterLocationServiceServer(server LocationServiceServer, opts ...ServerO
 	updateLocationHandler := BindingMiddleware[UpdateLocationRequest](
 		genericHandler(server.UpdateLocation, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLocationPathParams, updateLocationQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/location/v1/locations/{id}", updateLocationHandler)

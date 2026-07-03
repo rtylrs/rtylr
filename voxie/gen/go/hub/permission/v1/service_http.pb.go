@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // PermissionServiceServer is the server API for PermissionService service.
@@ -14,8 +14,7 @@ type PermissionServiceServer interface {
 	GetPermissions(context.Context, *GetPermissionsRequest) (*GetPermissionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error)
-	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
-	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error)
+	UpdatePermissionMatrix(context.Context, *UpdatePermissionMatrixRequest) (*UpdatePermissionMatrixResponse, error)
 }
 
 // RegisterPermissionServiceServer registers the HTTP handlers for service PermissionService to the given mux.
@@ -28,46 +27,37 @@ func RegisterPermissionServiceServer(server PermissionServiceServer, opts ...Ser
 	getPermissionsHandler := BindingMiddleware[GetPermissionsRequest](
 		genericHandler(server.GetPermissions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getPermissionsPathParams, getPermissionsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /permissions", getPermissionsHandler)
+	config.mux.Handle("GET /api/hub/permission/v1/permissions", getPermissionsHandler)
 
 	methodHeaders = getListRolesHeaders()
 	listRolesHandler := BindingMiddleware[ListRolesRequest](
 		genericHandler(server.ListRoles, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listRolesPathParams, listRolesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /roles", listRolesHandler)
+	config.mux.Handle("GET /api/hub/permission/v1/roles", listRolesHandler)
 
 	methodHeaders = getCreateRoleHeaders()
 	createRoleHandler := BindingMiddleware[CreateRoleRequest](
 		genericHandler(server.CreateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createRolePathParams, createRoleQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /roles", createRoleHandler)
+	config.mux.Handle("POST /api/hub/permission/v1/roles", createRoleHandler)
 
-	methodHeaders = getUpdateRoleHeaders()
-	updateRoleHandler := BindingMiddleware[UpdateRoleRequest](
-		genericHandler(server.UpdateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		updateRolePathParams, updateRoleQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+	methodHeaders = getUpdatePermissionMatrixHeaders()
+	updatePermissionMatrixHandler := BindingMiddleware[UpdatePermissionMatrixRequest](
+		genericHandler(server.UpdatePermissionMatrix, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updatePermissionMatrixPathParams, updatePermissionMatrixQueryParams,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /roles", updateRoleHandler)
-
-	methodHeaders = getDeleteRoleHeaders()
-	deleteRoleHandler := BindingMiddleware[DeleteRoleRequest](
-		genericHandler(server.DeleteRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		deleteRolePathParams, deleteRoleQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("DELETE /roles", deleteRoleHandler)
+	config.mux.Handle("PATCH /api/hub/permission/v1/matrix", updatePermissionMatrixHandler)
 
 	return nil
 }
@@ -92,13 +82,8 @@ func getCreateRoleHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getUpdateRoleHeaders returns the method-level required headers for UpdateRole
-func getUpdateRoleHeaders() []*onekithttp.Header {
-	return nil
-}
-
-// getDeleteRoleHeaders returns the method-level required headers for DeleteRole
-func getDeleteRoleHeaders() []*onekithttp.Header {
+// getUpdatePermissionMatrixHeaders returns the method-level required headers for UpdatePermissionMatrix
+func getUpdatePermissionMatrixHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -120,16 +105,8 @@ var createRolePathParams = []PathParamConfig{}
 // createRoleQueryParams contains query parameter configuration for CreateRole
 var createRoleQueryParams = []QueryParamConfig{}
 
-// updateRolePathParams contains path parameter configuration for UpdateRole
-var updateRolePathParams = []PathParamConfig{}
+// updatePermissionMatrixPathParams contains path parameter configuration for UpdatePermissionMatrix
+var updatePermissionMatrixPathParams = []PathParamConfig{}
 
-// updateRoleQueryParams contains query parameter configuration for UpdateRole
-var updateRoleQueryParams = []QueryParamConfig{}
-
-// deleteRolePathParams contains path parameter configuration for DeleteRole
-var deleteRolePathParams = []PathParamConfig{}
-
-// deleteRoleQueryParams contains query parameter configuration for DeleteRole
-var deleteRoleQueryParams = []QueryParamConfig{
-	{QueryName: "id", FieldName: "id", Required: false},
-}
+// updatePermissionMatrixQueryParams contains query parameter configuration for UpdatePermissionMatrix
+var updatePermissionMatrixQueryParams = []QueryParamConfig{}

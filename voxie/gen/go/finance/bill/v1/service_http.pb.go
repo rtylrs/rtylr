@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // BillServiceServer is the server API for BillService service.
@@ -26,7 +26,7 @@ func RegisterBillServiceServer(server BillServiceServer, opts ...ServerOption) e
 	listBillsHandler := BindingMiddleware[ListBillsRequest](
 		genericHandler(server.ListBills, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listBillsPathParams, listBillsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/bill/v1/bills", listBillsHandler)
@@ -35,7 +35,7 @@ func RegisterBillServiceServer(server BillServiceServer, opts ...ServerOption) e
 	createBillHandler := BindingMiddleware[CreateBillRequest](
 		genericHandler(server.CreateBill, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createBillPathParams, createBillQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/bill/v1/bills", createBillHandler)
@@ -44,7 +44,7 @@ func RegisterBillServiceServer(server BillServiceServer, opts ...ServerOption) e
 	updateBillHandler := BindingMiddleware[UpdateBillRequest](
 		genericHandler(server.UpdateBill, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateBillPathParams, updateBillQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/bill/v1/bills/{id}", updateBillHandler)

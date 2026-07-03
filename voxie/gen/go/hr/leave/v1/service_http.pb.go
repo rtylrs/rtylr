@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // LeaveServiceServer is the server API for LeaveService service.
@@ -30,7 +30,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	listLeaveRequestsHandler := BindingMiddleware[ListLeaveRequestsRequest](
 		genericHandler(server.ListLeaveRequests, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLeaveRequestsPathParams, listLeaveRequestsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/leave/v1/requests", listLeaveRequestsHandler)
@@ -39,7 +39,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	createLeaveRequestHandler := BindingMiddleware[CreateLeaveRequestRequest](
 		genericHandler(server.CreateLeaveRequest, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createLeaveRequestPathParams, createLeaveRequestQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/leave/v1/requests", createLeaveRequestHandler)
@@ -48,7 +48,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	approveLeaveHandler := BindingMiddleware[ApproveLeaveRequest](
 		genericHandler(server.ApproveLeave, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveLeavePathParams, approveLeaveQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/leave/v1/requests/{request_id}/approve", approveLeaveHandler)
@@ -57,7 +57,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	listLeaveTypesHandler := BindingMiddleware[ListLeaveTypesRequest](
 		genericHandler(server.ListLeaveTypes, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLeaveTypesPathParams, listLeaveTypesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/leave/v1/types", listLeaveTypesHandler)
@@ -66,7 +66,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	createLeaveTypeHandler := BindingMiddleware[CreateLeaveTypeRequest](
 		genericHandler(server.CreateLeaveType, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createLeaveTypePathParams, createLeaveTypeQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/leave/v1/types", createLeaveTypeHandler)
@@ -75,7 +75,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	updateLeaveTypeHandler := BindingMiddleware[UpdateLeaveTypeRequest](
 		genericHandler(server.UpdateLeaveType, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLeaveTypePathParams, updateLeaveTypeQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/leave/v1/types/{id}", updateLeaveTypeHandler)
@@ -84,7 +84,7 @@ func RegisterLeaveServiceServer(server LeaveServiceServer, opts ...ServerOption)
 	listLeaveBalancesHandler := BindingMiddleware[ListLeaveBalancesRequest](
 		genericHandler(server.ListLeaveBalances, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLeaveBalancesPathParams, listLeaveBalancesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/leave/v1/balances", listLeaveBalancesHandler)

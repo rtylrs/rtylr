@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OnboardingServiceServer is the server API for OnboardingService service.
@@ -24,10 +24,10 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	markOnboardedHandler := BindingMiddleware[MarkOnboardedRequest](
 		genericHandler(server.MarkOnboarded, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		markOnboardedPathParams, markOnboardedQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /user/onboarded", markOnboardedHandler)
+	config.mux.Handle("PATCH /api/hub/team/onboarding/v1/onboarded", markOnboardedHandler)
 
 	return nil
 }

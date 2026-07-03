@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,16 +25,18 @@ var File_hub_security_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_security_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhub/security/v1/service.proto\x12\x0fhub.security.v1\x1a(hub/security/v1/get_security_state.proto\x1a)hub/security/v1/invalidate_sessions.proto\x1a#hub/security/v1/login_history.proto\x1a hub/security/v1/update2_fa.proto\x1a\x1donekit/http/annotations.proto2\x93\x04\n" +
-	"\x0fSecurityService\x12z\n" +
-	"\x10GetSecurityState\x12(.hub.security.v1.GetSecurityStateRequest\x1a).hub.security.v1.GetSecurityStateResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/security\x10\x01\x12|\n" +
-	"\fLoginHistory\x12$.hub.security.v1.LoginHistoryRequest\x1a%.hub.security.v1.LoginHistoryResponse\"\x1f\x9a\xb5\x18\x1b\n" +
-	"\x17/security/login-history\x10\x01\x12\x94\x01\n" +
-	"\x12InvalidateSessions\x12*.hub.security.v1.InvalidateSessionsRequest\x1a+.hub.security.v1.InvalidateSessionsResponse\"%\x9a\xb5\x18!\n" +
-	"\x1d/security/invalidate-sessions\x10\x02\x12i\n" +
-	"\tUpdate2FA\x12!.hub.security.v1.Update2FARequest\x1a\".hub.security.v1.Update2FAResponse\"\x15\x9a\xb5\x18\x11\n" +
-	"\r/security/2fa\x10\x02\x1a\x04\xa2\xb5\x18\x00B0Z.github.com/voxire/voxie/gen/go/hub/security/v1b\x06proto3"
+	"\x1dhub/security/v1/service.proto\x12\x0fhub.security.v1\x1a(hub/security/v1/get_security_state.proto\x1a)hub/security/v1/invalidate_sessions.proto\x1a#hub/security/v1/login_history.proto\x1a hub/security/v1/update2_fa.proto\x1a\x1donekit/http/annotations.proto2\x8b\x04\n" +
+	"\x0fSecurityService\x12w\n" +
+	"\x10GetSecurityState\x12(.hub.security.v1.GetSecurityStateRequest\x1a).hub.security.v1.GetSecurityStateResponse\"\x0e\x9a\xb5\x18\n" +
+	"\n" +
+	"\x06/state\x10\x01\x12s\n" +
+	"\fLoginHistory\x12$.hub.security.v1.LoginHistoryRequest\x1a%.hub.security.v1.LoginHistoryResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/login-history\x10\x01\x12\x8b\x01\n" +
+	"\x12InvalidateSessions\x12*.hub.security.v1.InvalidateSessionsRequest\x1a+.hub.security.v1.InvalidateSessionsResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x14/invalidate-sessions\x10\x02\x12`\n" +
+	"\tUpdate2FA\x12!.hub.security.v1.Update2FARequest\x1a\".hub.security.v1.Update2FAResponse\"\f\x9a\xb5\x18\b\n" +
+	"\x04/2fa\x10\x05\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\x14/api/hub/security/v1B0Z.github.com/voxire/voxie/gen/go/hub/security/v1b\x06proto3"
 
 var file_hub_security_v1_service_proto_goTypes = []any{
 	(*GetSecurityStateRequest)(nil),    // 0: hub.security.v1.GetSecurityStateRequest

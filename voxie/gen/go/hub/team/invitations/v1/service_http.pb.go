@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // InvitationsServiceServer is the server API for InvitationsService service.
@@ -26,28 +26,28 @@ func RegisterInvitationsServiceServer(server InvitationsServiceServer, opts ...S
 	inviteUserHandler := BindingMiddleware[InviteUserRequest](
 		genericHandler(server.InviteUser, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		inviteUserPathParams, inviteUserQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /team/invite", inviteUserHandler)
+	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations", inviteUserHandler)
 
 	methodHeaders = getVerifyInviteHeaders()
 	verifyInviteHandler := BindingMiddleware[VerifyInviteRequest](
 		genericHandler(server.VerifyInvite, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		verifyInvitePathParams, verifyInviteQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /auth/invite/verify", verifyInviteHandler)
+	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations/verify", verifyInviteHandler)
 
 	methodHeaders = getAcceptInviteHeaders()
 	acceptInviteHandler := BindingMiddleware[AcceptInviteRequest](
 		genericHandler(server.AcceptInvite, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		acceptInvitePathParams, acceptInviteQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /auth/invite/accept", acceptInviteHandler)
+	config.mux.Handle("POST /api/hub/team/invitations/v1/invitations/accept", acceptInviteHandler)
 
 	return nil
 }
@@ -82,9 +82,7 @@ var inviteUserQueryParams = []QueryParamConfig{}
 var verifyInvitePathParams = []PathParamConfig{}
 
 // verifyInviteQueryParams contains query parameter configuration for VerifyInvite
-var verifyInviteQueryParams = []QueryParamConfig{
-	{QueryName: "token", FieldName: "token", Required: false},
-}
+var verifyInviteQueryParams = []QueryParamConfig{}
 
 // acceptInvitePathParams contains path parameter configuration for AcceptInvite
 var acceptInvitePathParams = []PathParamConfig{}

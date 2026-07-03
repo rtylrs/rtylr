@@ -7,7 +7,9 @@
 /* eslint-disable */
 import type { Business } from "./types";
 
-export interface UpdateBusinessBody {
+export interface UpdateBusinessRequest {
+  /** business_id is the business id value for this contract. */
+  businessId: number;
   /** name is the name value for this contract. */
   name: string;
   /** type is the type value for this contract. */
@@ -26,13 +28,6 @@ export interface UpdateBusinessBody {
   currency: string;
   /** slug is the slug value for this contract. */
   slug?: string | undefined;
-}
-
-export interface UpdateBusinessRequest {
-  /** business_id is the business id value for this contract. */
-  businessId: number;
-  /** body carries updatable business fields bound from the HTTP payload. */
-  body: UpdateBusinessBody | undefined;
 }
 
 export interface UpdateBusinessResponse {

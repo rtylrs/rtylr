@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AuthServiceServer is the server API for AuthService service.
@@ -31,7 +31,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	registerHandler := BindingMiddleware[RegisterRequest](
 		genericHandler(server.Register, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		registerPathParams, registerQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/register", registerHandler)
@@ -40,7 +40,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	loginHandler := BindingMiddleware[LoginRequest](
 		genericHandler(server.Login, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		loginPathParams, loginQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/login", loginHandler)
@@ -49,7 +49,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	googleAuthHandler := BindingMiddleware[GoogleAuthRequest](
 		genericHandler(server.GoogleAuth, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		googleAuthPathParams, googleAuthQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/register/google", googleAuthHandler)
@@ -58,7 +58,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	resetPasswordHandler := BindingMiddleware[ResetPasswordRequest](
 		genericHandler(server.ResetPassword, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		resetPasswordPathParams, resetPasswordQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/password-reset/request", resetPasswordHandler)
@@ -67,7 +67,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	resetPasswordConfirmHandler := BindingMiddleware[ResetPasswordConfirmRequest](
 		genericHandler(server.ResetPasswordConfirm, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		resetPasswordConfirmPathParams, resetPasswordConfirmQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/password-reset/confirm", resetPasswordConfirmHandler)
@@ -76,7 +76,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	verifyEmailHandler := BindingMiddleware[VerifyEmailRequest](
 		genericHandler(server.VerifyEmail, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		verifyEmailPathParams, verifyEmailQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/verify-email", verifyEmailHandler)
@@ -85,7 +85,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	resendVerificationHandler := BindingMiddleware[ResendVerificationRequest](
 		genericHandler(server.ResendVerification, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		resendVerificationPathParams, resendVerificationQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/resend-verification", resendVerificationHandler)
@@ -94,7 +94,7 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 	inviteAcceptHandler := BindingMiddleware[InviteAcceptRequest](
 		genericHandler(server.InviteAccept, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		inviteAcceptPathParams, inviteAcceptQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/auth/v1/invite/accept", inviteAcceptHandler)

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ProjectServiceServer is the server API for ProjectService service.
@@ -27,7 +27,7 @@ func RegisterProjectServiceServer(server ProjectServiceServer, opts ...ServerOpt
 	listProjectsHandler := BindingMiddleware[ListProjectsRequest](
 		genericHandler(server.ListProjects, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listProjectsPathParams, listProjectsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/project/v1/projects", listProjectsHandler)
@@ -36,7 +36,7 @@ func RegisterProjectServiceServer(server ProjectServiceServer, opts ...ServerOpt
 	createProjectHandler := BindingMiddleware[CreateProjectRequest](
 		genericHandler(server.CreateProject, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createProjectPathParams, createProjectQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/project/v1/projects", createProjectHandler)
@@ -45,7 +45,7 @@ func RegisterProjectServiceServer(server ProjectServiceServer, opts ...ServerOpt
 	updateProjectHandler := BindingMiddleware[UpdateProjectRequest](
 		genericHandler(server.UpdateProject, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateProjectPathParams, updateProjectQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/flow/project/v1/projects/{id}", updateProjectHandler)
@@ -54,7 +54,7 @@ func RegisterProjectServiceServer(server ProjectServiceServer, opts ...ServerOpt
 	deleteProjectHandler := BindingMiddleware[DeleteProjectRequest](
 		genericHandler(server.DeleteProject, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteProjectPathParams, deleteProjectQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/flow/project/v1/projects/{id}", deleteProjectHandler)

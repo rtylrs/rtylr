@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // TerminalServiceServer is the server API for TerminalService service.
@@ -27,7 +27,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 	listTerminalsHandler := BindingMiddleware[ListTerminalsRequest](
 		genericHandler(server.ListTerminals, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTerminalsPathParams, listTerminalsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/terminal/v1/terminals", listTerminalsHandler)
@@ -36,7 +36,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 	createTerminalHandler := BindingMiddleware[CreateTerminalRequest](
 		genericHandler(server.CreateTerminal, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createTerminalPathParams, createTerminalQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/terminal/v1/terminals", createTerminalHandler)
@@ -45,7 +45,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 	updateTerminalHandler := BindingMiddleware[UpdateTerminalRequest](
 		genericHandler(server.UpdateTerminal, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTerminalPathParams, updateTerminalQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/terminal/v1/terminals/{id}", updateTerminalHandler)
@@ -54,7 +54,7 @@ func RegisterTerminalServiceServer(server TerminalServiceServer, opts ...ServerO
 	heartbeatTerminalHandler := BindingMiddleware[HeartbeatTerminalRequest](
 		genericHandler(server.HeartbeatTerminal, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		heartbeatTerminalPathParams, heartbeatTerminalQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/terminal/v1/terminals/heartbeat", heartbeatTerminalHandler)

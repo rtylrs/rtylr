@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // InvoicePaymentServiceServer is the server API for InvoicePaymentService service.
@@ -24,7 +24,7 @@ func RegisterInvoicePaymentServiceServer(server InvoicePaymentServiceServer, opt
 	recordPaymentHandler := BindingMiddleware[RecordPaymentRequest](
 		genericHandler(server.RecordPayment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		recordPaymentPathParams, recordPaymentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/invoices/payments/v1/invoices/{invoice_id}/payment", recordPaymentHandler)

@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,14 +25,15 @@ var File_hub_notification_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_notification_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!hub/notification/v1/service.proto\x12\x13hub.notification.v1\x1a,hub/notification/v1/list_notifications.proto\x1a'hub/notification/v1/mark_all_read.proto\x1a0hub/notification/v1/mark_notification_read.proto\x1a\x1donekit/http/annotations.proto2\xcc\x03\n" +
+	"!hub/notification/v1/service.proto\x12\x13hub.notification.v1\x1a,hub/notification/v1/list_notifications.proto\x1a'hub/notification/v1/mark_all_read.proto\x1a0hub/notification/v1/mark_notification_read.proto\x1a\x1donekit/http/annotations.proto2\xe6\x03\n" +
 	"\x13NotificationService\x12\x8a\x01\n" +
 	"\x11ListNotifications\x12-.hub.notification.v1.ListNotificationsRequest\x1a..hub.notification.v1.ListNotificationsResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/notifications\x10\x01\x12\x81\x01\n" +
 	"\vMarkAllRead\x12'.hub.notification.v1.MarkAllReadRequest\x1a(.hub.notification.v1.MarkAllReadResponse\"\x1f\x9a\xb5\x18\x1b\n" +
-	"\x17/notifications/read-all\x10\x02\x12\x9d\x01\n" +
+	"\x17/notifications/read-all\x10\x05\x12\x9d\x01\n" +
 	"\x14MarkNotificationRead\x120.hub.notification.v1.MarkNotificationReadRequest\x1a1.hub.notification.v1.MarkNotificationReadResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/notifications/{id}/read\x10\x02\x1a\x04\xa2\xb5\x18\x00B4Z2github.com/voxire/voxie/gen/go/hub/notification/v1b\x06proto3"
+	"\x18/notifications/{id}/read\x10\x05\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"\x18/api/hub/notification/v1B4Z2github.com/voxire/voxie/gen/go/hub/notification/v1b\x06proto3"
 
 var file_hub_notification_v1_service_proto_goTypes = []any{
 	(*ListNotificationsRequest)(nil),     // 0: hub.notification.v1.ListNotificationsRequest

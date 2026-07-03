@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // CustomerServiceServer is the server API for CustomerService service.
@@ -28,7 +28,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	listCustomersHandler := BindingMiddleware[ListCustomersRequest](
 		genericHandler(server.ListCustomers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listCustomersPathParams, listCustomersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/customer/v1/customers", listCustomersHandler)
@@ -37,7 +37,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	createCustomerHandler := BindingMiddleware[CreateCustomerRequest](
 		genericHandler(server.CreateCustomer, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createCustomerPathParams, createCustomerQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/crm/customer/v1/customers", createCustomerHandler)
@@ -46,7 +46,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	getCustomerHandler := BindingMiddleware[GetCustomerRequest](
 		genericHandler(server.GetCustomer, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getCustomerPathParams, getCustomerQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/customer/v1/customers/{id}", getCustomerHandler)
@@ -55,7 +55,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	updateCustomerHandler := BindingMiddleware[UpdateCustomerRequest](
 		genericHandler(server.UpdateCustomer, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateCustomerPathParams, updateCustomerQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/customer/v1/customers/{id}", updateCustomerHandler)
@@ -64,7 +64,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	deleteCustomerHandler := BindingMiddleware[DeleteCustomerRequest](
 		genericHandler(server.DeleteCustomer, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteCustomerPathParams, deleteCustomerQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/crm/customer/v1/customers/{id}", deleteCustomerHandler)

@@ -7,6 +7,8 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,7 +24,9 @@ const (
 )
 
 type GetBusinessRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// business_id is the business id value for this contract.
+	BusinessId    int64 `protobuf:"varint,1,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -55,6 +59,13 @@ func (x *GetBusinessRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetBusinessRequest.ProtoReflect.Descriptor instead.
 func (*GetBusinessRequest) Descriptor() ([]byte, []int) {
 	return file_hub_business_v1_get_business_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetBusinessRequest) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
+	}
+	return 0
 }
 
 type GetBusinessResponse struct {
@@ -106,8 +117,10 @@ var File_hub_business_v1_get_business_proto protoreflect.FileDescriptor
 
 const file_hub_business_v1_get_business_proto_rawDesc = "" +
 	"\n" +
-	"\"hub/business/v1/get_business.proto\x12\x0fhub.business.v1\x1a\x1bhub/business/v1/types.proto\"\x14\n" +
-	"\x12GetBusinessRequest\"L\n" +
+	"\"hub/business/v1/get_business.proto\x12\x0fhub.business.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhub/business/v1/types.proto\x1a\x1donekit/http/annotations.proto\"E\n" +
+	"\x12GetBusinessRequest\x12/\n" +
+	"\vbusiness_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"businessId\"L\n" +
 	"\x13GetBusinessResponse\x125\n" +
 	"\bbusiness\x18\x01 \x01(\v2\x19.hub.business.v1.BusinessR\bbusinessB0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"
 

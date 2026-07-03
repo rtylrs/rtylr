@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ReceiptServiceServer is the server API for ReceiptService service.
@@ -24,7 +24,7 @@ func RegisterReceiptServiceServer(server ReceiptServiceServer, opts ...ServerOpt
 	listReceiptsHandler := BindingMiddleware[ListReceiptsRequest](
 		genericHandler(server.ListReceipts, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listReceiptsPathParams, listReceiptsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/receipt/v1/receipts", listReceiptsHandler)

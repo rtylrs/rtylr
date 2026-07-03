@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // BankAccountServiceServer is the server API for BankAccountService service.
@@ -26,7 +26,7 @@ func RegisterBankAccountServiceServer(server BankAccountServiceServer, opts ...S
 	listBankAccountsHandler := BindingMiddleware[ListBankAccountsRequest](
 		genericHandler(server.ListBankAccounts, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listBankAccountsPathParams, listBankAccountsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/bank-account/v1/bank-accounts", listBankAccountsHandler)
@@ -35,7 +35,7 @@ func RegisterBankAccountServiceServer(server BankAccountServiceServer, opts ...S
 	createBankAccountHandler := BindingMiddleware[CreateBankAccountRequest](
 		genericHandler(server.CreateBankAccount, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createBankAccountPathParams, createBankAccountQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/bank-account/v1/bank-accounts", createBankAccountHandler)
@@ -44,7 +44,7 @@ func RegisterBankAccountServiceServer(server BankAccountServiceServer, opts ...S
 	getBankAccountHandler := BindingMiddleware[GetBankAccountRequest](
 		genericHandler(server.GetBankAccount, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getBankAccountPathParams, getBankAccountQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/bank-account/v1/bank-accounts/{id}", getBankAccountHandler)

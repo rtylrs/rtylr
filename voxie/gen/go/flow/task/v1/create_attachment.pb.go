@@ -8,7 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

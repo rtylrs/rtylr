@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SessionServiceServer is the server API for SessionService service.
@@ -26,7 +26,7 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 	listSessionsHandler := BindingMiddleware[ListSessionsRequest](
 		genericHandler(server.ListSessions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listSessionsPathParams, listSessionsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/session/v1/sessions", listSessionsHandler)
@@ -35,7 +35,7 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 	openSessionHandler := BindingMiddleware[OpenSessionRequest](
 		genericHandler(server.OpenSession, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		openSessionPathParams, openSessionQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/session/v1/sessions/open", openSessionHandler)
@@ -44,7 +44,7 @@ func RegisterSessionServiceServer(server SessionServiceServer, opts ...ServerOpt
 	closeSessionHandler := BindingMiddleware[CloseSessionRequest](
 		genericHandler(server.CloseSession, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		closeSessionPathParams, closeSessionQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/session/v1/sessions/{id}/close", closeSessionHandler)

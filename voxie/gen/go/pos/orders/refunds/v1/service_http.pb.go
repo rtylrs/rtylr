@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderRefundServiceServer is the server API for OrderRefundService service.
@@ -24,7 +24,7 @@ func RegisterOrderRefundServiceServer(server OrderRefundServiceServer, opts ...S
 	processRefundHandler := BindingMiddleware[ProcessRefundRequest](
 		genericHandler(server.ProcessRefund, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		processRefundPathParams, processRefundQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/refunds/v1/orders/{order_id}/refund", processRefundHandler)

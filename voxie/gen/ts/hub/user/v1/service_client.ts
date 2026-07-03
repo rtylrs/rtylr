@@ -97,7 +97,7 @@ export class UserServiceClient {
   }
 
   async getMe(_req: GetMeRequest, options?: UserServiceCallOptions): Promise<GetMeResponse> {
-    let path = "/account";
+    let path = "/api/hub/user/v1/users/me";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -120,7 +120,7 @@ export class UserServiceClient {
   }
 
   async updateProfile(req: UpdateProfileRequest, options?: UserServiceCallOptions): Promise<UpdateProfileResponse> {
-    let path = "/account/profile";
+    let path = "/api/hub/user/v1/users/me";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -144,7 +144,7 @@ export class UserServiceClient {
   }
 
   async changePassword(req: ChangePasswordRequest, options?: UserServiceCallOptions): Promise<ChangePasswordResponse> {
-    let path = "/account/password";
+    let path = "/api/hub/user/v1/users/password";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {

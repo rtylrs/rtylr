@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // RecurringInvoiceServiceServer is the server API for RecurringInvoiceService service.
@@ -29,7 +29,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	listRecurringInvoicesHandler := BindingMiddleware[ListRecurringInvoicesRequest](
 		genericHandler(server.ListRecurringInvoices, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listRecurringInvoicesPathParams, listRecurringInvoicesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/recurring-invoice/v1/recurring-invoices", listRecurringInvoicesHandler)
@@ -38,7 +38,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	createRecurringInvoiceHandler := BindingMiddleware[CreateRecurringInvoiceRequest](
 		genericHandler(server.CreateRecurringInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createRecurringInvoicePathParams, createRecurringInvoiceQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/recurring-invoice/v1/recurring-invoices", createRecurringInvoiceHandler)
@@ -47,7 +47,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	getRecurringInvoiceHandler := BindingMiddleware[GetRecurringInvoiceRequest](
 		genericHandler(server.GetRecurringInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getRecurringInvoicePathParams, getRecurringInvoiceQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/recurring-invoice/v1/recurring-invoices/{id}", getRecurringInvoiceHandler)
@@ -56,7 +56,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	updateRecurringInvoiceHandler := BindingMiddleware[UpdateRecurringInvoiceRequest](
 		genericHandler(server.UpdateRecurringInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateRecurringInvoicePathParams, updateRecurringInvoiceQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/recurring-invoice/v1/recurring-invoices/{id}", updateRecurringInvoiceHandler)
@@ -65,7 +65,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	pauseRecurringInvoiceHandler := BindingMiddleware[PauseRecurringInvoiceRequest](
 		genericHandler(server.PauseRecurringInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		pauseRecurringInvoicePathParams, pauseRecurringInvoiceQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/finance/recurring-invoice/v1/recurring-invoices/{id}/pause", pauseRecurringInvoiceHandler)
@@ -74,7 +74,7 @@ func RegisterRecurringInvoiceServiceServer(server RecurringInvoiceServiceServer,
 	resumeRecurringInvoiceHandler := BindingMiddleware[ResumeRecurringInvoiceRequest](
 		genericHandler(server.ResumeRecurringInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		resumeRecurringInvoicePathParams, resumeRecurringInvoiceQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/finance/recurring-invoice/v1/recurring-invoices/{id}/resume", resumeRecurringInvoiceHandler)

@@ -77,7 +77,7 @@ export class DashboardServiceClient {
   }
 
   async getKPIs(_req: GetKPIsRequest, options?: DashboardServiceCallOptions): Promise<GetKPIsResponse> {
-    let path = "/hub/kpis";
+    let path = "/api/hub/dashboard/v1/kpis";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {

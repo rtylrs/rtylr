@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ModifierServiceServer is the server API for ModifierService service.
@@ -27,7 +27,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 	listModifiersHandler := BindingMiddleware[ListModifiersRequest](
 		genericHandler(server.ListModifiers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listModifiersPathParams, listModifiersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/modifier/v1/modifiers", listModifiersHandler)
@@ -36,7 +36,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 	createModifierHandler := BindingMiddleware[CreateModifierRequest](
 		genericHandler(server.CreateModifier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createModifierPathParams, createModifierQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/modifier/v1/modifiers", createModifierHandler)
@@ -45,7 +45,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 	updateModifierHandler := BindingMiddleware[UpdateModifierRequest](
 		genericHandler(server.UpdateModifier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateModifierPathParams, updateModifierQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/modifier/v1/modifiers/{id}", updateModifierHandler)
@@ -54,7 +54,7 @@ func RegisterModifierServiceServer(server ModifierServiceServer, opts ...ServerO
 	deleteModifierHandler := BindingMiddleware[DeleteModifierRequest](
 		genericHandler(server.DeleteModifier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteModifierPathParams, deleteModifierQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/pos/modifier/v1/modifiers/{id}", deleteModifierHandler)

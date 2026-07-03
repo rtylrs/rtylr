@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // NotificationServiceServer is the server API for NotificationService service.
@@ -26,28 +26,28 @@ func RegisterNotificationServiceServer(server NotificationServiceServer, opts ..
 	listNotificationsHandler := BindingMiddleware[ListNotificationsRequest](
 		genericHandler(server.ListNotifications, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listNotificationsPathParams, listNotificationsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /notifications", listNotificationsHandler)
+	config.mux.Handle("GET /api/hub/notification/v1/notifications", listNotificationsHandler)
 
 	methodHeaders = getMarkAllReadHeaders()
 	markAllReadHandler := BindingMiddleware[MarkAllReadRequest](
 		genericHandler(server.MarkAllRead, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		markAllReadPathParams, markAllReadQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /notifications/read-all", markAllReadHandler)
+	config.mux.Handle("PATCH /api/hub/notification/v1/notifications/read-all", markAllReadHandler)
 
 	methodHeaders = getMarkNotificationReadHeaders()
 	markNotificationReadHandler := BindingMiddleware[MarkNotificationReadRequest](
 		genericHandler(server.MarkNotificationRead, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		markNotificationReadPathParams, markNotificationReadQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /notifications/{id}/read", markNotificationReadHandler)
+	config.mux.Handle("PATCH /api/hub/notification/v1/notifications/{id}/read", markNotificationReadHandler)
 
 	return nil
 }

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ComboServiceServer is the server API for ComboService service.
@@ -27,7 +27,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 	listCombosHandler := BindingMiddleware[ListCombosRequest](
 		genericHandler(server.ListCombos, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listCombosPathParams, listCombosQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/combo/v1/combos", listCombosHandler)
@@ -36,7 +36,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 	createComboHandler := BindingMiddleware[CreateComboRequest](
 		genericHandler(server.CreateCombo, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createComboPathParams, createComboQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/combo/v1/combos", createComboHandler)
@@ -45,7 +45,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 	updateComboHandler := BindingMiddleware[UpdateComboRequest](
 		genericHandler(server.UpdateCombo, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateComboPathParams, updateComboQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/combo/v1/combos/{id}", updateComboHandler)
@@ -54,7 +54,7 @@ func RegisterComboServiceServer(server ComboServiceServer, opts ...ServerOption)
 	deleteComboHandler := BindingMiddleware[DeleteComboRequest](
 		genericHandler(server.DeleteCombo, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteComboPathParams, deleteComboQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/pos/combo/v1/combos/{id}", deleteComboHandler)

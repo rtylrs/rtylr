@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OperationServiceServer is the server API for OperationService service.
@@ -27,7 +27,7 @@ func RegisterOperationServiceServer(server OperationServiceServer, opts ...Serve
 	getHeadcountMetricsHandler := BindingMiddleware[GetHeadcountMetricsRequest](
 		genericHandler(server.GetHeadcountMetrics, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getHeadcountMetricsPathParams, getHeadcountMetricsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/operation/v1/headcount", getHeadcountMetricsHandler)
@@ -36,7 +36,7 @@ func RegisterOperationServiceServer(server OperationServiceServer, opts ...Serve
 	getShiftMetricsHandler := BindingMiddleware[GetShiftMetricsRequest](
 		genericHandler(server.GetShiftMetrics, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getShiftMetricsPathParams, getShiftMetricsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/operation/v1/shifts", getShiftMetricsHandler)
@@ -45,7 +45,7 @@ func RegisterOperationServiceServer(server OperationServiceServer, opts ...Serve
 	getTimeOffMetricsHandler := BindingMiddleware[GetTimeOffMetricsRequest](
 		genericHandler(server.GetTimeOffMetrics, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getTimeOffMetricsPathParams, getTimeOffMetricsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/operation/v1/time-off", getTimeOffMetricsHandler)
@@ -54,7 +54,7 @@ func RegisterOperationServiceServer(server OperationServiceServer, opts ...Serve
 	getUtilizationHandler := BindingMiddleware[GetUtilizationRequest](
 		genericHandler(server.GetUtilization, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getUtilizationPathParams, getUtilizationQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/operation/v1/utilization", getUtilizationHandler)

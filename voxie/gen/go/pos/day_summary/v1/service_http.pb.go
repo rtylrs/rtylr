@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // DaySummaryServiceServer is the server API for DaySummaryService service.
@@ -24,7 +24,7 @@ func RegisterDaySummaryServiceServer(server DaySummaryServiceServer, opts ...Ser
 	daySummaryHandler := BindingMiddleware[DaySummaryRequest](
 		genericHandler(server.DaySummary, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		daySummaryPathParams, daySummaryQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/day-summary/v1/day-summary", daySummaryHandler)

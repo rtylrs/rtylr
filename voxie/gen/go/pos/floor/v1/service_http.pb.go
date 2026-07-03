@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // FloorServiceServer is the server API for FloorService service.
@@ -27,7 +27,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 	listFloorsHandler := BindingMiddleware[ListFloorsRequest](
 		genericHandler(server.ListFloors, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listFloorsPathParams, listFloorsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/floor/v1/floors", listFloorsHandler)
@@ -36,7 +36,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 	createFloorHandler := BindingMiddleware[CreateFloorRequest](
 		genericHandler(server.CreateFloor, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createFloorPathParams, createFloorQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/floor/v1/floors", createFloorHandler)
@@ -45,7 +45,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 	updateFloorHandler := BindingMiddleware[UpdateFloorRequest](
 		genericHandler(server.UpdateFloor, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateFloorPathParams, updateFloorQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/floor/v1/floors/{id}", updateFloorHandler)
@@ -54,7 +54,7 @@ func RegisterFloorServiceServer(server FloorServiceServer, opts ...ServerOption)
 	deleteFloorHandler := BindingMiddleware[DeleteFloorRequest](
 		genericHandler(server.DeleteFloor, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteFloorPathParams, deleteFloorQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/pos/floor/v1/floors/{id}", deleteFloorHandler)

@@ -9,7 +9,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/activity/v1";
 
 // ActivityService defines hub activity feed endpoints.
 service ActivityService {
-  option (onekit.http.service_config) = {base_path: ""};
+  option (onekit.http.service_config) = {base_path: "/api/hub/activity/v1"};
 
   // ListActivity returns recent activity events.
   rpc ListActivity(ListActivityRequest) returns (ListActivityResponse) {

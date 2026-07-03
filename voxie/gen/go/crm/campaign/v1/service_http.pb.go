@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // CampaignServiceServer is the server API for CampaignService service.
@@ -29,7 +29,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	listCampaignsHandler := BindingMiddleware[ListCampaignsRequest](
 		genericHandler(server.ListCampaigns, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listCampaignsPathParams, listCampaignsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/campaign/v1/campaigns", listCampaignsHandler)
@@ -38,7 +38,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	createCampaignHandler := BindingMiddleware[CreateCampaignRequest](
 		genericHandler(server.CreateCampaign, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createCampaignPathParams, createCampaignQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/crm/campaign/v1/campaigns", createCampaignHandler)
@@ -47,7 +47,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	getCampaignDetailHandler := BindingMiddleware[GetCampaignDetailRequest](
 		genericHandler(server.GetCampaignDetail, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getCampaignDetailPathParams, getCampaignDetailQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/campaign/v1/campaigns/{id}", getCampaignDetailHandler)
@@ -56,7 +56,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	getCampaignStatsHandler := BindingMiddleware[GetCampaignStatsRequest](
 		genericHandler(server.GetCampaignStats, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getCampaignStatsPathParams, getCampaignStatsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/campaign/v1/campaigns/{campaign_id}/stats", getCampaignStatsHandler)
@@ -65,7 +65,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	updateCampaignHandler := BindingMiddleware[UpdateCampaignRequest](
 		genericHandler(server.UpdateCampaign, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateCampaignPathParams, updateCampaignQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/campaign/v1/campaigns/{id}", updateCampaignHandler)
@@ -74,7 +74,7 @@ func RegisterCampaignServiceServer(server CampaignServiceServer, opts ...ServerO
 	updateCampaignStatusHandler := BindingMiddleware[UpdateCampaignStatusRequest](
 		genericHandler(server.UpdateCampaignStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateCampaignStatusPathParams, updateCampaignStatusQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/crm/campaign/v1/campaigns/status", updateCampaignStatusHandler)

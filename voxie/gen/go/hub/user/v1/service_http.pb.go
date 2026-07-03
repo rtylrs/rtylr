@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // UserServiceServer is the server API for UserService service.
@@ -26,28 +26,28 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 	getMeHandler := BindingMiddleware[GetMeRequest](
 		genericHandler(server.GetMe, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getMePathParams, getMeQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /account", getMeHandler)
+	config.mux.Handle("GET /api/hub/user/v1/users/me", getMeHandler)
 
 	methodHeaders = getUpdateProfileHeaders()
 	updateProfileHandler := BindingMiddleware[UpdateProfileRequest](
 		genericHandler(server.UpdateProfile, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateProfilePathParams, updateProfileQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PATCH /account/profile", updateProfileHandler)
+	config.mux.Handle("PATCH /api/hub/user/v1/users/me", updateProfileHandler)
 
 	methodHeaders = getChangePasswordHeaders()
 	changePasswordHandler := BindingMiddleware[ChangePasswordRequest](
 		genericHandler(server.ChangePassword, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		changePasswordPathParams, changePasswordQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /account/password", changePasswordHandler)
+	config.mux.Handle("POST /api/hub/user/v1/users/password", changePasswordHandler)
 
 	return nil
 }

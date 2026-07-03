@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // GiftCardServiceServer is the server API for GiftCardService service.
@@ -26,7 +26,7 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 	listGiftCardsHandler := BindingMiddleware[ListGiftCardsRequest](
 		genericHandler(server.ListGiftCards, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listGiftCardsPathParams, listGiftCardsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/gift-card/v1/gift-cards", listGiftCardsHandler)
@@ -35,7 +35,7 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 	createGiftCardHandler := BindingMiddleware[CreateGiftCardRequest](
 		genericHandler(server.CreateGiftCard, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createGiftCardPathParams, createGiftCardQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/gift-card/v1/gift-cards", createGiftCardHandler)
@@ -44,7 +44,7 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 	redeemGiftCardHandler := BindingMiddleware[RedeemGiftCardRequest](
 		genericHandler(server.RedeemGiftCard, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		redeemGiftCardPathParams, redeemGiftCardQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/gift-card/v1/gift-cards/{code}/redeem", redeemGiftCardHandler)

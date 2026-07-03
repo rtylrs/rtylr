@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,12 +25,13 @@ var File_hub_billing_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_billing_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1chub/billing/v1/service.proto\x12\x0ehub.billing.v1\x1a(hub/billing/v1/get_billing_summary.proto\x1a\"hub/billing/v1/list_invoices.proto\x1a\x1donekit/http/annotations.proto2\x91\x02\n" +
-	"\x0eBillingService\x12\x82\x01\n" +
-	"\x11GetBillingSummary\x12(.hub.billing.v1.GetBillingSummaryRequest\x1a).hub.billing.v1.GetBillingSummaryResponse\"\x18\x9a\xb5\x18\x14\n" +
-	"\x10/billing/summary\x10\x01\x12t\n" +
-	"\fListInvoices\x12#.hub.billing.v1.ListInvoicesRequest\x1a$.hub.billing.v1.ListInvoicesResponse\"\x19\x9a\xb5\x18\x15\n" +
-	"\x11/billing/invoices\x10\x01\x1a\x04\xa2\xb5\x18\x00B/Z-github.com/voxire/voxie/gen/go/hub/billing/v1b\x06proto3"
+	"\x1chub/billing/v1/service.proto\x12\x0ehub.billing.v1\x1a(hub/billing/v1/get_billing_summary.proto\x1a\"hub/billing/v1/list_invoices.proto\x1a\x1donekit/http/annotations.proto2\x95\x02\n" +
+	"\x0eBillingService\x12z\n" +
+	"\x11GetBillingSummary\x12(.hub.billing.v1.GetBillingSummaryRequest\x1a).hub.billing.v1.GetBillingSummaryResponse\"\x10\x9a\xb5\x18\f\n" +
+	"\b/summary\x10\x01\x12l\n" +
+	"\fListInvoices\x12#.hub.billing.v1.ListInvoicesRequest\x1a$.hub.billing.v1.ListInvoicesResponse\"\x11\x9a\xb5\x18\r\n" +
+	"\t/invoices\x10\x01\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x13/api/hub/billing/v1B/Z-github.com/voxire/voxie/gen/go/hub/billing/v1b\x06proto3"
 
 var file_hub_billing_v1_service_proto_goTypes = []any{
 	(*GetBillingSummaryRequest)(nil),  // 0: hub.billing.v1.GetBillingSummaryRequest

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ConfigServiceServer is the server API for ConfigService service.
@@ -24,10 +24,10 @@ func RegisterConfigServiceServer(server ConfigServiceServer, opts ...ServerOptio
 	getConfigHandler := BindingMiddleware[GetConfigRequest](
 		genericHandler(server.GetConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getConfigPathParams, getConfigQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /get-configs", getConfigHandler)
+	config.mux.Handle("GET /api/hub/config/v1/config", getConfigHandler)
 
 	return nil
 }

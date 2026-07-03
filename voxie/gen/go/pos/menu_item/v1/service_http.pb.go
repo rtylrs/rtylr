@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // MenuItemServiceServer is the server API for MenuItemService service.
@@ -25,7 +25,7 @@ func RegisterMenuItemServiceServer(server MenuItemServiceServer, opts ...ServerO
 	listMenuItemsHandler := BindingMiddleware[ListMenuItemsRequest](
 		genericHandler(server.ListMenuItems, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listMenuItemsPathParams, listMenuItemsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/menu-item/v1/menu-items", listMenuItemsHandler)
@@ -34,7 +34,7 @@ func RegisterMenuItemServiceServer(server MenuItemServiceServer, opts ...ServerO
 	createMenuItemHandler := BindingMiddleware[CreateMenuItemRequest](
 		genericHandler(server.CreateMenuItem, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createMenuItemPathParams, createMenuItemQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/menu-item/v1/menu-items", createMenuItemHandler)

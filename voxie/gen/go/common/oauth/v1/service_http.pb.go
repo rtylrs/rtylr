@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OauthServiceServer is the server API for OauthService service.
@@ -24,7 +24,7 @@ func RegisterOauthServiceServer(server OauthServiceServer, opts ...ServerOption)
 	issueHandler := BindingMiddleware[IssueRequest](
 		genericHandler(server.Issue, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		issuePathParams, issueQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/common/oauth/v1/issue", issueHandler)

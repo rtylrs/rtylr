@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // DashboardServiceServer is the server API for DashboardService service.
@@ -24,10 +24,10 @@ func RegisterDashboardServiceServer(server DashboardServiceServer, opts ...Serve
 	getKPIsHandler := BindingMiddleware[GetKPIsRequest](
 		genericHandler(server.GetKPIs, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getKPIsPathParams, getKPIsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /hub/kpis", getKPIsHandler)
+	config.mux.Handle("GET /api/hub/dashboard/v1/kpis", getKPIsHandler)
 
 	return nil
 }

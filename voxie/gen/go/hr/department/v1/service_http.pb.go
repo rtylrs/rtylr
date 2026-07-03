@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // DepartmentServiceServer is the server API for DepartmentService service.
@@ -25,7 +25,7 @@ func RegisterDepartmentServiceServer(server DepartmentServiceServer, opts ...Ser
 	createDepartmentHandler := BindingMiddleware[CreateDepartmentRequest](
 		genericHandler(server.CreateDepartment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createDepartmentPathParams, createDepartmentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/department/v1/departments", createDepartmentHandler)
@@ -34,7 +34,7 @@ func RegisterDepartmentServiceServer(server DepartmentServiceServer, opts ...Ser
 	updateDepartmentHandler := BindingMiddleware[UpdateDepartmentRequest](
 		genericHandler(server.UpdateDepartment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateDepartmentPathParams, updateDepartmentQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/department/v1/departments/{id}", updateDepartmentHandler)

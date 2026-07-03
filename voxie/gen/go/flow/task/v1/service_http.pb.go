@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // TaskServiceServer is the server API for TaskService service.
@@ -40,7 +40,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	listTasksHandler := BindingMiddleware[ListTasksRequest](
 		genericHandler(server.ListTasks, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTasksPathParams, listTasksQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks", listTasksHandler)
@@ -49,7 +49,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	getMyTasksHandler := BindingMiddleware[GetMyTasksRequest](
 		genericHandler(server.GetMyTasks, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getMyTasksPathParams, getMyTasksQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/my", getMyTasksHandler)
@@ -58,7 +58,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	createTaskHandler := BindingMiddleware[CreateTaskRequest](
 		genericHandler(server.CreateTask, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createTaskPathParams, createTaskQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/task/v1/tasks", createTaskHandler)
@@ -67,7 +67,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	getTaskDetailHandler := BindingMiddleware[GetTaskDetailRequest](
 		genericHandler(server.GetTaskDetail, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getTaskDetailPathParams, getTaskDetailQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/{id}", getTaskDetailHandler)
@@ -76,7 +76,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	updateTaskHandler := BindingMiddleware[UpdateTaskRequest](
 		genericHandler(server.UpdateTask, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTaskPathParams, updateTaskQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/flow/task/v1/tasks/{id}", updateTaskHandler)
@@ -85,7 +85,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	updateTaskStatusHandler := BindingMiddleware[UpdateTaskStatusRequest](
 		genericHandler(server.UpdateTaskStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTaskStatusPathParams, updateTaskStatusQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/flow/task/v1/tasks/{id}/status", updateTaskStatusHandler)
@@ -94,7 +94,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	deleteTaskHandler := BindingMiddleware[DeleteTaskRequest](
 		genericHandler(server.DeleteTask, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteTaskPathParams, deleteTaskQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/flow/task/v1/tasks/{id}", deleteTaskHandler)
@@ -103,7 +103,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	createSubtaskHandler := BindingMiddleware[CreateSubtaskRequest](
 		genericHandler(server.CreateSubtask, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createSubtaskPathParams, createSubtaskQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/task/v1/tasks/subtasks", createSubtaskHandler)
@@ -112,7 +112,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	getSubtasksHandler := BindingMiddleware[GetSubtasksRequest](
 		genericHandler(server.GetSubtasks, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getSubtasksPathParams, getSubtasksQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/{task_id}/subtasks", getSubtasksHandler)
@@ -121,7 +121,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	addCommentHandler := BindingMiddleware[AddCommentRequest](
 		genericHandler(server.AddComment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		addCommentPathParams, addCommentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/task/v1/tasks/{task_id}/comments", addCommentHandler)
@@ -130,7 +130,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	deleteCommentHandler := BindingMiddleware[DeleteCommentRequest](
 		genericHandler(server.DeleteComment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteCommentPathParams, deleteCommentQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/flow/task/v1/tasks/comments/{id}", deleteCommentHandler)
@@ -139,7 +139,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	getTaskActivityHandler := BindingMiddleware[GetTaskActivityRequest](
 		genericHandler(server.GetTaskActivity, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getTaskActivityPathParams, getTaskActivityQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/{task_id}/activity", getTaskActivityHandler)
@@ -148,7 +148,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	createAttachmentHandler := BindingMiddleware[CreateAttachmentRequest](
 		genericHandler(server.CreateAttachment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createAttachmentPathParams, createAttachmentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/task/v1/tasks/attachments", createAttachmentHandler)
@@ -157,7 +157,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	getAttachmentsHandler := BindingMiddleware[GetAttachmentsRequest](
 		genericHandler(server.GetAttachments, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getAttachmentsPathParams, getAttachmentsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/{task_id}/attachments", getAttachmentsHandler)
@@ -166,7 +166,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	deleteAttachmentHandler := BindingMiddleware[DeleteAttachmentRequest](
 		genericHandler(server.DeleteAttachment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteAttachmentPathParams, deleteAttachmentQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/flow/task/v1/tasks/attachments/{id}", deleteAttachmentHandler)
@@ -175,7 +175,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	createTimeLogHandler := BindingMiddleware[CreateTimeLogRequest](
 		genericHandler(server.CreateTimeLog, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createTimeLogPathParams, createTimeLogQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/task/v1/tasks/{task_id}/time-logs", createTimeLogHandler)
@@ -184,7 +184,7 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	getTimeLogsHandler := BindingMiddleware[GetTimeLogsRequest](
 		genericHandler(server.GetTimeLogs, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getTimeLogsPathParams, getTimeLogsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/{task_id}/time-logs", getTimeLogsHandler)

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // BillingServiceServer is the server API for BillingService service.
@@ -25,19 +25,19 @@ func RegisterBillingServiceServer(server BillingServiceServer, opts ...ServerOpt
 	getBillingSummaryHandler := BindingMiddleware[GetBillingSummaryRequest](
 		genericHandler(server.GetBillingSummary, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getBillingSummaryPathParams, getBillingSummaryQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /billing/summary", getBillingSummaryHandler)
+	config.mux.Handle("GET /api/hub/billing/v1/summary", getBillingSummaryHandler)
 
 	methodHeaders = getListInvoicesHeaders()
 	listInvoicesHandler := BindingMiddleware[ListInvoicesRequest](
 		genericHandler(server.ListInvoices, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listInvoicesPathParams, listInvoicesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /billing/invoices", listInvoicesHandler)
+	config.mux.Handle("GET /api/hub/billing/v1/invoices", listInvoicesHandler)
 
 	return nil
 }

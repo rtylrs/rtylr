@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // RoleServiceServer is the server API for RoleService service.
@@ -26,7 +26,7 @@ func RegisterRoleServiceServer(server RoleServiceServer, opts ...ServerOption) e
 	createRoleHandler := BindingMiddleware[CreateRoleRequest](
 		genericHandler(server.CreateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createRolePathParams, createRoleQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/role/v1/roles", createRoleHandler)
@@ -35,7 +35,7 @@ func RegisterRoleServiceServer(server RoleServiceServer, opts ...ServerOption) e
 	updateRoleHandler := BindingMiddleware[UpdateRoleRequest](
 		genericHandler(server.UpdateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateRolePathParams, updateRoleQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/role/v1/roles/{id}", updateRoleHandler)
@@ -44,7 +44,7 @@ func RegisterRoleServiceServer(server RoleServiceServer, opts ...ServerOption) e
 	assignRoleHandler := BindingMiddleware[AssignRoleRequest](
 		genericHandler(server.AssignRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		assignRolePathParams, assignRoleQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/role/v1/roles/assign", assignRoleHandler)

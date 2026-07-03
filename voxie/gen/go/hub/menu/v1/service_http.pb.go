@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // MenuServiceServer is the server API for MenuService service.
@@ -25,7 +25,7 @@ func RegisterMenuServiceServer(server MenuServiceServer, opts ...ServerOption) e
 	listMenuHandler := BindingMiddleware[ListMenuRequest](
 		genericHandler(server.ListMenu, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listMenuPathParams, listMenuQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hub/menu/v1/menu", listMenuHandler)
@@ -34,7 +34,7 @@ func RegisterMenuServiceServer(server MenuServiceServer, opts ...ServerOption) e
 	updateMenuHandler := BindingMiddleware[UpdateMenuRequest](
 		genericHandler(server.UpdateMenu, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateMenuPathParams, updateMenuQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hub/menu/v1/menu", updateMenuHandler)

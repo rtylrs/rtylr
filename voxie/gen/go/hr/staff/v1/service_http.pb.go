@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // StaffServiceServer is the server API for StaffService service.
@@ -30,7 +30,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	listStaffHandler := BindingMiddleware[ListStaffRequest](
 		genericHandler(server.ListStaff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listStaffPathParams, listStaffQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/staff/v1/staff", listStaffHandler)
@@ -39,7 +39,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	createStaffHandler := BindingMiddleware[CreateStaffRequest](
 		genericHandler(server.CreateStaff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createStaffPathParams, createStaffQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/staff/v1/staff", createStaffHandler)
@@ -48,7 +48,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	getStaffHandler := BindingMiddleware[GetStaffRequest](
 		genericHandler(server.GetStaff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getStaffPathParams, getStaffQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/staff/v1/staff/{id}", getStaffHandler)
@@ -57,7 +57,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	updateStaffHandler := BindingMiddleware[UpdateStaffRequest](
 		genericHandler(server.UpdateStaff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateStaffPathParams, updateStaffQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/staff/v1/staff/{id}", updateStaffHandler)
@@ -66,7 +66,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	deleteStaffHandler := BindingMiddleware[DeleteStaffRequest](
 		genericHandler(server.DeleteStaff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteStaffPathParams, deleteStaffQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/hr/staff/v1/staff/{id}", deleteStaffHandler)
@@ -75,7 +75,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	clockInHandler := BindingMiddleware[ClockInRequest](
 		genericHandler(server.ClockIn, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		clockInPathParams, clockInQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/staff/v1/staff/clock-in", clockInHandler)
@@ -84,7 +84,7 @@ func RegisterStaffServiceServer(server StaffServiceServer, opts ...ServerOption)
 	clockOutHandler := BindingMiddleware[ClockOutRequest](
 		genericHandler(server.ClockOut, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		clockOutPathParams, clockOutQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/staff/v1/staff/clock-out", clockOutHandler)

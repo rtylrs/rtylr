@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // StockServiceServer is the server API for StockService service.
@@ -30,7 +30,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	listStockMovementsHandler := BindingMiddleware[ListStockMovementsRequest](
 		genericHandler(server.ListStockMovements, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listStockMovementsPathParams, listStockMovementsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/stock/v1/movements", listStockMovementsHandler)
@@ -39,7 +39,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	receiveStockHandler := BindingMiddleware[ReceiveStockRequest](
 		genericHandler(server.ReceiveStock, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		receiveStockPathParams, receiveStockQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/stock/v1/receive", receiveStockHandler)
@@ -48,7 +48,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	adjustStockHandler := BindingMiddleware[AdjustStockRequest](
 		genericHandler(server.AdjustStock, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		adjustStockPathParams, adjustStockQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/stock/v1/adjust", adjustStockHandler)
@@ -57,7 +57,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	wasteStockHandler := BindingMiddleware[WasteStockRequest](
 		genericHandler(server.WasteStock, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		wasteStockPathParams, wasteStockQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/stock/v1/waste", wasteStockHandler)
@@ -66,7 +66,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	transferStockHandler := BindingMiddleware[TransferStockRequest](
 		genericHandler(server.TransferStock, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		transferStockPathParams, transferStockQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/stock/v1/transfer", transferStockHandler)
@@ -75,7 +75,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	listInventoryHandler := BindingMiddleware[ListInventoryRequest](
 		genericHandler(server.ListInventory, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listInventoryPathParams, listInventoryQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/stock/v1/inventory", listInventoryHandler)
@@ -84,7 +84,7 @@ func RegisterStockServiceServer(server StockServiceServer, opts ...ServerOption)
 	lowStockHandler := BindingMiddleware[LowStockRequest](
 		genericHandler(server.LowStock, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		lowStockPathParams, lowStockQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/stock/v1/low-stock", lowStockHandler)

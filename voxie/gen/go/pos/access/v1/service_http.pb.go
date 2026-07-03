@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AccessServiceServer is the server API for AccessService service.
@@ -26,7 +26,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 	getMyLocationsHandler := BindingMiddleware[GetMyLocationsRequest](
 		genericHandler(server.GetMyLocations, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getMyLocationsPathParams, getMyLocationsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/access/v1/my-locations", getMyLocationsHandler)
@@ -35,7 +35,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 	assignLocationHandler := BindingMiddleware[AssignLocationRequest](
 		genericHandler(server.AssignLocation, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		assignLocationPathParams, assignLocationQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/access/v1/assign", assignLocationHandler)
@@ -44,7 +44,7 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 	removeLocationHandler := BindingMiddleware[RemoveLocationRequest](
 		genericHandler(server.RemoveLocation, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		removeLocationPathParams, removeLocationQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/access/v1/remove", removeLocationHandler)

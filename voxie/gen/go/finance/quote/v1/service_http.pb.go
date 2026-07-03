@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // QuoteServiceServer is the server API for QuoteService service.
@@ -26,7 +26,7 @@ func RegisterQuoteServiceServer(server QuoteServiceServer, opts ...ServerOption)
 	listQuotesHandler := BindingMiddleware[ListQuotesRequest](
 		genericHandler(server.ListQuotes, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listQuotesPathParams, listQuotesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/quote/v1/quotes", listQuotesHandler)
@@ -35,7 +35,7 @@ func RegisterQuoteServiceServer(server QuoteServiceServer, opts ...ServerOption)
 	createQuoteHandler := BindingMiddleware[CreateQuoteRequest](
 		genericHandler(server.CreateQuote, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createQuotePathParams, createQuoteQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/quote/v1/quotes", createQuoteHandler)
@@ -44,7 +44,7 @@ func RegisterQuoteServiceServer(server QuoteServiceServer, opts ...ServerOption)
 	getQuoteHandler := BindingMiddleware[GetQuoteRequest](
 		genericHandler(server.GetQuote, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getQuotePathParams, getQuoteQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/quote/v1/quotes/{id}", getQuoteHandler)

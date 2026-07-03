@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ActivityServiceServer is the server API for ActivityService service.
@@ -24,10 +24,10 @@ func RegisterActivityServiceServer(server ActivityServiceServer, opts ...ServerO
 	listActivityHandler := BindingMiddleware[ListActivityRequest](
 		genericHandler(server.ListActivity, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listActivityPathParams, listActivityQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /activity", listActivityHandler)
+	config.mux.Handle("GET /api/hub/activity/v1/activity", listActivityHandler)
 
 	return nil
 }

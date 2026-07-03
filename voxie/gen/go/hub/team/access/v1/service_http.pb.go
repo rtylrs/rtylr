@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AccessServiceServer is the server API for AccessService service.
@@ -24,10 +24,10 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 	requestAccessHandler := BindingMiddleware[RequestAccessRequest](
 		genericHandler(server.RequestAccess, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		requestAccessPathParams, requestAccessQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /team/request-access", requestAccessHandler)
+	config.mux.Handle("POST /api/hub/team/access/v1/requests", requestAccessHandler)
 
 	return nil
 }

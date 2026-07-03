@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ReportServiceServer is the server API for ReportService service.
@@ -24,7 +24,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	generateReportHandler := BindingMiddleware[GenerateReportRequest](
 		genericHandler(server.GenerateReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		generateReportPathParams, generateReportQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/report/v1/reports/generate", generateReportHandler)

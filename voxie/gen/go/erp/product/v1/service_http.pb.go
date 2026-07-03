@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ProductServiceServer is the server API for ProductService service.
@@ -27,7 +27,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	listProductsHandler := BindingMiddleware[ListProductsRequest](
 		genericHandler(server.ListProducts, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listProductsPathParams, listProductsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/erp/product/v1/products", listProductsHandler)
@@ -36,7 +36,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	createProductHandler := BindingMiddleware[CreateProductRequest](
 		genericHandler(server.CreateProduct, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createProductPathParams, createProductQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/erp/product/v1/products", createProductHandler)
@@ -45,7 +45,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	updateProductHandler := BindingMiddleware[UpdateProductRequest](
 		genericHandler(server.UpdateProduct, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateProductPathParams, updateProductQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/erp/product/v1/products/{id}", updateProductHandler)
@@ -54,7 +54,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	deleteProductHandler := BindingMiddleware[DeleteProductRequest](
 		genericHandler(server.DeleteProduct, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteProductPathParams, deleteProductQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/erp/product/v1/products/{id}", deleteProductHandler)

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderItemServiceServer is the server API for OrderItemService service.
@@ -24,7 +24,7 @@ func RegisterOrderItemServiceServer(server OrderItemServiceServer, opts ...Serve
 	updateOrderItemStatusHandler := BindingMiddleware[UpdateOrderItemStatusRequest](
 		genericHandler(server.UpdateOrderItemStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateOrderItemStatusPathParams, updateOrderItemStatusQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/orders/items/v1/orders/{order_id}/items/{item_id}/status", updateOrderItemStatusHandler)

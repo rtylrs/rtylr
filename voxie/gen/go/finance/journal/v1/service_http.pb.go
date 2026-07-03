@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // JournalServiceServer is the server API for JournalService service.
@@ -26,7 +26,7 @@ func RegisterJournalServiceServer(server JournalServiceServer, opts ...ServerOpt
 	listJournalEntriesHandler := BindingMiddleware[ListJournalEntriesRequest](
 		genericHandler(server.ListJournalEntries, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listJournalEntriesPathParams, listJournalEntriesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/journal/v1/entries", listJournalEntriesHandler)
@@ -35,7 +35,7 @@ func RegisterJournalServiceServer(server JournalServiceServer, opts ...ServerOpt
 	createJournalEntryHandler := BindingMiddleware[CreateJournalEntryRequest](
 		genericHandler(server.CreateJournalEntry, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createJournalEntryPathParams, createJournalEntryQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/journal/v1/entries", createJournalEntryHandler)
@@ -44,7 +44,7 @@ func RegisterJournalServiceServer(server JournalServiceServer, opts ...ServerOpt
 	getJournalEntryHandler := BindingMiddleware[GetJournalEntryRequest](
 		genericHandler(server.GetJournalEntry, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getJournalEntryPathParams, getJournalEntryQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/journal/v1/entries/{id}", getJournalEntryHandler)

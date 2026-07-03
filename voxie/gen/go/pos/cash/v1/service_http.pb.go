@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // CashServiceServer is the server API for CashService service.
@@ -27,7 +27,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 	listCashMovementsHandler := BindingMiddleware[ListCashMovementsRequest](
 		genericHandler(server.ListCashMovements, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listCashMovementsPathParams, listCashMovementsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/cash/v1/movements", listCashMovementsHandler)
@@ -36,7 +36,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 	cashDropHandler := BindingMiddleware[CashDropRequest](
 		genericHandler(server.CashDrop, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		cashDropPathParams, cashDropQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/cash/v1/drop", cashDropHandler)
@@ -45,7 +45,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 	cashPickupHandler := BindingMiddleware[CashPickupRequest](
 		genericHandler(server.CashPickup, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		cashPickupPathParams, cashPickupQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/cash/v1/pickup", cashPickupHandler)
@@ -54,7 +54,7 @@ func RegisterCashServiceServer(server CashServiceServer, opts ...ServerOption) e
 	cashAdjustHandler := BindingMiddleware[CashAdjustRequest](
 		genericHandler(server.CashAdjust, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		cashAdjustPathParams, cashAdjustQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/cash/v1/adjust", cashAdjustHandler)

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // LoyaltyServiceServer is the server API for LoyaltyService service.
@@ -29,7 +29,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	getLoyaltyConfigHandler := BindingMiddleware[GetLoyaltyConfigRequest](
 		genericHandler(server.GetLoyaltyConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getLoyaltyConfigPathParams, getLoyaltyConfigQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/loyalty/v1/config", getLoyaltyConfigHandler)
@@ -38,7 +38,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	updateLoyaltyConfigHandler := BindingMiddleware[UpdateLoyaltyConfigRequest](
 		genericHandler(server.UpdateLoyaltyConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLoyaltyConfigPathParams, updateLoyaltyConfigQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/loyalty/v1/config", updateLoyaltyConfigHandler)
@@ -47,7 +47,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	listLoyaltyTransactionsHandler := BindingMiddleware[ListLoyaltyTransactionsRequest](
 		genericHandler(server.ListLoyaltyTransactions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLoyaltyTransactionsPathParams, listLoyaltyTransactionsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/loyalty/v1/transactions", listLoyaltyTransactionsHandler)
@@ -56,7 +56,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	earnPointsHandler := BindingMiddleware[EarnPointsRequest](
 		genericHandler(server.EarnPoints, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		earnPointsPathParams, earnPointsQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/loyalty/v1/earn", earnPointsHandler)
@@ -65,7 +65,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	redeemPointsHandler := BindingMiddleware[RedeemPointsRequest](
 		genericHandler(server.RedeemPoints, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		redeemPointsPathParams, redeemPointsQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/loyalty/v1/redeem", redeemPointsHandler)
@@ -74,7 +74,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	getLoyaltyBalanceHandler := BindingMiddleware[GetLoyaltyBalanceRequest](
 		genericHandler(server.GetLoyaltyBalance, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getLoyaltyBalancePathParams, getLoyaltyBalanceQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/loyalty/v1/balance", getLoyaltyBalanceHandler)

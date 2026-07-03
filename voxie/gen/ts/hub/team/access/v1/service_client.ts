@@ -73,7 +73,7 @@ export class AccessServiceClient {
   }
 
   async requestAccess(req: RequestAccessRequest, options?: AccessServiceCallOptions): Promise<RequestAccessResponse> {
-    let path = "/team/request-access";
+    let path = "/api/hub/team/access/v1/requests";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // BusinessServiceServer is the server API for BusinessService service.
@@ -27,37 +27,37 @@ func RegisterBusinessServiceServer(server BusinessServiceServer, opts ...ServerO
 	getBusinessHandler := BindingMiddleware[GetBusinessRequest](
 		genericHandler(server.GetBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getBusinessPathParams, getBusinessQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /business/me", getBusinessHandler)
+	config.mux.Handle("GET /api/hub/business/v1/businesses/{business_id}", getBusinessHandler)
 
 	methodHeaders = getLookupBusinessBySlugHeaders()
 	lookupBusinessBySlugHandler := BindingMiddleware[LookupBusinessBySlugRequest](
 		genericHandler(server.LookupBusinessBySlug, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		lookupBusinessBySlugPathParams, lookupBusinessBySlugQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /pos/public/business/by-slug", lookupBusinessBySlugHandler)
+	config.mux.Handle("GET /api/hub/business/v1/businesses/by-slug", lookupBusinessBySlugHandler)
 
 	methodHeaders = getSetSlugHeaders()
 	setSlugHandler := BindingMiddleware[SetSlugRequest](
 		genericHandler(server.SetSlug, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		setSlugPathParams, setSlugQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /business/me/slug", setSlugHandler)
+	config.mux.Handle("PATCH /api/hub/business/v1/businesses/slug", setSlugHandler)
 
 	methodHeaders = getUpdateBusinessHeaders()
 	updateBusinessHandler := BindingMiddleware[UpdateBusinessRequest](
 		genericHandler(server.UpdateBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateBusinessPathParams, updateBusinessQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /businesses/{business_id}", updateBusinessHandler)
+	config.mux.Handle("PUT /api/hub/business/v1/businesses/{business_id}", updateBusinessHandler)
 
 	return nil
 }
@@ -88,7 +88,9 @@ func getUpdateBusinessHeaders() []*onekithttp.Header {
 }
 
 // getBusinessPathParams contains path parameter configuration for GetBusiness
-var getBusinessPathParams = []PathParamConfig{}
+var getBusinessPathParams = []PathParamConfig{
+	{URLParam: "business_id", FieldName: "business_id"},
+}
 
 // getBusinessQueryParams contains query parameter configuration for GetBusiness
 var getBusinessQueryParams = []QueryParamConfig{}

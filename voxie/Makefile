@@ -1,6 +1,6 @@
 .PHONY: clean lint format breaking generate install-plugins fetch-onekit-proto install-js typecheck
 
-ONEKIT_VERSION := v0.2.0
+ONEKIT_VERSION := v0.3.0
 
 # Clean generated code
 clean:
@@ -11,7 +11,7 @@ clean:
 fetch-onekit-proto:
 	rm -rf .onekit
 	mkdir -p .onekit
-	buf export "https://github.com/1homsi/onekit.git#tag=$(ONEKIT_VERSION),subdir=proto" -o .onekit/proto
+	buf export "https://github.com/stackxio/onekit.git#tag=$(ONEKIT_VERSION),subdir=proto" -o .onekit/proto
 
 # Lint proto files
 lint: fetch-onekit-proto
@@ -27,8 +27,8 @@ breaking: fetch-onekit-proto
 
 # Install the onekit protoc plugins used for generation
 install-plugins:
-	go install github.com/1homsi/onekit/cmd/protoc-gen-onekit-go-http@$(ONEKIT_VERSION)
-	go install github.com/1homsi/onekit/cmd/protoc-gen-onekit-ts-client@$(ONEKIT_VERSION)
+	go install github.com/stackxio/onekit/cmd/protoc-gen-onekit-go-http@$(ONEKIT_VERSION)
+	go install github.com/stackxio/onekit/cmd/protoc-gen-onekit-ts-client@$(ONEKIT_VERSION)
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 # Install JS codegen tooling (ts-proto)

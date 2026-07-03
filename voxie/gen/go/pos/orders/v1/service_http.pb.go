@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderServiceServer is the server API for OrderService service.
@@ -28,7 +28,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 	listOrdersHandler := BindingMiddleware[ListOrdersRequest](
 		genericHandler(server.ListOrders, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listOrdersPathParams, listOrdersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/orders/v1/orders", listOrdersHandler)
@@ -37,7 +37,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 	createOrderHandler := BindingMiddleware[CreateOrderRequest](
 		genericHandler(server.CreateOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createOrderPathParams, createOrderQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/v1/orders", createOrderHandler)
@@ -46,7 +46,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 	getOrderDetailHandler := BindingMiddleware[GetOrderDetailRequest](
 		genericHandler(server.GetOrderDetail, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getOrderDetailPathParams, getOrderDetailQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/orders/v1/orders/{order_id}", getOrderDetailHandler)
@@ -55,7 +55,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 	updateOrderStatusHandler := BindingMiddleware[UpdateOrderStatusRequest](
 		genericHandler(server.UpdateOrderStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateOrderStatusPathParams, updateOrderStatusQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/orders/v1/orders/{order_id}/status", updateOrderStatusHandler)
@@ -64,7 +64,7 @@ func RegisterOrderServiceServer(server OrderServiceServer, opts ...ServerOption)
 	voidOrderHandler := BindingMiddleware[VoidOrderRequest](
 		genericHandler(server.VoidOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		voidOrderPathParams, voidOrderQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/v1/orders/{order_id}/void", voidOrderHandler)

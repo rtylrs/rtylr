@@ -116,7 +116,7 @@ export class SecurityServiceClient {
   }
 
   async getSecurityState(_req: GetSecurityStateRequest, options?: SecurityServiceCallOptions): Promise<GetSecurityStateResponse> {
-    let path = "/security";
+    let path = "/api/hub/security/v1/state";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -139,7 +139,7 @@ export class SecurityServiceClient {
   }
 
   async loginHistory(_req: LoginHistoryRequest, options?: SecurityServiceCallOptions): Promise<LoginHistoryResponse> {
-    let path = "/security/login-history";
+    let path = "/api/hub/security/v1/login-history";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -162,7 +162,7 @@ export class SecurityServiceClient {
   }
 
   async invalidateSessions(req: InvalidateSessionsRequest, options?: SecurityServiceCallOptions): Promise<InvalidateSessionsResponse> {
-    let path = "/security/invalidate-sessions";
+    let path = "/api/hub/security/v1/invalidate-sessions";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -186,7 +186,7 @@ export class SecurityServiceClient {
   }
 
   async update2FA(req: Update2FARequest, options?: SecurityServiceCallOptions): Promise<Update2FAResponse> {
-    let path = "/security/2fa";
+    let path = "/api/hub/security/v1/2fa";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -196,7 +196,7 @@ export class SecurityServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "POST",
+      method: "PATCH",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,

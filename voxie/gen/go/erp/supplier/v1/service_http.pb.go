@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SupplierServiceServer is the server API for SupplierService service.
@@ -26,7 +26,7 @@ func RegisterSupplierServiceServer(server SupplierServiceServer, opts ...ServerO
 	listSuppliersHandler := BindingMiddleware[ListSuppliersRequest](
 		genericHandler(server.ListSuppliers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listSuppliersPathParams, listSuppliersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/erp/supplier/v1/suppliers", listSuppliersHandler)
@@ -35,7 +35,7 @@ func RegisterSupplierServiceServer(server SupplierServiceServer, opts ...ServerO
 	createSupplierHandler := BindingMiddleware[CreateSupplierRequest](
 		genericHandler(server.CreateSupplier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createSupplierPathParams, createSupplierQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/erp/supplier/v1/suppliers", createSupplierHandler)
@@ -44,7 +44,7 @@ func RegisterSupplierServiceServer(server SupplierServiceServer, opts ...ServerO
 	updateSupplierHandler := BindingMiddleware[UpdateSupplierRequest](
 		genericHandler(server.UpdateSupplier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateSupplierPathParams, updateSupplierQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/erp/supplier/v1/suppliers/{id}", updateSupplierHandler)

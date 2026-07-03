@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // WorkScheduleServiceServer is the server API for WorkScheduleService service.
@@ -25,7 +25,7 @@ func RegisterWorkScheduleServiceServer(server WorkScheduleServiceServer, opts ..
 	createWorkScheduleHandler := BindingMiddleware[CreateWorkScheduleRequest](
 		genericHandler(server.CreateWorkSchedule, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createWorkSchedulePathParams, createWorkScheduleQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/work-schedule/v1/work-schedules", createWorkScheduleHandler)
@@ -34,7 +34,7 @@ func RegisterWorkScheduleServiceServer(server WorkScheduleServiceServer, opts ..
 	updateWorkScheduleHandler := BindingMiddleware[UpdateWorkScheduleRequest](
 		genericHandler(server.UpdateWorkSchedule, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateWorkSchedulePathParams, updateWorkScheduleQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/work-schedule/v1/work-schedules/{id}", updateWorkScheduleHandler)

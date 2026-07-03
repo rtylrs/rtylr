@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SettingsServiceServer is the server API for SettingsService service.
@@ -25,7 +25,7 @@ func RegisterSettingsServiceServer(server SettingsServiceServer, opts ...ServerO
 	getPOSSettingsHandler := BindingMiddleware[GetPOSSettingsRequest](
 		genericHandler(server.GetPOSSettings, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getPOSSettingsPathParams, getPOSSettingsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/settings/v1/settings", getPOSSettingsHandler)
@@ -34,7 +34,7 @@ func RegisterSettingsServiceServer(server SettingsServiceServer, opts ...ServerO
 	updatePOSSettingsHandler := BindingMiddleware[UpdatePOSSettingsRequest](
 		genericHandler(server.UpdatePOSSettings, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updatePOSSettingsPathParams, updatePOSSettingsQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/settings/v1/settings", updatePOSSettingsHandler)

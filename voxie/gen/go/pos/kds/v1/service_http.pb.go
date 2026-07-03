@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // KDSServiceServer is the server API for KDSService service.
@@ -25,7 +25,7 @@ func RegisterKDSServiceServer(server KDSServiceServer, opts ...ServerOption) err
 	listKDSOrdersHandler := BindingMiddleware[ListKDSOrdersRequest](
 		genericHandler(server.ListKDSOrders, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listKDSOrdersPathParams, listKDSOrdersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/kds/v1/orders", listKDSOrdersHandler)
@@ -34,7 +34,7 @@ func RegisterKDSServiceServer(server KDSServiceServer, opts ...ServerOption) err
 	updateKDSItemStatusHandler := BindingMiddleware[UpdateKDSItemStatusRequest](
 		genericHandler(server.UpdateKDSItemStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateKDSItemStatusPathParams, updateKDSItemStatusQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/kds/v1/{order_id}/items/{item_id}", updateKDSItemStatusHandler)

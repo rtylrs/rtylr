@@ -9,12 +9,12 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/team/access/v1";
 
 // AccessService defines hub team access request endpoints.
 service AccessService {
-  option (onekit.http.service_config) = {base_path: ""};
+  option (onekit.http.service_config) = {base_path: "/api/hub/team/access/v1"};
 
   // RequestAccess submits a request for app access.
   rpc RequestAccess(RequestAccessRequest) returns (RequestAccessResponse) {
     option (onekit.http.config) = {
-      path: "/team/request-access"
+      path: "/requests"
       method: HTTP_METHOD_POST
     };
   }

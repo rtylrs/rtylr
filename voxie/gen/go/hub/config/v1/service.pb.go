@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,10 +25,11 @@ var File_hub_config_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_config_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhub/config/v1/service.proto\x12\rhub.config.v1\x1a\x1ehub/config/v1/get_config.proto\x1a\x1donekit/http/annotations.proto2{\n" +
-	"\rConfigService\x12d\n" +
-	"\tGetConfig\x12\x1f.hub.config.v1.GetConfigRequest\x1a .hub.config.v1.GetConfigResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/get-configs\x10\x02\x1a\x04\xa2\xb5\x18\x00B.Z,github.com/voxire/voxie/gen/go/hub/config/v1b\x06proto3"
+	"\x1bhub/config/v1/service.proto\x12\rhub.config.v1\x1a\x1ehub/config/v1/get_config.proto\x1a\x1donekit/http/annotations.proto2\x8a\x01\n" +
+	"\rConfigService\x12_\n" +
+	"\tGetConfig\x12\x1f.hub.config.v1.GetConfigRequest\x1a .hub.config.v1.GetConfigResponse\"\x0f\x9a\xb5\x18\v\n" +
+	"\a/config\x10\x01\x1a\x18\xa2\xb5\x18\x14\n" +
+	"\x12/api/hub/config/v1B.Z,github.com/voxire/voxie/gen/go/hub/config/v1b\x06proto3"
 
 var file_hub_config_v1_service_proto_goTypes = []any{
 	(*GetConfigRequest)(nil),  // 0: hub.config.v1.GetConfigRequest

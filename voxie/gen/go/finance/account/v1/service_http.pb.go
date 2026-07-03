@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AccountServiceServer is the server API for AccountService service.
@@ -25,7 +25,7 @@ func RegisterAccountServiceServer(server AccountServiceServer, opts ...ServerOpt
 	listAccountsHandler := BindingMiddleware[ListAccountsRequest](
 		genericHandler(server.ListAccounts, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listAccountsPathParams, listAccountsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/account/v1/accounts", listAccountsHandler)
@@ -34,7 +34,7 @@ func RegisterAccountServiceServer(server AccountServiceServer, opts ...ServerOpt
 	createAccountHandler := BindingMiddleware[CreateAccountRequest](
 		genericHandler(server.CreateAccount, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createAccountPathParams, createAccountQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/account/v1/accounts", createAccountHandler)

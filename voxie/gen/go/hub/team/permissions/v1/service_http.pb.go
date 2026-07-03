@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // PermissionsServiceServer is the server API for PermissionsService service.
@@ -24,10 +24,10 @@ func RegisterPermissionsServiceServer(server PermissionsServiceServer, opts ...S
 	updatePermissionsHandler := BindingMiddleware[UpdatePermissionsRequest](
 		genericHandler(server.UpdatePermissions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updatePermissionsPathParams, updatePermissionsQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /team/users/permissions", updatePermissionsHandler)
+	config.mux.Handle("PUT /api/hub/team/permissions/v1/permissions/{user_id}", updatePermissionsHandler)
 
 	return nil
 }
@@ -43,7 +43,9 @@ func getUpdatePermissionsHeaders() []*onekithttp.Header {
 }
 
 // updatePermissionsPathParams contains path parameter configuration for UpdatePermissions
-var updatePermissionsPathParams = []PathParamConfig{}
+var updatePermissionsPathParams = []PathParamConfig{
+	{URLParam: "user_id", FieldName: "user_id"},
+}
 
 // updatePermissionsQueryParams contains query parameter configuration for UpdatePermissions
 var updatePermissionsQueryParams = []QueryParamConfig{}

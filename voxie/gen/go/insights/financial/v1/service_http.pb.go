@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // FinancialServiceServer is the server API for FinancialService service.
@@ -26,7 +26,7 @@ func RegisterFinancialServiceServer(server FinancialServiceServer, opts ...Serve
 	getCashFlowAnalyticsHandler := BindingMiddleware[GetCashFlowAnalyticsRequest](
 		genericHandler(server.GetCashFlowAnalytics, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getCashFlowAnalyticsPathParams, getCashFlowAnalyticsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/financial/v1/cash-flow", getCashFlowAnalyticsHandler)
@@ -35,7 +35,7 @@ func RegisterFinancialServiceServer(server FinancialServiceServer, opts ...Serve
 	getExpenseAnalyticsHandler := BindingMiddleware[GetExpenseAnalyticsRequest](
 		genericHandler(server.GetExpenseAnalytics, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getExpenseAnalyticsPathParams, getExpenseAnalyticsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/financial/v1/expenses", getExpenseAnalyticsHandler)
@@ -44,7 +44,7 @@ func RegisterFinancialServiceServer(server FinancialServiceServer, opts ...Serve
 	getInvoiceAgingHandler := BindingMiddleware[GetInvoiceAgingRequest](
 		genericHandler(server.GetInvoiceAging, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getInvoiceAgingPathParams, getInvoiceAgingQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/financial/v1/invoice-aging", getInvoiceAgingHandler)

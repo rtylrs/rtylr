@@ -7,8 +7,8 @@
 /* eslint-disable */
 
 export interface RemoveMemberRequest {
-  /** id is the team member user id to deactivate. */
-  id: number;
+  /** user_id identifies the user associated with this request. */
+  userId: number;
 }
 
 export interface RemoveMemberResponse {

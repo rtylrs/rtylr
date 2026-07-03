@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // RunsServiceServer is the server API for RunsService service.
@@ -27,7 +27,7 @@ func RegisterRunsServiceServer(server RunsServiceServer, opts ...ServerOption) e
 	listPayrollRunsHandler := BindingMiddleware[ListPayrollRunsRequest](
 		genericHandler(server.ListPayrollRuns, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listPayrollRunsPathParams, listPayrollRunsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/employees/payroll/runs/v1/runs", listPayrollRunsHandler)
@@ -36,7 +36,7 @@ func RegisterRunsServiceServer(server RunsServiceServer, opts ...ServerOption) e
 	triggerPayrollRunHandler := BindingMiddleware[TriggerPayrollRunRequest](
 		genericHandler(server.TriggerPayrollRun, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		triggerPayrollRunPathParams, triggerPayrollRunQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/employees/payroll/runs/v1/runs/trigger", triggerPayrollRunHandler)
@@ -45,7 +45,7 @@ func RegisterRunsServiceServer(server RunsServiceServer, opts ...ServerOption) e
 	approvePayrollRunHandler := BindingMiddleware[ApprovePayrollRunRequest](
 		genericHandler(server.ApprovePayrollRun, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approvePayrollRunPathParams, approvePayrollRunQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/employees/payroll/runs/v1/runs/{id}/approve", approvePayrollRunHandler)
@@ -54,7 +54,7 @@ func RegisterRunsServiceServer(server RunsServiceServer, opts ...ServerOption) e
 	exportPayrollHandler := BindingMiddleware[ExportPayrollRequest](
 		genericHandler(server.ExportPayroll, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		exportPayrollPathParams, exportPayrollQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/employees/payroll/runs/v1/runs/export", exportPayrollHandler)

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SetupServiceServer is the server API for SetupService service.
@@ -24,7 +24,7 @@ func RegisterSetupServiceServer(server SetupServiceServer, opts ...ServerOption)
 	completeSetupStepHandler := BindingMiddleware[CompleteSetupStepRequest](
 		genericHandler(server.CompleteSetupStep, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		completeSetupStepPathParams, completeSetupStepQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/setup/v1/steps", completeSetupStepHandler)

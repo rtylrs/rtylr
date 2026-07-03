@@ -2,6 +2,7 @@
 // source: hub/business/v1/service.proto
 
 export interface GetBusinessRequest {
+  businessId: string;
 }
 
 export interface GetBusinessResponse {
@@ -62,10 +63,6 @@ export interface SetSlugResponse {
 
 export interface UpdateBusinessRequest {
   businessId: string;
-  body?: UpdateBusinessBody;
-}
-
-export interface UpdateBusinessBody {
   name: string;
   type: string;
   address: string;
@@ -144,8 +141,9 @@ export class BusinessServiceClient {
     this.retry = options?.retry;
   }
 
-  async getBusiness(_req: GetBusinessRequest, options?: BusinessServiceCallOptions): Promise<GetBusinessResponse> {
-    let path = "/business/me";
+  async getBusiness(req: GetBusinessRequest, options?: BusinessServiceCallOptions): Promise<GetBusinessResponse> {
+    let path = "/api/hub/business/v1/businesses/{business_id}";
+    path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -168,7 +166,7 @@ export class BusinessServiceClient {
   }
 
   async lookupBusinessBySlug(req: LookupBusinessBySlugRequest, options?: BusinessServiceCallOptions): Promise<LookupBusinessBySlugResponse> {
-    let path = "/pos/public/business/by-slug";
+    let path = "/api/hub/business/v1/businesses/by-slug";
     const params = new URLSearchParams();
     if (req.slug != null && req.slug !== "") params.set("slug", String(req.slug));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
@@ -193,7 +191,7 @@ export class BusinessServiceClient {
   }
 
   async setSlug(req: SetSlugRequest, options?: BusinessServiceCallOptions): Promise<SetSlugResponse> {
-    let path = "/business/me/slug";
+    let path = "/api/hub/business/v1/businesses/slug";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -203,7 +201,7 @@ export class BusinessServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "PUT",
+      method: "PATCH",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,
@@ -217,7 +215,7 @@ export class BusinessServiceClient {
   }
 
   async updateBusiness(req: UpdateBusinessRequest, options?: BusinessServiceCallOptions): Promise<UpdateBusinessResponse> {
-    let path = "/businesses/{business_id}";
+    let path = "/api/hub/business/v1/businesses/{business_id}";
     path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
     const url = this.baseURL + path;
 
@@ -230,7 +228,7 @@ export class BusinessServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req.body ?? {}),
+      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

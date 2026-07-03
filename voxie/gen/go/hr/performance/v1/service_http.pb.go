@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // PerformanceServiceServer is the server API for PerformanceService service.
@@ -28,7 +28,7 @@ func RegisterPerformanceServiceServer(server PerformanceServiceServer, opts ...S
 	listReviewCyclesHandler := BindingMiddleware[ListReviewCyclesRequest](
 		genericHandler(server.ListReviewCycles, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listReviewCyclesPathParams, listReviewCyclesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/performance/v1/review-cycles", listReviewCyclesHandler)
@@ -37,7 +37,7 @@ func RegisterPerformanceServiceServer(server PerformanceServiceServer, opts ...S
 	createReviewCycleHandler := BindingMiddleware[CreateReviewCycleRequest](
 		genericHandler(server.CreateReviewCycle, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createReviewCyclePathParams, createReviewCycleQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/performance/v1/review-cycles", createReviewCycleHandler)
@@ -46,7 +46,7 @@ func RegisterPerformanceServiceServer(server PerformanceServiceServer, opts ...S
 	openReviewCycleHandler := BindingMiddleware[OpenReviewCycleRequest](
 		genericHandler(server.OpenReviewCycle, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		openReviewCyclePathParams, openReviewCycleQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/performance/v1/review-cycles/open", openReviewCycleHandler)
@@ -55,7 +55,7 @@ func RegisterPerformanceServiceServer(server PerformanceServiceServer, opts ...S
 	listGoalsHandler := BindingMiddleware[ListGoalsRequest](
 		genericHandler(server.ListGoals, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listGoalsPathParams, listGoalsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/performance/v1/goals", listGoalsHandler)
@@ -64,7 +64,7 @@ func RegisterPerformanceServiceServer(server PerformanceServiceServer, opts ...S
 	submitReviewHandler := BindingMiddleware[SubmitReviewRequest](
 		genericHandler(server.SubmitReview, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		submitReviewPathParams, submitReviewQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/performance/v1/reviews", submitReviewHandler)

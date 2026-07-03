@@ -11,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/integration/v1";
 
 // IntegrationService defines hub integration endpoints.
 service IntegrationService {
-  option (onekit.http.service_config) = {base_path: ""};
+  option (onekit.http.service_config) = {base_path: "/api/hub/integration/v1"};
 
   // ListIntegrations returns connected integrations.
   rpc ListIntegrations(ListIntegrationsRequest) returns (ListIntegrationsResponse) {
@@ -24,7 +24,7 @@ service IntegrationService {
   // ConnectIntegration connects a third-party integration.
   rpc ConnectIntegration(ConnectIntegrationRequest) returns (ConnectIntegrationResponse) {
     option (onekit.http.config) = {
-      path: "/integrations"
+      path: "/integrations/connect"
       method: HTTP_METHOD_POST
     };
   }
@@ -32,8 +32,8 @@ service IntegrationService {
   // DisconnectIntegration disconnects a third-party integration.
   rpc DisconnectIntegration(DisconnectIntegrationRequest) returns (DisconnectIntegrationResponse) {
     option (onekit.http.config) = {
-      path: "/integrations"
-      method: HTTP_METHOD_DELETE
+      path: "/integrations/disconnect"
+      method: HTTP_METHOD_POST
     };
   }
 }

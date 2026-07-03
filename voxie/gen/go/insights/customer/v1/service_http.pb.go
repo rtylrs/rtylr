@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // CustomerServiceServer is the server API for CustomerService service.
@@ -27,7 +27,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	getCustomerAnalyticsHandler := BindingMiddleware[GetCustomerAnalyticsRequest](
 		genericHandler(server.GetCustomerAnalytics, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getCustomerAnalyticsPathParams, getCustomerAnalyticsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/customer/v1/analytics", getCustomerAnalyticsHandler)
@@ -36,7 +36,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	getChurnAnalysisHandler := BindingMiddleware[GetChurnAnalysisRequest](
 		genericHandler(server.GetChurnAnalysis, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getChurnAnalysisPathParams, getChurnAnalysisQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/customer/v1/churn", getChurnAnalysisHandler)
@@ -45,7 +45,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	getLTVAnalysisHandler := BindingMiddleware[GetLTVAnalysisRequest](
 		genericHandler(server.GetLTVAnalysis, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getLTVAnalysisPathParams, getLTVAnalysisQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/customer/v1/ltv", getLTVAnalysisHandler)
@@ -54,7 +54,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	getTopCustomersHandler := BindingMiddleware[GetTopCustomersRequest](
 		genericHandler(server.GetTopCustomers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getTopCustomersPathParams, getTopCustomersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/customer/v1/top", getTopCustomersHandler)

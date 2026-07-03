@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderDiscountServiceServer is the server API for OrderDiscountService service.
@@ -24,7 +24,7 @@ func RegisterOrderDiscountServiceServer(server OrderDiscountServiceServer, opts 
 	discountOrderHandler := BindingMiddleware[DiscountOrderRequest](
 		genericHandler(server.DiscountOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		discountOrderPathParams, discountOrderQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/discounts/v1/orders/{order_id}/discount", discountOrderHandler)

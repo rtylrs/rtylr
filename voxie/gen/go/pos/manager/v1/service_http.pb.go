@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ManagerServiceServer is the server API for ManagerService service.
@@ -24,7 +24,7 @@ func RegisterManagerServiceServer(server ManagerServiceServer, opts ...ServerOpt
 	verifyPINHandler := BindingMiddleware[VerifyPINRequest](
 		genericHandler(server.VerifyPIN, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		verifyPINPathParams, verifyPINQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/manager/v1/verify", verifyPINHandler)

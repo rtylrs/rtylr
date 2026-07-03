@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // EquipmentServiceServer is the server API for EquipmentService service.
@@ -27,7 +27,7 @@ func RegisterEquipmentServiceServer(server EquipmentServiceServer, opts ...Serve
 	listAssetsHandler := BindingMiddleware[ListAssetsRequest](
 		genericHandler(server.ListAssets, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listAssetsPathParams, listAssetsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/equipment/v1/assets", listAssetsHandler)
@@ -36,7 +36,7 @@ func RegisterEquipmentServiceServer(server EquipmentServiceServer, opts ...Serve
 	listEquipmentRequestsHandler := BindingMiddleware[ListEquipmentRequestsRequest](
 		genericHandler(server.ListEquipmentRequests, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listEquipmentRequestsPathParams, listEquipmentRequestsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/equipment/v1/requests", listEquipmentRequestsHandler)
@@ -45,7 +45,7 @@ func RegisterEquipmentServiceServer(server EquipmentServiceServer, opts ...Serve
 	createEquipmentRequestHandler := BindingMiddleware[CreateEquipmentRequestRequest](
 		genericHandler(server.CreateEquipmentRequest, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createEquipmentRequestPathParams, createEquipmentRequestQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/equipment/v1/requests", createEquipmentRequestHandler)
@@ -54,7 +54,7 @@ func RegisterEquipmentServiceServer(server EquipmentServiceServer, opts ...Serve
 	approveEquipmentHandler := BindingMiddleware[ApproveEquipmentRequest](
 		genericHandler(server.ApproveEquipment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveEquipmentPathParams, approveEquipmentQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/equipment/v1/requests/{equipment_request_id}/approve", approveEquipmentHandler)

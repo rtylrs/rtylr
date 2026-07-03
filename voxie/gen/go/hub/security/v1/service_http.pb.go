@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // SecurityServiceServer is the server API for SecurityService service.
@@ -27,37 +27,37 @@ func RegisterSecurityServiceServer(server SecurityServiceServer, opts ...ServerO
 	getSecurityStateHandler := BindingMiddleware[GetSecurityStateRequest](
 		genericHandler(server.GetSecurityState, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getSecurityStatePathParams, getSecurityStateQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /security", getSecurityStateHandler)
+	config.mux.Handle("GET /api/hub/security/v1/state", getSecurityStateHandler)
 
 	methodHeaders = getLoginHistoryHeaders()
 	loginHistoryHandler := BindingMiddleware[LoginHistoryRequest](
 		genericHandler(server.LoginHistory, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		loginHistoryPathParams, loginHistoryQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /security/login-history", loginHistoryHandler)
+	config.mux.Handle("GET /api/hub/security/v1/login-history", loginHistoryHandler)
 
 	methodHeaders = getInvalidateSessionsHeaders()
 	invalidateSessionsHandler := BindingMiddleware[InvalidateSessionsRequest](
 		genericHandler(server.InvalidateSessions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		invalidateSessionsPathParams, invalidateSessionsQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /security/invalidate-sessions", invalidateSessionsHandler)
+	config.mux.Handle("POST /api/hub/security/v1/invalidate-sessions", invalidateSessionsHandler)
 
 	methodHeaders = getUpdate2FAHeaders()
 	update2FAHandler := BindingMiddleware[Update2FARequest](
 		genericHandler(server.Update2FA, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		update2FAPathParams, update2FAQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /security/2fa", update2FAHandler)
+	config.mux.Handle("PATCH /api/hub/security/v1/2fa", update2FAHandler)
 
 	return nil
 }

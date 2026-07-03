@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ProductServiceServer is the server API for ProductService service.
@@ -27,7 +27,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	getBestSellersHandler := BindingMiddleware[GetBestSellersRequest](
 		genericHandler(server.GetBestSellers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getBestSellersPathParams, getBestSellersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/product/v1/best-sellers", getBestSellersHandler)
@@ -36,7 +36,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	getCategoryPerformanceHandler := BindingMiddleware[GetCategoryPerformanceRequest](
 		genericHandler(server.GetCategoryPerformance, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getCategoryPerformancePathParams, getCategoryPerformanceQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/product/v1/categories", getCategoryPerformanceHandler)
@@ -45,7 +45,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	getProductMarginsHandler := BindingMiddleware[GetProductMarginsRequest](
 		genericHandler(server.GetProductMargins, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getProductMarginsPathParams, getProductMarginsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/product/v1/margins", getProductMarginsHandler)
@@ -54,7 +54,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	getSlowMoversHandler := BindingMiddleware[GetSlowMoversRequest](
 		genericHandler(server.GetSlowMovers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getSlowMoversPathParams, getSlowMoversQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/product/v1/slow-movers", getSlowMoversHandler)

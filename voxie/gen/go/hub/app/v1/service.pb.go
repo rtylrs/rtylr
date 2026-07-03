@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -26,20 +26,21 @@ var File_hub_app_v1_service_proto protoreflect.FileDescriptor
 const file_hub_app_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x18hub/app/v1/service.proto\x12\n" +
-	"hub.app.v1\x1a\x1dhub/app/v1/addon_status.proto\x1a\x1ehub/app/v1/disable_addon.proto\x1a\x1dhub/app/v1/enable_addon.proto\x1a\x1chub/app/v1/list_addons.proto\x1a\x1ahub/app/v1/list_apps.proto\x1a\x1donekit/http/annotations.proto2\x82\x04\n" +
+	"hub.app.v1\x1a\x1dhub/app/v1/addon_status.proto\x1a\x1ehub/app/v1/disable_addon.proto\x1a\x1dhub/app/v1/enable_addon.proto\x1a\x1chub/app/v1/list_addons.proto\x1a\x1ahub/app/v1/list_apps.proto\x1a\x1donekit/http/annotations.proto2\xb4\x04\n" +
 	"\n" +
 	"AppService\x12T\n" +
 	"\bListApps\x12\x1b.hub.app.v1.ListAppsRequest\x1a\x1c.hub.app.v1.ListAppsResponse\"\r\x9a\xb5\x18\t\n" +
 	"\x05/apps\x10\x01\x12\\\n" +
 	"\n" +
 	"ListAddons\x12\x1d.hub.app.v1.ListAddonsRequest\x1a\x1e.hub.app.v1.ListAddonsResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/addons\x10\x01\x12f\n" +
-	"\vAddonStatus\x12\x1e.hub.app.v1.AddonStatusRequest\x1a\x1f.hub.app.v1.AddonStatusResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/addons/status\x10\x01\x12f\n" +
-	"\vEnableAddon\x12\x1e.hub.app.v1.EnableAddonRequest\x1a\x1f.hub.app.v1.EnableAddonResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/addons/enable\x10\x02\x12j\n" +
-	"\fDisableAddon\x12\x1f.hub.app.v1.DisableAddonRequest\x1a .hub.app.v1.DisableAddonResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/addons/disable\x10\x02\x1a\x04\xa2\xb5\x18\x00B+Z)github.com/voxire/voxie/gen/go/hub/app/v1b\x06proto3"
+	"\a/addons\x10\x01\x12q\n" +
+	"\vAddonStatus\x12\x1e.hub.app.v1.AddonStatusRequest\x1a\x1f.hub.app.v1.AddonStatusResponse\"!\x9a\xb5\x18\x1d\n" +
+	"\x19/addons/{addon_id}/status\x10\x01\x12q\n" +
+	"\vEnableAddon\x12\x1e.hub.app.v1.EnableAddonRequest\x1a\x1f.hub.app.v1.EnableAddonResponse\"!\x9a\xb5\x18\x1d\n" +
+	"\x19/addons/{addon_id}/enable\x10\x05\x12u\n" +
+	"\fDisableAddon\x12\x1f.hub.app.v1.DisableAddonRequest\x1a .hub.app.v1.DisableAddonResponse\"\"\x9a\xb5\x18\x1e\n" +
+	"\x1a/addons/{addon_id}/disable\x10\x05\x1a\x15\xa2\xb5\x18\x11\n" +
+	"\x0f/api/hub/app/v1B+Z)github.com/voxire/voxie/gen/go/hub/app/v1b\x06proto3"
 
 var file_hub_app_v1_service_proto_goTypes = []any{
 	(*ListAppsRequest)(nil),      // 0: hub.app.v1.ListAppsRequest

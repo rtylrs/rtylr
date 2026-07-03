@@ -66,10 +66,6 @@ export interface CreateWebhookResponse {
 
 export interface UpdateWebhookRequest {
   id: string;
-  body?: UpdateWebhookBody;
-}
-
-export interface UpdateWebhookBody {
   url: string;
   events: string[];
   isActive: boolean;
@@ -151,7 +147,7 @@ export class DeveloperServiceClient {
   }
 
   async listApiKeys(_req: ListApiKeysRequest, options?: DeveloperServiceCallOptions): Promise<ListApiKeysResponse> {
-    let path = "/api-keys";
+    let path = "/api/hub/developer/v1/api-keys";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -174,7 +170,7 @@ export class DeveloperServiceClient {
   }
 
   async createApiKey(req: CreateApiKeyRequest, options?: DeveloperServiceCallOptions): Promise<CreateApiKeyResponse> {
-    let path = "/api-keys";
+    let path = "/api/hub/developer/v1/api-keys";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -198,10 +194,8 @@ export class DeveloperServiceClient {
   }
 
   async revokeApiKey(req: RevokeApiKeyRequest, options?: DeveloperServiceCallOptions): Promise<RevokeApiKeyResponse> {
-    let path = "/api-keys";
-    const params = new URLSearchParams();
-    if (req.id != null && req.id !== "0") params.set("id", String(req.id));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    let path = "/api/hub/developer/v1/api-keys/revoke";
+    const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -210,8 +204,9 @@ export class DeveloperServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "DELETE",
+      method: "POST",
       headers,
+      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
@@ -223,7 +218,7 @@ export class DeveloperServiceClient {
   }
 
   async listWebhooks(_req: ListWebhooksRequest, options?: DeveloperServiceCallOptions): Promise<ListWebhooksResponse> {
-    let path = "/webhooks";
+    let path = "/api/hub/developer/v1/webhooks";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -246,7 +241,7 @@ export class DeveloperServiceClient {
   }
 
   async createWebhook(req: CreateWebhookRequest, options?: DeveloperServiceCallOptions): Promise<CreateWebhookResponse> {
-    let path = "/webhooks";
+    let path = "/api/hub/developer/v1/webhooks";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -270,7 +265,7 @@ export class DeveloperServiceClient {
   }
 
   async updateWebhook(req: UpdateWebhookRequest, options?: DeveloperServiceCallOptions): Promise<UpdateWebhookResponse> {
-    let path = "/webhooks/{id}";
+    let path = "/api/hub/developer/v1/webhooks/{id}";
     path = path.replace("{id}", encodeURIComponent(String(req.id)));
     const url = this.baseURL + path;
 
@@ -283,7 +278,7 @@ export class DeveloperServiceClient {
     const resp = await this.doFetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(req.body ?? {}),
+      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 
@@ -295,10 +290,9 @@ export class DeveloperServiceClient {
   }
 
   async deleteWebhook(req: DeleteWebhookRequest, options?: DeveloperServiceCallOptions): Promise<DeleteWebhookResponse> {
-    let path = "/webhooks";
-    const params = new URLSearchParams();
-    if (req.id != null && req.id !== "0") params.set("id", String(req.id));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    let path = "/api/hub/developer/v1/webhooks/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

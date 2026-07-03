@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AuditServiceServer is the server API for AuditService service.
@@ -25,7 +25,7 @@ func RegisterAuditServiceServer(server AuditServiceServer, opts ...ServerOption)
 	listAuditHandler := BindingMiddleware[ListAuditRequest](
 		genericHandler(server.ListAudit, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listAuditPathParams, listAuditQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/audit/v1/audit", listAuditHandler)
@@ -34,7 +34,7 @@ func RegisterAuditServiceServer(server AuditServiceServer, opts ...ServerOption)
 	createAuditHandler := BindingMiddleware[CreateAuditRequest](
 		genericHandler(server.CreateAudit, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createAuditPathParams, createAuditQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/audit/v1/audit", createAuditHandler)

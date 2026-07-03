@@ -8,7 +8,6 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -118,11 +117,10 @@ var File_hub_app_v1_addon_status_proto protoreflect.FileDescriptor
 const file_hub_app_v1_addon_status_proto_rawDesc = "" +
 	"\n" +
 	"\x1dhub/app/v1/addon_status.proto\x12\n" +
-	"hub.app.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"I\n" +
-	"\x12AddonStatusRequest\x123\n" +
-	"\baddon_id\x18\x01 \x01(\tB\x18\xbaH\a\xc8\x01\x01r\x02\x10\x01µ\x18\n" +
-	"\n" +
-	"\baddon_idR\aaddonId\"4\n" +
+	"hub.app.v1\x1a\x1bbuf/validate/validate.proto\";\n" +
+	"\x12AddonStatusRequest\x12%\n" +
+	"\baddon_id\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\aaddonId\"4\n" +
 	"\x13AddonStatusResponse\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x01 \x01(\bR\tisEnabledB+Z)github.com/voxire/voxie/gen/go/hub/app/v1b\x06proto3"

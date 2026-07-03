@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // InventoryServiceServer is the server API for InventoryService service.
@@ -27,7 +27,7 @@ func RegisterInventoryServiceServer(server InventoryServiceServer, opts ...Serve
 	getInventoryReportHandler := BindingMiddleware[GetInventoryReportRequest](
 		genericHandler(server.GetInventoryReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getInventoryReportPathParams, getInventoryReportQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/erp/inventory/v1/report", getInventoryReportHandler)
@@ -36,7 +36,7 @@ func RegisterInventoryServiceServer(server InventoryServiceServer, opts ...Serve
 	getLowStockHandler := BindingMiddleware[GetLowStockRequest](
 		genericHandler(server.GetLowStock, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getLowStockPathParams, getLowStockQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/erp/inventory/v1/low-stock", getLowStockHandler)
@@ -45,7 +45,7 @@ func RegisterInventoryServiceServer(server InventoryServiceServer, opts ...Serve
 	getValuationHandler := BindingMiddleware[GetValuationRequest](
 		genericHandler(server.GetValuation, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getValuationPathParams, getValuationQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/erp/inventory/v1/valuation", getValuationHandler)
@@ -54,7 +54,7 @@ func RegisterInventoryServiceServer(server InventoryServiceServer, opts ...Serve
 	adjustInventoryHandler := BindingMiddleware[AdjustInventoryRequest](
 		genericHandler(server.AdjustInventory, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		adjustInventoryPathParams, adjustInventoryQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/erp/inventory/v1/adjust", adjustInventoryHandler)

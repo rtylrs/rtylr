@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // DashboardServiceServer is the server API for DashboardService service.
@@ -24,7 +24,7 @@ func RegisterDashboardServiceServer(server DashboardServiceServer, opts ...Serve
 	getFlowDashboardHandler := BindingMiddleware[GetFlowDashboardRequest](
 		genericHandler(server.GetFlowDashboard, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getFlowDashboardPathParams, getFlowDashboardQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/dashboard/v1/dashboard", getFlowDashboardHandler)

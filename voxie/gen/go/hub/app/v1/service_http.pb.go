@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AppServiceServer is the server API for AppService service.
@@ -28,46 +28,46 @@ func RegisterAppServiceServer(server AppServiceServer, opts ...ServerOption) err
 	listAppsHandler := BindingMiddleware[ListAppsRequest](
 		genericHandler(server.ListApps, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listAppsPathParams, listAppsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /apps", listAppsHandler)
+	config.mux.Handle("GET /api/hub/app/v1/apps", listAppsHandler)
 
 	methodHeaders = getListAddonsHeaders()
 	listAddonsHandler := BindingMiddleware[ListAddonsRequest](
 		genericHandler(server.ListAddons, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listAddonsPathParams, listAddonsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /addons", listAddonsHandler)
+	config.mux.Handle("GET /api/hub/app/v1/addons", listAddonsHandler)
 
 	methodHeaders = getAddonStatusHeaders()
 	addonStatusHandler := BindingMiddleware[AddonStatusRequest](
 		genericHandler(server.AddonStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		addonStatusPathParams, addonStatusQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /addons/status", addonStatusHandler)
+	config.mux.Handle("GET /api/hub/app/v1/addons/{addon_id}/status", addonStatusHandler)
 
 	methodHeaders = getEnableAddonHeaders()
 	enableAddonHandler := BindingMiddleware[EnableAddonRequest](
 		genericHandler(server.EnableAddon, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		enableAddonPathParams, enableAddonQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /addons/enable", enableAddonHandler)
+	config.mux.Handle("PATCH /api/hub/app/v1/addons/{addon_id}/enable", enableAddonHandler)
 
 	methodHeaders = getDisableAddonHeaders()
 	disableAddonHandler := BindingMiddleware[DisableAddonRequest](
 		genericHandler(server.DisableAddon, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		disableAddonPathParams, disableAddonQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /addons/disable", disableAddonHandler)
+	config.mux.Handle("PATCH /api/hub/app/v1/addons/{addon_id}/disable", disableAddonHandler)
 
 	return nil
 }
@@ -115,21 +115,25 @@ var listAddonsPathParams = []PathParamConfig{}
 var listAddonsQueryParams = []QueryParamConfig{}
 
 // addonStatusPathParams contains path parameter configuration for AddonStatus
-var addonStatusPathParams = []PathParamConfig{}
-
-// addonStatusQueryParams contains query parameter configuration for AddonStatus
-var addonStatusQueryParams = []QueryParamConfig{
-	{QueryName: "addon_id", FieldName: "addon_id", Required: false},
+var addonStatusPathParams = []PathParamConfig{
+	{URLParam: "addon_id", FieldName: "addon_id"},
 }
 
+// addonStatusQueryParams contains query parameter configuration for AddonStatus
+var addonStatusQueryParams = []QueryParamConfig{}
+
 // enableAddonPathParams contains path parameter configuration for EnableAddon
-var enableAddonPathParams = []PathParamConfig{}
+var enableAddonPathParams = []PathParamConfig{
+	{URLParam: "addon_id", FieldName: "addon_id"},
+}
 
 // enableAddonQueryParams contains query parameter configuration for EnableAddon
 var enableAddonQueryParams = []QueryParamConfig{}
 
 // disableAddonPathParams contains path parameter configuration for DisableAddon
-var disableAddonPathParams = []PathParamConfig{}
+var disableAddonPathParams = []PathParamConfig{
+	{URLParam: "addon_id", FieldName: "addon_id"},
+}
 
 // disableAddonQueryParams contains query parameter configuration for DisableAddon
 var disableAddonQueryParams = []QueryParamConfig{}

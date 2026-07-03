@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // CustomerServiceServer is the server API for CustomerService service.
@@ -24,7 +24,7 @@ func RegisterCustomerServiceServer(server CustomerServiceServer, opts ...ServerO
 	searchCustomersHandler := BindingMiddleware[SearchCustomersRequest](
 		genericHandler(server.SearchCustomers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		searchCustomersPathParams, searchCustomersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/customer/v1/customers", searchCustomersHandler)

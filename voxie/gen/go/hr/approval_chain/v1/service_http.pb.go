@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ApprovalChainServiceServer is the server API for ApprovalChainService service.
@@ -24,7 +24,7 @@ func RegisterApprovalChainServiceServer(server ApprovalChainServiceServer, opts 
 	upsertApprovalChainHandler := BindingMiddleware[UpsertApprovalChainRequest](
 		genericHandler(server.UpsertApprovalChain, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		upsertApprovalChainPathParams, upsertApprovalChainQueryParams,
-		"PUT", "", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/approval-chain/v1/approval-chains", upsertApprovalChainHandler)

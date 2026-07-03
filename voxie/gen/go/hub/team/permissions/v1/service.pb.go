@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,10 +25,11 @@ var File_hub_team_permissions_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_permissions_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%hub/team/permissions/v1/service.proto\x12\x17hub.team.permissions.v1\x1a0hub/team/permissions/v1/update_permissions.proto\x1a\x1donekit/http/annotations.proto2\xb8\x01\n" +
-	"\x12PermissionsService\x12\x9b\x01\n" +
-	"\x11UpdatePermissions\x121.hub.team.permissions.v1.UpdatePermissionsRequest\x1a2.hub.team.permissions.v1.UpdatePermissionsResponse\"\x1f\x9a\xb5\x18\x1b\n" +
-	"\x17/team/users/permissions\x10\x03\x1a\x04\xa2\xb5\x18\x00B8Z6github.com/voxire/voxie/gen/go/hub/team/permissions/v1b\x06proto3"
+	"%hub/team/permissions/v1/service.proto\x12\x17hub.team.permissions.v1\x1a0hub/team/permissions/v1/update_permissions.proto\x1a\x1donekit/http/annotations.proto2\xd5\x01\n" +
+	"\x12PermissionsService\x12\x9a\x01\n" +
+	"\x11UpdatePermissions\x121.hub.team.permissions.v1.UpdatePermissionsRequest\x1a2.hub.team.permissions.v1.UpdatePermissionsResponse\"\x1e\x9a\xb5\x18\x1a\n" +
+	"\x16/permissions/{user_id}\x10\x03\x1a\"\xa2\xb5\x18\x1e\n" +
+	"\x1c/api/hub/team/permissions/v1B8Z6github.com/voxire/voxie/gen/go/hub/team/permissions/v1b\x06proto3"
 
 var file_hub_team_permissions_v1_service_proto_goTypes = []any{
 	(*UpdatePermissionsRequest)(nil),  // 0: hub.team.permissions.v1.UpdatePermissionsRequest

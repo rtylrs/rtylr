@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OnboardingServiceServer is the server API for OnboardingService service.
@@ -31,7 +31,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	listChecklistTemplatesHandler := BindingMiddleware[ListChecklistTemplatesRequest](
 		genericHandler(server.ListChecklistTemplates, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listChecklistTemplatesPathParams, listChecklistTemplatesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/onboarding/v1/templates", listChecklistTemplatesHandler)
@@ -40,7 +40,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	createChecklistTemplateHandler := BindingMiddleware[CreateChecklistTemplateRequest](
 		genericHandler(server.CreateChecklistTemplate, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createChecklistTemplatePathParams, createChecklistTemplateQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/onboarding/v1/templates", createChecklistTemplateHandler)
@@ -49,7 +49,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	updateChecklistTemplateHandler := BindingMiddleware[UpdateChecklistTemplateRequest](
 		genericHandler(server.UpdateChecklistTemplate, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateChecklistTemplatePathParams, updateChecklistTemplateQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/onboarding/v1/templates/{role_id}", updateChecklistTemplateHandler)
@@ -58,7 +58,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	addItemToChecklistTemplateHandler := BindingMiddleware[AddItemToChecklistTemplateRequest](
 		genericHandler(server.AddItemToChecklistTemplate, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		addItemToChecklistTemplatePathParams, addItemToChecklistTemplateQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/onboarding/v1/templates/{role_id}/items", addItemToChecklistTemplateHandler)
@@ -67,7 +67,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	listEmployeeChecklistsHandler := BindingMiddleware[ListEmployeeChecklistsRequest](
 		genericHandler(server.ListEmployeeChecklists, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listEmployeeChecklistsPathParams, listEmployeeChecklistsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/onboarding/v1/checklists", listEmployeeChecklistsHandler)
@@ -76,7 +76,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	getEmployeeChecklistHandler := BindingMiddleware[GetEmployeeChecklistRequest](
 		genericHandler(server.GetEmployeeChecklist, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getEmployeeChecklistPathParams, getEmployeeChecklistQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/onboarding/v1/employees/{employee_id}", getEmployeeChecklistHandler)
@@ -85,7 +85,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	triggerChecklistHandler := BindingMiddleware[TriggerChecklistRequest](
 		genericHandler(server.TriggerChecklist, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		triggerChecklistPathParams, triggerChecklistQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/onboarding/v1/checklists/trigger", triggerChecklistHandler)
@@ -94,7 +94,7 @@ func RegisterOnboardingServiceServer(server OnboardingServiceServer, opts ...Ser
 	completeChecklistItemHandler := BindingMiddleware[CompleteChecklistItemRequest](
 		genericHandler(server.CompleteChecklistItem, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		completeChecklistItemPathParams, completeChecklistItemQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/onboarding/v1/checklists/items/complete", completeChecklistItemHandler)

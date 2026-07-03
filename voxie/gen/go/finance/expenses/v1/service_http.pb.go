@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ExpensesServiceServer is the server API for ExpensesService service.
@@ -28,7 +28,7 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 	listExpensesHandler := BindingMiddleware[ListExpensesRequest](
 		genericHandler(server.ListExpenses, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listExpensesPathParams, listExpensesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/expenses/v1/expenses", listExpensesHandler)
@@ -37,7 +37,7 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 	createExpenseHandler := BindingMiddleware[CreateExpenseRequest](
 		genericHandler(server.CreateExpense, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createExpensePathParams, createExpenseQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/expenses/v1/expenses", createExpenseHandler)
@@ -46,7 +46,7 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 	updateExpenseHandler := BindingMiddleware[UpdateExpenseRequest](
 		genericHandler(server.UpdateExpense, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateExpensePathParams, updateExpenseQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/expenses/v1/expenses/{id}", updateExpenseHandler)
@@ -55,7 +55,7 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 	deleteExpenseHandler := BindingMiddleware[DeleteExpenseRequest](
 		genericHandler(server.DeleteExpense, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteExpensePathParams, deleteExpenseQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/finance/expenses/v1/expenses/{id}", deleteExpenseHandler)
@@ -64,7 +64,7 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 	listExpenseCategoriesHandler := BindingMiddleware[ListExpenseCategoriesRequest](
 		genericHandler(server.ListExpenseCategories, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listExpenseCategoriesPathParams, listExpenseCategoriesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/expenses/v1/categories", listExpenseCategoriesHandler)

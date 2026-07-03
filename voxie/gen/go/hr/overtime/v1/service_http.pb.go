@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OvertimeServiceServer is the server API for OvertimeService service.
@@ -26,7 +26,7 @@ func RegisterOvertimeServiceServer(server OvertimeServiceServer, opts ...ServerO
 	listOvertimeRequestsHandler := BindingMiddleware[ListOvertimeRequestsRequest](
 		genericHandler(server.ListOvertimeRequests, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listOvertimeRequestsPathParams, listOvertimeRequestsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/overtime/v1/requests", listOvertimeRequestsHandler)
@@ -35,7 +35,7 @@ func RegisterOvertimeServiceServer(server OvertimeServiceServer, opts ...ServerO
 	createOvertimeRequestHandler := BindingMiddleware[CreateOvertimeRequestRequest](
 		genericHandler(server.CreateOvertimeRequest, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createOvertimeRequestPathParams, createOvertimeRequestQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/overtime/v1/requests", createOvertimeRequestHandler)
@@ -44,7 +44,7 @@ func RegisterOvertimeServiceServer(server OvertimeServiceServer, opts ...ServerO
 	approveOvertimeHandler := BindingMiddleware[ApproveOvertimeRequest](
 		genericHandler(server.ApproveOvertime, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		approveOvertimePathParams, approveOvertimeQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/hr/overtime/v1/requests/{overtime_request_id}/approve", approveOvertimeHandler)

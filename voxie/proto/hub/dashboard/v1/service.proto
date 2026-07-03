@@ -9,12 +9,12 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/dashboard/v1";
 
 // DashboardService defines hub dashboard endpoints.
 service DashboardService {
-  option (onekit.http.service_config) = {base_path: ""};
+  option (onekit.http.service_config) = {base_path: "/api/hub/dashboard/v1"};
 
   // GetKPIs returns key performance indicators for the active business.
   rpc GetKPIs(GetKPIsRequest) returns (GetKPIsResponse) {
     option (onekit.http.config) = {
-      path: "/hub/kpis"
+      path: "/kpis"
       method: HTTP_METHOD_GET
     };
   }

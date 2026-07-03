@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ReportServiceServer is the server API for ReportService service.
@@ -29,7 +29,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	getPLReportHandler := BindingMiddleware[GetPLReportRequest](
 		genericHandler(server.GetPLReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getPLReportPathParams, getPLReportQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/report/v1/pl", getPLReportHandler)
@@ -38,7 +38,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	getTaxReportHandler := BindingMiddleware[GetTaxReportRequest](
 		genericHandler(server.GetTaxReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getTaxReportPathParams, getTaxReportQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/report/v1/tax", getTaxReportHandler)
@@ -47,7 +47,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	listExpenseCategoryDetailsHandler := BindingMiddleware[ListExpenseCategoryDetailsRequest](
 		genericHandler(server.ListExpenseCategoryDetails, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listExpenseCategoryDetailsPathParams, listExpenseCategoryDetailsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/report/v1/expense-categories", listExpenseCategoryDetailsHandler)
@@ -56,7 +56,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	createExpenseCategoryDetailHandler := BindingMiddleware[CreateExpenseCategoryDetailRequest](
 		genericHandler(server.CreateExpenseCategoryDetail, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createExpenseCategoryDetailPathParams, createExpenseCategoryDetailQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/report/v1/expense-categories", createExpenseCategoryDetailHandler)
@@ -65,7 +65,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	listTaxConfigHandler := BindingMiddleware[ListTaxConfigRequest](
 		genericHandler(server.ListTaxConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTaxConfigPathParams, listTaxConfigQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/report/v1/tax-config", listTaxConfigHandler)
@@ -74,7 +74,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	createTaxConfigHandler := BindingMiddleware[CreateTaxConfigRequest](
 		genericHandler(server.CreateTaxConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createTaxConfigPathParams, createTaxConfigQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/report/v1/tax-config", createTaxConfigHandler)

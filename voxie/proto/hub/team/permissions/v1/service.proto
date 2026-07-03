@@ -9,12 +9,12 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/team/permissions/v1";
 
 // PermissionsService defines hub team permission endpoints.
 service PermissionsService {
-  option (onekit.http.service_config) = {base_path: ""};
+  option (onekit.http.service_config) = {base_path: "/api/hub/team/permissions/v1"};
 
   // UpdatePermissions assigns apps and role for a team member.
   rpc UpdatePermissions(UpdatePermissionsRequest) returns (UpdatePermissionsResponse) {
     option (onekit.http.config) = {
-      path: "/team/users/permissions"
+      path: "/permissions/{user_id}"
       method: HTTP_METHOD_PUT
     };
   }

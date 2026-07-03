@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // IntegrationServiceServer is the server API for IntegrationService service.
@@ -26,28 +26,28 @@ func RegisterIntegrationServiceServer(server IntegrationServiceServer, opts ...S
 	listIntegrationsHandler := BindingMiddleware[ListIntegrationsRequest](
 		genericHandler(server.ListIntegrations, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listIntegrationsPathParams, listIntegrationsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /integrations", listIntegrationsHandler)
+	config.mux.Handle("GET /api/hub/integration/v1/integrations", listIntegrationsHandler)
 
 	methodHeaders = getConnectIntegrationHeaders()
 	connectIntegrationHandler := BindingMiddleware[ConnectIntegrationRequest](
 		genericHandler(server.ConnectIntegration, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		connectIntegrationPathParams, connectIntegrationQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /integrations", connectIntegrationHandler)
+	config.mux.Handle("POST /api/hub/integration/v1/integrations/connect", connectIntegrationHandler)
 
 	methodHeaders = getDisconnectIntegrationHeaders()
 	disconnectIntegrationHandler := BindingMiddleware[DisconnectIntegrationRequest](
 		genericHandler(server.DisconnectIntegration, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		disconnectIntegrationPathParams, disconnectIntegrationQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /integrations", disconnectIntegrationHandler)
+	config.mux.Handle("POST /api/hub/integration/v1/integrations/disconnect", disconnectIntegrationHandler)
 
 	return nil
 }
@@ -88,6 +88,4 @@ var connectIntegrationQueryParams = []QueryParamConfig{}
 var disconnectIntegrationPathParams = []PathParamConfig{}
 
 // disconnectIntegrationQueryParams contains query parameter configuration for DisconnectIntegration
-var disconnectIntegrationQueryParams = []QueryParamConfig{
-	{QueryName: "id", FieldName: "id", Required: false},
-}
+var disconnectIntegrationQueryParams = []QueryParamConfig{}

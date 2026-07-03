@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // UserServiceServer is the server API for UserService service.
@@ -28,7 +28,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 	listPOSUsersHandler := BindingMiddleware[ListPOSUsersRequest](
 		genericHandler(server.ListPOSUsers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listPOSUsersPathParams, listPOSUsersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/user/v1/users", listPOSUsersHandler)
@@ -37,7 +37,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 	createPOSUserHandler := BindingMiddleware[CreatePOSUserRequest](
 		genericHandler(server.CreatePOSUser, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createPOSUserPathParams, createPOSUserQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/user/v1/users", createPOSUserHandler)
@@ -46,7 +46,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 	updatePOSUserHandler := BindingMiddleware[UpdatePOSUserRequest](
 		genericHandler(server.UpdatePOSUser, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updatePOSUserPathParams, updatePOSUserQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/pos/user/v1/users/update", updatePOSUserHandler)
@@ -55,7 +55,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 	deactivatePOSUserHandler := BindingMiddleware[DeactivatePOSUserRequest](
 		genericHandler(server.DeactivatePOSUser, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deactivatePOSUserPathParams, deactivatePOSUserQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/pos/user/v1/users/deactivate", deactivatePOSUserHandler)
@@ -64,7 +64,7 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 	verifyPOSUserPINHandler := BindingMiddleware[VerifyPOSUserPINRequest](
 		genericHandler(server.VerifyPOSUserPIN, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		verifyPOSUserPINPathParams, verifyPOSUserPINQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/user/v1/users/verify-pin", verifyPOSUserPINHandler)

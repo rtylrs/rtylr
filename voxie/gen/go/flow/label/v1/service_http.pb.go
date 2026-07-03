@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // LabelServiceServer is the server API for LabelService service.
@@ -25,7 +25,7 @@ func RegisterLabelServiceServer(server LabelServiceServer, opts ...ServerOption)
 	listLabelsHandler := BindingMiddleware[ListLabelsRequest](
 		genericHandler(server.ListLabels, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLabelsPathParams, listLabelsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/flow/label/v1/labels", listLabelsHandler)
@@ -34,7 +34,7 @@ func RegisterLabelServiceServer(server LabelServiceServer, opts ...ServerOption)
 	createLabelHandler := BindingMiddleware[CreateLabelRequest](
 		genericHandler(server.CreateLabel, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createLabelPathParams, createLabelQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/flow/label/v1/labels", createLabelHandler)

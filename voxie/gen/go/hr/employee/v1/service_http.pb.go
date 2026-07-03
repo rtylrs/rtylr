@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // EmployeeServiceServer is the server API for EmployeeService service.
@@ -28,7 +28,7 @@ func RegisterEmployeeServiceServer(server EmployeeServiceServer, opts ...ServerO
 	listEmployeesHandler := BindingMiddleware[ListEmployeesRequest](
 		genericHandler(server.ListEmployees, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listEmployeesPathParams, listEmployeesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/employee/v1/employees", listEmployeesHandler)
@@ -37,7 +37,7 @@ func RegisterEmployeeServiceServer(server EmployeeServiceServer, opts ...ServerO
 	createEmployeeHandler := BindingMiddleware[CreateEmployeeRequest](
 		genericHandler(server.CreateEmployee, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createEmployeePathParams, createEmployeeQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/employee/v1/employees", createEmployeeHandler)
@@ -46,7 +46,7 @@ func RegisterEmployeeServiceServer(server EmployeeServiceServer, opts ...ServerO
 	updateEmployeeHandler := BindingMiddleware[UpdateEmployeeRequest](
 		genericHandler(server.UpdateEmployee, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateEmployeePathParams, updateEmployeeQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hr/employee/v1/employees/{id}", updateEmployeeHandler)
@@ -55,7 +55,7 @@ func RegisterEmployeeServiceServer(server EmployeeServiceServer, opts ...ServerO
 	inviteEmployeeHandler := BindingMiddleware[InviteEmployeeRequest](
 		genericHandler(server.InviteEmployee, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		inviteEmployeePathParams, inviteEmployeeQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/employee/v1/employees/invite", inviteEmployeeHandler)
@@ -64,7 +64,7 @@ func RegisterEmployeeServiceServer(server EmployeeServiceServer, opts ...ServerO
 	acceptInviteHandler := BindingMiddleware[AcceptInviteRequest](
 		genericHandler(server.AcceptInvite, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		acceptInvitePathParams, acceptInviteQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/employee/v1/employees/invite/accept", acceptInviteHandler)

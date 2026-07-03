@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderHoldServiceServer is the server API for OrderHoldService service.
@@ -25,7 +25,7 @@ func RegisterOrderHoldServiceServer(server OrderHoldServiceServer, opts ...Serve
 	holdOrderHandler := BindingMiddleware[HoldOrderRequest](
 		genericHandler(server.HoldOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		holdOrderPathParams, holdOrderQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/holds/v1/orders/{order_id}/hold", holdOrderHandler)
@@ -34,7 +34,7 @@ func RegisterOrderHoldServiceServer(server OrderHoldServiceServer, opts ...Serve
 	listHeldOrdersHandler := BindingMiddleware[ListHeldOrdersRequest](
 		genericHandler(server.ListHeldOrders, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listHeldOrdersPathParams, listHeldOrdersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/orders/holds/v1/orders/held", listHeldOrdersHandler)

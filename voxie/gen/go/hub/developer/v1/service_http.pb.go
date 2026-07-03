@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // DeveloperServiceServer is the server API for DeveloperService service.
@@ -30,64 +30,64 @@ func RegisterDeveloperServiceServer(server DeveloperServiceServer, opts ...Serve
 	listApiKeysHandler := BindingMiddleware[ListApiKeysRequest](
 		genericHandler(server.ListApiKeys, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listApiKeysPathParams, listApiKeysQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api-keys", listApiKeysHandler)
+	config.mux.Handle("GET /api/hub/developer/v1/api-keys", listApiKeysHandler)
 
 	methodHeaders = getCreateApiKeyHeaders()
 	createApiKeyHandler := BindingMiddleware[CreateApiKeyRequest](
 		genericHandler(server.CreateApiKey, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createApiKeyPathParams, createApiKeyQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api-keys", createApiKeyHandler)
+	config.mux.Handle("POST /api/hub/developer/v1/api-keys", createApiKeyHandler)
 
 	methodHeaders = getRevokeApiKeyHeaders()
 	revokeApiKeyHandler := BindingMiddleware[RevokeApiKeyRequest](
 		genericHandler(server.RevokeApiKey, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		revokeApiKeyPathParams, revokeApiKeyQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /api-keys", revokeApiKeyHandler)
+	config.mux.Handle("POST /api/hub/developer/v1/api-keys/revoke", revokeApiKeyHandler)
 
 	methodHeaders = getListWebhooksHeaders()
 	listWebhooksHandler := BindingMiddleware[ListWebhooksRequest](
 		genericHandler(server.ListWebhooks, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listWebhooksPathParams, listWebhooksQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /webhooks", listWebhooksHandler)
+	config.mux.Handle("GET /api/hub/developer/v1/webhooks", listWebhooksHandler)
 
 	methodHeaders = getCreateWebhookHeaders()
 	createWebhookHandler := BindingMiddleware[CreateWebhookRequest](
 		genericHandler(server.CreateWebhook, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createWebhookPathParams, createWebhookQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /webhooks", createWebhookHandler)
+	config.mux.Handle("POST /api/hub/developer/v1/webhooks", createWebhookHandler)
 
 	methodHeaders = getUpdateWebhookHeaders()
 	updateWebhookHandler := BindingMiddleware[UpdateWebhookRequest](
 		genericHandler(server.UpdateWebhook, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateWebhookPathParams, updateWebhookQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("PUT /webhooks/{id}", updateWebhookHandler)
+	config.mux.Handle("PUT /api/hub/developer/v1/webhooks/{id}", updateWebhookHandler)
 
 	methodHeaders = getDeleteWebhookHeaders()
 	deleteWebhookHandler := BindingMiddleware[DeleteWebhookRequest](
 		genericHandler(server.DeleteWebhook, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteWebhookPathParams, deleteWebhookQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("DELETE /webhooks", deleteWebhookHandler)
+	config.mux.Handle("DELETE /api/hub/developer/v1/webhooks/{id}", deleteWebhookHandler)
 
 	return nil
 }
@@ -148,9 +148,7 @@ var createApiKeyQueryParams = []QueryParamConfig{}
 var revokeApiKeyPathParams = []PathParamConfig{}
 
 // revokeApiKeyQueryParams contains query parameter configuration for RevokeApiKey
-var revokeApiKeyQueryParams = []QueryParamConfig{
-	{QueryName: "id", FieldName: "id", Required: false},
-}
+var revokeApiKeyQueryParams = []QueryParamConfig{}
 
 // listWebhooksPathParams contains path parameter configuration for ListWebhooks
 var listWebhooksPathParams = []PathParamConfig{}
@@ -173,9 +171,9 @@ var updateWebhookPathParams = []PathParamConfig{
 var updateWebhookQueryParams = []QueryParamConfig{}
 
 // deleteWebhookPathParams contains path parameter configuration for DeleteWebhook
-var deleteWebhookPathParams = []PathParamConfig{}
+var deleteWebhookPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
 
 // deleteWebhookQueryParams contains query parameter configuration for DeleteWebhook
-var deleteWebhookQueryParams = []QueryParamConfig{
-	{QueryName: "id", FieldName: "id", Required: false},
-}
+var deleteWebhookQueryParams = []QueryParamConfig{}

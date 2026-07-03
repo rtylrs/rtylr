@@ -97,7 +97,7 @@ export class NotificationServiceClient {
   }
 
   async listNotifications(_req: ListNotificationsRequest, options?: NotificationServiceCallOptions): Promise<ListNotificationsResponse> {
-    let path = "/notifications";
+    let path = "/api/hub/notification/v1/notifications";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -120,7 +120,7 @@ export class NotificationServiceClient {
   }
 
   async markAllRead(req: MarkAllReadRequest, options?: NotificationServiceCallOptions): Promise<MarkAllReadResponse> {
-    let path = "/notifications/read-all";
+    let path = "/api/hub/notification/v1/notifications/read-all";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -130,7 +130,7 @@ export class NotificationServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "POST",
+      method: "PATCH",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,
@@ -144,7 +144,7 @@ export class NotificationServiceClient {
   }
 
   async markNotificationRead(req: MarkNotificationReadRequest, options?: NotificationServiceCallOptions): Promise<MarkNotificationReadResponse> {
-    let path = "/notifications/{id}/read";
+    let path = "/api/hub/notification/v1/notifications/{id}/read";
     path = path.replace("{id}", encodeURIComponent(String(req.id)));
     const url = this.baseURL + path;
 
@@ -155,7 +155,7 @@ export class NotificationServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "POST",
+      method: "PATCH",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,

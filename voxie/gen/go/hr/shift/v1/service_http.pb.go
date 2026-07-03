@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ShiftServiceServer is the server API for ShiftService service.
@@ -28,7 +28,7 @@ func RegisterShiftServiceServer(server ShiftServiceServer, opts ...ServerOption)
 	listShiftsHandler := BindingMiddleware[ListShiftsRequest](
 		genericHandler(server.ListShifts, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listShiftsPathParams, listShiftsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/shift/v1/shifts", listShiftsHandler)
@@ -37,7 +37,7 @@ func RegisterShiftServiceServer(server ShiftServiceServer, opts ...ServerOption)
 	createShiftHandler := BindingMiddleware[CreateShiftRequest](
 		genericHandler(server.CreateShift, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createShiftPathParams, createShiftQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/shift/v1/shifts", createShiftHandler)
@@ -46,7 +46,7 @@ func RegisterShiftServiceServer(server ShiftServiceServer, opts ...ServerOption)
 	createShiftAssignmentHandler := BindingMiddleware[CreateShiftAssignmentRequest](
 		genericHandler(server.CreateShiftAssignment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createShiftAssignmentPathParams, createShiftAssignmentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/shift/v1/assignments", createShiftAssignmentHandler)
@@ -55,7 +55,7 @@ func RegisterShiftServiceServer(server ShiftServiceServer, opts ...ServerOption)
 	getRosterHandler := BindingMiddleware[GetRosterRequest](
 		genericHandler(server.GetRoster, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getRosterPathParams, getRosterQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/shift/v1/roster/{location_id}", getRosterHandler)
@@ -64,7 +64,7 @@ func RegisterShiftServiceServer(server ShiftServiceServer, opts ...ServerOption)
 	publishRosterHandler := BindingMiddleware[PublishRosterRequest](
 		genericHandler(server.PublishRoster, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		publishRosterPathParams, publishRosterQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/shift/v1/roster/publish", publishRosterHandler)

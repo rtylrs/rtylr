@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // ReportServiceServer is the server API for ReportService service.
@@ -28,7 +28,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	listReportTemplatesHandler := BindingMiddleware[ListReportTemplatesRequest](
 		genericHandler(server.ListReportTemplates, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listReportTemplatesPathParams, listReportTemplatesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/report/v1/templates", listReportTemplatesHandler)
@@ -37,7 +37,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	createReportTemplateHandler := BindingMiddleware[CreateReportTemplateRequest](
 		genericHandler(server.CreateReportTemplate, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createReportTemplatePathParams, createReportTemplateQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/insights/report/v1/templates", createReportTemplateHandler)
@@ -46,7 +46,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	getReportTemplateHandler := BindingMiddleware[GetReportTemplateRequest](
 		genericHandler(server.GetReportTemplate, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getReportTemplatePathParams, getReportTemplateQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/report/v1/templates/{id}", getReportTemplateHandler)
@@ -55,7 +55,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	listScheduledReportsHandler := BindingMiddleware[ListScheduledReportsRequest](
 		genericHandler(server.ListScheduledReports, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listScheduledReportsPathParams, listScheduledReportsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/report/v1/scheduled", listScheduledReportsHandler)
@@ -64,7 +64,7 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 	createScheduledReportHandler := BindingMiddleware[CreateScheduledReportRequest](
 		genericHandler(server.CreateScheduledReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createScheduledReportPathParams, createScheduledReportQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/insights/report/v1/scheduled", createScheduledReportHandler)

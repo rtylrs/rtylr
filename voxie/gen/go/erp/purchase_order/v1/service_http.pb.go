@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // PurchaseOrderServiceServer is the server API for PurchaseOrderService service.
@@ -26,7 +26,7 @@ func RegisterPurchaseOrderServiceServer(server PurchaseOrderServiceServer, opts 
 	listPurchaseOrdersHandler := BindingMiddleware[ListPurchaseOrdersRequest](
 		genericHandler(server.ListPurchaseOrders, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listPurchaseOrdersPathParams, listPurchaseOrdersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/erp/purchase-order/v1/purchase-orders", listPurchaseOrdersHandler)
@@ -35,7 +35,7 @@ func RegisterPurchaseOrderServiceServer(server PurchaseOrderServiceServer, opts 
 	createPurchaseOrderHandler := BindingMiddleware[CreatePurchaseOrderRequest](
 		genericHandler(server.CreatePurchaseOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createPurchaseOrderPathParams, createPurchaseOrderQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/erp/purchase-order/v1/purchase-orders", createPurchaseOrderHandler)
@@ -44,7 +44,7 @@ func RegisterPurchaseOrderServiceServer(server PurchaseOrderServiceServer, opts 
 	updatePurchaseOrderStatusHandler := BindingMiddleware[UpdatePurchaseOrderStatusRequest](
 		genericHandler(server.UpdatePurchaseOrderStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updatePurchaseOrderStatusPathParams, updatePurchaseOrderStatusQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/erp/purchase-order/v1/purchase-orders/{id}/status", updatePurchaseOrderStatusHandler)

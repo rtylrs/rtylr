@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,14 +25,15 @@ var File_hub_integration_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_integration_v1_service_proto_rawDesc = "" +
 	"\n" +
-	" hub/integration/v1/service.proto\x12\x12hub.integration.v1\x1a,hub/integration/v1/connect_integration.proto\x1a/hub/integration/v1/disconnect_integration.proto\x1a*hub/integration/v1/list_integrations.proto\x1a\x1donekit/http/annotations.proto2\xc4\x03\n" +
+	" hub/integration/v1/service.proto\x12\x12hub.integration.v1\x1a,hub/integration/v1/connect_integration.proto\x1a/hub/integration/v1/disconnect_integration.proto\x1a*hub/integration/v1/list_integrations.proto\x1a\x1donekit/http/annotations.proto2\xf0\x03\n" +
 	"\x12IntegrationService\x12\x84\x01\n" +
 	"\x10ListIntegrations\x12+.hub.integration.v1.ListIntegrationsRequest\x1a,.hub.integration.v1.ListIntegrationsResponse\"\x15\x9a\xb5\x18\x11\n" +
-	"\r/integrations\x10\x01\x12\x8a\x01\n" +
-	"\x12ConnectIntegration\x12-.hub.integration.v1.ConnectIntegrationRequest\x1a..hub.integration.v1.ConnectIntegrationResponse\"\x15\x9a\xb5\x18\x11\n" +
-	"\r/integrations\x10\x02\x12\x93\x01\n" +
-	"\x15DisconnectIntegration\x120.hub.integration.v1.DisconnectIntegrationRequest\x1a1.hub.integration.v1.DisconnectIntegrationResponse\"\x15\x9a\xb5\x18\x11\n" +
-	"\r/integrations\x10\x04\x1a\x04\xa2\xb5\x18\x00B3Z1github.com/voxire/voxie/gen/go/hub/integration/v1b\x06proto3"
+	"\r/integrations\x10\x01\x12\x92\x01\n" +
+	"\x12ConnectIntegration\x12-.hub.integration.v1.ConnectIntegrationRequest\x1a..hub.integration.v1.ConnectIntegrationResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x15/integrations/connect\x10\x02\x12\x9e\x01\n" +
+	"\x15DisconnectIntegration\x120.hub.integration.v1.DisconnectIntegrationRequest\x1a1.hub.integration.v1.DisconnectIntegrationResponse\" \x9a\xb5\x18\x1c\n" +
+	"\x18/integrations/disconnect\x10\x02\x1a\x1d\xa2\xb5\x18\x19\n" +
+	"\x17/api/hub/integration/v1B3Z1github.com/voxire/voxie/gen/go/hub/integration/v1b\x06proto3"
 
 var file_hub_integration_v1_service_proto_goTypes = []any{
 	(*ListIntegrationsRequest)(nil),       // 0: hub.integration.v1.ListIntegrationsRequest

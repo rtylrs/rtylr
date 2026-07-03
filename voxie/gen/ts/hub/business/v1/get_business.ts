@@ -8,6 +8,8 @@
 import type { Business } from "./types";
 
 export interface GetBusinessRequest {
+  /** business_id is the business id value for this contract. */
+  businessId: number;
 }
 
 export interface GetBusinessResponse {

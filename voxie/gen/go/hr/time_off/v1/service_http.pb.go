@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // TimeOffServiceServer is the server API for TimeOffService service.
@@ -25,7 +25,7 @@ func RegisterTimeOffServiceServer(server TimeOffServiceServer, opts ...ServerOpt
 	listTimeOffHandler := BindingMiddleware[ListTimeOffRequest](
 		genericHandler(server.ListTimeOff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTimeOffPathParams, listTimeOffQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/time-off/v1/requests", listTimeOffHandler)
@@ -34,7 +34,7 @@ func RegisterTimeOffServiceServer(server TimeOffServiceServer, opts ...ServerOpt
 	submitTimeOffHandler := BindingMiddleware[SubmitTimeOffRequest](
 		genericHandler(server.SubmitTimeOff, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		submitTimeOffPathParams, submitTimeOffQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/time-off/v1/requests", submitTimeOffHandler)

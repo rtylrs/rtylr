@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // LoyaltyServiceServer is the server API for LoyaltyService service.
@@ -31,7 +31,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	getLoyaltyConfigHandler := BindingMiddleware[GetLoyaltyConfigRequest](
 		genericHandler(server.GetLoyaltyConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getLoyaltyConfigPathParams, getLoyaltyConfigQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/loyalty/v1/config", getLoyaltyConfigHandler)
@@ -40,7 +40,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	updateLoyaltyConfigHandler := BindingMiddleware[UpdateLoyaltyConfigRequest](
 		genericHandler(server.UpdateLoyaltyConfig, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLoyaltyConfigPathParams, updateLoyaltyConfigQueryParams,
-		"PATCH", "", config.errorHandler, config.marshalOpts,
+		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/crm/loyalty/v1/config", updateLoyaltyConfigHandler)
@@ -49,7 +49,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	listLoyaltyTiersHandler := BindingMiddleware[ListLoyaltyTiersRequest](
 		genericHandler(server.ListLoyaltyTiers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLoyaltyTiersPathParams, listLoyaltyTiersQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/loyalty/v1/tiers", listLoyaltyTiersHandler)
@@ -58,7 +58,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	createLoyaltyTierHandler := BindingMiddleware[CreateLoyaltyTierRequest](
 		genericHandler(server.CreateLoyaltyTier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createLoyaltyTierPathParams, createLoyaltyTierQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/crm/loyalty/v1/tiers", createLoyaltyTierHandler)
@@ -67,7 +67,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	updateLoyaltyTierHandler := BindingMiddleware[UpdateLoyaltyTierRequest](
 		genericHandler(server.UpdateLoyaltyTier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateLoyaltyTierPathParams, updateLoyaltyTierQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/crm/loyalty/v1/tiers/{id}", updateLoyaltyTierHandler)
@@ -76,7 +76,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	listLoyaltyTransactionsHandler := BindingMiddleware[ListLoyaltyTransactionsRequest](
 		genericHandler(server.ListLoyaltyTransactions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listLoyaltyTransactionsPathParams, listLoyaltyTransactionsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/crm/loyalty/v1/transactions", listLoyaltyTransactionsHandler)
@@ -85,7 +85,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	awardPointsHandler := BindingMiddleware[AwardPointsRequest](
 		genericHandler(server.AwardPoints, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		awardPointsPathParams, awardPointsQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/crm/loyalty/v1/award", awardPointsHandler)
@@ -94,7 +94,7 @@ func RegisterLoyaltyServiceServer(server LoyaltyServiceServer, opts ...ServerOpt
 	redeemPointsHandler := BindingMiddleware[RedeemPointsRequest](
 		genericHandler(server.RedeemPoints, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		redeemPointsPathParams, redeemPointsQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/crm/loyalty/v1/redeem", redeemPointsHandler)

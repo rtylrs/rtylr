@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,10 +25,12 @@ var File_hub_team_onboarding_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_onboarding_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"$hub/team/onboarding/v1/service.proto\x12\x16hub.team.onboarding.v1\x1a+hub/team/onboarding/v1/mark_onboarded.proto\x1a\x1donekit/http/annotations.proto2\xa1\x01\n" +
-	"\x11OnboardingService\x12\x85\x01\n" +
-	"\rMarkOnboarded\x12,.hub.team.onboarding.v1.MarkOnboardedRequest\x1a-.hub.team.onboarding.v1.MarkOnboardedResponse\"\x17\x9a\xb5\x18\x13\n" +
-	"\x0f/user/onboarded\x10\x01\x1a\x04\xa2\xb5\x18\x00B7Z5github.com/voxire/voxie/gen/go/hub/team/onboarding/v1b\x06proto3"
+	"$hub/team/onboarding/v1/service.proto\x12\x16hub.team.onboarding.v1\x1a+hub/team/onboarding/v1/mark_onboarded.proto\x1a\x1donekit/http/annotations.proto2\xb9\x01\n" +
+	"\x11OnboardingService\x12\x80\x01\n" +
+	"\rMarkOnboarded\x12,.hub.team.onboarding.v1.MarkOnboardedRequest\x1a-.hub.team.onboarding.v1.MarkOnboardedResponse\"\x12\x9a\xb5\x18\x0e\n" +
+	"\n" +
+	"/onboarded\x10\x05\x1a!\xa2\xb5\x18\x1d\n" +
+	"\x1b/api/hub/team/onboarding/v1B7Z5github.com/voxire/voxie/gen/go/hub/team/onboarding/v1b\x06proto3"
 
 var file_hub_team_onboarding_v1_service_proto_goTypes = []any{
 	(*MarkOnboardedRequest)(nil),  // 0: hub.team.onboarding.v1.MarkOnboardedRequest

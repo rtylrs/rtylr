@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/1homsi/onekit/http"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,10 +25,11 @@ var File_hub_dashboard_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_dashboard_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehub/dashboard/v1/service.proto\x12\x10hub.dashboard.v1\x1a\x1fhub/dashboard/v1/get_kpis.proto\x1a\x1donekit/http/annotations.proto2{\n" +
-	"\x10DashboardService\x12a\n" +
-	"\aGetKPIs\x12 .hub.dashboard.v1.GetKPIsRequest\x1a!.hub.dashboard.v1.GetKPIsResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/hub/kpis\x10\x01\x1a\x04\xa2\xb5\x18\x00B1Z/github.com/voxire/voxie/gen/go/hub/dashboard/v1b\x06proto3"
+	"\x1ehub/dashboard/v1/service.proto\x12\x10hub.dashboard.v1\x1a\x1fhub/dashboard/v1/get_kpis.proto\x1a\x1donekit/http/annotations.proto2\x8e\x01\n" +
+	"\x10DashboardService\x12]\n" +
+	"\aGetKPIs\x12 .hub.dashboard.v1.GetKPIsRequest\x1a!.hub.dashboard.v1.GetKPIsResponse\"\r\x9a\xb5\x18\t\n" +
+	"\x05/kpis\x10\x01\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\x15/api/hub/dashboard/v1B1Z/github.com/voxire/voxie/gen/go/hub/dashboard/v1b\x06proto3"
 
 var file_hub_dashboard_v1_service_proto_goTypes = []any{
 	(*GetKPIsRequest)(nil),  // 0: hub.dashboard.v1.GetKPIsRequest

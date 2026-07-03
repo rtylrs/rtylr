@@ -99,7 +99,7 @@ export class IntegrationServiceClient {
   }
 
   async listIntegrations(_req: ListIntegrationsRequest, options?: IntegrationServiceCallOptions): Promise<ListIntegrationsResponse> {
-    let path = "/integrations";
+    let path = "/api/hub/integration/v1/integrations";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -122,7 +122,7 @@ export class IntegrationServiceClient {
   }
 
   async connectIntegration(req: ConnectIntegrationRequest, options?: IntegrationServiceCallOptions): Promise<ConnectIntegrationResponse> {
-    let path = "/integrations";
+    let path = "/api/hub/integration/v1/integrations/connect";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -146,10 +146,8 @@ export class IntegrationServiceClient {
   }
 
   async disconnectIntegration(req: DisconnectIntegrationRequest, options?: IntegrationServiceCallOptions): Promise<DisconnectIntegrationResponse> {
-    let path = "/integrations";
-    const params = new URLSearchParams();
-    if (req.id != null && req.id !== "0") params.set("id", String(req.id));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+    let path = "/api/hub/integration/v1/integrations/disconnect";
+    const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -158,8 +156,9 @@ export class IntegrationServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "DELETE",
+      method: "POST",
       headers,
+      body: JSON.stringify(req),
       signal: options?.signal,
     }, options?.retry ?? this.retry);
 

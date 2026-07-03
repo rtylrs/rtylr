@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderSplitServiceServer is the server API for OrderSplitService service.
@@ -24,7 +24,7 @@ func RegisterOrderSplitServiceServer(server OrderSplitServiceServer, opts ...Ser
 	splitOrderHandler := BindingMiddleware[SplitOrderRequest](
 		genericHandler(server.SplitOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		splitOrderPathParams, splitOrderQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/splits/v1/orders/{order_id}/split", splitOrderHandler)

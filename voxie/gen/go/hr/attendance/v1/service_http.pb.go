@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // AttendanceServiceServer is the server API for AttendanceService service.
@@ -26,7 +26,7 @@ func RegisterAttendanceServiceServer(server AttendanceServiceServer, opts ...Ser
 	listAttendanceHandler := BindingMiddleware[ListAttendanceRequest](
 		genericHandler(server.ListAttendance, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listAttendancePathParams, listAttendanceQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/attendance/v1/attendance", listAttendanceHandler)
@@ -35,7 +35,7 @@ func RegisterAttendanceServiceServer(server AttendanceServiceServer, opts ...Ser
 	attendanceClockInHandler := BindingMiddleware[AttendanceClockInRequest](
 		genericHandler(server.AttendanceClockIn, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		attendanceClockInPathParams, attendanceClockInQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/attendance/v1/attendance/clock-in", attendanceClockInHandler)
@@ -44,7 +44,7 @@ func RegisterAttendanceServiceServer(server AttendanceServiceServer, opts ...Ser
 	attendanceClockOutHandler := BindingMiddleware[AttendanceClockOutRequest](
 		genericHandler(server.AttendanceClockOut, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		attendanceClockOutPathParams, attendanceClockOutQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/attendance/v1/attendance/clock-out", attendanceClockOutHandler)

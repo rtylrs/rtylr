@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // TableServiceServer is the server API for TableService service.
@@ -27,7 +27,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 	listTablesHandler := BindingMiddleware[ListTablesRequest](
 		genericHandler(server.ListTables, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listTablesPathParams, listTablesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/pos/table/v1/tables", listTablesHandler)
@@ -36,7 +36,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 	createTableHandler := BindingMiddleware[CreateTableRequest](
 		genericHandler(server.CreateTable, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createTablePathParams, createTableQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/table/v1/tables", createTableHandler)
@@ -45,7 +45,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 	updateTableHandler := BindingMiddleware[UpdateTableRequest](
 		genericHandler(server.UpdateTable, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateTablePathParams, updateTableQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/pos/table/v1/tables/{id}", updateTableHandler)
@@ -54,7 +54,7 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 	deleteTableHandler := BindingMiddleware[DeleteTableRequest](
 		genericHandler(server.DeleteTable, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteTablePathParams, deleteTableQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/pos/table/v1/tables/{id}", deleteTableHandler)

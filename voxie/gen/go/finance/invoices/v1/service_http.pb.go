@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // InvoicesServiceServer is the server API for InvoicesService service.
@@ -29,7 +29,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	listInvoicesHandler := BindingMiddleware[ListInvoicesRequest](
 		genericHandler(server.ListInvoices, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listInvoicesPathParams, listInvoicesQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/invoices/v1/invoices", listInvoicesHandler)
@@ -38,7 +38,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	createInvoiceHandler := BindingMiddleware[CreateInvoiceRequest](
 		genericHandler(server.CreateInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createInvoicePathParams, createInvoiceQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/finance/invoices/v1/invoices", createInvoiceHandler)
@@ -47,7 +47,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	getInvoiceHandler := BindingMiddleware[GetInvoiceRequest](
 		genericHandler(server.GetInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getInvoicePathParams, getInvoiceQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/finance/invoices/v1/invoices/{id}", getInvoiceHandler)
@@ -56,7 +56,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	updateInvoiceHandler := BindingMiddleware[UpdateInvoiceRequest](
 		genericHandler(server.UpdateInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateInvoicePathParams, updateInvoiceQueryParams,
-		"PUT", "body", config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/finance/invoices/v1/invoices/{id}", updateInvoiceHandler)
@@ -65,7 +65,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	updateInvoiceStatusHandler := BindingMiddleware[UpdateInvoiceStatusRequest](
 		genericHandler(server.UpdateInvoiceStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateInvoiceStatusPathParams, updateInvoiceStatusQueryParams,
-		"PATCH", "body", config.errorHandler, config.marshalOpts,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PATCH /api/finance/invoices/v1/invoices/{id}/status", updateInvoiceStatusHandler)
@@ -74,7 +74,7 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 	deleteInvoiceHandler := BindingMiddleware[DeleteInvoiceRequest](
 		genericHandler(server.DeleteInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		deleteInvoicePathParams, deleteInvoiceQueryParams,
-		"DELETE", "", config.errorHandler, config.marshalOpts,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("DELETE /api/finance/invoices/v1/invoices/{id}", deleteInvoiceHandler)

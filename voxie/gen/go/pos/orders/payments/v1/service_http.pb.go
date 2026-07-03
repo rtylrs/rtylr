@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // OrderPaymentServiceServer is the server API for OrderPaymentService service.
@@ -24,7 +24,7 @@ func RegisterOrderPaymentServiceServer(server OrderPaymentServiceServer, opts ..
 	processPaymentHandler := BindingMiddleware[ProcessPaymentRequest](
 		genericHandler(server.ProcessPayment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		processPaymentPathParams, processPaymentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/pos/orders/payments/v1/orders/{order_id}/payment", processPaymentHandler)

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // DocumentServiceServer is the server API for DocumentService service.
@@ -25,7 +25,7 @@ func RegisterDocumentServiceServer(server DocumentServiceServer, opts ...ServerO
 	listEmployeeDocumentsHandler := BindingMiddleware[ListEmployeeDocumentsRequest](
 		genericHandler(server.ListEmployeeDocuments, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		listEmployeeDocumentsPathParams, listEmployeeDocumentsQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/hr/document/v1/documents", listEmployeeDocumentsHandler)
@@ -34,7 +34,7 @@ func RegisterDocumentServiceServer(server DocumentServiceServer, opts ...ServerO
 	uploadDocumentHandler := BindingMiddleware[UploadDocumentRequest](
 		genericHandler(server.UploadDocument, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		uploadDocumentPathParams, uploadDocumentQueryParams,
-		"POST", "", config.errorHandler, config.marshalOpts,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("POST /api/hr/document/v1/documents", uploadDocumentHandler)

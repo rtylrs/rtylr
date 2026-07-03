@@ -5887,7 +5887,18 @@ export const contractValidationMetadata = {
   "hub.app.v1.ListAppsRequest": {},
   "hub.billing.v1.GetBillingSummaryRequest": {},
   "hub.billing.v1.ListInvoicesRequest": {},
-  "hub.business.v1.GetBusinessRequest": {},
+  "hub.business.v1.GetBusinessRequest": {
+    "businessId": {
+      "gt": 0,
+      "name": "businessId",
+      "optional": false,
+      "protoName": "business_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "hub.business.v1.LookupBusinessBySlugRequest": {
     "slug": {
       "minLen": 1,
@@ -5913,14 +5924,14 @@ export const contractValidationMetadata = {
     }
   },
   "hub.business.v1.UpdateBusinessRequest": {
-    "body": {
-      "name": "body",
+    "address": {
+      "name": "address",
       "optional": false,
-      "protoName": "body",
+      "protoName": "address",
       "repeated": false,
       "required": false,
-      "scalar": false,
-      "type": "UpdateBusinessBody"
+      "scalar": true,
+      "type": "string"
     },
     "businessId": {
       "gt": 0,
@@ -5931,6 +5942,84 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
+    },
+    "currency": {
+      "minLen": 1,
+      "name": "currency",
+      "optional": false,
+      "protoName": "currency",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "email": {
+      "email": true,
+      "minLen": 1,
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "phone": {
+      "name": "phone",
+      "optional": false,
+      "protoName": "phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "slug": {
+      "name": "slug",
+      "optional": true,
+      "protoName": "slug",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "timezone": {
+      "minLen": 1,
+      "name": "timezone",
+      "optional": false,
+      "protoName": "timezone",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "minLen": 1,
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "website": {
+      "name": "website",
+      "optional": false,
+      "protoName": "website",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "hub.config.v1.GetConfigRequest": {},
@@ -6006,14 +6095,15 @@ export const contractValidationMetadata = {
     }
   },
   "hub.developer.v1.UpdateWebhookRequest": {
-    "body": {
-      "name": "body",
+    "events": {
+      "minItems": 1,
+      "name": "events",
       "optional": false,
-      "protoName": "body",
-      "repeated": false,
-      "required": false,
-      "scalar": false,
-      "type": "UpdateWebhookBody"
+      "protoName": "events",
+      "repeated": true,
+      "required": true,
+      "scalar": true,
+      "type": "string"
     },
     "id": {
       "gt": 0,
@@ -6024,6 +6114,25 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "url": {
+      "minLen": 1,
+      "name": "url",
+      "optional": false,
+      "protoName": "url",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
     }
   },
   "hub.integration.v1.ConnectIntegrationRequest": {
@@ -6122,6 +6231,37 @@ export const contractValidationMetadata = {
   },
   "hub.permission.v1.GetPermissionsRequest": {},
   "hub.permission.v1.ListRolesRequest": {},
+  "hub.permission.v1.UpdatePermissionMatrixRequest": {
+    "enabled": {
+      "name": "enabled",
+      "optional": false,
+      "protoName": "enabled",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "permissionKey": {
+      "minLen": 1,
+      "name": "permissionKey",
+      "optional": false,
+      "protoName": "permission_key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "role": {
+      "minLen": 1,
+      "name": "role",
+      "optional": false,
+      "protoName": "role",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "hub.permission.v1.UpdateRoleRequest": {
     "id": {
       "gt": 0,
@@ -6268,11 +6408,11 @@ export const contractValidationMetadata = {
   },
   "hub.team.members.v1.ListTeamRequest": {},
   "hub.team.members.v1.RemoveMemberRequest": {
-    "id": {
+    "userId": {
       "gt": 0,
-      "name": "id",
+      "name": "userId",
       "optional": false,
-      "protoName": "id",
+      "protoName": "user_id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -6288,15 +6428,6 @@ export const contractValidationMetadata = {
       "protoName": "apps",
       "repeated": true,
       "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "fullName": {
-      "name": "fullName",
-      "optional": true,
-      "protoName": "full_name",
-      "repeated": false,
-      "required": false,
       "scalar": true,
       "type": "string"
     },

@@ -6,7 +6,7 @@ package v1
 import (
 	"context"
 
-	onekithttp "github.com/1homsi/onekit/http"
+	onekithttp "github.com/stackxio/onekit/http"
 )
 
 // RevenueServiceServer is the server API for RevenueService service.
@@ -26,7 +26,7 @@ func RegisterRevenueServiceServer(server RevenueServiceServer, opts ...ServerOpt
 	getRevenueOverviewHandler := BindingMiddleware[GetRevenueOverviewRequest](
 		genericHandler(server.GetRevenueOverview, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getRevenueOverviewPathParams, getRevenueOverviewQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/revenue/v1/overview", getRevenueOverviewHandler)
@@ -35,7 +35,7 @@ func RegisterRevenueServiceServer(server RevenueServiceServer, opts ...ServerOpt
 	getRevenueByAppHandler := BindingMiddleware[GetRevenueByAppRequest](
 		genericHandler(server.GetRevenueByApp, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getRevenueByAppPathParams, getRevenueByAppQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/revenue/v1/by-app", getRevenueByAppHandler)
@@ -44,7 +44,7 @@ func RegisterRevenueServiceServer(server RevenueServiceServer, opts ...ServerOpt
 	getRevenueComparisonHandler := BindingMiddleware[GetRevenueComparisonRequest](
 		genericHandler(server.GetRevenueComparison, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		getRevenueComparisonPathParams, getRevenueComparisonQueryParams,
-		"GET", "", config.errorHandler, config.marshalOpts,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("GET /api/insights/revenue/v1/comparison", getRevenueComparisonHandler)

@@ -46,22 +46,14 @@ export interface CreateRoleResponse {
   role?: CustomRole;
 }
 
-export interface UpdateRoleRequest {
-  id: string;
-  name: string;
-  permissions: string[];
+export interface UpdatePermissionMatrixRequest {
+  role: string;
+  permissionKey: string;
+  enabled: boolean;
 }
 
-export interface UpdateRoleResponse {
-  message: string;
-}
-
-export interface DeleteRoleRequest {
-  id: string;
-}
-
-export interface DeleteRoleResponse {
-  message: string;
+export interface UpdatePermissionMatrixResponse {
+  success: boolean;
 }
 
 export interface FieldViolation {
@@ -128,7 +120,7 @@ export class PermissionServiceClient {
   }
 
   async getPermissions(_req: GetPermissionsRequest, options?: PermissionServiceCallOptions): Promise<GetPermissionsResponse> {
-    let path = "/permissions";
+    let path = "/api/hub/permission/v1/permissions";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -151,7 +143,7 @@ export class PermissionServiceClient {
   }
 
   async listRoles(_req: ListRolesRequest, options?: PermissionServiceCallOptions): Promise<ListRolesResponse> {
-    let path = "/roles";
+    let path = "/api/hub/permission/v1/roles";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -174,7 +166,7 @@ export class PermissionServiceClient {
   }
 
   async createRole(req: CreateRoleRequest, options?: PermissionServiceCallOptions): Promise<CreateRoleResponse> {
-    let path = "/roles";
+    let path = "/api/hub/permission/v1/roles";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -197,8 +189,8 @@ export class PermissionServiceClient {
     return await resp.json() as CreateRoleResponse;
   }
 
-  async updateRole(req: UpdateRoleRequest, options?: PermissionServiceCallOptions): Promise<UpdateRoleResponse> {
-    let path = "/roles";
+  async updatePermissionMatrix(req: UpdatePermissionMatrixRequest, options?: PermissionServiceCallOptions): Promise<UpdatePermissionMatrixResponse> {
+    let path = "/api/hub/permission/v1/matrix";
     const url = this.baseURL + path;
 
     const headers: Record<string, string> = {
@@ -208,7 +200,7 @@ export class PermissionServiceClient {
     };
 
     const resp = await this.doFetch(url, {
-      method: "PUT",
+      method: "PATCH",
       headers,
       body: JSON.stringify(req),
       signal: options?.signal,
@@ -218,32 +210,7 @@ export class PermissionServiceClient {
       return this.handleError(resp);
     }
 
-    return await resp.json() as UpdateRoleResponse;
-  }
-
-  async deleteRole(req: DeleteRoleRequest, options?: PermissionServiceCallOptions): Promise<DeleteRoleResponse> {
-    let path = "/roles";
-    const params = new URLSearchParams();
-    if (req.id != null && req.id !== "0") params.set("id", String(req.id));
-    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "DELETE",
-      headers,
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as DeleteRoleResponse;
+    return await resp.json() as UpdatePermissionMatrixResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {
