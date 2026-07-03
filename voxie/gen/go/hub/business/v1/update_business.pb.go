@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -197,10 +198,9 @@ var File_hub_business_v1_update_business_proto protoreflect.FileDescriptor
 
 const file_hub_business_v1_update_business_proto_rawDesc = "" +
 	"\n" +
-	"%hub/business/v1/update_business.proto\x12\x0fhub.business.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhub/business/v1/types.proto\"\xe4\x02\n" +
-	"\x15UpdateBusinessRequest\x12+\n" +
-	"\vbusiness_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"%hub/business/v1/update_business.proto\x12\x0fhub.business.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhub/business/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xee\x02\n" +
+	"\x15UpdateBusinessRequest\x12/\n" +
+	"\vbusiness_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"businessId\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1e\n" +
@@ -213,9 +213,9 @@ const file_hub_business_v1_update_business_proto_rawDesc = "" +
 	"\btimezone\x18\b \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\btimezone\x12&\n" +
 	"\bcurrency\x18\t \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12\x17\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12\x1d\n" +
 	"\x04slug\x18\n" +
-	" \x01(\tH\x00R\x04slug\x88\x01\x01B\a\n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x04slug\x88\x01\x01B\a\n" +
 	"\x05_slug\"O\n" +
 	"\x16UpdateBusinessResponse\x125\n" +
 	"\bbusiness\x18\x01 \x01(\v2\x19.hub.business.v1.BusinessR\bbusinessB0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"

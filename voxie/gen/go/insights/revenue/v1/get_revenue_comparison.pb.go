@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -126,12 +127,14 @@ var File_insights_revenue_v1_get_revenue_comparison_proto protoreflect.FileDescr
 
 const file_insights_revenue_v1_get_revenue_comparison_proto_rawDesc = "" +
 	"\n" +
-	"0insights/revenue/v1/get_revenue_comparison.proto\x12\x13insights.revenue.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1finsights/revenue/v1/types.proto\"`\n" +
-	"\x1bGetRevenueComparisonRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\x12)\n" +
+	"0insights/revenue/v1/get_revenue_comparison.proto\x12\x13insights.revenue.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1finsights/revenue/v1/types.proto\x1a\x1donekit/http/annotations.proto\"~\n" +
+	"\x1bGetRevenueComparisonRequest\x12$\n" +
+	"\x06period\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\x129\n" +
 	"\n" +
-	"compare_to\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tcompareTo\"h\n" +
+	"compare_to\x18\x02 \x01(\tB\x1a\xbaH\a\xc8\x01\x01r\x02\x10\x01µ\x18\f\n" +
+	"\n" +
+	"compare_toR\tcompareTo\"h\n" +
 	"\x1cGetRevenueComparisonResponse\x12H\n" +
 	"\vcomparisons\x18\x01 \x03(\v2&.insights.revenue.v1.RevenueComparisonR\vcomparisonsB4Z2github.com/voxire/voxie/gen/go/insights/revenue/v1b\x06proto3"
 

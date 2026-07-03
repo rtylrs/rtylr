@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,12 +116,12 @@ var File_hub_integration_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_integration_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehub/integration/v1/types.proto\x12\x12hub.integration.v1\"\xab\x01\n" +
-	"\vIntegration\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
+	"\x1ehub/integration/v1/types.proto\x12\x12hub.integration.v1\x1a\x1donekit/http/annotations.proto\"\xb7\x01\n" +
+	"\vIntegration\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1a\n" +
 	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\x12\x16\n" +
-	"\x06config\x18\x04 \x01(\fR\x06config\x12!\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x1c\n" +
+	"\x06config\x18\x04 \x01(\fB\x04\x80\xb6\x18\x01R\x06config\x12!\n" +
 	"\fconnected_at\x18\x05 \x01(\tR\vconnectedAt\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAtB3Z1github.com/voxire/voxie/gen/go/hub/integration/v1b\x06proto3"

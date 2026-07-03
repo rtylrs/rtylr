@@ -5,21 +5,20 @@
 // source: insights/customer/v1/get_top_customers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
+import type { PaginationResponse } from "../../../common/pagination/v1/pagination";
 import type { TopCustomerEntry } from "./types";
 
 export interface GetTopCustomersRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
+  /** page is the current result page. */
+  page: number;
+  /** limit is the maximum number of records to return. */
+  limit: number;
+  /** sort_by is the sort field (total_spent, order_count). */
+  sortBy: string;
+  /** sort_dir is the sort direction ("asc" or "desc"). */
+  sortDir: string;
   /** period is the period value for this contract. */
   period: string;
-  /**
-   * sort_by is the sort by value for this contract.
-   * total_spent, order_count
-   */
-  sortBy: string;
 }
 
 export interface GetTopCustomersResponse {

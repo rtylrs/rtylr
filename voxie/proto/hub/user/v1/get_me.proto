@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hub.user.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hub/user/v1";
 
 // ── User / Auth ─────────────────────────────────────────────────────
@@ -10,7 +12,9 @@ message GetMeRequest {}
 
 message GetMeResponse {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // email is the email address used for lookup or contact.
   string email = 2;
   // full_name is the full name value for this contract.
@@ -20,7 +24,9 @@ message GetMeResponse {
   // role is the role value for this contract.
   string role = 5;
   // business_id is the business id value for this contract.
-  int64 business_id = 6;
+  int64 business_id = 6 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // business_name is the business name value for this contract.
   string business_name = 7;
   // is_owner is the is owner value for this contract.

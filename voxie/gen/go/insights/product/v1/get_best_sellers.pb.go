@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_insights_product_v1_get_best_sellers_proto protoreflect.FileDescriptor
 
 const file_insights_product_v1_get_best_sellers_proto_rawDesc = "" +
 	"\n" +
-	"*insights/product/v1/get_best_sellers.proto\x12\x13insights.product.v1\x1a\x1finsights/product/v1/types.proto\"-\n" +
-	"\x15GetBestSellersRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit\"U\n" +
+	"*insights/product/v1/get_best_sellers.proto\x12\x13insights.product.v1\x1a\x1finsights/product/v1/types.proto\x1a\x1donekit/http/annotations.proto\":\n" +
+	"\x15GetBestSellersRequest\x12!\n" +
+	"\x05limit\x18\x01 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\"U\n" +
 	"\x16GetBestSellersResponse\x12;\n" +
 	"\bproducts\x18\x01 \x03(\v2\x1f.insights.product.v1.BestSellerR\bproductsB4Z2github.com/voxire/voxie/gen/go/insights/product/v1b\x06proto3"
 

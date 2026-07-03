@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -244,19 +245,19 @@ var File_insights_report_v1_types_proto protoreflect.FileDescriptor
 
 const file_insights_report_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1einsights/report/v1/types.proto\x12\x12insights.report.v1\"\xbb\x01\n" +
-	"\x0eReportTemplate\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x1einsights/report/v1/types.proto\x12\x12insights.report.v1\x1a\x1donekit/http/annotations.proto\"\xc1\x01\n" +
+	"\x0eReportTemplate\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x18\n" +
 	"\ametrics\x18\x05 \x03(\tR\ametrics\x12\x16\n" +
 	"\x06format\x18\x06 \x01(\tR\x06format\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"\xae\x02\n" +
-	"\x0fScheduledReport\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vtemplate_id\x18\x02 \x01(\x03R\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\"\xba\x02\n" +
+	"\x0fScheduledReport\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
+	"\vtemplate_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
 	"templateId\x12#\n" +
 	"\rtemplate_name\x18\x03 \x01(\tR\ftemplateName\x12\x1c\n" +
 	"\tfrequency\x18\x04 \x01(\tR\tfrequency\x12'\n" +

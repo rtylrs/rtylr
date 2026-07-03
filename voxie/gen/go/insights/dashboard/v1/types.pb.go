@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -223,18 +224,18 @@ var File_insights_dashboard_v1_types_proto protoreflect.FileDescriptor
 
 const file_insights_dashboard_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"!insights/dashboard/v1/types.proto\x12\x15insights.dashboard.v1\"\xe4\x01\n" +
-	"\rWorkloadEntry\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1d\n" +
+	"!insights/dashboard/v1/types.proto\x12\x15insights.dashboard.v1\x1a\x1donekit/http/annotations.proto\"\xea\x01\n" +
+	"\rWorkloadEntry\x12\x1d\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x1d\n" +
 	"\n" +
 	"open_tasks\x18\x02 \x01(\x03R\topenTasks\x12*\n" +
 	"\x11in_progress_tasks\x18\x03 \x01(\x03R\x0finProgressTasks\x12'\n" +
 	"\x0fcompleted_tasks\x18\x04 \x01(\x03R\x0ecompletedTasks\x12#\n" +
 	"\roverdue_tasks\x18\x05 \x01(\x03R\foverdueTasks\x12!\n" +
-	"\ftotal_active\x18\x06 \x01(\x03R\vtotalActive\"\x99\x02\n" +
-	"\x0eRoadmapProject\x12\x1d\n" +
+	"\ftotal_active\x18\x06 \x01(\x03R\vtotalActive\"\x9f\x02\n" +
+	"\x0eRoadmapProject\x12#\n" +
 	"\n" +
-	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
+	"project_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tprojectId\x12!\n" +
 	"\fproject_name\x18\x02 \x01(\tR\vprojectName\x12\x16\n" +
 	"\x06status\x18\x03 \x01(\tR\x06status\x12\x1f\n" +
 	"\vtotal_tasks\x18\x04 \x01(\x03R\n" +

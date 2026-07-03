@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,13 +144,13 @@ var File_hub_developer_v1_create_api_key_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_create_api_key_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/create_api_key.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\"W\n" +
+	"%hub/developer/v1/create_api_key.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"W\n" +
 	"\x13CreateApiKeyRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
-	"\x06scopes\x18\x02 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x06scopes\"R\n" +
-	"\x14CreateApiKeyResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
+	"\x06scopes\x18\x02 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x06scopes\"X\n" +
+	"\x14CreateApiKeyResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessageB1Z/github.com/voxire/voxie/gen/go/hub/developer/v1b\x06proto3"
 

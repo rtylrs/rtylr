@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -304,27 +305,27 @@ var File_insights_product_v1_types_proto protoreflect.FileDescriptor
 
 const file_insights_product_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1finsights/product/v1/types.proto\x12\x13insights.product.v1\"\x8e\x01\n" +
+	"\x1finsights/product/v1/types.proto\x12\x13insights.product.v1\x1a\x1donekit/http/annotations.proto\"\x94\x01\n" +
 	"\n" +
-	"BestSeller\x12\x1d\n" +
+	"BestSeller\x12#\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x12\n" +
+	"product_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tproductId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
 	"units_sold\x18\x03 \x01(\x01R\tunitsSold\x12.\n" +
-	"\x13revenue_minor_units\x18\x04 \x01(\x03R\x11revenueMinorUnits\"e\n" +
-	"\tSlowMover\x12\x1d\n" +
+	"\x13revenue_minor_units\x18\x04 \x01(\x03R\x11revenueMinorUnits\"k\n" +
+	"\tSlowMover\x12#\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x12\n" +
+	"product_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tproductId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12%\n" +
 	"\x0estock_quantity\x18\x03 \x01(\x01R\rstockQuantity\"\x83\x01\n" +
 	"\fMarginBucket\x12\x14\n" +
 	"\x05label\x18\x01 \x01(\tR\x05label\x12\x1b\n" +
 	"\tlower_pct\x18\x02 \x01(\x01R\blowerPct\x12\x1b\n" +
 	"\tupper_pct\x18\x03 \x01(\x01R\bupperPct\x12#\n" +
-	"\rproduct_count\x18\x04 \x01(\x03R\fproductCount\"\xa4\x01\n" +
-	"\rCategorySales\x12\x1f\n" +
-	"\vcategory_id\x18\x01 \x01(\x03R\n" +
+	"\rproduct_count\x18\x04 \x01(\x03R\fproductCount\"\xaa\x01\n" +
+	"\rCategorySales\x12%\n" +
+	"\vcategory_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"categoryId\x12#\n" +
 	"\rcategory_name\x18\x02 \x01(\tR\fcategoryName\x12\x1d\n" +
 	"\n" +

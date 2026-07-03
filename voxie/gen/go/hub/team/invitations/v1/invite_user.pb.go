@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,7 +162,7 @@ var File_hub_team_invitations_v1_invite_user_proto protoreflect.FileDescriptor
 
 const file_hub_team_invitations_v1_invite_user_proto_rawDesc = "" +
 	"\n" +
-	")hub/team/invitations/v1/invite_user.proto\x12\x17hub.team.invitations.v1\x1a\x1bbuf/validate/validate.proto\"\xc6\x01\n" +
+	")hub/team/invitations/v1/invite_user.proto\x12\x17hub.team.invitations.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc6\x01\n" +
 	"\x11InviteUserRequest\x12\"\n" +
 	"\x05email\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x05email\x12'\n" +
 	"\tfull_name\x18\x02 \x01(\tB\n" +
@@ -170,9 +171,9 @@ const file_hub_team_invitations_v1_invite_user_proto_rawDesc = "" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04role\x12\x1c\n" +
 	"\x04apps\x18\x04 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x04apps\x12&\n" +
 	"\bpassword\x18\x05 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"G\n" +
-	"\x12InviteUserResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"M\n" +
+	"\x12InviteUserResponse\x12\x1d\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB8Z6github.com/voxire/voxie/gen/go/hub/team/invitations/v1b\x06proto3"
 
 var (

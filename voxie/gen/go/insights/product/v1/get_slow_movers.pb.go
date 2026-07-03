@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,11 @@ var File_insights_product_v1_get_slow_movers_proto protoreflect.FileDescriptor
 
 const file_insights_product_v1_get_slow_movers_proto_rawDesc = "" +
 	"\n" +
-	")insights/product/v1/get_slow_movers.proto\x12\x13insights.product.v1\x1a\x1finsights/product/v1/types.proto\"*\n" +
-	"\x14GetSlowMoversRequest\x12\x12\n" +
-	"\x04days\x18\x01 \x01(\x05R\x04days\"S\n" +
+	")insights/product/v1/get_slow_movers.proto\x12\x13insights.product.v1\x1a\x1finsights/product/v1/types.proto\x1a\x1donekit/http/annotations.proto\"6\n" +
+	"\x14GetSlowMoversRequest\x12\x1e\n" +
+	"\x04days\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04daysR\x04days\"S\n" +
 	"\x15GetSlowMoversResponse\x12:\n" +
 	"\bproducts\x18\x01 \x03(\v2\x1e.insights.product.v1.SlowMoverR\bproductsB4Z2github.com/voxire/voxie/gen/go/insights/product/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -511,7 +512,7 @@ var File_insights_customer_v1_types_proto protoreflect.FileDescriptor
 
 const file_insights_customer_v1_types_proto_rawDesc = "" +
 	"\n" +
-	" insights/customer/v1/types.proto\x12\x14insights.customer.v1\"\x88\x02\n" +
+	" insights/customer/v1/types.proto\x12\x14insights.customer.v1\x1a\x1donekit/http/annotations.proto\"\x88\x02\n" +
 	"\x11CustomerAnalytics\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x12&\n" +
 	"\x0fnew_this_period\x18\x02 \x01(\x05R\rnewThisPeriod\x12%\n" +
@@ -523,9 +524,9 @@ const file_insights_customer_v1_types_proto_rawDesc = "" +
 	"\x13CustomerGrowthPoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12#\n" +
 	"\rnew_customers\x18\x02 \x01(\x05R\fnewCustomers\x12\x14\n" +
-	"\x05total\x18\x03 \x01(\x05R\x05total\"\x9c\x01\n" +
-	"\x10TopCustomerEntry\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\"\xa2\x01\n" +
+	"\x10TopCustomerEntry\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
 	"\vtotal_spent\x18\x03 \x01(\x01R\n" +
 	"totalSpent\x12\x1f\n" +

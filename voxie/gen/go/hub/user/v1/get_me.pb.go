@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -178,15 +179,15 @@ var File_hub_user_v1_get_me_proto protoreflect.FileDescriptor
 
 const file_hub_user_v1_get_me_proto_rawDesc = "" +
 	"\n" +
-	"\x18hub/user/v1/get_me.proto\x12\vhub.user.v1\"\x0e\n" +
-	"\fGetMeRequest\"\xf9\x01\n" +
-	"\rGetMeResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x18hub/user/v1/get_me.proto\x12\vhub.user.v1\x1a\x1donekit/http/annotations.proto\"\x0e\n" +
+	"\fGetMeRequest\"\x85\x02\n" +
+	"\rGetMeResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
 	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x12\n" +
 	"\x04apps\x18\x04 \x03(\tR\x04apps\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1f\n" +
-	"\vbusiness_id\x18\x06 \x01(\x03R\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12%\n" +
+	"\vbusiness_id\x18\x06 \x01(\x03B\x04е\x18\x01R\n" +
 	"businessId\x12#\n" +
 	"\rbusiness_name\x18\a \x01(\tR\fbusinessName\x12\x19\n" +
 	"\bis_owner\x18\b \x01(\bR\aisOwner\x12\x1c\n" +

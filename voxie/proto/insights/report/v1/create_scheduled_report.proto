@@ -4,6 +4,8 @@ package insights.report.v1;
 
 import "buf/validate/validate.proto";
 import "insights/report/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
 
@@ -11,7 +13,8 @@ message CreateScheduledReportRequest {
   // template_id is the template id value for this contract.
   int64 template_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // frequency is the frequency value for this contract.
   string frequency = 2 [

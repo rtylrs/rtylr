@@ -2,13 +2,17 @@ syntax = "proto3";
 
 package insights.product.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/insights/product/v1";
 
 // ── Product Analytics ───────────────────────────────────────────────
 
 message BestSeller {
   // product_id is the product id value for this contract.
-  int64 product_id = 1;
+  int64 product_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // name is the name value for this contract.
   string name = 2;
   // units_sold is the units sold value for this contract.
@@ -19,7 +23,9 @@ message BestSeller {
 
 message SlowMover {
   // product_id is the product id value for this contract.
-  int64 product_id = 1;
+  int64 product_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // name is the name value for this contract.
   string name = 2;
   // stock_quantity is the stock quantity value for this contract.
@@ -39,7 +45,9 @@ message MarginBucket {
 
 message CategorySales {
   // category_id is the category id value for this contract.
-  int64 category_id = 1;
+  int64 category_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // category_name is the category name value for this contract.
   string category_name = 2;
   // units_sold is the units sold value for this contract.

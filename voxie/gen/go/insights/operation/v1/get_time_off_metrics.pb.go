@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_insights_operation_v1_get_time_off_metrics_proto protoreflect.FileDescr
 
 const file_insights_operation_v1_get_time_off_metrics_proto_rawDesc = "" +
 	"\n" +
-	"0insights/operation/v1/get_time_off_metrics.proto\x12\x15insights.operation.v1\x1a!insights/operation/v1/types.proto\"2\n" +
-	"\x18GetTimeOffMetricsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"\\\n" +
+	"0insights/operation/v1/get_time_off_metrics.proto\x12\x15insights.operation.v1\x1a!insights/operation/v1/types.proto\x1a\x1donekit/http/annotations.proto\"@\n" +
+	"\x18GetTimeOffMetricsRequest\x12$\n" +
+	"\x06period\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\"\\\n" +
 	"\x19GetTimeOffMetricsResponse\x12?\n" +
 	"\ametrics\x18\x01 \x01(\v2%.insights.operation.v1.TimeOffMetricsR\ametricsB6Z4github.com/voxire/voxie/gen/go/insights/operation/v1b\x06proto3"
 

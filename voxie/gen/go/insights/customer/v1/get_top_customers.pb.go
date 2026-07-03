@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -24,13 +25,16 @@ const (
 
 type GetTopCustomersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// pagination is the pagination value for this contract.
-	Pagination *v1.PaginationRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	// page is the current result page.
+	Page int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// sort_by is the sort field (total_spent, order_count).
+	SortBy string `protobuf:"bytes,3,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
+	SortDir string `protobuf:"bytes,4,opt,name=sort_dir,json=sortDir,proto3" json:"sort_dir,omitempty"`
 	// period is the period value for this contract.
-	Period string `protobuf:"bytes,2,opt,name=period,proto3" json:"period,omitempty"`
-	// sort_by is the sort by value for this contract.
-	// total_spent, order_count
-	SortBy        string `protobuf:"bytes,3,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
+	Period        string `protobuf:"bytes,5,opt,name=period,proto3" json:"period,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -65,23 +69,37 @@ func (*GetTopCustomersRequest) Descriptor() ([]byte, []int) {
 	return file_insights_customer_v1_get_top_customers_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *GetTopCustomersRequest) GetPagination() *v1.PaginationRequest {
+func (x *GetTopCustomersRequest) GetPage() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
 }
 
-func (x *GetTopCustomersRequest) GetPeriod() string {
+func (x *GetTopCustomersRequest) GetLimit() int32 {
 	if x != nil {
-		return x.Period
+		return x.Limit
 	}
-	return ""
+	return 0
 }
 
 func (x *GetTopCustomersRequest) GetSortBy() string {
 	if x != nil {
 		return x.SortBy
+	}
+	return ""
+}
+
+func (x *GetTopCustomersRequest) GetSortDir() string {
+	if x != nil {
+		return x.SortDir
+	}
+	return ""
+}
+
+func (x *GetTopCustomersRequest) GetPeriod() string {
+	if x != nil {
+		return x.Period
 	}
 	return ""
 }
@@ -144,13 +162,20 @@ var File_insights_customer_v1_get_top_customers_proto protoreflect.FileDescripto
 
 const file_insights_customer_v1_get_top_customers_proto_rawDesc = "" +
 	"\n" +
-	",insights/customer/v1/get_top_customers.proto\x12\x14insights.customer.v1\x1a%common/pagination/v1/pagination.proto\x1a insights/customer/v1/types.proto\"\x92\x01\n" +
-	"\x16GetTopCustomersRequest\x12G\n" +
+	",insights/customer/v1/get_top_customers.proto\x12\x14insights.customer.v1\x1a%common/pagination/v1/pagination.proto\x1a insights/customer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xd4\x01\n" +
+	"\x16GetTopCustomersRequest\x12\x1e\n" +
+	"\x04page\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12!\n" +
+	"\x05limit\x18\x02 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\x12&\n" +
+	"\asort_by\x18\x03 \x01(\tB\rµ\x18\t\n" +
+	"\asort_byR\x06sortBy\x12)\n" +
+	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2'.common.pagination.v1.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06period\x18\x02 \x01(\tR\x06period\x12\x17\n" +
-	"\asort_by\x18\x03 \x01(\tR\x06sortBy\"\xa9\x01\n" +
+	"\bsort_dirR\asortDir\x12$\n" +
+	"\x06period\x18\x05 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\"\xa9\x01\n" +
 	"\x17GetTopCustomersResponse\x12D\n" +
 	"\tcustomers\x18\x01 \x03(\v2&.insights.customer.v1.TopCustomerEntryR\tcustomers\x12H\n" +
 	"\n" +
@@ -173,19 +198,17 @@ var file_insights_customer_v1_get_top_customers_proto_msgTypes = make([]protoimp
 var file_insights_customer_v1_get_top_customers_proto_goTypes = []any{
 	(*GetTopCustomersRequest)(nil),  // 0: insights.customer.v1.GetTopCustomersRequest
 	(*GetTopCustomersResponse)(nil), // 1: insights.customer.v1.GetTopCustomersResponse
-	(*v1.PaginationRequest)(nil),    // 2: common.pagination.v1.PaginationRequest
-	(*TopCustomerEntry)(nil),        // 3: insights.customer.v1.TopCustomerEntry
-	(*v1.PaginationResponse)(nil),   // 4: common.pagination.v1.PaginationResponse
+	(*TopCustomerEntry)(nil),        // 2: insights.customer.v1.TopCustomerEntry
+	(*v1.PaginationResponse)(nil),   // 3: common.pagination.v1.PaginationResponse
 }
 var file_insights_customer_v1_get_top_customers_proto_depIdxs = []int32{
-	2, // 0: insights.customer.v1.GetTopCustomersRequest.pagination:type_name -> common.pagination.v1.PaginationRequest
-	3, // 1: insights.customer.v1.GetTopCustomersResponse.customers:type_name -> insights.customer.v1.TopCustomerEntry
-	4, // 2: insights.customer.v1.GetTopCustomersResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: insights.customer.v1.GetTopCustomersResponse.customers:type_name -> insights.customer.v1.TopCustomerEntry
+	3, // 1: insights.customer.v1.GetTopCustomersResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_insights_customer_v1_get_top_customers_proto_init() }

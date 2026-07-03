@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_insights_revenue_v1_get_revenue_by_app_proto protoreflect.FileDescripto
 
 const file_insights_revenue_v1_get_revenue_by_app_proto_rawDesc = "" +
 	"\n" +
-	",insights/revenue/v1/get_revenue_by_app.proto\x12\x13insights.revenue.v1\x1a\x1finsights/revenue/v1/types.proto\"0\n" +
-	"\x16GetRevenueByAppRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"P\n" +
+	",insights/revenue/v1/get_revenue_by_app.proto\x12\x13insights.revenue.v1\x1a\x1finsights/revenue/v1/types.proto\x1a\x1donekit/http/annotations.proto\">\n" +
+	"\x16GetRevenueByAppRequest\x12$\n" +
+	"\x06period\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\"P\n" +
 	"\x17GetRevenueByAppResponse\x125\n" +
 	"\x04apps\x18\x01 \x03(\v2!.insights.revenue.v1.RevenueByAppR\x04appsB4Z2github.com/voxire/voxie/gen/go/insights/revenue/v1b\x06proto3"
 

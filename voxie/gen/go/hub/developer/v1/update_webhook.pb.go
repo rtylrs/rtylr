@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,10 +144,9 @@ var File_hub_developer_v1_update_webhook_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_update_webhook_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/update_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chub/developer/v1/types.proto\"\x8f\x01\n" +
-	"\x14UpdateWebhookRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x1c\n" +
+	"%hub/developer/v1/update_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chub/developer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x93\x01\n" +
+	"\x14UpdateWebhookRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1c\n" +
 	"\x03url\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03url\x12 \n" +
 	"\x06events\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\x06events\x12\x1b\n" +

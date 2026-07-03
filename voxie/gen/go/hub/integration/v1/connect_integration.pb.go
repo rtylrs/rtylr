@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,13 +135,13 @@ var File_hub_integration_v1_connect_integration_proto protoreflect.FileDescripto
 
 const file_hub_integration_v1_connect_integration_proto_rawDesc = "" +
 	"\n" +
-	",hub/integration/v1/connect_integration.proto\x12\x12hub.integration.v1\x1a\x1bbuf/validate/validate.proto\"[\n" +
+	",hub/integration/v1/connect_integration.proto\x12\x12hub.integration.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"a\n" +
 	"\x19ConnectIntegrationRequest\x12&\n" +
 	"\bprovider\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bprovider\x12\x16\n" +
-	"\x06config\x18\x02 \x01(\fR\x06config\"F\n" +
-	"\x1aConnectIntegrationResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bprovider\x12\x1c\n" +
+	"\x06config\x18\x02 \x01(\fB\x04\x80\xb6\x18\x01R\x06config\"L\n" +
+	"\x1aConnectIntegrationResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB3Z1github.com/voxire/voxie/gen/go/hub/integration/v1b\x06proto3"
 
 var (

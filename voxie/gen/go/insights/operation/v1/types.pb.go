@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -619,7 +620,7 @@ var File_insights_operation_v1_types_proto protoreflect.FileDescriptor
 
 const file_insights_operation_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"!insights/operation/v1/types.proto\x12\x15insights.operation.v1\"\x8d\x02\n" +
+	"!insights/operation/v1/types.proto\x12\x15insights.operation.v1\x1a\x1donekit/http/annotations.proto\"\x8d\x02\n" +
 	"\x12UtilizationMetrics\x12'\n" +
 	"\x0favg_utilization\x18\x01 \x01(\x01R\x0eavgUtilization\x12\x1f\n" +
 	"\vtotal_staff\x18\x02 \x01(\x05R\n" +
@@ -628,9 +629,9 @@ const file_insights_operation_v1_types_proto_rawDesc = "" +
 	"\vtotal_hours\x18\x04 \x01(\x01R\n" +
 	"totalHours\x12%\n" +
 	"\x0eovertime_hours\x18\x05 \x01(\x01R\rovertimeHours\x12B\n" +
-	"\bby_staff\x18\x06 \x03(\v2'.insights.operation.v1.StaffUtilizationR\abyStaff\"\xaf\x01\n" +
-	"\x10StaffUtilization\x12\x19\n" +
-	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\x12\x12\n" +
+	"\bby_staff\x18\x06 \x03(\v2'.insights.operation.v1.StaffUtilizationR\abyStaff\"\xb5\x01\n" +
+	"\x10StaffUtilization\x12\x1f\n" +
+	"\bstaff_id\x18\x01 \x01(\x03B\x04е\x18\x01R\astaffId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
 	"\fhours_worked\x18\x03 \x01(\x01R\vhoursWorked\x12'\n" +
 	"\x0fhours_scheduled\x18\x04 \x01(\x01R\x0ehoursScheduled\x12 \n" +

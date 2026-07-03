@@ -3,6 +3,8 @@ syntax = "proto3";
 package hub.team.members.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/team/members/v1";
 
@@ -10,7 +12,8 @@ message RemoveMemberRequest {
   // user_id identifies the user associated with this request.
   int64 user_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
 }
 

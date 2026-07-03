@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,17 +152,17 @@ var File_hub_activity_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_activity_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhub/activity/v1/types.proto\x12\x0fhub.activity.v1\"\x99\x02\n" +
-	"\rActivityEntry\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x10\n" +
+	"\x1bhub/activity/v1/types.proto\x12\x0fhub.activity.v1\x1a\x1donekit/http/annotations.proto\"\xb1\x02\n" +
+	"\rActivityEntry\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x10\n" +
 	"\x03app\x18\x03 \x01(\tR\x03app\x12\x1f\n" +
 	"\ventity_type\x18\x04 \x01(\tR\n" +
-	"entityType\x12\x1b\n" +
-	"\tentity_id\x18\x05 \x01(\x03R\bentityId\x12\x16\n" +
+	"entityType\x12!\n" +
+	"\tentity_id\x18\x05 \x01(\x03B\x04е\x18\x01R\bentityId\x12\x16\n" +
 	"\x06action\x18\x06 \x01(\tR\x06action\x12 \n" +
-	"\vdescription\x18\a \x01(\tR\vdescription\x12\x17\n" +
-	"\auser_id\x18\b \x01(\x03R\x06userId\x12\x1b\n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12\x1d\n" +
+	"\auser_id\x18\b \x01(\x03B\x04е\x18\x01R\x06userId\x12\x1b\n" +
 	"\tuser_name\x18\t \x01(\tR\buserName\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +

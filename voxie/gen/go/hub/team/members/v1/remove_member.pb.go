@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_hub_team_members_v1_remove_member_proto protoreflect.FileDescriptor
 
 const file_hub_team_members_v1_remove_member_proto_rawDesc = "" +
 	"\n" +
-	"'hub/team/members/v1/remove_member.proto\x12\x13hub.team.members.v1\x1a\x1bbuf/validate/validate.proto\":\n" +
-	"\x13RemoveMemberRequest\x12#\n" +
-	"\auser_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06userId\"0\n" +
+	"'hub/team/members/v1/remove_member.proto\x12\x13hub.team.members.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\">\n" +
+	"\x13RemoveMemberRequest\x12'\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\"0\n" +
 	"\x14RemoveMemberResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_insights_customer_v1_get_churn_analysis_proto protoreflect.FileDescript
 
 const file_insights_customer_v1_get_churn_analysis_proto_rawDesc = "" +
 	"\n" +
-	"-insights/customer/v1/get_churn_analysis.proto\x12\x14insights.customer.v1\x1a insights/customer/v1/types.proto\"1\n" +
-	"\x17GetChurnAnalysisRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"[\n" +
+	"-insights/customer/v1/get_churn_analysis.proto\x12\x14insights.customer.v1\x1a insights/customer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"?\n" +
+	"\x17GetChurnAnalysisRequest\x12$\n" +
+	"\x06period\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\"[\n" +
 	"\x18GetChurnAnalysisResponse\x12?\n" +
 	"\banalysis\x18\x01 \x01(\v2#.insights.customer.v1.ChurnAnalysisR\banalysisB5Z3github.com/voxire/voxie/gen/go/insights/customer/v1b\x06proto3"
 

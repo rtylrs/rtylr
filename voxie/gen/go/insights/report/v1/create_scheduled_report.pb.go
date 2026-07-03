@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -134,10 +135,9 @@ var File_insights_report_v1_create_scheduled_report_proto protoreflect.FileDescr
 
 const file_insights_report_v1_create_scheduled_report_proto_rawDesc = "" +
 	"\n" +
-	"0insights/report/v1/create_scheduled_report.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\"\xac\x01\n" +
-	"\x1cCreateScheduledReportRequest\x12+\n" +
-	"\vtemplate_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"0insights/report/v1/create_scheduled_report.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb0\x01\n" +
+	"\x1cCreateScheduledReportRequest\x12/\n" +
+	"\vtemplate_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"templateId\x12(\n" +
 	"\tfrequency\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x125\n" +

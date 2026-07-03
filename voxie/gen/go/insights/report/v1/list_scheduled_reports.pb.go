@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -24,8 +25,14 @@ const (
 
 type ListScheduledReportsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// pagination is the pagination value for this contract.
-	Pagination    *v1.PaginationRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	// page is the current result page.
+	Page int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `protobuf:"bytes,3,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
+	SortDir       string `protobuf:"bytes,4,opt,name=sort_dir,json=sortDir,proto3" json:"sort_dir,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,11 +67,32 @@ func (*ListScheduledReportsRequest) Descriptor() ([]byte, []int) {
 	return file_insights_report_v1_list_scheduled_reports_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ListScheduledReportsRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListScheduledReportsRequest) GetPage() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
+}
+
+func (x *ListScheduledReportsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListScheduledReportsRequest) GetSortBy() string {
+	if x != nil {
+		return x.SortBy
+	}
+	return ""
+}
+
+func (x *ListScheduledReportsRequest) GetSortDir() string {
+	if x != nil {
+		return x.SortDir
+	}
+	return ""
 }
 
 type ListScheduledReportsResponse struct {
@@ -125,11 +153,18 @@ var File_insights_report_v1_list_scheduled_reports_proto protoreflect.FileDescri
 
 const file_insights_report_v1_list_scheduled_reports_proto_rawDesc = "" +
 	"\n" +
-	"/insights/report/v1/list_scheduled_reports.proto\x12\x12insights.report.v1\x1a%common/pagination/v1/pagination.proto\x1a\x1einsights/report/v1/types.proto\"f\n" +
-	"\x1bListScheduledReportsRequest\x12G\n" +
+	"/insights/report/v1/list_scheduled_reports.proto\x12\x12insights.report.v1\x1a%common/pagination/v1/pagination.proto\x1a\x1einsights/report/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb3\x01\n" +
+	"\x1bListScheduledReportsRequest\x12\x1e\n" +
+	"\x04page\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12!\n" +
+	"\x05limit\x18\x02 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\x12&\n" +
+	"\asort_by\x18\x03 \x01(\tB\rµ\x18\t\n" +
+	"\asort_byR\x06sortBy\x12)\n" +
+	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2'.common.pagination.v1.PaginationRequestR\n" +
-	"pagination\"\xa7\x01\n" +
+	"\bsort_dirR\asortDir\"\xa7\x01\n" +
 	"\x1cListScheduledReportsResponse\x12=\n" +
 	"\areports\x18\x01 \x03(\v2#.insights.report.v1.ScheduledReportR\areports\x12H\n" +
 	"\n" +
@@ -152,19 +187,17 @@ var file_insights_report_v1_list_scheduled_reports_proto_msgTypes = make([]proto
 var file_insights_report_v1_list_scheduled_reports_proto_goTypes = []any{
 	(*ListScheduledReportsRequest)(nil),  // 0: insights.report.v1.ListScheduledReportsRequest
 	(*ListScheduledReportsResponse)(nil), // 1: insights.report.v1.ListScheduledReportsResponse
-	(*v1.PaginationRequest)(nil),         // 2: common.pagination.v1.PaginationRequest
-	(*ScheduledReport)(nil),              // 3: insights.report.v1.ScheduledReport
-	(*v1.PaginationResponse)(nil),        // 4: common.pagination.v1.PaginationResponse
+	(*ScheduledReport)(nil),              // 2: insights.report.v1.ScheduledReport
+	(*v1.PaginationResponse)(nil),        // 3: common.pagination.v1.PaginationResponse
 }
 var file_insights_report_v1_list_scheduled_reports_proto_depIdxs = []int32{
-	2, // 0: insights.report.v1.ListScheduledReportsRequest.pagination:type_name -> common.pagination.v1.PaginationRequest
-	3, // 1: insights.report.v1.ListScheduledReportsResponse.reports:type_name -> insights.report.v1.ScheduledReport
-	4, // 2: insights.report.v1.ListScheduledReportsResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: insights.report.v1.ListScheduledReportsResponse.reports:type_name -> insights.report.v1.ScheduledReport
+	3, // 1: insights.report.v1.ListScheduledReportsResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_insights_report_v1_list_scheduled_reports_proto_init() }

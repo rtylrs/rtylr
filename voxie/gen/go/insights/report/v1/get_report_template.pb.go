@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_insights_report_v1_get_report_template_proto protoreflect.FileDescripto
 
 const file_insights_report_v1_get_report_template_proto_rawDesc = "" +
 	"\n" +
-	",insights/report/v1/get_report_template.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\"6\n" +
-	"\x18GetReportTemplateRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"[\n" +
+	",insights/report/v1/get_report_template.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\x1a\x1donekit/http/annotations.proto\":\n" +
+	"\x18GetReportTemplateRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"[\n" +
 	"\x19GetReportTemplateResponse\x12>\n" +
 	"\btemplate\x18\x01 \x01(\v2\".insights.report.v1.ReportTemplateR\btemplateB3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 

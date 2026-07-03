@@ -4,6 +4,8 @@ package hub.developer.v1;
 
 import "buf/validate/validate.proto";
 import "hub/developer/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/developer/v1";
 
@@ -11,7 +13,8 @@ message UpdateWebhookRequest {
   // id is the unique identifier for the resource.
   int64 id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // url is the url value for this contract.
   string url = 2 [

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -196,16 +197,16 @@ var File_hub_billing_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_billing_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahub/billing/v1/types.proto\x12\x0ehub.billing.v1\"\xae\x01\n" +
+	"\x1ahub/billing/v1/types.proto\x12\x0ehub.billing.v1\x1a\x1donekit/http/annotations.proto\"\xae\x01\n" +
 	"\x0eBillingSummary\x12\x12\n" +
 	"\x04plan\x18\x01 \x01(\tR\x04plan\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12#\n" +
 	"\rcurrent_usage\x18\x03 \x01(\x01R\fcurrentUsage\x12\x1f\n" +
 	"\vusage_limit\x18\x04 \x01(\x01R\n" +
 	"usageLimit\x12*\n" +
-	"\x11next_billing_date\x18\x05 \x01(\tR\x0fnextBillingDate\"\x9b\x01\n" +
-	"\aInvoice\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
+	"\x11next_billing_date\x18\x05 \x01(\tR\x0fnextBillingDate\"\xa1\x01\n" +
+	"\aInvoice\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1b\n" +

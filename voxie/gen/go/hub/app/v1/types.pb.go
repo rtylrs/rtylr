@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -224,14 +225,14 @@ var File_hub_app_v1_types_proto protoreflect.FileDescriptor
 const file_hub_app_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"\x16hub/app/v1/types.proto\x12\n" +
-	"hub.app.v1\"~\n" +
+	"hub.app.v1\x1a\x1donekit/http/annotations.proto\"~\n" +
 	"\x03App\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\x1d\n" +
 	"\n" +
-	"is_enabled\x18\x05 \x01(\bR\tisEnabled\"\x98\x02\n" +
+	"is_enabled\x18\x05 \x01(\bR\tisEnabled\"\xa4\x02\n" +
 	"\x05Addon\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -240,10 +241,10 @@ const file_hub_app_v1_types_proto_rawDesc = "" +
 	"\x05price\x18\x05 \x01(\x01R\x05price\x12\x17\n" +
 	"\ais_free\x18\x06 \x01(\bR\x06isFree\x12\x1d\n" +
 	"\n" +
-	"is_enabled\x18\a \x01(\bR\tisEnabled\x12\"\n" +
+	"is_enabled\x18\a \x01(\bR\tisEnabled\x12(\n" +
 	"\n" +
-	"enabled_at\x18\b \x01(\tH\x00R\tenabledAt\x88\x01\x01\x12$\n" +
-	"\vdisabled_at\x18\t \x01(\tH\x01R\n" +
+	"enabled_at\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\tenabledAt\x88\x01\x01\x12*\n" +
+	"\vdisabled_at\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\n" +
 	"disabledAt\x88\x01\x01B\r\n" +
 	"\v_enabled_atB\x0e\n" +
 	"\f_disabled_atB+Z)github.com/voxire/voxie/gen/go/hub/app/v1b\x06proto3"

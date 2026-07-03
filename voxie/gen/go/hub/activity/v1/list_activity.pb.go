@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_hub_activity_v1_list_activity_proto protoreflect.FileDescriptor
 
 const file_hub_activity_v1_list_activity_proto_rawDesc = "" +
 	"\n" +
-	"#hub/activity/v1/list_activity.proto\x12\x0fhub.activity.v1\x1a\x1bhub/activity/v1/types.proto\"+\n" +
-	"\x13ListActivityRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit\"V\n" +
+	"#hub/activity/v1/list_activity.proto\x12\x0fhub.activity.v1\x1a\x1bhub/activity/v1/types.proto\x1a\x1donekit/http/annotations.proto\"8\n" +
+	"\x13ListActivityRequest\x12!\n" +
+	"\x05limit\x18\x01 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\"V\n" +
 	"\x14ListActivityResponse\x12>\n" +
 	"\n" +
 	"activities\x18\x01 \x03(\v2\x1e.hub.activity.v1.ActivityEntryR\n" +

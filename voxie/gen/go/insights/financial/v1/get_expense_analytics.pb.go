@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,10 @@ var File_insights_financial_v1_get_expense_analytics_proto protoreflect.FileDesc
 
 const file_insights_financial_v1_get_expense_analytics_proto_rawDesc = "" +
 	"\n" +
-	"1insights/financial/v1/get_expense_analytics.proto\x12\x15insights.financial.v1\x1a!insights/financial/v1/types.proto\"4\n" +
-	"\x1aGetExpenseAnalyticsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"d\n" +
+	"1insights/financial/v1/get_expense_analytics.proto\x12\x15insights.financial.v1\x1a!insights/financial/v1/types.proto\x1a\x1donekit/http/annotations.proto\"B\n" +
+	"\x1aGetExpenseAnalyticsRequest\x12$\n" +
+	"\x06period\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\"d\n" +
 	"\x1bGetExpenseAnalyticsResponse\x12E\n" +
 	"\tanalytics\x18\x01 \x01(\v2'.insights.financial.v1.ExpenseAnalyticsR\tanalyticsB6Z4github.com/voxire/voxie/gen/go/insights/financial/v1b\x06proto3"
 

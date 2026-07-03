@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,9 +126,9 @@ var File_hub_notification_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_notification_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1fhub/notification/v1/types.proto\x12\x13hub.notification.v1\"\xa3\x01\n" +
-	"\fNotification\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x1fhub/notification/v1/types.proto\x12\x13hub.notification.v1\x1a\x1donekit/http/annotations.proto\"\xa9\x01\n" +
+	"\fNotification\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
 	"\x04body\x18\x03 \x01(\tR\x04body\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x12\n" +

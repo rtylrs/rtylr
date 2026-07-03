@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -224,9 +225,9 @@ var File_hub_developer_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1chub/developer/v1/types.proto\x12\x10hub.developer.v1\"\xe0\x01\n" +
-	"\x06ApiKey\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x1chub/developer/v1/types.proto\x12\x10hub.developer.v1\x1a\x1donekit/http/annotations.proto\"\xe6\x01\n" +
+	"\x06ApiKey\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
 	"key_prefix\x18\x03 \x01(\tR\tkeyPrefix\x12\x16\n" +
@@ -237,9 +238,9 @@ const file_hub_developer_v1_types_proto_rawDesc = "" +
 	"lastUsedAt\x12\x1d\n" +
 	"\n" +
 	"expires_at\x18\a \x01(\tR\texpiresAt\x12\x1b\n" +
-	"\tis_active\x18\b \x01(\bR\bisActive\"\xab\x01\n" +
-	"\aWebhook\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
+	"\tis_active\x18\b \x01(\bR\bisActive\"\xb1\x01\n" +
+	"\aWebhook\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x16\n" +
 	"\x06events\x18\x03 \x03(\tR\x06events\x12\x1b\n" +
 	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x1d\n" +

@@ -4,6 +4,8 @@ package hub.business.v1;
 
 import "buf/validate/validate.proto";
 import "hub/business/v1/types.proto";
+import "onekit/http/annotations.proto";
+
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
 
@@ -11,7 +13,8 @@ message UpdateBusinessRequest {
   // business_id is the business id value for this contract.
   int64 business_id = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // name is the name value for this contract.
   string name = 2 [
@@ -48,7 +51,9 @@ message UpdateBusinessRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // slug is the slug value for this contract.
-  optional string slug = 10;
+  optional string slug = 10 [
+    (onekit.http.nullable) = true
+  ];
 }
 
 message UpdateBusinessResponse {

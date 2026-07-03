@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,9 +126,10 @@ var File_hub_business_v1_lookup_business_by_slug_proto protoreflect.FileDescript
 
 const file_hub_business_v1_lookup_business_by_slug_proto_rawDesc = "" +
 	"\n" +
-	"-hub/business/v1/lookup_business_by_slug.proto\x12\x0fhub.business.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhub/business/v1/types.proto\"e\n" +
-	"\x1bLookupBusinessBySlugRequest\x12F\n" +
-	"\x04slug\x18\x01 \x01(\tB2\xbaH/\xc8\x01\x01r*\x10\x012&^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$R\x04slug\"\xa1\x01\n" +
+	"-hub/business/v1/lookup_business_by_slug.proto\x12\x0fhub.business.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhub/business/v1/types.proto\x1a\x1donekit/http/annotations.proto\"o\n" +
+	"\x1bLookupBusinessBySlugRequest\x12P\n" +
+	"\x04slug\x18\x01 \x01(\tB<\xbaH/\xc8\x01\x01r*\x10\x012&^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$µ\x18\x06\n" +
+	"\x04slugR\x04slug\"\xa1\x01\n" +
 	"\x1cLookupBusinessBySlugResponse\x12B\n" +
 	"\bbusiness\x18\x01 \x01(\v2&.hub.business.v1.PublicBusinessSummaryR\bbusiness\x12=\n" +
 	"\tlocations\x18\x02 \x03(\v2\x1f.hub.business.v1.PublicLocationR\tlocationsB0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"

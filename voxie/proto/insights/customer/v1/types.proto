@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package insights.customer.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/insights/customer/v1";
 
 // ── Customer Analytics ──────────────────────────────────────────────
@@ -32,7 +34,9 @@ message CustomerGrowthPoint {
 
 message TopCustomerEntry {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // name is the name value for this contract.
   string name = 2;
   // total_spent is the total spent value for this contract.

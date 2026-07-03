@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_hub_developer_v1_delete_webhook_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_delete_webhook_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/delete_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\"2\n" +
-	"\x14DeleteWebhookRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"1\n" +
+	"%hub/developer/v1/delete_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"6\n" +
+	"\x14DeleteWebhookRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"1\n" +
 	"\x15DeleteWebhookResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB1Z/github.com/voxire/voxie/gen/go/hub/developer/v1b\x06proto3"
 
