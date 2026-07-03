@@ -28,6 +28,17 @@ jobs:
           go-version: "1.26"
           cache: true
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: pnpm
+
       - name: Add GOPATH/bin to PATH
         run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
@@ -46,28 +57,31 @@ jobs:
           make generate
           go mod tidy
 
-      - name: Build & vet generated code
+      - name: Build & vet generated Go code
         run: |
           go build ./...
           go vet ./...
 
+      - name: Typecheck generated TypeScript code
+        run: make typecheck
+
       - name: Fail PR on drift
         if: github.event_name == 'pull_request'
         run: |
-          git diff --exit-code -- gen/ go.mod go.sum || {
-            echo "::error::gen/go is out of date with the proto sources. Run 'make generate' locally and commit gen/, go.mod, and go.sum."
+          git diff --exit-code -- gen/ go.mod go.sum pnpm-lock.yaml || {
+            echo "::error::gen/ is out of date with the proto sources. Run 'make generate' locally and commit gen/, go.mod, go.sum, and pnpm-lock.yaml."
             exit 1
           }
 
       - name: Commit regenerated contracts
         if: github.event_name == 'push'
         run: |
-          if git diff --quiet -- gen/ go.mod go.sum; then
-            echo "gen/go already up to date."
+          if git diff --quiet -- gen/ go.mod go.sum pnpm-lock.yaml; then
+            echo "gen/ already up to date."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add gen/ go.mod go.sum
+          git add gen/ go.mod go.sum pnpm-lock.yaml
           git commit -m "Regenerate contracts [skip ci]"
           git push

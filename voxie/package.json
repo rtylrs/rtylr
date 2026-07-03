@@ -1,0 +1,9 @@
+{
+  "name": "voxie-contracts",
+  "private": true,
+  "description": "TypeScript codegen tooling for voxie protobuf contracts",
+  "devDependencies": {
+    "ts-proto": "^2.11.6",
+    "typescript": "^5.9.3"
+  }
+}

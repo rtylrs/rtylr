@@ -1,4 +1,4 @@
-.PHONY: clean lint format breaking generate install-plugins fetch-onekit-proto
+.PHONY: clean lint format breaking generate install-plugins fetch-onekit-proto install-js typecheck
 
 ONEKIT_VERSION := v0.2.0
 
@@ -28,10 +28,20 @@ breaking: fetch-onekit-proto
 # Install the onekit protoc plugins used for generation
 install-plugins:
 	go install github.com/1homsi/onekit/cmd/protoc-gen-onekit-go-http@$(ONEKIT_VERSION)
+	go install github.com/1homsi/onekit/cmd/protoc-gen-onekit-ts-client@$(ONEKIT_VERSION)
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
-# Regenerate gen/go from proto sources. Output is committed to the repo.
-generate: install-plugins fetch-onekit-proto
+# Install JS codegen tooling (ts-proto)
+install-js:
+	pnpm install --frozen-lockfile
+
+# Regenerate gen/go and gen/ts from proto sources. Output is committed to the repo.
+generate: install-plugins install-js fetch-onekit-proto
 	buf dep update
-	rm -rf gen/go
+	rm -rf gen/go gen/ts
 	buf generate
+	python3 scripts/generate_validation_metadata.py --proto-root proto --out-dir gen/ts/validation
+
+# Typecheck the generated TypeScript output
+typecheck: install-js
+	pnpm exec tsc --noEmit
