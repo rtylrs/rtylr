@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_finance_bank_account_v1_get_bank_account_proto protoreflect.FileDescrip
 
 const file_finance_bank_account_v1_get_bank_account_proto_rawDesc = "" +
 	"\n" +
-	".finance/bank_account/v1/get_bank_account.proto\x12\x17finance.bank_account.v1\x1a\x1bbuf/validate/validate.proto\x1a#finance/bank_account/v1/types.proto\"3\n" +
-	"\x15GetBankAccountRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"X\n" +
+	".finance/bank_account/v1/get_bank_account.proto\x12\x17finance.bank_account.v1\x1a\x1bbuf/validate/validate.proto\x1a#finance/bank_account/v1/types.proto\x1a\x1donekit/http/annotations.proto\"7\n" +
+	"\x15GetBankAccountRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"X\n" +
 	"\x16GetBankAccountResponse\x12>\n" +
 	"\aaccount\x18\x01 \x01(\v2$.finance.bank_account.v1.BankAccountR\aaccountB8Z6github.com/voxire/voxie/gen/go/finance/bank_account/v1b\x06proto3"
 

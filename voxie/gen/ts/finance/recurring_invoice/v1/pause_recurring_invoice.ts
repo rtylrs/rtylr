@@ -7,6 +7,8 @@
 /* eslint-disable */
 
 export interface PauseRecurringInvoiceRequest {
+  /** id is the recurring invoice to pause. */
+  id: number;
 }
 
 export interface PauseRecurringInvoiceResponse {

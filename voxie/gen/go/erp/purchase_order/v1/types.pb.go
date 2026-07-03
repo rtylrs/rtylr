@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -359,31 +360,31 @@ var File_erp_purchase_order_v1_types_proto protoreflect.FileDescriptor
 
 const file_erp_purchase_order_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"!erp/purchase_order/v1/types.proto\x12\x15erp.purchase_order.v1\x1a\x1bbuf/validate/validate.proto\"\x82\x02\n" +
-	"\x11PurchaseOrderItem\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12*\n" +
-	"\x11purchase_order_id\x18\x02 \x01(\x03R\x0fpurchaseOrderId\x12\x1d\n" +
+	"!erp/purchase_order/v1/types.proto\x12\x15erp.purchase_order.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x94\x02\n" +
+	"\x11PurchaseOrderItem\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x120\n" +
+	"\x11purchase_order_id\x18\x02 \x01(\x03B\x04е\x18\x01R\x0fpurchaseOrderId\x12#\n" +
 	"\n" +
-	"product_id\x18\x03 \x01(\x03R\tproductId\x12)\n" +
+	"product_id\x18\x03 \x01(\x03B\x04е\x18\x01R\tproductId\x12)\n" +
 	"\x10quantity_ordered\x18\x04 \x01(\x01R\x0fquantityOrdered\x12+\n" +
 	"\x11quantity_received\x18\x05 \x01(\x01R\x10quantityReceived\x12\x1b\n" +
 	"\tunit_cost\x18\x06 \x01(\x01R\bunitCost\x12\x1d\n" +
 	"\n" +
-	"total_cost\x18\a \x01(\x01R\ttotalCost\"\x92\x04\n" +
-	"\rPurchaseOrder\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
-	"\vsupplier_id\x18\x03 \x01(\x03R\n" +
+	"total_cost\x18\a \x01(\x01R\ttotalCost\"\xb0\x04\n" +
+	"\rPurchaseOrder\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
+	"\vsupplier_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"supplierId\x12\x1b\n" +
 	"\tpo_number\x18\x04 \x01(\tR\bpoNumber\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1a\n" +
 	"\bsubtotal\x18\x06 \x01(\x01R\bsubtotal\x12\x1d\n" +
 	"\n" +
 	"tax_amount\x18\a \x01(\x01R\ttaxAmount\x12\x14\n" +
-	"\x05total\x18\b \x01(\x01R\x05total\x120\n" +
-	"\x11expected_delivery\x18\t \x01(\tH\x00R\x10expectedDelivery\x88\x01\x01\x12$\n" +
+	"\x05total\x18\b \x01(\x01R\x05total\x126\n" +
+	"\x11expected_delivery\x18\t \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x10expectedDelivery\x88\x01\x01\x12*\n" +
 	"\vreceived_at\x18\n" +
-	" \x01(\tH\x01R\n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\n" +
 	"receivedAt\x88\x01\x01\x12\x14\n" +
 	"\x05notes\x18\v \x01(\tR\x05notes\x12\x1d\n" +
 	"\n" +
@@ -394,11 +395,10 @@ const file_erp_purchase_order_v1_types_proto_rawDesc = "" +
 	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12>\n" +
 	"\x05items\x18\x0f \x03(\v2(.erp.purchase_order.v1.PurchaseOrderItemR\x05itemsB\x14\n" +
 	"\x12_expected_deliveryB\x0e\n" +
-	"\f_received_at\"\xb3\x01\n" +
-	"\x1eCreatePurchaseOrderItemRequest\x12)\n" +
+	"\f_received_at\"\xb7\x01\n" +
+	"\x1eCreatePurchaseOrderItemRequest\x12-\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tproductId\x129\n" +
+	"product_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tproductId\x129\n" +
 	"\x10quantity_ordered\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0fquantityOrdered\x12+\n" +
 	"\tunit_cost\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\bunitCostB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 

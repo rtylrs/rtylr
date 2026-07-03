@@ -4,6 +4,7 @@ package erp.purchase_order.v1;
 
 import "buf/validate/validate.proto";
 import "erp/purchase_order/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
 
@@ -12,6 +13,8 @@ message CreatePurchaseOrderRequest {
   int64 supplier_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // po_number is the po number value for this contract.
   string po_number = 2 [
@@ -33,7 +36,7 @@ message CreatePurchaseOrderRequest {
 
 message CreatePurchaseOrderResponse {
   // purchase_order_id is the purchase order id value for this contract.
-  int64 purchase_order_id = 1;
+  int64 purchase_order_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // message is a human-readable result message.
   string message = 2;
 }

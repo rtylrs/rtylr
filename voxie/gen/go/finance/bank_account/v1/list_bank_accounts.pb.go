@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -24,8 +25,14 @@ const (
 
 type ListBankAccountsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// pagination is the pagination value for this contract.
-	Pagination    *v1.PaginationRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	// page is the current result page.
+	Page int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `protobuf:"bytes,3,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
+	SortDir       string `protobuf:"bytes,4,opt,name=sort_dir,json=sortDir,proto3" json:"sort_dir,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,11 +67,32 @@ func (*ListBankAccountsRequest) Descriptor() ([]byte, []int) {
 	return file_finance_bank_account_v1_list_bank_accounts_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ListBankAccountsRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListBankAccountsRequest) GetPage() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
+}
+
+func (x *ListBankAccountsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListBankAccountsRequest) GetSortBy() string {
+	if x != nil {
+		return x.SortBy
+	}
+	return ""
+}
+
+func (x *ListBankAccountsRequest) GetSortDir() string {
+	if x != nil {
+		return x.SortDir
+	}
+	return ""
 }
 
 type ListBankAccountsResponse struct {
@@ -125,11 +153,18 @@ var File_finance_bank_account_v1_list_bank_accounts_proto protoreflect.FileDescr
 
 const file_finance_bank_account_v1_list_bank_accounts_proto_rawDesc = "" +
 	"\n" +
-	"0finance/bank_account/v1/list_bank_accounts.proto\x12\x17finance.bank_account.v1\x1a%common/pagination/v1/pagination.proto\x1a#finance/bank_account/v1/types.proto\"b\n" +
-	"\x17ListBankAccountsRequest\x12G\n" +
+	"0finance/bank_account/v1/list_bank_accounts.proto\x12\x17finance.bank_account.v1\x1a%common/pagination/v1/pagination.proto\x1a#finance/bank_account/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xaf\x01\n" +
+	"\x17ListBankAccountsRequest\x12\x1e\n" +
+	"\x04page\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12!\n" +
+	"\x05limit\x18\x02 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\x12&\n" +
+	"\asort_by\x18\x03 \x01(\tB\rµ\x18\t\n" +
+	"\asort_byR\x06sortBy\x12)\n" +
+	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2'.common.pagination.v1.PaginationRequestR\n" +
-	"pagination\"\xa6\x01\n" +
+	"\bsort_dirR\asortDir\"\xa6\x01\n" +
 	"\x18ListBankAccountsResponse\x12@\n" +
 	"\baccounts\x18\x01 \x03(\v2$.finance.bank_account.v1.BankAccountR\baccounts\x12H\n" +
 	"\n" +
@@ -152,19 +187,17 @@ var file_finance_bank_account_v1_list_bank_accounts_proto_msgTypes = make([]prot
 var file_finance_bank_account_v1_list_bank_accounts_proto_goTypes = []any{
 	(*ListBankAccountsRequest)(nil),  // 0: finance.bank_account.v1.ListBankAccountsRequest
 	(*ListBankAccountsResponse)(nil), // 1: finance.bank_account.v1.ListBankAccountsResponse
-	(*v1.PaginationRequest)(nil),     // 2: common.pagination.v1.PaginationRequest
-	(*BankAccount)(nil),              // 3: finance.bank_account.v1.BankAccount
-	(*v1.PaginationResponse)(nil),    // 4: common.pagination.v1.PaginationResponse
+	(*BankAccount)(nil),              // 2: finance.bank_account.v1.BankAccount
+	(*v1.PaginationResponse)(nil),    // 3: common.pagination.v1.PaginationResponse
 }
 var file_finance_bank_account_v1_list_bank_accounts_proto_depIdxs = []int32{
-	2, // 0: finance.bank_account.v1.ListBankAccountsRequest.pagination:type_name -> common.pagination.v1.PaginationRequest
-	3, // 1: finance.bank_account.v1.ListBankAccountsResponse.accounts:type_name -> finance.bank_account.v1.BankAccount
-	4, // 2: finance.bank_account.v1.ListBankAccountsResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: finance.bank_account.v1.ListBankAccountsResponse.accounts:type_name -> finance.bank_account.v1.BankAccount
+	3, // 1: finance.bank_account.v1.ListBankAccountsResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_finance_bank_account_v1_list_bank_accounts_proto_init() }

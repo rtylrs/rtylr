@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -206,7 +207,7 @@ var File_erp_supplier_v1_create_supplier_proto protoreflect.FileDescriptor
 
 const file_erp_supplier_v1_create_supplier_proto_rawDesc = "" +
 	"\n" +
-	"%erp/supplier/v1/create_supplier.proto\x12\x0ferp.supplier.v1\x1a\x1bbuf/validate/validate.proto\"\xc0\x02\n" +
+	"%erp/supplier/v1/create_supplier.proto\x12\x0ferp.supplier.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc0\x02\n" +
 	"\x15CreateSupplierRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\"\n" +
@@ -221,9 +222,9 @@ const file_erp_supplier_v1_create_supplier_proto_rawDesc = "" +
 	"\rpayment_terms\x18\b \x01(\tR\fpaymentTerms\x12\x14\n" +
 	"\x05notes\x18\t \x01(\tR\x05notes\x12\x1b\n" +
 	"\tis_active\x18\n" +
-	" \x01(\bR\bisActive\"S\n" +
-	"\x16CreateSupplierResponse\x12\x1f\n" +
-	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
+	" \x01(\bR\bisActive\"Y\n" +
+	"\x16CreateSupplierResponse\x12%\n" +
+	"\vsupplier_id\x18\x01 \x01(\x03B\x04е\x18\x01R\n" +
 	"supplierId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/erp/supplier/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -223,10 +224,10 @@ var File_finance_report_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_report_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1dfinance/report/v1/types.proto\x12\x11finance.report.v1\"\xcd\x01\n" +
-	"\tTaxConfig\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x1dfinance/report/v1/types.proto\x12\x11finance.report.v1\x1a\x1donekit/http/annotations.proto\"\xd9\x01\n" +
+	"\tTaxConfig\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x12\n" +
 	"\x04rate\x18\x04 \x01(\x01R\x04rate\x12\x12\n" +
 	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1d\n" +
@@ -234,10 +235,10 @@ const file_finance_report_v1_types_proto_rawDesc = "" +
 	"is_default\x18\x06 \x01(\bR\tisDefault\x12\x1b\n" +
 	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\"\x9f\x01\n" +
-	"\x15ExpenseCategoryDetail\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"\xab\x01\n" +
+	"\x15ExpenseCategoryDetail\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
 	"\x05color\x18\x04 \x01(\tR\x05color\x12\x12\n" +
 	"\x04icon\x18\x05 \x01(\tR\x04icon\x12\x1d\n" +

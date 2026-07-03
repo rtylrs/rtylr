@@ -5,17 +5,21 @@
 // source: finance/journal/v1/list_journal_entries.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
+import type { PaginationResponse } from "../../../common/pagination/v1/pagination";
 import type { JournalEntry } from "./types";
 
 export interface ListJournalEntriesRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
-  /** from_date is the from date value for this contract. */
+  /** page is the current result page. */
+  page: number;
+  /** limit is the maximum number of records to return. */
+  limit: number;
+  /** sort_by is the field to sort results by. */
+  sortBy: string;
+  /** sort_dir is the sort direction ("asc" or "desc"). */
+  sortDir: string;
+  /** from_date is the inclusive start date filter. */
   fromDate: string;
-  /** to_date is the to date value for this contract. */
+  /** to_date is the inclusive end date filter. */
   toDate: string;
 }
 

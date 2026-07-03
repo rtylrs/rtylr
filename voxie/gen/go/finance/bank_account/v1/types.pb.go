@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -143,9 +144,9 @@ var File_finance_bank_account_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_bank_account_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"#finance/bank_account/v1/types.proto\x12\x17finance.bank_account.v1\"\x82\x02\n" +
-	"\vBankAccount\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"#finance/bank_account/v1/types.proto\x12\x17finance.bank_account.v1\x1a\x1donekit/http/annotations.proto\"\x88\x02\n" +
+	"\vBankAccount\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
 	"\tbank_name\x18\x03 \x01(\tR\bbankName\x12!\n" +
 	"\faccount_type\x18\x04 \x01(\tR\vaccountType\x12\x1b\n" +

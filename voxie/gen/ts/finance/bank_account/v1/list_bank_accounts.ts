@@ -5,12 +5,18 @@
 // source: finance/bank_account/v1/list_bank_accounts.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
+import type { PaginationResponse } from "../../../common/pagination/v1/pagination";
 import type { BankAccount } from "./types";
 
 export interface ListBankAccountsRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationRequest | undefined;
+  /** page is the current result page. */
+  page: number;
+  /** limit is the maximum number of records to return. */
+  limit: number;
+  /** sort_by is the field to sort results by. */
+  sortBy: string;
+  /** sort_dir is the sort direction ("asc" or "desc"). */
+  sortDir: string;
 }
 
 export interface ListBankAccountsResponse {

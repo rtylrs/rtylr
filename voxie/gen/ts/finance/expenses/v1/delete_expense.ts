@@ -7,6 +7,8 @@
 /* eslint-disable */
 
 export interface DeleteExpenseRequest {
+  /** id is the unique identifier for the expense. */
+  id: number;
 }
 
 export interface DeleteExpenseResponse {

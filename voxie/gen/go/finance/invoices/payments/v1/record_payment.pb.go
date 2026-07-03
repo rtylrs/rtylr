@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -180,11 +181,10 @@ var File_finance_invoices_payments_v1_record_payment_proto protoreflect.FileDesc
 
 const file_finance_invoices_payments_v1_record_payment_proto_rawDesc = "" +
 	"\n" +
-	"1finance/invoices/payments/v1/record_payment.proto\x12\x1cfinance.invoices.payments.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ffinance/invoices/v1/types.proto\"\xa4\x02\n" +
-	"\x14RecordPaymentRequest\x12)\n" +
+	"1finance/invoices/payments/v1/record_payment.proto\x12\x1cfinance.invoices.payments.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ffinance/invoices/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xa8\x02\n" +
+	"\x14RecordPaymentRequest\x12-\n" +
 	"\n" +
-	"invoice_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tinvoiceId\x12&\n" +
+	"invoice_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tinvoiceId\x12&\n" +
 	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
 	"\bcurrency\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12-\n" +

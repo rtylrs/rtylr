@@ -3,6 +3,7 @@ syntax = "proto3";
 package finance.recurring_invoice.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
 
@@ -11,6 +12,8 @@ message CreateRecurringInvoiceRequest {
   int64 template_invoice_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // frequency is how often the recurring invoice should be generated.
   string frequency = 2 [
@@ -26,14 +29,14 @@ message CreateRecurringInvoiceRequest {
     }
   ];
   // end_date is when recurring generation should stop; absent when open-ended.
-  optional string end_date = 4;
+  optional string end_date = 4 [(onekit.http.nullable) = true];
   // is_active indicates whether the recurring invoice should start active.
-  optional bool is_active = 5;
+  optional bool is_active = 5 [(onekit.http.nullable) = true];
 }
 
 message CreateRecurringInvoiceResponse {
   // id is the recurring invoice that was created.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // message is the backend confirmation message.
   string message = 2;
 }

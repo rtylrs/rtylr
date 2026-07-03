@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,14 +134,14 @@ var File_finance_recurring_invoice_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_recurring_invoice_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"(finance/recurring_invoice/v1/types.proto\x12\x1cfinance.recurring_invoice.v1\"\xa0\x02\n" +
-	"\x10RecurringInvoice\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12.\n" +
-	"\x13template_invoice_id\x18\x03 \x01(\x03R\x11templateInvoiceId\x12\x1c\n" +
+	"(finance/recurring_invoice/v1/types.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1donekit/http/annotations.proto\"\xb8\x02\n" +
+	"\x10RecurringInvoice\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x124\n" +
+	"\x13template_invoice_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x11templateInvoiceId\x12\x1c\n" +
 	"\tfrequency\x18\x04 \x01(\tR\tfrequency\x12*\n" +
-	"\x11next_invoice_date\x18\x05 \x01(\tR\x0fnextInvoiceDate\x12\x1e\n" +
-	"\bend_date\x18\x06 \x01(\tH\x00R\aendDate\x88\x01\x01\x12\x1b\n" +
+	"\x11next_invoice_date\x18\x05 \x01(\tR\x0fnextInvoiceDate\x12$\n" +
+	"\bend_date\x18\x06 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\aendDate\x88\x01\x01\x12\x1b\n" +
 	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAtB\v\n" +

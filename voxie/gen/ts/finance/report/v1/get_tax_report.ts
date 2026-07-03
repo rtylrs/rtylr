@@ -7,9 +7,9 @@
 /* eslint-disable */
 
 export interface GetTaxReportRequest {
-  /** period is the period value for this contract. */
+  /** period is the reporting period label. */
   period: string;
-  /** date is the date value for this contract. */
+  /** date is the report anchor date. */
   date: string;
 }
 

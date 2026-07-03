@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -233,13 +234,11 @@ var File_erp_product_v1_create_product_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_create_product_proto_rawDesc = "" +
 	"\n" +
-	"#erp/product/v1/create_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\"\xc1\x04\n" +
-	"\x14CreateProductRequest\x12+\n" +
-	"\vcategory_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
-	"categoryId\x12+\n" +
-	"\vsupplier_id\x18\x02 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"#erp/product/v1/create_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc9\x04\n" +
+	"\x14CreateProductRequest\x12/\n" +
+	"\vcategory_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"categoryId\x12/\n" +
+	"\vsupplier_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"supplierId\x12\x1e\n" +
 	"\x04name\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1c\n" +
@@ -259,10 +258,10 @@ const file_erp_product_v1_create_product_proto_rawDesc = "" +
 	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x11lowStockThreshold\x129\n" +
 	"\x10reorder_quantity\x18\v \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0freorderQuantity\x12\x1b\n" +
 	"\tis_active\x18\f \x01(\bR\bisActive\x12'\n" +
-	"\x0ftrack_inventory\x18\r \x01(\bR\x0etrackInventory\"P\n" +
-	"\x15CreateProductResponse\x12\x1d\n" +
+	"\x0ftrack_inventory\x18\r \x01(\bR\x0etrackInventory\"V\n" +
+	"\x15CreateProductResponse\x12#\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x18\n" +
+	"product_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tproductId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"
 
 var (

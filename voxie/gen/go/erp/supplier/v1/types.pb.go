@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -187,10 +188,10 @@ var File_erp_supplier_v1_types_proto protoreflect.FileDescriptor
 
 const file_erp_supplier_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1berp/supplier/v1/types.proto\x12\x0ferp.supplier.v1\"\xea\x02\n" +
-	"\bSupplier\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\x1berp/supplier/v1/types.proto\x12\x0ferp.supplier.v1\x1a\x1donekit/http/annotations.proto\"\xf6\x02\n" +
+	"\bSupplier\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x18\n" +

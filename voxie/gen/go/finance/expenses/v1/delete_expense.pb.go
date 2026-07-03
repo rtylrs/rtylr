@@ -7,6 +7,8 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,7 +24,9 @@ const (
 )
 
 type DeleteExpenseRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the expense.
+	Id            int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -55,6 +59,13 @@ func (x *DeleteExpenseRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use DeleteExpenseRequest.ProtoReflect.Descriptor instead.
 func (*DeleteExpenseRequest) Descriptor() ([]byte, []int) {
 	return file_finance_expenses_v1_delete_expense_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *DeleteExpenseRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 type DeleteExpenseResponse struct {
@@ -106,8 +117,9 @@ var File_finance_expenses_v1_delete_expense_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_delete_expense_proto_rawDesc = "" +
 	"\n" +
-	"(finance/expenses/v1/delete_expense.proto\x12\x13finance.expenses.v1\"\x16\n" +
-	"\x14DeleteExpenseRequest\"1\n" +
+	"(finance/expenses/v1/delete_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"6\n" +
+	"\x14DeleteExpenseRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"1\n" +
 	"\x15DeleteExpenseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/finance/expenses/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -269,11 +270,11 @@ var File_finance_quote_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_quote_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cfinance/quote/v1/types.proto\x12\x10finance.quote.v1\"\x95\x03\n" +
-	"\x05Quote\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06number\x18\x02 \x01(\tR\x06number\x12\x1f\n" +
-	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
+	"\x1cfinance/quote/v1/types.proto\x12\x10finance.quote.v1\x1a\x1donekit/http/annotations.proto\"\xa1\x03\n" +
+	"\x05Quote\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x16\n" +
+	"\x06number\x18\x02 \x01(\tR\x06number\x12%\n" +
+	"\vcustomer_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"customerId\x12#\n" +
 	"\rcustomer_name\x18\x04 \x01(\tR\fcustomerName\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\tR\x06status\x121\n" +

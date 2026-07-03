@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,20 +162,19 @@ var File_finance_recurring_invoice_v1_create_recurring_invoice_proto protoreflec
 
 const file_finance_recurring_invoice_v1_create_recurring_invoice_proto_rawDesc = "" +
 	"\n" +
-	";finance/recurring_invoice/v1/create_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\"\xaf\x02\n" +
-	"\x1dCreateRecurringInvoiceRequest\x12:\n" +
-	"\x13template_invoice_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x11templateInvoiceId\x12(\n" +
+	";finance/recurring_invoice/v1/create_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xbf\x02\n" +
+	"\x1dCreateRecurringInvoiceRequest\x12>\n" +
+	"\x13template_invoice_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x11templateInvoiceId\x12(\n" +
 	"\tfrequency\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x12K\n" +
-	"\x11next_invoice_date\x18\x03 \x01(\tB\x1f\xbaH\x1c\xc8\x01\x01r\x17\x10\x012\x13^\\d{4}-\\d{2}-\\d{2}$R\x0fnextInvoiceDate\x12\x1e\n" +
-	"\bend_date\x18\x04 \x01(\tH\x00R\aendDate\x88\x01\x01\x12 \n" +
-	"\tis_active\x18\x05 \x01(\bH\x01R\bisActive\x88\x01\x01B\v\n" +
+	"\x11next_invoice_date\x18\x03 \x01(\tB\x1f\xbaH\x1c\xc8\x01\x01r\x17\x10\x012\x13^\\d{4}-\\d{2}-\\d{2}$R\x0fnextInvoiceDate\x12$\n" +
+	"\bend_date\x18\x04 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\aendDate\x88\x01\x01\x12&\n" +
+	"\tis_active\x18\x05 \x01(\bB\x04\xe8\xb5\x18\x01H\x01R\bisActive\x88\x01\x01B\v\n" +
 	"\t_end_dateB\f\n" +
 	"\n" +
-	"_is_active\"J\n" +
-	"\x1eCreateRecurringInvoiceResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"_is_active\"P\n" +
+	"\x1eCreateRecurringInvoiceResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB=Z;github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1b\x06proto3"
 
 var (

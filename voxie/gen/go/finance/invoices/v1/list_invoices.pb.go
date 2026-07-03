@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,13 +24,13 @@ const (
 
 type ListInvoicesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// status is the current lifecycle state.
+	// status filters invoices by lifecycle state.
 	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
-	// search is the search value for this contract.
+	// search filters by customer or invoice number.
 	Search string `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`
-	// date_from is the date from value for this contract.
+	// date_from is the inclusive start date filter.
 	DateFrom string `protobuf:"bytes,3,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
-	// date_to is the date to value for this contract.
+	// date_to is the inclusive end date filter.
 	DateTo        string `protobuf:"bytes,4,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -142,12 +143,16 @@ var File_finance_invoices_v1_list_invoices_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_list_invoices_proto_rawDesc = "" +
 	"\n" +
-	"'finance/invoices/v1/list_invoices.proto\x12\x13finance.invoices.v1\x1a\x1ffinance/invoices/v1/types.proto\"{\n" +
-	"\x13ListInvoicesRequest\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12\x16\n" +
-	"\x06search\x18\x02 \x01(\tR\x06search\x12\x1b\n" +
-	"\tdate_from\x18\x03 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x04 \x01(\tR\x06dateTo\"W\n" +
+	"'finance/invoices/v1/list_invoices.proto\x12\x13finance.invoices.v1\x1a\x1ffinance/invoices/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb7\x01\n" +
+	"\x13ListInvoicesRequest\x12$\n" +
+	"\x06status\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06statusR\x06status\x12$\n" +
+	"\x06search\x18\x02 \x01(\tB\fµ\x18\b\n" +
+	"\x06searchR\x06search\x12,\n" +
+	"\tdate_from\x18\x03 \x01(\tB\x0fµ\x18\v\n" +
+	"\tdate_fromR\bdateFrom\x12&\n" +
+	"\adate_to\x18\x04 \x01(\tB\rµ\x18\t\n" +
+	"\adate_toR\x06dateTo\"W\n" +
 	"\x14ListInvoicesResponse\x12?\n" +
 	"\binvoices\x18\x01 \x03(\v2#.finance.invoices.v1.InvoiceSummaryR\binvoicesB4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"
 

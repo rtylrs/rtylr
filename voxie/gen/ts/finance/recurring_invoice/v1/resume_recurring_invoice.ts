@@ -7,6 +7,8 @@
 /* eslint-disable */
 
 export interface ResumeRecurringInvoiceRequest {
+  /** id is the recurring invoice to resume. */
+  id: number;
 }
 
 export interface ResumeRecurringInvoiceResponse {

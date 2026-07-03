@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,9 +25,9 @@ const (
 
 type GetPLReportRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// period is the period value for this contract.
+	// period is the reporting period label.
 	Period string `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
-	// date is the date value for this contract.
+	// date is the report anchor date.
 	Date          string `protobuf:"bytes,2,opt,name=date,proto3" json:"date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -179,11 +180,12 @@ var File_finance_report_v1_get_pl_report_proto protoreflect.FileDescriptor
 
 const file_finance_report_v1_get_pl_report_proto_rawDesc = "" +
 	"\n" +
-	"%finance/report/v1/get_pl_report.proto\x12\x11finance.report.v1\x1a\x1bbuf/validate/validate.proto\"L\n" +
-	"\x12GetPLReportRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\x12\x1e\n" +
-	"\x04date\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04date\"\xeb\x01\n" +
+	"%finance/report/v1/get_pl_report.proto\x12\x11finance.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"d\n" +
+	"\x12GetPLReportRequest\x12$\n" +
+	"\x06period\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06periodR\x06period\x12(\n" +
+	"\x04date\x18\x02 \x01(\tB\x14\xbaH\a\xc8\x01\x01r\x02\x10\x01µ\x18\x06\n" +
+	"\x04dateR\x04date\"\xeb\x01\n" +
 	"\x13GetPLReportResponse\x12\x16\n" +
 	"\x06period\x18\x01 \x01(\tR\x06period\x12\x18\n" +
 	"\arevenue\x18\x02 \x01(\x01R\arevenue\x12\x12\n" +

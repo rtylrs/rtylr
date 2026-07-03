@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,11 +24,11 @@ const (
 
 type ListProductsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// search is the search value for this contract.
+	// search filters products by name or SKU.
 	Search string `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
-	// category_id is the category id value for this contract.
+	// category_id filters products by category.
 	CategoryId int64 `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
-	// limit is the maximum number of records to return.
+	// limit is the maximum number of products to return.
 	Limit int64 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 	// offset is the number of records to skip.
 	Offset        int64 `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
@@ -142,13 +143,17 @@ var File_erp_product_v1_list_products_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_list_products_proto_rawDesc = "" +
 	"\n" +
-	"\"erp/product/v1/list_products.proto\x12\x0eerp.product.v1\x1a\x1aerp/product/v1/types.proto\"|\n" +
-	"\x13ListProductsRequest\x12\x16\n" +
-	"\x06search\x18\x01 \x01(\tR\x06search\x12\x1f\n" +
-	"\vcategory_id\x18\x02 \x01(\x03R\n" +
-	"categoryId\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x03R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x04 \x01(\x03R\x06offset\"K\n" +
+	"\"erp/product/v1/list_products.proto\x12\x0eerp.product.v1\x1a\x1aerp/product/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xc4\x01\n" +
+	"\x13ListProductsRequest\x12$\n" +
+	"\x06search\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06searchR\x06search\x126\n" +
+	"\vcategory_id\x18\x02 \x01(\x03B\x15µ\x18\r\n" +
+	"\vcategory_idе\x18\x01R\n" +
+	"categoryId\x12%\n" +
+	"\x05limit\x18\x03 \x01(\x03B\x0fµ\x18\a\n" +
+	"\x05limitе\x18\x02R\x05limit\x12(\n" +
+	"\x06offset\x18\x04 \x01(\x03B\x10µ\x18\b\n" +
+	"\x06offsetе\x18\x02R\x06offset\"K\n" +
 	"\x14ListProductsResponse\x123\n" +
 	"\bproducts\x18\x01 \x03(\v2\x17.erp.product.v1.ProductR\bproductsB/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"
 

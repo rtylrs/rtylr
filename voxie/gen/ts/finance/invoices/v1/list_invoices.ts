@@ -8,13 +8,13 @@
 import type { InvoiceSummary } from "./types";
 
 export interface ListInvoicesRequest {
-  /** status is the current lifecycle state. */
+  /** status filters invoices by lifecycle state. */
   status: string;
-  /** search is the search value for this contract. */
+  /** search filters by customer or invoice number. */
   search: string;
-  /** date_from is the date from value for this contract. */
+  /** date_from is the inclusive start date filter. */
   dateFrom: string;
-  /** date_to is the date to value for this contract. */
+  /** date_to is the inclusive end date filter. */
   dateTo: string;
 }
 

@@ -3,6 +3,7 @@ syntax = "proto3";
 package erp.product.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
 
@@ -11,11 +12,15 @@ message CreateProductRequest {
   int64 category_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // supplier_id is the supplier id value for this contract.
   int64 supplier_id = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // name is the name value for this contract.
   string name = 3 [
@@ -58,7 +63,7 @@ message CreateProductRequest {
 
 message CreateProductResponse {
   // product_id is the product id value for this contract.
-  int64 product_id = 1;
+  int64 product_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // message is a human-readable result message.
   string message = 2;
 }

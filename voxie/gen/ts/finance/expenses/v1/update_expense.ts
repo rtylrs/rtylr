@@ -7,6 +7,8 @@
 /* eslint-disable */
 
 export interface UpdateExpenseRequest {
+  /** id is the unique identifier for the expense. */
+  id: number;
   /** category_id is the category id value for this contract. */
   categoryId?:
     | number

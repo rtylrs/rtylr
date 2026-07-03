@@ -7,6 +7,8 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,7 +24,9 @@ const (
 )
 
 type ResumeRecurringInvoiceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the recurring invoice to resume.
+	Id            int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -55,6 +59,13 @@ func (x *ResumeRecurringInvoiceRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ResumeRecurringInvoiceRequest.ProtoReflect.Descriptor instead.
 func (*ResumeRecurringInvoiceRequest) Descriptor() ([]byte, []int) {
 	return file_finance_recurring_invoice_v1_resume_recurring_invoice_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ResumeRecurringInvoiceRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 type ResumeRecurringInvoiceResponse struct {
@@ -106,8 +117,9 @@ var File_finance_recurring_invoice_v1_resume_recurring_invoice_proto protoreflec
 
 const file_finance_recurring_invoice_v1_resume_recurring_invoice_proto_rawDesc = "" +
 	"\n" +
-	";finance/recurring_invoice/v1/resume_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\"\x1f\n" +
-	"\x1dResumeRecurringInvoiceRequest\":\n" +
+	";finance/recurring_invoice/v1/resume_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"?\n" +
+	"\x1dResumeRecurringInvoiceRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\":\n" +
 	"\x1eResumeRecurringInvoiceResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB=Z;github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1b\x06proto3"
 

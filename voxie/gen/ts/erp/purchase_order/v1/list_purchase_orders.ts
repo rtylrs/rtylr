@@ -8,7 +8,7 @@
 import type { PurchaseOrder } from "./types";
 
 export interface ListPurchaseOrdersRequest {
-  /** status is the current lifecycle state. */
+  /** status filters purchase orders by lifecycle state. */
   status: string;
 }
 

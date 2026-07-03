@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -241,10 +242,10 @@ var File_erp_inventory_v1_types_proto protoreflect.FileDescriptor
 
 const file_erp_inventory_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cerp/inventory/v1/types.proto\x12\x10erp.inventory.v1\"\x80\x03\n" +
-	"\x13InventoryReportItem\x12\x1d\n" +
+	"\x1cerp/inventory/v1/types.proto\x12\x10erp.inventory.v1\x1a\x1donekit/http/annotations.proto\"\x86\x03\n" +
+	"\x13InventoryReportItem\x12#\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12!\n" +
+	"product_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tproductId\x12!\n" +
 	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12\x10\n" +
 	"\x03sku\x18\x03 \x01(\tR\x03sku\x12\x12\n" +
 	"\x04unit\x18\x04 \x01(\tR\x04unit\x12%\n" +

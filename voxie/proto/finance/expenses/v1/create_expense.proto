@@ -3,12 +3,13 @@ syntax = "proto3";
 package finance.expenses.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/expenses/v1";
 
 message CreateExpenseRequest {
   // category_id is the category id value for this contract.
-  optional int64 category_id = 1;
+  optional int64 category_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // amount is the amount value for this contract.
   double amount = 2 [(buf.validate.field).double.gte = 0];
   // currency is the currency value for this contract.
@@ -40,7 +41,7 @@ message CreateExpenseRequest {
 
 message CreateExpenseResponse {
   // expense_id is the expense id value for this contract.
-  int64 expense_id = 1;
+  int64 expense_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // message is a human-readable result message.
   string message = 2;
 }

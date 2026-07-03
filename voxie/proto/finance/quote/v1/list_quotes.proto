@@ -9,12 +9,20 @@ import "onekit/http/annotations.proto";
 option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
 
 message ListQuotesRequest {
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1 [(onekit.http.flatten) = true];
+  // page is the current result page.
+  int32 page = 1 [(onekit.http.query).name = "page"];
+  // limit is the maximum number of records to return.
+  int32 limit = 2 [(onekit.http.query).name = "limit"];
+  // sort_by is the field to sort results by.
+  string sort_by = 3 [(onekit.http.query).name = "sort_by"];
+  // sort_dir is the sort direction ("asc" or "desc").
+  string sort_dir = 4 [(onekit.http.query).name = "sort_dir"];
   // status filters quotes by lifecycle state.
-  string status = 2 [(onekit.http.query).name = "status"];
+  string status = 5 [(onekit.http.query).name = "status"];
   // customer_id filters quotes for a single customer.
-  int64 customer_id = 3 [(onekit.http.query).name = "customer_id"];
+  int64 customer_id = 6 [(onekit.http.query).name = "customer_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
 }
 
 message ListQuotesResponse {

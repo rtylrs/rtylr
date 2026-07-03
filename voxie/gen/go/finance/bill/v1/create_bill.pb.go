@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -170,10 +171,9 @@ var File_finance_bill_v1_create_bill_proto protoreflect.FileDescriptor
 
 const file_finance_bill_v1_create_bill_proto_rawDesc = "" +
 	"\n" +
-	"!finance/bill/v1/create_bill.proto\x12\x0ffinance.bill.v1\x1a\x1bbuf/validate/validate.proto\"\x89\x02\n" +
-	"\x11CreateBillRequest\x12+\n" +
-	"\vsupplier_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"!finance/bill/v1/create_bill.proto\x12\x0ffinance.bill.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x8d\x02\n" +
+	"\x11CreateBillRequest\x12/\n" +
+	"\vsupplier_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"supplierId\x12&\n" +
 	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
 	"\bcurrency\x18\x03 \x01(\tB\n" +
@@ -183,9 +183,9 @@ const file_finance_bill_v1_create_bill_proto_rawDesc = "" +
 	"\x06status\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\x12,\n" +
 	"\vdescription\x18\x06 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\">\n" +
-	"\x12CreateBillResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\"D\n" +
+	"\x12CreateBillResponse\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/finance/bill/v1b\x06proto3"
 
 var (

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,7 +24,7 @@ const (
 
 type ListPurchaseOrdersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// status is the current lifecycle state.
+	// status filters purchase orders by lifecycle state.
 	Status        string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -115,9 +116,10 @@ var File_erp_purchase_order_v1_list_purchase_orders_proto protoreflect.FileDescr
 
 const file_erp_purchase_order_v1_list_purchase_orders_proto_rawDesc = "" +
 	"\n" +
-	"0erp/purchase_order/v1/list_purchase_orders.proto\x12\x15erp.purchase_order.v1\x1a!erp/purchase_order/v1/types.proto\"3\n" +
-	"\x19ListPurchaseOrdersRequest\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\"k\n" +
+	"0erp/purchase_order/v1/list_purchase_orders.proto\x12\x15erp.purchase_order.v1\x1a!erp/purchase_order/v1/types.proto\x1a\x1donekit/http/annotations.proto\"A\n" +
+	"\x19ListPurchaseOrdersRequest\x12$\n" +
+	"\x06status\x18\x01 \x01(\tB\fµ\x18\b\n" +
+	"\x06statusR\x06status\"k\n" +
 	"\x1aListPurchaseOrdersResponse\x12M\n" +
 	"\x0fpurchase_orders\x18\x01 \x03(\v2$.erp.purchase_order.v1.PurchaseOrderR\x0epurchaseOrdersB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 

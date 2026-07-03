@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,11 +116,11 @@ var File_erp_inventory_v1_get_low_stock_proto protoreflect.FileDescriptor
 
 const file_erp_inventory_v1_get_low_stock_proto_rawDesc = "" +
 	"\n" +
-	"$erp/inventory/v1/get_low_stock.proto\x12\x10erp.inventory.v1\x1a\x1cerp/inventory/v1/types.proto\"\x14\n" +
-	"\x12GetLowStockRequest\"h\n" +
+	"$erp/inventory/v1/get_low_stock.proto\x12\x10erp.inventory.v1\x1a\x1cerp/inventory/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x14\n" +
+	"\x12GetLowStockRequest\"n\n" +
 	"\x13GetLowStockResponse\x12;\n" +
-	"\x05items\x18\x01 \x03(\v2%.erp.inventory.v1.InventoryReportItemR\x05items\x12\x14\n" +
-	"\x05count\x18\x02 \x01(\x03R\x05countB1Z/github.com/voxire/voxie/gen/go/erp/inventory/v1b\x06proto3"
+	"\x05items\x18\x01 \x03(\v2%.erp.inventory.v1.InventoryReportItemR\x05items\x12\x1a\n" +
+	"\x05count\x18\x02 \x01(\x03B\x04е\x18\x02R\x05countB1Z/github.com/voxire/voxie/gen/go/erp/inventory/v1b\x06proto3"
 
 var (
 	file_erp_inventory_v1_get_low_stock_proto_rawDescOnce sync.Once

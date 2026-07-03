@@ -8,11 +8,11 @@
 import type { Product } from "./types";
 
 export interface ListProductsRequest {
-  /** search is the search value for this contract. */
+  /** search filters products by name or SKU. */
   search: string;
-  /** category_id is the category id value for this contract. */
+  /** category_id filters products by category. */
   categoryId: number;
-  /** limit is the maximum number of records to return. */
+  /** limit is the maximum number of products to return. */
   limit: number;
   /** offset is the number of records to skip. */
   offset: number;

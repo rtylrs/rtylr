@@ -11,11 +11,17 @@ message ListProductsRequest {
   // search filters products by name or SKU.
   string search = 1 [(onekit.http.query).name = "search"];
   // category_id filters products by category.
-  int64 category_id = 2 [(onekit.http.query).name = "category_id"];
+  int64 category_id = 2 [(onekit.http.query).name = "category_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // limit is the maximum number of products to return.
-  int64 limit = 3 [(onekit.http.query).name = "limit"];
+  int64 limit = 3 [(onekit.http.query).name = "limit",
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
   // offset is the number of records to skip.
-  int64 offset = 4 [(onekit.http.query).name = "offset"];
+  int64 offset = 4 [(onekit.http.query).name = "offset",
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
 }
 
 message ListProductsResponse {

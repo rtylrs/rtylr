@@ -3,6 +3,7 @@ syntax = "proto3";
 package erp.purchase_order.v1;
 
 import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
 
@@ -10,11 +11,11 @@ option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
 
 message PurchaseOrderItem {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // purchase_order_id is the purchase order id value for this contract.
-  int64 purchase_order_id = 2;
+  int64 purchase_order_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // product_id is the product id value for this contract.
-  int64 product_id = 3;
+  int64 product_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // quantity_ordered is the quantity ordered value for this contract.
   double quantity_ordered = 4;
   // quantity_received is the quantity received value for this contract.
@@ -27,11 +28,11 @@ message PurchaseOrderItem {
 
 message PurchaseOrder {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // owner_id identifies the tenant that owns the resource.
-  int64 owner_id = 2;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // supplier_id is the supplier id value for this contract.
-  int64 supplier_id = 3;
+  int64 supplier_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // po_number is the po number value for this contract.
   string po_number = 4;
   // status is the current lifecycle state.
@@ -43,9 +44,9 @@ message PurchaseOrder {
   // total is the total number of matching records.
   double total = 8;
   // expected_delivery is the expected delivery value for this contract.
-  optional string expected_delivery = 9;
+  optional string expected_delivery = 9 [(onekit.http.nullable) = true];
   // received_at is the received at value for this contract.
-  optional string received_at = 10;
+  optional string received_at = 10 [(onekit.http.nullable) = true];
   // notes is the notes value for this contract.
   string notes = 11;
   // created_by is the created by value for this contract.
@@ -63,6 +64,8 @@ message CreatePurchaseOrderItemRequest {
   int64 product_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // quantity_ordered is the quantity ordered value for this contract.
   double quantity_ordered = 2 [(buf.validate.field).double.gte = 0];

@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -161,16 +162,15 @@ var File_finance_recurring_invoice_v1_update_recurring_invoice_proto protoreflec
 
 const file_finance_recurring_invoice_v1_update_recurring_invoice_proto_rawDesc = "" +
 	"\n" +
-	";finance/recurring_invoice/v1/update_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\"\xdc\x02\n" +
-	"\x1dUpdateRecurringInvoiceRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x123\n" +
-	"\x13template_invoice_id\x18\x02 \x01(\x03H\x00R\x11templateInvoiceId\x88\x01\x01\x12(\n" +
+	";finance/recurring_invoice/v1/update_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xf6\x02\n" +
+	"\x1dUpdateRecurringInvoiceRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12=\n" +
+	"\x13template_invoice_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\x11templateInvoiceId\x88\x01\x01\x12(\n" +
 	"\tfrequency\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x12K\n" +
-	"\x11next_invoice_date\x18\x04 \x01(\tB\x1f\xbaH\x1c\xc8\x01\x01r\x17\x10\x012\x13^\\d{4}-\\d{2}-\\d{2}$R\x0fnextInvoiceDate\x12\x1e\n" +
-	"\bend_date\x18\x05 \x01(\tH\x01R\aendDate\x88\x01\x01\x12 \n" +
-	"\tis_active\x18\x06 \x01(\bH\x02R\bisActive\x88\x01\x01B\x16\n" +
+	"\x11next_invoice_date\x18\x04 \x01(\tB\x1f\xbaH\x1c\xc8\x01\x01r\x17\x10\x012\x13^\\d{4}-\\d{2}-\\d{2}$R\x0fnextInvoiceDate\x12$\n" +
+	"\bend_date\x18\x05 \x01(\tB\x04\xe8\xb5\x18\x01H\x01R\aendDate\x88\x01\x01\x12&\n" +
+	"\tis_active\x18\x06 \x01(\bB\x04\xe8\xb5\x18\x01H\x02R\bisActive\x88\x01\x01B\x16\n" +
 	"\x14_template_invoice_idB\v\n" +
 	"\t_end_dateB\f\n" +
 	"\n" +

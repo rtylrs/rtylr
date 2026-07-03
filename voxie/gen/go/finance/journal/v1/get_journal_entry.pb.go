@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -116,10 +117,9 @@ var File_finance_journal_v1_get_journal_entry_proto protoreflect.FileDescriptor
 
 const file_finance_journal_v1_get_journal_entry_proto_rawDesc = "" +
 	"\n" +
-	"*finance/journal/v1/get_journal_entry.proto\x12\x12finance.journal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1efinance/journal/v1/types.proto\"4\n" +
-	"\x16GetJournalEntryRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"Q\n" +
+	"*finance/journal/v1/get_journal_entry.proto\x12\x12finance.journal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1efinance/journal/v1/types.proto\x1a\x1donekit/http/annotations.proto\"8\n" +
+	"\x16GetJournalEntryRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"Q\n" +
 	"\x17GetJournalEntryResponse\x126\n" +
 	"\x05entry\x18\x01 \x01(\v2 .finance.journal.v1.JournalEntryR\x05entryB3Z1github.com/voxire/voxie/gen/go/finance/journal/v1b\x06proto3"
 

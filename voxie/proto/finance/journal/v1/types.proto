@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package finance.journal.v1;
 
+import "onekit/http/annotations.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/finance/journal/v1";
 
 // ── Journal Entries ─────────────────────────────────────────────────
 
 message JournalEntry {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // number is the number value for this contract.
   string number = 2;
   // date is the date value for this contract.
@@ -26,7 +28,7 @@ message JournalEntry {
 
 message JournalLine {
   // account_id is the account id value for this contract.
-  int64 account_id = 1;
+  int64 account_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // account_name is the account name value for this contract.
   string account_name = 2;
   // debit is the debit value for this contract.

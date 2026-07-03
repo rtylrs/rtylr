@@ -4,6 +4,7 @@ package finance.invoices.payments.v1;
 
 import "buf/validate/validate.proto";
 import "finance/invoices/v1/types.proto";
+import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/payments/v1";
 
@@ -12,6 +13,8 @@ message RecordPaymentRequest {
   int64 invoice_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // amount is the amount value for this contract.
   double amount = 2 [(buf.validate.field).double.gte = 0];

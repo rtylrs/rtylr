@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -754,7 +755,7 @@ var File_finance_invoices_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ffinance/invoices/v1/types.proto\x12\x13finance.invoices.v1\"\xf1\x01\n" +
+	"\x1ffinance/invoices/v1/types.proto\x12\x13finance.invoices.v1\x1a\x1donekit/http/annotations.proto\"\xf1\x01\n" +
 	"\vInvoiceItem\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x1a\n" +
 	"\bquantity\x18\x02 \x01(\x01R\bquantity\x12\x12\n" +
@@ -765,9 +766,9 @@ const file_finance_invoices_v1_types_proto_rawDesc = "" +
 	"\fdiscount_pct\x18\x06 \x01(\x01R\vdiscountPct\x12\x1d\n" +
 	"\n" +
 	"sort_order\x18\a \x01(\x03R\tsortOrder\x12\x14\n" +
-	"\x05total\x18\b \x01(\x01R\x05total\"\xe8\x02\n" +
-	"\x0eInvoiceSummary\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12%\n" +
+	"\x05total\x18\b \x01(\x01R\x05total\"\xee\x02\n" +
+	"\x0eInvoiceSummary\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
 	"\x0einvoice_number\x18\x02 \x01(\tR\rinvoiceNumber\x12\x1f\n" +
 	"\vclient_name\x18\x03 \x01(\tR\n" +
 	"clientName\x12\x16\n" +
@@ -784,10 +785,10 @@ const file_finance_invoices_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"amount_due\x18\v \x01(\x01R\tamountDue\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\f \x01(\tR\tcreatedAt\"\xbe\x06\n" +
-	"\rInvoiceDetail\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12%\n" +
+	"created_at\x18\f \x01(\tR\tcreatedAt\"\xca\x06\n" +
+	"\rInvoiceDetail\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
 	"\x0einvoice_number\x18\x03 \x01(\tR\rinvoiceNumber\x12\x1f\n" +
 	"\vclient_name\x18\x04 \x01(\tR\n" +
 	"clientName\x12!\n" +
@@ -819,19 +820,19 @@ const file_finance_invoices_v1_types_proto_rawDesc = "" +
 	"created_at\x18\x18 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x19 \x01(\tR\tupdatedAt\x126\n" +
-	"\x05items\x18\x1a \x03(\v2 .finance.invoices.v1.InvoiceItemR\x05items\"\xbc\x01\n" +
-	"\aPayment\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
+	"\x05items\x18\x1a \x03(\v2 .finance.invoices.v1.InvoiceItemR\x05items\"\xc2\x01\n" +
+	"\aPayment\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12!\n" +
 	"\fpayment_date\x18\x04 \x01(\tR\vpaymentDate\x12\x16\n" +
 	"\x06method\x18\x05 \x01(\tR\x06method\x12\x1c\n" +
 	"\treference\x18\x06 \x01(\tR\treference\x12\x14\n" +
-	"\x05notes\x18\a \x01(\tR\x05notes\"\xf0\x01\n" +
-	"\x1cRecordPaymentResponsePayload\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\x05notes\x18\a \x01(\tR\x05notes\"\xfc\x01\n" +
+	"\x1cRecordPaymentResponsePayload\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12#\n" +
 	"\n" +
-	"invoice_id\x18\x02 \x01(\x03R\tinvoiceId\x12\x16\n" +
+	"invoice_id\x18\x02 \x01(\x03B\x04е\x18\x01R\tinvoiceId\x12\x16\n" +
 	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bcurrency\x18\x04 \x01(\tR\bcurrency\x12!\n" +
 	"\fpayment_date\x18\x05 \x01(\tR\vpaymentDate\x12\x16\n" +

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -24,12 +25,18 @@ const (
 
 type ListJournalEntriesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// pagination is the pagination value for this contract.
-	Pagination *v1.PaginationRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	// from_date is the from date value for this contract.
-	FromDate string `protobuf:"bytes,2,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
-	// to_date is the to date value for this contract.
-	ToDate        string `protobuf:"bytes,3,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
+	// page is the current result page.
+	Page int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	// limit is the maximum number of records to return.
+	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// sort_by is the field to sort results by.
+	SortBy string `protobuf:"bytes,3,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
+	// sort_dir is the sort direction ("asc" or "desc").
+	SortDir string `protobuf:"bytes,4,opt,name=sort_dir,json=sortDir,proto3" json:"sort_dir,omitempty"`
+	// from_date is the inclusive start date filter.
+	FromDate string `protobuf:"bytes,5,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
+	// to_date is the inclusive end date filter.
+	ToDate        string `protobuf:"bytes,6,opt,name=to_date,json=toDate,proto3" json:"to_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -64,11 +71,32 @@ func (*ListJournalEntriesRequest) Descriptor() ([]byte, []int) {
 	return file_finance_journal_v1_list_journal_entries_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ListJournalEntriesRequest) GetPagination() *v1.PaginationRequest {
+func (x *ListJournalEntriesRequest) GetPage() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
+}
+
+func (x *ListJournalEntriesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListJournalEntriesRequest) GetSortBy() string {
+	if x != nil {
+		return x.SortBy
+	}
+	return ""
+}
+
+func (x *ListJournalEntriesRequest) GetSortDir() string {
+	if x != nil {
+		return x.SortDir
+	}
+	return ""
 }
 
 func (x *ListJournalEntriesRequest) GetFromDate() string {
@@ -143,13 +171,22 @@ var File_finance_journal_v1_list_journal_entries_proto protoreflect.FileDescript
 
 const file_finance_journal_v1_list_journal_entries_proto_rawDesc = "" +
 	"\n" +
-	"-finance/journal/v1/list_journal_entries.proto\x12\x12finance.journal.v1\x1a%common/pagination/v1/pagination.proto\x1a\x1efinance/journal/v1/types.proto\"\x9a\x01\n" +
-	"\x19ListJournalEntriesRequest\x12G\n" +
+	"-finance/journal/v1/list_journal_entries.proto\x12\x12finance.journal.v1\x1a%common/pagination/v1/pagination.proto\x1a\x1efinance/journal/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x87\x02\n" +
+	"\x19ListJournalEntriesRequest\x12\x1e\n" +
+	"\x04page\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12!\n" +
+	"\x05limit\x18\x02 \x01(\x05B\vµ\x18\a\n" +
+	"\x05limitR\x05limit\x12&\n" +
+	"\asort_by\x18\x03 \x01(\tB\rµ\x18\t\n" +
+	"\asort_byR\x06sortBy\x12)\n" +
+	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2'.common.pagination.v1.PaginationRequestR\n" +
-	"pagination\x12\x1b\n" +
-	"\tfrom_date\x18\x02 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\x03 \x01(\tR\x06toDate\"\xa2\x01\n" +
+	"\bsort_dirR\asortDir\x12,\n" +
+	"\tfrom_date\x18\x05 \x01(\tB\x0fµ\x18\v\n" +
+	"\tfrom_dateR\bfromDate\x12&\n" +
+	"\ato_date\x18\x06 \x01(\tB\rµ\x18\t\n" +
+	"\ato_dateR\x06toDate\"\xa2\x01\n" +
 	"\x1aListJournalEntriesResponse\x12:\n" +
 	"\aentries\x18\x01 \x03(\v2 .finance.journal.v1.JournalEntryR\aentries\x12H\n" +
 	"\n" +
@@ -172,19 +209,17 @@ var file_finance_journal_v1_list_journal_entries_proto_msgTypes = make([]protoim
 var file_finance_journal_v1_list_journal_entries_proto_goTypes = []any{
 	(*ListJournalEntriesRequest)(nil),  // 0: finance.journal.v1.ListJournalEntriesRequest
 	(*ListJournalEntriesResponse)(nil), // 1: finance.journal.v1.ListJournalEntriesResponse
-	(*v1.PaginationRequest)(nil),       // 2: common.pagination.v1.PaginationRequest
-	(*JournalEntry)(nil),               // 3: finance.journal.v1.JournalEntry
-	(*v1.PaginationResponse)(nil),      // 4: common.pagination.v1.PaginationResponse
+	(*JournalEntry)(nil),               // 2: finance.journal.v1.JournalEntry
+	(*v1.PaginationResponse)(nil),      // 3: common.pagination.v1.PaginationResponse
 }
 var file_finance_journal_v1_list_journal_entries_proto_depIdxs = []int32{
-	2, // 0: finance.journal.v1.ListJournalEntriesRequest.pagination:type_name -> common.pagination.v1.PaginationRequest
-	3, // 1: finance.journal.v1.ListJournalEntriesResponse.entries:type_name -> finance.journal.v1.JournalEntry
-	4, // 2: finance.journal.v1.ListJournalEntriesResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: finance.journal.v1.ListJournalEntriesResponse.entries:type_name -> finance.journal.v1.JournalEntry
+	3, // 1: finance.journal.v1.ListJournalEntriesResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_finance_journal_v1_list_journal_entries_proto_init() }

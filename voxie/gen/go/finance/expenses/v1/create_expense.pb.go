@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -179,9 +180,9 @@ var File_finance_expenses_v1_create_expense_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_create_expense_proto_rawDesc = "" +
 	"\n" +
-	"(finance/expenses/v1/create_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\"\xca\x02\n" +
-	"\x14CreateExpenseRequest\x12$\n" +
-	"\vcategory_id\x18\x01 \x01(\x03H\x00R\n" +
+	"(finance/expenses/v1/create_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xd4\x02\n" +
+	"\x14CreateExpenseRequest\x12.\n" +
+	"\vcategory_id\x18\x01 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"categoryId\x88\x01\x01\x12&\n" +
 	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
 	"\bcurrency\x18\x03 \x01(\tB\n" +
@@ -195,10 +196,10 @@ const file_finance_expenses_v1_create_expense_proto_rawDesc = "" +
 	"receiptUrl\x12-\n" +
 	"\fexpense_date\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vexpenseDateB\x0e\n" +
-	"\f_category_id\"P\n" +
-	"\x15CreateExpenseResponse\x12\x1d\n" +
+	"\f_category_id\"V\n" +
+	"\x15CreateExpenseResponse\x12#\n" +
 	"\n" +
-	"expense_id\x18\x01 \x01(\x03R\texpenseId\x12\x18\n" +
+	"expense_id\x18\x01 \x01(\x03B\x04е\x18\x01R\texpenseId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/finance/expenses/v1b\x06proto3"
 
 var (

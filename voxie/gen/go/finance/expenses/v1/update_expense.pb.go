@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,20 +25,22 @@ const (
 
 type UpdateExpenseRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the expense.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// category_id is the category id value for this contract.
-	CategoryId *int64 `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
+	CategoryId *int64 `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
 	// amount is the amount value for this contract.
-	Amount float64 `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	Amount float64 `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	// currency is the currency value for this contract.
-	Currency string `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	Currency string `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
 	// description is the description value for this contract.
-	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	// vendor is the vendor value for this contract.
-	Vendor string `protobuf:"bytes,5,opt,name=vendor,proto3" json:"vendor,omitempty"`
+	Vendor string `protobuf:"bytes,6,opt,name=vendor,proto3" json:"vendor,omitempty"`
 	// receipt_url is the receipt url value for this contract.
-	ReceiptUrl string `protobuf:"bytes,6,opt,name=receipt_url,json=receiptUrl,proto3" json:"receipt_url,omitempty"`
+	ReceiptUrl string `protobuf:"bytes,7,opt,name=receipt_url,json=receiptUrl,proto3" json:"receipt_url,omitempty"`
 	// expense_date is the expense date value for this contract.
-	ExpenseDate   string `protobuf:"bytes,7,opt,name=expense_date,json=expenseDate,proto3" json:"expense_date,omitempty"`
+	ExpenseDate   string `protobuf:"bytes,8,opt,name=expense_date,json=expenseDate,proto3" json:"expense_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -70,6 +73,13 @@ func (x *UpdateExpenseRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateExpenseRequest.ProtoReflect.Descriptor instead.
 func (*UpdateExpenseRequest) Descriptor() ([]byte, []int) {
 	return file_finance_expenses_v1_update_expense_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateExpenseRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 func (x *UpdateExpenseRequest) GetCategoryId() int64 {
@@ -170,21 +180,22 @@ var File_finance_expenses_v1_update_expense_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_update_expense_proto_rawDesc = "" +
 	"\n" +
-	"(finance/expenses/v1/update_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\"\xca\x02\n" +
-	"\x14UpdateExpenseRequest\x12$\n" +
-	"\vcategory_id\x18\x01 \x01(\x03H\x00R\n" +
+	"(finance/expenses/v1/update_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xf4\x02\n" +
+	"\x14UpdateExpenseRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12.\n" +
+	"\vcategory_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"categoryId\x88\x01\x01\x12&\n" +
-	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
-	"\bcurrency\x18\x03 \x01(\tB\n" +
+	"\x06amount\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
+	"\bcurrency\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12,\n" +
-	"\vdescription\x18\x04 \x01(\tB\n" +
+	"\vdescription\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12\"\n" +
-	"\x06vendor\x18\x05 \x01(\tB\n" +
+	"\x06vendor\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06vendor\x12+\n" +
-	"\vreceipt_url\x18\x06 \x01(\tB\n" +
+	"\vreceipt_url\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
 	"receiptUrl\x12-\n" +
-	"\fexpense_date\x18\a \x01(\tB\n" +
+	"\fexpense_date\x18\b \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vexpenseDateB\x0e\n" +
 	"\f_category_id\"1\n" +
 	"\x15UpdateExpenseResponse\x12\x18\n" +

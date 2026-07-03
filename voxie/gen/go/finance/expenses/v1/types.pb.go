@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/1homsi/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -250,11 +251,11 @@ var File_finance_expenses_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ffinance/expenses/v1/types.proto\x12\x13finance.expenses.v1\"\xf2\x02\n" +
-	"\aExpense\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
-	"\vcategory_id\x18\x03 \x01(\x03H\x00R\n" +
+	"\x1ffinance/expenses/v1/types.proto\x12\x13finance.expenses.v1\x1a\x1donekit/http/annotations.proto\"\x88\x03\n" +
+	"\aExpense\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12.\n" +
+	"\vcategory_id\x18\x03 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"categoryId\x88\x01\x01\x12\x16\n" +
 	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12\x1a\n" +
 	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12 \n" +
@@ -269,10 +270,10 @@ const file_finance_expenses_v1_types_proto_rawDesc = "" +
 	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\f \x01(\tR\tupdatedAtB\x0e\n" +
-	"\f_category_id\"\x85\x01\n" +
-	"\x0fExpenseCategory\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
+	"\f_category_id\"\x91\x01\n" +
+	"\x0fExpenseCategory\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
 	"\x05color\x18\x04 \x01(\tR\x05color\x12\x1d\n" +
 	"\n" +
