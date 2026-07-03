@@ -1,23 +1,25 @@
 {
   "name": "@voxire/contracts",
   "version": "0.0.1",
-  "description": "Generated TypeScript types from voxie protobuf contracts",
+  "description": "TypeScript contracts re-exported from the voxie submodule's generated gen/ts",
   "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
-    "./validation/metadata": "./src/validation/metadata.ts",
-    "./validation/metadata.json": "./src/validation/metadata.json",
-    "./*": "./src/*.ts",
+    "./validation/metadata": "./voxie/gen/ts/validation/metadata.ts",
+    "./validation/metadata.json": "./voxie/gen/ts/validation/metadata.json",
+    "./*": "./voxie/gen/ts/*.ts",
     "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
       "*": [
-        "./src/*"
+        "./voxie/gen/ts/*"
       ]
     }
   },
   "devDependencies": {
-    "ts-proto": "^2.11.6",
     "typescript": "~6.0.3"
   }
 }
