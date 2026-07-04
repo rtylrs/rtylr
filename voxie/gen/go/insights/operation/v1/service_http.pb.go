@@ -15,6 +15,7 @@ type OperationServiceServer interface {
 	GetShiftMetrics(context.Context, *GetShiftMetricsRequest) (*GetShiftMetricsResponse, error)
 	GetTimeOffMetrics(context.Context, *GetTimeOffMetricsRequest) (*GetTimeOffMetricsResponse, error)
 	GetUtilization(context.Context, *GetUtilizationRequest) (*GetUtilizationResponse, error)
+	GetOperationsSummary(context.Context, *GetOperationsSummaryRequest) (*GetOperationsSummaryResponse, error)
 }
 
 // RegisterOperationServiceServer registers the HTTP handlers for service OperationService to the given mux.
@@ -59,6 +60,15 @@ func RegisterOperationServiceServer(server OperationServiceServer, opts ...Serve
 
 	config.mux.Handle("GET /api/insights/operation/v1/utilization", getUtilizationHandler)
 
+	methodHeaders = getGetOperationsSummaryHeaders()
+	getOperationsSummaryHandler := BindingMiddleware[GetOperationsSummaryRequest](
+		genericHandler(server.GetOperationsSummary, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getOperationsSummaryPathParams, getOperationsSummaryQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/insights/operation/v1/summary", getOperationsSummaryHandler)
+
 	return nil
 }
 
@@ -84,6 +94,11 @@ func getGetTimeOffMetricsHeaders() []*onekithttp.Header {
 
 // getGetUtilizationHeaders returns the method-level required headers for GetUtilization
 func getGetUtilizationHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetOperationsSummaryHeaders returns the method-level required headers for GetOperationsSummary
+func getGetOperationsSummaryHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -118,3 +133,9 @@ var getUtilizationPathParams = []PathParamConfig{}
 var getUtilizationQueryParams = []QueryParamConfig{
 	{QueryName: "period", FieldName: "period", Required: false},
 }
+
+// getOperationsSummaryPathParams contains path parameter configuration for GetOperationsSummary
+var getOperationsSummaryPathParams = []PathParamConfig{}
+
+// getOperationsSummaryQueryParams contains query parameter configuration for GetOperationsSummary
+var getOperationsSummaryQueryParams = []QueryParamConfig{}

@@ -12,6 +12,7 @@ import (
 // MenuItemServiceServer is the server API for MenuItemService service.
 type MenuItemServiceServer interface {
 	ListMenuItems(context.Context, *ListMenuItemsRequest) (*ListMenuItemsResponse, error)
+	ListPublicMenuItems(context.Context, *ListPublicMenuItemsRequest) (*ListPublicMenuItemsResponse, error)
 	CreateMenuItem(context.Context, *CreateMenuItemRequest) (*CreateMenuItemResponse, error)
 }
 
@@ -29,6 +30,15 @@ func RegisterMenuItemServiceServer(server MenuItemServiceServer, opts ...ServerO
 	)
 
 	config.mux.Handle("GET /api/pos/menu-item/v1/menu-items", listMenuItemsHandler)
+
+	methodHeaders = getListPublicMenuItemsHeaders()
+	listPublicMenuItemsHandler := BindingMiddleware[ListPublicMenuItemsRequest](
+		genericHandler(server.ListPublicMenuItems, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listPublicMenuItemsPathParams, listPublicMenuItemsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/pos/menu-item/v1/menu-items/public", listPublicMenuItemsHandler)
 
 	methodHeaders = getCreateMenuItemHeaders()
 	createMenuItemHandler := BindingMiddleware[CreateMenuItemRequest](
@@ -52,6 +62,11 @@ func getListMenuItemsHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getListPublicMenuItemsHeaders returns the method-level required headers for ListPublicMenuItems
+func getListPublicMenuItemsHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getCreateMenuItemHeaders returns the method-level required headers for CreateMenuItem
 func getCreateMenuItemHeaders() []*onekithttp.Header {
 	return nil
@@ -62,6 +77,15 @@ var listMenuItemsPathParams = []PathParamConfig{}
 
 // listMenuItemsQueryParams contains query parameter configuration for ListMenuItems
 var listMenuItemsQueryParams = []QueryParamConfig{}
+
+// listPublicMenuItemsPathParams contains path parameter configuration for ListPublicMenuItems
+var listPublicMenuItemsPathParams = []PathParamConfig{}
+
+// listPublicMenuItemsQueryParams contains query parameter configuration for ListPublicMenuItems
+var listPublicMenuItemsQueryParams = []QueryParamConfig{
+	{QueryName: "business_id", FieldName: "business_id", Required: false},
+	{QueryName: "location_id", FieldName: "location_id", Required: false},
+}
 
 // createMenuItemPathParams contains path parameter configuration for CreateMenuItem
 var createMenuItemPathParams = []PathParamConfig{}

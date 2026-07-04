@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package insights.report.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
+
+message GenerateRevenueReportRequest {
+  // from is the inclusive start date (YYYY-MM-DD).
+  string from = 1;
+  // to is the inclusive end date (YYYY-MM-DD).
+  string to = 2;
+  // format is the export format (csv, pdf).
+  string format = 3;
+}
+
+message GenerateRevenueReportResponse {
+  // report_id is the queued report identifier.
+  string report_id = 1;
+  // url is the download URL when ready.
+  string url = 2;
+  // status is the queue status.
+  string status = 3;
+}

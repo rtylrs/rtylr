@@ -11,25 +11,13 @@ export interface DepartmentPayload {
   id: number;
   /** Tenant owner this department belongs to. */
   ownerId: number;
-  /** Location this department operates from. */
-  locationId: number;
-  /** Parent department for org-chart hierarchy; absent if top-level. */
-  parentDepartmentId?:
-    | number
-    | undefined;
+  businessId: number;
   /** Display name of the department. */
   name: string;
-  /** Work schedule applied to employees in this department by default; absent if none. */
-  defaultWorkScheduleId?:
-    | number
-    | undefined;
+  description: string;
+  managerStaffId: number;
   /** Unix timestamp when this department was created. */
   createdAt: number;
   /** Unix timestamp when this department was last updated. */
   updatedAt: number;
-}
-
-export interface ListDepartmentsResponse {
-  /** All departments for the tenant. */
-  departments: DepartmentPayload[];
 }

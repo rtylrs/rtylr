@@ -25,27 +25,21 @@ var File_pos_orders_items_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_orders_items_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!pos/orders/items/v1/service.proto\x12\x13pos.orders.items.v1\x1a\x1donekit/http/annotations.proto\x1a2pos/orders/items/v1/update_order_item_status.proto\x1a)pos/orders/items/v1/void_order_item.proto2\x81\x03\n" +
+	"!pos/orders/items/v1/service.proto\x12\x13pos.orders.items.v1\x1a\x1donekit/http/annotations.proto\x1a2pos/orders/items/v1/update_order_item_status.proto2\xec\x01\n" +
 	"\x10OrderItemService\x12\xb7\x01\n" +
 	"\x15UpdateOrderItemStatus\x121.pos.orders.items.v1.UpdateOrderItemStatusRequest\x1a2.pos.orders.items.v1.UpdateOrderItemStatusResponse\"7\x9a\xb5\x183\n" +
-	")/orders/{order_id}/items/{item_id}/status\x10\x03\"\x04body\x12\x92\x01\n" +
-	"\rVoidOrderItem\x12).pos.orders.items.v1.VoidOrderItemRequest\x1a*.pos.orders.items.v1.VoidOrderItemResponse\"*\x9a\xb5\x18&\n" +
-	"\"/orders/{order_id}/items/{item_id}\x10\x04\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	")/orders/{order_id}/items/{item_id}/status\x10\x03\"\x04body\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/pos/orders/items/v1B4Z2github.com/voxire/voxie/gen/go/pos/orders/items/v1b\x06proto3"
 
 var file_pos_orders_items_v1_service_proto_goTypes = []any{
 	(*UpdateOrderItemStatusRequest)(nil),  // 0: pos.orders.items.v1.UpdateOrderItemStatusRequest
-	(*VoidOrderItemRequest)(nil),          // 1: pos.orders.items.v1.VoidOrderItemRequest
-	(*UpdateOrderItemStatusResponse)(nil), // 2: pos.orders.items.v1.UpdateOrderItemStatusResponse
-	(*VoidOrderItemResponse)(nil),         // 3: pos.orders.items.v1.VoidOrderItemResponse
+	(*UpdateOrderItemStatusResponse)(nil), // 1: pos.orders.items.v1.UpdateOrderItemStatusResponse
 }
 var file_pos_orders_items_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.orders.items.v1.OrderItemService.UpdateOrderItemStatus:input_type -> pos.orders.items.v1.UpdateOrderItemStatusRequest
-	1, // 1: pos.orders.items.v1.OrderItemService.VoidOrderItem:input_type -> pos.orders.items.v1.VoidOrderItemRequest
-	2, // 2: pos.orders.items.v1.OrderItemService.UpdateOrderItemStatus:output_type -> pos.orders.items.v1.UpdateOrderItemStatusResponse
-	3, // 3: pos.orders.items.v1.OrderItemService.VoidOrderItem:output_type -> pos.orders.items.v1.VoidOrderItemResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	1, // 1: pos.orders.items.v1.OrderItemService.UpdateOrderItemStatus:output_type -> pos.orders.items.v1.UpdateOrderItemStatusResponse
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -57,7 +51,6 @@ func file_pos_orders_items_v1_service_proto_init() {
 		return
 	}
 	file_pos_orders_items_v1_update_order_item_status_proto_init()
-	file_pos_orders_items_v1_void_order_item_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

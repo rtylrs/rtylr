@@ -14,7 +14,6 @@ type NotificationServiceServer interface {
 	ListNotifications(context.Context, *ListNotificationsRequest) (*ListNotificationsResponse, error)
 	MarkAllRead(context.Context, *MarkAllReadRequest) (*MarkAllReadResponse, error)
 	MarkNotificationRead(context.Context, *MarkNotificationReadRequest) (*MarkNotificationReadResponse, error)
-	MarkNotificationsRead(context.Context, *MarkNotificationsReadRequest) (*MarkNotificationsReadResponse, error)
 }
 
 // RegisterNotificationServiceServer registers the HTTP handlers for service NotificationService to the given mux.
@@ -50,15 +49,6 @@ func RegisterNotificationServiceServer(server NotificationServiceServer, opts ..
 
 	config.mux.Handle("PATCH /api/hub/notification/v1/notifications/{id}/read", markNotificationReadHandler)
 
-	methodHeaders = getMarkNotificationsReadHeaders()
-	markNotificationsReadHandler := BindingMiddleware[MarkNotificationsReadRequest](
-		genericHandler(server.MarkNotificationsRead, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		markNotificationsReadPathParams, markNotificationsReadQueryParams,
-		"PATCH", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("PATCH /api/hub/notification/v1/notifications/read", markNotificationsReadHandler)
-
 	return nil
 }
 
@@ -82,11 +72,6 @@ func getMarkNotificationReadHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getMarkNotificationsReadHeaders returns the method-level required headers for MarkNotificationsRead
-func getMarkNotificationsReadHeaders() []*onekithttp.Header {
-	return nil
-}
-
 // listNotificationsPathParams contains path parameter configuration for ListNotifications
 var listNotificationsPathParams = []PathParamConfig{}
 
@@ -106,9 +91,3 @@ var markNotificationReadPathParams = []PathParamConfig{
 
 // markNotificationReadQueryParams contains query parameter configuration for MarkNotificationRead
 var markNotificationReadQueryParams = []QueryParamConfig{}
-
-// markNotificationsReadPathParams contains path parameter configuration for MarkNotificationsRead
-var markNotificationsReadPathParams = []PathParamConfig{}
-
-// markNotificationsReadQueryParams contains query parameter configuration for MarkNotificationsRead
-var markNotificationsReadQueryParams = []QueryParamConfig{}

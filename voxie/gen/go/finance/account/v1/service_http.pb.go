@@ -13,6 +13,9 @@ import (
 type AccountServiceServer interface {
 	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
+	UpdateAccount(context.Context, *UpdateAccountRequest) (*UpdateAccountResponse, error)
+	DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error)
+	GetChartOfAccounts(context.Context, *GetChartOfAccountsRequest) (*GetChartOfAccountsResponse, error)
 }
 
 // RegisterAccountServiceServer registers the HTTP handlers for service AccountService to the given mux.
@@ -39,6 +42,33 @@ func RegisterAccountServiceServer(server AccountServiceServer, opts ...ServerOpt
 
 	config.mux.Handle("POST /api/finance/account/v1/accounts", createAccountHandler)
 
+	methodHeaders = getUpdateAccountHeaders()
+	updateAccountHandler := BindingMiddleware[UpdateAccountRequest](
+		genericHandler(server.UpdateAccount, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateAccountPathParams, updateAccountQueryParams,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/finance/account/v1/accounts/{id}", updateAccountHandler)
+
+	methodHeaders = getDeleteAccountHeaders()
+	deleteAccountHandler := BindingMiddleware[DeleteAccountRequest](
+		genericHandler(server.DeleteAccount, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteAccountPathParams, deleteAccountQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/finance/account/v1/accounts/{id}", deleteAccountHandler)
+
+	methodHeaders = getGetChartOfAccountsHeaders()
+	getChartOfAccountsHandler := BindingMiddleware[GetChartOfAccountsRequest](
+		genericHandler(server.GetChartOfAccounts, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getChartOfAccountsPathParams, getChartOfAccountsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/finance/account/v1/chart-of-accounts", getChartOfAccountsHandler)
+
 	return nil
 }
 
@@ -57,6 +87,21 @@ func getCreateAccountHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getUpdateAccountHeaders returns the method-level required headers for UpdateAccount
+func getUpdateAccountHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getDeleteAccountHeaders returns the method-level required headers for DeleteAccount
+func getDeleteAccountHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetChartOfAccountsHeaders returns the method-level required headers for GetChartOfAccounts
+func getGetChartOfAccountsHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listAccountsPathParams contains path parameter configuration for ListAccounts
 var listAccountsPathParams = []PathParamConfig{}
 
@@ -68,3 +113,25 @@ var createAccountPathParams = []PathParamConfig{}
 
 // createAccountQueryParams contains query parameter configuration for CreateAccount
 var createAccountQueryParams = []QueryParamConfig{}
+
+// updateAccountPathParams contains path parameter configuration for UpdateAccount
+var updateAccountPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateAccountQueryParams contains query parameter configuration for UpdateAccount
+var updateAccountQueryParams = []QueryParamConfig{}
+
+// deleteAccountPathParams contains path parameter configuration for DeleteAccount
+var deleteAccountPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteAccountQueryParams contains query parameter configuration for DeleteAccount
+var deleteAccountQueryParams = []QueryParamConfig{}
+
+// getChartOfAccountsPathParams contains path parameter configuration for GetChartOfAccounts
+var getChartOfAccountsPathParams = []PathParamConfig{}
+
+// getChartOfAccountsQueryParams contains query parameter configuration for GetChartOfAccounts
+var getChartOfAccountsQueryParams = []QueryParamConfig{}

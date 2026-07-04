@@ -8,12 +8,16 @@
 import type { ScheduledReport } from "./types";
 
 export interface CreateScheduledReportRequest {
-  /** template_id is the template id value for this contract. */
-  templateId: number;
-  /** frequency is the frequency value for this contract. */
+  /** template_slug is the template slug (e.g. revenue-monthly). */
+  templateSlug: string;
+  /** frequency is the delivery frequency (daily, weekly, monthly). */
   frequency: string;
-  /** recipient_email is the recipient email value for this contract. */
+  /** channel is the delivery channel (email, slack). */
+  channel: string;
+  /** recipient_email is the delivery recipient. */
   recipientEmail: string;
+  /** is_active toggles whether the schedule is active. */
+  isActive: boolean;
 }
 
 export interface CreateScheduledReportResponse {

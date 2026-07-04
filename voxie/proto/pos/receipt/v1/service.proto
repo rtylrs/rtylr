@@ -3,7 +3,6 @@ syntax = "proto3";
 package pos.receipt.v1;
 
 import "onekit/http/annotations.proto";
-import "pos/receipt/v1/email_receipt.proto";
 import "pos/receipt/v1/list_receipts.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/receipt/v1";
@@ -15,13 +14,6 @@ service ReceiptService {
     option (onekit.http.config) = {
       path: "/receipts"
       method: HTTP_METHOD_GET
-    };
-  }
-
-  rpc EmailReceipt(EmailReceiptRequest) returns (EmailReceiptResponse) {
-    option (onekit.http.config) = {
-      path: "/receipts/{id}/email"
-      method: HTTP_METHOD_POST
     };
   }
 }

@@ -23,21 +23,72 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type UpdateRoleBody struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// name is the role name.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// permissions is the permissions value for this contract.
+	Permissions   []string `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateRoleBody) Reset() {
+	*x = UpdateRoleBody{}
+	mi := &file_hub_permission_v1_update_role_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRoleBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRoleBody) ProtoMessage() {}
+
+func (x *UpdateRoleBody) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_permission_v1_update_role_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRoleBody.ProtoReflect.Descriptor instead.
+func (*UpdateRoleBody) Descriptor() ([]byte, []int) {
+	return file_hub_permission_v1_update_role_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UpdateRoleBody) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateRoleBody) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
 type UpdateRoleRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the role.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// name is the role name.
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// permissions is the permissions value for this contract.
-	Permissions   []string `protobuf:"bytes,3,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Id            int64           `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Body          *UpdateRoleBody `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateRoleRequest) Reset() {
 	*x = UpdateRoleRequest{}
-	mi := &file_hub_permission_v1_update_role_proto_msgTypes[0]
+	mi := &file_hub_permission_v1_update_role_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +100,7 @@ func (x *UpdateRoleRequest) String() string {
 func (*UpdateRoleRequest) ProtoMessage() {}
 
 func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_permission_v1_update_role_proto_msgTypes[0]
+	mi := &file_hub_permission_v1_update_role_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +113,7 @@ func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRoleRequest) Descriptor() ([]byte, []int) {
-	return file_hub_permission_v1_update_role_proto_rawDescGZIP(), []int{0}
+	return file_hub_permission_v1_update_role_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdateRoleRequest) GetId() int64 {
@@ -72,16 +123,9 @@ func (x *UpdateRoleRequest) GetId() int64 {
 	return 0
 }
 
-func (x *UpdateRoleRequest) GetName() string {
+func (x *UpdateRoleRequest) GetBody() *UpdateRoleBody {
 	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateRoleRequest) GetPermissions() []string {
-	if x != nil {
-		return x.Permissions
+		return x.Body
 	}
 	return nil
 }
@@ -96,7 +140,7 @@ type UpdateRoleResponse struct {
 
 func (x *UpdateRoleResponse) Reset() {
 	*x = UpdateRoleResponse{}
-	mi := &file_hub_permission_v1_update_role_proto_msgTypes[1]
+	mi := &file_hub_permission_v1_update_role_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -108,7 +152,7 @@ func (x *UpdateRoleResponse) String() string {
 func (*UpdateRoleResponse) ProtoMessage() {}
 
 func (x *UpdateRoleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_hub_permission_v1_update_role_proto_msgTypes[1]
+	mi := &file_hub_permission_v1_update_role_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +165,7 @@ func (x *UpdateRoleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRoleResponse) Descriptor() ([]byte, []int) {
-	return file_hub_permission_v1_update_role_proto_rawDescGZIP(), []int{1}
+	return file_hub_permission_v1_update_role_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateRoleResponse) GetMessage() string {
@@ -135,12 +179,14 @@ var File_hub_permission_v1_update_role_proto protoreflect.FileDescriptor
 
 const file_hub_permission_v1_update_role_proto_rawDesc = "" +
 	"\n" +
-	"#hub/permission/v1/update_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"u\n" +
-	"\x11UpdateRoleRequest\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x12\x1e\n" +
-	"\x04name\x18\x02 \x01(\tB\n" +
+	"#hub/permission/v1/update_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"R\n" +
+	"\x0eUpdateRoleBody\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
-	"\vpermissions\x18\x03 \x03(\tR\vpermissions\".\n" +
+	"\vpermissions\x18\x02 \x03(\tR\vpermissions\"j\n" +
+	"\x11UpdateRoleRequest\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x125\n" +
+	"\x04body\x18\x02 \x01(\v2!.hub.permission.v1.UpdateRoleBodyR\x04body\".\n" +
 	"\x12UpdateRoleResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/hub/permission/v1b\x06proto3"
 
@@ -156,17 +202,19 @@ func file_hub_permission_v1_update_role_proto_rawDescGZIP() []byte {
 	return file_hub_permission_v1_update_role_proto_rawDescData
 }
 
-var file_hub_permission_v1_update_role_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_hub_permission_v1_update_role_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hub_permission_v1_update_role_proto_goTypes = []any{
-	(*UpdateRoleRequest)(nil),  // 0: hub.permission.v1.UpdateRoleRequest
-	(*UpdateRoleResponse)(nil), // 1: hub.permission.v1.UpdateRoleResponse
+	(*UpdateRoleBody)(nil),     // 0: hub.permission.v1.UpdateRoleBody
+	(*UpdateRoleRequest)(nil),  // 1: hub.permission.v1.UpdateRoleRequest
+	(*UpdateRoleResponse)(nil), // 2: hub.permission.v1.UpdateRoleResponse
 }
 var file_hub_permission_v1_update_role_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: hub.permission.v1.UpdateRoleRequest.body:type_name -> hub.permission.v1.UpdateRoleBody
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_hub_permission_v1_update_role_proto_init() }
@@ -180,7 +228,7 @@ func file_hub_permission_v1_update_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_permission_v1_update_role_proto_rawDesc), len(file_hub_permission_v1_update_role_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

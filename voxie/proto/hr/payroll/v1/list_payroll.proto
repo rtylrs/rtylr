@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package hr.payroll.v1;
+
+import "hr/payroll/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/payroll/v1";
+
+message ListPayrollRequest {
+  string period_label = 1 [
+    (onekit.http.query).name = "period_label"
+  ];
+}
+
+message ListPayrollResponse {
+  repeated PayrollRecord records = 1;
+}

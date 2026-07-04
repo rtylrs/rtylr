@@ -25,4 +25,6 @@ export interface MenuItem {
   createdAt: string;
   /** updated_at is when the record was last updated. */
   updatedAt: string;
+  /** image_url is a public storefront image for the menu item. */
+  imageUrl: string;
 }

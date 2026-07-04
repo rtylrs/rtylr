@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package hub.memory.v1;
+
+import "hub/memory/v1/chat_messages.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/memory/v1";
+
+service MemoryService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/memory/v1"};
+
+  rpc ListChats(ListChatsRequest) returns (ListChatsResponse) {
+    option (onekit.http.config) = {
+      path: "/chats"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetChatMessages(GetChatMessagesRequest) returns (GetChatMessagesResponse) {
+    option (onekit.http.config) = {
+      path: "/chats/{session_id}/messages"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc DeleteChat(DeleteChatRequest) returns (DeleteChatResponse) {
+    option (onekit.http.config) = {
+      path: "/chats/{session_id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc RenameChat(RenameChatRequest) returns (RenameChatResponse) {
+    option (onekit.http.config) = {
+      path: "/chats/{session_id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  rpc PinChat(PinChatRequest) returns (PinChatResponse) {
+    option (onekit.http.config) = {
+      path: "/chats/{session_id}/pin"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

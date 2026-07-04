@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package booking.resource.v1;
+
+import "booking/resource/v1/create_resource.proto";
+import "booking/resource/v1/delete_resource.proto";
+import "booking/resource/v1/list_resources.proto";
+import "booking/resource/v1/update_resource.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/resource/v1";
+
+service ResourceService {
+  option (onekit.http.service_config) = {base_path: "/api/booking/resource/v1"};
+
+  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse) {
+    option (onekit.http.config) = {
+      path: "/resources"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateResource(CreateResourceRequest) returns (CreateResourceResponse) {
+    option (onekit.http.config) = {
+      path: "/resources"
+      method: HTTP_METHOD_POST
+      body: "*"
+    };
+  }
+
+  rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceResponse) {
+    option (onekit.http.config) = {
+      path: "/resources/{id}"
+      method: HTTP_METHOD_PUT
+      body: "*"
+    };
+  }
+
+  rpc DeleteResource(DeleteResourceRequest) returns (DeleteResourceResponse) {
+    option (onekit.http.config) = {
+      path: "/resources/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

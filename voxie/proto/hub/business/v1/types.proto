@@ -97,4 +97,6 @@ message PublicBusinessSummary {
   string currency = 5;
   // type is the type value for this contract.
   string type = 6;
+  // timezone is the timezone value for this contract.
+  string timezone = 7;
 }

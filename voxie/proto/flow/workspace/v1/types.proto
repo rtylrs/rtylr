@@ -37,3 +37,22 @@ message Workspace {
   // True when this is the caller's auto-created Personal workspace.
   bool is_personal = 12;
 }
+
+message WorkspaceMember {
+  // id is the unique identifier for the membership record.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // user_id identifies the user associated with this request.
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the member display name.
+  string name = 4;
+  // email is the member email address.
+  string email = 5;
+  // role is the role value for this contract.
+  string role = 6;
+  // invited_by is the user id of the inviter, if any.
+  int64 invited_by = 7 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // joined_at is when the member joined the workspace.
+  string joined_at = 8;
+}

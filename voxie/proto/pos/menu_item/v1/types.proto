@@ -27,4 +27,6 @@ message MenuItem {
   string created_at = 8;
   // updated_at is when the record was last updated.
   string updated_at = 9;
+  // image_url is a public storefront image for the menu item.
+  string image_url = 10;
 }

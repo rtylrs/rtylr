@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hr.benefit.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/benefit/v1";
+
+message BenefitPlan {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 3;
+  string type = 4;
+  string provider = 5;
+  double cost_employer = 6;
+  double cost_employee = 7;
+  bool is_active = 8;
+  string created_at = 9;
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package erp.brand.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/brand/v1";
+
+message CreateBrandRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string logo_url = 2;
+  string description = 3;
+}
+
+message CreateBrandResponse {
+  int64 brand_id = 1;
+  string message = 2;
+}

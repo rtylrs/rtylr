@@ -284,7 +284,7 @@ func (x *DashboardDataPayload) GetData() []byte {
 	return nil
 }
 
-type GetDashboardResponse struct {
+type GetDashboardWidgetsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Widget layout definitions for the requesting user's dashboard.
 	Widgets []*DashboardWidgetPayload `protobuf:"bytes,1,rep,name=widgets,proto3" json:"widgets,omitempty"`
@@ -294,20 +294,20 @@ type GetDashboardResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetDashboardResponse) Reset() {
-	*x = GetDashboardResponse{}
+func (x *GetDashboardWidgetsResponse) Reset() {
+	*x = GetDashboardWidgetsResponse{}
 	mi := &file_hr_dashboard_v1_types_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetDashboardResponse) String() string {
+func (x *GetDashboardWidgetsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetDashboardResponse) ProtoMessage() {}
+func (*GetDashboardWidgetsResponse) ProtoMessage() {}
 
-func (x *GetDashboardResponse) ProtoReflect() protoreflect.Message {
+func (x *GetDashboardWidgetsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_dashboard_v1_types_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -319,26 +319,26 @@ func (x *GetDashboardResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetDashboardResponse.ProtoReflect.Descriptor instead.
-func (*GetDashboardResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetDashboardWidgetsResponse.ProtoReflect.Descriptor instead.
+func (*GetDashboardWidgetsResponse) Descriptor() ([]byte, []int) {
 	return file_hr_dashboard_v1_types_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetDashboardResponse) GetWidgets() []*DashboardWidgetPayload {
+func (x *GetDashboardWidgetsResponse) GetWidgets() []*DashboardWidgetPayload {
 	if x != nil {
 		return x.Widgets
 	}
 	return nil
 }
 
-func (x *GetDashboardResponse) GetData() map[string]*DashboardDataPayload {
+func (x *GetDashboardWidgetsResponse) GetData() map[string]*DashboardDataPayload {
 	if x != nil {
 		return x.Data
 	}
 	return nil
 }
 
-type UpdateWidgetLayoutRequest struct {
+type UpdateDashboardWidgetsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Updated widget positions and sizes.
 	Widgets       []*DashboardWidgetPayload `protobuf:"bytes,1,rep,name=widgets,proto3" json:"widgets,omitempty"`
@@ -346,20 +346,20 @@ type UpdateWidgetLayoutRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateWidgetLayoutRequest) Reset() {
-	*x = UpdateWidgetLayoutRequest{}
+func (x *UpdateDashboardWidgetsRequest) Reset() {
+	*x = UpdateDashboardWidgetsRequest{}
 	mi := &file_hr_dashboard_v1_types_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateWidgetLayoutRequest) String() string {
+func (x *UpdateDashboardWidgetsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateWidgetLayoutRequest) ProtoMessage() {}
+func (*UpdateDashboardWidgetsRequest) ProtoMessage() {}
 
-func (x *UpdateWidgetLayoutRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateDashboardWidgetsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_hr_dashboard_v1_types_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -371,12 +371,12 @@ func (x *UpdateWidgetLayoutRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateWidgetLayoutRequest.ProtoReflect.Descriptor instead.
-func (*UpdateWidgetLayoutRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateDashboardWidgetsRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDashboardWidgetsRequest) Descriptor() ([]byte, []int) {
 	return file_hr_dashboard_v1_types_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateWidgetLayoutRequest) GetWidgets() []*DashboardWidgetPayload {
+func (x *UpdateDashboardWidgetsRequest) GetWidgets() []*DashboardWidgetPayload {
 	if x != nil {
 		return x.Widgets
 	}
@@ -415,14 +415,14 @@ const file_hr_dashboard_v1_types_proto_rawDesc = "" +
 	"\x14DashboardDataPayload\x12\x1f\n" +
 	"\vwidget_type\x18\x01 \x01(\tR\n" +
 	"widgetType\x12\x18\n" +
-	"\x04data\x18\x02 \x01(\fB\x04\x80\xb6\x18\x01R\x04data\"\xfe\x01\n" +
-	"\x14GetDashboardResponse\x12A\n" +
-	"\awidgets\x18\x01 \x03(\v2'.hr.dashboard.v1.DashboardWidgetPayloadR\awidgets\x12C\n" +
-	"\x04data\x18\x02 \x03(\v2/.hr.dashboard.v1.GetDashboardResponse.DataEntryR\x04data\x1a^\n" +
+	"\x04data\x18\x02 \x01(\fB\x04\x80\xb6\x18\x01R\x04data\"\x8c\x02\n" +
+	"\x1bGetDashboardWidgetsResponse\x12A\n" +
+	"\awidgets\x18\x01 \x03(\v2'.hr.dashboard.v1.DashboardWidgetPayloadR\awidgets\x12J\n" +
+	"\x04data\x18\x02 \x03(\v26.hr.dashboard.v1.GetDashboardWidgetsResponse.DataEntryR\x04data\x1a^\n" +
 	"\tDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12;\n" +
-	"\x05value\x18\x02 \x01(\v2%.hr.dashboard.v1.DashboardDataPayloadR\x05value:\x028\x01\"h\n" +
-	"\x19UpdateWidgetLayoutRequest\x12K\n" +
+	"\x05value\x18\x02 \x01(\v2%.hr.dashboard.v1.DashboardDataPayloadR\x05value:\x028\x01\"l\n" +
+	"\x1dUpdateDashboardWidgetsRequest\x12K\n" +
 	"\awidgets\x18\x01 \x03(\v2'.hr.dashboard.v1.DashboardWidgetPayloadB\b\xbaH\x05\x92\x01\x02\b\x01R\awidgetsB0Z.github.com/voxire/voxie/gen/go/hr/dashboard/v1b\x06proto3"
 
 var (
@@ -439,18 +439,18 @@ func file_hr_dashboard_v1_types_proto_rawDescGZIP() []byte {
 
 var file_hr_dashboard_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_hr_dashboard_v1_types_proto_goTypes = []any{
-	(*DashboardStats)(nil),            // 0: hr.dashboard.v1.DashboardStats
-	(*DashboardWidgetPayload)(nil),    // 1: hr.dashboard.v1.DashboardWidgetPayload
-	(*DashboardDataPayload)(nil),      // 2: hr.dashboard.v1.DashboardDataPayload
-	(*GetDashboardResponse)(nil),      // 3: hr.dashboard.v1.GetDashboardResponse
-	(*UpdateWidgetLayoutRequest)(nil), // 4: hr.dashboard.v1.UpdateWidgetLayoutRequest
-	nil,                               // 5: hr.dashboard.v1.GetDashboardResponse.DataEntry
+	(*DashboardStats)(nil),                // 0: hr.dashboard.v1.DashboardStats
+	(*DashboardWidgetPayload)(nil),        // 1: hr.dashboard.v1.DashboardWidgetPayload
+	(*DashboardDataPayload)(nil),          // 2: hr.dashboard.v1.DashboardDataPayload
+	(*GetDashboardWidgetsResponse)(nil),   // 3: hr.dashboard.v1.GetDashboardWidgetsResponse
+	(*UpdateDashboardWidgetsRequest)(nil), // 4: hr.dashboard.v1.UpdateDashboardWidgetsRequest
+	nil,                                   // 5: hr.dashboard.v1.GetDashboardWidgetsResponse.DataEntry
 }
 var file_hr_dashboard_v1_types_proto_depIdxs = []int32{
-	1, // 0: hr.dashboard.v1.GetDashboardResponse.widgets:type_name -> hr.dashboard.v1.DashboardWidgetPayload
-	5, // 1: hr.dashboard.v1.GetDashboardResponse.data:type_name -> hr.dashboard.v1.GetDashboardResponse.DataEntry
-	1, // 2: hr.dashboard.v1.UpdateWidgetLayoutRequest.widgets:type_name -> hr.dashboard.v1.DashboardWidgetPayload
-	2, // 3: hr.dashboard.v1.GetDashboardResponse.DataEntry.value:type_name -> hr.dashboard.v1.DashboardDataPayload
+	1, // 0: hr.dashboard.v1.GetDashboardWidgetsResponse.widgets:type_name -> hr.dashboard.v1.DashboardWidgetPayload
+	5, // 1: hr.dashboard.v1.GetDashboardWidgetsResponse.data:type_name -> hr.dashboard.v1.GetDashboardWidgetsResponse.DataEntry
+	1, // 2: hr.dashboard.v1.UpdateDashboardWidgetsRequest.widgets:type_name -> hr.dashboard.v1.DashboardWidgetPayload
+	2, // 3: hr.dashboard.v1.GetDashboardWidgetsResponse.DataEntry.value:type_name -> hr.dashboard.v1.DashboardDataPayload
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name

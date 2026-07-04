@@ -32,3 +32,22 @@ export interface Workspace {
   /** True when this is the caller's auto-created Personal workspace. */
   isPersonal: boolean;
 }
+
+export interface WorkspaceMember {
+  /** id is the unique identifier for the membership record. */
+  id: number;
+  /** workspace_id is the workspace id value for this contract. */
+  workspaceId: number;
+  /** user_id identifies the user associated with this request. */
+  userId: number;
+  /** name is the member display name. */
+  name: string;
+  /** email is the member email address. */
+  email: string;
+  /** role is the role value for this contract. */
+  role: string;
+  /** invited_by is the user id of the inviter, if any. */
+  invitedBy: number;
+  /** joined_at is when the member joined the workspace. */
+  joinedAt: string;
+}

@@ -37,47 +37,25 @@ export interface Session {
   createdAt: string;
 }
 
-/**
- * CurrentSession mirrors the POS register session shape returned by
- * the current-session endpoint, which carries cash-drawer totals.
- */
 export interface CurrentSession {
-  /** id is the unique identifier for the resource. */
+  /** id is the unique identifier for the current session. */
   id: number;
-  /** owner_id identifies the tenant that owns the resource. */
+  /** owner_id identifies the tenant that owns the session. */
   ownerId: number;
-  /** location_id is the location id value for this contract. */
+  /** location_id is the active location id. */
   locationId: number;
-  /** staff_id is the staff id value for this contract. */
+  /** staff_id is the staff member who opened the session. */
   staffId: number;
+  /** opening_cash is the cash drawer opening float. */
+  openingCash: number;
+  /** closing_cash is the cash drawer closing float. */
+  closingCash: number;
+  /** total_sales is the current session sales total. */
+  totalSales: number;
   /** status is the current lifecycle state. */
   status: string;
-  /** opening_cash is the opening cash value for this contract. */
-  openingCash: number;
-  /** closing_cash is the closing cash value for this contract. */
-  closingCash: number;
-  /** expected_cash is the expected cash value for this contract. */
-  expectedCash: number;
-  /** cash_difference is the cash difference value for this contract. */
-  cashDifference: number;
-  /** total_sales is the total sales value for this contract. */
-  totalSales: number;
-  /** total_orders is the total orders value for this contract. */
-  totalOrders: number;
-  /** total_cash_sales is the total cash sales value for this contract. */
-  totalCashSales: number;
-  /** total_card_sales is the total card sales value for this contract. */
-  totalCardSales: number;
-  /** total_online_sales is the total online sales value for this contract. */
-  totalOnlineSales: number;
-  /** total_refunds is the total refunds value for this contract. */
-  totalRefunds: number;
-  /** opened_at is the opened at value for this contract. */
+  /** opened_at is when the session was opened. */
   openedAt: string;
-  /** closed_at is the closed at value for this contract. */
-  closedAt?:
-    | string
-    | undefined;
-  /** notes is the notes value for this contract. */
-  notes: string;
+  /** closed_at is when the session was closed. */
+  closedAt?: string | undefined;
 }

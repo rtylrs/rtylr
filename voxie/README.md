@@ -40,5 +40,5 @@ make generate   # regenerates gen/go — commit the result
 ## Tools
 
 - [buf](https://buf.build/) for linting, formatting, and breaking change detection.
-- `onekit` (github.com/1homsi/onekit) generates the Go HTTP server bindings in `gen/go`.
+- `onekit` (github.com/stackxio/onekit) generates the Go HTTP server bindings in `gen/go`.
 - `rtylr` owns its own TypeScript code generation.

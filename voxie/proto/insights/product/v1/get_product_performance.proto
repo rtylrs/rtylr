@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package insights.product.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/product/v1";
+
+message GetProductPerformanceRequest {}
+
+message GetProductPerformanceResponse {
+  // total_skus is the total SKU count.
+  int64 total_skus = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // active_skus is the active SKU count.
+  int64 active_skus = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // out_of_stock is the out-of-stock SKU count.
+  int64 out_of_stock = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // avg_margin_pct is the average margin percentage.
+  double avg_margin_pct = 4;
+}

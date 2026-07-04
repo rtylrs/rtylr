@@ -15,6 +15,8 @@ export interface UtilizationMetrics {
   activeToday: number;
   /** total_hours is the total hours value for this contract. */
   totalHours: number;
+  /** available_hours is the available hours capacity for the period. */
+  availableHours: number;
   /** overtime_hours is the overtime hours value for this contract. */
   overtimeHours: number;
   /** by_staff is the by staff value for this contract. */

@@ -25,22 +25,34 @@ var File_hr_dashboard_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_dashboard_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dhr/dashboard/v1/service.proto\x12\x0fhr.dashboard.v1\x1a&hr/dashboard/v1/get_hr_dashboard.proto\x1a\x1donekit/http/annotations.proto2\xa5\x01\n" +
+	"\x1dhr/dashboard/v1/service.proto\x12\x0fhr.dashboard.v1\x1a+hr/dashboard/v1/get_dashboard_widgets.proto\x1a&hr/dashboard/v1/get_hr_dashboard.proto\x1a\x1bhr/dashboard/v1/types.proto\x1a.hr/dashboard/v1/update_dashboard_widgets.proto\x1a\x1donekit/http/annotations.proto2\xcc\x03\n" +
 	"\x10DashboardService\x12u\n" +
 	"\x0eGetHRDashboard\x12&.hr.dashboard.v1.GetHRDashboardRequest\x1a'.hr.dashboard.v1.GetHRDashboardResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/dashboard\x10\x01\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"/dashboard\x10\x01\x12\x8c\x01\n" +
+	"\x13GetDashboardWidgets\x12+.hr.dashboard.v1.GetDashboardWidgetsRequest\x1a,.hr.dashboard.v1.GetDashboardWidgetsResponse\"\x1a\x9a\xb5\x18\x16\n" +
+	"\x12/dashboard/widgets\x10\x01\x12\x95\x01\n" +
+	"\x16UpdateDashboardWidgets\x12..hr.dashboard.v1.UpdateDashboardWidgetsRequest\x1a/.hr.dashboard.v1.UpdateDashboardWidgetsResponse\"\x1a\x9a\xb5\x18\x16\n" +
+	"\x12/dashboard/widgets\x10\x03\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/hr/dashboard/v1B0Z.github.com/voxire/voxie/gen/go/hr/dashboard/v1b\x06proto3"
 
 var file_hr_dashboard_v1_service_proto_goTypes = []any{
-	(*GetHRDashboardRequest)(nil),  // 0: hr.dashboard.v1.GetHRDashboardRequest
-	(*GetHRDashboardResponse)(nil), // 1: hr.dashboard.v1.GetHRDashboardResponse
+	(*GetHRDashboardRequest)(nil),          // 0: hr.dashboard.v1.GetHRDashboardRequest
+	(*GetDashboardWidgetsRequest)(nil),     // 1: hr.dashboard.v1.GetDashboardWidgetsRequest
+	(*UpdateDashboardWidgetsRequest)(nil),  // 2: hr.dashboard.v1.UpdateDashboardWidgetsRequest
+	(*GetHRDashboardResponse)(nil),         // 3: hr.dashboard.v1.GetHRDashboardResponse
+	(*GetDashboardWidgetsResponse)(nil),    // 4: hr.dashboard.v1.GetDashboardWidgetsResponse
+	(*UpdateDashboardWidgetsResponse)(nil), // 5: hr.dashboard.v1.UpdateDashboardWidgetsResponse
 }
 var file_hr_dashboard_v1_service_proto_depIdxs = []int32{
 	0, // 0: hr.dashboard.v1.DashboardService.GetHRDashboard:input_type -> hr.dashboard.v1.GetHRDashboardRequest
-	1, // 1: hr.dashboard.v1.DashboardService.GetHRDashboard:output_type -> hr.dashboard.v1.GetHRDashboardResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: hr.dashboard.v1.DashboardService.GetDashboardWidgets:input_type -> hr.dashboard.v1.GetDashboardWidgetsRequest
+	2, // 2: hr.dashboard.v1.DashboardService.UpdateDashboardWidgets:input_type -> hr.dashboard.v1.UpdateDashboardWidgetsRequest
+	3, // 3: hr.dashboard.v1.DashboardService.GetHRDashboard:output_type -> hr.dashboard.v1.GetHRDashboardResponse
+	4, // 4: hr.dashboard.v1.DashboardService.GetDashboardWidgets:output_type -> hr.dashboard.v1.GetDashboardWidgetsResponse
+	5, // 5: hr.dashboard.v1.DashboardService.UpdateDashboardWidgets:output_type -> hr.dashboard.v1.UpdateDashboardWidgetsResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -51,7 +63,10 @@ func file_hr_dashboard_v1_service_proto_init() {
 	if File_hr_dashboard_v1_service_proto != nil {
 		return
 	}
+	file_hr_dashboard_v1_get_dashboard_widgets_proto_init()
 	file_hr_dashboard_v1_get_hr_dashboard_proto_init()
+	file_hr_dashboard_v1_types_proto_init()
+	file_hr_dashboard_v1_update_dashboard_widgets_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

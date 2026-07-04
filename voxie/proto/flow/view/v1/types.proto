@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package flow.view.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/view/v1";
+
+message View {
+  int64 id = 1;
+  string name = 2;
+  string icon = 3;
+  google.protobuf.Struct filters = 4;
+  string group_by = 5;
+  string sort_by = 6;
+  string sort_dir = 7;
+}

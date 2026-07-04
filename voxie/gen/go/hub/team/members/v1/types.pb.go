@@ -122,9 +122,6 @@ func (x *StaffUserPayload) GetIsActive() bool {
 	return false
 }
 
-// StaffUserWithGroups mirrors StaffUserPayload with the user's group
-// summaries flattened alongside it (the legacy payload embeds the staff
-// user fields at the top level).
 type StaffUserWithGroups struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
@@ -141,7 +138,7 @@ type StaffUserWithGroups struct {
 	Role string `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
 	// is_active is the is active value for this contract.
 	IsActive bool `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	// groups is the groups value for this contract.
+	// groups contains the groups the staff user belongs to.
 	Groups        []*v1.GroupSummary `protobuf:"bytes,8,rep,name=groups,proto3" json:"groups,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

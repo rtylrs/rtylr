@@ -3,6 +3,8 @@ syntax = "proto3";
 package finance.bill.v1;
 
 import "finance/bill/v1/create_bill.proto";
+import "finance/bill/v1/delete_bill.proto";
+import "finance/bill/v1/get_bill.proto";
 import "finance/bill/v1/list_bills.proto";
 import "finance/bill/v1/update_bill.proto";
 import "onekit/http/annotations.proto";
@@ -32,6 +34,20 @@ service BillService {
       path: "/bills/{id}"
       method: HTTP_METHOD_PUT
       body: "body"
+    };
+  }
+
+  rpc GetBill(GetBillRequest) returns (GetBillResponse) {
+    option (onekit.http.config) = {
+      path: "/bills/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc DeleteBill(DeleteBillRequest) returns (DeleteBillResponse) {
+    option (onekit.http.config) = {
+      path: "/bills/{id}"
+      method: HTTP_METHOD_DELETE
     };
   }
 }

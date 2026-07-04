@@ -7,6 +7,8 @@
 /* eslint-disable */
 
 export interface CreateSubtaskRequest {
+  /** parent_task_id is the parent task id value for this contract. */
+  parentTaskId: number;
   /** project_id is the project id value for this contract. */
   projectId: number;
   /** workspace_id is the workspace id value for this contract. */

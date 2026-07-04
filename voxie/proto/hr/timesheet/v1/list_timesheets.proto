@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package hr.timesheet.v1;
+
+import "hr/timesheet/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/timesheet/v1";
+
+message ListTimesheetsRequest {
+  string week_start = 1 [
+    (onekit.http.query).name = "week_start"
+  ];
+}
+
+message ListTimesheetsResponse {
+  repeated TimesheetEntry timesheets = 1;
+}

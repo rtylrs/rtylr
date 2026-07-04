@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package support.customer.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/customer/v1";
+
+message Customer {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 business_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 3;
+  string email = 4;
+  string phone = 5;
+  int32 total_tickets = 6;
+  string last_ticket_at = 7;
+  string created_at = 8;
+}

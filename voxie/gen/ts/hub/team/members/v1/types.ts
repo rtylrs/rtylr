@@ -24,11 +24,6 @@ export interface StaffUserPayload {
   isActive: boolean;
 }
 
-/**
- * StaffUserWithGroups mirrors StaffUserPayload with the user's group
- * summaries flattened alongside it (the legacy payload embeds the staff
- * user fields at the top level).
- */
 export interface StaffUserWithGroups {
   /** id is the unique identifier for the resource. */
   id: number;
@@ -44,6 +39,6 @@ export interface StaffUserWithGroups {
   role: string;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
-  /** groups is the groups value for this contract. */
+  /** groups contains the groups the staff user belongs to. */
   groups: GroupSummary[];
 }

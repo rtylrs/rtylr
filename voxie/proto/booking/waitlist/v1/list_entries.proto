@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package booking.waitlist.v1;
+
+import "booking/waitlist/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/waitlist/v1";
+
+message ListEntriesRequest {}
+
+message ListEntriesResponse {
+  repeated WaitlistEntry entries = 1;
+}

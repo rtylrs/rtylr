@@ -57,6 +57,14 @@ export interface CreatePurchaseOrderResponse {
   message: string;
 }
 
+export interface GetPurchaseOrderRequest {
+  id: string;
+}
+
+export interface GetPurchaseOrderResponse {
+  purchaseOrder?: PurchaseOrder;
+}
+
 export interface UpdatePurchaseOrderStatusRequest {
   id: string;
   body?: UpdatePurchaseOrderStatusBody;
@@ -67,6 +75,14 @@ export interface UpdatePurchaseOrderStatusBody {
 }
 
 export interface UpdatePurchaseOrderStatusResponse {
+  message: string;
+}
+
+export interface ApprovePurchaseOrderRequest {
+  id: string;
+}
+
+export interface ApprovePurchaseOrderResponse {
   message: string;
 }
 
@@ -182,6 +198,30 @@ export class PurchaseOrderServiceClient {
     return await resp.json() as CreatePurchaseOrderResponse;
   }
 
+  async getPurchaseOrder(req: GetPurchaseOrderRequest, options?: PurchaseOrderServiceCallOptions): Promise<GetPurchaseOrderResponse> {
+    let path = "/api/erp/purchase-order/v1/purchase-orders/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetPurchaseOrderResponse;
+  }
+
   async updatePurchaseOrderStatus(req: UpdatePurchaseOrderStatusRequest, options?: PurchaseOrderServiceCallOptions): Promise<UpdatePurchaseOrderStatusResponse> {
     let path = "/api/erp/purchase-order/v1/purchase-orders/{id}/status";
     path = path.replace("{id}", encodeURIComponent(String(req.id)));
@@ -205,6 +245,31 @@ export class PurchaseOrderServiceClient {
     }
 
     return await resp.json() as UpdatePurchaseOrderStatusResponse;
+  }
+
+  async approvePurchaseOrder(req: ApprovePurchaseOrderRequest, options?: PurchaseOrderServiceCallOptions): Promise<ApprovePurchaseOrderResponse> {
+    let path = "/api/erp/purchase-order/v1/purchase-orders/{id}/approve";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ApprovePurchaseOrderResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

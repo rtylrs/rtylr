@@ -14,7 +14,6 @@ type TableServiceServer interface {
 	ListTables(context.Context, *ListTablesRequest) (*ListTablesResponse, error)
 	CreateTable(context.Context, *CreateTableRequest) (*CreateTableResponse, error)
 	UpdateTable(context.Context, *UpdateTableRequest) (*UpdateTableResponse, error)
-	UpdateTableStatus(context.Context, *UpdateTableStatusRequest) (*UpdateTableStatusResponse, error)
 	DeleteTable(context.Context, *DeleteTableRequest) (*DeleteTableResponse, error)
 }
 
@@ -51,15 +50,6 @@ func RegisterTableServiceServer(server TableServiceServer, opts ...ServerOption)
 
 	config.mux.Handle("PUT /api/pos/table/v1/tables/{id}", updateTableHandler)
 
-	methodHeaders = getUpdateTableStatusHeaders()
-	updateTableStatusHandler := BindingMiddleware[UpdateTableStatusRequest](
-		genericHandler(server.UpdateTableStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		updateTableStatusPathParams, updateTableStatusQueryParams,
-		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("PUT /api/pos/table/v1/tables/{id}/status", updateTableStatusHandler)
-
 	methodHeaders = getDeleteTableHeaders()
 	deleteTableHandler := BindingMiddleware[DeleteTableRequest](
 		genericHandler(server.DeleteTable, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -92,11 +82,6 @@ func getUpdateTableHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getUpdateTableStatusHeaders returns the method-level required headers for UpdateTableStatus
-func getUpdateTableStatusHeaders() []*onekithttp.Header {
-	return nil
-}
-
 // getDeleteTableHeaders returns the method-level required headers for DeleteTable
 func getDeleteTableHeaders() []*onekithttp.Header {
 	return nil
@@ -121,14 +106,6 @@ var updateTablePathParams = []PathParamConfig{
 
 // updateTableQueryParams contains query parameter configuration for UpdateTable
 var updateTableQueryParams = []QueryParamConfig{}
-
-// updateTableStatusPathParams contains path parameter configuration for UpdateTableStatus
-var updateTableStatusPathParams = []PathParamConfig{
-	{URLParam: "id", FieldName: "id"},
-}
-
-// updateTableStatusQueryParams contains query parameter configuration for UpdateTableStatus
-var updateTableStatusQueryParams = []QueryParamConfig{}
 
 // deleteTablePathParams contains path parameter configuration for DeleteTable
 var deleteTablePathParams = []PathParamConfig{

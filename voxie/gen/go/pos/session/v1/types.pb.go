@@ -157,46 +157,28 @@ func (x *Session) GetCreatedAt() string {
 	return ""
 }
 
-// CurrentSession mirrors the POS register session shape returned by
-// the current-session endpoint, which carries cash-drawer totals.
 type CurrentSession struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// id is the unique identifier for the resource.
+	// id is the unique identifier for the current session.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// owner_id identifies the tenant that owns the resource.
+	// owner_id identifies the tenant that owns the session.
 	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	// location_id is the location id value for this contract.
+	// location_id is the active location id.
 	LocationId int64 `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	// staff_id is the staff id value for this contract.
+	// staff_id is the staff member who opened the session.
 	StaffId int64 `protobuf:"varint,4,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	// opening_cash is the cash drawer opening float.
+	OpeningCash float64 `protobuf:"fixed64,5,opt,name=opening_cash,json=openingCash,proto3" json:"opening_cash,omitempty"`
+	// closing_cash is the cash drawer closing float.
+	ClosingCash float64 `protobuf:"fixed64,6,opt,name=closing_cash,json=closingCash,proto3" json:"closing_cash,omitempty"`
+	// total_sales is the current session sales total.
+	TotalSales float64 `protobuf:"fixed64,7,opt,name=total_sales,json=totalSales,proto3" json:"total_sales,omitempty"`
 	// status is the current lifecycle state.
-	Status string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	// opening_cash is the opening cash value for this contract.
-	OpeningCash float64 `protobuf:"fixed64,6,opt,name=opening_cash,json=openingCash,proto3" json:"opening_cash,omitempty"`
-	// closing_cash is the closing cash value for this contract.
-	ClosingCash float64 `protobuf:"fixed64,7,opt,name=closing_cash,json=closingCash,proto3" json:"closing_cash,omitempty"`
-	// expected_cash is the expected cash value for this contract.
-	ExpectedCash float64 `protobuf:"fixed64,8,opt,name=expected_cash,json=expectedCash,proto3" json:"expected_cash,omitempty"`
-	// cash_difference is the cash difference value for this contract.
-	CashDifference float64 `protobuf:"fixed64,9,opt,name=cash_difference,json=cashDifference,proto3" json:"cash_difference,omitempty"`
-	// total_sales is the total sales value for this contract.
-	TotalSales float64 `protobuf:"fixed64,10,opt,name=total_sales,json=totalSales,proto3" json:"total_sales,omitempty"`
-	// total_orders is the total orders value for this contract.
-	TotalOrders int32 `protobuf:"varint,11,opt,name=total_orders,json=totalOrders,proto3" json:"total_orders,omitempty"`
-	// total_cash_sales is the total cash sales value for this contract.
-	TotalCashSales float64 `protobuf:"fixed64,12,opt,name=total_cash_sales,json=totalCashSales,proto3" json:"total_cash_sales,omitempty"`
-	// total_card_sales is the total card sales value for this contract.
-	TotalCardSales float64 `protobuf:"fixed64,13,opt,name=total_card_sales,json=totalCardSales,proto3" json:"total_card_sales,omitempty"`
-	// total_online_sales is the total online sales value for this contract.
-	TotalOnlineSales float64 `protobuf:"fixed64,14,opt,name=total_online_sales,json=totalOnlineSales,proto3" json:"total_online_sales,omitempty"`
-	// total_refunds is the total refunds value for this contract.
-	TotalRefunds float64 `protobuf:"fixed64,15,opt,name=total_refunds,json=totalRefunds,proto3" json:"total_refunds,omitempty"`
-	// opened_at is the opened at value for this contract.
-	OpenedAt string `protobuf:"bytes,16,opt,name=opened_at,json=openedAt,proto3" json:"opened_at,omitempty"`
-	// closed_at is the closed at value for this contract.
-	ClosedAt *string `protobuf:"bytes,17,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
-	// notes is the notes value for this contract.
-	Notes         string `protobuf:"bytes,18,opt,name=notes,proto3" json:"notes,omitempty"`
+	Status string `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
+	// opened_at is when the session was opened.
+	OpenedAt string `protobuf:"bytes,9,opt,name=opened_at,json=openedAt,proto3" json:"opened_at,omitempty"`
+	// closed_at is when the session was closed.
+	ClosedAt      *string `protobuf:"bytes,10,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,13 +241,6 @@ func (x *CurrentSession) GetStaffId() int64 {
 	return 0
 }
 
-func (x *CurrentSession) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
 func (x *CurrentSession) GetOpeningCash() float64 {
 	if x != nil {
 		return x.OpeningCash
@@ -280,20 +255,6 @@ func (x *CurrentSession) GetClosingCash() float64 {
 	return 0
 }
 
-func (x *CurrentSession) GetExpectedCash() float64 {
-	if x != nil {
-		return x.ExpectedCash
-	}
-	return 0
-}
-
-func (x *CurrentSession) GetCashDifference() float64 {
-	if x != nil {
-		return x.CashDifference
-	}
-	return 0
-}
-
 func (x *CurrentSession) GetTotalSales() float64 {
 	if x != nil {
 		return x.TotalSales
@@ -301,39 +262,11 @@ func (x *CurrentSession) GetTotalSales() float64 {
 	return 0
 }
 
-func (x *CurrentSession) GetTotalOrders() int32 {
+func (x *CurrentSession) GetStatus() string {
 	if x != nil {
-		return x.TotalOrders
+		return x.Status
 	}
-	return 0
-}
-
-func (x *CurrentSession) GetTotalCashSales() float64 {
-	if x != nil {
-		return x.TotalCashSales
-	}
-	return 0
-}
-
-func (x *CurrentSession) GetTotalCardSales() float64 {
-	if x != nil {
-		return x.TotalCardSales
-	}
-	return 0
-}
-
-func (x *CurrentSession) GetTotalOnlineSales() float64 {
-	if x != nil {
-		return x.TotalOnlineSales
-	}
-	return 0
-}
-
-func (x *CurrentSession) GetTotalRefunds() float64 {
-	if x != nil {
-		return x.TotalRefunds
-	}
-	return 0
+	return ""
 }
 
 func (x *CurrentSession) GetOpenedAt() string {
@@ -346,13 +279,6 @@ func (x *CurrentSession) GetOpenedAt() string {
 func (x *CurrentSession) GetClosedAt() string {
 	if x != nil && x.ClosedAt != nil {
 		return *x.ClosedAt
-	}
-	return ""
-}
-
-func (x *CurrentSession) GetNotes() string {
-	if x != nil {
-		return x.Notes
 	}
 	return ""
 }
@@ -381,29 +307,21 @@ const file_pos_session_v1_types_proto_rawDesc = "" +
 	"\f_location_idB\v\n" +
 	"\t_staff_idB\f\n" +
 	"\n" +
-	"_closed_at\"\x8f\x05\n" +
+	"_closed_at\"\xe1\x02\n" +
 	"\x0eCurrentSession\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
 	"\vlocation_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"locationId\x12\x1f\n" +
-	"\bstaff_id\x18\x04 \x01(\x03B\x04е\x18\x01R\astaffId\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12!\n" +
-	"\fopening_cash\x18\x06 \x01(\x01R\vopeningCash\x12!\n" +
-	"\fclosing_cash\x18\a \x01(\x01R\vclosingCash\x12#\n" +
-	"\rexpected_cash\x18\b \x01(\x01R\fexpectedCash\x12'\n" +
-	"\x0fcash_difference\x18\t \x01(\x01R\x0ecashDifference\x12\x1f\n" +
-	"\vtotal_sales\x18\n" +
-	" \x01(\x01R\n" +
-	"totalSales\x12!\n" +
-	"\ftotal_orders\x18\v \x01(\x05R\vtotalOrders\x12(\n" +
-	"\x10total_cash_sales\x18\f \x01(\x01R\x0etotalCashSales\x12(\n" +
-	"\x10total_card_sales\x18\r \x01(\x01R\x0etotalCardSales\x12,\n" +
-	"\x12total_online_sales\x18\x0e \x01(\x01R\x10totalOnlineSales\x12#\n" +
-	"\rtotal_refunds\x18\x0f \x01(\x01R\ftotalRefunds\x12\x1b\n" +
-	"\topened_at\x18\x10 \x01(\tR\bopenedAt\x12&\n" +
-	"\tclosed_at\x18\x11 \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\bclosedAt\x88\x01\x01\x12\x14\n" +
-	"\x05notes\x18\x12 \x01(\tR\x05notesB\f\n" +
+	"\bstaff_id\x18\x04 \x01(\x03B\x04е\x18\x01R\astaffId\x12!\n" +
+	"\fopening_cash\x18\x05 \x01(\x01R\vopeningCash\x12!\n" +
+	"\fclosing_cash\x18\x06 \x01(\x01R\vclosingCash\x12\x1f\n" +
+	"\vtotal_sales\x18\a \x01(\x01R\n" +
+	"totalSales\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x12\x1b\n" +
+	"\topened_at\x18\t \x01(\tR\bopenedAt\x12&\n" +
+	"\tclosed_at\x18\n" +
+	" \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\bclosedAt\x88\x01\x01B\f\n" +
 	"\n" +
 	"_closed_atB/Z-github.com/voxire/voxie/gen/go/pos/session/v1b\x06proto3"
 

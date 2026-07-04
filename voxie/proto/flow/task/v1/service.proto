@@ -10,13 +10,16 @@ import "flow/task/v1/create_time_log.proto";
 import "flow/task/v1/delete_attachment.proto";
 import "flow/task/v1/delete_comment.proto";
 import "flow/task/v1/delete_task.proto";
+import "flow/task/v1/delete_time_log.proto";
 import "flow/task/v1/get_attachments.proto";
 import "flow/task/v1/get_my_tasks.proto";
+import "flow/task/v1/get_my_tasks_project.proto";
 import "flow/task/v1/get_subtasks.proto";
 import "flow/task/v1/get_task_activity.proto";
 import "flow/task/v1/get_task_detail.proto";
 import "flow/task/v1/get_time_logs.proto";
 import "flow/task/v1/list_tasks.proto";
+import "flow/task/v1/search_tasks.proto";
 import "flow/task/v1/update_task.proto";
 import "flow/task/v1/update_task_status.proto";
 import "onekit/http/annotations.proto";
@@ -36,6 +39,20 @@ service TaskService {
   rpc GetMyTasks(GetMyTasksRequest) returns (GetMyTasksResponse) {
     option (onekit.http.config) = {
       path: "/tasks/my"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetMyTasksProject(GetMyTasksProjectRequest) returns (GetMyTasksProjectResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/my-project"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc SearchTasks(SearchTasksRequest) returns (SearchTasksResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/search"
       method: HTTP_METHOD_GET
     };
   }
@@ -144,6 +161,13 @@ service TaskService {
     option (onekit.http.config) = {
       path: "/tasks/{task_id}/time-logs"
       method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc DeleteTimeLog(DeleteTimeLogRequest) returns (DeleteTimeLogResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/time-logs/{id}"
+      method: HTTP_METHOD_DELETE
     };
   }
 }

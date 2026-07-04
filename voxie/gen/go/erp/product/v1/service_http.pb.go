@@ -13,8 +13,15 @@ import (
 type ProductServiceServer interface {
 	ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error)
 	CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error)
+	GetProductByBarcode(context.Context, *GetProductByBarcodeRequest) (*GetProductByBarcodeResponse, error)
+	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
+	GetProductFull(context.Context, *GetProductFullRequest) (*GetProductFullResponse, error)
+	ListProductAttributes(context.Context, *ListProductAttributesRequest) (*ListProductAttributesResponse, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*UpdateProductResponse, error)
 	DeleteProduct(context.Context, *DeleteProductRequest) (*DeleteProductResponse, error)
+	GetDashboard(context.Context, *GetDashboardRequest) (*GetDashboardResponse, error)
+	ListReorderSuggestions(context.Context, *ListReorderSuggestionsRequest) (*ListReorderSuggestionsResponse, error)
+	ListExpiringItems(context.Context, *ListExpiringItemsRequest) (*ListExpiringItemsResponse, error)
 }
 
 // RegisterProductServiceServer registers the HTTP handlers for service ProductService to the given mux.
@@ -41,6 +48,42 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 
 	config.mux.Handle("POST /api/erp/product/v1/products", createProductHandler)
 
+	methodHeaders = getGetProductByBarcodeHeaders()
+	getProductByBarcodeHandler := BindingMiddleware[GetProductByBarcodeRequest](
+		genericHandler(server.GetProductByBarcode, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getProductByBarcodePathParams, getProductByBarcodeQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/products/barcode/{code}", getProductByBarcodeHandler)
+
+	methodHeaders = getGetProductHeaders()
+	getProductHandler := BindingMiddleware[GetProductRequest](
+		genericHandler(server.GetProduct, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getProductPathParams, getProductQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/products/{id}", getProductHandler)
+
+	methodHeaders = getGetProductFullHeaders()
+	getProductFullHandler := BindingMiddleware[GetProductFullRequest](
+		genericHandler(server.GetProductFull, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getProductFullPathParams, getProductFullQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/products/{id}/full", getProductFullHandler)
+
+	methodHeaders = getListProductAttributesHeaders()
+	listProductAttributesHandler := BindingMiddleware[ListProductAttributesRequest](
+		genericHandler(server.ListProductAttributes, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listProductAttributesPathParams, listProductAttributesQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/products/{id}/attributes", listProductAttributesHandler)
+
 	methodHeaders = getUpdateProductHeaders()
 	updateProductHandler := BindingMiddleware[UpdateProductRequest](
 		genericHandler(server.UpdateProduct, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -58,6 +101,33 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 	)
 
 	config.mux.Handle("DELETE /api/erp/product/v1/products/{id}", deleteProductHandler)
+
+	methodHeaders = getGetDashboardHeaders()
+	getDashboardHandler := BindingMiddleware[GetDashboardRequest](
+		genericHandler(server.GetDashboard, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getDashboardPathParams, getDashboardQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/dashboard", getDashboardHandler)
+
+	methodHeaders = getListReorderSuggestionsHeaders()
+	listReorderSuggestionsHandler := BindingMiddleware[ListReorderSuggestionsRequest](
+		genericHandler(server.ListReorderSuggestions, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listReorderSuggestionsPathParams, listReorderSuggestionsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/reorder-suggestions", listReorderSuggestionsHandler)
+
+	methodHeaders = getListExpiringItemsHeaders()
+	listExpiringItemsHandler := BindingMiddleware[ListExpiringItemsRequest](
+		genericHandler(server.ListExpiringItems, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listExpiringItemsPathParams, listExpiringItemsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/product/v1/expiry", listExpiringItemsHandler)
 
 	return nil
 }
@@ -77,6 +147,26 @@ func getCreateProductHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetProductByBarcodeHeaders returns the method-level required headers for GetProductByBarcode
+func getGetProductByBarcodeHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetProductHeaders returns the method-level required headers for GetProduct
+func getGetProductHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetProductFullHeaders returns the method-level required headers for GetProductFull
+func getGetProductFullHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getListProductAttributesHeaders returns the method-level required headers for ListProductAttributes
+func getListProductAttributesHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getUpdateProductHeaders returns the method-level required headers for UpdateProduct
 func getUpdateProductHeaders() []*onekithttp.Header {
 	return nil
@@ -84,6 +174,21 @@ func getUpdateProductHeaders() []*onekithttp.Header {
 
 // getDeleteProductHeaders returns the method-level required headers for DeleteProduct
 func getDeleteProductHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetDashboardHeaders returns the method-level required headers for GetDashboard
+func getGetDashboardHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getListReorderSuggestionsHeaders returns the method-level required headers for ListReorderSuggestions
+func getListReorderSuggestionsHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getListExpiringItemsHeaders returns the method-level required headers for ListExpiringItems
+func getListExpiringItemsHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -104,6 +209,38 @@ var createProductPathParams = []PathParamConfig{}
 // createProductQueryParams contains query parameter configuration for CreateProduct
 var createProductQueryParams = []QueryParamConfig{}
 
+// getProductByBarcodePathParams contains path parameter configuration for GetProductByBarcode
+var getProductByBarcodePathParams = []PathParamConfig{
+	{URLParam: "code", FieldName: "code"},
+}
+
+// getProductByBarcodeQueryParams contains query parameter configuration for GetProductByBarcode
+var getProductByBarcodeQueryParams = []QueryParamConfig{}
+
+// getProductPathParams contains path parameter configuration for GetProduct
+var getProductPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// getProductQueryParams contains query parameter configuration for GetProduct
+var getProductQueryParams = []QueryParamConfig{}
+
+// getProductFullPathParams contains path parameter configuration for GetProductFull
+var getProductFullPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// getProductFullQueryParams contains query parameter configuration for GetProductFull
+var getProductFullQueryParams = []QueryParamConfig{}
+
+// listProductAttributesPathParams contains path parameter configuration for ListProductAttributes
+var listProductAttributesPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// listProductAttributesQueryParams contains query parameter configuration for ListProductAttributes
+var listProductAttributesQueryParams = []QueryParamConfig{}
+
 // updateProductPathParams contains path parameter configuration for UpdateProduct
 var updateProductPathParams = []PathParamConfig{
 	{URLParam: "id", FieldName: "id"},
@@ -119,3 +256,23 @@ var deleteProductPathParams = []PathParamConfig{
 
 // deleteProductQueryParams contains query parameter configuration for DeleteProduct
 var deleteProductQueryParams = []QueryParamConfig{}
+
+// getDashboardPathParams contains path parameter configuration for GetDashboard
+var getDashboardPathParams = []PathParamConfig{}
+
+// getDashboardQueryParams contains query parameter configuration for GetDashboard
+var getDashboardQueryParams = []QueryParamConfig{}
+
+// listReorderSuggestionsPathParams contains path parameter configuration for ListReorderSuggestions
+var listReorderSuggestionsPathParams = []PathParamConfig{}
+
+// listReorderSuggestionsQueryParams contains query parameter configuration for ListReorderSuggestions
+var listReorderSuggestionsQueryParams = []QueryParamConfig{}
+
+// listExpiringItemsPathParams contains path parameter configuration for ListExpiringItems
+var listExpiringItemsPathParams = []PathParamConfig{}
+
+// listExpiringItemsQueryParams contains query parameter configuration for ListExpiringItems
+var listExpiringItemsQueryParams = []QueryParamConfig{
+	{QueryName: "days_ahead", FieldName: "days_ahead", Required: false},
+}

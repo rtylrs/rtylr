@@ -28,9 +28,6 @@ message StaffUserPayload {
   bool is_active = 7;
 }
 
-// StaffUserWithGroups mirrors StaffUserPayload with the user's group
-// summaries flattened alongside it (the legacy payload embeds the staff
-// user fields at the top level).
 message StaffUserWithGroups {
   // id is the unique identifier for the resource.
   int64 id = 1 [
@@ -48,6 +45,6 @@ message StaffUserWithGroups {
   string role = 6;
   // is_active is the is active value for this contract.
   bool is_active = 7;
-  // groups is the groups value for this contract.
-  repeated .hub.team.groups.v1.GroupSummary groups = 8;
+  // groups contains the groups the staff user belongs to.
+  repeated hub.team.groups.v1.GroupSummary groups = 8;
 }

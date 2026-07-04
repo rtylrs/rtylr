@@ -44,3 +44,47 @@ export interface Product {
   /** updated_at is when the record was last updated. */
   updatedAt: string;
 }
+
+export interface FullProduct {
+  id: number;
+  ownerId: number;
+  businessId: number;
+  categoryId: number;
+  supplierId: number;
+  name: string;
+  sku: string;
+  barcode: string;
+  description: string;
+  unit: string;
+  costPrice: number;
+  salePrice: number;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  reorderQuantity: number;
+  isActive: boolean;
+  trackInventory: boolean;
+  brandId: number;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductAttribute {
+  id: number;
+  name: string;
+  value: string;
+  position: number;
+}

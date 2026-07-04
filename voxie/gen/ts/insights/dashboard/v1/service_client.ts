@@ -60,6 +60,26 @@ export interface WorkloadEntry {
   totalActive: string;
 }
 
+export interface GetDashboardSummaryRequest {
+}
+
+export interface GetDashboardSummaryResponse {
+  revenue?: InsightsMetricCard;
+  customers?: InsightsMetricCard;
+  orders?: InsightsMetricCard;
+  margin?: InsightsPctCard;
+}
+
+export interface InsightsMetricCard {
+  value: string;
+  deltaPct: number;
+}
+
+export interface InsightsPctCard {
+  value: number;
+  deltaPct: number;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -213,6 +233,29 @@ export class DashboardServiceClient {
     }
 
     return await resp.json() as GetWorkloadResponse;
+  }
+
+  async getDashboardSummary(_req: GetDashboardSummaryRequest, options?: DashboardServiceCallOptions): Promise<GetDashboardSummaryResponse> {
+    let path = "/api/insights/dashboard/v1/summary";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetDashboardSummaryResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

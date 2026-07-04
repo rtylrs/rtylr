@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package hub.feature.v1;
+
+import "hub/feature/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/feature/v1";
+
+message ResolveFeaturesRequest {
+  string subject = 1;
+  map<string, string> attributes = 2;
+}
+
+message ResolveFeaturesResponse {
+  map<string, FeatureResolution> features = 1;
+  string variant = 2;
+}
+
+message ResolveMyFeaturesRequest {
+  map<string, string> attributes = 1;
+}
+
+message ResolveMyFeaturesResponse {
+  map<string, FeatureResolution> features = 1;
+  string variant = 2;
+}

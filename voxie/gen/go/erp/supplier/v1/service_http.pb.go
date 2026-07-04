@@ -14,6 +14,7 @@ type SupplierServiceServer interface {
 	ListSuppliers(context.Context, *ListSuppliersRequest) (*ListSuppliersResponse, error)
 	CreateSupplier(context.Context, *CreateSupplierRequest) (*CreateSupplierResponse, error)
 	UpdateSupplier(context.Context, *UpdateSupplierRequest) (*UpdateSupplierResponse, error)
+	DeleteSupplier(context.Context, *DeleteSupplierRequest) (*DeleteSupplierResponse, error)
 }
 
 // RegisterSupplierServiceServer registers the HTTP handlers for service SupplierService to the given mux.
@@ -49,6 +50,15 @@ func RegisterSupplierServiceServer(server SupplierServiceServer, opts ...ServerO
 
 	config.mux.Handle("PUT /api/erp/supplier/v1/suppliers/{id}", updateSupplierHandler)
 
+	methodHeaders = getDeleteSupplierHeaders()
+	deleteSupplierHandler := BindingMiddleware[DeleteSupplierRequest](
+		genericHandler(server.DeleteSupplier, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteSupplierPathParams, deleteSupplierQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/erp/supplier/v1/suppliers/{id}", deleteSupplierHandler)
+
 	return nil
 }
 
@@ -72,6 +82,11 @@ func getUpdateSupplierHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getDeleteSupplierHeaders returns the method-level required headers for DeleteSupplier
+func getDeleteSupplierHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listSuppliersPathParams contains path parameter configuration for ListSuppliers
 var listSuppliersPathParams = []PathParamConfig{}
 
@@ -91,3 +106,11 @@ var updateSupplierPathParams = []PathParamConfig{
 
 // updateSupplierQueryParams contains query parameter configuration for UpdateSupplier
 var updateSupplierQueryParams = []QueryParamConfig{}
+
+// deleteSupplierPathParams contains path parameter configuration for DeleteSupplier
+var deleteSupplierPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteSupplierQueryParams contains query parameter configuration for DeleteSupplier
+var deleteSupplierQueryParams = []QueryParamConfig{}

@@ -39,6 +39,661 @@ export type ContractValidationIssue = {
 };
 
 export const contractValidationMetadata = {
+  "booking.appointment.v1.CreateAppointmentRequest": {
+    "customerEmail": {
+      "name": "customerEmail",
+      "optional": false,
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "minLen": 1,
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerPhone": {
+      "name": "customerPhone",
+      "optional": false,
+      "protoName": "customer_phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "endTime": {
+      "minLen": 1,
+      "name": "endTime",
+      "optional": false,
+      "protoName": "end_time",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "resourceId": {
+      "name": "resourceId",
+      "optional": false,
+      "protoName": "resource_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "serviceId": {
+      "gt": 0,
+      "name": "serviceId",
+      "optional": false,
+      "protoName": "service_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "staffId": {
+      "name": "staffId",
+      "optional": false,
+      "protoName": "staff_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "startTime": {
+      "minLen": 1,
+      "name": "startTime",
+      "optional": false,
+      "protoName": "start_time",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "booking.appointment.v1.DeleteAppointmentRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "booking.appointment.v1.ListAppointmentsRequest": {},
+  "booking.appointment.v1.ListTodayAppointmentsRequest": {},
+  "booking.appointment.v1.UpdateAppointmentRequest": {
+    "customerEmail": {
+      "name": "customerEmail",
+      "optional": false,
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerPhone": {
+      "name": "customerPhone",
+      "optional": false,
+      "protoName": "customer_phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "endTime": {
+      "name": "endTime",
+      "optional": false,
+      "protoName": "end_time",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "resourceId": {
+      "name": "resourceId",
+      "optional": false,
+      "protoName": "resource_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "serviceId": {
+      "name": "serviceId",
+      "optional": false,
+      "protoName": "service_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "staffId": {
+      "name": "staffId",
+      "optional": false,
+      "protoName": "staff_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "startTime": {
+      "name": "startTime",
+      "optional": false,
+      "protoName": "start_time",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "booking.calendar.v1.GetCalendarRequest": {
+    "from": {
+      "minLen": 1,
+      "name": "from",
+      "optional": false,
+      "protoName": "from",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "to": {
+      "minLen": 1,
+      "name": "to",
+      "optional": false,
+      "protoName": "to",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "booking.dashboard.v1.GetDashboardRequest": {},
+  "booking.reminder.v1.CreateReminderRequest": {
+    "appointmentId": {
+      "gt": 0,
+      "name": "appointmentId",
+      "optional": false,
+      "protoName": "appointment_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "scheduledAt": {
+      "minLen": 1,
+      "name": "scheduledAt",
+      "optional": false,
+      "protoName": "scheduled_at",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "minLen": 1,
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "booking.reminder.v1.ListRemindersRequest": {},
+  "booking.resource.v1.CreateResourceRequest": {
+    "capacity": {
+      "name": "capacity",
+      "optional": false,
+      "protoName": "capacity",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "booking.resource.v1.DeleteResourceRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "booking.resource.v1.ListResourcesRequest": {},
+  "booking.resource.v1.UpdateResourceRequest": {
+    "capacity": {
+      "name": "capacity",
+      "optional": false,
+      "protoName": "capacity",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "booking.service.v1.CreateServiceRequest": {
+    "color": {
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "durationMinutes": {
+      "gt": 0,
+      "name": "durationMinutes",
+      "optional": false,
+      "protoName": "duration_minutes",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int32"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "price": {
+      "gte": 0,
+      "name": "price",
+      "optional": false,
+      "protoName": "price",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    }
+  },
+  "booking.service.v1.DeleteServiceRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "booking.service.v1.ListServicesRequest": {},
+  "booking.service.v1.UpdateServiceRequest": {
+    "color": {
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "durationMinutes": {
+      "gt": 0,
+      "name": "durationMinutes",
+      "optional": false,
+      "protoName": "duration_minutes",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int32"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "price": {
+      "gte": 0,
+      "name": "price",
+      "optional": false,
+      "protoName": "price",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    }
+  },
+  "booking.waitlist.v1.CreateEntryRequest": {
+    "customerEmail": {
+      "name": "customerEmail",
+      "optional": false,
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "minLen": 1,
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerPhone": {
+      "name": "customerPhone",
+      "optional": false,
+      "protoName": "customer_phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "preferredDate": {
+      "name": "preferredDate",
+      "optional": false,
+      "protoName": "preferred_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "preferredTime": {
+      "name": "preferredTime",
+      "optional": false,
+      "protoName": "preferred_time",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "serviceId": {
+      "name": "serviceId",
+      "optional": false,
+      "protoName": "service_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "booking.waitlist.v1.ListEntriesRequest": {},
+  "booking.waitlist.v1.UpdateEntryRequest": {
+    "customerEmail": {
+      "name": "customerEmail",
+      "optional": false,
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerPhone": {
+      "name": "customerPhone",
+      "optional": false,
+      "protoName": "customer_phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "preferredDate": {
+      "name": "preferredDate",
+      "optional": false,
+      "protoName": "preferred_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "preferredTime": {
+      "name": "preferredTime",
+      "optional": false,
+      "protoName": "preferred_time",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "serviceId": {
+      "name": "serviceId",
+      "optional": false,
+      "protoName": "service_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "common.auth.v1.CheckEmailExistsRequest": {
+    "email": {
+      "email": true,
+      "minLen": 1,
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "common.auth.v1.GoogleAuthRequest": {
     "businessName": {
       "name": "businessName",
@@ -204,6 +859,17 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "common.auth.v1.SocialAuthorizeRequest": {
+    "provider": {
+      "name": "provider",
+      "optional": false,
+      "protoName": "provider",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "common.auth.v1.VerifyEmailRequest": {
     "token": {
       "minLen": 1,
@@ -274,6 +940,86 @@ export const contractValidationMetadata = {
       "protoName": "state",
       "repeated": false,
       "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "common.oauth.v1.MeRequest": {},
+  "common.oauth.v1.RevokeRequest": {
+    "clientId": {
+      "name": "clientId",
+      "optional": false,
+      "protoName": "client_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "token": {
+      "minLen": 1,
+      "name": "token",
+      "optional": false,
+      "protoName": "token",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "common.oauth.v1.TokenRequest": {
+    "clientId": {
+      "minLen": 1,
+      "name": "clientId",
+      "optional": false,
+      "protoName": "client_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "code": {
+      "name": "code",
+      "optional": false,
+      "protoName": "code",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "codeVerifier": {
+      "name": "codeVerifier",
+      "optional": false,
+      "protoName": "code_verifier",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "grantType": {
+      "minLen": 1,
+      "name": "grantType",
+      "optional": false,
+      "protoName": "grant_type",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "redirectUri": {
+      "name": "redirectUri",
+      "optional": false,
+      "protoName": "redirect_uri",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "refreshToken": {
+      "name": "refreshToken",
+      "optional": false,
+      "protoName": "refresh_token",
+      "repeated": false,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
@@ -668,6 +1414,110 @@ export const contractValidationMetadata = {
     }
   },
   "crm.dashboard.v1.GetDashboardRequest": {},
+  "crm.feedback.v1.CreateFeedbackRequest": {
+    "comment": {
+      "name": "comment",
+      "optional": false,
+      "protoName": "comment",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerId": {
+      "name": "customerId",
+      "optional": false,
+      "protoName": "customer_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "score": {
+      "name": "score",
+      "optional": false,
+      "protoName": "score",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "source": {
+      "name": "source",
+      "optional": false,
+      "protoName": "source",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "minLen": 1,
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "crm.feedback.v1.ListFeedbackRequest": {
+    "maxScore": {
+      "name": "maxScore",
+      "optional": true,
+      "protoName": "max_score",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "minScore": {
+      "name": "minScore",
+      "optional": true,
+      "protoName": "min_score",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "source": {
+      "name": "source",
+      "optional": false,
+      "protoName": "source",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "crm.loyalty.v1.AwardPointsRequest": {
     "customerId": {
       "gt": 0,
@@ -1006,21 +1856,21 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
-    "name": {
+    "filters": {
       "minLen": 1,
-      "name": "name",
+      "name": "filters",
       "optional": false,
-      "protoName": "name",
+      "protoName": "filters",
       "repeated": false,
       "required": true,
       "scalar": true,
       "type": "string"
     },
-    "rules": {
+    "name": {
       "minLen": 1,
-      "name": "rules",
+      "name": "name",
       "optional": false,
-      "protoName": "rules",
+      "protoName": "name",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -1105,6 +1955,264 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "crm.settings.v1.GetSettingsRequest": {},
+  "crm.settings.v1.UpdateSettingsRequest": {
+    "defaultConsent": {
+      "name": "defaultConsent",
+      "optional": false,
+      "protoName": "default_consent",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "fromEmail": {
+      "name": "fromEmail",
+      "optional": false,
+      "protoName": "from_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "fromName": {
+      "name": "fromName",
+      "optional": false,
+      "protoName": "from_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "smsSenderId": {
+      "name": "smsSenderId",
+      "optional": false,
+      "protoName": "sms_sender_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "timezone": {
+      "name": "timezone",
+      "optional": false,
+      "protoName": "timezone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "crm.template.v1.CreateTemplateRequest": {
+    "body": {
+      "minLen": 1,
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "subject": {
+      "name": "subject",
+      "optional": false,
+      "protoName": "subject",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "minLen": 1,
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "variables": {
+      "name": "variables",
+      "optional": false,
+      "protoName": "variables",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "google.protobuf.Value"
+    }
+  },
+  "crm.template.v1.DeleteTemplateRequest": {
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "crm.template.v1.ListTemplatesRequest": {},
+  "crm.template.v1.UpdateTemplateRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateTemplateBody"
+    },
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.brand.v1.CreateBrandRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "logoUrl": {
+      "name": "logoUrl",
+      "optional": false,
+      "protoName": "logo_url",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "erp.brand.v1.DeleteBrandRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.brand.v1.ListBrandsRequest": {},
+  "erp.brand.v1.UpdateBrandRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateBrandBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.category.v1.CreateCategoryRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "erp.category.v1.DeleteCategoryRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.category.v1.ListCategoriesRequest": {},
+  "erp.category.v1.UpdateCategoryRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateCategoryBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "erp.inventory.v1.AdjustInventoryRequest": {
     "change": {
       "gt": 0,
@@ -1149,6 +2257,37 @@ export const contractValidationMetadata = {
   "erp.inventory.v1.GetInventoryReportRequest": {},
   "erp.inventory.v1.GetLowStockRequest": {},
   "erp.inventory.v1.GetValuationRequest": {},
+  "erp.price_list.v1.CreatePriceListRequest": {
+    "currency": {
+      "name": "currency",
+      "optional": false,
+      "protoName": "currency",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "isDefault": {
+      "name": "isDefault",
+      "optional": false,
+      "protoName": "is_default",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "erp.price_list.v1.ListPriceListsRequest": {},
   "erp.product.v1.CreateProductRequest": {
     "barcode": {
       "minLen": 1,
@@ -1291,6 +2430,66 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "erp.product.v1.GetDashboardRequest": {},
+  "erp.product.v1.GetProductByBarcodeRequest": {
+    "code": {
+      "minLen": 1,
+      "name": "code",
+      "optional": false,
+      "protoName": "code",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "erp.product.v1.GetProductFullRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.product.v1.GetProductRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.product.v1.ListExpiringItemsRequest": {
+    "daysAhead": {
+      "name": "daysAhead",
+      "optional": false,
+      "protoName": "days_ahead",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "erp.product.v1.ListProductAttributesRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "erp.product.v1.ListProductsRequest": {
     "categoryId": {
       "name": "categoryId",
@@ -1329,6 +2528,7 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "erp.product.v1.ListReorderSuggestionsRequest": {},
   "erp.product.v1.UpdateProductRequest": {
     "body": {
       "name": "body",
@@ -1339,6 +2539,18 @@ export const contractValidationMetadata = {
       "scalar": false,
       "type": "UpdateProductBody"
     },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.purchase_order.v1.ApprovePurchaseOrderRequest": {
     "id": {
       "gt": 0,
       "name": "id",
@@ -1443,6 +2655,18 @@ export const contractValidationMetadata = {
       "type": "double"
     }
   },
+  "erp.purchase_order.v1.GetPurchaseOrderRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "erp.purchase_order.v1.ListPurchaseOrdersRequest": {
     "status": {
       "name": "status",
@@ -1463,6 +2687,207 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": false,
       "type": "UpdatePurchaseOrderStatusBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_take.v1.CreateStockTakeItemRequest": {
+    "countedQty": {
+      "name": "countedQty",
+      "optional": false,
+      "protoName": "counted_qty",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "expectedQty": {
+      "name": "expectedQty",
+      "optional": false,
+      "protoName": "expected_qty",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "productId": {
+      "name": "productId",
+      "optional": false,
+      "protoName": "product_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_take.v1.CreateStockTakeRequest": {
+    "items": {
+      "name": "items",
+      "optional": false,
+      "protoName": "items",
+      "repeated": true,
+      "required": false,
+      "scalar": false,
+      "type": "CreateStockTakeItemRequest"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "warehouseId": {
+      "gt": 0,
+      "name": "warehouseId",
+      "optional": false,
+      "protoName": "warehouse_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_take.v1.ListStockTakesRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_take.v1.UpdateStockTakeRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateStockTakeBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_transfer.v1.CreateStockTransferItemRequest": {
+    "productId": {
+      "name": "productId",
+      "optional": false,
+      "protoName": "product_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "quantity": {
+      "name": "quantity",
+      "optional": false,
+      "protoName": "quantity",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    }
+  },
+  "erp.stock_transfer.v1.CreateStockTransferRequest": {
+    "fromWarehouseId": {
+      "gt": 0,
+      "name": "fromWarehouseId",
+      "optional": false,
+      "protoName": "from_warehouse_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "items": {
+      "name": "items",
+      "optional": false,
+      "protoName": "items",
+      "repeated": true,
+      "required": false,
+      "scalar": false,
+      "type": "CreateStockTransferItemRequest"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "toWarehouseId": {
+      "gt": 0,
+      "name": "toWarehouseId",
+      "optional": false,
+      "protoName": "to_warehouse_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_transfer.v1.ListStockTransfersRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.stock_transfer.v1.UpdateStockTransferStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateStockTransferStatusBody"
     },
     "id": {
       "gt": 0,
@@ -1572,6 +2997,18 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "erp.supplier.v1.DeleteSupplierRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "erp.supplier.v1.ListSuppliersRequest": {},
   "erp.supplier.v1.UpdateSupplierRequest": {
     "body": {
@@ -1582,6 +3019,244 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": false,
       "type": "UpdateSupplierBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.variant.v1.CreateVariantRequest": {
+    "attributes": {
+      "name": "attributes",
+      "optional": false,
+      "protoName": "attributes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "barcode": {
+      "name": "barcode",
+      "optional": false,
+      "protoName": "barcode",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "costPrice": {
+      "name": "costPrice",
+      "optional": false,
+      "protoName": "cost_price",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "productId": {
+      "gt": 0,
+      "name": "productId",
+      "optional": false,
+      "protoName": "product_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "salePrice": {
+      "name": "salePrice",
+      "optional": false,
+      "protoName": "sale_price",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "sku": {
+      "name": "sku",
+      "optional": false,
+      "protoName": "sku",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "stockQuantity": {
+      "name": "stockQuantity",
+      "optional": false,
+      "protoName": "stock_quantity",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    }
+  },
+  "erp.variant.v1.DeleteVariantRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.variant.v1.ListVariantsRequest": {
+    "productId": {
+      "name": "productId",
+      "optional": false,
+      "protoName": "product_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.variant.v1.UpdateVariantRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateVariantBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.warehouse.v1.CreateWarehouseRequest": {
+    "address": {
+      "name": "address",
+      "optional": false,
+      "protoName": "address",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "capacity": {
+      "name": "capacity",
+      "optional": false,
+      "protoName": "capacity",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "city": {
+      "name": "city",
+      "optional": false,
+      "protoName": "city",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "country": {
+      "name": "country",
+      "optional": false,
+      "protoName": "country",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "isDefault": {
+      "name": "isDefault",
+      "optional": false,
+      "protoName": "is_default",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "managerName": {
+      "name": "managerName",
+      "optional": false,
+      "protoName": "manager_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "erp.warehouse.v1.DeleteWarehouseRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "erp.warehouse.v1.ListWarehousesRequest": {},
+  "erp.warehouse.v1.UpdateWarehouseRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateWarehouseBody"
     },
     "id": {
       "gt": 0,
@@ -1645,7 +3320,41 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "finance.account.v1.DeleteAccountRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "finance.account.v1.GetChartOfAccountsRequest": {},
   "finance.account.v1.ListAccountsRequest": {},
+  "finance.account.v1.UpdateAccountRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateAccountBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.bank_account.v1.CreateBankAccountRequest": {
     "accountType": {
       "minLen": 1,
@@ -1823,6 +3532,30 @@ export const contractValidationMetadata = {
       "name": "supplierId",
       "optional": false,
       "protoName": "supplier_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "finance.bill.v1.DeleteBillRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "finance.bill.v1.GetBillRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -2481,6 +4214,37 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "finance.reconciliation.v1.GetOverviewRequest": {},
+  "finance.reconciliation.v1.MatchRequest": {
+    "bankFeedId": {
+      "name": "bankFeedId",
+      "optional": false,
+      "protoName": "bank_feed_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "targetId": {
+      "name": "targetId",
+      "optional": false,
+      "protoName": "target_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "targetType": {
+      "minLen": 1,
+      "name": "targetType",
+      "optional": false,
+      "protoName": "target_type",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "finance.recurring_invoice.v1.CreateRecurringInvoiceRequest": {
     "endDate": {
       "name": "endDate",
@@ -2706,6 +4470,148 @@ export const contractValidationMetadata = {
   },
   "finance.report.v1.ListExpenseCategoryDetailsRequest": {},
   "finance.report.v1.ListTaxConfigRequest": {},
+  "finance.statement.v1.GetBalanceSheetRequest": {},
+  "finance.statement.v1.GetCashFlowRequest": {
+    "period": {
+      "name": "period",
+      "optional": false,
+      "protoName": "period",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "finance.tax.v1.GetPLReportRequest": {},
+  "finance.tax.v1.GetTaxConfigRequest": {},
+  "finance.tax.v1.UpdateTaxConfigRequest": {
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "isInclusive": {
+      "name": "isInclusive",
+      "optional": false,
+      "protoName": "is_inclusive",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "taxName": {
+      "minLen": 1,
+      "name": "taxName",
+      "optional": false,
+      "protoName": "tax_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "taxRate": {
+      "gte": 0,
+      "name": "taxRate",
+      "optional": false,
+      "protoName": "tax_rate",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    }
+  },
+  "flow.cycle.v1.CreateCycleRequest": {
+    "endDate": {
+      "name": "endDate",
+      "optional": false,
+      "protoName": "end_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "startDate": {
+      "name": "startDate",
+      "optional": false,
+      "protoName": "start_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.cycle.v1.ListCyclesRequest": {
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.cycle.v1.UpdateCycleRequest": {
+    "endDate": {
+      "name": "endDate",
+      "optional": false,
+      "protoName": "end_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "flow.dashboard.v1.GetFlowDashboardRequest": {
     "workspaceId": {
       "gt": 0,
@@ -2716,6 +4622,39 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
+    }
+  },
+  "flow.insights.v1.GetInsightsRequest": {
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.insights.v1.GetRoadmapRequest": {
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.insights.v1.GetTeamWorkloadRequest": {
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "flow.label.v1.CreateLabelRequest": {
@@ -2750,7 +4689,280 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "flow.label.v1.DeleteLabelRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "flow.label.v1.ListLabelsRequest": {
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.label.v1.SetTaskLabelsRequest": {
+    "labelIds": {
+      "name": "labelIds",
+      "optional": false,
+      "protoName": "label_ids",
+      "repeated": true,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "taskId": {
+      "gt": 0,
+      "name": "taskId",
+      "optional": false,
+      "protoName": "task_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.label.v1.UpdateLabelRequest": {
+    "color": {
+      "minLen": 1,
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.milestone.v1.CreateMilestoneRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "projectId": {
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "targetDate": {
+      "name": "targetDate",
+      "optional": false,
+      "protoName": "target_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.milestone.v1.ListMilestonesRequest": {
+    "projectId": {
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.milestone.v1.UpdateMilestoneRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "targetDate": {
+      "name": "targetDate",
+      "optional": false,
+      "protoName": "target_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.notification.v1.ListNotificationsRequest": {},
+  "flow.notification.v1.MarkAllNotificationsReadRequest": {},
+  "flow.notification.v1.MarkNotificationReadRequest": {
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.AddProjectMemberRequest": {
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "role": {
+      "name": "role",
+      "optional": false,
+      "protoName": "role",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.CreateProjectColumnRequest": {
+    "color": {
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "sortOrder": {
+      "name": "sortOrder",
+      "optional": false,
+      "protoName": "sort_order",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
     "workspaceId": {
       "name": "workspaceId",
       "optional": false,
@@ -2833,12 +5045,79 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "flow.project.v1.DeleteProjectColumnRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "flow.project.v1.DeleteProjectRequest": {
     "id": {
       "gt": 0,
       "name": "id",
       "optional": false,
       "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.InviteProjectMemberRequest": {
+    "email": {
+      "minLen": 1,
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "role": {
+      "name": "role",
+      "optional": false,
+      "protoName": "role",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.project.v1.ListProjectColumnsRequest": {
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.ListProjectMembersRequest": {
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -2852,6 +5131,165 @@ export const contractValidationMetadata = {
       "protoName": "workspace_id",
       "repeated": false,
       "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.MoveProjectRequest": {
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "workspaceId": {
+      "gt": 0,
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.MoveTaskToColumnRequest": {
+    "columnId": {
+      "name": "columnId",
+      "optional": false,
+      "protoName": "column_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "taskId": {
+      "gt": 0,
+      "name": "taskId",
+      "optional": false,
+      "protoName": "task_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.RemoveProjectMemberRequest": {
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.TransferProjectOwnershipRequest": {
+    "newOwnerId": {
+      "gt": 0,
+      "name": "newOwnerId",
+      "optional": false,
+      "protoName": "new_owner_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.project.v1.UpdateProjectColumnRequest": {
+    "color": {
+      "name": "color",
+      "optional": false,
+      "protoName": "color",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortOrder": {
+      "name": "sortOrder",
+      "optional": false,
+      "protoName": "sort_order",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "flow.project.v1.UpdateProjectMemberRoleRequest": {
+    "projectId": {
+      "gt": 0,
+      "name": "projectId",
+      "optional": false,
+      "protoName": "project_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "role": {
+      "minLen": 1,
+      "name": "role",
+      "optional": false,
+      "protoName": "role",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
       "scalar": true,
       "type": "int64"
     }
@@ -2875,6 +5313,63 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
+    }
+  },
+  "flow.setting.v1.GetUserSettingsRequest": {},
+  "flow.setting.v1.GetUserSettingsRequest.UpdateUserSettingsRequest": {
+    "emailNotifications": {
+      "name": "emailNotifications",
+      "optional": false,
+      "protoName": "email_notifications",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "mentions": {
+      "name": "mentions",
+      "optional": false,
+      "protoName": "mentions",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "statusChanges": {
+      "name": "statusChanges",
+      "optional": false,
+      "protoName": "status_changes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "taskAssigned": {
+      "name": "taskAssigned",
+      "optional": false,
+      "protoName": "task_assigned",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "taskComments": {
+      "name": "taskComments",
+      "optional": false,
+      "protoName": "task_comments",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "weeklyDigest": {
+      "name": "weeklyDigest",
+      "optional": false,
+      "protoName": "weekly_digest",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
     }
   },
   "flow.task.v1.AddCommentRequest": {
@@ -2915,6 +5410,16 @@ export const contractValidationMetadata = {
       "name": "size",
       "optional": false,
       "protoName": "size",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "taskId": {
+      "gt": 0,
+      "name": "taskId",
+      "optional": false,
+      "protoName": "task_id",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -2969,6 +5474,16 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "double"
+    },
+    "parentTaskId": {
+      "gt": 0,
+      "name": "parentTaskId",
+      "optional": false,
+      "protoName": "parent_task_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
     },
     "priority": {
       "minLen": 1,
@@ -3198,6 +5713,18 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "flow.task.v1.DeleteTimeLogRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "flow.task.v1.GetAttachmentsRequest": {
     "taskId": {
       "gt": 0,
@@ -3210,6 +5737,7 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "flow.task.v1.GetMyTasksProjectRequest": {},
   "flow.task.v1.GetMyTasksRequest": {},
   "flow.task.v1.GetSubtasksRequest": {
     "taskId": {
@@ -3306,6 +5834,27 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "flow.task.v1.SearchTasksRequest": {
+    "q": {
+      "name": "q",
+      "optional": false,
+      "protoName": "q",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "workspaceId": {
+      "minLen": 1,
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "flow.task.v1.UpdateTaskRequest": {
     "body": {
       "name": "body",
@@ -3346,6 +5895,159 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
+    }
+  },
+  "flow.view.v1.CreateViewRequest": {
+    "filters": {
+      "name": "filters",
+      "optional": false,
+      "protoName": "filters",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "google.protobuf.Struct"
+    },
+    "groupBy": {
+      "name": "groupBy",
+      "optional": false,
+      "protoName": "group_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "icon": {
+      "name": "icon",
+      "optional": false,
+      "protoName": "icon",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.view.v1.DeleteViewRequest": {
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.view.v1.ListViewsRequest": {
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "flow.view.v1.UpdateViewRequest": {
+    "filters": {
+      "name": "filters",
+      "optional": false,
+      "protoName": "filters",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "google.protobuf.Struct"
+    },
+    "groupBy": {
+      "name": "groupBy",
+      "optional": false,
+      "protoName": "group_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "icon": {
+      "name": "icon",
+      "optional": false,
+      "protoName": "icon",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "optional": false,
+      "protoName": "sort_by",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "sortDir": {
+      "name": "sortDir",
+      "optional": false,
+      "protoName": "sort_dir",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "flow.workspace.v1.AddWorkspaceMemberRequest": {
@@ -3434,8 +6136,52 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "flow.workspace.v1.ListWorkspaceMembersRequest": {
+    "workspaceId": {
+      "gt": 0,
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "flow.workspace.v1.ListWorkspacesRequest": {},
   "flow.workspace.v1.RemoveWorkspaceMemberRequest": {
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "workspaceId": {
+      "gt": 0,
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "flow.workspace.v1.UpdateWorkspaceMemberRoleRequest": {
+    "role": {
+      "minLen": 1,
+      "name": "role",
+      "optional": false,
+      "protoName": "role",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
     "userId": {
       "gt": 0,
       "name": "userId",
@@ -3619,8 +6365,67 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "hr.benefit.v1.CreateBenefitRequest": {
+    "costEmployee": {
+      "name": "costEmployee",
+      "optional": false,
+      "protoName": "cost_employee",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "costEmployer": {
+      "name": "costEmployer",
+      "optional": false,
+      "protoName": "cost_employer",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "provider": {
+      "name": "provider",
+      "optional": false,
+      "protoName": "provider",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "type": {
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hr.benefit.v1.ListBenefitsRequest": {},
+  "hr.dashboard.v1.GetDashboardWidgetsRequest": {},
   "hr.dashboard.v1.GetHRDashboardRequest": {},
-  "hr.dashboard.v1.UpdateWidgetLayoutRequest": {
+  "hr.dashboard.v1.UpdateDashboardWidgetsRequest": {
     "widgets": {
       "minItems": 1,
       "name": "widgets",
@@ -3633,22 +6438,21 @@ export const contractValidationMetadata = {
     }
   },
   "hr.department.v1.CreateDepartmentRequest": {
-    "defaultWorkScheduleId": {
-      "name": "defaultWorkScheduleId",
-      "optional": true,
-      "protoName": "default_work_schedule_id",
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
       "repeated": false,
       "required": false,
       "scalar": true,
-      "type": "int64"
+      "type": "string"
     },
-    "locationId": {
-      "gt": 0,
-      "name": "locationId",
+    "managerStaffId": {
+      "name": "managerStaffId",
       "optional": false,
-      "protoName": "location_id",
+      "protoName": "manager_staff_id",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "int64"
     },
@@ -3661,17 +6465,21 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
-    },
-    "parentDepartmentId": {
-      "name": "parentDepartmentId",
-      "optional": true,
-      "protoName": "parent_department_id",
+    }
+  },
+  "hr.department.v1.DeleteDepartmentRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
       "repeated": false,
-      "required": false,
+      "required": true,
       "scalar": true,
       "type": "int64"
     }
   },
+  "hr.department.v1.ListDepartmentsRequest": {},
   "hr.department.v1.UpdateDepartmentRequest": {
     "body": {
       "name": "body",
@@ -3693,50 +6501,10 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
-  "hr.document.v1.ListEmployeeDocumentsRequest": {
-    "documentType": {
-      "name": "documentType",
-      "optional": true,
-      "protoName": "document_type",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "employeeId": {
-      "name": "employeeId",
-      "optional": true,
-      "protoName": "employee_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    }
-  },
-  "hr.document.v1.UploadDocumentRequest": {
-    "documentType": {
-      "minLen": 1,
-      "name": "documentType",
-      "optional": false,
-      "protoName": "document_type",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "employeeId": {
-      "gt": 0,
-      "name": "employeeId",
-      "optional": false,
-      "protoName": "employee_id",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "int64"
-    },
+  "hr.document.v1.CreateDocumentRequest": {
     "expiryDate": {
       "name": "expiryDate",
-      "optional": true,
+      "optional": false,
       "protoName": "expiry_date",
       "repeated": false,
       "required": false,
@@ -3744,12 +6512,11 @@ export const contractValidationMetadata = {
       "type": "string"
     },
     "fileUrl": {
-      "minLen": 1,
       "name": "fileUrl",
       "optional": false,
       "protoName": "file_url",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     },
@@ -3763,17 +6530,38 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
-    "storageMode": {
-      "minLen": 1,
-      "name": "storageMode",
+    "staffId": {
+      "name": "staffId",
       "optional": false,
-      "protoName": "storage_mode",
+      "protoName": "staff_id",
       "repeated": false,
-      "required": true,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "type": {
+      "name": "type",
+      "optional": false,
+      "protoName": "type",
+      "repeated": false,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
   },
+  "hr.document.v1.DeleteDocumentRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hr.document.v1.ListDocumentsRequest": {},
   "hr.employee.v1.AcceptInviteRequest": {
     "password": {
       "minLen": 1,
@@ -4640,6 +7428,66 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "hr.one_on_one.v1.CreateOneOnOneRequest": {
+    "actionItems": {
+      "name": "actionItems",
+      "optional": false,
+      "protoName": "action_items",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "managerId": {
+      "gt": 0,
+      "name": "managerId",
+      "optional": false,
+      "protoName": "manager_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "scheduledAt": {
+      "minLen": 1,
+      "name": "scheduledAt",
+      "optional": false,
+      "protoName": "scheduled_at",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "staffId": {
+      "gt": 0,
+      "name": "staffId",
+      "optional": false,
+      "protoName": "staff_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hr.one_on_one.v1.ListOneOnOnesRequest": {},
   "hr.overtime.v1.ApproveOvertimeRequest": {
     "body": {
       "name": "body",
@@ -4719,6 +7567,61 @@ export const contractValidationMetadata = {
       "protoName": "status",
       "repeated": false,
       "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hr.payroll.v1.ListPayrollRequest": {
+    "periodLabel": {
+      "name": "periodLabel",
+      "optional": false,
+      "protoName": "period_label",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hr.payroll.v1.MarkPayrollPaidRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hr.payroll.v1.RunPayrollRequest": {
+    "periodEnd": {
+      "minLen": 1,
+      "name": "periodEnd",
+      "optional": false,
+      "protoName": "period_end",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "periodLabel": {
+      "minLen": 1,
+      "name": "periodLabel",
+      "optional": false,
+      "protoName": "period_label",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "periodStart": {
+      "minLen": 1,
+      "name": "periodStart",
+      "optional": false,
+      "protoName": "period_start",
+      "repeated": false,
+      "required": true,
       "scalar": true,
       "type": "string"
     }
@@ -4841,6 +7744,91 @@ export const contractValidationMetadata = {
       "type": "ReportRequestPayload"
     }
   },
+  "hr.review.v1.CreateReviewRequest": {
+    "goalsRating": {
+      "name": "goalsRating",
+      "optional": false,
+      "protoName": "goals_rating",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "period": {
+      "minLen": 1,
+      "name": "period",
+      "optional": false,
+      "protoName": "period",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "rating": {
+      "name": "rating",
+      "optional": false,
+      "protoName": "rating",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "reviewerId": {
+      "name": "reviewerId",
+      "optional": false,
+      "protoName": "reviewer_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "skillsRating": {
+      "name": "skillsRating",
+      "optional": false,
+      "protoName": "skills_rating",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "staffId": {
+      "name": "staffId",
+      "optional": false,
+      "protoName": "staff_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "valuesRating": {
+      "name": "valuesRating",
+      "optional": false,
+      "protoName": "values_rating",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    }
+  },
+  "hr.review.v1.ListReviewsRequest": {},
   "hr.role.v1.AssignRoleRequest": {
     "employeeId": {
       "gt": 0,
@@ -5733,6 +8721,57 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "hr.timesheet.v1.ListTimesheetsRequest": {
+    "weekStart": {
+      "name": "weekStart",
+      "optional": false,
+      "protoName": "week_start",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hr.training.v1.CreateTrainingCourseRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "durationHours": {
+      "name": "durationHours",
+      "optional": false,
+      "protoName": "duration_hours",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "isRequired": {
+      "name": "isRequired",
+      "optional": false,
+      "protoName": "is_required",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hr.training.v1.ListTrainingCoursesRequest": {},
   "hr.work_schedule.v1.CreateWorkScheduleRequest": {
     "breakMinutes": {
       "gte": 0,
@@ -5847,6 +8886,20 @@ export const contractValidationMetadata = {
       "type": "int32"
     }
   },
+  "hub.ai.v1.GetAiQuotaSettingsRequest": {},
+  "hub.ai.v1.GetAiQuotaSettingsRequest.UpdateAiQuotaSettingsRequest": {
+    "mode": {
+      "minLen": 1,
+      "name": "mode",
+      "optional": false,
+      "protoName": "mode",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.ai.v1.GetAiUsageRequest": {},
   "hub.app.v1.AddonStatusRequest": {
     "addonId": {
       "minLen": 1,
@@ -5887,6 +8940,18 @@ export const contractValidationMetadata = {
   "hub.app.v1.ListAppsRequest": {},
   "hub.billing.v1.GetBillingSummaryRequest": {},
   "hub.billing.v1.ListInvoicesRequest": {},
+  "hub.business.v1.CheckBusinessNameExistsRequest": {
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "hub.business.v1.CreateSubBusinessRequest": {
     "name": {
       "minLen": 1,
@@ -5921,6 +8986,18 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "hub.business.v1.GetPublicBusinessRequest": {
+    "businessId": {
+      "gt": 0,
+      "name": "businessId",
+      "optional": false,
+      "protoName": "business_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "hub.business.v1.ListMyBusinessesRequest": {},
   "hub.business.v1.LookupBusinessBySlugRequest": {
     "slug": {
@@ -5928,6 +9005,18 @@ export const contractValidationMetadata = {
       "name": "slug",
       "optional": false,
       "protoName": "slug",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.business.v1.OnboardBusinessRequest": {
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
       "repeated": false,
       "required": true,
       "scalar": true,
@@ -6039,6 +9128,17 @@ export const contractValidationMetadata = {
       "name": "website",
       "optional": false,
       "protoName": "website",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.caret.v1.ListCaretToolsRequest": {
+    "mode": {
+      "name": "mode",
+      "optional": false,
+      "protoName": "mode",
       "repeated": false,
       "required": false,
       "scalar": true,
@@ -6390,6 +9490,314 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "hub.feature.v1.CreateRuleRequest": {
+    "conditions": {
+      "name": "conditions",
+      "optional": false,
+      "protoName": "conditions",
+      "repeated": true,
+      "required": false,
+      "scalar": false,
+      "type": "FeatureCondition"
+    },
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "enabled": {
+      "name": "enabled",
+      "optional": false,
+      "protoName": "enabled",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "featureKey": {
+      "minLen": 1,
+      "name": "featureKey",
+      "optional": false,
+      "protoName": "feature_key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "priority": {
+      "name": "priority",
+      "optional": false,
+      "protoName": "priority",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "rolloutPercentage": {
+      "name": "rolloutPercentage",
+      "optional": false,
+      "protoName": "rollout_percentage",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "variant": {
+      "name": "variant",
+      "optional": false,
+      "protoName": "variant",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.DeleteRuleRequest": {
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.feature.v1.DeleteTargetRequest": {
+    "featureKey": {
+      "minLen": 1,
+      "name": "featureKey",
+      "optional": false,
+      "protoName": "feature_key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "ownerId": {
+      "name": "ownerId",
+      "optional": false,
+      "protoName": "owner_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "hub.feature.v1.ListFlagsRequest": {},
+  "hub.feature.v1.ListFlagsRequest.DeleteFlagRequest": {
+    "key": {
+      "minLen": 1,
+      "name": "key",
+      "optional": false,
+      "protoName": "key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.ListFlagsRequest.UpsertFlagRequest": {
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "enabled": {
+      "name": "enabled",
+      "optional": false,
+      "protoName": "enabled",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "key": {
+      "minLen": 1,
+      "name": "key",
+      "optional": false,
+      "protoName": "key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "rolloutPercentage": {
+      "name": "rolloutPercentage",
+      "optional": false,
+      "protoName": "rollout_percentage",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "variantOff": {
+      "name": "variantOff",
+      "optional": false,
+      "protoName": "variant_off",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "variantOn": {
+      "name": "variantOn",
+      "optional": false,
+      "protoName": "variant_on",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.ListRulesRequest": {
+    "featureKey": {
+      "minLen": 1,
+      "name": "featureKey",
+      "optional": false,
+      "protoName": "feature_key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.ListTargetsRequest": {
+    "featureKey": {
+      "minLen": 1,
+      "name": "featureKey",
+      "optional": false,
+      "protoName": "feature_key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.ResolveFeaturesRequest": {
+    "subject": {
+      "name": "subject",
+      "optional": false,
+      "protoName": "subject",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.ResolveMyFeaturesRequest": {},
+  "hub.feature.v1.UpdateRuleRequest": {
+    "conditions": {
+      "name": "conditions",
+      "optional": false,
+      "protoName": "conditions",
+      "repeated": true,
+      "required": false,
+      "scalar": false,
+      "type": "FeatureCondition"
+    },
+    "description": {
+      "name": "description",
+      "optional": false,
+      "protoName": "description",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "enabled": {
+      "name": "enabled",
+      "optional": false,
+      "protoName": "enabled",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "id": {
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "priority": {
+      "name": "priority",
+      "optional": false,
+      "protoName": "priority",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "rolloutPercentage": {
+      "name": "rolloutPercentage",
+      "optional": false,
+      "protoName": "rollout_percentage",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "variant": {
+      "name": "variant",
+      "optional": false,
+      "protoName": "variant",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.feature.v1.UpsertTargetRequest": {
+    "enabled": {
+      "name": "enabled",
+      "optional": false,
+      "protoName": "enabled",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "featureKey": {
+      "minLen": 1,
+      "name": "featureKey",
+      "optional": false,
+      "protoName": "feature_key",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "ownerId": {
+      "name": "ownerId",
+      "optional": false,
+      "protoName": "owner_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "variant": {
+      "name": "variant",
+      "optional": false,
+      "protoName": "variant",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "hub.integration.v1.ConnectIntegrationRequest": {
     "config": {
       "name": "config",
@@ -6424,6 +9832,88 @@ export const contractValidationMetadata = {
     }
   },
   "hub.integration.v1.ListIntegrationsRequest": {},
+  "hub.memory.v1.DeleteChatRequest": {
+    "sessionId": {
+      "name": "sessionId",
+      "optional": false,
+      "protoName": "session_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.memory.v1.GetChatMessagesRequest": {
+    "sessionId": {
+      "name": "sessionId",
+      "optional": false,
+      "protoName": "session_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.memory.v1.ListChatsRequest": {
+    "limit": {
+      "name": "limit",
+      "optional": false,
+      "protoName": "limit",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "offset": {
+      "name": "offset",
+      "optional": false,
+      "protoName": "offset",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "hub.memory.v1.PinChatRequest": {
+    "pinned": {
+      "name": "pinned",
+      "optional": false,
+      "protoName": "pinned",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "sessionId": {
+      "name": "sessionId",
+      "optional": false,
+      "protoName": "session_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.memory.v1.RenameChatRequest": {
+    "sessionId": {
+      "name": "sessionId",
+      "optional": false,
+      "protoName": "session_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "title": {
+      "name": "title",
+      "optional": false,
+      "protoName": "title",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
   "hub.menu.v1.ListMenuRequest": {},
   "hub.menu.v1.UpdateMenuRequest": {},
   "hub.notification.v1.ListNotificationsRequest": {},
@@ -6454,12 +9944,11 @@ export const contractValidationMetadata = {
   },
   "hub.permission.v1.CreateRoleRequest": {
     "description": {
-      "minLen": 1,
       "name": "description",
       "optional": false,
       "protoName": "description",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     },
@@ -6474,12 +9963,11 @@ export const contractValidationMetadata = {
       "type": "string"
     },
     "permissions": {
-      "minItems": 1,
       "name": "permissions",
       "optional": false,
       "protoName": "permissions",
       "repeated": true,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
@@ -6530,6 +10018,15 @@ export const contractValidationMetadata = {
     }
   },
   "hub.permission.v1.UpdateRoleRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateRoleBody"
+    },
     "id": {
       "gt": 0,
       "name": "id",
@@ -6539,25 +10036,6 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
-    },
-    "name": {
-      "minLen": 1,
-      "name": "name",
-      "optional": false,
-      "protoName": "name",
-      "repeated": false,
-      "required": true,
-      "scalar": true,
-      "type": "string"
-    },
-    "permissions": {
-      "name": "permissions",
-      "optional": false,
-      "protoName": "permissions",
-      "repeated": true,
-      "required": false,
-      "scalar": true,
-      "type": "string"
     }
   },
   "hub.security.v1.GetSecurityStateRequest": {},
@@ -6572,6 +10050,41 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "bool"
+    }
+  },
+  "hub.subscription.v1.GetMySubscriptionRequest": {},
+  "hub.subscription.v1.GetMySubscriptionRequest.ListPlansRequest": {},
+  "hub.subscription.v1.GetMySubscriptionRequest.ListPlansRequest.GetBillingDetailRequest": {},
+  "hub.subscription.v1.GetMySubscriptionRequest.ListPlansRequest.GetBillingDetailRequest.GetBillingHistoryRequest": {},
+  "hub.subscription.v1.GetMySubscriptionRequest.ListPlansRequest.GetBillingDetailRequest.GetBillingHistoryRequest.CreateCheckoutRequest": {
+    "email": {
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "planSlug": {
+      "name": "planSlug",
+      "optional": false,
+      "protoName": "plan_slug",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "hub.subscription.v1.GetMySubscriptionRequest.ListPlansRequest.GetBillingDetailRequest.GetBillingHistoryRequest.UpsertSubscriptionRequest": {
+    "planSlug": {
+      "name": "planSlug",
+      "optional": false,
+      "protoName": "plan_slug",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "hub.team.access.v1.AccessRequest": {
@@ -7051,6 +10564,18 @@ export const contractValidationMetadata = {
     }
   },
   "hub.user.v1.GetMeRequest": {},
+  "hub.user.v1.SwitchBusinessRequest": {
+    "businessId": {
+      "gt": 0,
+      "name": "businessId",
+      "optional": false,
+      "protoName": "business_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "hub.user.v1.UpdateProfileRequest": {
     "email": {
       "email": true,
@@ -7143,6 +10668,7 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "insights.dashboard.v1.GetDashboardSummaryRequest": {},
   "insights.dashboard.v1.GetInsightsRequest": {},
   "insights.dashboard.v1.GetKPIsRequest": {},
   "insights.dashboard.v1.GetRoadmapRequest": {},
@@ -7181,6 +10707,7 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "insights.operation.v1.GetOperationsSummaryRequest": {},
   "insights.operation.v1.GetShiftMetricsRequest": {
     "period": {
       "name": "period",
@@ -7227,6 +10754,7 @@ export const contractValidationMetadata = {
   },
   "insights.product.v1.GetCategoryPerformanceRequest": {},
   "insights.product.v1.GetProductMarginsRequest": {},
+  "insights.product.v1.GetProductPerformanceRequest": {},
   "insights.product.v1.GetSlowMoversRequest": {
     "days": {
       "name": "days",
@@ -7291,6 +10819,16 @@ export const contractValidationMetadata = {
     }
   },
   "insights.report.v1.CreateScheduledReportRequest": {
+    "channel": {
+      "minLen": 1,
+      "name": "channel",
+      "optional": false,
+      "protoName": "channel",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
     "frequency": {
       "minLen": 1,
       "name": "frequency",
@@ -7300,6 +10838,15 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
     },
     "recipientEmail": {
       "email": true,
@@ -7312,15 +10859,76 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
-    "templateId": {
-      "gt": 0,
-      "name": "templateId",
+    "templateSlug": {
+      "minLen": 1,
+      "name": "templateSlug",
       "optional": false,
-      "protoName": "template_id",
+      "protoName": "template_slug",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "insights.report.v1.DeleteScheduledReportRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
       "repeated": false,
       "required": true,
       "scalar": true,
       "type": "int64"
+    }
+  },
+  "insights.report.v1.ExportRevenueReportRequest": {
+    "from": {
+      "name": "from",
+      "optional": false,
+      "protoName": "from",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "to": {
+      "name": "to",
+      "optional": false,
+      "protoName": "to",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "insights.report.v1.GenerateRevenueReportRequest": {
+    "format": {
+      "name": "format",
+      "optional": false,
+      "protoName": "format",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "from": {
+      "name": "from",
+      "optional": false,
+      "protoName": "from",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "to": {
+      "name": "to",
+      "optional": false,
+      "protoName": "to",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     }
   },
   "insights.report.v1.GetReportTemplateRequest": {
@@ -7416,6 +11024,68 @@ export const contractValidationMetadata = {
       "protoName": "sort_dir",
       "repeated": false,
       "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "insights.report.v1.UpdateScheduledReportRequest": {
+    "channel": {
+      "minLen": 1,
+      "name": "channel",
+      "optional": false,
+      "protoName": "channel",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "frequency": {
+      "minLen": 1,
+      "name": "frequency",
+      "optional": false,
+      "protoName": "frequency",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": false,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "recipientEmail": {
+      "email": true,
+      "minLen": 1,
+      "name": "recipientEmail",
+      "optional": false,
+      "protoName": "recipient_email",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "templateSlug": {
+      "minLen": 1,
+      "name": "templateSlug",
+      "optional": false,
+      "protoName": "template_slug",
+      "repeated": false,
+      "required": true,
       "scalar": true,
       "type": "string"
     }
@@ -8442,6 +12112,27 @@ export const contractValidationMetadata = {
     }
   },
   "pos.menu_item.v1.ListMenuItemsRequest": {},
+  "pos.menu_item.v1.ListPublicMenuItemsRequest": {
+    "businessId": {
+      "gt": 0,
+      "name": "businessId",
+      "optional": false,
+      "protoName": "business_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "locationId": {
+      "name": "locationId",
+      "optional": false,
+      "protoName": "location_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.modifier.v1.CreateModifierRequest": {
     "groupName": {
       "minLen": 1,
@@ -8804,7 +12495,77 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "pos.orders.v1.CreatePublicOrderRequest": {
+    "customerEmail": {
+      "name": "customerEmail",
+      "optional": false,
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerPhone": {
+      "name": "customerPhone",
+      "optional": false,
+      "protoName": "customer_phone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "items": {
+      "minItems": 1,
+      "name": "items",
+      "optional": false,
+      "protoName": "items",
+      "repeated": true,
+      "required": true,
+      "scalar": false,
+      "type": "PublicOrderItemInput"
+    },
+    "notes": {
+      "name": "notes",
+      "optional": false,
+      "protoName": "notes",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "ownerId": {
+      "gt": 0,
+      "name": "ownerId",
+      "optional": false,
+      "protoName": "owner_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "pos.orders.v1.GetOrderDetailRequest": {
+    "orderId": {
+      "gt": 0,
+      "name": "orderId",
+      "optional": false,
+      "protoName": "order_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.orders.v1.GetPublicOrderStatusRequest": {
     "orderId": {
       "gt": 0,
       "name": "orderId",
@@ -9791,6 +13552,16 @@ export const contractValidationMetadata = {
     }
   },
   "pos.user.v1.VerifyPOSUserPINRequest": {
+    "locationId": {
+      "gt": 0,
+      "name": "locationId",
+      "optional": false,
+      "protoName": "location_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
     "pin": {
       "minLen": 1,
       "name": "pin",
@@ -9800,6 +13571,349 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    },
+    "userId": {
+      "gt": 0,
+      "name": "userId",
+      "optional": false,
+      "protoName": "user_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "support.canned.v1.CreateCannedResponseRequest": {
+    "body": {
+      "minLen": 1,
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "category": {
+      "name": "category",
+      "optional": false,
+      "protoName": "category",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "name": {
+      "minLen": 1,
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "shortcut": {
+      "name": "shortcut",
+      "optional": false,
+      "protoName": "shortcut",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "support.canned.v1.DeleteCannedResponseRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "support.canned.v1.ListCannedResponsesRequest": {},
+  "support.canned.v1.UpdateCannedResponseRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "category": {
+      "name": "category",
+      "optional": false,
+      "protoName": "category",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "shortcut": {
+      "name": "shortcut",
+      "optional": false,
+      "protoName": "shortcut",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "support.customer.v1.GetCustomerRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "support.customer.v1.ListCustomersRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "support.inbox.v1.GetUnreadCountRequest": {},
+  "support.inbox.v1.ListInboxRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "support.knowledge.v1.CreateArticleRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "category": {
+      "name": "category",
+      "optional": false,
+      "protoName": "category",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "isPublished": {
+      "name": "isPublished",
+      "optional": false,
+      "protoName": "is_published",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "slug": {
+      "minLen": 1,
+      "name": "slug",
+      "optional": false,
+      "protoName": "slug",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "title": {
+      "minLen": 1,
+      "name": "title",
+      "optional": false,
+      "protoName": "title",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "support.knowledge.v1.DeleteArticleRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "support.knowledge.v1.ListArticlesRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "support.knowledge.v1.UpdateArticleRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "category": {
+      "name": "category",
+      "optional": false,
+      "protoName": "category",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "isPublished": {
+      "name": "isPublished",
+      "optional": false,
+      "protoName": "is_published",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "slug": {
+      "name": "slug",
+      "optional": false,
+      "protoName": "slug",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "title": {
+      "name": "title",
+      "optional": false,
+      "protoName": "title",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "support.settings.v1.GetSettingsRequest": {},
+  "support.settings.v1.UpdateSettingsRequest": {
+    "autoAssign": {
+      "name": "autoAssign",
+      "optional": false,
+      "protoName": "auto_assign",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "businessHours": {
+      "name": "businessHours",
+      "optional": false,
+      "protoName": "business_hours",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "notificationEmail": {
+      "name": "notificationEmail",
+      "optional": false,
+      "protoName": "notification_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "slaHours": {
+      "gt": 0,
+      "lte": 1000,
+      "name": "slaHours",
+      "optional": false,
+      "protoName": "sla_hours",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int32"
     }
   }
 } as const satisfies ContractValidationMetadata;

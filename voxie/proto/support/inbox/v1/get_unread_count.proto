@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package support.inbox.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/support/inbox/v1";
+
+message GetUnreadCountRequest {}
+
+message GetUnreadCountResponse {
+  int32 count = 1;
+}

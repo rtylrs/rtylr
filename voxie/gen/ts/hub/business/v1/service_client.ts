@@ -25,6 +25,22 @@ export interface CreateSubBusinessResponse {
   id: string;
 }
 
+export interface OnboardBusinessRequest {
+  name: string;
+}
+
+export interface OnboardBusinessResponse {
+  token: string;
+}
+
+export interface CheckBusinessNameExistsRequest {
+  name: string;
+}
+
+export interface CheckBusinessNameExistsResponse {
+  exists: boolean;
+}
+
 export interface GetBusinessRequest {
   businessId: string;
 }
@@ -66,6 +82,7 @@ export interface PublicBusinessSummary {
   logoUrl: string;
   currency: string;
   type: string;
+  timezone: string;
 }
 
 export interface PublicLocation {
@@ -75,6 +92,22 @@ export interface PublicLocation {
   address: string;
   timezone: string;
   isActive: boolean;
+}
+
+export interface GetPublicBusinessRequest {
+  businessId: string;
+}
+
+export interface GetPublicBusinessResponse {
+  business?: PublicBusinessProfile;
+}
+
+export interface PublicBusinessProfile {
+  id: string;
+  name: string;
+  logoUrl: string;
+  currency: string;
+  timezone: string;
 }
 
 export interface SetSlugRequest {
@@ -212,6 +245,55 @@ export class BusinessServiceClient {
     return await resp.json() as CreateSubBusinessResponse;
   }
 
+  async onboardBusiness(req: OnboardBusinessRequest, options?: BusinessServiceCallOptions): Promise<OnboardBusinessResponse> {
+    let path = "/api/hub/business/v1/businesses/onboard";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as OnboardBusinessResponse;
+  }
+
+  async checkBusinessNameExists(req: CheckBusinessNameExistsRequest, options?: BusinessServiceCallOptions): Promise<CheckBusinessNameExistsResponse> {
+    let path = "/api/hub/business/v1/businesses/name-exists";
+    const params = new URLSearchParams();
+    if (req.name != null && req.name !== "") params.set("name", String(req.name));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as CheckBusinessNameExistsResponse;
+  }
+
   async getBusiness(req: GetBusinessRequest, options?: BusinessServiceCallOptions): Promise<GetBusinessResponse> {
     let path = "/api/hub/business/v1/businesses/{business_id}";
     path = path.replace("{business_id}", encodeURIComponent(String(req.businessId)));
@@ -259,6 +341,31 @@ export class BusinessServiceClient {
     }
 
     return await resp.json() as LookupBusinessBySlugResponse;
+  }
+
+  async getPublicBusiness(req: GetPublicBusinessRequest, options?: BusinessServiceCallOptions): Promise<GetPublicBusinessResponse> {
+    let path = "/api/hub/business/v1/businesses/public";
+    const params = new URLSearchParams();
+    if (req.businessId != null && req.businessId !== "0") params.set("business_id", String(req.businessId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetPublicBusinessResponse;
   }
 
   async setSlug(req: SetSlugRequest, options?: BusinessServiceCallOptions): Promise<SetSlugResponse> {

@@ -7,6 +7,16 @@ import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/permission/v1";
 
+message UpdateRoleBody {
+  // name is the role name.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // permissions is the permissions value for this contract.
+  repeated string permissions = 2;
+}
+
 message UpdateRoleRequest {
   // id is the unique identifier for the role.
   int64 id = 1 [
@@ -14,13 +24,7 @@ message UpdateRoleRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
-  // name is the role name.
-  string name = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // permissions is the permissions value for this contract.
-  repeated string permissions = 3;
+  UpdateRoleBody body = 2;
 }
 
 message UpdateRoleResponse {

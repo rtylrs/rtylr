@@ -17,6 +17,8 @@ message UtilizationMetrics {
   int32 active_today = 3;
   // total_hours is the total hours value for this contract.
   double total_hours = 4;
+  // available_hours is the available hours capacity for the period.
+  double available_hours = 7;
   // overtime_hours is the overtime hours value for this contract.
   double overtime_hours = 5;
   // by_staff is the by staff value for this contract.

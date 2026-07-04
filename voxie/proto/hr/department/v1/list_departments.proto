@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hr.department.v1;
+
+import "hr/department/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
+
+message ListDepartmentsRequest {}
+
+message ListDepartmentsResponse {
+  repeated DepartmentPayload departments = 1;
+}

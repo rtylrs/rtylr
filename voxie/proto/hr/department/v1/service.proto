@@ -3,6 +3,8 @@ syntax = "proto3";
 package hr.department.v1;
 
 import "hr/department/v1/create_department.proto";
+import "hr/department/v1/delete_department.proto";
+import "hr/department/v1/list_departments.proto";
 import "hr/department/v1/update_department.proto";
 import "onekit/http/annotations.proto";
 
@@ -11,6 +13,14 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
 // DepartmentService defines HR department endpoints.
 service DepartmentService {
   option (onekit.http.service_config) = {base_path: "/api/hr/department/v1"};
+
+  // ListDepartments returns departments for the active business.
+  rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse) {
+    option (onekit.http.config) = {
+      path: "/departments"
+      method: HTTP_METHOD_GET
+    };
+  }
 
   // CreateDepartment creates a new department.
   rpc CreateDepartment(CreateDepartmentRequest) returns (CreateDepartmentResponse) {
@@ -26,6 +36,14 @@ service DepartmentService {
       path: "/departments/{id}"
       method: HTTP_METHOD_PUT
       body: "body"
+    };
+  }
+
+  // DeleteDepartment deletes a department.
+  rpc DeleteDepartment(DeleteDepartmentRequest) returns (DeleteDepartmentResponse) {
+    option (onekit.http.config) = {
+      path: "/departments/{id}"
+      method: HTTP_METHOD_DELETE
     };
   }
 }

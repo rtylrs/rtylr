@@ -15,6 +15,41 @@ export interface DashboardStats {
   payrollDraft: string;
 }
 
+export interface GetDashboardWidgetsRequest {
+}
+
+export interface GetDashboardWidgetsResponse {
+  widgets: DashboardWidgetPayload[];
+  data: Record<string, DashboardDataPayload>;
+}
+
+export interface DashboardWidgetPayload {
+  id: string;
+  ownerId: string;
+  roleId: string;
+  widgetType: string;
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
+  config: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardDataPayload {
+  widgetType: string;
+  data: string;
+}
+
+export interface UpdateDashboardWidgetsRequest {
+  widgets: DashboardWidgetPayload[];
+}
+
+export interface UpdateDashboardWidgetsResponse {
+  success: boolean;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -99,6 +134,53 @@ export class DashboardServiceClient {
     }
 
     return await resp.json() as GetHRDashboardResponse;
+  }
+
+  async getDashboardWidgets(_req: GetDashboardWidgetsRequest, options?: DashboardServiceCallOptions): Promise<GetDashboardWidgetsResponse> {
+    let path = "/api/hr/dashboard/v1/dashboard/widgets";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetDashboardWidgetsResponse;
+  }
+
+  async updateDashboardWidgets(req: UpdateDashboardWidgetsRequest, options?: DashboardServiceCallOptions): Promise<UpdateDashboardWidgetsResponse> {
+    let path = "/api/hr/dashboard/v1/dashboard/widgets";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateDashboardWidgetsResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

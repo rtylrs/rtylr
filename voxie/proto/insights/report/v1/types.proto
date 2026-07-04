@@ -45,6 +45,8 @@ message ScheduledReport {
   string frequency = 4;
   // recipient_email is the recipient email value for this contract.
   string recipient_email = 5;
+  // channel is the delivery channel (email, slack).
+  string channel = 10;
   // is_active is the is active value for this contract.
   bool is_active = 6;
   // last_sent_at is the last sent at value for this contract.

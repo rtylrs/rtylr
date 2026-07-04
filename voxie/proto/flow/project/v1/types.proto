@@ -48,3 +48,41 @@ message Project {
   // Short project code used to build Task.identifier (e.g. "FLW" → "FLW-42").
   string code = 17;
 }
+
+message ProjectColumn {
+  // id is the unique identifier for the column.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // project_id is the project id value for this contract.
+  int64 project_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the column name.
+  string name = 4;
+  // color is the column color.
+  string color = 5;
+  // sort_order is the column sort order.
+  int32 sort_order = 6;
+  // created_at is when the record was created.
+  string created_at = 7;
+  // updated_at is when the record was last updated.
+  string updated_at = 8;
+}
+
+message ProjectMember {
+  // id is the unique identifier for the membership record.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // project_id is the project id value for this contract.
+  int64 project_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // user_id identifies the user associated with this request.
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the member display name.
+  string name = 4;
+  // email is the member email address.
+  string email = 5;
+  // role is the role value for this contract.
+  string role = 6;
+  // added_by is the user id of the inviter, if any.
+  int64 added_by = 7 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // added_at is when the member joined the project.
+  string added_at = 8;
+}

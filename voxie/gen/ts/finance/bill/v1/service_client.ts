@@ -53,6 +53,22 @@ export interface UpdateBillResponse {
   message: string;
 }
 
+export interface GetBillRequest {
+  id: string;
+}
+
+export interface GetBillResponse {
+  bill?: Bill;
+}
+
+export interface DeleteBillRequest {
+  id: string;
+}
+
+export interface DeleteBillResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -186,6 +202,54 @@ export class BillServiceClient {
     }
 
     return await resp.json() as UpdateBillResponse;
+  }
+
+  async getBill(req: GetBillRequest, options?: BillServiceCallOptions): Promise<GetBillResponse> {
+    let path = "/api/finance/bill/v1/bills/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetBillResponse;
+  }
+
+  async deleteBill(req: DeleteBillRequest, options?: BillServiceCallOptions): Promise<DeleteBillResponse> {
+    let path = "/api/finance/bill/v1/bills/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteBillResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

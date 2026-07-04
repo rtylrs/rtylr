@@ -32,6 +32,46 @@ export interface CreateAccountResponse {
   message: string;
 }
 
+export interface UpdateAccountRequest {
+  id: string;
+  body?: UpdateAccountBody;
+}
+
+export interface UpdateAccountBody {
+  name: string;
+  type: string;
+  currency: string;
+  balance: number;
+  isActive: boolean;
+}
+
+export interface UpdateAccountResponse {
+  message: string;
+}
+
+export interface DeleteAccountRequest {
+  id: string;
+}
+
+export interface DeleteAccountResponse {
+  message: string;
+}
+
+export interface GetChartOfAccountsRequest {
+}
+
+export interface GetChartOfAccountsResponse {
+  tree: ChartOfAccountsNode[];
+}
+
+export interface ChartOfAccountsNode {
+  id: string;
+  name: string;
+  code: string;
+  type: string;
+  children: ChartOfAccountsNode[];
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -140,6 +180,78 @@ export class AccountServiceClient {
     }
 
     return await resp.json() as CreateAccountResponse;
+  }
+
+  async updateAccount(req: UpdateAccountRequest, options?: AccountServiceCallOptions): Promise<UpdateAccountResponse> {
+    let path = "/api/finance/account/v1/accounts/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req.body ?? {}),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateAccountResponse;
+  }
+
+  async deleteAccount(req: DeleteAccountRequest, options?: AccountServiceCallOptions): Promise<DeleteAccountResponse> {
+    let path = "/api/finance/account/v1/accounts/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteAccountResponse;
+  }
+
+  async getChartOfAccounts(_req: GetChartOfAccountsRequest, options?: AccountServiceCallOptions): Promise<GetChartOfAccountsResponse> {
+    let path = "/api/finance/account/v1/chart-of-accounts";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetChartOfAccountsResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

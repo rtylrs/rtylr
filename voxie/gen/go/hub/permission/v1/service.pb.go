@@ -25,7 +25,7 @@ var File_hub_permission_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_permission_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1fhub/permission/v1/service.proto\x12\x11hub.permission.v1\x1a#hub/permission/v1/create_role.proto\x1a#hub/permission/v1/delete_role.proto\x1a'hub/permission/v1/get_permissions.proto\x1a\"hub/permission/v1/list_roles.proto\x1a0hub/permission/v1/update_permission_matrix.proto\x1a#hub/permission/v1/update_role.proto\x1a\x1donekit/http/annotations.proto2\xf2\x05\n" +
+	"\x1fhub/permission/v1/service.proto\x12\x11hub.permission.v1\x1a#hub/permission/v1/create_role.proto\x1a#hub/permission/v1/delete_role.proto\x1a'hub/permission/v1/get_permissions.proto\x1a\"hub/permission/v1/list_roles.proto\x1a0hub/permission/v1/update_permission_matrix.proto\x1a#hub/permission/v1/update_role.proto\x1a\x1donekit/http/annotations.proto2\xf8\x05\n" +
 	"\x11PermissionService\x12{\n" +
 	"\x0eGetPermissions\x12(.hub.permission.v1.GetPermissionsRequest\x1a).hub.permission.v1.GetPermissionsResponse\"\x14\x9a\xb5\x18\x10\n" +
 	"\f/permissions\x10\x01\x12f\n" +
@@ -35,10 +35,10 @@ const file_hub_permission_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"CreateRole\x12$.hub.permission.v1.CreateRoleRequest\x1a%.hub.permission.v1.CreateRoleResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/roles\x10\x02\x12n\n" +
+	"\x06/roles\x10\x02\x12t\n" +
 	"\n" +
-	"UpdateRole\x12$.hub.permission.v1.UpdateRoleRequest\x1a%.hub.permission.v1.UpdateRoleResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/roles/{id}\x10\x03\x12n\n" +
+	"UpdateRole\x12$.hub.permission.v1.UpdateRoleRequest\x1a%.hub.permission.v1.UpdateRoleResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\v/roles/{id}\x10\x03\"\x04body\x12n\n" +
 	"\n" +
 	"DeleteRole\x12$.hub.permission.v1.DeleteRoleRequest\x1a%.hub.permission.v1.DeleteRoleResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/roles/{id}\x10\x04\x12\x8e\x01\n" +

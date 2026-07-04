@@ -136,6 +136,8 @@ type ScheduledReport struct {
 	Frequency string `protobuf:"bytes,4,opt,name=frequency,proto3" json:"frequency,omitempty"`
 	// recipient_email is the recipient email value for this contract.
 	RecipientEmail string `protobuf:"bytes,5,opt,name=recipient_email,json=recipientEmail,proto3" json:"recipient_email,omitempty"`
+	// channel is the delivery channel (email, slack).
+	Channel string `protobuf:"bytes,10,opt,name=channel,proto3" json:"channel,omitempty"`
 	// is_active is the is active value for this contract.
 	IsActive bool `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	// last_sent_at is the last sent at value for this contract.
@@ -213,6 +215,13 @@ func (x *ScheduledReport) GetRecipientEmail() string {
 	return ""
 }
 
+func (x *ScheduledReport) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
 func (x *ScheduledReport) GetIsActive() bool {
 	if x != nil {
 		return x.IsActive
@@ -254,14 +263,16 @@ const file_insights_report_v1_types_proto_rawDesc = "" +
 	"\ametrics\x18\x05 \x03(\tR\ametrics\x12\x16\n" +
 	"\x06format\x18\x06 \x01(\tR\x06format\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\a \x01(\tR\tcreatedAt\"\xba\x02\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\"\xd4\x02\n" +
 	"\x0fScheduledReport\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12%\n" +
 	"\vtemplate_id\x18\x02 \x01(\x03B\x04е\x18\x01R\n" +
 	"templateId\x12#\n" +
 	"\rtemplate_name\x18\x03 \x01(\tR\ftemplateName\x12\x1c\n" +
 	"\tfrequency\x18\x04 \x01(\tR\tfrequency\x12'\n" +
-	"\x0frecipient_email\x18\x05 \x01(\tR\x0erecipientEmail\x12\x1b\n" +
+	"\x0frecipient_email\x18\x05 \x01(\tR\x0erecipientEmail\x12\x18\n" +
+	"\achannel\x18\n" +
+	" \x01(\tR\achannel\x12\x1b\n" +
 	"\tis_active\x18\x06 \x01(\bR\bisActive\x12 \n" +
 	"\flast_sent_at\x18\a \x01(\tR\n" +
 	"lastSentAt\x12 \n" +

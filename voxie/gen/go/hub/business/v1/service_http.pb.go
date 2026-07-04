@@ -13,8 +13,11 @@ import (
 type BusinessServiceServer interface {
 	ListMyBusinesses(context.Context, *ListMyBusinessesRequest) (*ListMyBusinessesResponse, error)
 	CreateSubBusiness(context.Context, *CreateSubBusinessRequest) (*CreateSubBusinessResponse, error)
+	OnboardBusiness(context.Context, *OnboardBusinessRequest) (*OnboardBusinessResponse, error)
+	CheckBusinessNameExists(context.Context, *CheckBusinessNameExistsRequest) (*CheckBusinessNameExistsResponse, error)
 	GetBusiness(context.Context, *GetBusinessRequest) (*GetBusinessResponse, error)
 	LookupBusinessBySlug(context.Context, *LookupBusinessBySlugRequest) (*LookupBusinessBySlugResponse, error)
+	GetPublicBusiness(context.Context, *GetPublicBusinessRequest) (*GetPublicBusinessResponse, error)
 	SetSlug(context.Context, *SetSlugRequest) (*SetSlugResponse, error)
 	UpdateBusiness(context.Context, *UpdateBusinessRequest) (*UpdateBusinessResponse, error)
 }
@@ -43,6 +46,24 @@ func RegisterBusinessServiceServer(server BusinessServiceServer, opts ...ServerO
 
 	config.mux.Handle("POST /api/hub/business/v1/businesses", createSubBusinessHandler)
 
+	methodHeaders = getOnboardBusinessHeaders()
+	onboardBusinessHandler := BindingMiddleware[OnboardBusinessRequest](
+		genericHandler(server.OnboardBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		onboardBusinessPathParams, onboardBusinessQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/hub/business/v1/businesses/onboard", onboardBusinessHandler)
+
+	methodHeaders = getCheckBusinessNameExistsHeaders()
+	checkBusinessNameExistsHandler := BindingMiddleware[CheckBusinessNameExistsRequest](
+		genericHandler(server.CheckBusinessNameExists, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		checkBusinessNameExistsPathParams, checkBusinessNameExistsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hub/business/v1/businesses/name-exists", checkBusinessNameExistsHandler)
+
 	methodHeaders = getGetBusinessHeaders()
 	getBusinessHandler := BindingMiddleware[GetBusinessRequest](
 		genericHandler(server.GetBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -60,6 +81,15 @@ func RegisterBusinessServiceServer(server BusinessServiceServer, opts ...ServerO
 	)
 
 	config.mux.Handle("GET /api/hub/business/v1/businesses/by-slug", lookupBusinessBySlugHandler)
+
+	methodHeaders = getGetPublicBusinessHeaders()
+	getPublicBusinessHandler := BindingMiddleware[GetPublicBusinessRequest](
+		genericHandler(server.GetPublicBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getPublicBusinessPathParams, getPublicBusinessQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hub/business/v1/businesses/public", getPublicBusinessHandler)
 
 	methodHeaders = getSetSlugHeaders()
 	setSlugHandler := BindingMiddleware[SetSlugRequest](
@@ -97,6 +127,16 @@ func getCreateSubBusinessHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getOnboardBusinessHeaders returns the method-level required headers for OnboardBusiness
+func getOnboardBusinessHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getCheckBusinessNameExistsHeaders returns the method-level required headers for CheckBusinessNameExists
+func getCheckBusinessNameExistsHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getGetBusinessHeaders returns the method-level required headers for GetBusiness
 func getGetBusinessHeaders() []*onekithttp.Header {
 	return nil
@@ -104,6 +144,11 @@ func getGetBusinessHeaders() []*onekithttp.Header {
 
 // getLookupBusinessBySlugHeaders returns the method-level required headers for LookupBusinessBySlug
 func getLookupBusinessBySlugHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetPublicBusinessHeaders returns the method-level required headers for GetPublicBusiness
+func getGetPublicBusinessHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -129,6 +174,20 @@ var createSubBusinessPathParams = []PathParamConfig{}
 // createSubBusinessQueryParams contains query parameter configuration for CreateSubBusiness
 var createSubBusinessQueryParams = []QueryParamConfig{}
 
+// onboardBusinessPathParams contains path parameter configuration for OnboardBusiness
+var onboardBusinessPathParams = []PathParamConfig{}
+
+// onboardBusinessQueryParams contains query parameter configuration for OnboardBusiness
+var onboardBusinessQueryParams = []QueryParamConfig{}
+
+// checkBusinessNameExistsPathParams contains path parameter configuration for CheckBusinessNameExists
+var checkBusinessNameExistsPathParams = []PathParamConfig{}
+
+// checkBusinessNameExistsQueryParams contains query parameter configuration for CheckBusinessNameExists
+var checkBusinessNameExistsQueryParams = []QueryParamConfig{
+	{QueryName: "name", FieldName: "name", Required: false},
+}
+
 // getBusinessPathParams contains path parameter configuration for GetBusiness
 var getBusinessPathParams = []PathParamConfig{
 	{URLParam: "business_id", FieldName: "business_id"},
@@ -143,6 +202,14 @@ var lookupBusinessBySlugPathParams = []PathParamConfig{}
 // lookupBusinessBySlugQueryParams contains query parameter configuration for LookupBusinessBySlug
 var lookupBusinessBySlugQueryParams = []QueryParamConfig{
 	{QueryName: "slug", FieldName: "slug", Required: false},
+}
+
+// getPublicBusinessPathParams contains path parameter configuration for GetPublicBusiness
+var getPublicBusinessPathParams = []PathParamConfig{}
+
+// getPublicBusinessQueryParams contains query parameter configuration for GetPublicBusiness
+var getPublicBusinessQueryParams = []QueryParamConfig{
+	{QueryName: "business_id", FieldName: "business_id", Required: false},
 }
 
 // setSlugPathParams contains path parameter configuration for SetSlug

@@ -13,7 +13,9 @@ import (
 type PurchaseOrderServiceServer interface {
 	ListPurchaseOrders(context.Context, *ListPurchaseOrdersRequest) (*ListPurchaseOrdersResponse, error)
 	CreatePurchaseOrder(context.Context, *CreatePurchaseOrderRequest) (*CreatePurchaseOrderResponse, error)
+	GetPurchaseOrder(context.Context, *GetPurchaseOrderRequest) (*GetPurchaseOrderResponse, error)
 	UpdatePurchaseOrderStatus(context.Context, *UpdatePurchaseOrderStatusRequest) (*UpdatePurchaseOrderStatusResponse, error)
+	ApprovePurchaseOrder(context.Context, *ApprovePurchaseOrderRequest) (*ApprovePurchaseOrderResponse, error)
 }
 
 // RegisterPurchaseOrderServiceServer registers the HTTP handlers for service PurchaseOrderService to the given mux.
@@ -40,6 +42,15 @@ func RegisterPurchaseOrderServiceServer(server PurchaseOrderServiceServer, opts 
 
 	config.mux.Handle("POST /api/erp/purchase-order/v1/purchase-orders", createPurchaseOrderHandler)
 
+	methodHeaders = getGetPurchaseOrderHeaders()
+	getPurchaseOrderHandler := BindingMiddleware[GetPurchaseOrderRequest](
+		genericHandler(server.GetPurchaseOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getPurchaseOrderPathParams, getPurchaseOrderQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/erp/purchase-order/v1/purchase-orders/{id}", getPurchaseOrderHandler)
+
 	methodHeaders = getUpdatePurchaseOrderStatusHeaders()
 	updatePurchaseOrderStatusHandler := BindingMiddleware[UpdatePurchaseOrderStatusRequest](
 		genericHandler(server.UpdatePurchaseOrderStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -48,6 +59,15 @@ func RegisterPurchaseOrderServiceServer(server PurchaseOrderServiceServer, opts 
 	)
 
 	config.mux.Handle("PATCH /api/erp/purchase-order/v1/purchase-orders/{id}/status", updatePurchaseOrderStatusHandler)
+
+	methodHeaders = getApprovePurchaseOrderHeaders()
+	approvePurchaseOrderHandler := BindingMiddleware[ApprovePurchaseOrderRequest](
+		genericHandler(server.ApprovePurchaseOrder, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		approvePurchaseOrderPathParams, approvePurchaseOrderQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/erp/purchase-order/v1/purchase-orders/{id}/approve", approvePurchaseOrderHandler)
 
 	return nil
 }
@@ -67,8 +87,18 @@ func getCreatePurchaseOrderHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetPurchaseOrderHeaders returns the method-level required headers for GetPurchaseOrder
+func getGetPurchaseOrderHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getUpdatePurchaseOrderStatusHeaders returns the method-level required headers for UpdatePurchaseOrderStatus
 func getUpdatePurchaseOrderStatusHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getApprovePurchaseOrderHeaders returns the method-level required headers for ApprovePurchaseOrder
+func getApprovePurchaseOrderHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -86,6 +116,14 @@ var createPurchaseOrderPathParams = []PathParamConfig{}
 // createPurchaseOrderQueryParams contains query parameter configuration for CreatePurchaseOrder
 var createPurchaseOrderQueryParams = []QueryParamConfig{}
 
+// getPurchaseOrderPathParams contains path parameter configuration for GetPurchaseOrder
+var getPurchaseOrderPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// getPurchaseOrderQueryParams contains query parameter configuration for GetPurchaseOrder
+var getPurchaseOrderQueryParams = []QueryParamConfig{}
+
 // updatePurchaseOrderStatusPathParams contains path parameter configuration for UpdatePurchaseOrderStatus
 var updatePurchaseOrderStatusPathParams = []PathParamConfig{
 	{URLParam: "id", FieldName: "id"},
@@ -93,3 +131,11 @@ var updatePurchaseOrderStatusPathParams = []PathParamConfig{
 
 // updatePurchaseOrderStatusQueryParams contains query parameter configuration for UpdatePurchaseOrderStatus
 var updatePurchaseOrderStatusQueryParams = []QueryParamConfig{}
+
+// approvePurchaseOrderPathParams contains path parameter configuration for ApprovePurchaseOrder
+var approvePurchaseOrderPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// approvePurchaseOrderQueryParams contains query parameter configuration for ApprovePurchaseOrder
+var approvePurchaseOrderQueryParams = []QueryParamConfig{}

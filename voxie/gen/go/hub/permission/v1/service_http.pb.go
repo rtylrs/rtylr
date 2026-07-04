@@ -56,7 +56,7 @@ func RegisterPermissionServiceServer(server PermissionServiceServer, opts ...Ser
 	updateRoleHandler := BindingMiddleware[UpdateRoleRequest](
 		genericHandler(server.UpdateRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		updateRolePathParams, updateRoleQueryParams,
-		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
 	config.mux.Handle("PUT /api/hub/permission/v1/roles/{id}", updateRoleHandler)

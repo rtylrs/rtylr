@@ -1,14 +1,12 @@
 version: v2
 modules:
   - path: proto
-  - path: .onekit/proto
 deps:
+  - buf.build/stackxio/onekit
   - buf.build/bufbuild/protovalidate
 lint:
   use:
     - STANDARD
-  ignore:
-    - .onekit/proto
 breaking:
   use:
     - FILE

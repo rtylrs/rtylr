@@ -12,7 +12,6 @@ import (
 // ReceiptServiceServer is the server API for ReceiptService service.
 type ReceiptServiceServer interface {
 	ListReceipts(context.Context, *ListReceiptsRequest) (*ListReceiptsResponse, error)
-	EmailReceipt(context.Context, *EmailReceiptRequest) (*EmailReceiptResponse, error)
 }
 
 // RegisterReceiptServiceServer registers the HTTP handlers for service ReceiptService to the given mux.
@@ -30,15 +29,6 @@ func RegisterReceiptServiceServer(server ReceiptServiceServer, opts ...ServerOpt
 
 	config.mux.Handle("GET /api/pos/receipt/v1/receipts", listReceiptsHandler)
 
-	methodHeaders = getEmailReceiptHeaders()
-	emailReceiptHandler := BindingMiddleware[EmailReceiptRequest](
-		genericHandler(server.EmailReceipt, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		emailReceiptPathParams, emailReceiptQueryParams,
-		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("POST /api/pos/receipt/v1/receipts/{id}/email", emailReceiptHandler)
-
 	return nil
 }
 
@@ -52,11 +42,6 @@ func getListReceiptsHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getEmailReceiptHeaders returns the method-level required headers for EmailReceipt
-func getEmailReceiptHeaders() []*onekithttp.Header {
-	return nil
-}
-
 // listReceiptsPathParams contains path parameter configuration for ListReceipts
 var listReceiptsPathParams = []PathParamConfig{}
 
@@ -65,11 +50,3 @@ var listReceiptsQueryParams = []QueryParamConfig{
 	{QueryName: "from", FieldName: "from", Required: false},
 	{QueryName: "to", FieldName: "to", Required: false},
 }
-
-// emailReceiptPathParams contains path parameter configuration for EmailReceipt
-var emailReceiptPathParams = []PathParamConfig{
-	{URLParam: "id", FieldName: "id"},
-}
-
-// emailReceiptQueryParams contains query parameter configuration for EmailReceipt
-var emailReceiptQueryParams = []QueryParamConfig{}

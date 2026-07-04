@@ -26,34 +26,28 @@ var File_pos_kds_v1_service_proto protoreflect.FileDescriptor
 const file_pos_kds_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"\x18pos/kds/v1/service.proto\x12\n" +
-	"pos.kds.v1\x1a\x1donekit/http/annotations.proto\x1a pos/kds/v1/list_kds_orders.proto\x1a&pos/kds/v1/update_kds_item_by_id.proto\x1a'pos/kds/v1/update_kds_item_status.proto2\xa1\x03\n" +
+	"pos.kds.v1\x1a\x1donekit/http/annotations.proto\x1a pos/kds/v1/list_kds_orders.proto\x1a'pos/kds/v1/update_kds_item_status.proto2\x9e\x02\n" +
 	"\n" +
 	"KDSService\x12e\n" +
 	"\rListKDSOrders\x12 .pos.kds.v1.ListKDSOrdersRequest\x1a!.pos.kds.v1.ListKDSOrdersResponse\"\x0f\x9a\xb5\x18\v\n" +
-	"\a/orders\x10\x01\x12\x80\x01\n" +
-	"\x11UpdateKDSItemByID\x12$.pos.kds.v1.UpdateKDSItemByIDRequest\x1a%.pos.kds.v1.UpdateKDSItemByIDResponse\"\x1e\x9a\xb5\x18\x1a\n" +
-	"\x10/items/{item_id}\x10\x03\"\x04body\x12\x91\x01\n" +
+	"\a/orders\x10\x01\x12\x91\x01\n" +
 	"\x13UpdateKDSItemStatus\x12&.pos.kds.v1.UpdateKDSItemStatusRequest\x1a'.pos.kds.v1.UpdateKDSItemStatusResponse\")\x9a\xb5\x18%\n" +
 	"\x1b/{order_id}/items/{item_id}\x10\x03\"\x04body\x1a\x15\xa2\xb5\x18\x11\n" +
 	"\x0f/api/pos/kds/v1B+Z)github.com/voxire/voxie/gen/go/pos/kds/v1b\x06proto3"
 
 var file_pos_kds_v1_service_proto_goTypes = []any{
 	(*ListKDSOrdersRequest)(nil),        // 0: pos.kds.v1.ListKDSOrdersRequest
-	(*UpdateKDSItemByIDRequest)(nil),    // 1: pos.kds.v1.UpdateKDSItemByIDRequest
-	(*UpdateKDSItemStatusRequest)(nil),  // 2: pos.kds.v1.UpdateKDSItemStatusRequest
-	(*ListKDSOrdersResponse)(nil),       // 3: pos.kds.v1.ListKDSOrdersResponse
-	(*UpdateKDSItemByIDResponse)(nil),   // 4: pos.kds.v1.UpdateKDSItemByIDResponse
-	(*UpdateKDSItemStatusResponse)(nil), // 5: pos.kds.v1.UpdateKDSItemStatusResponse
+	(*UpdateKDSItemStatusRequest)(nil),  // 1: pos.kds.v1.UpdateKDSItemStatusRequest
+	(*ListKDSOrdersResponse)(nil),       // 2: pos.kds.v1.ListKDSOrdersResponse
+	(*UpdateKDSItemStatusResponse)(nil), // 3: pos.kds.v1.UpdateKDSItemStatusResponse
 }
 var file_pos_kds_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.kds.v1.KDSService.ListKDSOrders:input_type -> pos.kds.v1.ListKDSOrdersRequest
-	1, // 1: pos.kds.v1.KDSService.UpdateKDSItemByID:input_type -> pos.kds.v1.UpdateKDSItemByIDRequest
-	2, // 2: pos.kds.v1.KDSService.UpdateKDSItemStatus:input_type -> pos.kds.v1.UpdateKDSItemStatusRequest
-	3, // 3: pos.kds.v1.KDSService.ListKDSOrders:output_type -> pos.kds.v1.ListKDSOrdersResponse
-	4, // 4: pos.kds.v1.KDSService.UpdateKDSItemByID:output_type -> pos.kds.v1.UpdateKDSItemByIDResponse
-	5, // 5: pos.kds.v1.KDSService.UpdateKDSItemStatus:output_type -> pos.kds.v1.UpdateKDSItemStatusResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 1: pos.kds.v1.KDSService.UpdateKDSItemStatus:input_type -> pos.kds.v1.UpdateKDSItemStatusRequest
+	2, // 2: pos.kds.v1.KDSService.ListKDSOrders:output_type -> pos.kds.v1.ListKDSOrdersResponse
+	3, // 3: pos.kds.v1.KDSService.UpdateKDSItemStatus:output_type -> pos.kds.v1.UpdateKDSItemStatusResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -65,7 +59,6 @@ func file_pos_kds_v1_service_proto_init() {
 		return
 	}
 	file_pos_kds_v1_list_kds_orders_proto_init()
-	file_pos_kds_v1_update_kds_item_by_id_proto_init()
 	file_pos_kds_v1_update_kds_item_status_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

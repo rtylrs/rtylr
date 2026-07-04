@@ -96,15 +96,15 @@ func (x *MyLocation) GetPhone() string {
 
 type RosterEntry struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// user_id is the user id value for this contract.
+	// user_id identifies the staff member.
 	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	// name is the name value for this contract.
+	// name is the staff display name.
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// has_pin is the has pin value for this contract.
+	// has_pin tells the terminal whether the staff member can sign in with a PIN.
 	HasPin bool `protobuf:"varint,3,opt,name=has_pin,json=hasPin,proto3" json:"has_pin,omitempty"`
-	// is_manager is the is manager value for this contract.
+	// is_manager tells whether this staff member can manage POS access.
 	IsManager bool `protobuf:"varint,4,opt,name=is_manager,json=isManager,proto3" json:"is_manager,omitempty"`
-	// pos_role is the pos role value for this contract.
+	// pos_role is the POS-specific role label.
 	PosRole       string `protobuf:"bytes,5,opt,name=pos_role,json=posRole,proto3" json:"pos_role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -177,15 +177,15 @@ func (x *RosterEntry) GetPosRole() string {
 
 type MemberLocationEntry struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// id is the unique identifier for the resource.
+	// id is the unique assignment identifier.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// location_id is the location id value for this contract.
+	// location_id identifies the assigned location.
 	LocationId int64 `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	// can_manage_pos_users is the can manage pos users value for this contract.
+	// can_manage_pos_users controls POS staff management.
 	CanManagePosUsers bool `protobuf:"varint,3,opt,name=can_manage_pos_users,json=canManagePosUsers,proto3" json:"can_manage_pos_users,omitempty"`
-	// can_manage_terminals is the can manage terminals value for this contract.
+	// can_manage_terminals controls terminal management.
 	CanManageTerminals bool `protobuf:"varint,4,opt,name=can_manage_terminals,json=canManageTerminals,proto3" json:"can_manage_terminals,omitempty"`
-	// can_view_reports is the can view reports value for this contract.
+	// can_view_reports controls POS reporting access.
 	CanViewReports bool `protobuf:"varint,5,opt,name=can_view_reports,json=canViewReports,proto3" json:"can_view_reports,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache

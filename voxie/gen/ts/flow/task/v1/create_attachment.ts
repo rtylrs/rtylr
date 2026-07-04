@@ -7,6 +7,8 @@
 /* eslint-disable */
 
 export interface CreateAttachmentRequest {
+  /** task_id identifies the task the attachment belongs to. */
+  taskId: number;
   /** name is the name value for this contract. */
   name: string;
   /** url is the url value for this contract. */

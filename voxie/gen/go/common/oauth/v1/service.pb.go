@@ -25,22 +25,41 @@ var File_common_oauth_v1_service_proto protoreflect.FileDescriptor
 
 const file_common_oauth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcommon/oauth/v1/service.proto\x12\x0fcommon.oauth.v1\x1a\x1bcommon/oauth/v1/issue.proto\x1a\x1donekit/http/annotations.proto2\x82\x01\n" +
+	"\x1dcommon/oauth/v1/service.proto\x12\x0fcommon.oauth.v1\x1a\x1bcommon/oauth/v1/issue.proto\x1a\x18common/oauth/v1/me.proto\x1a\x1ccommon/oauth/v1/revoke.proto\x1a\x1bcommon/oauth/v1/token.proto\x1a\x1donekit/http/annotations.proto2\x82\x03\n" +
 	"\fOauthService\x12V\n" +
 	"\x05Issue\x12\x1d.common.oauth.v1.IssueRequest\x1a\x1e.common.oauth.v1.IssueResponse\"\x0e\x9a\xb5\x18\n" +
 	"\n" +
-	"\x06/issue\x10\x02\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\x06/issue\x10\x02\x12V\n" +
+	"\x05Token\x12\x1d.common.oauth.v1.TokenRequest\x1a\x1e.common.oauth.v1.TokenResponse\"\x0e\x9a\xb5\x18\n" +
+	"\n" +
+	"\x06/token\x10\x02\x12Z\n" +
+	"\x06Revoke\x12\x1e.common.oauth.v1.RevokeRequest\x1a\x1f.common.oauth.v1.RevokeResponse\"\x0f\x9a\xb5\x18\v\n" +
+	"\a/revoke\x10\x02\x12J\n" +
+	"\x02Me\x12\x1a.common.oauth.v1.MeRequest\x1a\x1b.common.oauth.v1.MeResponse\"\v\x9a\xb5\x18\a\n" +
+	"\x03/me\x10\x01\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/common/oauth/v1B0Z.github.com/voxire/voxie/gen/go/common/oauth/v1b\x06proto3"
 
 var file_common_oauth_v1_service_proto_goTypes = []any{
-	(*IssueRequest)(nil),  // 0: common.oauth.v1.IssueRequest
-	(*IssueResponse)(nil), // 1: common.oauth.v1.IssueResponse
+	(*IssueRequest)(nil),   // 0: common.oauth.v1.IssueRequest
+	(*TokenRequest)(nil),   // 1: common.oauth.v1.TokenRequest
+	(*RevokeRequest)(nil),  // 2: common.oauth.v1.RevokeRequest
+	(*MeRequest)(nil),      // 3: common.oauth.v1.MeRequest
+	(*IssueResponse)(nil),  // 4: common.oauth.v1.IssueResponse
+	(*TokenResponse)(nil),  // 5: common.oauth.v1.TokenResponse
+	(*RevokeResponse)(nil), // 6: common.oauth.v1.RevokeResponse
+	(*MeResponse)(nil),     // 7: common.oauth.v1.MeResponse
 }
 var file_common_oauth_v1_service_proto_depIdxs = []int32{
 	0, // 0: common.oauth.v1.OauthService.Issue:input_type -> common.oauth.v1.IssueRequest
-	1, // 1: common.oauth.v1.OauthService.Issue:output_type -> common.oauth.v1.IssueResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: common.oauth.v1.OauthService.Token:input_type -> common.oauth.v1.TokenRequest
+	2, // 2: common.oauth.v1.OauthService.Revoke:input_type -> common.oauth.v1.RevokeRequest
+	3, // 3: common.oauth.v1.OauthService.Me:input_type -> common.oauth.v1.MeRequest
+	4, // 4: common.oauth.v1.OauthService.Issue:output_type -> common.oauth.v1.IssueResponse
+	5, // 5: common.oauth.v1.OauthService.Token:output_type -> common.oauth.v1.TokenResponse
+	6, // 6: common.oauth.v1.OauthService.Revoke:output_type -> common.oauth.v1.RevokeResponse
+	7, // 7: common.oauth.v1.OauthService.Me:output_type -> common.oauth.v1.MeResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -52,6 +71,9 @@ func file_common_oauth_v1_service_proto_init() {
 		return
 	}
 	file_common_oauth_v1_issue_proto_init()
+	file_common_oauth_v1_me_proto_init()
+	file_common_oauth_v1_revoke_proto_init()
+	file_common_oauth_v1_token_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

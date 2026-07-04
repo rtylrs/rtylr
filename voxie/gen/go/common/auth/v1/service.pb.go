@@ -25,7 +25,7 @@ var File_common_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccommon/auth/v1/service.proto\x12\x0ecommon.auth.v1\x1a common/auth/v1/google_auth.proto\x1a\"common/auth/v1/invite_accept.proto\x1a\x1acommon/auth/v1/login.proto\x1a\x1dcommon/auth/v1/register.proto\x1a(common/auth/v1/resend_verification.proto\x1a#common/auth/v1/reset_password.proto\x1a+common/auth/v1/reset_password_confirm.proto\x1a!common/auth/v1/verify_email.proto\x1a\x1donekit/http/annotations.proto2\xd1\a\n" +
+	"\x1ccommon/auth/v1/service.proto\x12\x0ecommon.auth.v1\x1a'common/auth/v1/check_email_exists.proto\x1a common/auth/v1/google_auth.proto\x1a\"common/auth/v1/invite_accept.proto\x1a\x1acommon/auth/v1/login.proto\x1a\x1dcommon/auth/v1/register.proto\x1a(common/auth/v1/resend_verification.proto\x1a#common/auth/v1/reset_password.proto\x1a+common/auth/v1/reset_password_confirm.proto\x1a%common/auth/v1/social_authorize.proto\x1a!common/auth/v1/verify_email.proto\x1a\x1donekit/http/annotations.proto2\xce\t\n" +
 	"\vAuthService\x12`\n" +
 	"\bRegister\x12\x1f.common.auth.v1.RegisterRequest\x1a .common.auth.v1.RegisterResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/register\x10\x02\x12T\n" +
@@ -44,7 +44,11 @@ const file_common_auth_v1_service_proto_rawDesc = "" +
 	"\x12ResendVerification\x12).common.auth.v1.ResendVerificationRequest\x1a*.common.auth.v1.ResendVerificationResponse\"\x1c\x9a\xb5\x18\x18\n" +
 	"\x14/resend-verification\x10\x02\x12q\n" +
 	"\fInviteAccept\x12#.common.auth.v1.InviteAcceptRequest\x1a$.common.auth.v1.InviteAcceptResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/invite/accept\x10\x02\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x0e/invite/accept\x10\x02\x12|\n" +
+	"\x10CheckEmailExists\x12'.common.auth.v1.CheckEmailExistsRequest\x1a(.common.auth.v1.CheckEmailExistsResponse\"\x15\x9a\xb5\x18\x11\n" +
+	"\r/email-exists\x10\x01\x12}\n" +
+	"\x0fSocialAuthorize\x12&.common.auth.v1.SocialAuthorizeRequest\x1a'.common.auth.v1.SocialAuthorizeResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/social/authorize\x10\x01\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/common/auth/v1B/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
 
 var file_common_auth_v1_service_proto_goTypes = []any{
@@ -56,14 +60,18 @@ var file_common_auth_v1_service_proto_goTypes = []any{
 	(*VerifyEmailRequest)(nil),           // 5: common.auth.v1.VerifyEmailRequest
 	(*ResendVerificationRequest)(nil),    // 6: common.auth.v1.ResendVerificationRequest
 	(*InviteAcceptRequest)(nil),          // 7: common.auth.v1.InviteAcceptRequest
-	(*RegisterResponse)(nil),             // 8: common.auth.v1.RegisterResponse
-	(*LoginResponse)(nil),                // 9: common.auth.v1.LoginResponse
-	(*GoogleAuthResponse)(nil),           // 10: common.auth.v1.GoogleAuthResponse
-	(*ResetPasswordResponse)(nil),        // 11: common.auth.v1.ResetPasswordResponse
-	(*ResetPasswordConfirmResponse)(nil), // 12: common.auth.v1.ResetPasswordConfirmResponse
-	(*VerifyEmailResponse)(nil),          // 13: common.auth.v1.VerifyEmailResponse
-	(*ResendVerificationResponse)(nil),   // 14: common.auth.v1.ResendVerificationResponse
-	(*InviteAcceptResponse)(nil),         // 15: common.auth.v1.InviteAcceptResponse
+	(*CheckEmailExistsRequest)(nil),      // 8: common.auth.v1.CheckEmailExistsRequest
+	(*SocialAuthorizeRequest)(nil),       // 9: common.auth.v1.SocialAuthorizeRequest
+	(*RegisterResponse)(nil),             // 10: common.auth.v1.RegisterResponse
+	(*LoginResponse)(nil),                // 11: common.auth.v1.LoginResponse
+	(*GoogleAuthResponse)(nil),           // 12: common.auth.v1.GoogleAuthResponse
+	(*ResetPasswordResponse)(nil),        // 13: common.auth.v1.ResetPasswordResponse
+	(*ResetPasswordConfirmResponse)(nil), // 14: common.auth.v1.ResetPasswordConfirmResponse
+	(*VerifyEmailResponse)(nil),          // 15: common.auth.v1.VerifyEmailResponse
+	(*ResendVerificationResponse)(nil),   // 16: common.auth.v1.ResendVerificationResponse
+	(*InviteAcceptResponse)(nil),         // 17: common.auth.v1.InviteAcceptResponse
+	(*CheckEmailExistsResponse)(nil),     // 18: common.auth.v1.CheckEmailExistsResponse
+	(*SocialAuthorizeResponse)(nil),      // 19: common.auth.v1.SocialAuthorizeResponse
 }
 var file_common_auth_v1_service_proto_depIdxs = []int32{
 	0,  // 0: common.auth.v1.AuthService.Register:input_type -> common.auth.v1.RegisterRequest
@@ -74,16 +82,20 @@ var file_common_auth_v1_service_proto_depIdxs = []int32{
 	5,  // 5: common.auth.v1.AuthService.VerifyEmail:input_type -> common.auth.v1.VerifyEmailRequest
 	6,  // 6: common.auth.v1.AuthService.ResendVerification:input_type -> common.auth.v1.ResendVerificationRequest
 	7,  // 7: common.auth.v1.AuthService.InviteAccept:input_type -> common.auth.v1.InviteAcceptRequest
-	8,  // 8: common.auth.v1.AuthService.Register:output_type -> common.auth.v1.RegisterResponse
-	9,  // 9: common.auth.v1.AuthService.Login:output_type -> common.auth.v1.LoginResponse
-	10, // 10: common.auth.v1.AuthService.GoogleAuth:output_type -> common.auth.v1.GoogleAuthResponse
-	11, // 11: common.auth.v1.AuthService.ResetPassword:output_type -> common.auth.v1.ResetPasswordResponse
-	12, // 12: common.auth.v1.AuthService.ResetPasswordConfirm:output_type -> common.auth.v1.ResetPasswordConfirmResponse
-	13, // 13: common.auth.v1.AuthService.VerifyEmail:output_type -> common.auth.v1.VerifyEmailResponse
-	14, // 14: common.auth.v1.AuthService.ResendVerification:output_type -> common.auth.v1.ResendVerificationResponse
-	15, // 15: common.auth.v1.AuthService.InviteAccept:output_type -> common.auth.v1.InviteAcceptResponse
-	8,  // [8:16] is the sub-list for method output_type
-	0,  // [0:8] is the sub-list for method input_type
+	8,  // 8: common.auth.v1.AuthService.CheckEmailExists:input_type -> common.auth.v1.CheckEmailExistsRequest
+	9,  // 9: common.auth.v1.AuthService.SocialAuthorize:input_type -> common.auth.v1.SocialAuthorizeRequest
+	10, // 10: common.auth.v1.AuthService.Register:output_type -> common.auth.v1.RegisterResponse
+	11, // 11: common.auth.v1.AuthService.Login:output_type -> common.auth.v1.LoginResponse
+	12, // 12: common.auth.v1.AuthService.GoogleAuth:output_type -> common.auth.v1.GoogleAuthResponse
+	13, // 13: common.auth.v1.AuthService.ResetPassword:output_type -> common.auth.v1.ResetPasswordResponse
+	14, // 14: common.auth.v1.AuthService.ResetPasswordConfirm:output_type -> common.auth.v1.ResetPasswordConfirmResponse
+	15, // 15: common.auth.v1.AuthService.VerifyEmail:output_type -> common.auth.v1.VerifyEmailResponse
+	16, // 16: common.auth.v1.AuthService.ResendVerification:output_type -> common.auth.v1.ResendVerificationResponse
+	17, // 17: common.auth.v1.AuthService.InviteAccept:output_type -> common.auth.v1.InviteAcceptResponse
+	18, // 18: common.auth.v1.AuthService.CheckEmailExists:output_type -> common.auth.v1.CheckEmailExistsResponse
+	19, // 19: common.auth.v1.AuthService.SocialAuthorize:output_type -> common.auth.v1.SocialAuthorizeResponse
+	10, // [10:20] is the sub-list for method output_type
+	0,  // [0:10] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -94,6 +106,7 @@ func file_common_auth_v1_service_proto_init() {
 	if File_common_auth_v1_service_proto != nil {
 		return
 	}
+	file_common_auth_v1_check_email_exists_proto_init()
 	file_common_auth_v1_google_auth_proto_init()
 	file_common_auth_v1_invite_accept_proto_init()
 	file_common_auth_v1_login_proto_init()
@@ -101,6 +114,7 @@ func file_common_auth_v1_service_proto_init() {
 	file_common_auth_v1_resend_verification_proto_init()
 	file_common_auth_v1_reset_password_proto_init()
 	file_common_auth_v1_reset_password_confirm_proto_init()
+	file_common_auth_v1_social_authorize_proto_init()
 	file_common_auth_v1_verify_email_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

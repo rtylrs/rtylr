@@ -18,6 +18,7 @@ export interface MenuItem {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  imageUrl: string;
 }
 
 export interface UpdateMenuRequest {

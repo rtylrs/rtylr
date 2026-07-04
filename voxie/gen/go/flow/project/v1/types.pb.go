@@ -211,6 +211,222 @@ func (x *Project) GetCode() string {
 	return ""
 }
 
+type ProjectColumn struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the column.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId int64 `protobuf:"varint,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// workspace_id is the workspace id value for this contract.
+	WorkspaceId int64 `protobuf:"varint,3,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	// name is the column name.
+	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	// color is the column color.
+	Color string `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
+	// sort_order is the column sort order.
+	SortOrder int32 `protobuf:"varint,6,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	// created_at is when the record was created.
+	CreatedAt string `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// updated_at is when the record was last updated.
+	UpdatedAt     string `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProjectColumn) Reset() {
+	*x = ProjectColumn{}
+	mi := &file_flow_project_v1_types_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProjectColumn) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectColumn) ProtoMessage() {}
+
+func (x *ProjectColumn) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_project_v1_types_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectColumn.ProtoReflect.Descriptor instead.
+func (*ProjectColumn) Descriptor() ([]byte, []int) {
+	return file_flow_project_v1_types_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ProjectColumn) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ProjectColumn) GetProjectId() int64 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *ProjectColumn) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
+}
+
+func (x *ProjectColumn) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProjectColumn) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *ProjectColumn) GetSortOrder() int32 {
+	if x != nil {
+		return x.SortOrder
+	}
+	return 0
+}
+
+func (x *ProjectColumn) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *ProjectColumn) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ProjectMember struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the membership record.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// project_id is the project id value for this contract.
+	ProjectId int64 `protobuf:"varint,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// name is the member display name.
+	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	// email is the member email address.
+	Email string `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	// role is the role value for this contract.
+	Role string `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	// added_by is the user id of the inviter, if any.
+	AddedBy int64 `protobuf:"varint,7,opt,name=added_by,json=addedBy,proto3" json:"added_by,omitempty"`
+	// added_at is when the member joined the project.
+	AddedAt       string `protobuf:"bytes,8,opt,name=added_at,json=addedAt,proto3" json:"added_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProjectMember) Reset() {
+	*x = ProjectMember{}
+	mi := &file_flow_project_v1_types_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProjectMember) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectMember) ProtoMessage() {}
+
+func (x *ProjectMember) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_project_v1_types_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectMember.ProtoReflect.Descriptor instead.
+func (*ProjectMember) Descriptor() ([]byte, []int) {
+	return file_flow_project_v1_types_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ProjectMember) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ProjectMember) GetProjectId() int64 {
+	if x != nil {
+		return x.ProjectId
+	}
+	return 0
+}
+
+func (x *ProjectMember) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ProjectMember) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProjectMember) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *ProjectMember) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *ProjectMember) GetAddedBy() int64 {
+	if x != nil {
+		return x.AddedBy
+	}
+	return 0
+}
+
+func (x *ProjectMember) GetAddedAt() string {
+	if x != nil {
+		return x.AddedAt
+	}
+	return ""
+}
+
 var File_flow_project_v1_types_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_types_proto_rawDesc = "" +
@@ -239,7 +455,30 @@ const file_flow_project_v1_types_proto_rawDesc = "" +
 	"task_count\x18\x0e \x01(\x05R\ttaskCount\x12'\n" +
 	"\x0fcompleted_count\x18\x0f \x01(\x05R\x0ecompletedCount\x12!\n" +
 	"\fmember_count\x18\x10 \x01(\x05R\vmemberCount\x12\x12\n" +
-	"\x04code\x18\x11 \x01(\tR\x04codeB0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"
+	"\x04code\x18\x11 \x01(\tR\x04code\"\xfa\x01\n" +
+	"\rProjectColumn\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12#\n" +
+	"\n" +
+	"project_id\x18\x02 \x01(\x03B\x04е\x18\x01R\tprojectId\x12'\n" +
+	"\fworkspace_id\x18\x03 \x01(\x03B\x04е\x18\x01R\vworkspaceId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
+	"\x05color\x18\x05 \x01(\tR\x05color\x12\x1d\n" +
+	"\n" +
+	"sort_order\x18\x06 \x01(\x05R\tsortOrder\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\xe3\x01\n" +
+	"\rProjectMember\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12#\n" +
+	"\n" +
+	"project_id\x18\x02 \x01(\x03B\x04е\x18\x01R\tprojectId\x12\x1d\n" +
+	"\auser_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x05 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1f\n" +
+	"\badded_by\x18\a \x01(\x03B\x04е\x18\x01R\aaddedBy\x12\x19\n" +
+	"\badded_at\x18\b \x01(\tR\aaddedAtB0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"
 
 var (
 	file_flow_project_v1_types_proto_rawDescOnce sync.Once
@@ -253,9 +492,11 @@ func file_flow_project_v1_types_proto_rawDescGZIP() []byte {
 	return file_flow_project_v1_types_proto_rawDescData
 }
 
-var file_flow_project_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_flow_project_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_flow_project_v1_types_proto_goTypes = []any{
-	(*Project)(nil), // 0: flow.project.v1.Project
+	(*Project)(nil),       // 0: flow.project.v1.Project
+	(*ProjectColumn)(nil), // 1: flow.project.v1.ProjectColumn
+	(*ProjectMember)(nil), // 2: flow.project.v1.ProjectMember
 }
 var file_flow_project_v1_types_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -276,7 +517,7 @@ func file_flow_project_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_project_v1_types_proto_rawDesc), len(file_flow_project_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

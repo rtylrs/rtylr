@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package support.settings.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/settings/v1";
+
+message Settings {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 business_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  bool auto_assign = 3;
+  int32 sla_hours = 4;
+  string business_hours = 5;
+  string notification_email = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}

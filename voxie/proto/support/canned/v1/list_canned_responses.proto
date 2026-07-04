@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package support.canned.v1;
+
+import "support/canned/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/canned/v1";
+
+message ListCannedResponsesRequest {}
+
+message ListCannedResponsesResponse {
+  repeated CannedResponse canned_responses = 1;
+}

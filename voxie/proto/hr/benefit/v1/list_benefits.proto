@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hr.benefit.v1;
+
+import "hr/benefit/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/benefit/v1";
+
+message ListBenefitsRequest {}
+
+message ListBenefitsResponse {
+  repeated BenefitPlan plans = 1;
+}

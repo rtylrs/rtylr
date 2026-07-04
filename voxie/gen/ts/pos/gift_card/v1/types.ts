@@ -11,9 +11,9 @@ export interface GiftCard {
   id: number;
   /** owner_id identifies the tenant that owns the resource. */
   ownerId: number;
-  /** business_id identifies the business that owns the resource. */
+  /** business_id identifies the active business. */
   businessId: number;
-  /** customer_id is the customer id value for this contract. */
+  /** customer_id identifies the linked customer when present. */
   customerId: number;
   /** code is the code value for this contract. */
   code: string;

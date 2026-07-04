@@ -8,7 +8,6 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,16 +24,12 @@ const (
 
 type CreateDepartmentRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Location this department operates from.
-	LocationId int64 `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
-	// Parent department for org-chart hierarchy; absent if top-level.
-	ParentDepartmentId *int64 `protobuf:"varint,2,opt,name=parent_department_id,json=parentDepartmentId,proto3,oneof" json:"parent_department_id,omitempty"`
 	// Display name of the department.
-	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	// Default work schedule for employees in this department; absent if none.
-	DefaultWorkScheduleId *int64 `protobuf:"varint,4,opt,name=default_work_schedule_id,json=defaultWorkScheduleId,proto3,oneof" json:"default_work_schedule_id,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	Name           string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	ManagerStaffId int64  `protobuf:"varint,3,opt,name=manager_staff_id,json=managerStaffId,proto3" json:"manager_staff_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateDepartmentRequest) Reset() {
@@ -67,20 +62,6 @@ func (*CreateDepartmentRequest) Descriptor() ([]byte, []int) {
 	return file_hr_department_v1_create_department_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CreateDepartmentRequest) GetLocationId() int64 {
-	if x != nil {
-		return x.LocationId
-	}
-	return 0
-}
-
-func (x *CreateDepartmentRequest) GetParentDepartmentId() int64 {
-	if x != nil && x.ParentDepartmentId != nil {
-		return *x.ParentDepartmentId
-	}
-	return 0
-}
-
 func (x *CreateDepartmentRequest) GetName() string {
 	if x != nil {
 		return x.Name
@@ -88,17 +69,23 @@ func (x *CreateDepartmentRequest) GetName() string {
 	return ""
 }
 
-func (x *CreateDepartmentRequest) GetDefaultWorkScheduleId() int64 {
-	if x != nil && x.DefaultWorkScheduleId != nil {
-		return *x.DefaultWorkScheduleId
+func (x *CreateDepartmentRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateDepartmentRequest) GetManagerStaffId() int64 {
+	if x != nil {
+		return x.ManagerStaffId
 	}
 	return 0
 }
 
 type CreateDepartmentResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The newly created department.
-	Department    *DepartmentPayload `protobuf:"bytes,1,opt,name=department,proto3" json:"department,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -133,31 +120,25 @@ func (*CreateDepartmentResponse) Descriptor() ([]byte, []int) {
 	return file_hr_department_v1_create_department_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateDepartmentResponse) GetDepartment() *DepartmentPayload {
+func (x *CreateDepartmentResponse) GetId() int64 {
 	if x != nil {
-		return x.Department
+		return x.Id
 	}
-	return nil
+	return 0
 }
 
 var File_hr_department_v1_create_department_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_create_department_proto_rawDesc = "" +
 	"\n" +
-	"(hr/department/v1/create_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xa9\x02\n" +
-	"\x17CreateDepartmentRequest\x12/\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
-	"locationId\x12?\n" +
-	"\x14parent_department_id\x18\x02 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
-	"\x04name\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12F\n" +
-	"\x18default_work_schedule_id\x18\x04 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x01R\x15defaultWorkScheduleId\x88\x01\x01B\x17\n" +
-	"\x15_parent_department_idB\x1b\n" +
-	"\x19_default_work_schedule_id\"_\n" +
-	"\x18CreateDepartmentResponse\x12C\n" +
-	"\n" +
-	"department\x18\x01 \x01(\v2#.hr.department.v1.DepartmentPayloadR\n" +
-	"departmentB1Z/github.com/voxire/voxie/gen/go/hr/department/v1b\x06proto3"
+	"(hr/department/v1/create_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\"\x85\x01\n" +
+	"\x17CreateDepartmentRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12(\n" +
+	"\x10manager_staff_id\x18\x03 \x01(\x03R\x0emanagerStaffId\"*\n" +
+	"\x18CreateDepartmentResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02idB1Z/github.com/voxire/voxie/gen/go/hr/department/v1b\x06proto3"
 
 var (
 	file_hr_department_v1_create_department_proto_rawDescOnce sync.Once
@@ -175,15 +156,13 @@ var file_hr_department_v1_create_department_proto_msgTypes = make([]protoimpl.Me
 var file_hr_department_v1_create_department_proto_goTypes = []any{
 	(*CreateDepartmentRequest)(nil),  // 0: hr.department.v1.CreateDepartmentRequest
 	(*CreateDepartmentResponse)(nil), // 1: hr.department.v1.CreateDepartmentResponse
-	(*DepartmentPayload)(nil),        // 2: hr.department.v1.DepartmentPayload
 }
 var file_hr_department_v1_create_department_proto_depIdxs = []int32{
-	2, // 0: hr.department.v1.CreateDepartmentResponse.department:type_name -> hr.department.v1.DepartmentPayload
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_hr_department_v1_create_department_proto_init() }
@@ -191,8 +170,6 @@ func file_hr_department_v1_create_department_proto_init() {
 	if File_hr_department_v1_create_department_proto != nil {
 		return
 	}
-	file_hr_department_v1_types_proto_init()
-	file_hr_department_v1_create_department_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

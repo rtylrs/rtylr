@@ -4,8 +4,6 @@ package pos.session.v1;
 
 import "onekit/http/annotations.proto";
 import "pos/session/v1/close_session.proto";
-import "pos/session/v1/get_current_session.proto";
-import "pos/session/v1/get_session.proto";
 import "pos/session/v1/list_sessions.proto";
 import "pos/session/v1/open_session.proto";
 
@@ -17,20 +15,6 @@ service SessionService {
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option (onekit.http.config) = {
       path: "/sessions"
-      method: HTTP_METHOD_GET
-    };
-  }
-
-  rpc GetCurrentSession(GetCurrentSessionRequest) returns (GetCurrentSessionResponse) {
-    option (onekit.http.config) = {
-      path: "/sessions/current"
-      method: HTTP_METHOD_GET
-    };
-  }
-
-  rpc GetSession(GetSessionRequest) returns (GetSessionResponse) {
-    option (onekit.http.config) = {
-      path: "/sessions/{id}"
       method: HTTP_METHOD_GET
     };
   }

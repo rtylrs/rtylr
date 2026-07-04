@@ -25,7 +25,7 @@ var File_insights_product_v1_service_proto protoreflect.FileDescriptor
 
 const file_insights_product_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!insights/product/v1/service.proto\x12\x13insights.product.v1\x1a*insights/product/v1/get_best_sellers.proto\x1a2insights/product/v1/get_category_performance.proto\x1a-insights/product/v1/get_product_margins.proto\x1a)insights/product/v1/get_slow_movers.proto\x1a\x1donekit/http/annotations.proto2\xd1\x04\n" +
+	"!insights/product/v1/service.proto\x12\x13insights.product.v1\x1a*insights/product/v1/get_best_sellers.proto\x1a2insights/product/v1/get_category_performance.proto\x1a-insights/product/v1/get_product_margins.proto\x1a1insights/product/v1/get_product_performance.proto\x1a)insights/product/v1/get_slow_movers.proto\x1a\x1donekit/http/annotations.proto2\xe8\x05\n" +
 	"\x0eProductService\x12\x80\x01\n" +
 	"\x0eGetBestSellers\x12*.insights.product.v1.GetBestSellersRequest\x1a+.insights.product.v1.GetBestSellersResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\r/best-sellers\x10\x01\x12\x96\x01\n" +
@@ -34,7 +34,9 @@ const file_insights_product_v1_service_proto_rawDesc = "" +
 	"\x11GetProductMargins\x12-.insights.product.v1.GetProductMarginsRequest\x1a..insights.product.v1.GetProductMarginsResponse\"\x10\x9a\xb5\x18\f\n" +
 	"\b/margins\x10\x01\x12|\n" +
 	"\rGetSlowMovers\x12).insights.product.v1.GetSlowMoversRequest\x1a*.insights.product.v1.GetSlowMoversResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/slow-movers\x10\x01\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"\f/slow-movers\x10\x01\x12\x94\x01\n" +
+	"\x15GetProductPerformance\x121.insights.product.v1.GetProductPerformanceRequest\x1a2.insights.product.v1.GetProductPerformanceResponse\"\x14\x9a\xb5\x18\x10\n" +
+	"\f/performance\x10\x01\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/insights/product/v1B4Z2github.com/voxire/voxie/gen/go/insights/product/v1b\x06proto3"
 
 var file_insights_product_v1_service_proto_goTypes = []any{
@@ -42,22 +44,26 @@ var file_insights_product_v1_service_proto_goTypes = []any{
 	(*GetCategoryPerformanceRequest)(nil),  // 1: insights.product.v1.GetCategoryPerformanceRequest
 	(*GetProductMarginsRequest)(nil),       // 2: insights.product.v1.GetProductMarginsRequest
 	(*GetSlowMoversRequest)(nil),           // 3: insights.product.v1.GetSlowMoversRequest
-	(*GetBestSellersResponse)(nil),         // 4: insights.product.v1.GetBestSellersResponse
-	(*GetCategoryPerformanceResponse)(nil), // 5: insights.product.v1.GetCategoryPerformanceResponse
-	(*GetProductMarginsResponse)(nil),      // 6: insights.product.v1.GetProductMarginsResponse
-	(*GetSlowMoversResponse)(nil),          // 7: insights.product.v1.GetSlowMoversResponse
+	(*GetProductPerformanceRequest)(nil),   // 4: insights.product.v1.GetProductPerformanceRequest
+	(*GetBestSellersResponse)(nil),         // 5: insights.product.v1.GetBestSellersResponse
+	(*GetCategoryPerformanceResponse)(nil), // 6: insights.product.v1.GetCategoryPerformanceResponse
+	(*GetProductMarginsResponse)(nil),      // 7: insights.product.v1.GetProductMarginsResponse
+	(*GetSlowMoversResponse)(nil),          // 8: insights.product.v1.GetSlowMoversResponse
+	(*GetProductPerformanceResponse)(nil),  // 9: insights.product.v1.GetProductPerformanceResponse
 }
 var file_insights_product_v1_service_proto_depIdxs = []int32{
 	0, // 0: insights.product.v1.ProductService.GetBestSellers:input_type -> insights.product.v1.GetBestSellersRequest
 	1, // 1: insights.product.v1.ProductService.GetCategoryPerformance:input_type -> insights.product.v1.GetCategoryPerformanceRequest
 	2, // 2: insights.product.v1.ProductService.GetProductMargins:input_type -> insights.product.v1.GetProductMarginsRequest
 	3, // 3: insights.product.v1.ProductService.GetSlowMovers:input_type -> insights.product.v1.GetSlowMoversRequest
-	4, // 4: insights.product.v1.ProductService.GetBestSellers:output_type -> insights.product.v1.GetBestSellersResponse
-	5, // 5: insights.product.v1.ProductService.GetCategoryPerformance:output_type -> insights.product.v1.GetCategoryPerformanceResponse
-	6, // 6: insights.product.v1.ProductService.GetProductMargins:output_type -> insights.product.v1.GetProductMarginsResponse
-	7, // 7: insights.product.v1.ProductService.GetSlowMovers:output_type -> insights.product.v1.GetSlowMoversResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	4, // 4: insights.product.v1.ProductService.GetProductPerformance:input_type -> insights.product.v1.GetProductPerformanceRequest
+	5, // 5: insights.product.v1.ProductService.GetBestSellers:output_type -> insights.product.v1.GetBestSellersResponse
+	6, // 6: insights.product.v1.ProductService.GetCategoryPerformance:output_type -> insights.product.v1.GetCategoryPerformanceResponse
+	7, // 7: insights.product.v1.ProductService.GetProductMargins:output_type -> insights.product.v1.GetProductMarginsResponse
+	8, // 8: insights.product.v1.ProductService.GetSlowMovers:output_type -> insights.product.v1.GetSlowMoversResponse
+	9, // 9: insights.product.v1.ProductService.GetProductPerformance:output_type -> insights.product.v1.GetProductPerformanceResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -71,6 +77,7 @@ func file_insights_product_v1_service_proto_init() {
 	file_insights_product_v1_get_best_sellers_proto_init()
 	file_insights_product_v1_get_category_performance_proto_init()
 	file_insights_product_v1_get_product_margins_proto_init()
+	file_insights_product_v1_get_product_performance_proto_init()
 	file_insights_product_v1_get_slow_movers_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

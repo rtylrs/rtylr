@@ -18,27 +18,27 @@ export interface MyLocation {
 }
 
 export interface RosterEntry {
-  /** user_id is the user id value for this contract. */
+  /** user_id identifies the staff member. */
   userId: number;
-  /** name is the name value for this contract. */
+  /** name is the staff display name. */
   name: string;
-  /** has_pin is the has pin value for this contract. */
+  /** has_pin tells the terminal whether the staff member can sign in with a PIN. */
   hasPin: boolean;
-  /** is_manager is the is manager value for this contract. */
+  /** is_manager tells whether this staff member can manage POS access. */
   isManager: boolean;
-  /** pos_role is the pos role value for this contract. */
+  /** pos_role is the POS-specific role label. */
   posRole: string;
 }
 
 export interface MemberLocationEntry {
-  /** id is the unique identifier for the resource. */
+  /** id is the unique assignment identifier. */
   id: number;
-  /** location_id is the location id value for this contract. */
+  /** location_id identifies the assigned location. */
   locationId: number;
-  /** can_manage_pos_users is the can manage pos users value for this contract. */
+  /** can_manage_pos_users controls POS staff management. */
   canManagePosUsers: boolean;
-  /** can_manage_terminals is the can manage terminals value for this contract. */
+  /** can_manage_terminals controls terminal management. */
   canManageTerminals: boolean;
-  /** can_view_reports is the can view reports value for this contract. */
+  /** can_view_reports controls POS reporting access. */
   canViewReports: boolean;
 }

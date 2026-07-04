@@ -65,6 +65,14 @@ export interface UpdateSupplierResponse {
   message: string;
 }
 
+export interface DeleteSupplierRequest {
+  id: string;
+}
+
+export interface DeleteSupplierResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -198,6 +206,30 @@ export class SupplierServiceClient {
     }
 
     return await resp.json() as UpdateSupplierResponse;
+  }
+
+  async deleteSupplier(req: DeleteSupplierRequest, options?: SupplierServiceCallOptions): Promise<DeleteSupplierResponse> {
+    let path = "/api/erp/supplier/v1/suppliers/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteSupplierResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

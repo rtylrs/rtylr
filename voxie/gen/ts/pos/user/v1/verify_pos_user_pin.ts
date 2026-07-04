@@ -5,14 +5,35 @@
 // source: pos/user/v1/verify_pos_user_pin.proto
 
 /* eslint-disable */
-import type { POSUser } from "./types";
 
 export interface VerifyPOSUserPINRequest {
-  /** pin is the pin value for this contract. */
+  /** location_id is the POS location where the operator is signing in. */
+  locationId: number;
+  /** user_id is the hub user id of the roster operator. */
+  userId: number;
+  /** pin is the operator PIN. Sensitive: do not log this field. */
   pin: string;
 }
 
 export interface VerifyPOSUserPINResponse {
-  /** user is the user value for this contract. */
-  user: POSUser | undefined;
+  /** user_id is the hub user id for the verified operator. */
+  userId: number;
+  /** pos_user_id is the POS roster row id. */
+  posUserId: number;
+  /** location_id is the location where the operator signed in. */
+  locationId: number;
+  /** role is the operator role at this location. */
+  role: string;
+  /** display_name is the operator name shown on receipts and session UI. */
+  displayName: string;
+  /** can_void grants void permission for this session. */
+  canVoid: boolean;
+  /** can_refund grants refund permission for this session. */
+  canRefund: boolean;
+  /** can_open_drawer grants cash drawer access for this session. */
+  canOpenDrawer: boolean;
+  /** can_apply_discount grants discount permission for this session. */
+  canApplyDiscount: boolean;
+  /** max_discount_pct is the maximum discount percentage allowed. */
+  maxDiscountPct: number;
 }

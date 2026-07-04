@@ -12,7 +12,6 @@ import (
 // OrderItemServiceServer is the server API for OrderItemService service.
 type OrderItemServiceServer interface {
 	UpdateOrderItemStatus(context.Context, *UpdateOrderItemStatusRequest) (*UpdateOrderItemStatusResponse, error)
-	VoidOrderItem(context.Context, *VoidOrderItemRequest) (*VoidOrderItemResponse, error)
 }
 
 // RegisterOrderItemServiceServer registers the HTTP handlers for service OrderItemService to the given mux.
@@ -30,15 +29,6 @@ func RegisterOrderItemServiceServer(server OrderItemServiceServer, opts ...Serve
 
 	config.mux.Handle("PUT /api/pos/orders/items/v1/orders/{order_id}/items/{item_id}/status", updateOrderItemStatusHandler)
 
-	methodHeaders = getVoidOrderItemHeaders()
-	voidOrderItemHandler := BindingMiddleware[VoidOrderItemRequest](
-		genericHandler(server.VoidOrderItem, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		voidOrderItemPathParams, voidOrderItemQueryParams,
-		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("DELETE /api/pos/orders/items/v1/orders/{order_id}/items/{item_id}", voidOrderItemHandler)
-
 	return nil
 }
 
@@ -52,11 +42,6 @@ func getUpdateOrderItemStatusHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getVoidOrderItemHeaders returns the method-level required headers for VoidOrderItem
-func getVoidOrderItemHeaders() []*onekithttp.Header {
-	return nil
-}
-
 // updateOrderItemStatusPathParams contains path parameter configuration for UpdateOrderItemStatus
 var updateOrderItemStatusPathParams = []PathParamConfig{
 	{URLParam: "order_id", FieldName: "order_id"},
@@ -65,12 +50,3 @@ var updateOrderItemStatusPathParams = []PathParamConfig{
 
 // updateOrderItemStatusQueryParams contains query parameter configuration for UpdateOrderItemStatus
 var updateOrderItemStatusQueryParams = []QueryParamConfig{}
-
-// voidOrderItemPathParams contains path parameter configuration for VoidOrderItem
-var voidOrderItemPathParams = []PathParamConfig{
-	{URLParam: "order_id", FieldName: "order_id"},
-	{URLParam: "item_id", FieldName: "item_id"},
-}
-
-// voidOrderItemQueryParams contains query parameter configuration for VoidOrderItem
-var voidOrderItemQueryParams = []QueryParamConfig{}

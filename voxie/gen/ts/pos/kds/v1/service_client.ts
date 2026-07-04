@@ -29,19 +29,6 @@ export interface KDSItem {
   status: string;
 }
 
-export interface UpdateKDSItemByIDRequest {
-  itemId: string;
-  body?: UpdateKDSItemByIDBody;
-}
-
-export interface UpdateKDSItemByIDBody {
-  status: string;
-}
-
-export interface UpdateKDSItemByIDResponse {
-  message: string;
-}
-
 export interface UpdateKDSItemStatusRequest {
   orderId: string;
   itemId: string;
@@ -140,31 +127,6 @@ export class KDSServiceClient {
     }
 
     return await resp.json() as ListKDSOrdersResponse;
-  }
-
-  async updateKDSItemByID(req: UpdateKDSItemByIDRequest, options?: KDSServiceCallOptions): Promise<UpdateKDSItemByIDResponse> {
-    let path = "/api/pos/kds/v1/items/{item_id}";
-    path = path.replace("{item_id}", encodeURIComponent(String(req.itemId)));
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "PUT",
-      headers,
-      body: JSON.stringify(req.body ?? {}),
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as UpdateKDSItemByIDResponse;
   }
 
   async updateKDSItemStatus(req: UpdateKDSItemStatusRequest, options?: KDSServiceCallOptions): Promise<UpdateKDSItemStatusResponse> {

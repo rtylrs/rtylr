@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package crm.template.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/struct.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/template/v1";
+
+message UpdateTemplateRequest {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (buf.validate.field).required = true
+  ];
+  UpdateTemplateBody body = 2;
+}
+
+message UpdateTemplateBody {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string type = 2;
+  string subject = 3;
+  string body = 4;
+  google.protobuf.Value variables = 5;
+  bool is_active = 6;
+}
+
+message UpdateTemplateResponse {
+  string message = 1;
+}

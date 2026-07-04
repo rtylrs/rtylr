@@ -5,6 +5,7 @@ package insights.product.v1;
 import "insights/product/v1/get_best_sellers.proto";
 import "insights/product/v1/get_category_performance.proto";
 import "insights/product/v1/get_product_margins.proto";
+import "insights/product/v1/get_product_performance.proto";
 import "insights/product/v1/get_slow_movers.proto";
 import "onekit/http/annotations.proto";
 
@@ -42,6 +43,14 @@ service ProductService {
   rpc GetSlowMovers(GetSlowMoversRequest) returns (GetSlowMoversResponse) {
     option (onekit.http.config) = {
       path: "/slow-movers"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetProductPerformance returns aggregate product KPI counters.
+  rpc GetProductPerformance(GetProductPerformanceRequest) returns (GetProductPerformanceResponse) {
+    option (onekit.http.config) = {
+      path: "/performance"
       method: HTTP_METHOD_GET
     };
   }

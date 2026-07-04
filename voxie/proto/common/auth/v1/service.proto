@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package common.auth.v1;
 
+import "common/auth/v1/check_email_exists.proto";
 import "common/auth/v1/google_auth.proto";
 import "common/auth/v1/invite_accept.proto";
 import "common/auth/v1/login.proto";
@@ -9,6 +10,7 @@ import "common/auth/v1/register.proto";
 import "common/auth/v1/resend_verification.proto";
 import "common/auth/v1/reset_password.proto";
 import "common/auth/v1/reset_password_confirm.proto";
+import "common/auth/v1/social_authorize.proto";
 import "common/auth/v1/verify_email.proto";
 import "onekit/http/annotations.proto";
 
@@ -79,6 +81,22 @@ service AuthService {
     option (onekit.http.config) = {
       path: "/invite/accept"
       method: HTTP_METHOD_POST
+    };
+  }
+
+  // CheckEmailExists probes whether an email is already registered.
+  rpc CheckEmailExists(CheckEmailExistsRequest) returns (CheckEmailExistsResponse) {
+    option (onekit.http.config) = {
+      path: "/email-exists"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // SocialAuthorize returns the WorkOS-hosted consent URL for a provider.
+  rpc SocialAuthorize(SocialAuthorizeRequest) returns (SocialAuthorizeResponse) {
+    option (onekit.http.config) = {
+      path: "/social/authorize"
+      method: HTTP_METHOD_GET
     };
   }
 }

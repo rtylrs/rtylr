@@ -166,6 +166,114 @@ func (x *Workspace) GetIsPersonal() bool {
 	return false
 }
 
+type WorkspaceMember struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the unique identifier for the membership record.
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// workspace_id is the workspace id value for this contract.
+	WorkspaceId int64 `protobuf:"varint,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	// user_id identifies the user associated with this request.
+	UserId int64 `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// name is the member display name.
+	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	// email is the member email address.
+	Email string `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	// role is the role value for this contract.
+	Role string `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	// invited_by is the user id of the inviter, if any.
+	InvitedBy int64 `protobuf:"varint,7,opt,name=invited_by,json=invitedBy,proto3" json:"invited_by,omitempty"`
+	// joined_at is when the member joined the workspace.
+	JoinedAt      string `protobuf:"bytes,8,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WorkspaceMember) Reset() {
+	*x = WorkspaceMember{}
+	mi := &file_flow_workspace_v1_types_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WorkspaceMember) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorkspaceMember) ProtoMessage() {}
+
+func (x *WorkspaceMember) ProtoReflect() protoreflect.Message {
+	mi := &file_flow_workspace_v1_types_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorkspaceMember.ProtoReflect.Descriptor instead.
+func (*WorkspaceMember) Descriptor() ([]byte, []int) {
+	return file_flow_workspace_v1_types_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *WorkspaceMember) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *WorkspaceMember) GetWorkspaceId() int64 {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return 0
+}
+
+func (x *WorkspaceMember) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *WorkspaceMember) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *WorkspaceMember) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *WorkspaceMember) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *WorkspaceMember) GetInvitedBy() int64 {
+	if x != nil {
+		return x.InvitedBy
+	}
+	return 0
+}
+
+func (x *WorkspaceMember) GetJoinedAt() string {
+	if x != nil {
+		return x.JoinedAt
+	}
+	return ""
+}
+
 var File_flow_workspace_v1_types_proto protoreflect.FileDescriptor
 
 const file_flow_workspace_v1_types_proto_rawDesc = "" +
@@ -189,7 +297,17 @@ const file_flow_workspace_v1_types_proto_rawDesc = "" +
 	" \x01(\tR\tupdatedAt\x12!\n" +
 	"\fmember_count\x18\v \x01(\x05R\vmemberCount\x12\x1f\n" +
 	"\vis_personal\x18\f \x01(\bR\n" +
-	"isPersonalB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
+	"isPersonal\"\xef\x01\n" +
+	"\x0fWorkspaceMember\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12'\n" +
+	"\fworkspace_id\x18\x02 \x01(\x03B\x04е\x18\x01R\vworkspaceId\x12\x1d\n" +
+	"\auser_id\x18\x03 \x01(\x03B\x04е\x18\x01R\x06userId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x05 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\x12#\n" +
+	"\n" +
+	"invited_by\x18\a \x01(\x03B\x04е\x18\x01R\tinvitedBy\x12\x1b\n" +
+	"\tjoined_at\x18\b \x01(\tR\bjoinedAtB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
 
 var (
 	file_flow_workspace_v1_types_proto_rawDescOnce sync.Once
@@ -203,9 +321,10 @@ func file_flow_workspace_v1_types_proto_rawDescGZIP() []byte {
 	return file_flow_workspace_v1_types_proto_rawDescData
 }
 
-var file_flow_workspace_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_flow_workspace_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_flow_workspace_v1_types_proto_goTypes = []any{
-	(*Workspace)(nil), // 0: flow.workspace.v1.Workspace
+	(*Workspace)(nil),       // 0: flow.workspace.v1.Workspace
+	(*WorkspaceMember)(nil), // 1: flow.workspace.v1.WorkspaceMember
 }
 var file_flow_workspace_v1_types_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -226,7 +345,7 @@ func file_flow_workspace_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_flow_workspace_v1_types_proto_rawDesc), len(file_flow_workspace_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

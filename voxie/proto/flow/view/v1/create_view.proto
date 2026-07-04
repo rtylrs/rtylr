@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package flow.view.v1;
+
+import "buf/validate/validate.proto";
+import "flow/view/v1/types.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/view/v1";
+
+message CreateViewRequest {
+  string workspace_id = 1;
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string icon = 3;
+  google.protobuf.Struct filters = 4;
+  string group_by = 5;
+  string sort_by = 6;
+  string sort_dir = 7;
+}
+
+message CreateViewResponse {
+  View view = 1;
+}

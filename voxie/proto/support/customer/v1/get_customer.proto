@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package support.customer.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+import "support/customer/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/customer/v1";
+
+message GetCustomerRequest {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+}
+
+message GetCustomerResponse {
+  Customer customer = 1;
+}

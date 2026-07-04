@@ -25,33 +25,21 @@ var File_hub_team_access_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_access_v1_service_proto_rawDesc = "" +
 	"\n" +
-	" hub/team/access/v1/service.proto\x12\x12hub.team.access.v1\x1a/hub/team/access/v1/approve_access_request.proto\x1a-hub/team/access/v1/list_access_requests.proto\x1a'hub/team/access/v1/request_access.proto\x1a\x1donekit/http/annotations.proto2\xcc\x03\n" +
+	" hub/team/access/v1/service.proto\x12\x12hub.team.access.v1\x1a'hub/team/access/v1/request_access.proto\x1a\x1donekit/http/annotations.proto2\xa7\x01\n" +
 	"\rAccessService\x12w\n" +
 	"\rRequestAccess\x12(.hub.team.access.v1.RequestAccessRequest\x1a).hub.team.access.v1.RequestAccessResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/requests\x10\x02\x12\x86\x01\n" +
-	"\x12ListAccessRequests\x12-.hub.team.access.v1.ListAccessRequestsRequest\x1a..hub.team.access.v1.ListAccessRequestsResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/requests\x10\x01\x12\x99\x01\n" +
-	"\x14ApproveAccessRequest\x12/.hub.team.access.v1.ApproveAccessRequestRequest\x1a0.hub.team.access.v1.ApproveAccessRequestResponse\"\x1e\x9a\xb5\x18\x1a\n" +
-	"\x16/requests/{id}/approve\x10\x02\x1a\x1d\xa2\xb5\x18\x19\n" +
+	"\t/requests\x10\x02\x1a\x1d\xa2\xb5\x18\x19\n" +
 	"\x17/api/hub/team/access/v1B3Z1github.com/voxire/voxie/gen/go/hub/team/access/v1b\x06proto3"
 
 var file_hub_team_access_v1_service_proto_goTypes = []any{
-	(*RequestAccessRequest)(nil),         // 0: hub.team.access.v1.RequestAccessRequest
-	(*ListAccessRequestsRequest)(nil),    // 1: hub.team.access.v1.ListAccessRequestsRequest
-	(*ApproveAccessRequestRequest)(nil),  // 2: hub.team.access.v1.ApproveAccessRequestRequest
-	(*RequestAccessResponse)(nil),        // 3: hub.team.access.v1.RequestAccessResponse
-	(*ListAccessRequestsResponse)(nil),   // 4: hub.team.access.v1.ListAccessRequestsResponse
-	(*ApproveAccessRequestResponse)(nil), // 5: hub.team.access.v1.ApproveAccessRequestResponse
+	(*RequestAccessRequest)(nil),  // 0: hub.team.access.v1.RequestAccessRequest
+	(*RequestAccessResponse)(nil), // 1: hub.team.access.v1.RequestAccessResponse
 }
 var file_hub_team_access_v1_service_proto_depIdxs = []int32{
 	0, // 0: hub.team.access.v1.AccessService.RequestAccess:input_type -> hub.team.access.v1.RequestAccessRequest
-	1, // 1: hub.team.access.v1.AccessService.ListAccessRequests:input_type -> hub.team.access.v1.ListAccessRequestsRequest
-	2, // 2: hub.team.access.v1.AccessService.ApproveAccessRequest:input_type -> hub.team.access.v1.ApproveAccessRequestRequest
-	3, // 3: hub.team.access.v1.AccessService.RequestAccess:output_type -> hub.team.access.v1.RequestAccessResponse
-	4, // 4: hub.team.access.v1.AccessService.ListAccessRequests:output_type -> hub.team.access.v1.ListAccessRequestsResponse
-	5, // 5: hub.team.access.v1.AccessService.ApproveAccessRequest:output_type -> hub.team.access.v1.ApproveAccessRequestResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 1: hub.team.access.v1.AccessService.RequestAccess:output_type -> hub.team.access.v1.RequestAccessResponse
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -62,8 +50,6 @@ func file_hub_team_access_v1_service_proto_init() {
 	if File_hub_team_access_v1_service_proto != nil {
 		return
 	}
-	file_hub_team_access_v1_approve_access_request_proto_init()
-	file_hub_team_access_v1_list_access_requests_proto_init()
 	file_hub_team_access_v1_request_access_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

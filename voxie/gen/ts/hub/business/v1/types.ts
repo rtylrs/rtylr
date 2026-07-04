@@ -82,4 +82,6 @@ export interface PublicBusinessSummary {
   currency: string;
   /** type is the type value for this contract. */
   type: string;
+  /** timezone is the timezone value for this contract. */
+  timezone: string;
 }

@@ -4,31 +4,35 @@ package insights.report.v1;
 
 import "buf/validate/validate.proto";
 import "insights/report/v1/types.proto";
-import "onekit/http/annotations.proto";
-
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
 
 message CreateScheduledReportRequest {
-  // template_id is the template id value for this contract.
-  int64 template_id = 1 [
+  // template_slug is the template slug (e.g. revenue-monthly).
+  string template_slug = 1 [
     (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0,
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+    (buf.validate.field).string.min_len = 1
   ];
-  // frequency is the frequency value for this contract.
+  // frequency is the delivery frequency (daily, weekly, monthly).
   string frequency = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
-  // recipient_email is the recipient email value for this contract.
-  string recipient_email = 3 [
+  // channel is the delivery channel (email, slack).
+  string channel = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // recipient_email is the delivery recipient.
+  string recipient_email = 4 [
     (buf.validate.field).required = true,
     (buf.validate.field).string = {
       min_len: 1
       email: true
     }
   ];
+  // is_active toggles whether the schedule is active.
+  bool is_active = 5;
 }
 
 message CreateScheduledReportResponse {

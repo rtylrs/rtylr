@@ -134,13 +134,12 @@ var File_hub_permission_v1_create_role_proto protoreflect.FileDescriptor
 
 const file_hub_permission_v1_create_role_proto_rawDesc = "" +
 	"\n" +
-	"#hub/permission/v1/create_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhub/permission/v1/types.proto\"\x8d\x01\n" +
+	"#hub/permission/v1/create_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhub/permission/v1/types.proto\"w\n" +
 	"\x11CreateRoleRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
-	"\vdescription\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12*\n" +
-	"\vpermissions\x18\x03 \x03(\tB\b\xbaH\x05\x92\x01\x02\b\x01R\vpermissions\"G\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12 \n" +
+	"\vpermissions\x18\x03 \x03(\tR\vpermissions\"G\n" +
 	"\x12CreateRoleResponse\x121\n" +
 	"\x04role\x18\x01 \x01(\v2\x1d.hub.permission.v1.CustomRoleR\x04roleB2Z0github.com/voxire/voxie/gen/go/hub/permission/v1b\x06proto3"
 

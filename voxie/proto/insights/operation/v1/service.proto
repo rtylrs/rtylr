@@ -3,6 +3,7 @@ syntax = "proto3";
 package insights.operation.v1;
 
 import "insights/operation/v1/get_headcount_metrics.proto";
+import "insights/operation/v1/get_operations_summary.proto";
 import "insights/operation/v1/get_shift_metrics.proto";
 import "insights/operation/v1/get_time_off_metrics.proto";
 import "insights/operation/v1/get_utilization.proto";
@@ -42,6 +43,14 @@ service OperationService {
   rpc GetUtilization(GetUtilizationRequest) returns (GetUtilizationResponse) {
     option (onekit.http.config) = {
       path: "/utilization"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetOperationsSummary returns headline HR operations KPI counters.
+  rpc GetOperationsSummary(GetOperationsSummaryRequest) returns (GetOperationsSummaryResponse) {
+    option (onekit.http.config) = {
+      path: "/summary"
       method: HTTP_METHOD_GET
     };
   }

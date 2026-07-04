@@ -25,7 +25,7 @@ var File_pos_table_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_table_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1apos/table/v1/service.proto\x12\fpos.table.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/table/v1/create_table.proto\x1a\x1fpos/table/v1/delete_table.proto\x1a\x1epos/table/v1/list_tables.proto\x1a\x1fpos/table/v1/update_table.proto\x1a&pos/table/v1/update_table_status.proto2\xd2\x04\n" +
+	"\x1apos/table/v1/service.proto\x12\fpos.table.v1\x1a\x1donekit/http/annotations.proto\x1a\x1fpos/table/v1/create_table.proto\x1a\x1fpos/table/v1/delete_table.proto\x1a\x1epos/table/v1/list_tables.proto\x1a\x1fpos/table/v1/update_table.proto2\xc8\x03\n" +
 	"\fTableService\x12`\n" +
 	"\n" +
 	"ListTables\x12\x1f.pos.table.v1.ListTablesRequest\x1a .pos.table.v1.ListTablesResponse\"\x0f\x9a\xb5\x18\v\n" +
@@ -33,38 +33,32 @@ const file_pos_table_v1_service_proto_rawDesc = "" +
 	"\vCreateTable\x12 .pos.table.v1.CreateTableRequest\x1a!.pos.table.v1.CreateTableResponse\"\x0f\x9a\xb5\x18\v\n" +
 	"\a/tables\x10\x02\x12n\n" +
 	"\vUpdateTable\x12 .pos.table.v1.UpdateTableRequest\x1a!.pos.table.v1.UpdateTableResponse\"\x1a\x9a\xb5\x18\x16\n" +
-	"\f/tables/{id}\x10\x03\"\x04body\x12\x87\x01\n" +
-	"\x11UpdateTableStatus\x12&.pos.table.v1.UpdateTableStatusRequest\x1a'.pos.table.v1.UpdateTableStatusResponse\"!\x9a\xb5\x18\x1d\n" +
-	"\x13/tables/{id}/status\x10\x03\"\x04body\x12h\n" +
+	"\f/tables/{id}\x10\x03\"\x04body\x12h\n" +
 	"\vDeleteTable\x12 .pos.table.v1.DeleteTableRequest\x1a!.pos.table.v1.DeleteTableResponse\"\x14\x9a\xb5\x18\x10\n" +
 	"\f/tables/{id}\x10\x04\x1a\x17\xa2\xb5\x18\x13\n" +
 	"\x11/api/pos/table/v1B-Z+github.com/voxire/voxie/gen/go/pos/table/v1b\x06proto3"
 
 var file_pos_table_v1_service_proto_goTypes = []any{
-	(*ListTablesRequest)(nil),         // 0: pos.table.v1.ListTablesRequest
-	(*CreateTableRequest)(nil),        // 1: pos.table.v1.CreateTableRequest
-	(*UpdateTableRequest)(nil),        // 2: pos.table.v1.UpdateTableRequest
-	(*UpdateTableStatusRequest)(nil),  // 3: pos.table.v1.UpdateTableStatusRequest
-	(*DeleteTableRequest)(nil),        // 4: pos.table.v1.DeleteTableRequest
-	(*ListTablesResponse)(nil),        // 5: pos.table.v1.ListTablesResponse
-	(*CreateTableResponse)(nil),       // 6: pos.table.v1.CreateTableResponse
-	(*UpdateTableResponse)(nil),       // 7: pos.table.v1.UpdateTableResponse
-	(*UpdateTableStatusResponse)(nil), // 8: pos.table.v1.UpdateTableStatusResponse
-	(*DeleteTableResponse)(nil),       // 9: pos.table.v1.DeleteTableResponse
+	(*ListTablesRequest)(nil),   // 0: pos.table.v1.ListTablesRequest
+	(*CreateTableRequest)(nil),  // 1: pos.table.v1.CreateTableRequest
+	(*UpdateTableRequest)(nil),  // 2: pos.table.v1.UpdateTableRequest
+	(*DeleteTableRequest)(nil),  // 3: pos.table.v1.DeleteTableRequest
+	(*ListTablesResponse)(nil),  // 4: pos.table.v1.ListTablesResponse
+	(*CreateTableResponse)(nil), // 5: pos.table.v1.CreateTableResponse
+	(*UpdateTableResponse)(nil), // 6: pos.table.v1.UpdateTableResponse
+	(*DeleteTableResponse)(nil), // 7: pos.table.v1.DeleteTableResponse
 }
 var file_pos_table_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.table.v1.TableService.ListTables:input_type -> pos.table.v1.ListTablesRequest
 	1, // 1: pos.table.v1.TableService.CreateTable:input_type -> pos.table.v1.CreateTableRequest
 	2, // 2: pos.table.v1.TableService.UpdateTable:input_type -> pos.table.v1.UpdateTableRequest
-	3, // 3: pos.table.v1.TableService.UpdateTableStatus:input_type -> pos.table.v1.UpdateTableStatusRequest
-	4, // 4: pos.table.v1.TableService.DeleteTable:input_type -> pos.table.v1.DeleteTableRequest
-	5, // 5: pos.table.v1.TableService.ListTables:output_type -> pos.table.v1.ListTablesResponse
-	6, // 6: pos.table.v1.TableService.CreateTable:output_type -> pos.table.v1.CreateTableResponse
-	7, // 7: pos.table.v1.TableService.UpdateTable:output_type -> pos.table.v1.UpdateTableResponse
-	8, // 8: pos.table.v1.TableService.UpdateTableStatus:output_type -> pos.table.v1.UpdateTableStatusResponse
-	9, // 9: pos.table.v1.TableService.DeleteTable:output_type -> pos.table.v1.DeleteTableResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
+	3, // 3: pos.table.v1.TableService.DeleteTable:input_type -> pos.table.v1.DeleteTableRequest
+	4, // 4: pos.table.v1.TableService.ListTables:output_type -> pos.table.v1.ListTablesResponse
+	5, // 5: pos.table.v1.TableService.CreateTable:output_type -> pos.table.v1.CreateTableResponse
+	6, // 6: pos.table.v1.TableService.UpdateTable:output_type -> pos.table.v1.UpdateTableResponse
+	7, // 7: pos.table.v1.TableService.DeleteTable:output_type -> pos.table.v1.DeleteTableResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -79,7 +73,6 @@ func file_pos_table_v1_service_proto_init() {
 	file_pos_table_v1_delete_table_proto_init()
 	file_pos_table_v1_list_tables_proto_init()
 	file_pos_table_v1_update_table_proto_init()
-	file_pos_table_v1_update_table_status_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

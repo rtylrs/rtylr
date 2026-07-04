@@ -22,39 +22,127 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Document struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	StaffId       int64                  `protobuf:"varint,3,opt,name=staff_id,json=staffId,proto3" json:"staff_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	FileUrl       string                 `protobuf:"bytes,6,opt,name=file_url,json=fileUrl,proto3" json:"file_url,omitempty"`
+	ExpiryDate    string                 `protobuf:"bytes,7,opt,name=expiry_date,json=expiryDate,proto3" json:"expiry_date,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Document) Reset() {
+	*x = Document{}
+	mi := &file_hr_document_v1_types_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Document) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Document) ProtoMessage() {}
+
+func (x *Document) ProtoReflect() protoreflect.Message {
+	mi := &file_hr_document_v1_types_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Document.ProtoReflect.Descriptor instead.
+func (*Document) Descriptor() ([]byte, []int) {
+	return file_hr_document_v1_types_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Document) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Document) GetOwnerId() int64 {
+	if x != nil {
+		return x.OwnerId
+	}
+	return 0
+}
+
+func (x *Document) GetStaffId() int64 {
+	if x != nil {
+		return x.StaffId
+	}
+	return 0
+}
+
+func (x *Document) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Document) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *Document) GetFileUrl() string {
+	if x != nil {
+		return x.FileUrl
+	}
+	return ""
+}
+
+func (x *Document) GetExpiryDate() string {
+	if x != nil {
+		return x.ExpiryDate
+	}
+	return ""
+}
+
+func (x *Document) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
 type EmployeeDocumentPayload struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Unique identifier for the document.
-	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Tenant owner this document belongs to.
-	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	// Employee this document is associated with.
-	EmployeeId int64 `protobuf:"varint,3,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
-	// Category of document (e.g. "id_card", "contract", "certificate", "visa").
-	DocumentType string `protobuf:"bytes,4,opt,name=document_type,json=documentType,proto3" json:"document_type,omitempty"`
-	// Human-readable name for the document.
-	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	// How the document is stored (stored | linked).
-	StorageMode string `protobuf:"bytes,6,opt,name=storage_mode,json=storageMode,proto3" json:"storage_mode,omitempty"`
-	// URL to access the document file.
-	FileUrl string `protobuf:"bytes,7,opt,name=file_url,json=fileUrl,proto3" json:"file_url,omitempty"`
-	// Date the document expires (ISO-8601 date); absent if no expiry.
-	ExpiryDate *string `protobuf:"bytes,8,opt,name=expiry_date,json=expiryDate,proto3,oneof" json:"expiry_date,omitempty"`
-	// Employee who uploaded or linked the document.
-	UploadedBy int64 `protobuf:"varint,9,opt,name=uploaded_by,json=uploadedBy,proto3" json:"uploaded_by,omitempty"`
-	// Unix timestamp when the document was uploaded.
-	UploadedAt int64 `protobuf:"varint,10,opt,name=uploaded_at,json=uploadedAt,proto3" json:"uploaded_at,omitempty"`
-	// Unix timestamp when this record was created.
-	CreatedAt int64 `protobuf:"varint,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	// Unix timestamp when this record was last updated.
-	UpdatedAt     int64 `protobuf:"varint,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	EmployeeId    int64                  `protobuf:"varint,3,opt,name=employee_id,json=employeeId,proto3" json:"employee_id,omitempty"`
+	DocumentType  string                 `protobuf:"bytes,4,opt,name=document_type,json=documentType,proto3" json:"document_type,omitempty"`
+	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	StorageMode   string                 `protobuf:"bytes,6,opt,name=storage_mode,json=storageMode,proto3" json:"storage_mode,omitempty"`
+	FileUrl       string                 `protobuf:"bytes,7,opt,name=file_url,json=fileUrl,proto3" json:"file_url,omitempty"`
+	ExpiryDate    *string                `protobuf:"bytes,8,opt,name=expiry_date,json=expiryDate,proto3,oneof" json:"expiry_date,omitempty"`
+	UploadedBy    int64                  `protobuf:"varint,9,opt,name=uploaded_by,json=uploadedBy,proto3" json:"uploaded_by,omitempty"`
+	UploadedAt    int64                  `protobuf:"varint,10,opt,name=uploaded_at,json=uploadedAt,proto3" json:"uploaded_at,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     int64                  `protobuf:"varint,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EmployeeDocumentPayload) Reset() {
 	*x = EmployeeDocumentPayload{}
-	mi := &file_hr_document_v1_types_proto_msgTypes[0]
+	mi := &file_hr_document_v1_types_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -66,7 +154,7 @@ func (x *EmployeeDocumentPayload) String() string {
 func (*EmployeeDocumentPayload) ProtoMessage() {}
 
 func (x *EmployeeDocumentPayload) ProtoReflect() protoreflect.Message {
-	mi := &file_hr_document_v1_types_proto_msgTypes[0]
+	mi := &file_hr_document_v1_types_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -79,7 +167,7 @@ func (x *EmployeeDocumentPayload) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmployeeDocumentPayload.ProtoReflect.Descriptor instead.
 func (*EmployeeDocumentPayload) Descriptor() ([]byte, []int) {
-	return file_hr_document_v1_types_proto_rawDescGZIP(), []int{0}
+	return file_hr_document_v1_types_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *EmployeeDocumentPayload) GetId() int64 {
@@ -170,7 +258,18 @@ var File_hr_document_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_document_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahr/document/v1/types.proto\x12\x0ehr.document.v1\x1a\x1donekit/http/annotations.proto\"\xaa\x03\n" +
+	"\x1ahr/document/v1/types.proto\x12\x0ehr.document.v1\x1a\x1donekit/http/annotations.proto\"\xe5\x01\n" +
+	"\bDocument\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x1f\n" +
+	"\bstaff_id\x18\x03 \x01(\x03B\x04е\x18\x01R\astaffId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x05 \x01(\tR\x04type\x12\x19\n" +
+	"\bfile_url\x18\x06 \x01(\tR\afileUrl\x12\x1f\n" +
+	"\vexpiry_date\x18\a \x01(\tR\n" +
+	"expiryDate\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"\xb0\x03\n" +
 	"\x17EmployeeDocumentPayload\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
@@ -181,8 +280,8 @@ const file_hr_document_v1_types_proto_rawDesc = "" +
 	"\fstorage_mode\x18\x06 \x01(\tR\vstorageMode\x12\x19\n" +
 	"\bfile_url\x18\a \x01(\tR\afileUrl\x12*\n" +
 	"\vexpiry_date\x18\b \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\n" +
-	"expiryDate\x88\x01\x01\x12\x1f\n" +
-	"\vuploaded_by\x18\t \x01(\x03R\n" +
+	"expiryDate\x88\x01\x01\x12%\n" +
+	"\vuploaded_by\x18\t \x01(\x03B\x04е\x18\x01R\n" +
 	"uploadedBy\x12\x1f\n" +
 	"\vuploaded_at\x18\n" +
 	" \x01(\x03R\n" +
@@ -205,9 +304,10 @@ func file_hr_document_v1_types_proto_rawDescGZIP() []byte {
 	return file_hr_document_v1_types_proto_rawDescData
 }
 
-var file_hr_document_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_hr_document_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_hr_document_v1_types_proto_goTypes = []any{
-	(*EmployeeDocumentPayload)(nil), // 0: hr.document.v1.EmployeeDocumentPayload
+	(*Document)(nil),                // 0: hr.document.v1.Document
+	(*EmployeeDocumentPayload)(nil), // 1: hr.document.v1.EmployeeDocumentPayload
 }
 var file_hr_document_v1_types_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -222,14 +322,14 @@ func file_hr_document_v1_types_proto_init() {
 	if File_hr_document_v1_types_proto != nil {
 		return
 	}
-	file_hr_document_v1_types_proto_msgTypes[0].OneofWrappers = []any{}
+	file_hr_document_v1_types_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hr_document_v1_types_proto_rawDesc), len(file_hr_document_v1_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

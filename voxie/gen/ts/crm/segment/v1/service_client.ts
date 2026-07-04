@@ -13,7 +13,7 @@ export interface Segment {
   ownerId: string;
   name: string;
   description: string;
-  rules: string;
+  filters: string;
   customerCount: string;
   lastCalculatedAt: string | null;
   createdAt: string;
@@ -23,7 +23,7 @@ export interface Segment {
 export interface CreateSegmentRequest {
   name: string;
   description: string;
-  rules: string;
+  filters: string;
 }
 
 export interface CreateSegmentResponse {
@@ -69,7 +69,7 @@ export interface UpdateSegmentRequest {
 export interface UpdateSegmentBody {
   name: string;
   description: string;
-  rules: string;
+  filters: string;
 }
 
 export interface UpdateSegmentResponse {

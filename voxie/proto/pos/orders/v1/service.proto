@@ -3,11 +3,11 @@ syntax = "proto3";
 package pos.orders.v1;
 
 import "onekit/http/annotations.proto";
+import "pos/orders/v1/create_public_order.proto";
 import "pos/orders/v1/create_order.proto";
+import "pos/orders/v1/get_public_order_status.proto";
 import "pos/orders/v1/get_order_detail.proto";
 import "pos/orders/v1/list_orders.proto";
-import "pos/orders/v1/send_to_kitchen.proto";
-import "pos/orders/v1/transfer_table.proto";
 import "pos/orders/v1/update_order_status.proto";
 import "pos/orders/v1/void_order.proto";
 
@@ -33,6 +33,22 @@ service OrderService {
     };
   }
 
+  // CreatePublicOrder places an anonymous online order from the public menu app.
+  rpc CreatePublicOrder(CreatePublicOrderRequest) returns (CreatePublicOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/public"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // GetPublicOrderStatus returns lifecycle status for a public online order.
+  rpc GetPublicOrderStatus(GetPublicOrderStatusRequest) returns (GetPublicOrderStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/public-status"
+      method: HTTP_METHOD_GET
+    };
+  }
+
   // GetOrderDetail returns an order and its purchased items.
   rpc GetOrderDetail(GetOrderDetailRequest) returns (GetOrderDetailResponse) {
     option (onekit.http.config) = {
@@ -54,22 +70,6 @@ service OrderService {
   rpc VoidOrder(VoidOrderRequest) returns (VoidOrderResponse) {
     option (onekit.http.config) = {
       path: "/orders/{order_id}/void"
-      method: HTTP_METHOD_POST
-    };
-  }
-
-  // SendToKitchen dispatches an order to the kitchen display.
-  rpc SendToKitchen(SendToKitchenRequest) returns (SendToKitchenResponse) {
-    option (onekit.http.config) = {
-      path: "/orders/{order_id}/send-to-kitchen"
-      method: HTTP_METHOD_POST
-    };
-  }
-
-  // TransferTable moves an open order to a different table.
-  rpc TransferTable(TransferTableRequest) returns (TransferTableResponse) {
-    option (onekit.http.config) = {
-      path: "/orders/{order_id}/transfer-table"
       method: HTTP_METHOD_POST
     };
   }

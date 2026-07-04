@@ -25,24 +25,26 @@ const (
 
 type CreateSubtaskRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// parent_task_id is the parent task id value for this contract.
+	ParentTaskId int64 `protobuf:"varint,1,opt,name=parent_task_id,json=parentTaskId,proto3" json:"parent_task_id,omitempty"`
 	// project_id is the project id value for this contract.
-	ProjectId int64 `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ProjectId int64 `protobuf:"varint,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 	// workspace_id is the workspace id value for this contract.
-	WorkspaceId int64 `protobuf:"varint,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	WorkspaceId int64 `protobuf:"varint,3,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	// title is the title value for this contract.
-	Title string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Title string `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
 	// description is the description value for this contract.
-	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	// priority is the priority value for this contract.
-	Priority string `protobuf:"bytes,5,opt,name=priority,proto3" json:"priority,omitempty"`
+	Priority string `protobuf:"bytes,6,opt,name=priority,proto3" json:"priority,omitempty"`
 	// assignee_id is the assignee id value for this contract.
-	AssigneeId *int64 `protobuf:"varint,6,opt,name=assignee_id,json=assigneeId,proto3,oneof" json:"assignee_id,omitempty"`
+	AssigneeId *int64 `protobuf:"varint,7,opt,name=assignee_id,json=assigneeId,proto3,oneof" json:"assignee_id,omitempty"`
 	// due_date is the due date value for this contract.
-	DueDate string `protobuf:"bytes,7,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	DueDate string `protobuf:"bytes,8,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
 	// start_date is the start date value for this contract.
-	StartDate string `protobuf:"bytes,8,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	StartDate string `protobuf:"bytes,9,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
 	// estimated_hours is the estimated hours value for this contract.
-	EstimatedHours *float64 `protobuf:"fixed64,9,opt,name=estimated_hours,json=estimatedHours,proto3,oneof" json:"estimated_hours,omitempty"`
+	EstimatedHours *float64 `protobuf:"fixed64,10,opt,name=estimated_hours,json=estimatedHours,proto3,oneof" json:"estimated_hours,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -75,6 +77,13 @@ func (x *CreateSubtaskRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateSubtaskRequest.ProtoReflect.Descriptor instead.
 func (*CreateSubtaskRequest) Descriptor() ([]byte, []int) {
 	return file_flow_task_v1_create_subtask_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *CreateSubtaskRequest) GetParentTaskId() int64 {
+	if x != nil {
+		return x.ParentTaskId
+	}
+	return 0
 }
 
 func (x *CreateSubtaskRequest) GetProjectId() int64 {
@@ -198,25 +207,27 @@ var File_flow_task_v1_create_subtask_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_create_subtask_proto_rawDesc = "" +
 	"\n" +
-	"!flow/task/v1/create_subtask.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xca\x03\n" +
-	"\x14CreateSubtaskRequest\x12-\n" +
+	"!flow/task/v1/create_subtask.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x80\x04\n" +
+	"\x14CreateSubtaskRequest\x124\n" +
+	"\x0eparent_task_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\fparentTaskId\x12-\n" +
 	"\n" +
-	"project_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tprojectId\x121\n" +
-	"\fworkspace_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\vworkspaceId\x12 \n" +
-	"\x05title\x18\x03 \x01(\tB\n" +
+	"project_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\tprojectId\x121\n" +
+	"\fworkspace_id\x18\x03 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\vworkspaceId\x12 \n" +
+	"\x05title\x18\x04 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05title\x12,\n" +
-	"\vdescription\x18\x04 \x01(\tB\n" +
+	"\vdescription\x18\x05 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12&\n" +
-	"\bpriority\x18\x05 \x01(\tB\n" +
+	"\bpriority\x18\x06 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpriority\x12.\n" +
-	"\vassignee_id\x18\x06 \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
+	"\vassignee_id\x18\a \x01(\x03B\bе\x18\x01\xe8\xb5\x18\x01H\x00R\n" +
 	"assigneeId\x88\x01\x01\x12%\n" +
-	"\bdue_date\x18\a \x01(\tB\n" +
+	"\bdue_date\x18\b \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\x12)\n" +
 	"\n" +
-	"start_date\x18\b \x01(\tB\n" +
+	"start_date\x18\t \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x122\n" +
-	"\x0festimated_hours\x18\t \x01(\x01B\x04\xe8\xb5\x18\x01H\x01R\x0eestimatedHours\x88\x01\x01B\x0e\n" +
+	"\x0festimated_hours\x18\n" +
+	" \x01(\x01B\x04\xe8\xb5\x18\x01H\x01R\x0eestimatedHours\x88\x01\x01B\x0e\n" +
 	"\f_assignee_idB\x12\n" +
 	"\x10_estimated_hours\"P\n" +
 	"\x15CreateSubtaskResponse\x12\x1d\n" +

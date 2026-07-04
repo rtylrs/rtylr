@@ -58,6 +58,25 @@ export interface DeleteWorkspaceResponse {
   message: string;
 }
 
+export interface ListWorkspaceMembersRequest {
+  workspaceId: string;
+}
+
+export interface ListWorkspaceMembersResponse {
+  members: WorkspaceMember[];
+}
+
+export interface WorkspaceMember {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  invitedBy: string;
+  joinedAt: string;
+}
+
 export interface AddWorkspaceMemberRequest {
   workspaceId: string;
   userId: string;
@@ -74,6 +93,16 @@ export interface RemoveWorkspaceMemberRequest {
 }
 
 export interface RemoveWorkspaceMemberResponse {
+  message: string;
+}
+
+export interface UpdateWorkspaceMemberRoleRequest {
+  workspaceId: string;
+  userId: string;
+  role: string;
+}
+
+export interface UpdateWorkspaceMemberRoleResponse {
   message: string;
 }
 
@@ -236,6 +265,31 @@ export class WorkspaceServiceClient {
     return await resp.json() as DeleteWorkspaceResponse;
   }
 
+  async listWorkspaceMembers(req: ListWorkspaceMembersRequest, options?: WorkspaceServiceCallOptions): Promise<ListWorkspaceMembersResponse> {
+    let path = "/api/flow/workspace/v1/workspaces/members";
+    const params = new URLSearchParams();
+    if (req.workspaceId != null && req.workspaceId !== "0") params.set("workspace_id", String(req.workspaceId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListWorkspaceMembersResponse;
+  }
+
   async addWorkspaceMember(req: AddWorkspaceMemberRequest, options?: WorkspaceServiceCallOptions): Promise<AddWorkspaceMemberResponse> {
     let path = "/api/flow/workspace/v1/workspaces/members";
     const url = this.baseURL + path;
@@ -284,6 +338,30 @@ export class WorkspaceServiceClient {
     }
 
     return await resp.json() as RemoveWorkspaceMemberResponse;
+  }
+
+  async updateWorkspaceMemberRole(req: UpdateWorkspaceMemberRoleRequest, options?: WorkspaceServiceCallOptions): Promise<UpdateWorkspaceMemberRoleResponse> {
+    let path = "/api/flow/workspace/v1/workspaces/members/role";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateWorkspaceMemberRoleResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

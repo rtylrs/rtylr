@@ -32,8 +32,8 @@ type Segment struct {
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	// description is the description value for this contract.
 	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	// rules is the rules value for this contract.
-	Rules string `protobuf:"bytes,5,opt,name=rules,proto3" json:"rules,omitempty"`
+	// filters is the JSON filter definition for this segment.
+	Filters string `protobuf:"bytes,5,opt,name=filters,proto3" json:"filters,omitempty"`
 	// customer_count is the customer count value for this contract.
 	CustomerCount int64 `protobuf:"varint,6,opt,name=customer_count,json=customerCount,proto3" json:"customer_count,omitempty"`
 	// last_calculated_at is the last calculated at value for this contract.
@@ -104,9 +104,9 @@ func (x *Segment) GetDescription() string {
 	return ""
 }
 
-func (x *Segment) GetRules() string {
+func (x *Segment) GetFilters() string {
 	if x != nil {
-		return x.Rules
+		return x.Filters
 	}
 	return ""
 }
@@ -143,13 +143,13 @@ var File_crm_segment_v1_types_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1acrm/segment/v1/types.proto\x12\x0ecrm.segment.v1\x1a\x1donekit/http/annotations.proto\"\xc1\x02\n" +
+	"\x1acrm/segment/v1/types.proto\x12\x0ecrm.segment.v1\x1a\x1donekit/http/annotations.proto\"\xc5\x02\n" +
 	"\aSegment\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05rules\x18\x05 \x01(\tR\x05rules\x12%\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x18\n" +
+	"\afilters\x18\x05 \x01(\tR\afilters\x12%\n" +
 	"\x0ecustomer_count\x18\x06 \x01(\x03R\rcustomerCount\x127\n" +
 	"\x12last_calculated_at\x18\a \x01(\tB\x04\xe8\xb5\x18\x01H\x00R\x10lastCalculatedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +

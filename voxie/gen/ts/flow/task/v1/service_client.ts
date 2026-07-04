@@ -52,6 +52,23 @@ export interface GetMyTasksResponse {
   tasks: Task[];
 }
 
+export interface GetMyTasksProjectRequest {
+}
+
+export interface GetMyTasksProjectResponse {
+  projectId: string;
+  workspaceId: string;
+}
+
+export interface SearchTasksRequest {
+  q: string;
+  workspaceId: string;
+}
+
+export interface SearchTasksResponse {
+  tasks: Task[];
+}
+
 export interface CreateTaskRequest {
   projectId: string;
   workspaceId: string;
@@ -143,6 +160,7 @@ export interface DeleteTaskResponse {
 }
 
 export interface CreateSubtaskRequest {
+  parentTaskId: string;
   projectId: string;
   workspaceId: string;
   title: string;
@@ -202,6 +220,7 @@ export interface GetTaskActivityResponse {
 }
 
 export interface CreateAttachmentRequest {
+  taskId: string;
   name: string;
   url: string;
   size: string;
@@ -265,6 +284,14 @@ export interface TimeLog {
   description: string;
   loggedAt: string;
   createdAt: string;
+}
+
+export interface DeleteTimeLogRequest {
+  id: string;
+}
+
+export interface DeleteTimeLogResponse {
+  message: string;
 }
 
 export interface FieldViolation {
@@ -380,6 +407,55 @@ export class TaskServiceClient {
     }
 
     return await resp.json() as GetMyTasksResponse;
+  }
+
+  async getMyTasksProject(_req: GetMyTasksProjectRequest, options?: TaskServiceCallOptions): Promise<GetMyTasksProjectResponse> {
+    let path = "/api/flow/task/v1/tasks/my-project";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetMyTasksProjectResponse;
+  }
+
+  async searchTasks(req: SearchTasksRequest, options?: TaskServiceCallOptions): Promise<SearchTasksResponse> {
+    let path = "/api/flow/task/v1/tasks/search";
+    const params = new URLSearchParams();
+    if (req.q != null && req.q !== "") params.set("q", String(req.q));
+    if (req.workspaceId != null && req.workspaceId !== "") params.set("workspace_id", String(req.workspaceId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SearchTasksResponse;
   }
 
   async createTask(req: CreateTaskRequest, options?: TaskServiceCallOptions): Promise<CreateTaskResponse> {
@@ -744,6 +820,30 @@ export class TaskServiceClient {
     }
 
     return await resp.json() as GetTimeLogsResponse;
+  }
+
+  async deleteTimeLog(req: DeleteTimeLogRequest, options?: TaskServiceCallOptions): Promise<DeleteTimeLogResponse> {
+    let path = "/api/flow/task/v1/tasks/time-logs/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteTimeLogResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

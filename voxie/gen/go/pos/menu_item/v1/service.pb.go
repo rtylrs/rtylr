@@ -25,27 +25,33 @@ var File_pos_menu_item_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_menu_item_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1epos/menu_item/v1/service.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/menu_item/v1/create_menu_item.proto\x1a&pos/menu_item/v1/list_menu_items.proto2\x9f\x02\n" +
+	"\x1epos/menu_item/v1/service.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/menu_item/v1/create_menu_item.proto\x1a-pos/menu_item/v1/list_public_menu_items.proto\x1a&pos/menu_item/v1/list_menu_items.proto2\xb0\x03\n" +
 	"\x0fMenuItemService\x12u\n" +
 	"\rListMenuItems\x12&.pos.menu_item.v1.ListMenuItemsRequest\x1a'.pos.menu_item.v1.ListMenuItemsResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/menu-items\x10\x01\x12x\n" +
+	"\v/menu-items\x10\x01\x12\x8e\x01\n" +
+	"\x13ListPublicMenuItems\x12,.pos.menu_item.v1.ListPublicMenuItemsRequest\x1a-.pos.menu_item.v1.ListPublicMenuItemsResponse\"\x1a\x9a\xb5\x18\x16\n" +
+	"\x12/menu-items/public\x10\x01\x12x\n" +
 	"\x0eCreateMenuItem\x12'.pos.menu_item.v1.CreateMenuItemRequest\x1a(.pos.menu_item.v1.CreateMenuItemResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/menu-items\x10\x02\x1a\x1b\xa2\xb5\x18\x17\n" +
 	"\x15/api/pos/menu-item/v1B1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
 
 var file_pos_menu_item_v1_service_proto_goTypes = []any{
-	(*ListMenuItemsRequest)(nil),   // 0: pos.menu_item.v1.ListMenuItemsRequest
-	(*CreateMenuItemRequest)(nil),  // 1: pos.menu_item.v1.CreateMenuItemRequest
-	(*ListMenuItemsResponse)(nil),  // 2: pos.menu_item.v1.ListMenuItemsResponse
-	(*CreateMenuItemResponse)(nil), // 3: pos.menu_item.v1.CreateMenuItemResponse
+	(*ListMenuItemsRequest)(nil),        // 0: pos.menu_item.v1.ListMenuItemsRequest
+	(*ListPublicMenuItemsRequest)(nil),  // 1: pos.menu_item.v1.ListPublicMenuItemsRequest
+	(*CreateMenuItemRequest)(nil),       // 2: pos.menu_item.v1.CreateMenuItemRequest
+	(*ListMenuItemsResponse)(nil),       // 3: pos.menu_item.v1.ListMenuItemsResponse
+	(*ListPublicMenuItemsResponse)(nil), // 4: pos.menu_item.v1.ListPublicMenuItemsResponse
+	(*CreateMenuItemResponse)(nil),      // 5: pos.menu_item.v1.CreateMenuItemResponse
 }
 var file_pos_menu_item_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.menu_item.v1.MenuItemService.ListMenuItems:input_type -> pos.menu_item.v1.ListMenuItemsRequest
-	1, // 1: pos.menu_item.v1.MenuItemService.CreateMenuItem:input_type -> pos.menu_item.v1.CreateMenuItemRequest
-	2, // 2: pos.menu_item.v1.MenuItemService.ListMenuItems:output_type -> pos.menu_item.v1.ListMenuItemsResponse
-	3, // 3: pos.menu_item.v1.MenuItemService.CreateMenuItem:output_type -> pos.menu_item.v1.CreateMenuItemResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	1, // 1: pos.menu_item.v1.MenuItemService.ListPublicMenuItems:input_type -> pos.menu_item.v1.ListPublicMenuItemsRequest
+	2, // 2: pos.menu_item.v1.MenuItemService.CreateMenuItem:input_type -> pos.menu_item.v1.CreateMenuItemRequest
+	3, // 3: pos.menu_item.v1.MenuItemService.ListMenuItems:output_type -> pos.menu_item.v1.ListMenuItemsResponse
+	4, // 4: pos.menu_item.v1.MenuItemService.ListPublicMenuItems:output_type -> pos.menu_item.v1.ListPublicMenuItemsResponse
+	5, // 5: pos.menu_item.v1.MenuItemService.CreateMenuItem:output_type -> pos.menu_item.v1.CreateMenuItemResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -57,6 +63,7 @@ func file_pos_menu_item_v1_service_proto_init() {
 		return
 	}
 	file_pos_menu_item_v1_create_menu_item_proto_init()
+	file_pos_menu_item_v1_list_public_menu_items_proto_init()
 	file_pos_menu_item_v1_list_menu_items_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

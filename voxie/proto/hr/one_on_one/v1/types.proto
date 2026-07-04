@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.one_on_one.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/one_on_one/v1";
+
+message OneOnOne {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 manager_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 staff_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string scheduled_at = 5;
+  string notes = 6;
+  string action_items = 7;
+  string status = 8;
+  string created_at = 9;
+}

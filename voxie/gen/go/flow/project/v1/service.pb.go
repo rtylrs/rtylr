@@ -25,7 +25,7 @@ var File_flow_project_v1_service_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1dflow/project/v1/service.proto\x12\x0fflow.project.v1\x1a$flow/project/v1/create_project.proto\x1a$flow/project/v1/delete_project.proto\x1a#flow/project/v1/list_projects.proto\x1a$flow/project/v1/update_project.proto\x1a\x1donekit/http/annotations.proto2\x85\x04\n" +
+	"\x1dflow/project/v1/service.proto\x12\x0fflow.project.v1\x1a(flow/project/v1/add_project_member.proto\x1a$flow/project/v1/create_project.proto\x1a+flow/project/v1/create_project_column.proto\x1a$flow/project/v1/delete_project.proto\x1a+flow/project/v1/delete_project_column.proto\x1a+flow/project/v1/invite_project_member.proto\x1a*flow/project/v1/list_project_columns.proto\x1a*flow/project/v1/list_project_members.proto\x1a#flow/project/v1/list_projects.proto\x1a\"flow/project/v1/move_project.proto\x1a)flow/project/v1/move_task_to_column.proto\x1a+flow/project/v1/remove_project_member.proto\x1a0flow/project/v1/transfer_project_ownership.proto\x1a$flow/project/v1/update_project.proto\x1a+flow/project/v1/update_project_column.proto\x1a0flow/project/v1/update_project_member_role.proto\x1a\x1donekit/http/annotations.proto2\xb0\x11\n" +
 	"\x0eProjectService\x12n\n" +
 	"\fListProjects\x12$.flow.project.v1.ListProjectsRequest\x1a%.flow.project.v1.ListProjectsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/projects\x10\x01\x12q\n" +
@@ -34,33 +34,105 @@ const file_flow_project_v1_service_proto_rawDesc = "" +
 	"\rUpdateProject\x12%.flow.project.v1.UpdateProjectRequest\x1a&.flow.project.v1.UpdateProjectResponse\"\x1c\x9a\xb5\x18\x18\n" +
 	"\x0e/projects/{id}\x10\x03\"\x04body\x12v\n" +
 	"\rDeleteProject\x12%.flow.project.v1.DeleteProjectRequest\x1a&.flow.project.v1.DeleteProjectResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/projects/{id}\x10\x04\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\x0e/projects/{id}\x10\x04\x12\x88\x01\n" +
+	"\x12ListProjectColumns\x12*.flow.project.v1.ListProjectColumnsRequest\x1a+.flow.project.v1.ListProjectColumnsResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/projects/columns\x10\x01\x12\x8b\x01\n" +
+	"\x13CreateProjectColumn\x12+.flow.project.v1.CreateProjectColumnRequest\x1a,.flow.project.v1.CreateProjectColumnResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/projects/columns\x10\x02\x12\x90\x01\n" +
+	"\x13UpdateProjectColumn\x12+.flow.project.v1.UpdateProjectColumnRequest\x1a,.flow.project.v1.UpdateProjectColumnResponse\"\x1e\x9a\xb5\x18\x1a\n" +
+	"\x16/projects/columns/{id}\x10\x03\x12\x90\x01\n" +
+	"\x13DeleteProjectColumn\x12+.flow.project.v1.DeleteProjectColumnRequest\x1a,.flow.project.v1.DeleteProjectColumnResponse\"\x1e\x9a\xb5\x18\x1a\n" +
+	"\x16/projects/columns/{id}\x10\x04\x12\x87\x01\n" +
+	"\x10MoveTaskToColumn\x12(.flow.project.v1.MoveTaskToColumnRequest\x1a).flow.project.v1.MoveTaskToColumnResponse\"\x1e\x9a\xb5\x18\x1a\n" +
+	"\x16/projects/columns/move\x10\x03\x12\x88\x01\n" +
+	"\x12ListProjectMembers\x12*.flow.project.v1.ListProjectMembersRequest\x1a+.flow.project.v1.ListProjectMembersResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/projects/members\x10\x01\x12\x82\x01\n" +
+	"\x10AddProjectMember\x12(.flow.project.v1.AddProjectMemberRequest\x1a).flow.project.v1.AddProjectMemberResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/projects/members\x10\x02\x12\x8b\x01\n" +
+	"\x13RemoveProjectMember\x12+.flow.project.v1.RemoveProjectMemberRequest\x1a,.flow.project.v1.RemoveProjectMemberResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/projects/members\x10\x04\x12\x9c\x01\n" +
+	"\x17UpdateProjectMemberRole\x12/.flow.project.v1.UpdateProjectMemberRoleRequest\x1a0.flow.project.v1.UpdateProjectMemberRoleResponse\"\x1e\x9a\xb5\x18\x1a\n" +
+	"\x16/projects/members/role\x10\x03\x12\x92\x01\n" +
+	"\x13InviteProjectMember\x12+.flow.project.v1.InviteProjectMemberRequest\x1a,.flow.project.v1.InviteProjectMemberResponse\" \x9a\xb5\x18\x1c\n" +
+	"\x18/projects/members/invite\x10\x02\x12\x9b\x01\n" +
+	"\x18TransferProjectOwnership\x120.flow.project.v1.TransferProjectOwnershipRequest\x1a1.flow.project.v1.TransferProjectOwnershipResponse\"\x1a\x9a\xb5\x18\x16\n" +
+	"\x12/projects/transfer\x10\x03\x12p\n" +
+	"\vMoveProject\x12#.flow.project.v1.MoveProjectRequest\x1a$.flow.project.v1.MoveProjectResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/projects/move\x10\x03\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/flow/project/v1B0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"
 
 var file_flow_project_v1_service_proto_goTypes = []any{
-	(*ListProjectsRequest)(nil),   // 0: flow.project.v1.ListProjectsRequest
-	(*CreateProjectRequest)(nil),  // 1: flow.project.v1.CreateProjectRequest
-	(*UpdateProjectRequest)(nil),  // 2: flow.project.v1.UpdateProjectRequest
-	(*DeleteProjectRequest)(nil),  // 3: flow.project.v1.DeleteProjectRequest
-	(*ListProjectsResponse)(nil),  // 4: flow.project.v1.ListProjectsResponse
-	(*CreateProjectResponse)(nil), // 5: flow.project.v1.CreateProjectResponse
-	(*UpdateProjectResponse)(nil), // 6: flow.project.v1.UpdateProjectResponse
-	(*DeleteProjectResponse)(nil), // 7: flow.project.v1.DeleteProjectResponse
+	(*ListProjectsRequest)(nil),              // 0: flow.project.v1.ListProjectsRequest
+	(*CreateProjectRequest)(nil),             // 1: flow.project.v1.CreateProjectRequest
+	(*UpdateProjectRequest)(nil),             // 2: flow.project.v1.UpdateProjectRequest
+	(*DeleteProjectRequest)(nil),             // 3: flow.project.v1.DeleteProjectRequest
+	(*ListProjectColumnsRequest)(nil),        // 4: flow.project.v1.ListProjectColumnsRequest
+	(*CreateProjectColumnRequest)(nil),       // 5: flow.project.v1.CreateProjectColumnRequest
+	(*UpdateProjectColumnRequest)(nil),       // 6: flow.project.v1.UpdateProjectColumnRequest
+	(*DeleteProjectColumnRequest)(nil),       // 7: flow.project.v1.DeleteProjectColumnRequest
+	(*MoveTaskToColumnRequest)(nil),          // 8: flow.project.v1.MoveTaskToColumnRequest
+	(*ListProjectMembersRequest)(nil),        // 9: flow.project.v1.ListProjectMembersRequest
+	(*AddProjectMemberRequest)(nil),          // 10: flow.project.v1.AddProjectMemberRequest
+	(*RemoveProjectMemberRequest)(nil),       // 11: flow.project.v1.RemoveProjectMemberRequest
+	(*UpdateProjectMemberRoleRequest)(nil),   // 12: flow.project.v1.UpdateProjectMemberRoleRequest
+	(*InviteProjectMemberRequest)(nil),       // 13: flow.project.v1.InviteProjectMemberRequest
+	(*TransferProjectOwnershipRequest)(nil),  // 14: flow.project.v1.TransferProjectOwnershipRequest
+	(*MoveProjectRequest)(nil),               // 15: flow.project.v1.MoveProjectRequest
+	(*ListProjectsResponse)(nil),             // 16: flow.project.v1.ListProjectsResponse
+	(*CreateProjectResponse)(nil),            // 17: flow.project.v1.CreateProjectResponse
+	(*UpdateProjectResponse)(nil),            // 18: flow.project.v1.UpdateProjectResponse
+	(*DeleteProjectResponse)(nil),            // 19: flow.project.v1.DeleteProjectResponse
+	(*ListProjectColumnsResponse)(nil),       // 20: flow.project.v1.ListProjectColumnsResponse
+	(*CreateProjectColumnResponse)(nil),      // 21: flow.project.v1.CreateProjectColumnResponse
+	(*UpdateProjectColumnResponse)(nil),      // 22: flow.project.v1.UpdateProjectColumnResponse
+	(*DeleteProjectColumnResponse)(nil),      // 23: flow.project.v1.DeleteProjectColumnResponse
+	(*MoveTaskToColumnResponse)(nil),         // 24: flow.project.v1.MoveTaskToColumnResponse
+	(*ListProjectMembersResponse)(nil),       // 25: flow.project.v1.ListProjectMembersResponse
+	(*AddProjectMemberResponse)(nil),         // 26: flow.project.v1.AddProjectMemberResponse
+	(*RemoveProjectMemberResponse)(nil),      // 27: flow.project.v1.RemoveProjectMemberResponse
+	(*UpdateProjectMemberRoleResponse)(nil),  // 28: flow.project.v1.UpdateProjectMemberRoleResponse
+	(*InviteProjectMemberResponse)(nil),      // 29: flow.project.v1.InviteProjectMemberResponse
+	(*TransferProjectOwnershipResponse)(nil), // 30: flow.project.v1.TransferProjectOwnershipResponse
+	(*MoveProjectResponse)(nil),              // 31: flow.project.v1.MoveProjectResponse
 }
 var file_flow_project_v1_service_proto_depIdxs = []int32{
-	0, // 0: flow.project.v1.ProjectService.ListProjects:input_type -> flow.project.v1.ListProjectsRequest
-	1, // 1: flow.project.v1.ProjectService.CreateProject:input_type -> flow.project.v1.CreateProjectRequest
-	2, // 2: flow.project.v1.ProjectService.UpdateProject:input_type -> flow.project.v1.UpdateProjectRequest
-	3, // 3: flow.project.v1.ProjectService.DeleteProject:input_type -> flow.project.v1.DeleteProjectRequest
-	4, // 4: flow.project.v1.ProjectService.ListProjects:output_type -> flow.project.v1.ListProjectsResponse
-	5, // 5: flow.project.v1.ProjectService.CreateProject:output_type -> flow.project.v1.CreateProjectResponse
-	6, // 6: flow.project.v1.ProjectService.UpdateProject:output_type -> flow.project.v1.UpdateProjectResponse
-	7, // 7: flow.project.v1.ProjectService.DeleteProject:output_type -> flow.project.v1.DeleteProjectResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: flow.project.v1.ProjectService.ListProjects:input_type -> flow.project.v1.ListProjectsRequest
+	1,  // 1: flow.project.v1.ProjectService.CreateProject:input_type -> flow.project.v1.CreateProjectRequest
+	2,  // 2: flow.project.v1.ProjectService.UpdateProject:input_type -> flow.project.v1.UpdateProjectRequest
+	3,  // 3: flow.project.v1.ProjectService.DeleteProject:input_type -> flow.project.v1.DeleteProjectRequest
+	4,  // 4: flow.project.v1.ProjectService.ListProjectColumns:input_type -> flow.project.v1.ListProjectColumnsRequest
+	5,  // 5: flow.project.v1.ProjectService.CreateProjectColumn:input_type -> flow.project.v1.CreateProjectColumnRequest
+	6,  // 6: flow.project.v1.ProjectService.UpdateProjectColumn:input_type -> flow.project.v1.UpdateProjectColumnRequest
+	7,  // 7: flow.project.v1.ProjectService.DeleteProjectColumn:input_type -> flow.project.v1.DeleteProjectColumnRequest
+	8,  // 8: flow.project.v1.ProjectService.MoveTaskToColumn:input_type -> flow.project.v1.MoveTaskToColumnRequest
+	9,  // 9: flow.project.v1.ProjectService.ListProjectMembers:input_type -> flow.project.v1.ListProjectMembersRequest
+	10, // 10: flow.project.v1.ProjectService.AddProjectMember:input_type -> flow.project.v1.AddProjectMemberRequest
+	11, // 11: flow.project.v1.ProjectService.RemoveProjectMember:input_type -> flow.project.v1.RemoveProjectMemberRequest
+	12, // 12: flow.project.v1.ProjectService.UpdateProjectMemberRole:input_type -> flow.project.v1.UpdateProjectMemberRoleRequest
+	13, // 13: flow.project.v1.ProjectService.InviteProjectMember:input_type -> flow.project.v1.InviteProjectMemberRequest
+	14, // 14: flow.project.v1.ProjectService.TransferProjectOwnership:input_type -> flow.project.v1.TransferProjectOwnershipRequest
+	15, // 15: flow.project.v1.ProjectService.MoveProject:input_type -> flow.project.v1.MoveProjectRequest
+	16, // 16: flow.project.v1.ProjectService.ListProjects:output_type -> flow.project.v1.ListProjectsResponse
+	17, // 17: flow.project.v1.ProjectService.CreateProject:output_type -> flow.project.v1.CreateProjectResponse
+	18, // 18: flow.project.v1.ProjectService.UpdateProject:output_type -> flow.project.v1.UpdateProjectResponse
+	19, // 19: flow.project.v1.ProjectService.DeleteProject:output_type -> flow.project.v1.DeleteProjectResponse
+	20, // 20: flow.project.v1.ProjectService.ListProjectColumns:output_type -> flow.project.v1.ListProjectColumnsResponse
+	21, // 21: flow.project.v1.ProjectService.CreateProjectColumn:output_type -> flow.project.v1.CreateProjectColumnResponse
+	22, // 22: flow.project.v1.ProjectService.UpdateProjectColumn:output_type -> flow.project.v1.UpdateProjectColumnResponse
+	23, // 23: flow.project.v1.ProjectService.DeleteProjectColumn:output_type -> flow.project.v1.DeleteProjectColumnResponse
+	24, // 24: flow.project.v1.ProjectService.MoveTaskToColumn:output_type -> flow.project.v1.MoveTaskToColumnResponse
+	25, // 25: flow.project.v1.ProjectService.ListProjectMembers:output_type -> flow.project.v1.ListProjectMembersResponse
+	26, // 26: flow.project.v1.ProjectService.AddProjectMember:output_type -> flow.project.v1.AddProjectMemberResponse
+	27, // 27: flow.project.v1.ProjectService.RemoveProjectMember:output_type -> flow.project.v1.RemoveProjectMemberResponse
+	28, // 28: flow.project.v1.ProjectService.UpdateProjectMemberRole:output_type -> flow.project.v1.UpdateProjectMemberRoleResponse
+	29, // 29: flow.project.v1.ProjectService.InviteProjectMember:output_type -> flow.project.v1.InviteProjectMemberResponse
+	30, // 30: flow.project.v1.ProjectService.TransferProjectOwnership:output_type -> flow.project.v1.TransferProjectOwnershipResponse
+	31, // 31: flow.project.v1.ProjectService.MoveProject:output_type -> flow.project.v1.MoveProjectResponse
+	16, // [16:32] is the sub-list for method output_type
+	0,  // [0:16] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_flow_project_v1_service_proto_init() }
@@ -68,10 +140,22 @@ func file_flow_project_v1_service_proto_init() {
 	if File_flow_project_v1_service_proto != nil {
 		return
 	}
+	file_flow_project_v1_add_project_member_proto_init()
 	file_flow_project_v1_create_project_proto_init()
+	file_flow_project_v1_create_project_column_proto_init()
 	file_flow_project_v1_delete_project_proto_init()
+	file_flow_project_v1_delete_project_column_proto_init()
+	file_flow_project_v1_invite_project_member_proto_init()
+	file_flow_project_v1_list_project_columns_proto_init()
+	file_flow_project_v1_list_project_members_proto_init()
 	file_flow_project_v1_list_projects_proto_init()
+	file_flow_project_v1_move_project_proto_init()
+	file_flow_project_v1_move_task_to_column_proto_init()
+	file_flow_project_v1_remove_project_member_proto_init()
+	file_flow_project_v1_transfer_project_ownership_proto_init()
 	file_flow_project_v1_update_project_proto_init()
+	file_flow_project_v1_update_project_column_proto_init()
+	file_flow_project_v1_update_project_member_role_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

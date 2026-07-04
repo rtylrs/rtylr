@@ -19,6 +19,8 @@ type AuthServiceServer interface {
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*VerifyEmailResponse, error)
 	ResendVerification(context.Context, *ResendVerificationRequest) (*ResendVerificationResponse, error)
 	InviteAccept(context.Context, *InviteAcceptRequest) (*InviteAcceptResponse, error)
+	CheckEmailExists(context.Context, *CheckEmailExistsRequest) (*CheckEmailExistsResponse, error)
+	SocialAuthorize(context.Context, *SocialAuthorizeRequest) (*SocialAuthorizeResponse, error)
 }
 
 // RegisterAuthServiceServer registers the HTTP handlers for service AuthService to the given mux.
@@ -99,6 +101,24 @@ func RegisterAuthServiceServer(server AuthServiceServer, opts ...ServerOption) e
 
 	config.mux.Handle("POST /api/common/auth/v1/invite/accept", inviteAcceptHandler)
 
+	methodHeaders = getCheckEmailExistsHeaders()
+	checkEmailExistsHandler := BindingMiddleware[CheckEmailExistsRequest](
+		genericHandler(server.CheckEmailExists, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		checkEmailExistsPathParams, checkEmailExistsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/common/auth/v1/email-exists", checkEmailExistsHandler)
+
+	methodHeaders = getSocialAuthorizeHeaders()
+	socialAuthorizeHandler := BindingMiddleware[SocialAuthorizeRequest](
+		genericHandler(server.SocialAuthorize, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		socialAuthorizePathParams, socialAuthorizeQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/common/auth/v1/social/authorize", socialAuthorizeHandler)
+
 	return nil
 }
 
@@ -144,6 +164,16 @@ func getResendVerificationHeaders() []*onekithttp.Header {
 
 // getInviteAcceptHeaders returns the method-level required headers for InviteAccept
 func getInviteAcceptHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getCheckEmailExistsHeaders returns the method-level required headers for CheckEmailExists
+func getCheckEmailExistsHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getSocialAuthorizeHeaders returns the method-level required headers for SocialAuthorize
+func getSocialAuthorizeHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -194,3 +224,19 @@ var inviteAcceptPathParams = []PathParamConfig{}
 
 // inviteAcceptQueryParams contains query parameter configuration for InviteAccept
 var inviteAcceptQueryParams = []QueryParamConfig{}
+
+// checkEmailExistsPathParams contains path parameter configuration for CheckEmailExists
+var checkEmailExistsPathParams = []PathParamConfig{}
+
+// checkEmailExistsQueryParams contains query parameter configuration for CheckEmailExists
+var checkEmailExistsQueryParams = []QueryParamConfig{
+	{QueryName: "email", FieldName: "email", Required: false},
+}
+
+// socialAuthorizePathParams contains path parameter configuration for SocialAuthorize
+var socialAuthorizePathParams = []PathParamConfig{}
+
+// socialAuthorizeQueryParams contains query parameter configuration for SocialAuthorize
+var socialAuthorizeQueryParams = []QueryParamConfig{
+	{QueryName: "provider", FieldName: "provider", Required: false},
+}

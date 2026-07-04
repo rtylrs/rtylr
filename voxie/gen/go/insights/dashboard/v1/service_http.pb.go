@@ -15,6 +15,7 @@ type DashboardServiceServer interface {
 	GetKPIs(context.Context, *GetKPIsRequest) (*GetKPIsResponse, error)
 	GetRoadmap(context.Context, *GetRoadmapRequest) (*GetRoadmapResponse, error)
 	GetWorkload(context.Context, *GetWorkloadRequest) (*GetWorkloadResponse, error)
+	GetDashboardSummary(context.Context, *GetDashboardSummaryRequest) (*GetDashboardSummaryResponse, error)
 }
 
 // RegisterDashboardServiceServer registers the HTTP handlers for service DashboardService to the given mux.
@@ -59,6 +60,15 @@ func RegisterDashboardServiceServer(server DashboardServiceServer, opts ...Serve
 
 	config.mux.Handle("GET /api/insights/dashboard/v1/workload", getWorkloadHandler)
 
+	methodHeaders = getGetDashboardSummaryHeaders()
+	getDashboardSummaryHandler := BindingMiddleware[GetDashboardSummaryRequest](
+		genericHandler(server.GetDashboardSummary, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getDashboardSummaryPathParams, getDashboardSummaryQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/insights/dashboard/v1/summary", getDashboardSummaryHandler)
+
 	return nil
 }
 
@@ -87,6 +97,11 @@ func getGetWorkloadHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetDashboardSummaryHeaders returns the method-level required headers for GetDashboardSummary
+func getGetDashboardSummaryHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getInsightsPathParams contains path parameter configuration for GetInsights
 var getInsightsPathParams = []PathParamConfig{}
 
@@ -110,3 +125,9 @@ var getWorkloadPathParams = []PathParamConfig{}
 
 // getWorkloadQueryParams contains query parameter configuration for GetWorkload
 var getWorkloadQueryParams = []QueryParamConfig{}
+
+// getDashboardSummaryPathParams contains path parameter configuration for GetDashboardSummary
+var getDashboardSummaryPathParams = []PathParamConfig{}
+
+// getDashboardSummaryQueryParams contains query parameter configuration for GetDashboardSummary
+var getDashboardSummaryQueryParams = []QueryParamConfig{}

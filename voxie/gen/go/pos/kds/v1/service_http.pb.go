@@ -12,7 +12,6 @@ import (
 // KDSServiceServer is the server API for KDSService service.
 type KDSServiceServer interface {
 	ListKDSOrders(context.Context, *ListKDSOrdersRequest) (*ListKDSOrdersResponse, error)
-	UpdateKDSItemByID(context.Context, *UpdateKDSItemByIDRequest) (*UpdateKDSItemByIDResponse, error)
 	UpdateKDSItemStatus(context.Context, *UpdateKDSItemStatusRequest) (*UpdateKDSItemStatusResponse, error)
 }
 
@@ -30,15 +29,6 @@ func RegisterKDSServiceServer(server KDSServiceServer, opts ...ServerOption) err
 	)
 
 	config.mux.Handle("GET /api/pos/kds/v1/orders", listKDSOrdersHandler)
-
-	methodHeaders = getUpdateKDSItemByIDHeaders()
-	updateKDSItemByIDHandler := BindingMiddleware[UpdateKDSItemByIDRequest](
-		genericHandler(server.UpdateKDSItemByID, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		updateKDSItemByIDPathParams, updateKDSItemByIDQueryParams,
-		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("PUT /api/pos/kds/v1/items/{item_id}", updateKDSItemByIDHandler)
 
 	methodHeaders = getUpdateKDSItemStatusHeaders()
 	updateKDSItemStatusHandler := BindingMiddleware[UpdateKDSItemStatusRequest](
@@ -62,11 +52,6 @@ func getListKDSOrdersHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getUpdateKDSItemByIDHeaders returns the method-level required headers for UpdateKDSItemByID
-func getUpdateKDSItemByIDHeaders() []*onekithttp.Header {
-	return nil
-}
-
 // getUpdateKDSItemStatusHeaders returns the method-level required headers for UpdateKDSItemStatus
 func getUpdateKDSItemStatusHeaders() []*onekithttp.Header {
 	return nil
@@ -77,14 +62,6 @@ var listKDSOrdersPathParams = []PathParamConfig{}
 
 // listKDSOrdersQueryParams contains query parameter configuration for ListKDSOrders
 var listKDSOrdersQueryParams = []QueryParamConfig{}
-
-// updateKDSItemByIDPathParams contains path parameter configuration for UpdateKDSItemByID
-var updateKDSItemByIDPathParams = []PathParamConfig{
-	{URLParam: "item_id", FieldName: "item_id"},
-}
-
-// updateKDSItemByIDQueryParams contains query parameter configuration for UpdateKDSItemByID
-var updateKDSItemByIDQueryParams = []QueryParamConfig{}
 
 // updateKDSItemStatusPathParams contains path parameter configuration for UpdateKDSItemStatus
 var updateKDSItemStatusPathParams = []PathParamConfig{

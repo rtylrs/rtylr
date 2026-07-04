@@ -42,3 +42,41 @@ export interface Project {
   /** Short project code used to build Task.identifier (e.g. "FLW" → "FLW-42"). */
   code: string;
 }
+
+export interface ProjectColumn {
+  /** id is the unique identifier for the column. */
+  id: number;
+  /** project_id is the project id value for this contract. */
+  projectId: number;
+  /** workspace_id is the workspace id value for this contract. */
+  workspaceId: number;
+  /** name is the column name. */
+  name: string;
+  /** color is the column color. */
+  color: string;
+  /** sort_order is the column sort order. */
+  sortOrder: number;
+  /** created_at is when the record was created. */
+  createdAt: string;
+  /** updated_at is when the record was last updated. */
+  updatedAt: string;
+}
+
+export interface ProjectMember {
+  /** id is the unique identifier for the membership record. */
+  id: number;
+  /** project_id is the project id value for this contract. */
+  projectId: number;
+  /** user_id identifies the user associated with this request. */
+  userId: number;
+  /** name is the member display name. */
+  name: string;
+  /** email is the member email address. */
+  email: string;
+  /** role is the role value for this contract. */
+  role: string;
+  /** added_by is the user id of the inviter, if any. */
+  addedBy: number;
+  /** added_at is when the member joined the project. */
+  addedAt: string;
+}

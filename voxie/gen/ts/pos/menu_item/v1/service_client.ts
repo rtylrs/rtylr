@@ -18,6 +18,16 @@ export interface MenuItem {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  imageUrl: string;
+}
+
+export interface ListPublicMenuItemsRequest {
+  businessId: string;
+  locationId: string;
+}
+
+export interface ListPublicMenuItemsResponse {
+  items: MenuItem[];
 }
 
 export interface CreateMenuItemRequest {
@@ -115,6 +125,32 @@ export class MenuItemServiceClient {
     }
 
     return await resp.json() as ListMenuItemsResponse;
+  }
+
+  async listPublicMenuItems(req: ListPublicMenuItemsRequest, options?: MenuItemServiceCallOptions): Promise<ListPublicMenuItemsResponse> {
+    let path = "/api/pos/menu-item/v1/menu-items/public";
+    const params = new URLSearchParams();
+    if (req.businessId != null && req.businessId !== "0") params.set("business_id", String(req.businessId));
+    if (req.locationId != null && req.locationId !== "0") params.set("location_id", String(req.locationId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListPublicMenuItemsResponse;
   }
 
   async createMenuItem(req: CreateMenuItemRequest, options?: MenuItemServiceCallOptions): Promise<CreateMenuItemResponse> {

@@ -25,7 +25,7 @@ var File_insights_dashboard_v1_service_proto protoreflect.FileDescriptor
 
 const file_insights_dashboard_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"#insights/dashboard/v1/service.proto\x12\x15insights.dashboard.v1\x1a(insights/dashboard/v1/get_insights.proto\x1a$insights/dashboard/v1/get_kpis.proto\x1a'insights/dashboard/v1/get_roadmap.proto\x1a(insights/dashboard/v1/get_workload.proto\x1a\x1donekit/http/annotations.proto2\x84\x04\n" +
+	"#insights/dashboard/v1/service.proto\x12\x15insights.dashboard.v1\x1a1insights/dashboard/v1/get_dashboard_summary.proto\x1a(insights/dashboard/v1/get_insights.proto\x1a$insights/dashboard/v1/get_kpis.proto\x1a'insights/dashboard/v1/get_roadmap.proto\x1a(insights/dashboard/v1/get_workload.proto\x1a\x1donekit/http/annotations.proto2\x95\x05\n" +
 	"\x10DashboardService\x12w\n" +
 	"\vGetInsights\x12).insights.dashboard.v1.GetInsightsRequest\x1a*.insights.dashboard.v1.GetInsightsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/insights\x10\x01\x12g\n" +
@@ -35,30 +35,36 @@ const file_insights_dashboard_v1_service_proto_rawDesc = "" +
 	"GetRoadmap\x12(.insights.dashboard.v1.GetRoadmapRequest\x1a).insights.dashboard.v1.GetRoadmapResponse\"\x10\x9a\xb5\x18\f\n" +
 	"\b/roadmap\x10\x01\x12w\n" +
 	"\vGetWorkload\x12).insights.dashboard.v1.GetWorkloadRequest\x1a*.insights.dashboard.v1.GetWorkloadResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/workload\x10\x01\x1a \xa2\xb5\x18\x1c\n" +
+	"\t/workload\x10\x01\x12\x8e\x01\n" +
+	"\x13GetDashboardSummary\x121.insights.dashboard.v1.GetDashboardSummaryRequest\x1a2.insights.dashboard.v1.GetDashboardSummaryResponse\"\x10\x9a\xb5\x18\f\n" +
+	"\b/summary\x10\x01\x1a \xa2\xb5\x18\x1c\n" +
 	"\x1a/api/insights/dashboard/v1B6Z4github.com/voxire/voxie/gen/go/insights/dashboard/v1b\x06proto3"
 
 var file_insights_dashboard_v1_service_proto_goTypes = []any{
-	(*GetInsightsRequest)(nil),  // 0: insights.dashboard.v1.GetInsightsRequest
-	(*GetKPIsRequest)(nil),      // 1: insights.dashboard.v1.GetKPIsRequest
-	(*GetRoadmapRequest)(nil),   // 2: insights.dashboard.v1.GetRoadmapRequest
-	(*GetWorkloadRequest)(nil),  // 3: insights.dashboard.v1.GetWorkloadRequest
-	(*GetInsightsResponse)(nil), // 4: insights.dashboard.v1.GetInsightsResponse
-	(*GetKPIsResponse)(nil),     // 5: insights.dashboard.v1.GetKPIsResponse
-	(*GetRoadmapResponse)(nil),  // 6: insights.dashboard.v1.GetRoadmapResponse
-	(*GetWorkloadResponse)(nil), // 7: insights.dashboard.v1.GetWorkloadResponse
+	(*GetInsightsRequest)(nil),          // 0: insights.dashboard.v1.GetInsightsRequest
+	(*GetKPIsRequest)(nil),              // 1: insights.dashboard.v1.GetKPIsRequest
+	(*GetRoadmapRequest)(nil),           // 2: insights.dashboard.v1.GetRoadmapRequest
+	(*GetWorkloadRequest)(nil),          // 3: insights.dashboard.v1.GetWorkloadRequest
+	(*GetDashboardSummaryRequest)(nil),  // 4: insights.dashboard.v1.GetDashboardSummaryRequest
+	(*GetInsightsResponse)(nil),         // 5: insights.dashboard.v1.GetInsightsResponse
+	(*GetKPIsResponse)(nil),             // 6: insights.dashboard.v1.GetKPIsResponse
+	(*GetRoadmapResponse)(nil),          // 7: insights.dashboard.v1.GetRoadmapResponse
+	(*GetWorkloadResponse)(nil),         // 8: insights.dashboard.v1.GetWorkloadResponse
+	(*GetDashboardSummaryResponse)(nil), // 9: insights.dashboard.v1.GetDashboardSummaryResponse
 }
 var file_insights_dashboard_v1_service_proto_depIdxs = []int32{
 	0, // 0: insights.dashboard.v1.DashboardService.GetInsights:input_type -> insights.dashboard.v1.GetInsightsRequest
 	1, // 1: insights.dashboard.v1.DashboardService.GetKPIs:input_type -> insights.dashboard.v1.GetKPIsRequest
 	2, // 2: insights.dashboard.v1.DashboardService.GetRoadmap:input_type -> insights.dashboard.v1.GetRoadmapRequest
 	3, // 3: insights.dashboard.v1.DashboardService.GetWorkload:input_type -> insights.dashboard.v1.GetWorkloadRequest
-	4, // 4: insights.dashboard.v1.DashboardService.GetInsights:output_type -> insights.dashboard.v1.GetInsightsResponse
-	5, // 5: insights.dashboard.v1.DashboardService.GetKPIs:output_type -> insights.dashboard.v1.GetKPIsResponse
-	6, // 6: insights.dashboard.v1.DashboardService.GetRoadmap:output_type -> insights.dashboard.v1.GetRoadmapResponse
-	7, // 7: insights.dashboard.v1.DashboardService.GetWorkload:output_type -> insights.dashboard.v1.GetWorkloadResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	4, // 4: insights.dashboard.v1.DashboardService.GetDashboardSummary:input_type -> insights.dashboard.v1.GetDashboardSummaryRequest
+	5, // 5: insights.dashboard.v1.DashboardService.GetInsights:output_type -> insights.dashboard.v1.GetInsightsResponse
+	6, // 6: insights.dashboard.v1.DashboardService.GetKPIs:output_type -> insights.dashboard.v1.GetKPIsResponse
+	7, // 7: insights.dashboard.v1.DashboardService.GetRoadmap:output_type -> insights.dashboard.v1.GetRoadmapResponse
+	8, // 8: insights.dashboard.v1.DashboardService.GetWorkload:output_type -> insights.dashboard.v1.GetWorkloadResponse
+	9, // 9: insights.dashboard.v1.DashboardService.GetDashboardSummary:output_type -> insights.dashboard.v1.GetDashboardSummaryResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -69,6 +75,7 @@ func file_insights_dashboard_v1_service_proto_init() {
 	if File_insights_dashboard_v1_service_proto != nil {
 		return
 	}
+	file_insights_dashboard_v1_get_dashboard_summary_proto_init()
 	file_insights_dashboard_v1_get_insights_proto_init()
 	file_insights_dashboard_v1_get_kpis_proto_init()
 	file_insights_dashboard_v1_get_roadmap_proto_init()

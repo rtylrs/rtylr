@@ -25,33 +25,27 @@ var File_hub_team_members_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_team_members_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!hub/team/members/v1/service.proto\x12\x13hub.team.members.v1\x1a$hub/team/members/v1/get_member.proto\x1a&hub/team/members/v1/list_members.proto\x1a'hub/team/members/v1/remove_member.proto\x1a\x1donekit/http/annotations.proto2\x94\x03\n" +
+	"!hub/team/members/v1/service.proto\x12\x13hub.team.members.v1\x1a&hub/team/members/v1/list_members.proto\x1a'hub/team/members/v1/remove_member.proto\x1a\x1donekit/http/annotations.proto2\x9c\x02\n" +
 	"\x0eMembersService\x12i\n" +
 	"\bListTeam\x12$.hub.team.members.v1.ListTeamRequest\x1a%.hub.team.members.v1.ListTeamResponse\"\x10\x9a\xb5\x18\f\n" +
-	"\b/members\x10\x01\x12v\n" +
-	"\tGetMember\x12%.hub.team.members.v1.GetMemberRequest\x1a&.hub.team.members.v1.GetMemberResponse\"\x1a\x9a\xb5\x18\x16\n" +
-	"\x12/members/{user_id}\x10\x01\x12\x7f\n" +
+	"\b/members\x10\x01\x12\x7f\n" +
 	"\fRemoveMember\x12(.hub.team.members.v1.RemoveMemberRequest\x1a).hub.team.members.v1.RemoveMemberResponse\"\x1a\x9a\xb5\x18\x16\n" +
 	"\x12/members/{user_id}\x10\x04\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/hub/team/members/v1B4Z2github.com/voxire/voxie/gen/go/hub/team/members/v1b\x06proto3"
 
 var file_hub_team_members_v1_service_proto_goTypes = []any{
 	(*ListTeamRequest)(nil),      // 0: hub.team.members.v1.ListTeamRequest
-	(*GetMemberRequest)(nil),     // 1: hub.team.members.v1.GetMemberRequest
-	(*RemoveMemberRequest)(nil),  // 2: hub.team.members.v1.RemoveMemberRequest
-	(*ListTeamResponse)(nil),     // 3: hub.team.members.v1.ListTeamResponse
-	(*GetMemberResponse)(nil),    // 4: hub.team.members.v1.GetMemberResponse
-	(*RemoveMemberResponse)(nil), // 5: hub.team.members.v1.RemoveMemberResponse
+	(*RemoveMemberRequest)(nil),  // 1: hub.team.members.v1.RemoveMemberRequest
+	(*ListTeamResponse)(nil),     // 2: hub.team.members.v1.ListTeamResponse
+	(*RemoveMemberResponse)(nil), // 3: hub.team.members.v1.RemoveMemberResponse
 }
 var file_hub_team_members_v1_service_proto_depIdxs = []int32{
 	0, // 0: hub.team.members.v1.MembersService.ListTeam:input_type -> hub.team.members.v1.ListTeamRequest
-	1, // 1: hub.team.members.v1.MembersService.GetMember:input_type -> hub.team.members.v1.GetMemberRequest
-	2, // 2: hub.team.members.v1.MembersService.RemoveMember:input_type -> hub.team.members.v1.RemoveMemberRequest
-	3, // 3: hub.team.members.v1.MembersService.ListTeam:output_type -> hub.team.members.v1.ListTeamResponse
-	4, // 4: hub.team.members.v1.MembersService.GetMember:output_type -> hub.team.members.v1.GetMemberResponse
-	5, // 5: hub.team.members.v1.MembersService.RemoveMember:output_type -> hub.team.members.v1.RemoveMemberResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	1, // 1: hub.team.members.v1.MembersService.RemoveMember:input_type -> hub.team.members.v1.RemoveMemberRequest
+	2, // 2: hub.team.members.v1.MembersService.ListTeam:output_type -> hub.team.members.v1.ListTeamResponse
+	3, // 3: hub.team.members.v1.MembersService.RemoveMember:output_type -> hub.team.members.v1.RemoveMemberResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -62,7 +56,6 @@ func file_hub_team_members_v1_service_proto_init() {
 	if File_hub_team_members_v1_service_proto != nil {
 		return
 	}
-	file_hub_team_members_v1_get_member_proto_init()
 	file_hub_team_members_v1_list_members_proto_init()
 	file_hub_team_members_v1_remove_member_proto_init()
 	type x struct{}

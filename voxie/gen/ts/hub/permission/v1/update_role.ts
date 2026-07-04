@@ -6,13 +6,17 @@
 
 /* eslint-disable */
 
-export interface UpdateRoleRequest {
-  /** id is the unique identifier for the role. */
-  id: number;
+export interface UpdateRoleBody {
   /** name is the role name. */
   name: string;
   /** permissions is the permissions value for this contract. */
   permissions: string[];
+}
+
+export interface UpdateRoleRequest {
+  /** id is the unique identifier for the role. */
+  id: number;
+  body: UpdateRoleBody | undefined;
 }
 
 export interface UpdateRoleResponse {

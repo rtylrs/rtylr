@@ -11,8 +11,9 @@ import (
 
 // DocumentServiceServer is the server API for DocumentService service.
 type DocumentServiceServer interface {
-	ListEmployeeDocuments(context.Context, *ListEmployeeDocumentsRequest) (*ListEmployeeDocumentsResponse, error)
-	UploadDocument(context.Context, *UploadDocumentRequest) (*UploadDocumentResponse, error)
+	ListDocuments(context.Context, *ListDocumentsRequest) (*ListDocumentsResponse, error)
+	CreateDocument(context.Context, *CreateDocumentRequest) (*CreateDocumentResponse, error)
+	DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error)
 }
 
 // RegisterDocumentServiceServer registers the HTTP handlers for service DocumentService to the given mux.
@@ -21,23 +22,32 @@ func RegisterDocumentServiceServer(server DocumentServiceServer, opts ...ServerO
 
 	serviceHeaders := getDocumentServiceHeaders()
 
-	methodHeaders := getListEmployeeDocumentsHeaders()
-	listEmployeeDocumentsHandler := BindingMiddleware[ListEmployeeDocumentsRequest](
-		genericHandler(server.ListEmployeeDocuments, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		listEmployeeDocumentsPathParams, listEmployeeDocumentsQueryParams,
+	methodHeaders := getListDocumentsHeaders()
+	listDocumentsHandler := BindingMiddleware[ListDocumentsRequest](
+		genericHandler(server.ListDocuments, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listDocumentsPathParams, listDocumentsQueryParams,
 		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/hr/document/v1/documents", listEmployeeDocumentsHandler)
+	config.mux.Handle("GET /api/hr/document/v1/documents", listDocumentsHandler)
 
-	methodHeaders = getUploadDocumentHeaders()
-	uploadDocumentHandler := BindingMiddleware[UploadDocumentRequest](
-		genericHandler(server.UploadDocument, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		uploadDocumentPathParams, uploadDocumentQueryParams,
+	methodHeaders = getCreateDocumentHeaders()
+	createDocumentHandler := BindingMiddleware[CreateDocumentRequest](
+		genericHandler(server.CreateDocument, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		createDocumentPathParams, createDocumentQueryParams,
 		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("POST /api/hr/document/v1/documents", uploadDocumentHandler)
+	config.mux.Handle("POST /api/hr/document/v1/documents", createDocumentHandler)
+
+	methodHeaders = getDeleteDocumentHeaders()
+	deleteDocumentHandler := BindingMiddleware[DeleteDocumentRequest](
+		genericHandler(server.DeleteDocument, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteDocumentPathParams, deleteDocumentQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/hr/document/v1/documents/{id}", deleteDocumentHandler)
 
 	return nil
 }
@@ -47,27 +57,37 @@ func getDocumentServiceHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getListEmployeeDocumentsHeaders returns the method-level required headers for ListEmployeeDocuments
-func getListEmployeeDocumentsHeaders() []*onekithttp.Header {
+// getListDocumentsHeaders returns the method-level required headers for ListDocuments
+func getListDocumentsHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getUploadDocumentHeaders returns the method-level required headers for UploadDocument
-func getUploadDocumentHeaders() []*onekithttp.Header {
+// getCreateDocumentHeaders returns the method-level required headers for CreateDocument
+func getCreateDocumentHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// listEmployeeDocumentsPathParams contains path parameter configuration for ListEmployeeDocuments
-var listEmployeeDocumentsPathParams = []PathParamConfig{}
-
-// listEmployeeDocumentsQueryParams contains query parameter configuration for ListEmployeeDocuments
-var listEmployeeDocumentsQueryParams = []QueryParamConfig{
-	{QueryName: "employee_id", FieldName: "employee_id", Required: false},
-	{QueryName: "document_type", FieldName: "document_type", Required: false},
+// getDeleteDocumentHeaders returns the method-level required headers for DeleteDocument
+func getDeleteDocumentHeaders() []*onekithttp.Header {
+	return nil
 }
 
-// uploadDocumentPathParams contains path parameter configuration for UploadDocument
-var uploadDocumentPathParams = []PathParamConfig{}
+// listDocumentsPathParams contains path parameter configuration for ListDocuments
+var listDocumentsPathParams = []PathParamConfig{}
 
-// uploadDocumentQueryParams contains query parameter configuration for UploadDocument
-var uploadDocumentQueryParams = []QueryParamConfig{}
+// listDocumentsQueryParams contains query parameter configuration for ListDocuments
+var listDocumentsQueryParams = []QueryParamConfig{}
+
+// createDocumentPathParams contains path parameter configuration for CreateDocument
+var createDocumentPathParams = []PathParamConfig{}
+
+// createDocumentQueryParams contains query parameter configuration for CreateDocument
+var createDocumentQueryParams = []QueryParamConfig{}
+
+// deleteDocumentPathParams contains path parameter configuration for DeleteDocument
+var deleteDocumentPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteDocumentQueryParams contains query parameter configuration for DeleteDocument
+var deleteDocumentQueryParams = []QueryParamConfig{}

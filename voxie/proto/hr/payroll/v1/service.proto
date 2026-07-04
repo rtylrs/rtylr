@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package hr.payroll.v1;
+
+import "hr/payroll/v1/list_payroll.proto";
+import "hr/payroll/v1/mark_payroll_paid.proto";
+import "hr/payroll/v1/run_payroll.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/payroll/v1";
+
+service PayrollService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/payroll/v1"};
+
+  rpc ListPayroll(ListPayrollRequest) returns (ListPayrollResponse) {
+    option (onekit.http.config) = {
+      path: "/payroll"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc RunPayroll(RunPayrollRequest) returns (RunPayrollResponse) {
+    option (onekit.http.config) = {
+      path: "/payroll/run"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc MarkPayrollPaid(MarkPayrollPaidRequest) returns (MarkPayrollPaidResponse) {
+    option (onekit.http.config) = {
+      path: "/payroll/{id}/mark-paid"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

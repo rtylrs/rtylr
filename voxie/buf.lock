@@ -4,3 +4,6 @@ deps:
   - name: buf.build/bufbuild/protovalidate
     commit: 50325440f8f24053b047484a6bf60b76
     digest: b5:74cb6f5c0853c3c10aafc701614194bbd63326bdb8ef4068214454b8894b03ba4113e04b3a33a8321cdf05336e37db4dc14a5e2495db8462566914f36086ba31
+  - name: buf.build/stackxio/onekit
+    commit: 2c6ecc4a0cee4b7cb9482ae328cdd7c2
+    digest: b5:ab53b840183e8e358652b10d6b32bdaa97610055d65cfe9ae81a45990a792d1990b6cea16bea53fc5d00a7b500660b7b7b4b817beab2f014cd038264a00305b3

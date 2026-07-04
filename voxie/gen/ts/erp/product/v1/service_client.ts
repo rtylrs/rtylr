@@ -54,6 +54,82 @@ export interface CreateProductResponse {
   message: string;
 }
 
+export interface GetProductByBarcodeRequest {
+  code: string;
+}
+
+export interface GetProductByBarcodeResponse {
+  product?: Product;
+}
+
+export interface GetProductRequest {
+  id: string;
+}
+
+export interface GetProductResponse {
+  product?: Product;
+}
+
+export interface GetProductFullRequest {
+  id: string;
+}
+
+export interface GetProductFullResponse {
+  product?: FullProduct;
+}
+
+export interface FullProduct {
+  id: string;
+  ownerId: string;
+  businessId: string;
+  categoryId: string;
+  supplierId: string;
+  name: string;
+  sku: string;
+  barcode: string;
+  description: string;
+  unit: string;
+  costPrice: number;
+  salePrice: number;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  reorderQuantity: number;
+  isActive: boolean;
+  trackInventory: boolean;
+  brandId: string;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListProductAttributesRequest {
+  id: string;
+}
+
+export interface ListProductAttributesResponse {
+  attributes: ProductAttribute[];
+}
+
+export interface ProductAttribute {
+  id: string;
+  name: string;
+  value: string;
+  position: number;
+}
+
 export interface UpdateProductRequest {
   id: string;
   body?: UpdateProductBody;
@@ -85,6 +161,80 @@ export interface DeleteProductRequest {
 
 export interface DeleteProductResponse {
   message: string;
+}
+
+export interface GetDashboardRequest {
+}
+
+export interface GetDashboardResponse {
+  totalProducts: number;
+  lowStockCount: number;
+  pendingOrders: number;
+  totalSuppliers: number;
+  inventoryValue: number;
+  lowStockItems: DashboardLowStockItem[];
+  recentOrders: DashboardRecentOrder[];
+  topCategories: DashboardTopCategory[];
+}
+
+export interface DashboardLowStockItem {
+  productId: string;
+  name: string;
+  sku: string;
+  currentStock: number;
+  reorderPoint: number;
+  warehouseName: string;
+}
+
+export interface DashboardRecentOrder {
+  id: string;
+  poNumber: string;
+  supplierName: string;
+  status: string;
+  total: number;
+  createdAt: string;
+}
+
+export interface DashboardTopCategory {
+  name: string;
+  productCount: number;
+}
+
+export interface ListReorderSuggestionsRequest {
+}
+
+export interface ListReorderSuggestionsResponse {
+  suggestions: ReorderSuggestion[];
+}
+
+export interface ReorderSuggestion {
+  productId: string;
+  name: string;
+  sku: string;
+  currentStock: number;
+  reorderPoint: number;
+  suggestedQuantity: number;
+  avgDailySales: number;
+  leadTimeDays: number;
+  confidence: string;
+}
+
+export interface ListExpiringItemsRequest {
+  daysAhead: number;
+}
+
+export interface ListExpiringItemsResponse {
+  items: ExpiringItem[];
+}
+
+export interface ExpiringItem {
+  productId: string;
+  name: string;
+  sku: string;
+  batchId: string;
+  expiryDate: string;
+  quantity: number;
+  warehouseName: string;
 }
 
 export interface FieldViolation {
@@ -202,6 +352,102 @@ export class ProductServiceClient {
     return await resp.json() as CreateProductResponse;
   }
 
+  async getProductByBarcode(req: GetProductByBarcodeRequest, options?: ProductServiceCallOptions): Promise<GetProductByBarcodeResponse> {
+    let path = "/api/erp/product/v1/products/barcode/{code}";
+    path = path.replace("{code}", encodeURIComponent(String(req.code)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetProductByBarcodeResponse;
+  }
+
+  async getProduct(req: GetProductRequest, options?: ProductServiceCallOptions): Promise<GetProductResponse> {
+    let path = "/api/erp/product/v1/products/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetProductResponse;
+  }
+
+  async getProductFull(req: GetProductFullRequest, options?: ProductServiceCallOptions): Promise<GetProductFullResponse> {
+    let path = "/api/erp/product/v1/products/{id}/full";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetProductFullResponse;
+  }
+
+  async listProductAttributes(req: ListProductAttributesRequest, options?: ProductServiceCallOptions): Promise<ListProductAttributesResponse> {
+    let path = "/api/erp/product/v1/products/{id}/attributes";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListProductAttributesResponse;
+  }
+
   async updateProduct(req: UpdateProductRequest, options?: ProductServiceCallOptions): Promise<UpdateProductResponse> {
     let path = "/api/erp/product/v1/products/{id}";
     path = path.replace("{id}", encodeURIComponent(String(req.id)));
@@ -249,6 +495,77 @@ export class ProductServiceClient {
     }
 
     return await resp.json() as DeleteProductResponse;
+  }
+
+  async getDashboard(_req: GetDashboardRequest, options?: ProductServiceCallOptions): Promise<GetDashboardResponse> {
+    let path = "/api/erp/product/v1/dashboard";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetDashboardResponse;
+  }
+
+  async listReorderSuggestions(_req: ListReorderSuggestionsRequest, options?: ProductServiceCallOptions): Promise<ListReorderSuggestionsResponse> {
+    let path = "/api/erp/product/v1/reorder-suggestions";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListReorderSuggestionsResponse;
+  }
+
+  async listExpiringItems(req: ListExpiringItemsRequest, options?: ProductServiceCallOptions): Promise<ListExpiringItemsResponse> {
+    let path = "/api/erp/product/v1/expiry";
+    const params = new URLSearchParams();
+    if (req.daysAhead != null && req.daysAhead !== 0) params.set("days_ahead", String(req.daysAhead));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListExpiringItemsResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

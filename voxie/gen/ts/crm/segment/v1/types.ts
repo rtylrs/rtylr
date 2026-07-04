@@ -15,8 +15,8 @@ export interface Segment {
   name: string;
   /** description is the description value for this contract. */
   description: string;
-  /** rules is the rules value for this contract. */
-  rules: string;
+  /** filters is the JSON filter definition for this segment. */
+  filters: string;
   /** customer_count is the customer count value for this contract. */
   customerCount: number;
   /** last_calculated_at is the last calculated at value for this contract. */

@@ -28,26 +28,26 @@ type GiftCard struct {
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// owner_id identifies the tenant that owns the resource.
 	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	// business_id identifies the business that owns the resource.
-	BusinessId int64 `protobuf:"varint,11,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
-	// customer_id is the customer id value for this contract.
-	CustomerId int64 `protobuf:"varint,12,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	// business_id identifies the active business.
+	BusinessId int64 `protobuf:"varint,3,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
+	// customer_id identifies the linked customer when present.
+	CustomerId int64 `protobuf:"varint,4,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
 	// code is the code value for this contract.
-	Code string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
+	Code string `protobuf:"bytes,5,opt,name=code,proto3" json:"code,omitempty"`
 	// initial_amount is the initial amount value for this contract.
-	InitialAmount float64 `protobuf:"fixed64,4,opt,name=initial_amount,json=initialAmount,proto3" json:"initial_amount,omitempty"`
+	InitialAmount float64 `protobuf:"fixed64,6,opt,name=initial_amount,json=initialAmount,proto3" json:"initial_amount,omitempty"`
 	// current_balance is the current balance value for this contract.
-	CurrentBalance float64 `protobuf:"fixed64,5,opt,name=current_balance,json=currentBalance,proto3" json:"current_balance,omitempty"`
+	CurrentBalance float64 `protobuf:"fixed64,7,opt,name=current_balance,json=currentBalance,proto3" json:"current_balance,omitempty"`
 	// customer_name is the customer name value for this contract.
-	CustomerName string `protobuf:"bytes,6,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerName string `protobuf:"bytes,8,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
 	// customer_email is the customer email value for this contract.
-	CustomerEmail string `protobuf:"bytes,7,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	CustomerEmail string `protobuf:"bytes,9,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
 	// is_active is the is active value for this contract.
-	IsActive bool `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	IsActive bool `protobuf:"varint,10,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	// expires_at is the expires at value for this contract.
-	ExpiresAt string `protobuf:"bytes,9,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	ExpiresAt string `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	// created_at is when the record was created.
-	CreatedAt string `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CreatedAt string `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// updated_at is when the record was last updated.
 	UpdatedAt     string `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -183,21 +183,21 @@ const file_pos_gift_card_v1_types_proto_rawDesc = "" +
 	"\bGiftCard\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
-	"\vbusiness_id\x18\v \x01(\x03B\x04е\x18\x01R\n" +
+	"\vbusiness_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
 	"businessId\x12%\n" +
-	"\vcustomer_id\x18\f \x01(\x03B\x04е\x18\x01R\n" +
+	"\vcustomer_id\x18\x04 \x01(\x03B\x04е\x18\x01R\n" +
 	"customerId\x12\x12\n" +
-	"\x04code\x18\x03 \x01(\tR\x04code\x12%\n" +
-	"\x0einitial_amount\x18\x04 \x01(\x01R\rinitialAmount\x12'\n" +
-	"\x0fcurrent_balance\x18\x05 \x01(\x01R\x0ecurrentBalance\x12#\n" +
-	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12%\n" +
-	"\x0ecustomer_email\x18\a \x01(\tR\rcustomerEmail\x12\x1b\n" +
-	"\tis_active\x18\b \x01(\bR\bisActive\x12\x1d\n" +
+	"\x04code\x18\x05 \x01(\tR\x04code\x12%\n" +
+	"\x0einitial_amount\x18\x06 \x01(\x01R\rinitialAmount\x12'\n" +
+	"\x0fcurrent_balance\x18\a \x01(\x01R\x0ecurrentBalance\x12#\n" +
+	"\rcustomer_name\x18\b \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\t \x01(\tR\rcustomerEmail\x12\x1b\n" +
+	"\tis_active\x18\n" +
+	" \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\t \x01(\tR\texpiresAt\x12\x1d\n" +
+	"expires_at\x18\v \x01(\tR\texpiresAt\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\n" +
-	" \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"created_at\x18\f \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\r \x01(\tR\tupdatedAtB1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
 

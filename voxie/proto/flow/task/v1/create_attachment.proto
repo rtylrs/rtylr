@@ -8,18 +8,25 @@ import "onekit/http/annotations.proto";
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message CreateAttachmentRequest {
+  // task_id identifies the task the attachment belongs to.
+  int64 task_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // name is the name value for this contract.
-  string name = 1 [
+  string name = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // url is the url value for this contract.
-  string url = 2 [
+  string url = 3 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // size is the size value for this contract.
-  int64 size = 3 [
+  int64 size = 4 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];

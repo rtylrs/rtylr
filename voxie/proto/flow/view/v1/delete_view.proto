@@ -1,0 +1,7 @@
+syntax = "proto3";
+package flow.view.v1;
+option go_package = "github.com/voxire/voxie/gen/go/flow/view/v1";
+message DeleteViewRequest {
+  int64 id = 1;
+}
+message DeleteViewResponse {}

@@ -43,6 +43,8 @@ export interface ScheduledReport {
   frequency: string;
   /** recipient_email is the recipient email value for this contract. */
   recipientEmail: string;
+  /** channel is the delivery channel (email, slack). */
+  channel: string;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
   /** last_sent_at is the last sent at value for this contract. */

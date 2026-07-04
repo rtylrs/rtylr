@@ -1,0 +1,23 @@
+syntax = "proto3";
+package flow.view.v1;
+import "flow/view/v1/create_view.proto";
+import "flow/view/v1/delete_view.proto";
+import "flow/view/v1/list_views.proto";
+import "flow/view/v1/update_view.proto";
+import "onekit/http/annotations.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/view/v1";
+service ViewService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/view/v1"};
+  rpc ListViews(ListViewsRequest) returns (ListViewsResponse) {
+    option (onekit.http.config) = { path: "/views" method: HTTP_METHOD_GET };
+  }
+  rpc CreateView(CreateViewRequest) returns (CreateViewResponse) {
+    option (onekit.http.config) = { path: "/views" method: HTTP_METHOD_POST };
+  }
+  rpc UpdateView(UpdateViewRequest) returns (UpdateViewResponse) {
+    option (onekit.http.config) = { path: "/views/{id}" method: HTTP_METHOD_PUT };
+  }
+  rpc DeleteView(DeleteViewRequest) returns (DeleteViewResponse) {
+    option (onekit.http.config) = { path: "/views/{id}" method: HTTP_METHOD_DELETE };
+  }
+}

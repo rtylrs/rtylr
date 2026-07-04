@@ -3,6 +3,7 @@ syntax = "proto3";
 package erp.supplier.v1;
 
 import "erp/supplier/v1/create_supplier.proto";
+import "erp/supplier/v1/delete_supplier.proto";
 import "erp/supplier/v1/list_suppliers.proto";
 import "erp/supplier/v1/update_supplier.proto";
 import "onekit/http/annotations.proto";
@@ -32,6 +33,13 @@ service SupplierService {
       path: "/suppliers/{id}"
       method: HTTP_METHOD_PUT
       body: "body"
+    };
+  }
+
+  rpc DeleteSupplier(DeleteSupplierRequest) returns (DeleteSupplierResponse) {
+    option (onekit.http.config) = {
+      path: "/suppliers/{id}"
+      method: HTTP_METHOD_DELETE
     };
   }
 }

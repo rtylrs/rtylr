@@ -15,7 +15,6 @@ type UserServiceServer interface {
 	CreatePOSUser(context.Context, *CreatePOSUserRequest) (*CreatePOSUserResponse, error)
 	UpdatePOSUser(context.Context, *UpdatePOSUserRequest) (*UpdatePOSUserResponse, error)
 	DeactivatePOSUser(context.Context, *DeactivatePOSUserRequest) (*DeactivatePOSUserResponse, error)
-	SetPIN(context.Context, *SetPINRequest) (*SetPINResponse, error)
 	VerifyPOSUserPIN(context.Context, *VerifyPOSUserPINRequest) (*VerifyPOSUserPINResponse, error)
 }
 
@@ -61,15 +60,6 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 
 	config.mux.Handle("PATCH /api/pos/user/v1/users/deactivate", deactivatePOSUserHandler)
 
-	methodHeaders = getSetPINHeaders()
-	setPINHandler := BindingMiddleware[SetPINRequest](
-		genericHandler(server.SetPIN, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
-		setPINPathParams, setPINQueryParams,
-		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
-	)
-
-	config.mux.Handle("POST /api/pos/user/v1/users/set-pin", setPINHandler)
-
 	methodHeaders = getVerifyPOSUserPINHeaders()
 	verifyPOSUserPINHandler := BindingMiddleware[VerifyPOSUserPINRequest](
 		genericHandler(server.VerifyPOSUserPIN, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -107,11 +97,6 @@ func getDeactivatePOSUserHeaders() []*onekithttp.Header {
 	return nil
 }
 
-// getSetPINHeaders returns the method-level required headers for SetPIN
-func getSetPINHeaders() []*onekithttp.Header {
-	return nil
-}
-
 // getVerifyPOSUserPINHeaders returns the method-level required headers for VerifyPOSUserPIN
 func getVerifyPOSUserPINHeaders() []*onekithttp.Header {
 	return nil
@@ -142,12 +127,6 @@ var deactivatePOSUserPathParams = []PathParamConfig{}
 
 // deactivatePOSUserQueryParams contains query parameter configuration for DeactivatePOSUser
 var deactivatePOSUserQueryParams = []QueryParamConfig{}
-
-// setPINPathParams contains path parameter configuration for SetPIN
-var setPINPathParams = []PathParamConfig{}
-
-// setPINQueryParams contains query parameter configuration for SetPIN
-var setPINQueryParams = []QueryParamConfig{}
 
 // verifyPOSUserPINPathParams contains path parameter configuration for VerifyPOSUserPIN
 var verifyPOSUserPINPathParams = []PathParamConfig{}

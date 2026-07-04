@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package booking.service.v1;
+
+import "booking/service/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/service/v1";
+
+message ListServicesRequest {}
+
+message ListServicesResponse {
+  repeated BookingService services = 1;
+}

@@ -1,4 +1,4 @@
-.PHONY: clean lint format breaking generate install-plugins fetch-onekit-proto install-js typecheck
+.PHONY: clean lint format breaking generate install-plugins install-js typecheck
 
 ONEKIT_VERSION := v0.3.0
 
@@ -6,15 +6,8 @@ ONEKIT_VERSION := v0.3.0
 clean:
 	rm -rf gen
 
-# Fetch onekit's HTTP annotation .proto files for a pinned version.
-# Not vendored/committed — fetched on demand, same as installing the plugin binary.
-fetch-onekit-proto:
-	rm -rf .onekit
-	mkdir -p .onekit
-	buf export "https://github.com/stackxio/onekit.git#tag=$(ONEKIT_VERSION),subdir=proto" -o .onekit/proto
-
 # Lint proto files
-lint: fetch-onekit-proto
+lint:
 	buf lint
 
 # Format proto files
@@ -22,7 +15,7 @@ format:
 	buf format -w
 
 # Check for breaking changes
-breaking: fetch-onekit-proto
+breaking:
 	buf breaking --against '.git#branch=main'
 
 # Install the onekit protoc plugins used for generation
@@ -36,7 +29,7 @@ install-js:
 	pnpm install --frozen-lockfile
 
 # Regenerate gen/go and gen/ts from proto sources. Output is committed to the repo.
-generate: install-plugins install-js fetch-onekit-proto
+generate: install-plugins install-js
 	buf dep update
 	rm -rf gen/go gen/ts
 	buf generate

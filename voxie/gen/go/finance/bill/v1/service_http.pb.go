@@ -14,6 +14,8 @@ type BillServiceServer interface {
 	ListBills(context.Context, *ListBillsRequest) (*ListBillsResponse, error)
 	CreateBill(context.Context, *CreateBillRequest) (*CreateBillResponse, error)
 	UpdateBill(context.Context, *UpdateBillRequest) (*UpdateBillResponse, error)
+	GetBill(context.Context, *GetBillRequest) (*GetBillResponse, error)
+	DeleteBill(context.Context, *DeleteBillRequest) (*DeleteBillResponse, error)
 }
 
 // RegisterBillServiceServer registers the HTTP handlers for service BillService to the given mux.
@@ -49,6 +51,24 @@ func RegisterBillServiceServer(server BillServiceServer, opts ...ServerOption) e
 
 	config.mux.Handle("PUT /api/finance/bill/v1/bills/{id}", updateBillHandler)
 
+	methodHeaders = getGetBillHeaders()
+	getBillHandler := BindingMiddleware[GetBillRequest](
+		genericHandler(server.GetBill, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getBillPathParams, getBillQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/finance/bill/v1/bills/{id}", getBillHandler)
+
+	methodHeaders = getDeleteBillHeaders()
+	deleteBillHandler := BindingMiddleware[DeleteBillRequest](
+		genericHandler(server.DeleteBill, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteBillPathParams, deleteBillQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/finance/bill/v1/bills/{id}", deleteBillHandler)
+
 	return nil
 }
 
@@ -72,6 +92,16 @@ func getUpdateBillHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetBillHeaders returns the method-level required headers for GetBill
+func getGetBillHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getDeleteBillHeaders returns the method-level required headers for DeleteBill
+func getDeleteBillHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listBillsPathParams contains path parameter configuration for ListBills
 var listBillsPathParams = []PathParamConfig{}
 
@@ -91,3 +121,19 @@ var updateBillPathParams = []PathParamConfig{
 
 // updateBillQueryParams contains query parameter configuration for UpdateBill
 var updateBillQueryParams = []QueryParamConfig{}
+
+// getBillPathParams contains path parameter configuration for GetBill
+var getBillPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// getBillQueryParams contains query parameter configuration for GetBill
+var getBillQueryParams = []QueryParamConfig{}
+
+// deleteBillPathParams contains path parameter configuration for DeleteBill
+var deleteBillPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteBillQueryParams contains query parameter configuration for DeleteBill
+var deleteBillQueryParams = []QueryParamConfig{}

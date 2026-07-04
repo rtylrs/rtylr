@@ -14,6 +14,40 @@ export interface IssueResponse {
   redirectUrl: string;
 }
 
+export interface TokenRequest {
+  grantType: string;
+  code: string;
+  codeVerifier: string;
+  redirectUri: string;
+  clientId: string;
+  refreshToken: string;
+}
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+}
+
+export interface RevokeRequest {
+  token: string;
+  clientId: string;
+}
+
+export interface RevokeResponse {
+  ok: boolean;
+}
+
+export interface MeRequest {
+}
+
+export interface MeResponse {
+  userId: string;
+  businessId: string;
+  role: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -99,6 +133,77 @@ export class OauthServiceClient {
     }
 
     return await resp.json() as IssueResponse;
+  }
+
+  async token(req: TokenRequest, options?: OauthServiceCallOptions): Promise<TokenResponse> {
+    let path = "/api/common/oauth/v1/token";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as TokenResponse;
+  }
+
+  async revoke(req: RevokeRequest, options?: OauthServiceCallOptions): Promise<RevokeResponse> {
+    let path = "/api/common/oauth/v1/revoke";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as RevokeResponse;
+  }
+
+  async me(_req: MeRequest, options?: OauthServiceCallOptions): Promise<MeResponse> {
+    let path = "/api/common/oauth/v1/me";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as MeResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

@@ -4,6 +4,7 @@ package pos.menu_item.v1;
 
 import "onekit/http/annotations.proto";
 import "pos/menu_item/v1/create_menu_item.proto";
+import "pos/menu_item/v1/list_public_menu_items.proto";
 import "pos/menu_item/v1/list_menu_items.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
@@ -14,6 +15,13 @@ service MenuItemService {
   rpc ListMenuItems(ListMenuItemsRequest) returns (ListMenuItemsResponse) {
     option (onekit.http.config) = {
       path: "/menu-items"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListPublicMenuItems(ListPublicMenuItemsRequest) returns (ListPublicMenuItemsResponse) {
+    option (onekit.http.config) = {
+      path: "/menu-items/public"
       method: HTTP_METHOD_GET
     };
   }

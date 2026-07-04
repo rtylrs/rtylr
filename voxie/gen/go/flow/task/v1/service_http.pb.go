@@ -13,6 +13,8 @@ import (
 type TaskServiceServer interface {
 	ListTasks(context.Context, *ListTasksRequest) (*ListTasksResponse, error)
 	GetMyTasks(context.Context, *GetMyTasksRequest) (*GetMyTasksResponse, error)
+	GetMyTasksProject(context.Context, *GetMyTasksProjectRequest) (*GetMyTasksProjectResponse, error)
+	SearchTasks(context.Context, *SearchTasksRequest) (*SearchTasksResponse, error)
 	CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error)
 	GetTaskDetail(context.Context, *GetTaskDetailRequest) (*GetTaskDetailResponse, error)
 	UpdateTask(context.Context, *UpdateTaskRequest) (*UpdateTaskResponse, error)
@@ -28,6 +30,7 @@ type TaskServiceServer interface {
 	DeleteAttachment(context.Context, *DeleteAttachmentRequest) (*DeleteAttachmentResponse, error)
 	CreateTimeLog(context.Context, *CreateTimeLogRequest) (*CreateTimeLogResponse, error)
 	GetTimeLogs(context.Context, *GetTimeLogsRequest) (*GetTimeLogsResponse, error)
+	DeleteTimeLog(context.Context, *DeleteTimeLogRequest) (*DeleteTimeLogResponse, error)
 }
 
 // RegisterTaskServiceServer registers the HTTP handlers for service TaskService to the given mux.
@@ -53,6 +56,24 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 	)
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/my", getMyTasksHandler)
+
+	methodHeaders = getGetMyTasksProjectHeaders()
+	getMyTasksProjectHandler := BindingMiddleware[GetMyTasksProjectRequest](
+		genericHandler(server.GetMyTasksProject, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getMyTasksProjectPathParams, getMyTasksProjectQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/flow/task/v1/tasks/my-project", getMyTasksProjectHandler)
+
+	methodHeaders = getSearchTasksHeaders()
+	searchTasksHandler := BindingMiddleware[SearchTasksRequest](
+		genericHandler(server.SearchTasks, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		searchTasksPathParams, searchTasksQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/flow/task/v1/tasks/search", searchTasksHandler)
 
 	methodHeaders = getCreateTaskHeaders()
 	createTaskHandler := BindingMiddleware[CreateTaskRequest](
@@ -189,6 +210,15 @@ func RegisterTaskServiceServer(server TaskServiceServer, opts ...ServerOption) e
 
 	config.mux.Handle("GET /api/flow/task/v1/tasks/{task_id}/time-logs", getTimeLogsHandler)
 
+	methodHeaders = getDeleteTimeLogHeaders()
+	deleteTimeLogHandler := BindingMiddleware[DeleteTimeLogRequest](
+		genericHandler(server.DeleteTimeLog, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteTimeLogPathParams, deleteTimeLogQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/flow/task/v1/tasks/time-logs/{id}", deleteTimeLogHandler)
+
 	return nil
 }
 
@@ -204,6 +234,16 @@ func getListTasksHeaders() []*onekithttp.Header {
 
 // getGetMyTasksHeaders returns the method-level required headers for GetMyTasks
 func getGetMyTasksHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetMyTasksProjectHeaders returns the method-level required headers for GetMyTasksProject
+func getGetMyTasksProjectHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getSearchTasksHeaders returns the method-level required headers for SearchTasks
+func getSearchTasksHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -282,6 +322,11 @@ func getGetTimeLogsHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getDeleteTimeLogHeaders returns the method-level required headers for DeleteTimeLog
+func getDeleteTimeLogHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listTasksPathParams contains path parameter configuration for ListTasks
 var listTasksPathParams = []PathParamConfig{}
 
@@ -299,6 +344,21 @@ var getMyTasksPathParams = []PathParamConfig{}
 
 // getMyTasksQueryParams contains query parameter configuration for GetMyTasks
 var getMyTasksQueryParams = []QueryParamConfig{}
+
+// getMyTasksProjectPathParams contains path parameter configuration for GetMyTasksProject
+var getMyTasksProjectPathParams = []PathParamConfig{}
+
+// getMyTasksProjectQueryParams contains query parameter configuration for GetMyTasksProject
+var getMyTasksProjectQueryParams = []QueryParamConfig{}
+
+// searchTasksPathParams contains path parameter configuration for SearchTasks
+var searchTasksPathParams = []PathParamConfig{}
+
+// searchTasksQueryParams contains query parameter configuration for SearchTasks
+var searchTasksQueryParams = []QueryParamConfig{
+	{QueryName: "q", FieldName: "q", Required: false},
+	{QueryName: "workspace_id", FieldName: "workspace_id", Required: false},
+}
 
 // createTaskPathParams contains path parameter configuration for CreateTask
 var createTaskPathParams = []PathParamConfig{}
@@ -413,3 +473,11 @@ var getTimeLogsPathParams = []PathParamConfig{
 
 // getTimeLogsQueryParams contains query parameter configuration for GetTimeLogs
 var getTimeLogsQueryParams = []QueryParamConfig{}
+
+// deleteTimeLogPathParams contains path parameter configuration for DeleteTimeLog
+var deleteTimeLogPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteTimeLogQueryParams contains query parameter configuration for DeleteTimeLog
+var deleteTimeLogQueryParams = []QueryParamConfig{}

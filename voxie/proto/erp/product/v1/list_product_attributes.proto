@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+import "buf/validate/validate.proto";
+import "erp/product/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+message ListProductAttributesRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message ListProductAttributesResponse {
+  repeated ProductAttribute attributes = 1;
+}

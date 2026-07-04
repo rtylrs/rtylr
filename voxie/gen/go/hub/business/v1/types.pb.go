@@ -370,7 +370,9 @@ type PublicBusinessSummary struct {
 	// currency is the currency value for this contract.
 	Currency string `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`
 	// type is the type value for this contract.
-	Type          string `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
+	Type string `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
+	// timezone is the timezone value for this contract.
+	Timezone      string `protobuf:"bytes,7,opt,name=timezone,proto3" json:"timezone,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -447,6 +449,13 @@ func (x *PublicBusinessSummary) GetType() string {
 	return ""
 }
 
+func (x *PublicBusinessSummary) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
 var File_hub_business_v1_types_proto protoreflect.FileDescriptor
 
 const file_hub_business_v1_types_proto_rawDesc = "" +
@@ -481,14 +490,15 @@ const file_hub_business_v1_types_proto_rawDesc = "" +
 	"\x04slug\x18\x03 \x01(\tR\x04slug\x12\x18\n" +
 	"\aaddress\x18\x04 \x01(\tR\aaddress\x12\x1a\n" +
 	"\btimezone\x18\x05 \x01(\tR\btimezone\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\"\xa0\x01\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\"\xbc\x01\n" +
 	"\x15PublicBusinessSummary\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
 	"\x04slug\x18\x03 \x01(\tR\x04slug\x12\x19\n" +
 	"\blogo_url\x18\x04 \x01(\tR\alogoUrl\x12\x1a\n" +
 	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12\x12\n" +
-	"\x04type\x18\x06 \x01(\tR\x04typeB0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"
+	"\x04type\x18\x06 \x01(\tR\x04type\x12\x1a\n" +
+	"\btimezone\x18\a \x01(\tR\btimezoneB0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"
 
 var (
 	file_hub_business_v1_types_proto_rawDescOnce sync.Once

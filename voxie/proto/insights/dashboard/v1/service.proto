@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package insights.dashboard.v1;
 
+import "insights/dashboard/v1/get_dashboard_summary.proto";
 import "insights/dashboard/v1/get_insights.proto";
 import "insights/dashboard/v1/get_kpis.proto";
 import "insights/dashboard/v1/get_roadmap.proto";
@@ -42,6 +43,14 @@ service DashboardService {
   rpc GetWorkload(GetWorkloadRequest) returns (GetWorkloadResponse) {
     option (onekit.http.config) = {
       path: "/workload"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetDashboardSummary returns MTD headline KPI cards for the insights home dashboard.
+  rpc GetDashboardSummary(GetDashboardSummaryRequest) returns (GetDashboardSummaryResponse) {
+    option (onekit.http.config) = {
+      path: "/summary"
       method: HTTP_METHOD_GET
     };
   }

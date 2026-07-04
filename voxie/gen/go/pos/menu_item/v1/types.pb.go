@@ -41,7 +41,9 @@ type MenuItem struct {
 	// created_at is when the record was created.
 	CreatedAt string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// updated_at is when the record was last updated.
-	UpdatedAt     string `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UpdatedAt string `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// image_url is a public storefront image for the menu item.
+	ImageUrl      string `protobuf:"bytes,10,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -139,11 +141,18 @@ func (x *MenuItem) GetUpdatedAt() string {
 	return ""
 }
 
+func (x *MenuItem) GetImageUrl() string {
+	if x != nil {
+		return x.ImageUrl
+	}
+	return ""
+}
+
 var File_pos_menu_item_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_menu_item_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/menu_item/v1/types.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\"\x88\x02\n" +
+	"\x1cpos/menu_item/v1/types.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\"\xa5\x02\n" +
 	"\bMenuItem\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
@@ -157,7 +166,9 @@ const file_pos_menu_item_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAtB1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
+	"updated_at\x18\t \x01(\tR\tupdatedAt\x12\x1b\n" +
+	"\timage_url\x18\n" +
+	" \x01(\tR\bimageUrlB1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
 
 var (
 	file_pos_menu_item_v1_types_proto_rawDescOnce sync.Once

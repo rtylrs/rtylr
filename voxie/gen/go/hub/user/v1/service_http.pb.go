@@ -14,6 +14,7 @@ type UserServiceServer interface {
 	GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error)
 	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
+	SwitchBusiness(context.Context, *SwitchBusinessRequest) (*SwitchBusinessResponse, error)
 }
 
 // RegisterUserServiceServer registers the HTTP handlers for service UserService to the given mux.
@@ -49,6 +50,15 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 
 	config.mux.Handle("POST /api/hub/user/v1/users/password", changePasswordHandler)
 
+	methodHeaders = getSwitchBusinessHeaders()
+	switchBusinessHandler := BindingMiddleware[SwitchBusinessRequest](
+		genericHandler(server.SwitchBusiness, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		switchBusinessPathParams, switchBusinessQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/hub/user/v1/users/switch-business", switchBusinessHandler)
+
 	return nil
 }
 
@@ -72,6 +82,11 @@ func getChangePasswordHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getSwitchBusinessHeaders returns the method-level required headers for SwitchBusiness
+func getSwitchBusinessHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getMePathParams contains path parameter configuration for GetMe
 var getMePathParams = []PathParamConfig{}
 
@@ -89,3 +104,9 @@ var changePasswordPathParams = []PathParamConfig{}
 
 // changePasswordQueryParams contains query parameter configuration for ChangePassword
 var changePasswordQueryParams = []QueryParamConfig{}
+
+// switchBusinessPathParams contains path parameter configuration for SwitchBusiness
+var switchBusinessPathParams = []PathParamConfig{}
+
+// switchBusinessQueryParams contains query parameter configuration for SwitchBusiness
+var switchBusinessQueryParams = []QueryParamConfig{}

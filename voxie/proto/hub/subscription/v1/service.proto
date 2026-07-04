@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package hub.subscription.v1;
+
+import "hub/subscription/v1/subscription_messages.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/subscription/v1";
+
+service SubscriptionService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/subscription/v1"};
+
+  rpc GetMySubscription(GetMySubscriptionRequest) returns (GetMySubscriptionResponse) {
+    option (onekit.http.config) = {
+      path: "/my"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListPlans(ListPlansRequest) returns (ListPlansResponse) {
+    option (onekit.http.config) = {
+      path: "/plans"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetBillingDetail(GetBillingDetailRequest) returns (GetBillingDetailResponse) {
+    option (onekit.http.config) = {
+      path: "/billing"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetBillingHistory(GetBillingHistoryRequest) returns (GetBillingHistoryResponse) {
+    option (onekit.http.config) = {
+      path: "/billing/history"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpsertSubscription(UpsertSubscriptionRequest) returns (UpsertSubscriptionResponse) {
+    option (onekit.http.config) = {
+      path: "/my"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc CreateCheckout(CreateCheckoutRequest) returns (CreateCheckoutResponse) {
+    option (onekit.http.config) = {
+      path: "/checkout"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

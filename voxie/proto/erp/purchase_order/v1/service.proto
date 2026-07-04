@@ -2,7 +2,9 @@ syntax = "proto3";
 
 package erp.purchase_order.v1;
 
+import "erp/purchase_order/v1/approve_purchase_order.proto";
 import "erp/purchase_order/v1/create_purchase_order.proto";
+import "erp/purchase_order/v1/get_purchase_order.proto";
 import "erp/purchase_order/v1/list_purchase_orders.proto";
 import "erp/purchase_order/v1/update_purchase_order_status.proto";
 import "onekit/http/annotations.proto";
@@ -27,11 +29,25 @@ service PurchaseOrderService {
     };
   }
 
+  rpc GetPurchaseOrder(GetPurchaseOrderRequest) returns (GetPurchaseOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/purchase-orders/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
   rpc UpdatePurchaseOrderStatus(UpdatePurchaseOrderStatusRequest) returns (UpdatePurchaseOrderStatusResponse) {
     option (onekit.http.config) = {
       path: "/purchase-orders/{id}/status"
       method: HTTP_METHOD_PATCH
       body: "body"
+    };
+  }
+
+  rpc ApprovePurchaseOrder(ApprovePurchaseOrderRequest) returns (ApprovePurchaseOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/purchase-orders/{id}/approve"
+      method: HTTP_METHOD_POST
     };
   }
 }

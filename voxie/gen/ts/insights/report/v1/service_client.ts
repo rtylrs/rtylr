@@ -71,6 +71,7 @@ export interface ScheduledReport {
   templateName: string;
   frequency: string;
   recipientEmail: string;
+  channel: string;
   isActive: boolean;
   lastSentAt: string;
   nextSendAt: string;
@@ -78,13 +79,65 @@ export interface ScheduledReport {
 }
 
 export interface CreateScheduledReportRequest {
-  templateId: string;
+  templateSlug: string;
   frequency: string;
+  channel: string;
   recipientEmail: string;
+  isActive: boolean;
 }
 
 export interface CreateScheduledReportResponse {
   report?: ScheduledReport;
+}
+
+export interface UpdateScheduledReportRequest {
+  id: string;
+  templateSlug: string;
+  frequency: string;
+  channel: string;
+  recipientEmail: string;
+  isActive: boolean;
+}
+
+export interface UpdateScheduledReportResponse {
+  report?: ScheduledReport;
+}
+
+export interface DeleteScheduledReportRequest {
+  id: string;
+}
+
+export interface DeleteScheduledReportResponse {
+  deleted: boolean;
+}
+
+export interface GenerateRevenueReportRequest {
+  from: string;
+  to: string;
+  format: string;
+}
+
+export interface GenerateRevenueReportResponse {
+  reportId: string;
+  url: string;
+  status: string;
+}
+
+export interface ExportRevenueReportRequest {
+  from: string;
+  to: string;
+}
+
+export interface ExportRevenueReportResponse {
+  filename: string;
+  contentType: string;
+  csv: string;
+  rows: ExportRevenueRow[];
+}
+
+export interface ExportRevenueRow {
+  date: string;
+  amountMinorUnits: string;
 }
 
 export interface FieldViolation {
@@ -277,6 +330,105 @@ export class ReportServiceClient {
     }
 
     return await resp.json() as CreateScheduledReportResponse;
+  }
+
+  async updateScheduledReport(req: UpdateScheduledReportRequest, options?: ReportServiceCallOptions): Promise<UpdateScheduledReportResponse> {
+    let path = "/api/insights/report/v1/scheduled/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateScheduledReportResponse;
+  }
+
+  async deleteScheduledReport(req: DeleteScheduledReportRequest, options?: ReportServiceCallOptions): Promise<DeleteScheduledReportResponse> {
+    let path = "/api/insights/report/v1/scheduled/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteScheduledReportResponse;
+  }
+
+  async generateRevenueReport(req: GenerateRevenueReportRequest, options?: ReportServiceCallOptions): Promise<GenerateRevenueReportResponse> {
+    let path = "/api/insights/report/v1/reports/revenue/generate";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GenerateRevenueReportResponse;
+  }
+
+  async exportRevenueReport(req: ExportRevenueReportRequest, options?: ReportServiceCallOptions): Promise<ExportRevenueReportResponse> {
+    let path = "/api/insights/report/v1/reports/revenue/export";
+    const params = new URLSearchParams();
+    if (req.from != null && req.from !== "") params.set("from", String(req.from));
+    if (req.to != null && req.to !== "") params.set("to", String(req.to));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ExportRevenueReportResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

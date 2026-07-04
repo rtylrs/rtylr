@@ -4,6 +4,7 @@ package hub.user.v1;
 
 import "hub/user/v1/change_password.proto";
 import "hub/user/v1/get_me.proto";
+import "hub/user/v1/switch_business.proto";
 import "hub/user/v1/update_profile.proto";
 import "onekit/http/annotations.proto";
 
@@ -33,6 +34,14 @@ service UserService {
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
     option (onekit.http.config) = {
       path: "/users/password"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // SwitchBusiness issues a fresh JWT scoped to the selected business.
+  rpc SwitchBusiness(SwitchBusinessRequest) returns (SwitchBusinessResponse) {
+    option (onekit.http.config) = {
+      path: "/users/switch-business"
       method: HTTP_METHOD_POST
     };
   }

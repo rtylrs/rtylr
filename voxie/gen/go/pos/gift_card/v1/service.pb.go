@@ -25,39 +25,33 @@ var File_pos_gift_card_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1epos/gift_card/v1/service.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/gift_card/v1/create_gift_card.proto\x1a,pos/gift_card/v1/get_gift_card_by_code.proto\x1a&pos/gift_card/v1/list_gift_cards.proto\x1a'pos/gift_card/v1/redeem_gift_card.proto2\xb3\x04\n" +
+	"\x1epos/gift_card/v1/service.proto\x12\x10pos.gift_card.v1\x1a\x1donekit/http/annotations.proto\x1a'pos/gift_card/v1/create_gift_card.proto\x1a&pos/gift_card/v1/list_gift_cards.proto\x1a'pos/gift_card/v1/redeem_gift_card.proto2\xa8\x03\n" +
 	"\x0fGiftCardService\x12u\n" +
 	"\rListGiftCards\x12&.pos.gift_card.v1.ListGiftCardsRequest\x1a'.pos.gift_card.v1.ListGiftCardsResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/gift-cards\x10\x01\x12x\n" +
 	"\x0eCreateGiftCard\x12'.pos.gift_card.v1.CreateGiftCardRequest\x1a(.pos.gift_card.v1.CreateGiftCardResponse\"\x13\x9a\xb5\x18\x0f\n" +
-	"\v/gift-cards\x10\x02\x12\x88\x01\n" +
-	"\x11GetGiftCardByCode\x12*.pos.gift_card.v1.GetGiftCardByCodeRequest\x1a+.pos.gift_card.v1.GetGiftCardByCodeResponse\"\x1a\x9a\xb5\x18\x16\n" +
-	"\x12/gift-cards/{code}\x10\x01\x12\x86\x01\n" +
+	"\v/gift-cards\x10\x02\x12\x86\x01\n" +
 	"\x0eRedeemGiftCard\x12'.pos.gift_card.v1.RedeemGiftCardRequest\x1a(.pos.gift_card.v1.RedeemGiftCardResponse\"!\x9a\xb5\x18\x1d\n" +
 	"\x19/gift-cards/{code}/redeem\x10\x02\x1a\x1b\xa2\xb5\x18\x17\n" +
 	"\x15/api/pos/gift-card/v1B1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"
 
 var file_pos_gift_card_v1_service_proto_goTypes = []any{
-	(*ListGiftCardsRequest)(nil),      // 0: pos.gift_card.v1.ListGiftCardsRequest
-	(*CreateGiftCardRequest)(nil),     // 1: pos.gift_card.v1.CreateGiftCardRequest
-	(*GetGiftCardByCodeRequest)(nil),  // 2: pos.gift_card.v1.GetGiftCardByCodeRequest
-	(*RedeemGiftCardRequest)(nil),     // 3: pos.gift_card.v1.RedeemGiftCardRequest
-	(*ListGiftCardsResponse)(nil),     // 4: pos.gift_card.v1.ListGiftCardsResponse
-	(*CreateGiftCardResponse)(nil),    // 5: pos.gift_card.v1.CreateGiftCardResponse
-	(*GetGiftCardByCodeResponse)(nil), // 6: pos.gift_card.v1.GetGiftCardByCodeResponse
-	(*RedeemGiftCardResponse)(nil),    // 7: pos.gift_card.v1.RedeemGiftCardResponse
+	(*ListGiftCardsRequest)(nil),   // 0: pos.gift_card.v1.ListGiftCardsRequest
+	(*CreateGiftCardRequest)(nil),  // 1: pos.gift_card.v1.CreateGiftCardRequest
+	(*RedeemGiftCardRequest)(nil),  // 2: pos.gift_card.v1.RedeemGiftCardRequest
+	(*ListGiftCardsResponse)(nil),  // 3: pos.gift_card.v1.ListGiftCardsResponse
+	(*CreateGiftCardResponse)(nil), // 4: pos.gift_card.v1.CreateGiftCardResponse
+	(*RedeemGiftCardResponse)(nil), // 5: pos.gift_card.v1.RedeemGiftCardResponse
 }
 var file_pos_gift_card_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.gift_card.v1.GiftCardService.ListGiftCards:input_type -> pos.gift_card.v1.ListGiftCardsRequest
 	1, // 1: pos.gift_card.v1.GiftCardService.CreateGiftCard:input_type -> pos.gift_card.v1.CreateGiftCardRequest
-	2, // 2: pos.gift_card.v1.GiftCardService.GetGiftCardByCode:input_type -> pos.gift_card.v1.GetGiftCardByCodeRequest
-	3, // 3: pos.gift_card.v1.GiftCardService.RedeemGiftCard:input_type -> pos.gift_card.v1.RedeemGiftCardRequest
-	4, // 4: pos.gift_card.v1.GiftCardService.ListGiftCards:output_type -> pos.gift_card.v1.ListGiftCardsResponse
-	5, // 5: pos.gift_card.v1.GiftCardService.CreateGiftCard:output_type -> pos.gift_card.v1.CreateGiftCardResponse
-	6, // 6: pos.gift_card.v1.GiftCardService.GetGiftCardByCode:output_type -> pos.gift_card.v1.GetGiftCardByCodeResponse
-	7, // 7: pos.gift_card.v1.GiftCardService.RedeemGiftCard:output_type -> pos.gift_card.v1.RedeemGiftCardResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	2, // 2: pos.gift_card.v1.GiftCardService.RedeemGiftCard:input_type -> pos.gift_card.v1.RedeemGiftCardRequest
+	3, // 3: pos.gift_card.v1.GiftCardService.ListGiftCards:output_type -> pos.gift_card.v1.ListGiftCardsResponse
+	4, // 4: pos.gift_card.v1.GiftCardService.CreateGiftCard:output_type -> pos.gift_card.v1.CreateGiftCardResponse
+	5, // 5: pos.gift_card.v1.GiftCardService.RedeemGiftCard:output_type -> pos.gift_card.v1.RedeemGiftCardResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -69,7 +63,6 @@ func file_pos_gift_card_v1_service_proto_init() {
 		return
 	}
 	file_pos_gift_card_v1_create_gift_card_proto_init()
-	file_pos_gift_card_v1_get_gift_card_by_code_proto_init()
 	file_pos_gift_card_v1_list_gift_cards_proto_init()
 	file_pos_gift_card_v1_redeem_gift_card_proto_init()
 	type x struct{}

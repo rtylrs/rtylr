@@ -8,7 +8,6 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,14 +24,18 @@ const (
 
 type CreateScheduledReportRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// template_id is the template id value for this contract.
-	TemplateId int64 `protobuf:"varint,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
-	// frequency is the frequency value for this contract.
+	// template_slug is the template slug (e.g. revenue-monthly).
+	TemplateSlug string `protobuf:"bytes,1,opt,name=template_slug,json=templateSlug,proto3" json:"template_slug,omitempty"`
+	// frequency is the delivery frequency (daily, weekly, monthly).
 	Frequency string `protobuf:"bytes,2,opt,name=frequency,proto3" json:"frequency,omitempty"`
-	// recipient_email is the recipient email value for this contract.
-	RecipientEmail string `protobuf:"bytes,3,opt,name=recipient_email,json=recipientEmail,proto3" json:"recipient_email,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// channel is the delivery channel (email, slack).
+	Channel string `protobuf:"bytes,3,opt,name=channel,proto3" json:"channel,omitempty"`
+	// recipient_email is the delivery recipient.
+	RecipientEmail string `protobuf:"bytes,4,opt,name=recipient_email,json=recipientEmail,proto3" json:"recipient_email,omitempty"`
+	// is_active toggles whether the schedule is active.
+	IsActive      bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateScheduledReportRequest) Reset() {
@@ -65,11 +68,11 @@ func (*CreateScheduledReportRequest) Descriptor() ([]byte, []int) {
 	return file_insights_report_v1_create_scheduled_report_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CreateScheduledReportRequest) GetTemplateId() int64 {
+func (x *CreateScheduledReportRequest) GetTemplateSlug() string {
 	if x != nil {
-		return x.TemplateId
+		return x.TemplateSlug
 	}
-	return 0
+	return ""
 }
 
 func (x *CreateScheduledReportRequest) GetFrequency() string {
@@ -79,11 +82,25 @@ func (x *CreateScheduledReportRequest) GetFrequency() string {
 	return ""
 }
 
+func (x *CreateScheduledReportRequest) GetChannel() string {
+	if x != nil {
+		return x.Channel
+	}
+	return ""
+}
+
 func (x *CreateScheduledReportRequest) GetRecipientEmail() string {
 	if x != nil {
 		return x.RecipientEmail
 	}
 	return ""
+}
+
+func (x *CreateScheduledReportRequest) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
 }
 
 type CreateScheduledReportResponse struct {
@@ -135,13 +152,16 @@ var File_insights_report_v1_create_scheduled_report_proto protoreflect.FileDescr
 
 const file_insights_report_v1_create_scheduled_report_proto_rawDesc = "" +
 	"\n" +
-	"0insights/report/v1/create_scheduled_report.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb0\x01\n" +
+	"0insights/report/v1/create_scheduled_report.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\"\xf3\x01\n" +
 	"\x1cCreateScheduledReportRequest\x12/\n" +
-	"\vtemplate_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
-	"templateId\x12(\n" +
+	"\rtemplate_slug\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\ftemplateSlug\x12(\n" +
 	"\tfrequency\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x125\n" +
-	"\x0frecipient_email\x18\x03 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x0erecipientEmail\"\\\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x12$\n" +
+	"\achannel\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\achannel\x125\n" +
+	"\x0frecipient_email\x18\x04 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x0erecipientEmail\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\"\\\n" +
 	"\x1dCreateScheduledReportResponse\x12;\n" +
 	"\x06report\x18\x01 \x01(\v2#.insights.report.v1.ScheduledReportR\x06reportB3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 

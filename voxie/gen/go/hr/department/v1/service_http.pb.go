@@ -11,8 +11,10 @@ import (
 
 // DepartmentServiceServer is the server API for DepartmentService service.
 type DepartmentServiceServer interface {
+	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error)
+	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*DeleteDepartmentResponse, error)
 }
 
 // RegisterDepartmentServiceServer registers the HTTP handlers for service DepartmentService to the given mux.
@@ -21,7 +23,16 @@ func RegisterDepartmentServiceServer(server DepartmentServiceServer, opts ...Ser
 
 	serviceHeaders := getDepartmentServiceHeaders()
 
-	methodHeaders := getCreateDepartmentHeaders()
+	methodHeaders := getListDepartmentsHeaders()
+	listDepartmentsHandler := BindingMiddleware[ListDepartmentsRequest](
+		genericHandler(server.ListDepartments, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listDepartmentsPathParams, listDepartmentsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hr/department/v1/departments", listDepartmentsHandler)
+
+	methodHeaders = getCreateDepartmentHeaders()
 	createDepartmentHandler := BindingMiddleware[CreateDepartmentRequest](
 		genericHandler(server.CreateDepartment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
 		createDepartmentPathParams, createDepartmentQueryParams,
@@ -39,11 +50,25 @@ func RegisterDepartmentServiceServer(server DepartmentServiceServer, opts ...Ser
 
 	config.mux.Handle("PUT /api/hr/department/v1/departments/{id}", updateDepartmentHandler)
 
+	methodHeaders = getDeleteDepartmentHeaders()
+	deleteDepartmentHandler := BindingMiddleware[DeleteDepartmentRequest](
+		genericHandler(server.DeleteDepartment, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteDepartmentPathParams, deleteDepartmentQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/hr/department/v1/departments/{id}", deleteDepartmentHandler)
+
 	return nil
 }
 
 // getDepartmentServiceHeaders returns the service-level required headers for DepartmentService
 func getDepartmentServiceHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getListDepartmentsHeaders returns the method-level required headers for ListDepartments
+func getListDepartmentsHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -56,6 +81,17 @@ func getCreateDepartmentHeaders() []*onekithttp.Header {
 func getUpdateDepartmentHeaders() []*onekithttp.Header {
 	return nil
 }
+
+// getDeleteDepartmentHeaders returns the method-level required headers for DeleteDepartment
+func getDeleteDepartmentHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// listDepartmentsPathParams contains path parameter configuration for ListDepartments
+var listDepartmentsPathParams = []PathParamConfig{}
+
+// listDepartmentsQueryParams contains query parameter configuration for ListDepartments
+var listDepartmentsQueryParams = []QueryParamConfig{}
 
 // createDepartmentPathParams contains path parameter configuration for CreateDepartment
 var createDepartmentPathParams = []PathParamConfig{}
@@ -70,3 +106,11 @@ var updateDepartmentPathParams = []PathParamConfig{
 
 // updateDepartmentQueryParams contains query parameter configuration for UpdateDepartment
 var updateDepartmentQueryParams = []QueryParamConfig{}
+
+// deleteDepartmentPathParams contains path parameter configuration for DeleteDepartment
+var deleteDepartmentPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteDepartmentQueryParams contains query parameter configuration for DeleteDepartment
+var deleteDepartmentQueryParams = []QueryParamConfig{}

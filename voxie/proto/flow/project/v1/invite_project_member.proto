@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package flow.project.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
+
+message InviteProjectMemberRequest {
+  // project_id is the project id value for this contract.
+  int64 project_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // email is the invitee email address.
+  string email = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // role is the role value for this contract.
+  string role = 3;
+}
+
+message InviteProjectMemberResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

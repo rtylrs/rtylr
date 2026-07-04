@@ -25,39 +25,33 @@ var File_hub_notification_v1_service_proto protoreflect.FileDescriptor
 
 const file_hub_notification_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!hub/notification/v1/service.proto\x12\x13hub.notification.v1\x1a,hub/notification/v1/list_notifications.proto\x1a'hub/notification/v1/mark_all_read.proto\x1a0hub/notification/v1/mark_notification_read.proto\x1a1hub/notification/v1/mark_notifications_read.proto\x1a\x1donekit/http/annotations.proto2\x84\x05\n" +
+	"!hub/notification/v1/service.proto\x12\x13hub.notification.v1\x1a,hub/notification/v1/list_notifications.proto\x1a'hub/notification/v1/mark_all_read.proto\x1a0hub/notification/v1/mark_notification_read.proto\x1a\x1donekit/http/annotations.proto2\xe6\x03\n" +
 	"\x13NotificationService\x12\x8a\x01\n" +
 	"\x11ListNotifications\x12-.hub.notification.v1.ListNotificationsRequest\x1a..hub.notification.v1.ListNotificationsResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/notifications\x10\x01\x12\x81\x01\n" +
 	"\vMarkAllRead\x12'.hub.notification.v1.MarkAllReadRequest\x1a(.hub.notification.v1.MarkAllReadResponse\"\x1f\x9a\xb5\x18\x1b\n" +
 	"\x17/notifications/read-all\x10\x05\x12\x9d\x01\n" +
 	"\x14MarkNotificationRead\x120.hub.notification.v1.MarkNotificationReadRequest\x1a1.hub.notification.v1.MarkNotificationReadResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/notifications/{id}/read\x10\x05\x12\x9b\x01\n" +
-	"\x15MarkNotificationsRead\x121.hub.notification.v1.MarkNotificationsReadRequest\x1a2.hub.notification.v1.MarkNotificationsReadResponse\"\x1b\x9a\xb5\x18\x17\n" +
-	"\x13/notifications/read\x10\x05\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"\x18/notifications/{id}/read\x10\x05\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/hub/notification/v1B4Z2github.com/voxire/voxie/gen/go/hub/notification/v1b\x06proto3"
 
 var file_hub_notification_v1_service_proto_goTypes = []any{
-	(*ListNotificationsRequest)(nil),      // 0: hub.notification.v1.ListNotificationsRequest
-	(*MarkAllReadRequest)(nil),            // 1: hub.notification.v1.MarkAllReadRequest
-	(*MarkNotificationReadRequest)(nil),   // 2: hub.notification.v1.MarkNotificationReadRequest
-	(*MarkNotificationsReadRequest)(nil),  // 3: hub.notification.v1.MarkNotificationsReadRequest
-	(*ListNotificationsResponse)(nil),     // 4: hub.notification.v1.ListNotificationsResponse
-	(*MarkAllReadResponse)(nil),           // 5: hub.notification.v1.MarkAllReadResponse
-	(*MarkNotificationReadResponse)(nil),  // 6: hub.notification.v1.MarkNotificationReadResponse
-	(*MarkNotificationsReadResponse)(nil), // 7: hub.notification.v1.MarkNotificationsReadResponse
+	(*ListNotificationsRequest)(nil),     // 0: hub.notification.v1.ListNotificationsRequest
+	(*MarkAllReadRequest)(nil),           // 1: hub.notification.v1.MarkAllReadRequest
+	(*MarkNotificationReadRequest)(nil),  // 2: hub.notification.v1.MarkNotificationReadRequest
+	(*ListNotificationsResponse)(nil),    // 3: hub.notification.v1.ListNotificationsResponse
+	(*MarkAllReadResponse)(nil),          // 4: hub.notification.v1.MarkAllReadResponse
+	(*MarkNotificationReadResponse)(nil), // 5: hub.notification.v1.MarkNotificationReadResponse
 }
 var file_hub_notification_v1_service_proto_depIdxs = []int32{
 	0, // 0: hub.notification.v1.NotificationService.ListNotifications:input_type -> hub.notification.v1.ListNotificationsRequest
 	1, // 1: hub.notification.v1.NotificationService.MarkAllRead:input_type -> hub.notification.v1.MarkAllReadRequest
 	2, // 2: hub.notification.v1.NotificationService.MarkNotificationRead:input_type -> hub.notification.v1.MarkNotificationReadRequest
-	3, // 3: hub.notification.v1.NotificationService.MarkNotificationsRead:input_type -> hub.notification.v1.MarkNotificationsReadRequest
-	4, // 4: hub.notification.v1.NotificationService.ListNotifications:output_type -> hub.notification.v1.ListNotificationsResponse
-	5, // 5: hub.notification.v1.NotificationService.MarkAllRead:output_type -> hub.notification.v1.MarkAllReadResponse
-	6, // 6: hub.notification.v1.NotificationService.MarkNotificationRead:output_type -> hub.notification.v1.MarkNotificationReadResponse
-	7, // 7: hub.notification.v1.NotificationService.MarkNotificationsRead:output_type -> hub.notification.v1.MarkNotificationsReadResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	3, // 3: hub.notification.v1.NotificationService.ListNotifications:output_type -> hub.notification.v1.ListNotificationsResponse
+	4, // 4: hub.notification.v1.NotificationService.MarkAllRead:output_type -> hub.notification.v1.MarkAllReadResponse
+	5, // 5: hub.notification.v1.NotificationService.MarkNotificationRead:output_type -> hub.notification.v1.MarkNotificationReadResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -71,7 +65,6 @@ func file_hub_notification_v1_service_proto_init() {
 	file_hub_notification_v1_list_notifications_proto_init()
 	file_hub_notification_v1_mark_all_read_proto_init()
 	file_hub_notification_v1_mark_notification_read_proto_init()
-	file_hub_notification_v1_mark_notifications_read_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

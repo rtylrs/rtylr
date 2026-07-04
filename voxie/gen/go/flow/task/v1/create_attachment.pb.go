@@ -25,12 +25,14 @@ const (
 
 type CreateAttachmentRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// task_id identifies the task the attachment belongs to.
+	TaskId int64 `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	// name is the name value for this contract.
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// url is the url value for this contract.
-	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	Url string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
 	// size is the size value for this contract.
-	Size          int64 `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
+	Size          int64 `protobuf:"varint,4,opt,name=size,proto3" json:"size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,6 +65,13 @@ func (x *CreateAttachmentRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateAttachmentRequest.ProtoReflect.Descriptor instead.
 func (*CreateAttachmentRequest) Descriptor() ([]byte, []int) {
 	return file_flow_task_v1_create_attachment_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *CreateAttachmentRequest) GetTaskId() int64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
 }
 
 func (x *CreateAttachmentRequest) GetName() string {
@@ -144,13 +153,14 @@ var File_flow_task_v1_create_attachment_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_create_attachment_proto_rawDesc = "" +
 	"\n" +
-	"$flow/task/v1/create_attachment.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"w\n" +
-	"\x17CreateAttachmentRequest\x12\x1e\n" +
-	"\x04name\x18\x01 \x01(\tB\n" +
+	"$flow/task/v1/create_attachment.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xa0\x01\n" +
+	"\x17CreateAttachmentRequest\x12'\n" +
+	"\atask_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06taskId\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1c\n" +
-	"\x03url\x18\x02 \x01(\tB\n" +
+	"\x03url\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03url\x12\x1e\n" +
-	"\x04size\x18\x03 \x01(\x03B\n" +
+	"\x04size\x18\x04 \x01(\x03B\n" +
 	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x04size\"_\n" +
 	"\x18CreateAttachmentResponse\x12)\n" +
 	"\rattachment_id\x18\x01 \x01(\x03B\x04е\x18\x01R\fattachmentId\x12\x18\n" +

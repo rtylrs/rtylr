@@ -33,14 +33,6 @@ export interface MarkNotificationReadResponse {
   message: string;
 }
 
-export interface MarkNotificationsReadRequest {
-  ids: string[];
-}
-
-export interface MarkNotificationsReadResponse {
-  message: string;
-}
-
 export interface FieldViolation {
   field: string;
   description: string;
@@ -174,30 +166,6 @@ export class NotificationServiceClient {
     }
 
     return await resp.json() as MarkNotificationReadResponse;
-  }
-
-  async markNotificationsRead(req: MarkNotificationsReadRequest, options?: NotificationServiceCallOptions): Promise<MarkNotificationsReadResponse> {
-    let path = "/api/hub/notification/v1/notifications/read";
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify(req),
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as MarkNotificationsReadResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

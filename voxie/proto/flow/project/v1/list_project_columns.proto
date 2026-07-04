@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package flow.project.v1;
+
+import "buf/validate/validate.proto";
+import "flow/project/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
+
+message ListProjectColumnsRequest {
+  // project_id is the project id value for this contract.
+  int64 project_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "project_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message ListProjectColumnsResponse {
+  // columns is the project columns for this contract.
+  repeated ProjectColumn columns = 1;
+}

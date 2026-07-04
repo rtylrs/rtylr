@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package erp.stock_take.v1;
+
+import "erp/stock_take/v1/create_stock_take.proto";
+import "erp/stock_take/v1/list_stock_takes.proto";
+import "erp/stock_take/v1/update_stock_take.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/stock_take/v1";
+
+service StockTakeService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/stock-take/v1"};
+
+  rpc ListStockTakes(ListStockTakesRequest) returns (ListStockTakesResponse) {
+    option (onekit.http.config) = {
+      path: "/stock-takes"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateStockTake(CreateStockTakeRequest) returns (CreateStockTakeResponse) {
+    option (onekit.http.config) = {
+      path: "/stock-takes"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateStockTake(UpdateStockTakeRequest) returns (UpdateStockTakeResponse) {
+    option (onekit.http.config) = {
+      path: "/stock-takes/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+}

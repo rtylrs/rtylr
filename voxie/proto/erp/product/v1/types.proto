@@ -46,3 +46,47 @@ message Product {
   // updated_at is when the record was last updated.
   string updated_at = 18;
 }
+
+message FullProduct {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 business_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 category_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 supplier_id = 5 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 6;
+  string sku = 7;
+  string barcode = 8;
+  string description = 9;
+  string unit = 10;
+  double cost_price = 11;
+  double sale_price = 12;
+  double stock_quantity = 13;
+  double low_stock_threshold = 14;
+  double reorder_quantity = 15;
+  bool is_active = 16;
+  bool track_inventory = 17;
+  int64 brand_id = 18 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  double compare_at_price = 19;
+  double tax_rate = 20;
+  string currency = 21;
+  double weight = 22;
+  string weight_unit = 23;
+  double length = 24;
+  double width = 25;
+  double height = 26;
+  string dimension_unit = 27;
+  string country_of_origin = 28;
+  string hs_code = 29;
+  bool allow_backorder = 30;
+  int32 lead_time_days = 31;
+  string image_url = 32;
+  string created_at = 33;
+  string updated_at = 34;
+}
+
+message ProductAttribute {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 2;
+  string value = 3;
+  int32 position = 4;
+}

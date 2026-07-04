@@ -15,6 +15,7 @@ type ProductServiceServer interface {
 	GetCategoryPerformance(context.Context, *GetCategoryPerformanceRequest) (*GetCategoryPerformanceResponse, error)
 	GetProductMargins(context.Context, *GetProductMarginsRequest) (*GetProductMarginsResponse, error)
 	GetSlowMovers(context.Context, *GetSlowMoversRequest) (*GetSlowMoversResponse, error)
+	GetProductPerformance(context.Context, *GetProductPerformanceRequest) (*GetProductPerformanceResponse, error)
 }
 
 // RegisterProductServiceServer registers the HTTP handlers for service ProductService to the given mux.
@@ -59,6 +60,15 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 
 	config.mux.Handle("GET /api/insights/product/v1/slow-movers", getSlowMoversHandler)
 
+	methodHeaders = getGetProductPerformanceHeaders()
+	getProductPerformanceHandler := BindingMiddleware[GetProductPerformanceRequest](
+		genericHandler(server.GetProductPerformance, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getProductPerformancePathParams, getProductPerformanceQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/insights/product/v1/performance", getProductPerformanceHandler)
+
 	return nil
 }
 
@@ -84,6 +94,11 @@ func getGetProductMarginsHeaders() []*onekithttp.Header {
 
 // getGetSlowMoversHeaders returns the method-level required headers for GetSlowMovers
 func getGetSlowMoversHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGetProductPerformanceHeaders returns the method-level required headers for GetProductPerformance
+func getGetProductPerformanceHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -114,3 +129,9 @@ var getSlowMoversPathParams = []PathParamConfig{}
 var getSlowMoversQueryParams = []QueryParamConfig{
 	{QueryName: "days", FieldName: "days", Required: false},
 }
+
+// getProductPerformancePathParams contains path parameter configuration for GetProductPerformance
+var getProductPerformancePathParams = []PathParamConfig{}
+
+// getProductPerformanceQueryParams contains query parameter configuration for GetProductPerformance
+var getProductPerformanceQueryParams = []QueryParamConfig{}

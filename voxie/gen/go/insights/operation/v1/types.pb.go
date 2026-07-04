@@ -32,6 +32,8 @@ type UtilizationMetrics struct {
 	ActiveToday int32 `protobuf:"varint,3,opt,name=active_today,json=activeToday,proto3" json:"active_today,omitempty"`
 	// total_hours is the total hours value for this contract.
 	TotalHours float64 `protobuf:"fixed64,4,opt,name=total_hours,json=totalHours,proto3" json:"total_hours,omitempty"`
+	// available_hours is the available hours capacity for the period.
+	AvailableHours float64 `protobuf:"fixed64,7,opt,name=available_hours,json=availableHours,proto3" json:"available_hours,omitempty"`
 	// overtime_hours is the overtime hours value for this contract.
 	OvertimeHours float64 `protobuf:"fixed64,5,opt,name=overtime_hours,json=overtimeHours,proto3" json:"overtime_hours,omitempty"`
 	// by_staff is the by staff value for this contract.
@@ -94,6 +96,13 @@ func (x *UtilizationMetrics) GetActiveToday() int32 {
 func (x *UtilizationMetrics) GetTotalHours() float64 {
 	if x != nil {
 		return x.TotalHours
+	}
+	return 0
+}
+
+func (x *UtilizationMetrics) GetAvailableHours() float64 {
+	if x != nil {
+		return x.AvailableHours
 	}
 	return 0
 }
@@ -620,14 +629,15 @@ var File_insights_operation_v1_types_proto protoreflect.FileDescriptor
 
 const file_insights_operation_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"!insights/operation/v1/types.proto\x12\x15insights.operation.v1\x1a\x1donekit/http/annotations.proto\"\x8d\x02\n" +
+	"!insights/operation/v1/types.proto\x12\x15insights.operation.v1\x1a\x1donekit/http/annotations.proto\"\xb6\x02\n" +
 	"\x12UtilizationMetrics\x12'\n" +
 	"\x0favg_utilization\x18\x01 \x01(\x01R\x0eavgUtilization\x12\x1f\n" +
 	"\vtotal_staff\x18\x02 \x01(\x05R\n" +
 	"totalStaff\x12!\n" +
 	"\factive_today\x18\x03 \x01(\x05R\vactiveToday\x12\x1f\n" +
 	"\vtotal_hours\x18\x04 \x01(\x01R\n" +
-	"totalHours\x12%\n" +
+	"totalHours\x12'\n" +
+	"\x0favailable_hours\x18\a \x01(\x01R\x0eavailableHours\x12%\n" +
 	"\x0eovertime_hours\x18\x05 \x01(\x01R\rovertimeHours\x12B\n" +
 	"\bby_staff\x18\x06 \x03(\v2'.insights.operation.v1.StaffUtilizationR\abyStaff\"\xb5\x01\n" +
 	"\x10StaffUtilization\x12\x1f\n" +

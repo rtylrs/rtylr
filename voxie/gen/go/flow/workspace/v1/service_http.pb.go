@@ -15,8 +15,10 @@ type WorkspaceServiceServer interface {
 	CreateWorkspace(context.Context, *CreateWorkspaceRequest) (*CreateWorkspaceResponse, error)
 	UpdateWorkspace(context.Context, *UpdateWorkspaceRequest) (*UpdateWorkspaceResponse, error)
 	DeleteWorkspace(context.Context, *DeleteWorkspaceRequest) (*DeleteWorkspaceResponse, error)
+	ListWorkspaceMembers(context.Context, *ListWorkspaceMembersRequest) (*ListWorkspaceMembersResponse, error)
 	AddWorkspaceMember(context.Context, *AddWorkspaceMemberRequest) (*AddWorkspaceMemberResponse, error)
 	RemoveWorkspaceMember(context.Context, *RemoveWorkspaceMemberRequest) (*RemoveWorkspaceMemberResponse, error)
+	UpdateWorkspaceMemberRole(context.Context, *UpdateWorkspaceMemberRoleRequest) (*UpdateWorkspaceMemberRoleResponse, error)
 }
 
 // RegisterWorkspaceServiceServer registers the HTTP handlers for service WorkspaceService to the given mux.
@@ -61,6 +63,15 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 
 	config.mux.Handle("DELETE /api/flow/workspace/v1/workspaces/{id}", deleteWorkspaceHandler)
 
+	methodHeaders = getListWorkspaceMembersHeaders()
+	listWorkspaceMembersHandler := BindingMiddleware[ListWorkspaceMembersRequest](
+		genericHandler(server.ListWorkspaceMembers, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		listWorkspaceMembersPathParams, listWorkspaceMembersQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/flow/workspace/v1/workspaces/members", listWorkspaceMembersHandler)
+
 	methodHeaders = getAddWorkspaceMemberHeaders()
 	addWorkspaceMemberHandler := BindingMiddleware[AddWorkspaceMemberRequest](
 		genericHandler(server.AddWorkspaceMember, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -78,6 +89,15 @@ func RegisterWorkspaceServiceServer(server WorkspaceServiceServer, opts ...Serve
 	)
 
 	config.mux.Handle("DELETE /api/flow/workspace/v1/workspaces/members", removeWorkspaceMemberHandler)
+
+	methodHeaders = getUpdateWorkspaceMemberRoleHeaders()
+	updateWorkspaceMemberRoleHandler := BindingMiddleware[UpdateWorkspaceMemberRoleRequest](
+		genericHandler(server.UpdateWorkspaceMemberRole, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateWorkspaceMemberRolePathParams, updateWorkspaceMemberRoleQueryParams,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/flow/workspace/v1/workspaces/members/role", updateWorkspaceMemberRoleHandler)
 
 	return nil
 }
@@ -107,6 +127,11 @@ func getDeleteWorkspaceHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getListWorkspaceMembersHeaders returns the method-level required headers for ListWorkspaceMembers
+func getListWorkspaceMembersHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getAddWorkspaceMemberHeaders returns the method-level required headers for AddWorkspaceMember
 func getAddWorkspaceMemberHeaders() []*onekithttp.Header {
 	return nil
@@ -114,6 +139,11 @@ func getAddWorkspaceMemberHeaders() []*onekithttp.Header {
 
 // getRemoveWorkspaceMemberHeaders returns the method-level required headers for RemoveWorkspaceMember
 func getRemoveWorkspaceMemberHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getUpdateWorkspaceMemberRoleHeaders returns the method-level required headers for UpdateWorkspaceMemberRole
+func getUpdateWorkspaceMemberRoleHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -145,6 +175,14 @@ var deleteWorkspacePathParams = []PathParamConfig{
 // deleteWorkspaceQueryParams contains query parameter configuration for DeleteWorkspace
 var deleteWorkspaceQueryParams = []QueryParamConfig{}
 
+// listWorkspaceMembersPathParams contains path parameter configuration for ListWorkspaceMembers
+var listWorkspaceMembersPathParams = []PathParamConfig{}
+
+// listWorkspaceMembersQueryParams contains query parameter configuration for ListWorkspaceMembers
+var listWorkspaceMembersQueryParams = []QueryParamConfig{
+	{QueryName: "workspace_id", FieldName: "workspace_id", Required: false},
+}
+
 // addWorkspaceMemberPathParams contains path parameter configuration for AddWorkspaceMember
 var addWorkspaceMemberPathParams = []PathParamConfig{}
 
@@ -159,3 +197,9 @@ var removeWorkspaceMemberQueryParams = []QueryParamConfig{
 	{QueryName: "workspace_id", FieldName: "workspace_id", Required: false},
 	{QueryName: "user_id", FieldName: "user_id", Required: false},
 }
+
+// updateWorkspaceMemberRolePathParams contains path parameter configuration for UpdateWorkspaceMemberRole
+var updateWorkspaceMemberRolePathParams = []PathParamConfig{}
+
+// updateWorkspaceMemberRoleQueryParams contains query parameter configuration for UpdateWorkspaceMemberRole
+var updateWorkspaceMemberRoleQueryParams = []QueryParamConfig{}

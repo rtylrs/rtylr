@@ -79,6 +79,7 @@ export interface UtilizationMetrics {
   totalStaff: number;
   activeToday: number;
   totalHours: number;
+  availableHours: number;
   overtimeHours: number;
   byStaff: StaffUtilization[];
 }
@@ -89,6 +90,16 @@ export interface StaffUtilization {
   hoursWorked: number;
   hoursScheduled: number;
   utilization: number;
+}
+
+export interface GetOperationsSummaryRequest {
+}
+
+export interface GetOperationsSummaryResponse {
+  activeStaff: string;
+  shiftsThisWeek: string;
+  pendingTimeOff: string;
+  openLeaveRequests: string;
 }
 
 export interface FieldViolation {
@@ -252,6 +263,29 @@ export class OperationServiceClient {
     }
 
     return await resp.json() as GetUtilizationResponse;
+  }
+
+  async getOperationsSummary(_req: GetOperationsSummaryRequest, options?: OperationServiceCallOptions): Promise<GetOperationsSummaryResponse> {
+    let path = "/api/insights/operation/v1/summary";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetOperationsSummaryResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

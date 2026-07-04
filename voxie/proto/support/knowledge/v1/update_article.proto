@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package support.knowledge.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/knowledge/v1";
+
+message UpdateArticleRequest {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+  string title = 2;
+  string slug = 3;
+  string body = 4;
+  string category = 5;
+  bool is_published = 6;
+}
+
+message UpdateArticleResponse {
+  string message = 1;
+}

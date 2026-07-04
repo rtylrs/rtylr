@@ -2,7 +2,10 @@ syntax = "proto3";
 
 package hr.dashboard.v1;
 
+import "hr/dashboard/v1/get_dashboard_widgets.proto";
 import "hr/dashboard/v1/get_hr_dashboard.proto";
+import "hr/dashboard/v1/types.proto";
+import "hr/dashboard/v1/update_dashboard_widgets.proto";
 import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/dashboard/v1";
@@ -16,6 +19,22 @@ service DashboardService {
     option (onekit.http.config) = {
       path: "/dashboard"
       method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetDashboardWidgets returns widget layout and preloaded data.
+  rpc GetDashboardWidgets(GetDashboardWidgetsRequest) returns (GetDashboardWidgetsResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard/widgets"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UpdateDashboardWidgets saves widget layout for the current business.
+  rpc UpdateDashboardWidgets(UpdateDashboardWidgetsRequest) returns (UpdateDashboardWidgetsResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard/widgets"
+      method: HTTP_METHOD_PUT
     };
   }
 }

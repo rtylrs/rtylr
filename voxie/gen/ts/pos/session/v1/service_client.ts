@@ -22,42 +22,6 @@ export interface Session {
   createdAt: string;
 }
 
-export interface GetCurrentSessionRequest {
-}
-
-export interface GetCurrentSessionResponse {
-  session?: CurrentSession;
-}
-
-export interface CurrentSession {
-  id: string;
-  ownerId: string;
-  locationId: string;
-  staffId: string;
-  status: string;
-  openingCash: number;
-  closingCash: number;
-  expectedCash: number;
-  cashDifference: number;
-  totalSales: number;
-  totalOrders: number;
-  totalCashSales: number;
-  totalCardSales: number;
-  totalOnlineSales: number;
-  totalRefunds: number;
-  openedAt: string;
-  closedAt: string | null;
-  notes: string;
-}
-
-export interface GetSessionRequest {
-  id: string;
-}
-
-export interface GetSessionResponse {
-  session?: Session;
-}
-
 export interface OpenSessionRequest {
   locationId: string;
   staffId: string;
@@ -162,53 +126,6 @@ export class SessionServiceClient {
     }
 
     return await resp.json() as ListSessionsResponse;
-  }
-
-  async getCurrentSession(_req: GetCurrentSessionRequest, options?: SessionServiceCallOptions): Promise<GetCurrentSessionResponse> {
-    let path = "/api/pos/session/v1/sessions/current";
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "GET",
-      headers,
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as GetCurrentSessionResponse;
-  }
-
-  async getSession(req: GetSessionRequest, options?: SessionServiceCallOptions): Promise<GetSessionResponse> {
-    let path = "/api/pos/session/v1/sessions/{id}";
-    path = path.replace("{id}", encodeURIComponent(String(req.id)));
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "GET",
-      headers,
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as GetSessionResponse;
   }
 
   async openSession(req: OpenSessionRequest, options?: SessionServiceCallOptions): Promise<OpenSessionResponse> {

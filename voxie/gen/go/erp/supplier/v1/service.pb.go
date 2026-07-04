@@ -25,7 +25,7 @@ var File_erp_supplier_v1_service_proto protoreflect.FileDescriptor
 
 const file_erp_supplier_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1derp/supplier/v1/service.proto\x12\x0ferp.supplier.v1\x1a%erp/supplier/v1/create_supplier.proto\x1a$erp/supplier/v1/list_suppliers.proto\x1a%erp/supplier/v1/update_supplier.proto\x1a\x1donekit/http/annotations.proto2\x9b\x03\n" +
+	"\x1derp/supplier/v1/service.proto\x12\x0ferp.supplier.v1\x1a%erp/supplier/v1/create_supplier.proto\x1a%erp/supplier/v1/delete_supplier.proto\x1a$erp/supplier/v1/list_suppliers.proto\x1a%erp/supplier/v1/update_supplier.proto\x1a\x1donekit/http/annotations.proto2\x97\x04\n" +
 	"\x0fSupplierService\x12r\n" +
 	"\rListSuppliers\x12%.erp.supplier.v1.ListSuppliersRequest\x1a&.erp.supplier.v1.ListSuppliersResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -34,26 +34,32 @@ const file_erp_supplier_v1_service_proto_rawDesc = "" +
 	"\n" +
 	"/suppliers\x10\x02\x12\x80\x01\n" +
 	"\x0eUpdateSupplier\x12&.erp.supplier.v1.UpdateSupplierRequest\x1a'.erp.supplier.v1.UpdateSupplierResponse\"\x1d\x9a\xb5\x18\x19\n" +
-	"\x0f/suppliers/{id}\x10\x03\"\x04body\x1a\x1a\xa2\xb5\x18\x16\n" +
+	"\x0f/suppliers/{id}\x10\x03\"\x04body\x12z\n" +
+	"\x0eDeleteSupplier\x12&.erp.supplier.v1.DeleteSupplierRequest\x1a'.erp.supplier.v1.DeleteSupplierResponse\"\x17\x9a\xb5\x18\x13\n" +
+	"\x0f/suppliers/{id}\x10\x04\x1a\x1a\xa2\xb5\x18\x16\n" +
 	"\x14/api/erp/supplier/v1B0Z.github.com/voxire/voxie/gen/go/erp/supplier/v1b\x06proto3"
 
 var file_erp_supplier_v1_service_proto_goTypes = []any{
 	(*ListSuppliersRequest)(nil),   // 0: erp.supplier.v1.ListSuppliersRequest
 	(*CreateSupplierRequest)(nil),  // 1: erp.supplier.v1.CreateSupplierRequest
 	(*UpdateSupplierRequest)(nil),  // 2: erp.supplier.v1.UpdateSupplierRequest
-	(*ListSuppliersResponse)(nil),  // 3: erp.supplier.v1.ListSuppliersResponse
-	(*CreateSupplierResponse)(nil), // 4: erp.supplier.v1.CreateSupplierResponse
-	(*UpdateSupplierResponse)(nil), // 5: erp.supplier.v1.UpdateSupplierResponse
+	(*DeleteSupplierRequest)(nil),  // 3: erp.supplier.v1.DeleteSupplierRequest
+	(*ListSuppliersResponse)(nil),  // 4: erp.supplier.v1.ListSuppliersResponse
+	(*CreateSupplierResponse)(nil), // 5: erp.supplier.v1.CreateSupplierResponse
+	(*UpdateSupplierResponse)(nil), // 6: erp.supplier.v1.UpdateSupplierResponse
+	(*DeleteSupplierResponse)(nil), // 7: erp.supplier.v1.DeleteSupplierResponse
 }
 var file_erp_supplier_v1_service_proto_depIdxs = []int32{
 	0, // 0: erp.supplier.v1.SupplierService.ListSuppliers:input_type -> erp.supplier.v1.ListSuppliersRequest
 	1, // 1: erp.supplier.v1.SupplierService.CreateSupplier:input_type -> erp.supplier.v1.CreateSupplierRequest
 	2, // 2: erp.supplier.v1.SupplierService.UpdateSupplier:input_type -> erp.supplier.v1.UpdateSupplierRequest
-	3, // 3: erp.supplier.v1.SupplierService.ListSuppliers:output_type -> erp.supplier.v1.ListSuppliersResponse
-	4, // 4: erp.supplier.v1.SupplierService.CreateSupplier:output_type -> erp.supplier.v1.CreateSupplierResponse
-	5, // 5: erp.supplier.v1.SupplierService.UpdateSupplier:output_type -> erp.supplier.v1.UpdateSupplierResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	3, // 3: erp.supplier.v1.SupplierService.DeleteSupplier:input_type -> erp.supplier.v1.DeleteSupplierRequest
+	4, // 4: erp.supplier.v1.SupplierService.ListSuppliers:output_type -> erp.supplier.v1.ListSuppliersResponse
+	5, // 5: erp.supplier.v1.SupplierService.CreateSupplier:output_type -> erp.supplier.v1.CreateSupplierResponse
+	6, // 6: erp.supplier.v1.SupplierService.UpdateSupplier:output_type -> erp.supplier.v1.UpdateSupplierResponse
+	7, // 7: erp.supplier.v1.SupplierService.DeleteSupplier:output_type -> erp.supplier.v1.DeleteSupplierResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -65,6 +71,7 @@ func file_erp_supplier_v1_service_proto_init() {
 		return
 	}
 	file_erp_supplier_v1_create_supplier_proto_init()
+	file_erp_supplier_v1_delete_supplier_proto_init()
 	file_erp_supplier_v1_list_suppliers_proto_init()
 	file_erp_supplier_v1_update_supplier_proto_init()
 	type x struct{}

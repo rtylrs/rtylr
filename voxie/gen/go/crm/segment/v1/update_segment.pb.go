@@ -29,8 +29,8 @@ type UpdateSegmentBody struct {
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// description is the description value for this contract.
 	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	// rules is the rules value for this contract.
-	Rules         string `protobuf:"bytes,3,opt,name=rules,proto3" json:"rules,omitempty"`
+	// filters is the JSON filter definition for this segment.
+	Filters       string `protobuf:"bytes,3,opt,name=filters,proto3" json:"filters,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -79,9 +79,9 @@ func (x *UpdateSegmentBody) GetDescription() string {
 	return ""
 }
 
-func (x *UpdateSegmentBody) GetRules() string {
+func (x *UpdateSegmentBody) GetFilters() string {
 	if x != nil {
-		return x.Rules
+		return x.Filters
 	}
 	return ""
 }
@@ -189,14 +189,14 @@ var File_crm_segment_v1_update_segment_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_update_segment_proto_rawDesc = "" +
 	"\n" +
-	"#crm/segment/v1/update_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x83\x01\n" +
+	"#crm/segment/v1/update_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x87\x01\n" +
 	"\x11UpdateSegmentBody\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12,\n" +
 	"\vdescription\x18\x02 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12 \n" +
-	"\x05rules\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05rules\"m\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vdescription\x12$\n" +
+	"\afilters\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\afilters\"m\n" +
 	"\x14UpdateSegmentRequest\x12\x1e\n" +
 	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x125\n" +
 	"\x04body\x18\x02 \x01(\v2!.crm.segment.v1.UpdateSegmentBodyR\x04body\"1\n" +

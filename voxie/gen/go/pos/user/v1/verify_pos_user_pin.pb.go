@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,8 +25,12 @@ const (
 
 type VerifyPOSUserPINRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// pin is the pin value for this contract.
-	Pin           string `protobuf:"bytes,1,opt,name=pin,proto3" json:"pin,omitempty"`
+	// location_id is the POS location where the operator is signing in.
+	LocationId int64 `protobuf:"varint,1,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	// user_id is the hub user id of the roster operator.
+	UserId int64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// pin is the operator PIN. Sensitive: do not log this field.
+	Pin           string `protobuf:"bytes,3,opt,name=pin,proto3" json:"pin,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,6 +65,20 @@ func (*VerifyPOSUserPINRequest) Descriptor() ([]byte, []int) {
 	return file_pos_user_v1_verify_pos_user_pin_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *VerifyPOSUserPINRequest) GetLocationId() int64 {
+	if x != nil {
+		return x.LocationId
+	}
+	return 0
+}
+
+func (x *VerifyPOSUserPINRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 func (x *VerifyPOSUserPINRequest) GetPin() string {
 	if x != nil {
 		return x.Pin
@@ -69,10 +88,28 @@ func (x *VerifyPOSUserPINRequest) GetPin() string {
 
 type VerifyPOSUserPINResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// user is the user value for this contract.
-	User          *POSUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// user_id is the hub user id for the verified operator.
+	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// pos_user_id is the POS roster row id.
+	PosUserId int64 `protobuf:"varint,2,opt,name=pos_user_id,json=posUserId,proto3" json:"pos_user_id,omitempty"`
+	// location_id is the location where the operator signed in.
+	LocationId int64 `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	// role is the operator role at this location.
+	Role string `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	// display_name is the operator name shown on receipts and session UI.
+	DisplayName string `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// can_void grants void permission for this session.
+	CanVoid bool `protobuf:"varint,6,opt,name=can_void,json=canVoid,proto3" json:"can_void,omitempty"`
+	// can_refund grants refund permission for this session.
+	CanRefund bool `protobuf:"varint,7,opt,name=can_refund,json=canRefund,proto3" json:"can_refund,omitempty"`
+	// can_open_drawer grants cash drawer access for this session.
+	CanOpenDrawer bool `protobuf:"varint,8,opt,name=can_open_drawer,json=canOpenDrawer,proto3" json:"can_open_drawer,omitempty"`
+	// can_apply_discount grants discount permission for this session.
+	CanApplyDiscount bool `protobuf:"varint,9,opt,name=can_apply_discount,json=canApplyDiscount,proto3" json:"can_apply_discount,omitempty"`
+	// max_discount_pct is the maximum discount percentage allowed.
+	MaxDiscountPct float64 `protobuf:"fixed64,10,opt,name=max_discount_pct,json=maxDiscountPct,proto3" json:"max_discount_pct,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *VerifyPOSUserPINResponse) Reset() {
@@ -105,23 +142,101 @@ func (*VerifyPOSUserPINResponse) Descriptor() ([]byte, []int) {
 	return file_pos_user_v1_verify_pos_user_pin_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *VerifyPOSUserPINResponse) GetUser() *POSUser {
+func (x *VerifyPOSUserPINResponse) GetUserId() int64 {
 	if x != nil {
-		return x.User
+		return x.UserId
 	}
-	return nil
+	return 0
+}
+
+func (x *VerifyPOSUserPINResponse) GetPosUserId() int64 {
+	if x != nil {
+		return x.PosUserId
+	}
+	return 0
+}
+
+func (x *VerifyPOSUserPINResponse) GetLocationId() int64 {
+	if x != nil {
+		return x.LocationId
+	}
+	return 0
+}
+
+func (x *VerifyPOSUserPINResponse) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *VerifyPOSUserPINResponse) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanVoid() bool {
+	if x != nil {
+		return x.CanVoid
+	}
+	return false
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanRefund() bool {
+	if x != nil {
+		return x.CanRefund
+	}
+	return false
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanOpenDrawer() bool {
+	if x != nil {
+		return x.CanOpenDrawer
+	}
+	return false
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanApplyDiscount() bool {
+	if x != nil {
+		return x.CanApplyDiscount
+	}
+	return false
+}
+
+func (x *VerifyPOSUserPINResponse) GetMaxDiscountPct() float64 {
+	if x != nil {
+		return x.MaxDiscountPct
+	}
+	return 0
 }
 
 var File_pos_user_v1_verify_pos_user_pin_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_verify_pos_user_pin_proto_rawDesc = "" +
 	"\n" +
-	"%pos/user/v1/verify_pos_user_pin.proto\x12\vpos.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17pos/user/v1/types.proto\"7\n" +
-	"\x17VerifyPOSUserPINRequest\x12\x1c\n" +
-	"\x03pin\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03pin\"D\n" +
-	"\x18VerifyPOSUserPINResponse\x12(\n" +
-	"\x04user\x18\x01 \x01(\v2\x14.pos.user.v1.POSUserR\x04userB,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"
+	"%pos/user/v1/verify_pos_user_pin.proto\x12\vpos.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x91\x01\n" +
+	"\x17VerifyPOSUserPINRequest\x12/\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
+	"locationId\x12'\n" +
+	"\auser_id\x18\x02 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x06userId\x12\x1c\n" +
+	"\x03pin\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03pin\"\xf7\x02\n" +
+	"\x18VerifyPOSUserPINResponse\x12\x1d\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x04е\x18\x01R\x06userId\x12$\n" +
+	"\vpos_user_id\x18\x02 \x01(\x03B\x04е\x18\x01R\tposUserId\x12%\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
+	"locationId\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12!\n" +
+	"\fdisplay_name\x18\x05 \x01(\tR\vdisplayName\x12\x19\n" +
+	"\bcan_void\x18\x06 \x01(\bR\acanVoid\x12\x1d\n" +
+	"\n" +
+	"can_refund\x18\a \x01(\bR\tcanRefund\x12&\n" +
+	"\x0fcan_open_drawer\x18\b \x01(\bR\rcanOpenDrawer\x12,\n" +
+	"\x12can_apply_discount\x18\t \x01(\bR\x10canApplyDiscount\x12(\n" +
+	"\x10max_discount_pct\x18\n" +
+	" \x01(\x01R\x0emaxDiscountPctB,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"
 
 var (
 	file_pos_user_v1_verify_pos_user_pin_proto_rawDescOnce sync.Once
@@ -139,15 +254,13 @@ var file_pos_user_v1_verify_pos_user_pin_proto_msgTypes = make([]protoimpl.Messa
 var file_pos_user_v1_verify_pos_user_pin_proto_goTypes = []any{
 	(*VerifyPOSUserPINRequest)(nil),  // 0: pos.user.v1.VerifyPOSUserPINRequest
 	(*VerifyPOSUserPINResponse)(nil), // 1: pos.user.v1.VerifyPOSUserPINResponse
-	(*POSUser)(nil),                  // 2: pos.user.v1.POSUser
 }
 var file_pos_user_v1_verify_pos_user_pin_proto_depIdxs = []int32{
-	2, // 0: pos.user.v1.VerifyPOSUserPINResponse.user:type_name -> pos.user.v1.POSUser
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_pos_user_v1_verify_pos_user_pin_proto_init() }
@@ -155,7 +268,6 @@ func file_pos_user_v1_verify_pos_user_pin_proto_init() {
 	if File_pos_user_v1_verify_pos_user_pin_proto != nil {
 		return
 	}
-	file_pos_user_v1_types_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

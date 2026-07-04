@@ -85,6 +85,22 @@ export interface InviteAcceptResponse {
   message: string;
 }
 
+export interface CheckEmailExistsRequest {
+  email: string;
+}
+
+export interface CheckEmailExistsResponse {
+  exists: boolean;
+}
+
+export interface SocialAuthorizeRequest {
+  provider: string;
+}
+
+export interface SocialAuthorizeResponse {
+  url: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -338,6 +354,56 @@ export class AuthServiceClient {
     }
 
     return await resp.json() as InviteAcceptResponse;
+  }
+
+  async checkEmailExists(req: CheckEmailExistsRequest, options?: AuthServiceCallOptions): Promise<CheckEmailExistsResponse> {
+    let path = "/api/common/auth/v1/email-exists";
+    const params = new URLSearchParams();
+    if (req.email != null && req.email !== "") params.set("email", String(req.email));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as CheckEmailExistsResponse;
+  }
+
+  async socialAuthorize(req: SocialAuthorizeRequest, options?: AuthServiceCallOptions): Promise<SocialAuthorizeResponse> {
+    let path = "/api/common/auth/v1/social/authorize";
+    const params = new URLSearchParams();
+    if (req.provider != null && req.provider !== "") params.set("provider", String(req.provider));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SocialAuthorizeResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

@@ -49,19 +49,19 @@ export interface DashboardDataPayload {
   data: Uint8Array;
 }
 
-export interface GetDashboardResponse {
+export interface GetDashboardWidgetsResponse {
   /** Widget layout definitions for the requesting user's dashboard. */
   widgets: DashboardWidgetPayload[];
   /** Pre-loaded data keyed by widget type. */
   data: { [key: string]: DashboardDataPayload };
 }
 
-export interface GetDashboardResponse_DataEntry {
+export interface GetDashboardWidgetsResponse_DataEntry {
   key: string;
   value: DashboardDataPayload | undefined;
 }
 
-export interface UpdateWidgetLayoutRequest {
+export interface UpdateDashboardWidgetsRequest {
   /** Updated widget positions and sizes. */
   widgets: DashboardWidgetPayload[];
 }

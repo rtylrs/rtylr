@@ -40,15 +40,16 @@ service PermissionService {
     };
   }
 
-  // UpdateRole updates an existing role.
+  // UpdateRole updates a custom role.
   rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {
     option (onekit.http.config) = {
       path: "/roles/{id}"
       method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 
-  // DeleteRole deletes a role.
+  // DeleteRole deletes a custom role.
   rpc DeleteRole(DeleteRoleRequest) returns (DeleteRoleResponse) {
     option (onekit.http.config) = {
       path: "/roles/{id}"

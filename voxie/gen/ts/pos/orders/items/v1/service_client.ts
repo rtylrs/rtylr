@@ -15,15 +15,6 @@ export interface UpdateOrderItemStatusResponse {
   message: string;
 }
 
-export interface VoidOrderItemRequest {
-  orderId: string;
-  itemId: string;
-}
-
-export interface VoidOrderItemResponse {
-  success: boolean;
-}
-
 export interface FieldViolation {
   field: string;
   description: string;
@@ -111,31 +102,6 @@ export class OrderItemServiceClient {
     }
 
     return await resp.json() as UpdateOrderItemStatusResponse;
-  }
-
-  async voidOrderItem(req: VoidOrderItemRequest, options?: OrderItemServiceCallOptions): Promise<VoidOrderItemResponse> {
-    let path = "/api/pos/orders/items/v1/orders/{order_id}/items/{item_id}";
-    path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
-    path = path.replace("{item_id}", encodeURIComponent(String(req.itemId)));
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "DELETE",
-      headers,
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as VoidOrderItemResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

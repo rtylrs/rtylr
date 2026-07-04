@@ -25,33 +25,45 @@ var File_erp_purchase_order_v1_service_proto protoreflect.FileDescriptor
 
 const file_erp_purchase_order_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"#erp/purchase_order/v1/service.proto\x12\x15erp.purchase_order.v1\x1a1erp/purchase_order/v1/create_purchase_order.proto\x1a0erp/purchase_order/v1/list_purchase_orders.proto\x1a8erp/purchase_order/v1/update_purchase_order_status.proto\x1a\x1donekit/http/annotations.proto2\xa4\x04\n" +
+	"#erp/purchase_order/v1/service.proto\x12\x15erp.purchase_order.v1\x1a2erp/purchase_order/v1/approve_purchase_order.proto\x1a1erp/purchase_order/v1/create_purchase_order.proto\x1a.erp/purchase_order/v1/get_purchase_order.proto\x1a0erp/purchase_order/v1/list_purchase_orders.proto\x1a8erp/purchase_order/v1/update_purchase_order_status.proto\x1a\x1donekit/http/annotations.proto2\xe2\x06\n" +
 	"\x14PurchaseOrderService\x12\x93\x01\n" +
 	"\x12ListPurchaseOrders\x120.erp.purchase_order.v1.ListPurchaseOrdersRequest\x1a1.erp.purchase_order.v1.ListPurchaseOrdersResponse\"\x18\x9a\xb5\x18\x14\n" +
 	"\x10/purchase-orders\x10\x01\x12\x96\x01\n" +
 	"\x13CreatePurchaseOrder\x121.erp.purchase_order.v1.CreatePurchaseOrderRequest\x1a2.erp.purchase_order.v1.CreatePurchaseOrderResponse\"\x18\x9a\xb5\x18\x14\n" +
-	"\x10/purchase-orders\x10\x02\x12\xba\x01\n" +
+	"\x10/purchase-orders\x10\x02\x12\x92\x01\n" +
+	"\x10GetPurchaseOrder\x12..erp.purchase_order.v1.GetPurchaseOrderRequest\x1a/.erp.purchase_order.v1.GetPurchaseOrderResponse\"\x1d\x9a\xb5\x18\x19\n" +
+	"\x15/purchase-orders/{id}\x10\x01\x12\xba\x01\n" +
 	"\x19UpdatePurchaseOrderStatus\x127.erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest\x1a8.erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse\"*\x9a\xb5\x18&\n" +
-	"\x1c/purchase-orders/{id}/status\x10\x05\"\x04body\x1a \xa2\xb5\x18\x1c\n" +
+	"\x1c/purchase-orders/{id}/status\x10\x05\"\x04body\x12\xa6\x01\n" +
+	"\x14ApprovePurchaseOrder\x122.erp.purchase_order.v1.ApprovePurchaseOrderRequest\x1a3.erp.purchase_order.v1.ApprovePurchaseOrderResponse\"%\x9a\xb5\x18!\n" +
+	"\x1d/purchase-orders/{id}/approve\x10\x02\x1a \xa2\xb5\x18\x1c\n" +
 	"\x1a/api/erp/purchase-order/v1B6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 
 var file_erp_purchase_order_v1_service_proto_goTypes = []any{
 	(*ListPurchaseOrdersRequest)(nil),         // 0: erp.purchase_order.v1.ListPurchaseOrdersRequest
 	(*CreatePurchaseOrderRequest)(nil),        // 1: erp.purchase_order.v1.CreatePurchaseOrderRequest
-	(*UpdatePurchaseOrderStatusRequest)(nil),  // 2: erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest
-	(*ListPurchaseOrdersResponse)(nil),        // 3: erp.purchase_order.v1.ListPurchaseOrdersResponse
-	(*CreatePurchaseOrderResponse)(nil),       // 4: erp.purchase_order.v1.CreatePurchaseOrderResponse
-	(*UpdatePurchaseOrderStatusResponse)(nil), // 5: erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse
+	(*GetPurchaseOrderRequest)(nil),           // 2: erp.purchase_order.v1.GetPurchaseOrderRequest
+	(*UpdatePurchaseOrderStatusRequest)(nil),  // 3: erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest
+	(*ApprovePurchaseOrderRequest)(nil),       // 4: erp.purchase_order.v1.ApprovePurchaseOrderRequest
+	(*ListPurchaseOrdersResponse)(nil),        // 5: erp.purchase_order.v1.ListPurchaseOrdersResponse
+	(*CreatePurchaseOrderResponse)(nil),       // 6: erp.purchase_order.v1.CreatePurchaseOrderResponse
+	(*GetPurchaseOrderResponse)(nil),          // 7: erp.purchase_order.v1.GetPurchaseOrderResponse
+	(*UpdatePurchaseOrderStatusResponse)(nil), // 8: erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse
+	(*ApprovePurchaseOrderResponse)(nil),      // 9: erp.purchase_order.v1.ApprovePurchaseOrderResponse
 }
 var file_erp_purchase_order_v1_service_proto_depIdxs = []int32{
 	0, // 0: erp.purchase_order.v1.PurchaseOrderService.ListPurchaseOrders:input_type -> erp.purchase_order.v1.ListPurchaseOrdersRequest
 	1, // 1: erp.purchase_order.v1.PurchaseOrderService.CreatePurchaseOrder:input_type -> erp.purchase_order.v1.CreatePurchaseOrderRequest
-	2, // 2: erp.purchase_order.v1.PurchaseOrderService.UpdatePurchaseOrderStatus:input_type -> erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest
-	3, // 3: erp.purchase_order.v1.PurchaseOrderService.ListPurchaseOrders:output_type -> erp.purchase_order.v1.ListPurchaseOrdersResponse
-	4, // 4: erp.purchase_order.v1.PurchaseOrderService.CreatePurchaseOrder:output_type -> erp.purchase_order.v1.CreatePurchaseOrderResponse
-	5, // 5: erp.purchase_order.v1.PurchaseOrderService.UpdatePurchaseOrderStatus:output_type -> erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	2, // 2: erp.purchase_order.v1.PurchaseOrderService.GetPurchaseOrder:input_type -> erp.purchase_order.v1.GetPurchaseOrderRequest
+	3, // 3: erp.purchase_order.v1.PurchaseOrderService.UpdatePurchaseOrderStatus:input_type -> erp.purchase_order.v1.UpdatePurchaseOrderStatusRequest
+	4, // 4: erp.purchase_order.v1.PurchaseOrderService.ApprovePurchaseOrder:input_type -> erp.purchase_order.v1.ApprovePurchaseOrderRequest
+	5, // 5: erp.purchase_order.v1.PurchaseOrderService.ListPurchaseOrders:output_type -> erp.purchase_order.v1.ListPurchaseOrdersResponse
+	6, // 6: erp.purchase_order.v1.PurchaseOrderService.CreatePurchaseOrder:output_type -> erp.purchase_order.v1.CreatePurchaseOrderResponse
+	7, // 7: erp.purchase_order.v1.PurchaseOrderService.GetPurchaseOrder:output_type -> erp.purchase_order.v1.GetPurchaseOrderResponse
+	8, // 8: erp.purchase_order.v1.PurchaseOrderService.UpdatePurchaseOrderStatus:output_type -> erp.purchase_order.v1.UpdatePurchaseOrderStatusResponse
+	9, // 9: erp.purchase_order.v1.PurchaseOrderService.ApprovePurchaseOrder:output_type -> erp.purchase_order.v1.ApprovePurchaseOrderResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -62,7 +74,9 @@ func file_erp_purchase_order_v1_service_proto_init() {
 	if File_erp_purchase_order_v1_service_proto != nil {
 		return
 	}
+	file_erp_purchase_order_v1_approve_purchase_order_proto_init()
 	file_erp_purchase_order_v1_create_purchase_order_proto_init()
+	file_erp_purchase_order_v1_get_purchase_order_proto_init()
 	file_erp_purchase_order_v1_list_purchase_orders_proto_init()
 	file_erp_purchase_order_v1_update_purchase_order_status_proto_init()
 	type x struct{}

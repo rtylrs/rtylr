@@ -12,6 +12,8 @@ import (
 // DashboardServiceServer is the server API for DashboardService service.
 type DashboardServiceServer interface {
 	GetHRDashboard(context.Context, *GetHRDashboardRequest) (*GetHRDashboardResponse, error)
+	GetDashboardWidgets(context.Context, *GetDashboardWidgetsRequest) (*GetDashboardWidgetsResponse, error)
+	UpdateDashboardWidgets(context.Context, *UpdateDashboardWidgetsRequest) (*UpdateDashboardWidgetsResponse, error)
 }
 
 // RegisterDashboardServiceServer registers the HTTP handlers for service DashboardService to the given mux.
@@ -29,6 +31,24 @@ func RegisterDashboardServiceServer(server DashboardServiceServer, opts ...Serve
 
 	config.mux.Handle("GET /api/hr/dashboard/v1/dashboard", getHRDashboardHandler)
 
+	methodHeaders = getGetDashboardWidgetsHeaders()
+	getDashboardWidgetsHandler := BindingMiddleware[GetDashboardWidgetsRequest](
+		genericHandler(server.GetDashboardWidgets, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getDashboardWidgetsPathParams, getDashboardWidgetsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hr/dashboard/v1/dashboard/widgets", getDashboardWidgetsHandler)
+
+	methodHeaders = getUpdateDashboardWidgetsHeaders()
+	updateDashboardWidgetsHandler := BindingMiddleware[UpdateDashboardWidgetsRequest](
+		genericHandler(server.UpdateDashboardWidgets, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateDashboardWidgetsPathParams, updateDashboardWidgetsQueryParams,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/hr/dashboard/v1/dashboard/widgets", updateDashboardWidgetsHandler)
+
 	return nil
 }
 
@@ -42,8 +62,30 @@ func getGetHRDashboardHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetDashboardWidgetsHeaders returns the method-level required headers for GetDashboardWidgets
+func getGetDashboardWidgetsHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getUpdateDashboardWidgetsHeaders returns the method-level required headers for UpdateDashboardWidgets
+func getUpdateDashboardWidgetsHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getHRDashboardPathParams contains path parameter configuration for GetHRDashboard
 var getHRDashboardPathParams = []PathParamConfig{}
 
 // getHRDashboardQueryParams contains query parameter configuration for GetHRDashboard
 var getHRDashboardQueryParams = []QueryParamConfig{}
+
+// getDashboardWidgetsPathParams contains path parameter configuration for GetDashboardWidgets
+var getDashboardWidgetsPathParams = []PathParamConfig{}
+
+// getDashboardWidgetsQueryParams contains query parameter configuration for GetDashboardWidgets
+var getDashboardWidgetsQueryParams = []QueryParamConfig{}
+
+// updateDashboardWidgetsPathParams contains path parameter configuration for UpdateDashboardWidgets
+var updateDashboardWidgetsPathParams = []PathParamConfig{}
+
+// updateDashboardWidgetsQueryParams contains query parameter configuration for UpdateDashboardWidgets
+var updateDashboardWidgetsQueryParams = []QueryParamConfig{}

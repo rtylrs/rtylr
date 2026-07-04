@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package booking.resource.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/resource/v1";
+
+message CreateResourceRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string type = 2;
+  int32 capacity = 3;
+  bool is_active = 4;
+}
+
+message CreateResourceResponse {
+  int64 id = 1;
+  string message = 2;
+}

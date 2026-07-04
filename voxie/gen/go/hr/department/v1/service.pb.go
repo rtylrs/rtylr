@@ -25,27 +25,39 @@ var File_hr_department_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/department/v1/service.proto\x12\x10hr.department.v1\x1a(hr/department/v1/create_department.proto\x1a(hr/department/v1/update_department.proto\x1a\x1donekit/http/annotations.proto2\xbe\x02\n" +
-	"\x11DepartmentService\x12\x7f\n" +
+	"\x1ehr/department/v1/service.proto\x12\x10hr.department.v1\x1a(hr/department/v1/create_department.proto\x1a(hr/department/v1/delete_department.proto\x1a'hr/department/v1/list_departments.proto\x1a(hr/department/v1/update_department.proto\x1a\x1donekit/http/annotations.proto2\xc3\x04\n" +
+	"\x11DepartmentService\x12|\n" +
+	"\x0fListDepartments\x12(.hr.department.v1.ListDepartmentsRequest\x1a).hr.department.v1.ListDepartmentsResponse\"\x14\x9a\xb5\x18\x10\n" +
+	"\f/departments\x10\x01\x12\x7f\n" +
 	"\x10CreateDepartment\x12).hr.department.v1.CreateDepartmentRequest\x1a*.hr.department.v1.CreateDepartmentResponse\"\x14\x9a\xb5\x18\x10\n" +
 	"\f/departments\x10\x02\x12\x8a\x01\n" +
 	"\x10UpdateDepartment\x12).hr.department.v1.UpdateDepartmentRequest\x1a*.hr.department.v1.UpdateDepartmentResponse\"\x1f\x9a\xb5\x18\x1b\n" +
-	"\x11/departments/{id}\x10\x03\"\x04body\x1a\x1b\xa2\xb5\x18\x17\n" +
+	"\x11/departments/{id}\x10\x03\"\x04body\x12\x84\x01\n" +
+	"\x10DeleteDepartment\x12).hr.department.v1.DeleteDepartmentRequest\x1a*.hr.department.v1.DeleteDepartmentResponse\"\x19\x9a\xb5\x18\x15\n" +
+	"\x11/departments/{id}\x10\x04\x1a\x1b\xa2\xb5\x18\x17\n" +
 	"\x15/api/hr/department/v1B1Z/github.com/voxire/voxie/gen/go/hr/department/v1b\x06proto3"
 
 var file_hr_department_v1_service_proto_goTypes = []any{
-	(*CreateDepartmentRequest)(nil),  // 0: hr.department.v1.CreateDepartmentRequest
-	(*UpdateDepartmentRequest)(nil),  // 1: hr.department.v1.UpdateDepartmentRequest
-	(*CreateDepartmentResponse)(nil), // 2: hr.department.v1.CreateDepartmentResponse
-	(*UpdateDepartmentResponse)(nil), // 3: hr.department.v1.UpdateDepartmentResponse
+	(*ListDepartmentsRequest)(nil),   // 0: hr.department.v1.ListDepartmentsRequest
+	(*CreateDepartmentRequest)(nil),  // 1: hr.department.v1.CreateDepartmentRequest
+	(*UpdateDepartmentRequest)(nil),  // 2: hr.department.v1.UpdateDepartmentRequest
+	(*DeleteDepartmentRequest)(nil),  // 3: hr.department.v1.DeleteDepartmentRequest
+	(*ListDepartmentsResponse)(nil),  // 4: hr.department.v1.ListDepartmentsResponse
+	(*CreateDepartmentResponse)(nil), // 5: hr.department.v1.CreateDepartmentResponse
+	(*UpdateDepartmentResponse)(nil), // 6: hr.department.v1.UpdateDepartmentResponse
+	(*DeleteDepartmentResponse)(nil), // 7: hr.department.v1.DeleteDepartmentResponse
 }
 var file_hr_department_v1_service_proto_depIdxs = []int32{
-	0, // 0: hr.department.v1.DepartmentService.CreateDepartment:input_type -> hr.department.v1.CreateDepartmentRequest
-	1, // 1: hr.department.v1.DepartmentService.UpdateDepartment:input_type -> hr.department.v1.UpdateDepartmentRequest
-	2, // 2: hr.department.v1.DepartmentService.CreateDepartment:output_type -> hr.department.v1.CreateDepartmentResponse
-	3, // 3: hr.department.v1.DepartmentService.UpdateDepartment:output_type -> hr.department.v1.UpdateDepartmentResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	0, // 0: hr.department.v1.DepartmentService.ListDepartments:input_type -> hr.department.v1.ListDepartmentsRequest
+	1, // 1: hr.department.v1.DepartmentService.CreateDepartment:input_type -> hr.department.v1.CreateDepartmentRequest
+	2, // 2: hr.department.v1.DepartmentService.UpdateDepartment:input_type -> hr.department.v1.UpdateDepartmentRequest
+	3, // 3: hr.department.v1.DepartmentService.DeleteDepartment:input_type -> hr.department.v1.DeleteDepartmentRequest
+	4, // 4: hr.department.v1.DepartmentService.ListDepartments:output_type -> hr.department.v1.ListDepartmentsResponse
+	5, // 5: hr.department.v1.DepartmentService.CreateDepartment:output_type -> hr.department.v1.CreateDepartmentResponse
+	6, // 6: hr.department.v1.DepartmentService.UpdateDepartment:output_type -> hr.department.v1.UpdateDepartmentResponse
+	7, // 7: hr.department.v1.DepartmentService.DeleteDepartment:output_type -> hr.department.v1.DeleteDepartmentResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -57,6 +69,8 @@ func file_hr_department_v1_service_proto_init() {
 		return
 	}
 	file_hr_department_v1_create_department_proto_init()
+	file_hr_department_v1_delete_department_proto_init()
+	file_hr_department_v1_list_departments_proto_init()
 	file_hr_department_v1_update_department_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

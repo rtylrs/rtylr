@@ -58,6 +58,16 @@ export interface SlowMover {
   stockQuantity: number;
 }
 
+export interface GetProductPerformanceRequest {
+}
+
+export interface GetProductPerformanceResponse {
+  totalSkus: string;
+  activeSkus: string;
+  outOfStock: string;
+  avgMarginPct: number;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -215,6 +225,29 @@ export class ProductServiceClient {
     }
 
     return await resp.json() as GetSlowMoversResponse;
+  }
+
+  async getProductPerformance(_req: GetProductPerformanceRequest, options?: ProductServiceCallOptions): Promise<GetProductPerformanceResponse> {
+    let path = "/api/insights/product/v1/performance";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetProductPerformanceResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

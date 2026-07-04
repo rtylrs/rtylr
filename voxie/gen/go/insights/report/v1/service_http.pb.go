@@ -16,6 +16,10 @@ type ReportServiceServer interface {
 	GetReportTemplate(context.Context, *GetReportTemplateRequest) (*GetReportTemplateResponse, error)
 	ListScheduledReports(context.Context, *ListScheduledReportsRequest) (*ListScheduledReportsResponse, error)
 	CreateScheduledReport(context.Context, *CreateScheduledReportRequest) (*CreateScheduledReportResponse, error)
+	UpdateScheduledReport(context.Context, *UpdateScheduledReportRequest) (*UpdateScheduledReportResponse, error)
+	DeleteScheduledReport(context.Context, *DeleteScheduledReportRequest) (*DeleteScheduledReportResponse, error)
+	GenerateRevenueReport(context.Context, *GenerateRevenueReportRequest) (*GenerateRevenueReportResponse, error)
+	ExportRevenueReport(context.Context, *ExportRevenueReportRequest) (*ExportRevenueReportResponse, error)
 }
 
 // RegisterReportServiceServer registers the HTTP handlers for service ReportService to the given mux.
@@ -69,6 +73,42 @@ func RegisterReportServiceServer(server ReportServiceServer, opts ...ServerOptio
 
 	config.mux.Handle("POST /api/insights/report/v1/scheduled", createScheduledReportHandler)
 
+	methodHeaders = getUpdateScheduledReportHeaders()
+	updateScheduledReportHandler := BindingMiddleware[UpdateScheduledReportRequest](
+		genericHandler(server.UpdateScheduledReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateScheduledReportPathParams, updateScheduledReportQueryParams,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/insights/report/v1/scheduled/{id}", updateScheduledReportHandler)
+
+	methodHeaders = getDeleteScheduledReportHeaders()
+	deleteScheduledReportHandler := BindingMiddleware[DeleteScheduledReportRequest](
+		genericHandler(server.DeleteScheduledReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteScheduledReportPathParams, deleteScheduledReportQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/insights/report/v1/scheduled/{id}", deleteScheduledReportHandler)
+
+	methodHeaders = getGenerateRevenueReportHeaders()
+	generateRevenueReportHandler := BindingMiddleware[GenerateRevenueReportRequest](
+		genericHandler(server.GenerateRevenueReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		generateRevenueReportPathParams, generateRevenueReportQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/insights/report/v1/reports/revenue/generate", generateRevenueReportHandler)
+
+	methodHeaders = getExportRevenueReportHeaders()
+	exportRevenueReportHandler := BindingMiddleware[ExportRevenueReportRequest](
+		genericHandler(server.ExportRevenueReport, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		exportRevenueReportPathParams, exportRevenueReportQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/insights/report/v1/reports/revenue/export", exportRevenueReportHandler)
+
 	return nil
 }
 
@@ -99,6 +139,26 @@ func getListScheduledReportsHeaders() []*onekithttp.Header {
 
 // getCreateScheduledReportHeaders returns the method-level required headers for CreateScheduledReport
 func getCreateScheduledReportHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getUpdateScheduledReportHeaders returns the method-level required headers for UpdateScheduledReport
+func getUpdateScheduledReportHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getDeleteScheduledReportHeaders returns the method-level required headers for DeleteScheduledReport
+func getDeleteScheduledReportHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getGenerateRevenueReportHeaders returns the method-level required headers for GenerateRevenueReport
+func getGenerateRevenueReportHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getExportRevenueReportHeaders returns the method-level required headers for ExportRevenueReport
+func getExportRevenueReportHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -144,3 +204,34 @@ var createScheduledReportPathParams = []PathParamConfig{}
 
 // createScheduledReportQueryParams contains query parameter configuration for CreateScheduledReport
 var createScheduledReportQueryParams = []QueryParamConfig{}
+
+// updateScheduledReportPathParams contains path parameter configuration for UpdateScheduledReport
+var updateScheduledReportPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateScheduledReportQueryParams contains query parameter configuration for UpdateScheduledReport
+var updateScheduledReportQueryParams = []QueryParamConfig{}
+
+// deleteScheduledReportPathParams contains path parameter configuration for DeleteScheduledReport
+var deleteScheduledReportPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteScheduledReportQueryParams contains query parameter configuration for DeleteScheduledReport
+var deleteScheduledReportQueryParams = []QueryParamConfig{}
+
+// generateRevenueReportPathParams contains path parameter configuration for GenerateRevenueReport
+var generateRevenueReportPathParams = []PathParamConfig{}
+
+// generateRevenueReportQueryParams contains query parameter configuration for GenerateRevenueReport
+var generateRevenueReportQueryParams = []QueryParamConfig{}
+
+// exportRevenueReportPathParams contains path parameter configuration for ExportRevenueReport
+var exportRevenueReportPathParams = []PathParamConfig{}
+
+// exportRevenueReportQueryParams contains query parameter configuration for ExportRevenueReport
+var exportRevenueReportQueryParams = []QueryParamConfig{
+	{QueryName: "from", FieldName: "from", Required: false},
+	{QueryName: "to", FieldName: "to", Required: false},
+}

@@ -94,6 +94,39 @@ export interface CreateOrderResponse {
   message: string;
 }
 
+export interface CreatePublicOrderRequest {
+  ownerId: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  notes: string;
+  items: PublicOrderItemInput[];
+}
+
+export interface PublicOrderItemInput {
+  menuItemId: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  notes: string;
+}
+
+export interface CreatePublicOrderResponse {
+  orderId: string;
+  orderNumber: string;
+  status: string;
+}
+
+export interface GetPublicOrderStatusRequest {
+  orderId: string;
+}
+
+export interface GetPublicOrderStatusResponse {
+  orderId: string;
+  orderNumber: string;
+  status: string;
+}
+
 export interface GetOrderDetailRequest {
   orderId: string;
 }
@@ -122,23 +155,6 @@ export interface VoidOrderRequest {
 
 export interface VoidOrderResponse {
   message: string;
-}
-
-export interface SendToKitchenRequest {
-  orderId: string;
-}
-
-export interface SendToKitchenResponse {
-  success: boolean;
-}
-
-export interface TransferTableRequest {
-  orderId: string;
-  newTableId: string;
-}
-
-export interface TransferTableResponse {
-  success: boolean;
 }
 
 export interface FieldViolation {
@@ -259,6 +275,54 @@ export class OrderServiceClient {
     return await resp.json() as CreateOrderResponse;
   }
 
+  async createPublicOrder(req: CreatePublicOrderRequest, options?: OrderServiceCallOptions): Promise<CreatePublicOrderResponse> {
+    let path = "/api/pos/orders/v1/orders/public";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as CreatePublicOrderResponse;
+  }
+
+  async getPublicOrderStatus(req: GetPublicOrderStatusRequest, options?: OrderServiceCallOptions): Promise<GetPublicOrderStatusResponse> {
+    let path = "/api/pos/orders/v1/orders/{order_id}/public-status";
+    path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetPublicOrderStatusResponse;
+  }
+
   async getOrderDetail(req: GetOrderDetailRequest, options?: OrderServiceCallOptions): Promise<GetOrderDetailResponse> {
     let path = "/api/pos/orders/v1/orders/{order_id}";
     path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
@@ -331,56 +395,6 @@ export class OrderServiceClient {
     }
 
     return await resp.json() as VoidOrderResponse;
-  }
-
-  async sendToKitchen(req: SendToKitchenRequest, options?: OrderServiceCallOptions): Promise<SendToKitchenResponse> {
-    let path = "/api/pos/orders/v1/orders/{order_id}/send-to-kitchen";
-    path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(req),
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as SendToKitchenResponse;
-  }
-
-  async transferTable(req: TransferTableRequest, options?: OrderServiceCallOptions): Promise<TransferTableResponse> {
-    let path = "/api/pos/orders/v1/orders/{order_id}/transfer-table";
-    path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
-    const url = this.baseURL + path;
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...options?.headers,
-    };
-
-    const resp = await this.doFetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(req),
-      signal: options?.signal,
-    }, options?.retry ?? this.retry);
-
-    if (!resp.ok) {
-      return this.handleError(resp);
-    }
-
-    return await resp.json() as TransferTableResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

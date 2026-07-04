@@ -27,6 +27,33 @@ export interface CreateLabelResponse {
   label?: Label;
 }
 
+export interface UpdateLabelRequest {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface UpdateLabelResponse {
+  message: string;
+}
+
+export interface DeleteLabelRequest {
+  id: string;
+}
+
+export interface DeleteLabelResponse {
+  message: string;
+}
+
+export interface SetTaskLabelsRequest {
+  taskId: string;
+  labelIds: string[];
+}
+
+export interface SetTaskLabelsResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -137,6 +164,79 @@ export class LabelServiceClient {
     }
 
     return await resp.json() as CreateLabelResponse;
+  }
+
+  async updateLabel(req: UpdateLabelRequest, options?: LabelServiceCallOptions): Promise<UpdateLabelResponse> {
+    let path = "/api/flow/label/v1/labels/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateLabelResponse;
+  }
+
+  async deleteLabel(req: DeleteLabelRequest, options?: LabelServiceCallOptions): Promise<DeleteLabelResponse> {
+    let path = "/api/flow/label/v1/labels/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteLabelResponse;
+  }
+
+  async setTaskLabels(req: SetTaskLabelsRequest, options?: LabelServiceCallOptions): Promise<SetTaskLabelsResponse> {
+    let path = "/api/flow/label/v1/tasks/labels";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SetTaskLabelsResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

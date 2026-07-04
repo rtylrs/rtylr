@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+import "buf/validate/validate.proto";
+import "erp/product/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+message GetProductByBarcodeRequest {
+  string code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message GetProductByBarcodeResponse {
+  Product product = 1;
+}

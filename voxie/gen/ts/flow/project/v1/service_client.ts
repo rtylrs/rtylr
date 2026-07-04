@@ -70,6 +70,141 @@ export interface DeleteProjectResponse {
   message: string;
 }
 
+export interface ListProjectColumnsRequest {
+  projectId: string;
+}
+
+export interface ListProjectColumnsResponse {
+  columns: ProjectColumn[];
+}
+
+export interface ProjectColumn {
+  id: string;
+  projectId: string;
+  workspaceId: string;
+  name: string;
+  color: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProjectColumnRequest {
+  projectId: string;
+  workspaceId: string;
+  name: string;
+  color: string;
+  sortOrder: number;
+}
+
+export interface CreateProjectColumnResponse {
+  column?: ProjectColumn;
+}
+
+export interface UpdateProjectColumnRequest {
+  id: string;
+  name: string;
+  color: string;
+  sortOrder: number;
+}
+
+export interface UpdateProjectColumnResponse {
+  message: string;
+}
+
+export interface DeleteProjectColumnRequest {
+  id: string;
+}
+
+export interface DeleteProjectColumnResponse {
+  message: string;
+}
+
+export interface MoveTaskToColumnRequest {
+  taskId: string;
+  columnId: string;
+}
+
+export interface MoveTaskToColumnResponse {
+  message: string;
+}
+
+export interface ListProjectMembersRequest {
+  projectId: string;
+}
+
+export interface ListProjectMembersResponse {
+  members: ProjectMember[];
+}
+
+export interface ProjectMember {
+  id: string;
+  projectId: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  addedBy: string;
+  addedAt: string;
+}
+
+export interface AddProjectMemberRequest {
+  projectId: string;
+  userId: string;
+  role: string;
+}
+
+export interface AddProjectMemberResponse {
+  message: string;
+}
+
+export interface RemoveProjectMemberRequest {
+  projectId: string;
+  userId: string;
+}
+
+export interface RemoveProjectMemberResponse {
+  message: string;
+}
+
+export interface UpdateProjectMemberRoleRequest {
+  projectId: string;
+  userId: string;
+  role: string;
+}
+
+export interface UpdateProjectMemberRoleResponse {
+  message: string;
+}
+
+export interface InviteProjectMemberRequest {
+  projectId: string;
+  email: string;
+  role: string;
+}
+
+export interface InviteProjectMemberResponse {
+  message: string;
+}
+
+export interface TransferProjectOwnershipRequest {
+  projectId: string;
+  newOwnerId: string;
+}
+
+export interface TransferProjectOwnershipResponse {
+  message: string;
+}
+
+export interface MoveProjectRequest {
+  projectId: string;
+  workspaceId: string;
+}
+
+export interface MoveProjectResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -229,6 +364,299 @@ export class ProjectServiceClient {
     }
 
     return await resp.json() as DeleteProjectResponse;
+  }
+
+  async listProjectColumns(req: ListProjectColumnsRequest, options?: ProjectServiceCallOptions): Promise<ListProjectColumnsResponse> {
+    let path = "/api/flow/project/v1/projects/columns";
+    const params = new URLSearchParams();
+    if (req.projectId != null && req.projectId !== "0") params.set("project_id", String(req.projectId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListProjectColumnsResponse;
+  }
+
+  async createProjectColumn(req: CreateProjectColumnRequest, options?: ProjectServiceCallOptions): Promise<CreateProjectColumnResponse> {
+    let path = "/api/flow/project/v1/projects/columns";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as CreateProjectColumnResponse;
+  }
+
+  async updateProjectColumn(req: UpdateProjectColumnRequest, options?: ProjectServiceCallOptions): Promise<UpdateProjectColumnResponse> {
+    let path = "/api/flow/project/v1/projects/columns/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateProjectColumnResponse;
+  }
+
+  async deleteProjectColumn(req: DeleteProjectColumnRequest, options?: ProjectServiceCallOptions): Promise<DeleteProjectColumnResponse> {
+    let path = "/api/flow/project/v1/projects/columns/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as DeleteProjectColumnResponse;
+  }
+
+  async moveTaskToColumn(req: MoveTaskToColumnRequest, options?: ProjectServiceCallOptions): Promise<MoveTaskToColumnResponse> {
+    let path = "/api/flow/project/v1/projects/columns/move";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as MoveTaskToColumnResponse;
+  }
+
+  async listProjectMembers(req: ListProjectMembersRequest, options?: ProjectServiceCallOptions): Promise<ListProjectMembersResponse> {
+    let path = "/api/flow/project/v1/projects/members";
+    const params = new URLSearchParams();
+    if (req.projectId != null && req.projectId !== "0") params.set("project_id", String(req.projectId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ListProjectMembersResponse;
+  }
+
+  async addProjectMember(req: AddProjectMemberRequest, options?: ProjectServiceCallOptions): Promise<AddProjectMemberResponse> {
+    let path = "/api/flow/project/v1/projects/members";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as AddProjectMemberResponse;
+  }
+
+  async removeProjectMember(req: RemoveProjectMemberRequest, options?: ProjectServiceCallOptions): Promise<RemoveProjectMemberResponse> {
+    let path = "/api/flow/project/v1/projects/members";
+    const params = new URLSearchParams();
+    if (req.projectId != null && req.projectId !== "0") params.set("project_id", String(req.projectId));
+    if (req.userId != null && req.userId !== "0") params.set("user_id", String(req.userId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "DELETE",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as RemoveProjectMemberResponse;
+  }
+
+  async updateProjectMemberRole(req: UpdateProjectMemberRoleRequest, options?: ProjectServiceCallOptions): Promise<UpdateProjectMemberRoleResponse> {
+    let path = "/api/flow/project/v1/projects/members/role";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateProjectMemberRoleResponse;
+  }
+
+  async inviteProjectMember(req: InviteProjectMemberRequest, options?: ProjectServiceCallOptions): Promise<InviteProjectMemberResponse> {
+    let path = "/api/flow/project/v1/projects/members/invite";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as InviteProjectMemberResponse;
+  }
+
+  async transferProjectOwnership(req: TransferProjectOwnershipRequest, options?: ProjectServiceCallOptions): Promise<TransferProjectOwnershipResponse> {
+    let path = "/api/flow/project/v1/projects/transfer";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as TransferProjectOwnershipResponse;
+  }
+
+  async moveProject(req: MoveProjectRequest, options?: ProjectServiceCallOptions): Promise<MoveProjectResponse> {
+    let path = "/api/flow/project/v1/projects/move";
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as MoveProjectResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

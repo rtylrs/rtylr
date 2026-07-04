@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package crm.template.v1;
+
+import "crm/template/v1/create_template.proto";
+import "crm/template/v1/delete_template.proto";
+import "crm/template/v1/list_templates.proto";
+import "crm/template/v1/update_template.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/template/v1";
+
+service TemplateService {
+  option (onekit.http.service_config) = {base_path: "/api/crm/template/v1"};
+
+  rpc ListTemplates(ListTemplatesRequest) returns (ListTemplatesResponse) {
+    option (onekit.http.config) = {
+      path: "/templates"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateTemplate(CreateTemplateRequest) returns (CreateTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates"
+      method: HTTP_METHOD_POST
+      body: "*"
+    };
+  }
+
+  rpc UpdateTemplate(UpdateTemplateRequest) returns (UpdateTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc DeleteTemplate(DeleteTemplateRequest) returns (DeleteTemplateResponse) {
+    option (onekit.http.config) = {
+      path: "/templates/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

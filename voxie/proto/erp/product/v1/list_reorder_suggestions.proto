@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+message ReorderSuggestion {
+  int64 product_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 2;
+  string sku = 3;
+  double current_stock = 4;
+  double reorder_point = 5;
+  double suggested_quantity = 6;
+  double avg_daily_sales = 7;
+  int32 lead_time_days = 8;
+  string confidence = 9;
+}
+
+message ListReorderSuggestionsRequest {}
+
+message ListReorderSuggestionsResponse {
+  repeated ReorderSuggestion suggestions = 1;
+}

@@ -4,9 +4,13 @@ package insights.report.v1;
 
 import "insights/report/v1/create_report_template.proto";
 import "insights/report/v1/create_scheduled_report.proto";
+import "insights/report/v1/delete_scheduled_report.proto";
+import "insights/report/v1/export_revenue_report.proto";
+import "insights/report/v1/generate_revenue_report.proto";
 import "insights/report/v1/get_report_template.proto";
 import "insights/report/v1/list_report_templates.proto";
 import "insights/report/v1/list_scheduled_reports.proto";
+import "insights/report/v1/update_scheduled_report.proto";
 import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
@@ -52,6 +56,38 @@ service ReportService {
     option (onekit.http.config) = {
       path: "/scheduled"
       method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateScheduledReport updates a scheduled report.
+  rpc UpdateScheduledReport(UpdateScheduledReportRequest) returns (UpdateScheduledReportResponse) {
+    option (onekit.http.config) = {
+      path: "/scheduled/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  // DeleteScheduledReport removes a scheduled report.
+  rpc DeleteScheduledReport(DeleteScheduledReportRequest) returns (DeleteScheduledReportResponse) {
+    option (onekit.http.config) = {
+      path: "/scheduled/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  // GenerateRevenueReport queues a revenue report export.
+  rpc GenerateRevenueReport(GenerateRevenueReportRequest) returns (GenerateRevenueReportResponse) {
+    option (onekit.http.config) = {
+      path: "/reports/revenue/generate"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ExportRevenueReport returns a CSV export for a revenue date range.
+  rpc ExportRevenueReport(ExportRevenueReportRequest) returns (ExportRevenueReportResponse) {
+    option (onekit.http.config) = {
+      path: "/reports/revenue/export"
+      method: HTTP_METHOD_GET
     };
   }
 }

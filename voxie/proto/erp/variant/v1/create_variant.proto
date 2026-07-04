@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package erp.variant.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/variant/v1";
+
+message CreateVariantRequest {
+  int64 product_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string sku = 3;
+  string barcode = 4;
+  double cost_price = 5;
+  double sale_price = 6;
+  double stock_quantity = 7;
+  string attributes = 8;
+  bool is_active = 9;
+}
+
+message CreateVariantResponse {
+  int64 variant_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string message = 2;
+}

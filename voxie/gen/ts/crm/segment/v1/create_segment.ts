@@ -11,8 +11,8 @@ export interface CreateSegmentRequest {
   name: string;
   /** description is the description value for this contract. */
   description: string;
-  /** rules is the rules value for this contract. */
-  rules: string;
+  /** filters is the JSON filter definition for this segment. */
+  filters: string;
 }
 
 export interface CreateSegmentResponse {

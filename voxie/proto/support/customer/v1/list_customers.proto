@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package support.customer.v1;
+
+import "onekit/http/annotations.proto";
+import "support/customer/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/customer/v1";
+
+message ListCustomersRequest {
+  int32 page = 1 [
+    (onekit.http.query).name = "page"
+  ];
+  int32 page_size = 2 [
+    (onekit.http.query).name = "page_size"
+  ];
+}
+
+message ListCustomersResponse {
+  repeated Customer customers = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}

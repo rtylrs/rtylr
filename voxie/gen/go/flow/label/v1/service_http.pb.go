@@ -13,6 +13,9 @@ import (
 type LabelServiceServer interface {
 	ListLabels(context.Context, *ListLabelsRequest) (*ListLabelsResponse, error)
 	CreateLabel(context.Context, *CreateLabelRequest) (*CreateLabelResponse, error)
+	UpdateLabel(context.Context, *UpdateLabelRequest) (*UpdateLabelResponse, error)
+	DeleteLabel(context.Context, *DeleteLabelRequest) (*DeleteLabelResponse, error)
+	SetTaskLabels(context.Context, *SetTaskLabelsRequest) (*SetTaskLabelsResponse, error)
 }
 
 // RegisterLabelServiceServer registers the HTTP handlers for service LabelService to the given mux.
@@ -39,6 +42,33 @@ func RegisterLabelServiceServer(server LabelServiceServer, opts ...ServerOption)
 
 	config.mux.Handle("POST /api/flow/label/v1/labels", createLabelHandler)
 
+	methodHeaders = getUpdateLabelHeaders()
+	updateLabelHandler := BindingMiddleware[UpdateLabelRequest](
+		genericHandler(server.UpdateLabel, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateLabelPathParams, updateLabelQueryParams,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/flow/label/v1/labels/{id}", updateLabelHandler)
+
+	methodHeaders = getDeleteLabelHeaders()
+	deleteLabelHandler := BindingMiddleware[DeleteLabelRequest](
+		genericHandler(server.DeleteLabel, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		deleteLabelPathParams, deleteLabelQueryParams,
+		"DELETE", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("DELETE /api/flow/label/v1/labels/{id}", deleteLabelHandler)
+
+	methodHeaders = getSetTaskLabelsHeaders()
+	setTaskLabelsHandler := BindingMiddleware[SetTaskLabelsRequest](
+		genericHandler(server.SetTaskLabels, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		setTaskLabelsPathParams, setTaskLabelsQueryParams,
+		"PUT", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/flow/label/v1/tasks/labels", setTaskLabelsHandler)
+
 	return nil
 }
 
@@ -57,6 +87,21 @@ func getCreateLabelHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getUpdateLabelHeaders returns the method-level required headers for UpdateLabel
+func getUpdateLabelHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getDeleteLabelHeaders returns the method-level required headers for DeleteLabel
+func getDeleteLabelHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getSetTaskLabelsHeaders returns the method-level required headers for SetTaskLabels
+func getSetTaskLabelsHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listLabelsPathParams contains path parameter configuration for ListLabels
 var listLabelsPathParams = []PathParamConfig{}
 
@@ -70,3 +115,25 @@ var createLabelPathParams = []PathParamConfig{}
 
 // createLabelQueryParams contains query parameter configuration for CreateLabel
 var createLabelQueryParams = []QueryParamConfig{}
+
+// updateLabelPathParams contains path parameter configuration for UpdateLabel
+var updateLabelPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateLabelQueryParams contains query parameter configuration for UpdateLabel
+var updateLabelQueryParams = []QueryParamConfig{}
+
+// deleteLabelPathParams contains path parameter configuration for DeleteLabel
+var deleteLabelPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// deleteLabelQueryParams contains query parameter configuration for DeleteLabel
+var deleteLabelQueryParams = []QueryParamConfig{}
+
+// setTaskLabelsPathParams contains path parameter configuration for SetTaskLabels
+var setTaskLabelsPathParams = []PathParamConfig{}
+
+// setTaskLabelsQueryParams contains query parameter configuration for SetTaskLabels
+var setTaskLabelsQueryParams = []QueryParamConfig{}

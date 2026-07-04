@@ -8,49 +8,56 @@ import "onekit/http/annotations.proto";
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message CreateSubtaskRequest {
+  // parent_task_id is the parent task id value for this contract.
+  int64 parent_task_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
   // project_id is the project id value for this contract.
-  int64 project_id = 1 [
+  int64 project_id = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // workspace_id is the workspace id value for this contract.
-  int64 workspace_id = 2 [
+  int64 workspace_id = 3 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
   // title is the title value for this contract.
-  string title = 3 [
+  string title = 4 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 4 [
+  string description = 5 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // priority is the priority value for this contract.
-  string priority = 5 [
+  string priority = 6 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // assignee_id is the assignee id value for this contract.
-  optional int64 assignee_id = 6 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
+  optional int64 assignee_id = 7 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
   // due_date is the due date value for this contract.
-  string due_date = 7 [
+  string due_date = 8 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // start_date is the start date value for this contract.
-  string start_date = 8 [
+  string start_date = 9 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // estimated_hours is the estimated hours value for this contract.
-  optional double estimated_hours = 9 [(onekit.http.nullable) = true];
+  optional double estimated_hours = 10 [(onekit.http.nullable) = true];
 }
 
 message CreateSubtaskResponse {

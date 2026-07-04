@@ -6,31 +6,28 @@
 
 /* eslint-disable */
 
-export interface EmployeeDocumentPayload {
-  /** Unique identifier for the document. */
+export interface Document {
   id: number;
-  /** Tenant owner this document belongs to. */
   ownerId: number;
-  /** Employee this document is associated with. */
-  employeeId: number;
-  /** Category of document (e.g. "id_card", "contract", "certificate", "visa"). */
-  documentType: string;
-  /** Human-readable name for the document. */
+  staffId: number;
   name: string;
-  /** How the document is stored (stored | linked). */
-  storageMode: string;
-  /** URL to access the document file. */
+  type: string;
   fileUrl: string;
-  /** Date the document expires (ISO-8601 date); absent if no expiry. */
-  expiryDate?:
-    | string
-    | undefined;
-  /** Employee who uploaded or linked the document. */
+  expiryDate: string;
+  createdAt: string;
+}
+
+export interface EmployeeDocumentPayload {
+  id: number;
+  ownerId: number;
+  employeeId: number;
+  documentType: string;
+  name: string;
+  storageMode: string;
+  fileUrl: string;
+  expiryDate?: string | undefined;
   uploadedBy: number;
-  /** Unix timestamp when the document was uploaded. */
   uploadedAt: number;
-  /** Unix timestamp when this record was created. */
   createdAt: number;
-  /** Unix timestamp when this record was last updated. */
   updatedAt: number;
 }

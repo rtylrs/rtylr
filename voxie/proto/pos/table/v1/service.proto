@@ -7,7 +7,6 @@ import "pos/table/v1/create_table.proto";
 import "pos/table/v1/delete_table.proto";
 import "pos/table/v1/list_tables.proto";
 import "pos/table/v1/update_table.proto";
-import "pos/table/v1/update_table_status.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
 
@@ -31,14 +30,6 @@ service TableService {
   rpc UpdateTable(UpdateTableRequest) returns (UpdateTableResponse) {
     option (onekit.http.config) = {
       path: "/tables/{id}"
-      method: HTTP_METHOD_PUT
-      body: "body"
-    };
-  }
-
-  rpc UpdateTableStatus(UpdateTableStatusRequest) returns (UpdateTableStatusResponse) {
-    option (onekit.http.config) = {
-      path: "/tables/{id}/status"
       method: HTTP_METHOD_PUT
       body: "body"
     };

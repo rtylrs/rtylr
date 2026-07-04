@@ -3,7 +3,6 @@ syntax = "proto3";
 package hr.department.v1;
 
 import "buf/validate/validate.proto";
-import "hr/department/v1/types.proto";
 import "onekit/http/annotations.proto";
 
 
@@ -12,26 +11,13 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
 // ── Update ─────────────────────────────────────────────────────────
 
 message UpdateDepartmentBody {
-  // New location; absent to keep current.
-  optional int64 location_id = 1 [
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
-    (onekit.http.nullable) = true
-  ];
-  // New parent department; absent to keep current.
-  optional int64 parent_department_id = 2 [
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
-    (onekit.http.nullable) = true
-  ];
   // name is the updated department name.
-  string name = 3 [
+  string name = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
-  // New default work schedule; absent to keep current.
-  optional int64 default_work_schedule_id = 4 [
-    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
-    (onekit.http.nullable) = true
-  ];
+  string description = 2;
+  int64 manager_staff_id = 3;
 }
 
 message UpdateDepartmentRequest {
@@ -46,6 +32,5 @@ message UpdateDepartmentRequest {
 }
 
 message UpdateDepartmentResponse {
-  // The updated department.
-  DepartmentPayload department = 1;
+  bool success = 1;
 }

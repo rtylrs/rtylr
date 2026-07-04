@@ -25,29 +25,35 @@ var File_hr_document_v1_service_proto protoreflect.FileDescriptor
 
 const file_hr_document_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/document/v1/service.proto\x12\x0ehr.document.v1\x1a,hr/document/v1/list_employee_documents.proto\x1a$hr/document/v1/upload_document.proto\x1a\x1donekit/http/annotations.proto2\xac\x02\n" +
-	"\x0fDocumentService\x12\x88\x01\n" +
-	"\x15ListEmployeeDocuments\x12,.hr.document.v1.ListEmployeeDocumentsRequest\x1a-.hr.document.v1.ListEmployeeDocumentsResponse\"\x12\x9a\xb5\x18\x0e\n" +
+	"\x1chr/document/v1/service.proto\x12\x0ehr.document.v1\x1a$hr/document/v1/create_document.proto\x1a$hr/document/v1/delete_document.proto\x1a#hr/document/v1/list_documents.proto\x1a\x1donekit/http/annotations.proto2\x90\x03\n" +
+	"\x0fDocumentService\x12p\n" +
+	"\rListDocuments\x12$.hr.document.v1.ListDocumentsRequest\x1a%.hr.document.v1.ListDocumentsResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/documents\x10\x01\x12s\n" +
-	"\x0eUploadDocument\x12%.hr.document.v1.UploadDocumentRequest\x1a&.hr.document.v1.UploadDocumentResponse\"\x12\x9a\xb5\x18\x0e\n" +
+	"/documents\x10\x01\x12v\n" +
+	"\x0eCreateDocument\x12%.hr.document.v1.CreateDocumentRequest\x1a&.hr.document.v1.CreateDocumentResponse\"\x15\x9a\xb5\x18\x11\n" +
 	"\n" +
-	"/documents\x10\x02\x1a\x19\xa2\xb5\x18\x15\n" +
+	"/documents\x10\x02\"\x01*\x12x\n" +
+	"\x0eDeleteDocument\x12%.hr.document.v1.DeleteDocumentRequest\x1a&.hr.document.v1.DeleteDocumentResponse\"\x17\x9a\xb5\x18\x13\n" +
+	"\x0f/documents/{id}\x10\x04\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/hr/document/v1B/Z-github.com/voxire/voxie/gen/go/hr/document/v1b\x06proto3"
 
 var file_hr_document_v1_service_proto_goTypes = []any{
-	(*ListEmployeeDocumentsRequest)(nil),  // 0: hr.document.v1.ListEmployeeDocumentsRequest
-	(*UploadDocumentRequest)(nil),         // 1: hr.document.v1.UploadDocumentRequest
-	(*ListEmployeeDocumentsResponse)(nil), // 2: hr.document.v1.ListEmployeeDocumentsResponse
-	(*UploadDocumentResponse)(nil),        // 3: hr.document.v1.UploadDocumentResponse
+	(*ListDocumentsRequest)(nil),   // 0: hr.document.v1.ListDocumentsRequest
+	(*CreateDocumentRequest)(nil),  // 1: hr.document.v1.CreateDocumentRequest
+	(*DeleteDocumentRequest)(nil),  // 2: hr.document.v1.DeleteDocumentRequest
+	(*ListDocumentsResponse)(nil),  // 3: hr.document.v1.ListDocumentsResponse
+	(*CreateDocumentResponse)(nil), // 4: hr.document.v1.CreateDocumentResponse
+	(*DeleteDocumentResponse)(nil), // 5: hr.document.v1.DeleteDocumentResponse
 }
 var file_hr_document_v1_service_proto_depIdxs = []int32{
-	0, // 0: hr.document.v1.DocumentService.ListEmployeeDocuments:input_type -> hr.document.v1.ListEmployeeDocumentsRequest
-	1, // 1: hr.document.v1.DocumentService.UploadDocument:input_type -> hr.document.v1.UploadDocumentRequest
-	2, // 2: hr.document.v1.DocumentService.ListEmployeeDocuments:output_type -> hr.document.v1.ListEmployeeDocumentsResponse
-	3, // 3: hr.document.v1.DocumentService.UploadDocument:output_type -> hr.document.v1.UploadDocumentResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	0, // 0: hr.document.v1.DocumentService.ListDocuments:input_type -> hr.document.v1.ListDocumentsRequest
+	1, // 1: hr.document.v1.DocumentService.CreateDocument:input_type -> hr.document.v1.CreateDocumentRequest
+	2, // 2: hr.document.v1.DocumentService.DeleteDocument:input_type -> hr.document.v1.DeleteDocumentRequest
+	3, // 3: hr.document.v1.DocumentService.ListDocuments:output_type -> hr.document.v1.ListDocumentsResponse
+	4, // 4: hr.document.v1.DocumentService.CreateDocument:output_type -> hr.document.v1.CreateDocumentResponse
+	5, // 5: hr.document.v1.DocumentService.DeleteDocument:output_type -> hr.document.v1.DeleteDocumentResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -58,8 +64,9 @@ func file_hr_document_v1_service_proto_init() {
 	if File_hr_document_v1_service_proto != nil {
 		return
 	}
-	file_hr_document_v1_list_employee_documents_proto_init()
-	file_hr_document_v1_upload_document_proto_init()
+	file_hr_document_v1_create_document_proto_init()
+	file_hr_document_v1_delete_document_proto_init()
+	file_hr_document_v1_list_documents_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

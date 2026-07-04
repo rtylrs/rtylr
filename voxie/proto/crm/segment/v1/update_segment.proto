@@ -18,8 +18,8 @@ message UpdateSegmentBody {
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
-  // rules is the rules value for this contract.
-  string rules = 3 [
+  // filters is the JSON filter definition for this segment.
+  string filters = 3 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];

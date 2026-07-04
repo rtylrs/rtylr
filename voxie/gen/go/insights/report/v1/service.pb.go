@@ -25,7 +25,8 @@ var File_insights_report_v1_service_proto protoreflect.FileDescriptor
 
 const file_insights_report_v1_service_proto_rawDesc = "" +
 	"\n" +
-	" insights/report/v1/service.proto\x12\x12insights.report.v1\x1a/insights/report/v1/create_report_template.proto\x1a0insights/report/v1/create_scheduled_report.proto\x1a,insights/report/v1/get_report_template.proto\x1a.insights/report/v1/list_report_templates.proto\x1a/insights/report/v1/list_scheduled_reports.proto\x1a\x1donekit/http/annotations.proto2\xfa\x05\n" +
+	" insights/report/v1/service.proto\x12\x12insights.report.v1\x1a/insights/report/v1/create_report_template.proto\x1a0insights/report/v1/create_scheduled_report.proto\x1a0insights/report/v1/delete_scheduled_report.proto\x1a.insights/report/v1/export_revenue_report.proto\x1a0insights/report/v1/generate_revenue_report.proto\x1a,insights/report/v1/get_report_template.proto\x1a.insights/report/v1/list_report_templates.proto\x1a/insights/report/v1/list_scheduled_reports.proto\x1a0insights/report/v1/update_scheduled_report.proto\x1a\x1donekit/http/annotations.proto2\xe6\n" +
+	"\n" +
 	"\rReportService\x12\x8a\x01\n" +
 	"\x13ListReportTemplates\x12..insights.report.v1.ListReportTemplatesRequest\x1a/.insights.report.v1.ListReportTemplatesResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -40,7 +41,15 @@ const file_insights_report_v1_service_proto_rawDesc = "" +
 	"/scheduled\x10\x01\x12\x90\x01\n" +
 	"\x15CreateScheduledReport\x120.insights.report.v1.CreateScheduledReportRequest\x1a1.insights.report.v1.CreateScheduledReportResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
-	"/scheduled\x10\x02\x1a\x1d\xa2\xb5\x18\x19\n" +
+	"/scheduled\x10\x02\x12\x95\x01\n" +
+	"\x15UpdateScheduledReport\x120.insights.report.v1.UpdateScheduledReportRequest\x1a1.insights.report.v1.UpdateScheduledReportResponse\"\x17\x9a\xb5\x18\x13\n" +
+	"\x0f/scheduled/{id}\x10\x03\x12\x95\x01\n" +
+	"\x15DeleteScheduledReport\x120.insights.report.v1.DeleteScheduledReportRequest\x1a1.insights.report.v1.DeleteScheduledReportResponse\"\x17\x9a\xb5\x18\x13\n" +
+	"\x0f/scheduled/{id}\x10\x04\x12\x9f\x01\n" +
+	"\x15GenerateRevenueReport\x120.insights.report.v1.GenerateRevenueReportRequest\x1a1.insights.report.v1.GenerateRevenueReportResponse\"!\x9a\xb5\x18\x1d\n" +
+	"\x19/reports/revenue/generate\x10\x02\x12\x97\x01\n" +
+	"\x13ExportRevenueReport\x12..insights.report.v1.ExportRevenueReportRequest\x1a/.insights.report.v1.ExportRevenueReportResponse\"\x1f\x9a\xb5\x18\x1b\n" +
+	"\x17/reports/revenue/export\x10\x01\x1a\x1d\xa2\xb5\x18\x19\n" +
 	"\x17/api/insights/report/v1B3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 
 var file_insights_report_v1_service_proto_goTypes = []any{
@@ -49,28 +58,44 @@ var file_insights_report_v1_service_proto_goTypes = []any{
 	(*GetReportTemplateRequest)(nil),      // 2: insights.report.v1.GetReportTemplateRequest
 	(*ListScheduledReportsRequest)(nil),   // 3: insights.report.v1.ListScheduledReportsRequest
 	(*CreateScheduledReportRequest)(nil),  // 4: insights.report.v1.CreateScheduledReportRequest
-	(*ListReportTemplatesResponse)(nil),   // 5: insights.report.v1.ListReportTemplatesResponse
-	(*CreateReportTemplateResponse)(nil),  // 6: insights.report.v1.CreateReportTemplateResponse
-	(*GetReportTemplateResponse)(nil),     // 7: insights.report.v1.GetReportTemplateResponse
-	(*ListScheduledReportsResponse)(nil),  // 8: insights.report.v1.ListScheduledReportsResponse
-	(*CreateScheduledReportResponse)(nil), // 9: insights.report.v1.CreateScheduledReportResponse
+	(*UpdateScheduledReportRequest)(nil),  // 5: insights.report.v1.UpdateScheduledReportRequest
+	(*DeleteScheduledReportRequest)(nil),  // 6: insights.report.v1.DeleteScheduledReportRequest
+	(*GenerateRevenueReportRequest)(nil),  // 7: insights.report.v1.GenerateRevenueReportRequest
+	(*ExportRevenueReportRequest)(nil),    // 8: insights.report.v1.ExportRevenueReportRequest
+	(*ListReportTemplatesResponse)(nil),   // 9: insights.report.v1.ListReportTemplatesResponse
+	(*CreateReportTemplateResponse)(nil),  // 10: insights.report.v1.CreateReportTemplateResponse
+	(*GetReportTemplateResponse)(nil),     // 11: insights.report.v1.GetReportTemplateResponse
+	(*ListScheduledReportsResponse)(nil),  // 12: insights.report.v1.ListScheduledReportsResponse
+	(*CreateScheduledReportResponse)(nil), // 13: insights.report.v1.CreateScheduledReportResponse
+	(*UpdateScheduledReportResponse)(nil), // 14: insights.report.v1.UpdateScheduledReportResponse
+	(*DeleteScheduledReportResponse)(nil), // 15: insights.report.v1.DeleteScheduledReportResponse
+	(*GenerateRevenueReportResponse)(nil), // 16: insights.report.v1.GenerateRevenueReportResponse
+	(*ExportRevenueReportResponse)(nil),   // 17: insights.report.v1.ExportRevenueReportResponse
 }
 var file_insights_report_v1_service_proto_depIdxs = []int32{
-	0, // 0: insights.report.v1.ReportService.ListReportTemplates:input_type -> insights.report.v1.ListReportTemplatesRequest
-	1, // 1: insights.report.v1.ReportService.CreateReportTemplate:input_type -> insights.report.v1.CreateReportTemplateRequest
-	2, // 2: insights.report.v1.ReportService.GetReportTemplate:input_type -> insights.report.v1.GetReportTemplateRequest
-	3, // 3: insights.report.v1.ReportService.ListScheduledReports:input_type -> insights.report.v1.ListScheduledReportsRequest
-	4, // 4: insights.report.v1.ReportService.CreateScheduledReport:input_type -> insights.report.v1.CreateScheduledReportRequest
-	5, // 5: insights.report.v1.ReportService.ListReportTemplates:output_type -> insights.report.v1.ListReportTemplatesResponse
-	6, // 6: insights.report.v1.ReportService.CreateReportTemplate:output_type -> insights.report.v1.CreateReportTemplateResponse
-	7, // 7: insights.report.v1.ReportService.GetReportTemplate:output_type -> insights.report.v1.GetReportTemplateResponse
-	8, // 8: insights.report.v1.ReportService.ListScheduledReports:output_type -> insights.report.v1.ListScheduledReportsResponse
-	9, // 9: insights.report.v1.ReportService.CreateScheduledReport:output_type -> insights.report.v1.CreateScheduledReportResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: insights.report.v1.ReportService.ListReportTemplates:input_type -> insights.report.v1.ListReportTemplatesRequest
+	1,  // 1: insights.report.v1.ReportService.CreateReportTemplate:input_type -> insights.report.v1.CreateReportTemplateRequest
+	2,  // 2: insights.report.v1.ReportService.GetReportTemplate:input_type -> insights.report.v1.GetReportTemplateRequest
+	3,  // 3: insights.report.v1.ReportService.ListScheduledReports:input_type -> insights.report.v1.ListScheduledReportsRequest
+	4,  // 4: insights.report.v1.ReportService.CreateScheduledReport:input_type -> insights.report.v1.CreateScheduledReportRequest
+	5,  // 5: insights.report.v1.ReportService.UpdateScheduledReport:input_type -> insights.report.v1.UpdateScheduledReportRequest
+	6,  // 6: insights.report.v1.ReportService.DeleteScheduledReport:input_type -> insights.report.v1.DeleteScheduledReportRequest
+	7,  // 7: insights.report.v1.ReportService.GenerateRevenueReport:input_type -> insights.report.v1.GenerateRevenueReportRequest
+	8,  // 8: insights.report.v1.ReportService.ExportRevenueReport:input_type -> insights.report.v1.ExportRevenueReportRequest
+	9,  // 9: insights.report.v1.ReportService.ListReportTemplates:output_type -> insights.report.v1.ListReportTemplatesResponse
+	10, // 10: insights.report.v1.ReportService.CreateReportTemplate:output_type -> insights.report.v1.CreateReportTemplateResponse
+	11, // 11: insights.report.v1.ReportService.GetReportTemplate:output_type -> insights.report.v1.GetReportTemplateResponse
+	12, // 12: insights.report.v1.ReportService.ListScheduledReports:output_type -> insights.report.v1.ListScheduledReportsResponse
+	13, // 13: insights.report.v1.ReportService.CreateScheduledReport:output_type -> insights.report.v1.CreateScheduledReportResponse
+	14, // 14: insights.report.v1.ReportService.UpdateScheduledReport:output_type -> insights.report.v1.UpdateScheduledReportResponse
+	15, // 15: insights.report.v1.ReportService.DeleteScheduledReport:output_type -> insights.report.v1.DeleteScheduledReportResponse
+	16, // 16: insights.report.v1.ReportService.GenerateRevenueReport:output_type -> insights.report.v1.GenerateRevenueReportResponse
+	17, // 17: insights.report.v1.ReportService.ExportRevenueReport:output_type -> insights.report.v1.ExportRevenueReportResponse
+	9,  // [9:18] is the sub-list for method output_type
+	0,  // [0:9] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_insights_report_v1_service_proto_init() }
@@ -80,9 +105,13 @@ func file_insights_report_v1_service_proto_init() {
 	}
 	file_insights_report_v1_create_report_template_proto_init()
 	file_insights_report_v1_create_scheduled_report_proto_init()
+	file_insights_report_v1_delete_scheduled_report_proto_init()
+	file_insights_report_v1_export_revenue_report_proto_init()
+	file_insights_report_v1_generate_revenue_report_proto_init()
 	file_insights_report_v1_get_report_template_proto_init()
 	file_insights_report_v1_list_report_templates_proto_init()
 	file_insights_report_v1_list_scheduled_reports_proto_init()
+	file_insights_report_v1_update_scheduled_report_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

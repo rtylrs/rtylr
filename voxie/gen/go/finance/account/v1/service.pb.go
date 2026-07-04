@@ -25,27 +25,45 @@ var File_finance_account_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_account_v1_service_proto_rawDesc = "" +
 	"\n" +
-	" finance/account/v1/service.proto\x12\x12finance.account.v1\x1a'finance/account/v1/create_account.proto\x1a&finance/account/v1/list_accounts.proto\x1a\x1donekit/http/annotations.proto2\x9e\x02\n" +
+	" finance/account/v1/service.proto\x12\x12finance.account.v1\x1a'finance/account/v1/create_account.proto\x1a'finance/account/v1/delete_account.proto\x1a.finance/account/v1/get_chart_of_accounts.proto\x1a&finance/account/v1/list_accounts.proto\x1a'finance/account/v1/update_account.proto\x1a\x1donekit/http/annotations.proto2\xb3\x05\n" +
 	"\x0eAccountService\x12t\n" +
 	"\fListAccounts\x12'.finance.account.v1.ListAccountsRequest\x1a(.finance.account.v1.ListAccountsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/accounts\x10\x01\x12w\n" +
 	"\rCreateAccount\x12(.finance.account.v1.CreateAccountRequest\x1a).finance.account.v1.CreateAccountResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/accounts\x10\x02\x1a\x1d\xa2\xb5\x18\x19\n" +
+	"\t/accounts\x10\x02\x12\x82\x01\n" +
+	"\rUpdateAccount\x12(.finance.account.v1.UpdateAccountRequest\x1a).finance.account.v1.UpdateAccountResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x0e/accounts/{id}\x10\x03\"\x04body\x12|\n" +
+	"\rDeleteAccount\x12(.finance.account.v1.DeleteAccountRequest\x1a).finance.account.v1.DeleteAccountResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/accounts/{id}\x10\x04\x12\x8f\x01\n" +
+	"\x12GetChartOfAccounts\x12-.finance.account.v1.GetChartOfAccountsRequest\x1a..finance.account.v1.GetChartOfAccountsResponse\"\x1a\x9a\xb5\x18\x16\n" +
+	"\x12/chart-of-accounts\x10\x01\x1a\x1d\xa2\xb5\x18\x19\n" +
 	"\x17/api/finance/account/v1B3Z1github.com/voxire/voxie/gen/go/finance/account/v1b\x06proto3"
 
 var file_finance_account_v1_service_proto_goTypes = []any{
-	(*ListAccountsRequest)(nil),   // 0: finance.account.v1.ListAccountsRequest
-	(*CreateAccountRequest)(nil),  // 1: finance.account.v1.CreateAccountRequest
-	(*ListAccountsResponse)(nil),  // 2: finance.account.v1.ListAccountsResponse
-	(*CreateAccountResponse)(nil), // 3: finance.account.v1.CreateAccountResponse
+	(*ListAccountsRequest)(nil),        // 0: finance.account.v1.ListAccountsRequest
+	(*CreateAccountRequest)(nil),       // 1: finance.account.v1.CreateAccountRequest
+	(*UpdateAccountRequest)(nil),       // 2: finance.account.v1.UpdateAccountRequest
+	(*DeleteAccountRequest)(nil),       // 3: finance.account.v1.DeleteAccountRequest
+	(*GetChartOfAccountsRequest)(nil),  // 4: finance.account.v1.GetChartOfAccountsRequest
+	(*ListAccountsResponse)(nil),       // 5: finance.account.v1.ListAccountsResponse
+	(*CreateAccountResponse)(nil),      // 6: finance.account.v1.CreateAccountResponse
+	(*UpdateAccountResponse)(nil),      // 7: finance.account.v1.UpdateAccountResponse
+	(*DeleteAccountResponse)(nil),      // 8: finance.account.v1.DeleteAccountResponse
+	(*GetChartOfAccountsResponse)(nil), // 9: finance.account.v1.GetChartOfAccountsResponse
 }
 var file_finance_account_v1_service_proto_depIdxs = []int32{
 	0, // 0: finance.account.v1.AccountService.ListAccounts:input_type -> finance.account.v1.ListAccountsRequest
 	1, // 1: finance.account.v1.AccountService.CreateAccount:input_type -> finance.account.v1.CreateAccountRequest
-	2, // 2: finance.account.v1.AccountService.ListAccounts:output_type -> finance.account.v1.ListAccountsResponse
-	3, // 3: finance.account.v1.AccountService.CreateAccount:output_type -> finance.account.v1.CreateAccountResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 2: finance.account.v1.AccountService.UpdateAccount:input_type -> finance.account.v1.UpdateAccountRequest
+	3, // 3: finance.account.v1.AccountService.DeleteAccount:input_type -> finance.account.v1.DeleteAccountRequest
+	4, // 4: finance.account.v1.AccountService.GetChartOfAccounts:input_type -> finance.account.v1.GetChartOfAccountsRequest
+	5, // 5: finance.account.v1.AccountService.ListAccounts:output_type -> finance.account.v1.ListAccountsResponse
+	6, // 6: finance.account.v1.AccountService.CreateAccount:output_type -> finance.account.v1.CreateAccountResponse
+	7, // 7: finance.account.v1.AccountService.UpdateAccount:output_type -> finance.account.v1.UpdateAccountResponse
+	8, // 8: finance.account.v1.AccountService.DeleteAccount:output_type -> finance.account.v1.DeleteAccountResponse
+	9, // 9: finance.account.v1.AccountService.GetChartOfAccounts:output_type -> finance.account.v1.GetChartOfAccountsResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -57,7 +75,10 @@ func file_finance_account_v1_service_proto_init() {
 		return
 	}
 	file_finance_account_v1_create_account_proto_init()
+	file_finance_account_v1_delete_account_proto_init()
+	file_finance_account_v1_get_chart_of_accounts_proto_init()
 	file_finance_account_v1_list_accounts_proto_init()
+	file_finance_account_v1_update_account_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

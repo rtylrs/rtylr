@@ -25,7 +25,7 @@ var File_insights_operation_v1_service_proto protoreflect.FileDescriptor
 
 const file_insights_operation_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"#insights/operation/v1/service.proto\x12\x15insights.operation.v1\x1a1insights/operation/v1/get_headcount_metrics.proto\x1a-insights/operation/v1/get_shift_metrics.proto\x1a0insights/operation/v1/get_time_off_metrics.proto\x1a+insights/operation/v1/get_utilization.proto\x1a\x1donekit/http/annotations.proto2\xdd\x04\n" +
+	"#insights/operation/v1/service.proto\x12\x15insights.operation.v1\x1a1insights/operation/v1/get_headcount_metrics.proto\x1a2insights/operation/v1/get_operations_summary.proto\x1a-insights/operation/v1/get_shift_metrics.proto\x1a0insights/operation/v1/get_time_off_metrics.proto\x1a+insights/operation/v1/get_utilization.proto\x1a\x1donekit/http/annotations.proto2\xf1\x05\n" +
 	"\x10OperationService\x12\x90\x01\n" +
 	"\x13GetHeadcountMetrics\x121.insights.operation.v1.GetHeadcountMetricsRequest\x1a2.insights.operation.v1.GetHeadcountMetricsResponse\"\x12\x9a\xb5\x18\x0e\n" +
 	"\n" +
@@ -35,30 +35,36 @@ const file_insights_operation_v1_service_proto_rawDesc = "" +
 	"\x11GetTimeOffMetrics\x12/.insights.operation.v1.GetTimeOffMetricsRequest\x1a0.insights.operation.v1.GetTimeOffMetricsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/time-off\x10\x01\x12\x83\x01\n" +
 	"\x0eGetUtilization\x12,.insights.operation.v1.GetUtilizationRequest\x1a-.insights.operation.v1.GetUtilizationResponse\"\x14\x9a\xb5\x18\x10\n" +
-	"\f/utilization\x10\x01\x1a \xa2\xb5\x18\x1c\n" +
+	"\f/utilization\x10\x01\x12\x91\x01\n" +
+	"\x14GetOperationsSummary\x122.insights.operation.v1.GetOperationsSummaryRequest\x1a3.insights.operation.v1.GetOperationsSummaryResponse\"\x10\x9a\xb5\x18\f\n" +
+	"\b/summary\x10\x01\x1a \xa2\xb5\x18\x1c\n" +
 	"\x1a/api/insights/operation/v1B6Z4github.com/voxire/voxie/gen/go/insights/operation/v1b\x06proto3"
 
 var file_insights_operation_v1_service_proto_goTypes = []any{
-	(*GetHeadcountMetricsRequest)(nil),  // 0: insights.operation.v1.GetHeadcountMetricsRequest
-	(*GetShiftMetricsRequest)(nil),      // 1: insights.operation.v1.GetShiftMetricsRequest
-	(*GetTimeOffMetricsRequest)(nil),    // 2: insights.operation.v1.GetTimeOffMetricsRequest
-	(*GetUtilizationRequest)(nil),       // 3: insights.operation.v1.GetUtilizationRequest
-	(*GetHeadcountMetricsResponse)(nil), // 4: insights.operation.v1.GetHeadcountMetricsResponse
-	(*GetShiftMetricsResponse)(nil),     // 5: insights.operation.v1.GetShiftMetricsResponse
-	(*GetTimeOffMetricsResponse)(nil),   // 6: insights.operation.v1.GetTimeOffMetricsResponse
-	(*GetUtilizationResponse)(nil),      // 7: insights.operation.v1.GetUtilizationResponse
+	(*GetHeadcountMetricsRequest)(nil),   // 0: insights.operation.v1.GetHeadcountMetricsRequest
+	(*GetShiftMetricsRequest)(nil),       // 1: insights.operation.v1.GetShiftMetricsRequest
+	(*GetTimeOffMetricsRequest)(nil),     // 2: insights.operation.v1.GetTimeOffMetricsRequest
+	(*GetUtilizationRequest)(nil),        // 3: insights.operation.v1.GetUtilizationRequest
+	(*GetOperationsSummaryRequest)(nil),  // 4: insights.operation.v1.GetOperationsSummaryRequest
+	(*GetHeadcountMetricsResponse)(nil),  // 5: insights.operation.v1.GetHeadcountMetricsResponse
+	(*GetShiftMetricsResponse)(nil),      // 6: insights.operation.v1.GetShiftMetricsResponse
+	(*GetTimeOffMetricsResponse)(nil),    // 7: insights.operation.v1.GetTimeOffMetricsResponse
+	(*GetUtilizationResponse)(nil),       // 8: insights.operation.v1.GetUtilizationResponse
+	(*GetOperationsSummaryResponse)(nil), // 9: insights.operation.v1.GetOperationsSummaryResponse
 }
 var file_insights_operation_v1_service_proto_depIdxs = []int32{
 	0, // 0: insights.operation.v1.OperationService.GetHeadcountMetrics:input_type -> insights.operation.v1.GetHeadcountMetricsRequest
 	1, // 1: insights.operation.v1.OperationService.GetShiftMetrics:input_type -> insights.operation.v1.GetShiftMetricsRequest
 	2, // 2: insights.operation.v1.OperationService.GetTimeOffMetrics:input_type -> insights.operation.v1.GetTimeOffMetricsRequest
 	3, // 3: insights.operation.v1.OperationService.GetUtilization:input_type -> insights.operation.v1.GetUtilizationRequest
-	4, // 4: insights.operation.v1.OperationService.GetHeadcountMetrics:output_type -> insights.operation.v1.GetHeadcountMetricsResponse
-	5, // 5: insights.operation.v1.OperationService.GetShiftMetrics:output_type -> insights.operation.v1.GetShiftMetricsResponse
-	6, // 6: insights.operation.v1.OperationService.GetTimeOffMetrics:output_type -> insights.operation.v1.GetTimeOffMetricsResponse
-	7, // 7: insights.operation.v1.OperationService.GetUtilization:output_type -> insights.operation.v1.GetUtilizationResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	4, // 4: insights.operation.v1.OperationService.GetOperationsSummary:input_type -> insights.operation.v1.GetOperationsSummaryRequest
+	5, // 5: insights.operation.v1.OperationService.GetHeadcountMetrics:output_type -> insights.operation.v1.GetHeadcountMetricsResponse
+	6, // 6: insights.operation.v1.OperationService.GetShiftMetrics:output_type -> insights.operation.v1.GetShiftMetricsResponse
+	7, // 7: insights.operation.v1.OperationService.GetTimeOffMetrics:output_type -> insights.operation.v1.GetTimeOffMetricsResponse
+	8, // 8: insights.operation.v1.OperationService.GetUtilization:output_type -> insights.operation.v1.GetUtilizationResponse
+	9, // 9: insights.operation.v1.OperationService.GetOperationsSummary:output_type -> insights.operation.v1.GetOperationsSummaryResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -70,6 +76,7 @@ func file_insights_operation_v1_service_proto_init() {
 		return
 	}
 	file_insights_operation_v1_get_headcount_metrics_proto_init()
+	file_insights_operation_v1_get_operations_summary_proto_init()
 	file_insights_operation_v1_get_shift_metrics_proto_init()
 	file_insights_operation_v1_get_time_off_metrics_proto_init()
 	file_insights_operation_v1_get_utilization_proto_init()

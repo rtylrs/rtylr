@@ -25,42 +25,86 @@ var File_erp_product_v1_service_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cerp/product/v1/service.proto\x12\x0eerp.product.v1\x1a#erp/product/v1/create_product.proto\x1a#erp/product/v1/delete_product.proto\x1a\"erp/product/v1/list_products.proto\x1a#erp/product/v1/update_product.proto\x1a\x1donekit/http/annotations.proto2\xfc\x03\n" +
+	"\x1cerp/product/v1/service.proto\x12\x0eerp.product.v1\x1a#erp/product/v1/create_product.proto\x1a#erp/product/v1/delete_product.proto\x1a\"erp/product/v1/get_dashboard.proto\x1a erp/product/v1/get_product.proto\x1a+erp/product/v1/get_product_by_barcode.proto\x1a%erp/product/v1/get_product_full.proto\x1a(erp/product/v1/list_expiring_items.proto\x1a,erp/product/v1/list_product_attributes.proto\x1a\"erp/product/v1/list_products.proto\x1a-erp/product/v1/list_reorder_suggestions.proto\x1a#erp/product/v1/update_product.proto\x1a\x1donekit/http/annotations.proto2\x96\v\n" +
 	"\x0eProductService\x12l\n" +
 	"\fListProducts\x12#.erp.product.v1.ListProductsRequest\x1a$.erp.product.v1.ListProductsResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/products\x10\x01\x12o\n" +
 	"\rCreateProduct\x12$.erp.product.v1.CreateProductRequest\x1a%.erp.product.v1.CreateProductResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/products\x10\x02\x12z\n" +
+	"\t/products\x10\x02\x12\x90\x01\n" +
+	"\x13GetProductByBarcode\x12*.erp.product.v1.GetProductByBarcodeRequest\x1a+.erp.product.v1.GetProductByBarcodeResponse\" \x9a\xb5\x18\x1c\n" +
+	"\x18/products/barcode/{code}\x10\x01\x12k\n" +
+	"\n" +
+	"GetProduct\x12!.erp.product.v1.GetProductRequest\x1a\".erp.product.v1.GetProductResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/products/{id}\x10\x01\x12|\n" +
+	"\x0eGetProductFull\x12%.erp.product.v1.GetProductFullRequest\x1a&.erp.product.v1.GetProductFullResponse\"\x1b\x9a\xb5\x18\x17\n" +
+	"\x13/products/{id}/full\x10\x01\x12\x97\x01\n" +
+	"\x15ListProductAttributes\x12,.erp.product.v1.ListProductAttributesRequest\x1a-.erp.product.v1.ListProductAttributesResponse\"!\x9a\xb5\x18\x1d\n" +
+	"\x19/products/{id}/attributes\x10\x01\x12z\n" +
 	"\rUpdateProduct\x12$.erp.product.v1.UpdateProductRequest\x1a%.erp.product.v1.UpdateProductResponse\"\x1c\x9a\xb5\x18\x18\n" +
 	"\x0e/products/{id}\x10\x03\"\x04body\x12t\n" +
 	"\rDeleteProduct\x12$.erp.product.v1.DeleteProductRequest\x1a%.erp.product.v1.DeleteProductResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/products/{id}\x10\x04\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\x0e/products/{id}\x10\x04\x12m\n" +
+	"\fGetDashboard\x12#.erp.product.v1.GetDashboardRequest\x1a$.erp.product.v1.GetDashboardResponse\"\x12\x9a\xb5\x18\x0e\n" +
+	"\n" +
+	"/dashboard\x10\x01\x12\x95\x01\n" +
+	"\x16ListReorderSuggestions\x12-.erp.product.v1.ListReorderSuggestionsRequest\x1a..erp.product.v1.ListReorderSuggestionsResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x14/reorder-suggestions\x10\x01\x12y\n" +
+	"\x11ListExpiringItems\x12(.erp.product.v1.ListExpiringItemsRequest\x1a).erp.product.v1.ListExpiringItemsResponse\"\x0f\x9a\xb5\x18\v\n" +
+	"\a/expiry\x10\x01\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/erp/product/v1B/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"
 
 var file_erp_product_v1_service_proto_goTypes = []any{
-	(*ListProductsRequest)(nil),   // 0: erp.product.v1.ListProductsRequest
-	(*CreateProductRequest)(nil),  // 1: erp.product.v1.CreateProductRequest
-	(*UpdateProductRequest)(nil),  // 2: erp.product.v1.UpdateProductRequest
-	(*DeleteProductRequest)(nil),  // 3: erp.product.v1.DeleteProductRequest
-	(*ListProductsResponse)(nil),  // 4: erp.product.v1.ListProductsResponse
-	(*CreateProductResponse)(nil), // 5: erp.product.v1.CreateProductResponse
-	(*UpdateProductResponse)(nil), // 6: erp.product.v1.UpdateProductResponse
-	(*DeleteProductResponse)(nil), // 7: erp.product.v1.DeleteProductResponse
+	(*ListProductsRequest)(nil),            // 0: erp.product.v1.ListProductsRequest
+	(*CreateProductRequest)(nil),           // 1: erp.product.v1.CreateProductRequest
+	(*GetProductByBarcodeRequest)(nil),     // 2: erp.product.v1.GetProductByBarcodeRequest
+	(*GetProductRequest)(nil),              // 3: erp.product.v1.GetProductRequest
+	(*GetProductFullRequest)(nil),          // 4: erp.product.v1.GetProductFullRequest
+	(*ListProductAttributesRequest)(nil),   // 5: erp.product.v1.ListProductAttributesRequest
+	(*UpdateProductRequest)(nil),           // 6: erp.product.v1.UpdateProductRequest
+	(*DeleteProductRequest)(nil),           // 7: erp.product.v1.DeleteProductRequest
+	(*GetDashboardRequest)(nil),            // 8: erp.product.v1.GetDashboardRequest
+	(*ListReorderSuggestionsRequest)(nil),  // 9: erp.product.v1.ListReorderSuggestionsRequest
+	(*ListExpiringItemsRequest)(nil),       // 10: erp.product.v1.ListExpiringItemsRequest
+	(*ListProductsResponse)(nil),           // 11: erp.product.v1.ListProductsResponse
+	(*CreateProductResponse)(nil),          // 12: erp.product.v1.CreateProductResponse
+	(*GetProductByBarcodeResponse)(nil),    // 13: erp.product.v1.GetProductByBarcodeResponse
+	(*GetProductResponse)(nil),             // 14: erp.product.v1.GetProductResponse
+	(*GetProductFullResponse)(nil),         // 15: erp.product.v1.GetProductFullResponse
+	(*ListProductAttributesResponse)(nil),  // 16: erp.product.v1.ListProductAttributesResponse
+	(*UpdateProductResponse)(nil),          // 17: erp.product.v1.UpdateProductResponse
+	(*DeleteProductResponse)(nil),          // 18: erp.product.v1.DeleteProductResponse
+	(*GetDashboardResponse)(nil),           // 19: erp.product.v1.GetDashboardResponse
+	(*ListReorderSuggestionsResponse)(nil), // 20: erp.product.v1.ListReorderSuggestionsResponse
+	(*ListExpiringItemsResponse)(nil),      // 21: erp.product.v1.ListExpiringItemsResponse
 }
 var file_erp_product_v1_service_proto_depIdxs = []int32{
-	0, // 0: erp.product.v1.ProductService.ListProducts:input_type -> erp.product.v1.ListProductsRequest
-	1, // 1: erp.product.v1.ProductService.CreateProduct:input_type -> erp.product.v1.CreateProductRequest
-	2, // 2: erp.product.v1.ProductService.UpdateProduct:input_type -> erp.product.v1.UpdateProductRequest
-	3, // 3: erp.product.v1.ProductService.DeleteProduct:input_type -> erp.product.v1.DeleteProductRequest
-	4, // 4: erp.product.v1.ProductService.ListProducts:output_type -> erp.product.v1.ListProductsResponse
-	5, // 5: erp.product.v1.ProductService.CreateProduct:output_type -> erp.product.v1.CreateProductResponse
-	6, // 6: erp.product.v1.ProductService.UpdateProduct:output_type -> erp.product.v1.UpdateProductResponse
-	7, // 7: erp.product.v1.ProductService.DeleteProduct:output_type -> erp.product.v1.DeleteProductResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: erp.product.v1.ProductService.ListProducts:input_type -> erp.product.v1.ListProductsRequest
+	1,  // 1: erp.product.v1.ProductService.CreateProduct:input_type -> erp.product.v1.CreateProductRequest
+	2,  // 2: erp.product.v1.ProductService.GetProductByBarcode:input_type -> erp.product.v1.GetProductByBarcodeRequest
+	3,  // 3: erp.product.v1.ProductService.GetProduct:input_type -> erp.product.v1.GetProductRequest
+	4,  // 4: erp.product.v1.ProductService.GetProductFull:input_type -> erp.product.v1.GetProductFullRequest
+	5,  // 5: erp.product.v1.ProductService.ListProductAttributes:input_type -> erp.product.v1.ListProductAttributesRequest
+	6,  // 6: erp.product.v1.ProductService.UpdateProduct:input_type -> erp.product.v1.UpdateProductRequest
+	7,  // 7: erp.product.v1.ProductService.DeleteProduct:input_type -> erp.product.v1.DeleteProductRequest
+	8,  // 8: erp.product.v1.ProductService.GetDashboard:input_type -> erp.product.v1.GetDashboardRequest
+	9,  // 9: erp.product.v1.ProductService.ListReorderSuggestions:input_type -> erp.product.v1.ListReorderSuggestionsRequest
+	10, // 10: erp.product.v1.ProductService.ListExpiringItems:input_type -> erp.product.v1.ListExpiringItemsRequest
+	11, // 11: erp.product.v1.ProductService.ListProducts:output_type -> erp.product.v1.ListProductsResponse
+	12, // 12: erp.product.v1.ProductService.CreateProduct:output_type -> erp.product.v1.CreateProductResponse
+	13, // 13: erp.product.v1.ProductService.GetProductByBarcode:output_type -> erp.product.v1.GetProductByBarcodeResponse
+	14, // 14: erp.product.v1.ProductService.GetProduct:output_type -> erp.product.v1.GetProductResponse
+	15, // 15: erp.product.v1.ProductService.GetProductFull:output_type -> erp.product.v1.GetProductFullResponse
+	16, // 16: erp.product.v1.ProductService.ListProductAttributes:output_type -> erp.product.v1.ListProductAttributesResponse
+	17, // 17: erp.product.v1.ProductService.UpdateProduct:output_type -> erp.product.v1.UpdateProductResponse
+	18, // 18: erp.product.v1.ProductService.DeleteProduct:output_type -> erp.product.v1.DeleteProductResponse
+	19, // 19: erp.product.v1.ProductService.GetDashboard:output_type -> erp.product.v1.GetDashboardResponse
+	20, // 20: erp.product.v1.ProductService.ListReorderSuggestions:output_type -> erp.product.v1.ListReorderSuggestionsResponse
+	21, // 21: erp.product.v1.ProductService.ListExpiringItems:output_type -> erp.product.v1.ListExpiringItemsResponse
+	11, // [11:22] is the sub-list for method output_type
+	0,  // [0:11] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_erp_product_v1_service_proto_init() }
@@ -70,7 +114,14 @@ func file_erp_product_v1_service_proto_init() {
 	}
 	file_erp_product_v1_create_product_proto_init()
 	file_erp_product_v1_delete_product_proto_init()
+	file_erp_product_v1_get_dashboard_proto_init()
+	file_erp_product_v1_get_product_proto_init()
+	file_erp_product_v1_get_product_by_barcode_proto_init()
+	file_erp_product_v1_get_product_full_proto_init()
+	file_erp_product_v1_list_expiring_items_proto_init()
+	file_erp_product_v1_list_product_attributes_proto_init()
 	file_erp_product_v1_list_products_proto_init()
+	file_erp_product_v1_list_reorder_suggestions_proto_init()
 	file_erp_product_v1_update_product_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
