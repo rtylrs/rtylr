@@ -36,14 +36,30 @@ type SegmentUpdateInput struct {
 	Filters     []byte
 }
 
-// SegmentCustomer is the minimal customer projection returned alongside a
-// segment - segments don't own customer data, this is a read-only view.
+// SegmentCustomer is the customer projection returned alongside a segment -
+// segments don't own customer data, this is a read-only view.
 type SegmentCustomer struct {
-	ID        int64
-	FirstName string
-	LastName  string
-	Email     string
-	Phone     string
+	ID            int64
+	OwnerID       int64
+	FirstName     string
+	LastName      string
+	Email         string
+	Phone         string
+	DateOfBirth   *time.Time
+	Gender        string
+	Address       string
+	City          string
+	Country       string
+	LoyaltyPoints int64
+	TotalSpent    float64
+	VisitCount    int64
+	LastVisitAt   *time.Time
+	LoyaltyTier   string
+	Tags          []string
+	Notes         string
+	IsActive      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type SegmentDetail struct {

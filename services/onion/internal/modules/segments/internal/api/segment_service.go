@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
-	poscustomerv1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
@@ -153,16 +153,39 @@ func (a *SegmentAPI) GetSegmentCustomers(ctx context.Context, req *crmsegmentv1.
 	}, nil
 }
 
-func newSegmentCustomers(items []domain.SegmentCustomer) []*poscustomerv1.Customer {
-	out := make([]*poscustomerv1.Customer, 0, len(items))
+func newSegmentCustomers(items []domain.SegmentCustomer) []*crmcustomerv1.Customer {
+	out := make([]*crmcustomerv1.Customer, 0, len(items))
 	for _, item := range items {
-		out = append(out, &poscustomerv1.Customer{
-			Id:        item.ID,
-			FirstName: item.FirstName,
-			LastName:  item.LastName,
-			Email:     item.Email,
-			Phone:     item.Phone,
-		})
+		c := &crmcustomerv1.Customer{
+			Id:            item.ID,
+			OwnerId:       item.OwnerID,
+			FirstName:     item.FirstName,
+			LastName:      item.LastName,
+			Email:         item.Email,
+			Phone:         item.Phone,
+			Gender:        item.Gender,
+			Address:       item.Address,
+			City:          item.City,
+			Country:       item.Country,
+			LoyaltyPoints: item.LoyaltyPoints,
+			TotalSpent:    item.TotalSpent,
+			VisitCount:    item.VisitCount,
+			LoyaltyTier:   item.LoyaltyTier,
+			Tags:          item.Tags,
+			Notes:         item.Notes,
+			IsActive:      item.IsActive,
+			CreatedAt:     formatTime(item.CreatedAt),
+			UpdatedAt:     formatTime(item.UpdatedAt),
+		}
+		if item.DateOfBirth != nil {
+			dob := item.DateOfBirth.UTC().Format("2006-01-02")
+			c.DateOfBirth = &dob
+		}
+		if item.LastVisitAt != nil {
+			lastVisit := formatTime(*item.LastVisitAt)
+			c.LastVisitAt = &lastVisit
+		}
+		out = append(out, c)
 	}
 	return out
 }

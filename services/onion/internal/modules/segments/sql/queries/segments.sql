@@ -24,6 +24,8 @@ SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND is_active = TRUE;
 
 -- name: ListSegmentCustomers :many
 -- cross-schema read from crm_customers — see CountSegmentCustomers note above.
-SELECT id, first_name, last_name, email, phone
+SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
+       loyalty_tier, tags, notes, is_active, created_at, updated_at
 FROM crm_customers WHERE business_id = ? AND is_active = TRUE
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
