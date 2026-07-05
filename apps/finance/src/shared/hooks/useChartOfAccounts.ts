@@ -1,21 +1,24 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../lib/api';
+import { AccountServiceClient } from '@voxire/voxie/finance/account/v1/service_client';
+import {
+  JournalServiceClient,
+  type CreateJournalEntryResponse,
+} from '@voxire/voxie/finance/journal/v1/service_client';
 import { chartOfAccountSchema } from '../schemas/accounts';
 import { journalEntrySchema } from '../schemas/journal';
-import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/create_account';
-import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/create_journal_entry';
-import { unwrapList } from '../lib/unwrapList';
+import { z } from 'zod';
+
+const accountClient = createOneKitClient(AccountServiceClient, 'finance');
+const journalClient = createOneKitClient(JournalServiceClient, 'finance');
 
 export function useChartOfAccounts() {
   return useQuery({
     queryKey: ['chart-of-accounts'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/finance/chart-of-accounts'));
-      const raw = unwrapList(res, 'accounts', 'chart_of_accounts');
-      return z.array(chartOfAccountSchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await accountClient.listAccounts({});
+      return z.array(chartOfAccountSchema).parse(res.accounts);
     },
   });
 }
@@ -23,13 +26,28 @@ export function useChartOfAccounts() {
 export function useCreateAccount() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateAccountRequest) => unwrap(safe.post('/finance/accounts', data)),
+    mutationFn: (data: {
+      name: string;
+      type: string;
+      currency: string;
+      balance: number;
+      isActive: boolean;
+      code?: string;
+    }) =>
+      accountClient.createAccount({
+        name: data.name,
+        code: data.code ?? '',
+        type: data.type,
+        currency: data.currency,
+        balance: data.balance,
+        isActive: data.isActive,
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
       toast.success('Account created');
     },
-    onError: () => {
-      toast.error('Failed to create account');
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to create account'));
     },
   });
 }
@@ -51,17 +69,33 @@ export function useJournal(params: UseJournalParams = {}) {
   return useQuery<JournalResult>({
     queryKey: ['journal', { page, pageSize }],
     queryFn: async (): Promise<JournalResult> => {
-      const res = await unwrap(
-        safe.get<unknown>('/finance/journal', { params: { page, page_size: pageSize } })
+      const res = await journalClient.listJournalEntries({
+        page,
+        limit: pageSize,
+        sortBy: '',
+        sortDir: '',
+        fromDate: '',
+        toDate: '',
+      });
+      const entries = z.array(journalEntrySchema).parse(
+        res.entries.map((e) => ({
+          id: e.id,
+          date: e.date,
+          description: e.description,
+          lines: e.lines.map((l) => ({
+            account: l.accountName,
+            debit: l.debit,
+            credit: l.credit,
+            description: l.description,
+          })),
+        }))
       );
-      const raw = res as Record<string, unknown>;
-      const list = unwrapList(res, 'entries', 'journal');
-      const entries = z.array(journalEntrySchema).parse(Array.isArray(list) ? list : []);
+      const total = res.pagination?.total ?? entries.length;
       return {
         entries,
-        hasMore: Boolean(raw.has_more),
-        page: Number(raw.page ?? page),
-        pageSize: Number(raw.page_size ?? pageSize),
+        hasMore: page * pageSize < total,
+        page,
+        pageSize,
       };
     },
   });
@@ -70,12 +104,33 @@ export function useJournal(params: UseJournalParams = {}) {
 export function useCreateJournalEntry() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateJournalEntryRequest) => unwrap(safe.post('/finance/journal', data)),
+    mutationFn: (data: {
+      date: string;
+      description: string;
+      lines: Array<{
+        accountId: number;
+        accountName: string;
+        debit: number;
+        credit: number;
+        description: string;
+      }>;
+    }): Promise<CreateJournalEntryResponse> =>
+      journalClient.createJournalEntry({
+        date: data.date,
+        description: data.description,
+        lines: data.lines.map((l) => ({
+          accountId: String(l.accountId),
+          accountName: l.accountName,
+          debit: l.debit,
+          credit: l.credit,
+          description: l.description,
+        })),
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['journal'] });
     },
-    onError: () => {
-      toast.error('Failed to create journal entry');
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to create journal entry'));
     },
   });
 }
