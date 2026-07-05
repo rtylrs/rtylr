@@ -44,6 +44,3 @@ export type {
 
 export { reportTemplateSchema } from './reports';
 export type { ReportTemplate } from './reports';
-
-export { insightsSettingsSchema, scheduledReportSchema } from './settings';
-export type { InsightsSettings, ScheduledReport } from './settings';

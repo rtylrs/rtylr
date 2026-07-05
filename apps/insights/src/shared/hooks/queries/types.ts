@@ -220,19 +220,24 @@ export interface GenerateReportResult {
 
 export interface InsightsSettingsResponse {
   defaultCurrency: string;
+  defaultPeriod: string;
+  comparePrevious: boolean;
+  dashboardWidgets: string[];
+  favoriteReports: string[];
+  // insights.setting.v1.InsightsSettings has no fiscal-year-start or
+  // timezone field - these are UI-only and never persisted server-side.
   fiscalYearStart: string;
   timezone: string;
 }
 
 export interface ScheduledReport {
-  id: number;
+  id: string;
   templateId: string;
   cadence: string;
   channel: string;
   recipient: string;
   isActive: boolean;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface ScheduledReportsResponse {

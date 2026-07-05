@@ -2,12 +2,9 @@ import type {
   HeadcountResponse,
   OperationsKPIResponse,
   ProductKPIResponse,
-  ScheduledReport,
-  ScheduledReportsResponse,
   ShiftMetricsResponse,
   TimeOffResponse,
   UtilizationResponse,
-  InsightsSettingsResponse,
   RevenueSeriesResponse,
   RevenueByAppResponse,
   RevenueComparisonResponse,
@@ -73,51 +70,6 @@ export const mapUtilizationMetrics = (body: Record<string, unknown>): Utilizatio
     utilizationPct: Number(metrics.avgUtilization ?? 0),
   };
 };
-
-export const mapScheduledReport = (row: Record<string, unknown>): ScheduledReport => ({
-  id: Number(row.id ?? 0),
-  templateId: String(row.templateName ?? row.templateId ?? ''),
-  cadence: String(row.frequency ?? ''),
-  channel: String(row.channel ?? 'email'),
-  recipient: String(row.recipientEmail ?? ''),
-  isActive: Boolean(row.isActive ?? false),
-  createdAt: String(row.createdAt ?? ''),
-  updatedAt: String(row.updatedAt ?? row.createdAt ?? ''),
-});
-
-export const mapScheduledReportsResponse = (
-  body: Record<string, unknown>
-): ScheduledReportsResponse => {
-  const rows = Array.isArray(body.reports) ? body.reports : [];
-  return {
-    scheduledReports: rows.map((row) => mapScheduledReport(row as Record<string, unknown>)),
-  };
-};
-
-export const mapInsightsSettingsResponse = (
-  body: Record<string, unknown>
-): InsightsSettingsResponse => {
-  const settings = (body.settings ?? {}) as Record<string, unknown>;
-  return {
-    defaultCurrency: String(settings.currency ?? 'USD'),
-    fiscalYearStart: '01-01',
-    timezone: 'UTC',
-  };
-};
-
-export const toScheduledReportPayload = (data: {
-  templateId: string;
-  cadence: string;
-  channel: string;
-  recipient: string;
-  isActive: boolean;
-}) => ({
-  template_slug: data.templateId,
-  frequency: data.cadence,
-  channel: data.channel,
-  recipient_email: data.recipient,
-  is_active: data.isActive,
-});
 
 export const mapRevenueOverview = (body: Record<string, unknown>): RevenueSeriesResponse => {
   const overview = (body.overview ?? {}) as Record<string, unknown>;

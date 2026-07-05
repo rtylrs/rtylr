@@ -59,7 +59,7 @@ const Settings: React.FC = (): React.JSX.Element => {
     );
   };
 
-  const handleDeleteScheduled = (id: number): void => {
+  const handleDeleteScheduled = (id: string): void => {
     deleteScheduled.mutate(id, {
       onSuccess: () => toast.success('Scheduled report deleted'),
       onError: () => toast.error('Failed to delete scheduled report'),

@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import {
   useMutation,
   useQuery,
@@ -8,23 +8,59 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { safe } from '../../lib/api';
-import type { InsightsSettingsResponse, ScheduledReportsResponse, ScheduledReport } from './types';
 import {
-  mapInsightsSettingsResponse,
-  mapScheduledReport,
-  mapScheduledReportsResponse,
-  toScheduledReportPayload,
-} from '../../utils/onekitMappers';
+  SettingServiceClient,
+  type InsightsSettings as ApiInsightsSettings,
+} from '@voxire/voxie/insights/setting/v1/service_client';
+import {
+  ReportServiceClient,
+  type ScheduledReport as ApiScheduledReport,
+} from '@voxire/voxie/insights/report/v1/service_client';
+import type { InsightsSettingsResponse, ScheduledReportsResponse, ScheduledReport } from './types';
+
+const settingClient = createOneKitClient(SettingServiceClient, 'insights');
+const reportClient = createOneKitClient(ReportServiceClient, 'insights');
+
+const DEFAULT_API_SETTINGS: ApiInsightsSettings = {
+  defaultPeriod: '',
+  currency: 'USD',
+  comparePrevious: false,
+  dashboardWidgets: [],
+  favoriteReports: [],
+};
+
+function fromApiSettings(settings: ApiInsightsSettings): InsightsSettingsResponse {
+  return {
+    defaultCurrency: settings.currency,
+    defaultPeriod: settings.defaultPeriod,
+    comparePrevious: settings.comparePrevious,
+    dashboardWidgets: settings.dashboardWidgets,
+    favoriteReports: settings.favoriteReports,
+    // insights.setting.v1.InsightsSettings has no fiscal-year-start or
+    // timezone field - these are UI-only and never persisted server-side.
+    fiscalYearStart: '01-01',
+    timezone: 'UTC',
+  };
+}
+
+function fromApiScheduledReport(report: ApiScheduledReport): ScheduledReport {
+  return {
+    id: report.id,
+    templateId: report.templateName || report.templateId,
+    cadence: report.frequency,
+    channel: report.channel,
+    recipient: report.recipientEmail,
+    isActive: report.isActive,
+    createdAt: report.createdAt,
+  };
+}
 
 export const useInsightsSettings = (): UseQueryResult<InsightsSettingsResponse> => {
   return useQuery<InsightsSettingsResponse>({
     queryKey: ['insights-settings'],
     queryFn: async (): Promise<InsightsSettingsResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/setting/v1/settings')
-      );
-      return mapInsightsSettingsResponse(res as Record<string, unknown>);
+      const res = await settingClient.getInsightsSettings({});
+      return fromApiSettings(res.settings ?? DEFAULT_API_SETTINGS);
     },
   });
 };
@@ -40,18 +76,35 @@ export const useUpdateInsightsSettings = (): UseMutationResult<
     mutationFn: async (
       data: Partial<InsightsSettingsResponse>
     ): Promise<InsightsSettingsResponse> => {
-      const res = await unwrap(
-        safe.put<Record<string, unknown>>('/api/insights/setting/v1/settings', {
-          settings: {
-            default_period: 'this_month',
-            currency: data.defaultCurrency ?? 'USD',
-            compare_previous: false,
-            dashboard_widgets: [],
-            favorite_reports: [],
-          },
-        })
-      );
-      return mapInsightsSettingsResponse(res as Record<string, unknown>);
+      // insights.setting.v1.UpdateInsightsSettings replaces the whole
+      // settings object, so merge onto the currently cached settings rather
+      // than sending only the changed fields.
+      const current = qc.getQueryData<InsightsSettingsResponse>(['insights-settings']);
+      const res = await settingClient.updateInsightsSettings({
+        settings: {
+          defaultPeriod:
+            data.defaultPeriod ?? current?.defaultPeriod ?? DEFAULT_API_SETTINGS.defaultPeriod,
+          currency:
+            data.defaultCurrency ?? current?.defaultCurrency ?? DEFAULT_API_SETTINGS.currency,
+          comparePrevious:
+            data.comparePrevious ??
+            current?.comparePrevious ??
+            DEFAULT_API_SETTINGS.comparePrevious,
+          dashboardWidgets:
+            data.dashboardWidgets ??
+            current?.dashboardWidgets ??
+            DEFAULT_API_SETTINGS.dashboardWidgets,
+          favoriteReports:
+            data.favoriteReports ??
+            current?.favoriteReports ??
+            DEFAULT_API_SETTINGS.favoriteReports,
+        },
+      });
+      return {
+        ...fromApiSettings(res.settings ?? DEFAULT_API_SETTINGS),
+        fiscalYearStart: data.fiscalYearStart ?? current?.fiscalYearStart ?? '01-01',
+        timezone: data.timezone ?? current?.timezone ?? 'UTC',
+      };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['insights-settings'] });
@@ -67,75 +120,13 @@ export const useScheduledReports = (): UseQueryResult<ScheduledReportsResponse> 
   return useQuery<ScheduledReportsResponse>({
     queryKey: ['insights-scheduled-reports'],
     queryFn: async (): Promise<ScheduledReportsResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/report/v1/scheduled')
-      );
-      return mapScheduledReportsResponse(res as Record<string, unknown>);
-    },
-  });
-};
-
-export interface CreateScheduledReportPayload {
-  templateId: string;
-  cadence: string;
-  channel: string;
-  recipient: string;
-  isActive: boolean;
-}
-
-export const useCreateScheduledReport = (): UseMutationResult<
-  ScheduledReport,
-  unknown,
-  CreateScheduledReportPayload
-> => {
-  const qc = useQueryClient();
-  const { t } = useTranslation();
-  return useMutation<ScheduledReport, unknown, CreateScheduledReportPayload>({
-    mutationFn: async (data: CreateScheduledReportPayload): Promise<ScheduledReport> => {
-      const res = await unwrap(
-        safe.post<Record<string, unknown>>('/api/insights/report/v1/scheduled', toScheduledReportPayload(data))
-      );
-      const report = (res as Record<string, unknown>).report as Record<string, unknown>;
-      return mapScheduledReport(report);
-    },
-    onSuccess: (): void => {
-      void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
-      toast.success(t('insights.settings.scheduledReports.created'));
-    },
-    onError: (): void => {
-      toast.error(t('insights.errors.generic'));
-    },
-  });
-};
-
-export interface UpdateScheduledReportPayload {
-  id: number;
-  data: CreateScheduledReportPayload;
-}
-
-export const useUpdateScheduledReport = (): UseMutationResult<
-  ScheduledReport,
-  unknown,
-  UpdateScheduledReportPayload
-> => {
-  const qc = useQueryClient();
-  const { t } = useTranslation();
-  return useMutation<ScheduledReport, unknown, UpdateScheduledReportPayload>({
-    mutationFn: async ({ id, data }: UpdateScheduledReportPayload): Promise<ScheduledReport> => {
-      const res = await unwrap(
-        safe.put<Record<string, unknown>>(`/api/insights/report/v1/scheduled/${id}`, {
-          ...toScheduledReportPayload(data),
-        })
-      );
-      const report = (res as Record<string, unknown>).report as Record<string, unknown>;
-      return mapScheduledReport(report);
-    },
-    onSuccess: (): void => {
-      void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
-      toast.success(t('insights.settings.scheduledReports.updated'));
-    },
-    onError: (): void => {
-      toast.error(t('insights.errors.generic'));
+      const res = await reportClient.listScheduledReports({
+        page: 1,
+        limit: 100,
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+      });
+      return { scheduledReports: res.reports.map(fromApiScheduledReport) };
     },
   });
 };
@@ -143,23 +134,21 @@ export const useUpdateScheduledReport = (): UseMutationResult<
 export const useDeleteScheduledReport = (): UseMutationResult<
   { deleted: boolean },
   unknown,
-  number
+  string
 > => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<{ deleted: boolean }, unknown, number>({
-    mutationFn: async (id: number): Promise<{ deleted: boolean }> => {
-      const res = await unwrap(
-        safe.delete<{ deleted: boolean }>(`/api/insights/report/v1/scheduled/${id}`)
-      );
-      return res as { deleted: boolean };
+  return useMutation<{ deleted: boolean }, unknown, string>({
+    mutationFn: async (id: string): Promise<{ deleted: boolean }> => {
+      const res = await reportClient.deleteScheduledReport({ id });
+      return { deleted: res.deleted };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
       toast.success(t('insights.settings.scheduledReports.deleted'));
     },
-    onError: (): void => {
-      toast.error(t('insights.errors.generic'));
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, t('insights.errors.generic')));
     },
   });
 };
