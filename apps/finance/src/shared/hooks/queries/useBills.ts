@@ -1,46 +1,28 @@
-import { unwrap } from '@voxire/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { ListBillsResponse } from '@voxire/voxie/finance/bill/v1/list_bills';
-import type {
-  CreateBillRequest,
-  CreateBillResponse,
-} from '@voxire/voxie/finance/bill/v1/create_bill';
-import { safe } from '../../lib/api';
+import {
+  BillServiceClient,
+  type CreateBillRequest,
+  type CreateBillResponse,
+} from '@voxire/voxie/finance/bill/v1/service_client';
 
-interface ListBillsParams {
-  limit: number;
-  offset: number;
-  status?: string;
-  supplierId?: number;
-}
-
-export const useListBills = (params: ListBillsParams) => {
-  return useQuery<ListBillsResponse>({
-    queryKey: ['bills', 'filter', params],
-    queryFn: async (): Promise<ListBillsResponse> => {
-      const res = await unwrap(safe.get<ListBillsResponse>('/finance/bills', { params }));
-      return res as ListBillsResponse;
-    },
-  });
-};
+const billClient = createOneKitClient(BillServiceClient, 'finance');
 
 export const useCreateBill = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateBillRequest): Promise<CreateBillResponse> => {
-      const res = await unwrap(safe.post<CreateBillResponse>('/finance/bills', data));
-      return res as CreateBillResponse;
-    },
+    mutationFn: (data: CreateBillRequest): Promise<CreateBillResponse> =>
+      billClient.createBill(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bills'] });
       toast.success(t('bills.created'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };

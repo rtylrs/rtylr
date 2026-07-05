@@ -54,7 +54,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
     }
     createBill.mutate(
       {
-        supplierId: 0,
+        supplierId: '0',
         amount: form.amount,
         currency: 'USD',
         dueDate: form.dueDate,

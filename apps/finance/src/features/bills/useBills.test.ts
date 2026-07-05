@@ -4,26 +4,33 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock('../../shared/lib/api', () => ({
-  safe: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
+const mockClient = vi.hoisted(() => ({
+  listBills: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((val: unknown) => Promise.resolve(val)),
+  createOneKitClient: () => mockClient,
 }));
 
 import { useBills } from './useBills';
-import { safe } from '../../shared/lib/api';
 
 const createWrapper = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client }, children);
+};
+
+const baseBill = {
+  id: '1',
+  ownerId: '1',
+  supplierId: '1',
+  amount: 500,
+  currency: 'USD',
+  dueDate: '2024-06-01',
+  status: 'unpaid',
+  description: 'ACME',
+  createdAt: '',
+  updatedAt: '',
 };
 
 describe('useBills', () => {
@@ -32,32 +39,28 @@ describe('useBills', () => {
   });
 
   it('fetches bills on mount', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      bills: [{ id: '1', supplier: 'ACME', amount: 500 }],
-    });
+    mockClient.listBills.mockResolvedValue({ bills: [baseBill] });
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/bills');
+    expect(mockClient.listBills).toHaveBeenCalledWith({});
     expect(result.current.data).toHaveLength(1);
   });
 
   it('starts in loading state', () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    mockClient.listBills.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
 
   it('returns empty array when bills key is empty', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ bills: [] });
+    mockClient.listBills.mockResolvedValue({ bills: [] });
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
   });
 
-  it('coerces numeric bill id to string', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      bills: [{ id: 99, supplier: 'Vendor' }],
-    });
+  it('keeps bill id as a string', async () => {
+    mockClient.listBills.mockResolvedValue({ bills: [{ ...baseBill, id: '99' }] });
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.[0]?.id).toBe('99');
