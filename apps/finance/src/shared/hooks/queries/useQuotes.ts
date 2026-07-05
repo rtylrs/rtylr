@@ -2,8 +2,8 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { ListQuotesResponse } from '@voxire/contracts/finance/quote/v1/list_quotes';
-import type { CreateQuoteResponse } from '@voxire/contracts/finance/quote/v1/create_quote';
+import type { ListQuotesResponse } from '@voxire/voxie/finance/quote/v1/list_quotes';
+import type { CreateQuoteResponse } from '@voxire/voxie/finance/quote/v1/create_quote';
 import { safe } from '../../lib/api';
 
 interface ListQuotesParams {

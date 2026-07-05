@@ -18,7 +18,7 @@ export type ToolDef = z.infer<typeof toolDefSchema>;
 
 /** Fetch the tool registry, optionally scoped to a mode. */
 export async function listTools(mode?: string): Promise<ToolDef[]> {
-  const res = await unwrap(safe.post('/caret/tools', { mode: mode ?? '' }));
+  const res = await unwrap(safe.post('/api/hub/caret/v1/tools', { mode: mode ?? '' }));
   const parsed = toolsResponseSchema.safeParse(res);
   if (parsed.success) return parsed.data.tools;
   return [];

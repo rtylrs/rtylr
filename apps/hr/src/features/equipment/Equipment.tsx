@@ -51,8 +51,8 @@ const Equipment = (): React.JSX.Element => {
   const pendingRequests = requests.filter((r) => r.status === 'pending');
   const displayRequests = tab === tabs[1] ? pendingRequests : requests;
 
-  const handleApproval = (id: number, approved: boolean): void => {
-    approve.mutate({ equipmentRequestId: id, approved });
+  const handleApproval = (id: string, approved: boolean): void => {
+    approve.mutate({ equipmentRequestId: id, body: { approved } });
   };
 
   return (

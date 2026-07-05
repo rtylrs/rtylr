@@ -11,7 +11,12 @@ export function mapMeResponseToFlowUser(
   const email = String(data.email ?? data.emailAddress ?? '').trim();
   const id = String(data.id ?? data.userId ?? '').trim();
 
-  const fullName = typeof data.fullName === 'string' ? data.fullName.trim() : '';
+  const fullName =
+    typeof data.fullName === 'string'
+      ? data.fullName.trim()
+      : typeof data.full_name === 'string'
+        ? data.full_name.trim()
+        : '';
   const firstName = typeof data.firstName === 'string' ? data.firstName.trim() : '';
   const lastName = typeof data.lastName === 'string' ? data.lastName.trim() : '';
   const singleName = typeof data.name === 'string' ? data.name.trim() : '';

@@ -23,7 +23,7 @@ import {
 } from '../../shared/components/ui';
 
 const leaveFormSchema = z.object({
-  leaveTypeId: z.number().min(1),
+  leaveTypeId: z.string().min(1),
   startDate: z.string().min(1),
   endDate: z.string().min(1),
   notes: z.string().optional(),
@@ -42,11 +42,11 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const userId = useUserStore((s) => s.userId);
   const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
   const { data: balances } = useListLeaveBalances();
-  const { data: existingRequests } = useListLeaveRequests({ employeeId: Number(userId) });
+  const { data: existingRequests } = useListLeaveRequests({ employeeId: userId, status: null });
   const createRequest = useCreateLeaveRequest();
 
   const [form, setForm] = useState({
-    leaveTypeId: 0,
+    leaveTypeId: '',
     startDate: '',
     endDate: '',
     notes: '',
@@ -54,7 +54,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const selectedBalance = useMemo(() => {
-    if (!balances || form.leaveTypeId === 0) return null;
+    if (!balances || form.leaveTypeId === '') return null;
     return balances.find((b) => b.leaveTypeId === form.leaveTypeId) ?? null;
   }, [balances, form.leaveTypeId]);
 
@@ -90,18 +90,18 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
     createRequest.mutate(
       {
-        employeeId: Number(userId),
+        employeeId: userId ?? '',
         leaveTypeId,
         startDate,
         endDate,
         totalDays: daysBetween(startDate, endDate),
-        notes,
+        notes: notes || null,
       },
       { onSuccess: () => navigate({ to: '/leave' }) }
     );
   };
 
-  const update = (field: string, value: string | number): void => {
+  const update = (field: string, value: string): void => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => {
       const next = { ...prev };
@@ -147,10 +147,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
               <Label>{t('leave.form.leaveType')}</Label>
               <Select
                 value={form.leaveTypeId}
-                onChange={(e) => update('leaveTypeId', Number(e.target.value))}
+                onChange={(e) => update('leaveTypeId', e.target.value)}
                 style={errors.leaveTypeId ? { borderColor: 'var(--hr-error)' } : undefined}
               >
-                <option value={0}>{t('leave.form.selectType')}</option>
+                <option value="">{t('leave.form.selectType')}</option>
                 {leaveTypes.map((lt) => (
                   <option key={lt.id} value={lt.id}>
                     {lt.name}

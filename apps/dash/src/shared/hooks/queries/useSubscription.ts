@@ -201,28 +201,29 @@ interface CheckoutResponse {
 export const useMySubscription = () =>
   useQuery({
     queryKey: ['subscription'],
-    queryFn: () => unwrap(safe.get<MySubscriptionResponse>('/subscriptions/my')),
+    queryFn: () => unwrap(safe.get<MySubscriptionResponse>('/api/hub/subscription/v1/my')),
     select: (data) => data.subscription,
   });
 
 export const useListPlans = () =>
   useQuery({
     queryKey: ['subscription', 'plans'],
-    queryFn: () => unwrap(safe.get<ListPlansResponse>('/subscriptions/plans')),
+    queryFn: () => unwrap(safe.get<ListPlansResponse>('/api/hub/subscription/v1/plans')),
     select: (data) => data.plans,
   });
 
 export const useBillingDetail = () =>
   useQuery({
     queryKey: ['subscription', 'billing'],
-    queryFn: () => unwrap(safe.get<BillingDetailResponse>('/subscriptions/billing')),
+    queryFn: () => unwrap(safe.get<BillingDetailResponse>('/api/hub/subscription/v1/billing')),
     select: (data) => data.billing,
   });
 
 export const useBillingHistory = () =>
   useQuery({
     queryKey: ['subscription', 'billing', 'history'],
-    queryFn: () => unwrap(safe.get<BillingHistoryResponse>('/subscriptions/billing/history')),
+    queryFn: () =>
+      unwrap(safe.get<BillingHistoryResponse>('/api/hub/subscription/v1/billing/history')),
     select: (data) => data.history,
   });
 
@@ -230,7 +231,7 @@ export const useSetSubscription = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: SetSubscriptionRequest) =>
-      unwrap(safe.post('/subscriptions/my', { plan_slug: data.planSlug })),
+      unwrap(safe.post('/api/hub/subscription/v1/my', { plan_slug: data.planSlug })),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['subscription'] });
       toast.success('Subscription updated');
@@ -243,5 +244,8 @@ export const useSetSubscription = () => {
 export const useCheckout = () =>
   useMutation<CheckoutResponse, Error, CheckoutRequest>({
     mutationFn: (data: CheckoutRequest) =>
-      unwrap(safe.post<CheckoutResponse>('/subscriptions/checkout', data)),
+      unwrap(safe.post<CheckoutResponse>('/api/hub/subscription/v1/checkout', {
+        plan_slug: data.planSlug,
+        email: data.email,
+      })),
   });

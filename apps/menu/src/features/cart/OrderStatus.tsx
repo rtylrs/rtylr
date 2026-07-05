@@ -64,7 +64,9 @@ const OrderStatus = (): React.JSX.Element => {
   const fetchStatus = useCallback(async (): Promise<void> => {
     if (!id) return;
     try {
-      const res = await api.get<OrderStatusResponse>(`/pos/public/orders/${id}/status`);
+      const res = await api.get<OrderStatusResponse>(
+        `/api/pos/orders/v1/orders/${id}/public-status`
+      );
       setStatus(res.data.status);
       setFetchError(false);
 

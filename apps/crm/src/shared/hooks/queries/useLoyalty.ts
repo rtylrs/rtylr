@@ -1,9 +1,12 @@
-import { unwrap } from '@voxire/api';
-import type { AwardPointsRequest } from '@voxire/contracts/crm/loyalty/v1/award_points';
-import type { CreateLoyaltyTierRequest } from '@voxire/contracts/crm/loyalty/v1/create_loyalty_tier';
-import type { RedeemPointsRequest } from '@voxire/contracts/crm/loyalty/v1/redeem_points';
-import type { UpdateLoyaltyConfigRequest } from '@voxire/contracts/crm/loyalty/v1/update_loyalty_config';
-import type { UpdateLoyaltyTierRequest } from '@voxire/contracts/crm/loyalty/v1/update_loyalty_tier';
+import { createOneKitClient, unwrap } from '@voxire/api';
+import type { AwardPointsRequest } from '@voxire/voxie/crm/loyalty/v1/award_points';
+import type { RedeemPointsRequest } from '@voxire/voxie/crm/loyalty/v1/redeem_points';
+import type { UpdateLoyaltyConfigRequest } from '@voxire/voxie/crm/loyalty/v1/update_loyalty_config';
+import {
+  LoyaltyServiceClient,
+  type CreateLoyaltyTierRequest,
+  type UpdateLoyaltyTierRequest,
+} from '@voxire/voxie/crm/loyalty/v1/service_client';
 import {
   useMutation,
   useQuery,
@@ -30,6 +33,8 @@ import type {
   LoyaltyTier,
   LoyaltyTransaction,
 } from '../../schemas/loyalty';
+
+const loyaltyClient = createOneKitClient(LoyaltyServiceClient, 'crm');
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,20 +74,20 @@ function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): UpdateLoy
 function toCreateLoyaltyTierRequest(tier: Partial<LoyaltyTier>): CreateLoyaltyTierRequest {
   return {
     name: tier.name ?? '',
-    minPoints: tier.threshold ?? 0,
+    minPoints: String(tier.threshold ?? 0),
     discountPct: 0,
     perks: JSON.stringify(tier.perks ?? []),
-    sortOrder: 0,
+    sortOrder: '0',
   };
 }
 
 function toUpdateLoyaltyTierRequest(
-  id: number,
+  id: string,
   tier: Partial<LoyaltyTier>
 ): UpdateLoyaltyTierRequest {
   return {
     id,
-    ...toCreateLoyaltyTierRequest(tier),
+    body: toCreateLoyaltyTierRequest(tier),
   };
 }
 
@@ -164,11 +169,11 @@ export const useUpsertTier = (): UseMutationResult<unknown, unknown, UpsertTierP
   return useMutation<unknown, unknown, UpsertTierPayload>({
     mutationFn: (payload: UpsertTierPayload): Promise<unknown> => {
       if (payload.id) {
-        const request = toUpdateLoyaltyTierRequest(payload.id, payload.data);
-        return unwrap(safe.put('/crm/loyalty/tiers', request));
+        const request = toUpdateLoyaltyTierRequest(String(payload.id), payload.data);
+        return loyaltyClient.updateLoyaltyTier(request);
       }
       const request = toCreateLoyaltyTierRequest(payload.data);
-      return unwrap(safe.post('/crm/loyalty/tiers', request));
+      return loyaltyClient.createLoyaltyTier(request);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-tiers'] });

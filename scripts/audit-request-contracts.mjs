@@ -9,7 +9,7 @@ const ts = require('typescript');
 
 const root = process.cwd();
 const onionRoot = path.resolve(root, '..', 'onion');
-const metadataPath = path.join(root, 'packages/contracts/voxie/gen/ts/validation/metadata.json');
+const metadataPath = path.join(root, 'packages/voxie/gen/ts/validation/metadata.json');
 const failOnErrors = process.argv.includes('--fail-on-errors');
 const writeReport = !process.argv.includes('--no-report');
 
@@ -277,14 +277,14 @@ function parseBackendRoutes() {
 }
 
 function parseContractInterfaces() {
-  const files = walk(path.join(root, 'packages/contracts/voxie/gen/ts'), (file) =>
+  const files = walk(path.join(root, 'packages/voxie/gen/ts'), (file) =>
     file.endsWith('.ts')
   );
   const byDeclFileAndName = new Map();
   const byName = new Map();
 
   for (const file of files) {
-    const rel = toPosix(path.relative(path.join(root, 'packages/contracts/voxie/gen/ts'), file));
+    const rel = toPosix(path.relative(path.join(root, 'packages/voxie/gen/ts'), file));
     const sourceRoot = rel.replace(/\.ts$/, '');
     if (sourceRoot.startsWith('validation/') || sourceRoot.startsWith('google/')) continue;
     const namespace = sourceRoot.split('/').slice(0, -1).join('.');

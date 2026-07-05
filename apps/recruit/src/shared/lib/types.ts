@@ -1,6 +1,6 @@
 // Wire types for the recruit API. These mirror the Go payload structs
 // in onion's careers module; keep them in sync until we promote them
-// to @voxire/contracts protos.
+// to @voxire/voxie protos.
 
 export interface RecruitCareer {
   id: number;

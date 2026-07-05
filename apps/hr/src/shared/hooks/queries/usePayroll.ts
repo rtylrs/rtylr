@@ -3,16 +3,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   PayrollRunPayload,
   PayrollEntryPayload,
-} from '@voxire/contracts/hr/employees/payroll/runs/v1/types';
-import type { TriggerPayrollRunRequest } from '@voxire/contracts/hr/employees/payroll/runs/v1/trigger_payroll_run';
-import type { ApprovePayrollRunRequest } from '@voxire/contracts/hr/employees/payroll/runs/v1/approve_payroll_run';
-import type { ExportPayrollRequest } from '@voxire/contracts/hr/employees/payroll/runs/v1/export_payroll';
-import type { ListPayrollRunsResponse } from '@voxire/contracts/hr/employees/payroll/runs/v1/list_payroll_runs';
+} from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
+import type { TriggerPayrollRunRequest } from '@voxire/voxie/hr/employees/payroll/runs/v1/trigger_payroll_run';
+import type { ListPayrollRunsResponse } from '@voxire/voxie/hr/employees/payroll/runs/v1/list_payroll_runs';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 /* ── Local config type (no contract exists) ── */
+
+/**
+ * The `hr.employees.payroll.runs.v1.RunsService` proto exists but is never
+ * registered as an onekit service in onion (see hr_payroll/module.go - only
+ * `RegisterRoutes` is implemented, no `RegisterAPI`). Approval is served by
+ * the legacy chi route only, with a body shape that doesn't match the
+ * generated `ApprovePayrollRunRequest` (which assumes a live onekit rpc).
+ */
+interface ApprovePayrollRunRequest {
+  runId: number;
+}
 
 interface PayrollConfigData {
   grossModel: 'hourly' | 'salary' | 'both';

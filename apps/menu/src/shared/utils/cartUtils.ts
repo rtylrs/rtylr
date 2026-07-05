@@ -36,7 +36,7 @@ export function findCartItem(items: CartItem[], menuItemId: number): CartItem | 
 }
 
 /**
- * Builds an order-line payload array suitable for the /pos/public/orders API.
+ * Builds an order-line payload array suitable for the public orders OneKit API.
  */
 export function toOrderLines(
   items: CartItem[]

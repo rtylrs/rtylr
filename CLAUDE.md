@@ -96,7 +96,7 @@ rtylr/
 │   ├── components/   @voxire/components - Higher-level shared components (FullScreenLoader, etc.)
 │   ├── config/       @voxire/config   - APP_URLS, APP_CONFIG, AppFlagGuard, industries, themes
 │   ├── consent/      @voxire/consent  - Cookie/consent management
-│   ├── contracts/    @voxire/contracts - Re-exports gen/ts from packages/contracts/voxie (nested submodule)
+│   ├── voxie/       @voxire/voxie - Re-exports generated gen/ts contracts and clients
 │   ├── i18n/         @voxire/i18n     - Shared i18next setup
 │   ├── observability/ @voxire/observability - Client-side error/log reporting
 │   ├── permissions/  @voxire/permissions - RBAC helpers
@@ -116,7 +116,7 @@ rtylr/
 
 > **Removed apps:** `landing` (marketing site) now lives in its own repo. `hub` was renamed to `dash`. `vbitez` (POS desktop) is not part of this monorepo. Empty `apps/hub`, `apps/vbitez`, or `apps/landing` folders on disk are untracked leftovers - safe to delete.
 >
-> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here. It carries its own nested `voxie` submodule at `packages/contracts/voxie` (proto contracts + generated `gen/ts`, which `@voxire/contracts` re-exports directly) — there is no separate top-level `voxie/` anymore. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same `packages` submodule and gets contracts the same way.
+> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here. It contains `packages/voxie` directly (proto contracts + generated `gen/ts`, which `@voxire/voxie` re-exports). Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same `packages` submodule and gets contracts the same way.
 
 ### Tech Stack
 
@@ -424,10 +424,10 @@ Dash wraps its route tree in a `<BusinessRoute>` component (`apps/dash/src/share
 
 ### Contracts / Types Pattern
 
-- Prefer types from `@voxire/contracts` over hand-written interfaces when a proto definition exists.
+- Prefer types from `@voxire/voxie` over hand-written interfaces when a proto definition exists.
 - Import paths mirror the voxie proto layout (`{app}/{capability}/v1/{operation}` plus a `types` module per capability):
-  `import type { StaffUserPayload } from '@voxire/contracts/hub/team/members/v1/types'`
-  `import type { ClockInRequest } from '@voxire/contracts/hr/attendance/v1/attendance_clock_in'`
+  `import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types'`
+  `import type { ClockInRequest } from '@voxire/voxie/hr/attendance/v1/attendance_clock_in'`
 - `@voxire/types` contains non-proto types (legacy and shared domain types).
 - Never copy-paste type shapes from contracts. Import them.
 - Run `pnpm contracts:audit-requests` to verify request shapes used in apps still match the contracts.
@@ -685,7 +685,7 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 | Legacy `routes/AppRoutes.tsx` files still exist in some apps alongside the live `router.tsx`; `MenuWithId.jsx` is a mixed-extension import in dash             | `apps/dash/src/routes/`, `apps/dash/src/features/menu/`                  | Low      |
 | HR app still uses flat locale files (`locales/en.json`) instead of the namespaced `locales/en/*.json` layout                                                   | `apps/hr/src/locales/`                                                   | Low      |
 | Empty untracked `apps/hub/`, `apps/vbitez/`, `apps/landing/` leftover folders may exist on local checkouts                                                     | `apps/`                                                                  | Low      |
-| `@voxire/contracts/package.json` exports `book/v1/*`, `store/v1/*`, and `auth/v1/auth` paths with no proto sources in voxie                                    | `packages/contracts/package.json`                                        | Medium   |
+| `@voxire/voxie/package.json` exports `book/v1/*`, `store/v1/*`, and `auth/v1/auth` paths with no proto sources in voxie                                    | `packages/voxie/package.json`                                        | Medium   |
 | No `.env.example` visible in repo root - environment setup requires reading docs                                                                               | Root                                                                     | Medium   |
 
 ---
@@ -695,7 +695,7 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 Run these steps at the start of every new session before touching any file:
 
 1. `git pull origin main` (or the relevant branch)
-2. `git submodule update --init --recursive` (keeps `packages/` and its nested `voxie` contracts submodule in sync)
+2. `git submodule update --init --recursive` (keeps the shared `packages/` submodule in sync)
 3. `git checkout -b feat/<task-name>` to create a feature branch
 4. `pnpm install` if `pnpm-lock.yaml` changed since last session
 5. Check `docs/` for any new files added since last session
@@ -775,9 +775,9 @@ pnpm test          # Vitest unit tests
 pnpm test:e2e      # Playwright e2e tests
 ```
 
-### Submodules (packages, and its nested voxie contracts)
+### Submodules (packages)
 
-`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it carries its own nested `voxie` submodule at `packages/contracts/voxie` (proto contracts + committed `gen/ts`). After cloning or pulling:
+`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it contains `packages/voxie` directly (proto contracts + committed `gen/ts`). After cloning or pulling:
 
 ```bash
 git submodule update --init --recursive
@@ -786,7 +786,7 @@ git submodule update --init --recursive
 `gen/ts` is generated and committed by `voxie` itself — there is nothing to run locally to sync contracts. To pick up a newer voxie commit and audit usage:
 
 ```bash
-pnpm contracts:sync             # bumps the nested voxie submodule pointer to its latest commit
+pnpm contracts:sync             # typechecks the @voxire/voxie package
 pnpm contracts:audit-requests   # audits app request shapes against the contracts
 ```
 

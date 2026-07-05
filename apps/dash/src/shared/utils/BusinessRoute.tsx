@@ -100,7 +100,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const handleRequestAccess = async (appId: string): Promise<void> => {
     setRequestLoading(appId);
     try {
-      await safe.post('/team/request-access', { app: appId });
+      await safe.post('/api/hub/team/access/v1/requests', { app: appId });
       setRequested((prev) => new Set(prev).add(appId));
     } catch {
       // silently fail, server returns success anyway if already requested
@@ -380,31 +380,37 @@ function BusinessRoute(): React.JSX.Element | null {
 
     setToken(token);
 
-    unwrap(safe.get<Record<string, unknown>>('/user/me'))
+    unwrap(safe.get<Record<string, unknown>>('/api/hub/user/v1/users/me'))
       .then((res) => {
         setUser(res as StoredUser);
-        const businessId = res.businessId ?? res.business_id;
-        if (businessId) {
-          unwrap(
-            safe.post<{ config?: Record<string, unknown>; theme?: Record<string, unknown> }>(
-              '/get-configs',
-              { owner: String(businessId) }
-            )
+        unwrap(
+          safe.get<{ business?: Record<string, unknown>; maintenance?: boolean }>(
+            '/api/hub/config/v1/config'
           )
-            .then((configRes) => {
-              const config = normalizeConfigData(configRes?.config ?? {});
-              setWebsiteData(config);
-              setContactInfo({
-                contactEmail: (config.contactEmail as string | null) ?? null,
-                contactNumber: (config.contactNumber as string | null) ?? null,
-              });
-              setMaintanance((config.maintenanceMode as boolean) ?? false);
-              setAboutContent({ aboutContent: config.aboutContent ?? null });
-            })
+        )
+          .then((configRes) => {
+            const business = (configRes?.business ?? {}) as Record<string, unknown>;
+            const config = normalizeConfigData({
+              site_name: business.name,
+              logo_url: business.logo_url ?? business.logoUrl,
+              contact_email: business.email,
+              contact_number: business.phone,
+              address: business.address,
+              slug: business.slug,
+              website: business.website,
+              country: business.country,
+            });
+            setWebsiteData(config);
+            setContactInfo({
+              contactEmail: (config.contactEmail as string | null) ?? null,
+              contactNumber: (config.contactNumber as string | null) ?? null,
+            });
+            setMaintanance((configRes?.maintenance as boolean) ?? false);
+            setAboutContent({ aboutContent: config.aboutContent ?? null });
+          })
             .catch(() => {
               // config is non-critical - missing config won't block the app
             });
-        }
       })
       .catch(() => {
         // auth interceptor handles 401 redirect

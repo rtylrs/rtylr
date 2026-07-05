@@ -55,7 +55,7 @@ describe('useKpis', () => {
     mockGet.mockResolvedValue(mockKpis);
 
     renderHook(() => useKpis(), { wrapper: createWrapper() });
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/hub/kpis'));
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/api/hub/dashboard/v1/kpis'));
   });
 
   it('handles API error', async () => {

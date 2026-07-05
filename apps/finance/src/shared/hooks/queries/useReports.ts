@@ -1,7 +1,8 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import type { GetPLReportResponse } from '@voxire/contracts/finance/report/v1/get_pl_report';
+import type { GetPLReportResponse } from '@voxire/voxie/finance/report/v1/get_pl_report';
 import { safe } from '../../lib/api';
+import { plReportQueryParams } from '../../services/financeApi';
 
 interface ReportRange {
   from: string;
@@ -77,7 +78,11 @@ export const usePL = (range: ReportRange) => {
   return useQuery<GetPLReportResponse>({
     queryKey: ['pl', range],
     queryFn: async (): Promise<GetPLReportResponse> => {
-      const res = await unwrap(safe.get<GetPLReportResponse>('/finance/pl', { params: range }));
+      const res = await unwrap(
+        safe.get<GetPLReportResponse>('/api/finance/report/v1/pl', {
+          params: plReportQueryParams(range),
+        })
+      );
       return res as GetPLReportResponse;
     },
     enabled: !!range.from && !!range.to,

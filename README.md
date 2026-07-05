@@ -39,7 +39,7 @@ touching the others.
 | `@voxire/permissions`     | Typed RBAC with platform roles, POS roles, and 100+ granular capabilities        |
 | `@voxire/config`          | `APP_URLS`, `APP_CONFIG`, theme injection, brand colors                          |
 | `@voxire/types`           | `UserRole`, `AppId`, `User` interface                                            |
-| `@voxire/contracts`       | Generated TypeScript types from voxie protobuf contracts                         |
+| `@voxire/voxie`       | Generated TypeScript types and clients from voxie protobuf contracts             |
 | `@voxire/ui`              | Radix-based primitives (Dialog, Select, Switch, etc.)                            |
 | `@voxire/components`      | HelmetContainer, Button, Modal, Spinner, FullScreenLoader                        |
 | `@voxire/auth`            | Cookie helpers, `AppGuard` with per-app `apps[]` gating, user store              |
@@ -80,7 +80,7 @@ apps/{name}/src/
 
 ## API Contracts (voxie)
 
-API request/response types are defined as Protocol Buffers in the [voxie](https://github.com/voxire/voxie) submodule, shared between frontend and backend as the single source of truth.
+API request/response types are defined as Protocol Buffers in `packages/voxie`, shared between frontend and backend as the single source of truth.
 
 ```
 voxie/proto/
@@ -111,8 +111,8 @@ make generate    # Regenerate Go + TypeScript types
 git add -A && git commit -m "feat: add X contract"
 git push
 
-# Then update the submodule ref in frontend + backend
-cd .. && git add voxie && git commit -m "chore: update voxie submodule"
+# Then update the shared packages ref in frontend apps
+cd .. && git add packages && git commit -m "chore: update shared packages"
 ```
 
 ## API Layer

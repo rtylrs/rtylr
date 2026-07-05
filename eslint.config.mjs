@@ -16,7 +16,7 @@ export default tseslint.config(
       '**/*.config.{js,ts,mjs,cjs}',
       '**/*.d.ts',
       'voxie/**',
-      'packages/contracts/**',
+      'packages/voxie/**',
       'dist/**',
     ],
   },

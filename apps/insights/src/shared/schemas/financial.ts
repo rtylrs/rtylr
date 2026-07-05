@@ -7,9 +7,13 @@ export const profitLossSchema = z.object({
   totalExpenses: z.number().optional(),
   cogs: z.number().optional(),
   grossProfit: z.number().optional(),
+  gross_profit: z.number().optional(),
   operatingExpenses: z.number().optional(),
+  operating_expenses: z.number().optional(),
   netProfit: z.number().optional(),
+  net_profit: z.number().optional(),
   margin: z.number().optional(),
+  margin_pct: z.number().optional(),
 });
 
 export const expenseBreakdownSchema = z.object({

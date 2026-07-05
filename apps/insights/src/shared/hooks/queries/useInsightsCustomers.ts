@@ -7,13 +7,21 @@ import type {
   CustomerLTVResponse,
   CustomerChurnResponse,
 } from './types';
+import {
+  mapCustomerAnalytics,
+  mapCustomerChurn,
+  mapCustomerLTV,
+  mapTopCustomers,
+} from '../../utils/onekitMappers';
 
 export const useCustomerKPIs = (): UseQueryResult<CustomerKPIResponse> => {
   return useQuery<CustomerKPIResponse>({
     queryKey: ['insights-customers'],
     queryFn: async (): Promise<CustomerKPIResponse> => {
-      const res = await unwrap(safe.get<CustomerKPIResponse>('/insights/customers'));
-      return res as CustomerKPIResponse;
+      const res = await unwrap(
+        safe.get<Record<string, unknown>>('/api/insights/customer/v1/analytics')
+      );
+      return mapCustomerAnalytics(res as Record<string, unknown>);
     },
   });
 };
@@ -30,9 +38,9 @@ export const useTopCustomers = (
     queryKey: ['insights-customers-top', { limit }],
     queryFn: async (): Promise<TopCustomersResponse> => {
       const res = await unwrap(
-        safe.get<TopCustomersResponse>('/insights/customers/top', { params: { limit } })
+        safe.get<Record<string, unknown>>('/api/insights/customer/v1/top', { params: { limit } })
       );
-      return res as TopCustomersResponse;
+      return mapTopCustomers(res as Record<string, unknown>);
     },
   });
 };
@@ -41,8 +49,10 @@ export const useCustomerLTV = (): UseQueryResult<CustomerLTVResponse> => {
   return useQuery<CustomerLTVResponse>({
     queryKey: ['insights-customers-ltv'],
     queryFn: async (): Promise<CustomerLTVResponse> => {
-      const res = await unwrap(safe.get<CustomerLTVResponse>('/insights/customers/ltv'));
-      return res as CustomerLTVResponse;
+      const res = await unwrap(
+        safe.get<Record<string, unknown>>('/api/insights/customer/v1/ltv')
+      );
+      return mapCustomerLTV(res as Record<string, unknown>);
     },
   });
 };
@@ -51,8 +61,10 @@ export const useCustomerChurn = (): UseQueryResult<CustomerChurnResponse> => {
   return useQuery<CustomerChurnResponse>({
     queryKey: ['insights-customers-churn'],
     queryFn: async (): Promise<CustomerChurnResponse> => {
-      const res = await unwrap(safe.get<CustomerChurnResponse>('/insights/customers/churn'));
-      return res as CustomerChurnResponse;
+      const res = await unwrap(
+        safe.get<Record<string, unknown>>('/api/insights/customer/v1/churn')
+      );
+      return mapCustomerChurn(res as Record<string, unknown>);
     },
   });
 };

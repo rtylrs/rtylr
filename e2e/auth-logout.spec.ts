@@ -32,7 +32,7 @@ async function stubBackend(
   page: import('@playwright/test').Page,
   options: StubUserOptions = {}
 ): Promise<void> {
-  await page.route('**/user/me', (route) =>
+  await page.route('**/api/hub/user/v1/users/me', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

@@ -15,7 +15,9 @@ export const useReportTemplates = (): UseQueryResult<ReportTemplatesResponse> =>
   return useQuery<ReportTemplatesResponse>({
     queryKey: ['insights-report-templates'],
     queryFn: async (): Promise<ReportTemplatesResponse> => {
-      const res = await unwrap(safe.get<ReportTemplatesResponse>('/insights/reports/templates'));
+      const res = await unwrap(
+        safe.get<ReportTemplatesResponse>('/api/insights/report/v1/templates')
+      );
       return res as ReportTemplatesResponse;
     },
   });
@@ -38,7 +40,7 @@ export const useGenerateRevenueReport = (): UseMutationResult<
       variables: GenerateRevenueReportVariables
     ): Promise<GenerateReportResult> => {
       const res = await unwrap(
-        safe.post<GenerateReportResult>('/insights/reports/generate/revenue', variables)
+        safe.post<GenerateReportResult>('/api/insights/report/v1/reports/revenue/generate', variables)
       );
       return res as GenerateReportResult;
     },
@@ -62,5 +64,5 @@ export const useRevenueCSVExportURL = (params?: DateRangeParams): string => {
     'https://api.voxire.com/';
   const trimmed = base.endsWith('/') ? base.slice(0, -1) : base;
   const query = new URLSearchParams({ from, to }).toString();
-  return `${trimmed}/insights/reports/export/revenue?${query}`;
+  return `${trimmed}/api/insights/report/v1/reports/revenue/export?${query}`;
 };

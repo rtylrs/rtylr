@@ -20,7 +20,7 @@ const TeamWidget: React.FC = () => {
     queryFn: async (): Promise<WidgetMember[]> => {
       try {
         const res = await unwrap(
-          safe.get<{ users?: WidgetMember[] } | WidgetMember[]>('/team/members')
+          safe.get<{ users?: WidgetMember[] } | WidgetMember[]>('/api/hub/team/members/v1/members')
         );
         return (Array.isArray(res) ? res : res.users) ?? [];
       } catch {

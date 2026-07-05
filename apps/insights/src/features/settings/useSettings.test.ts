@@ -86,7 +86,7 @@ describe('useScheduledReports', () => {
 
   it('fetches scheduled reports', async () => {
     const response = {
-      scheduledReports: [{ id: '1', name: 'Weekly Sales', frequency: 'weekly', enabled: true }],
+      reports: [{ id: '1', name: 'Weekly Sales', frequency: 'weekly', enabled: true }],
     };
     (insightsService.getScheduledReports as any).mockResolvedValue(response);
     const { result } = renderHook(() => useScheduledReports(), {

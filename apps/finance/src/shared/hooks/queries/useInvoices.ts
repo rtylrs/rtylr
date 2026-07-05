@@ -2,22 +2,22 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { ListInvoicesResponse } from '@voxire/contracts/finance/invoices/v1/list_invoices';
-import type { GetInvoiceResponse } from '@voxire/contracts/finance/invoices/v1/get_invoice';
+import type { ListInvoicesResponse } from '@voxire/voxie/finance/invoices/v1/list_invoices';
+import type { GetInvoiceResponse } from '@voxire/voxie/finance/invoices/v1/get_invoice';
 import type {
   CreateInvoiceRequest,
   CreateInvoiceResponse,
-} from '@voxire/contracts/finance/invoices/v1/create_invoice';
+} from '@voxire/voxie/finance/invoices/v1/create_invoice';
 import type {
   UpdateInvoiceRequest,
   UpdateInvoiceResponse,
-} from '@voxire/contracts/finance/invoices/v1/update_invoice';
-import type { DeleteInvoiceResponse } from '@voxire/contracts/finance/invoices/v1/delete_invoice';
+} from '@voxire/voxie/finance/invoices/v1/update_invoice';
+import type { DeleteInvoiceResponse } from '@voxire/voxie/finance/invoices/v1/delete_invoice';
 import type {
   RecordPaymentRequest,
   RecordPaymentResponse,
-} from '@voxire/contracts/finance/invoices/payments/v1/record_payment';
-import type { UpdateInvoiceStatusResponse } from '@voxire/contracts/finance/invoices/v1/update_invoice_status';
+} from '@voxire/voxie/finance/invoices/payments/v1/record_payment';
+import type { UpdateInvoiceStatusResponse } from '@voxire/voxie/finance/invoices/v1/update_invoice_status';
 import { safe } from '../../lib/api';
 
 interface ListInvoicesParams {

@@ -12,6 +12,18 @@ export interface AddonData {
   isEnabled: boolean;
 }
 
+interface RawAddon {
+  id?: string;
+  name?: string;
+  description?: string;
+  icon?: string;
+  price?: number;
+  isFree?: boolean;
+  is_free?: boolean;
+  isEnabled?: boolean;
+  is_enabled?: boolean;
+}
+
 export const ADDONS_QUERY_KEY = ['addons'] as const;
 
 export const useAddons = () =>
@@ -19,8 +31,17 @@ export const useAddons = () =>
     queryKey: ADDONS_QUERY_KEY,
     queryFn: async () => {
       try {
-        const res = await unwrap(safe.get<{ addons?: AddonData[] }>('/addons'));
-        return res.addons ?? [];
+        const res = await unwrap(safe.get<{ addons?: RawAddon[] }>('/api/hub/app/v1/addons'));
+        const list = res.addons ?? [];
+        return list.map((addon) => ({
+          id: String(addon.id ?? ''),
+          name: String(addon.name ?? ''),
+          description: String(addon.description ?? ''),
+          icon: String(addon.icon ?? ''),
+          price: Number(addon.price ?? 0),
+          isFree: Boolean(addon.is_free ?? addon.isFree),
+          isEnabled: Boolean(addon.is_enabled ?? addon.isEnabled),
+        }));
       } catch {
         return [];
       }

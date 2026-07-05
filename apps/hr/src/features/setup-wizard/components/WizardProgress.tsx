@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
-import type { SetupWizardStepPayload } from '@voxire/contracts/hr/setup/v1/types';
+import type { SetupWizardStepPayload } from '@voxire/voxie/hr/setup/v1/types';
 
 const STEP_KEYS = [
   'company_profile',

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/setup/v1/types';
+import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 
 interface HRConfigState {
   config: HRCompanyConfigPayload | null;

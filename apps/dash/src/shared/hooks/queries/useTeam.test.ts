@@ -19,12 +19,15 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v) => v),
 }));
 
+const mockDelete = vi.fn();
+
 vi.mock('../../lib/api', () => ({
   safe: {
     get: (...args: unknown[]) => mockGet(...args),
     post: (...args: unknown[]) => mockPost(...args),
     put: (...args: unknown[]) => mockPut(...args),
     patch: (...args: unknown[]) => mockPatch(...args),
+    delete: (...args: unknown[]) => mockDelete(...args),
   },
 }));
 
@@ -171,7 +174,7 @@ describe('useInviteMember', () => {
       });
     });
 
-    expect(mockPost).toHaveBeenCalledWith('/team/invite', {
+    expect(mockPost).toHaveBeenCalledWith('/api/hub/team/invitations/v1/invitations', {
       email: 'new@test.com',
       fullName: 'New User',
       role: 'staff',
@@ -184,7 +187,7 @@ describe('useDeactivateMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls deactivate endpoint', async () => {
-    mockPatch.mockResolvedValue({ success: true });
+    mockDelete.mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useDeactivateMember(), { wrapper: createWrapper() });
 
@@ -192,7 +195,7 @@ describe('useDeactivateMember', () => {
       await result.current.mutateAsync('42');
     });
 
-    expect(mockPatch).toHaveBeenCalledWith('/team/members/42/deactivate');
+    expect(mockDelete).toHaveBeenCalledWith('/api/hub/team/members/v1/members/42');
   });
 });
 
@@ -211,11 +214,9 @@ describe('useUpdateMember', () => {
       });
     });
 
-    expect(mockPut).toHaveBeenCalledWith('/team/users/permissions', {
-      userId: 42,
-      fullName: 'Edited User',
-      role: 'admin',
+    expect(mockPut).toHaveBeenCalledWith('/api/hub/team/permissions/v1/permissions/42', {
       apps: ['pos', 'finance'],
+      role: 'admin',
     });
   });
 

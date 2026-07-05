@@ -1,10 +1,20 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ListEmployeeDocumentsResponse } from '@voxire/contracts/hr/document/v1/list_employee_documents';
-import type { UploadDocumentResponse } from '@voxire/contracts/hr/document/v1/upload_document';
+import type { EmployeeDocumentPayload } from '@voxire/voxie/hr/document/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+interface ListEmployeeDocumentsResponse {
+  documents: EmployeeDocumentPayload[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+interface UploadDocumentResponse {
+  document: EmployeeDocumentPayload;
+}
 
 export interface UploadDocumentPayload {
   employeeId: number;

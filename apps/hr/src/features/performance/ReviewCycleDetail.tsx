@@ -8,7 +8,7 @@ import { Share2 } from 'lucide-react';
 import type {
   PerformanceReviewPayload,
   ReviewGoalPayload,
-} from '@voxire/contracts/hr/performance/v1/types';
+} from '@voxire/voxie/hr/performance/v1/types';
 import {
   useGetReviewCycle,
   useListReviews,

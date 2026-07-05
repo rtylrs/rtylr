@@ -21,12 +21,12 @@ export const usePOSLocations = (enabled: boolean) =>
   useQuery<POSLocation[]>({
     queryKey: ['pos-locations'],
     queryFn: async (): Promise<POSLocation[]> => {
-      const res = await unwrap(safe.get('/pos/access/my-locations'));
+      const res = await unwrap(safe.get('/api/pos/access/v1/my-locations'));
       const raw = res as { locations?: RawLocation[] };
       const list = Array.isArray(raw?.locations) ? raw.locations : [];
       return list
         .map((l) => ({
-          id: Number(l.id ?? l.locationId ?? l.location_id ?? 0),
+          id: Number(l.location_id ?? l.locationId ?? l.id ?? 0),
           name: String(l.name ?? ''),
           address: String(l.address ?? ''),
         }))
@@ -67,12 +67,12 @@ export function toAssignLocationPayload(input: AssignLocationInput): {
 export const useAssignPOSLocation = () =>
   useMutation({
     mutationFn: (input: AssignLocationInput) =>
-      unwrap(safe.post('/pos/access/assign', toAssignLocationPayload(input))),
+      unwrap(safe.post('/api/pos/access/v1/assign', toAssignLocationPayload(input))),
   });
 
 export const useRemovePOSLocation = () =>
   useMutation({
-    mutationFn: (id: number) => unwrap(safe.post('/pos/access/remove', { id })),
+    mutationFn: (id: number) => unwrap(safe.post('/api/pos/access/v1/remove', { id })),
   });
 
 export interface MemberLocation {
@@ -101,17 +101,17 @@ export const useMemberLocations = (userId: string | number | undefined, enabled:
     queryKey: ['pos-member-locations', String(userId ?? '')],
     queryFn: async (): Promise<MemberLocation[]> => {
       const res = await unwrap(
-        safe.get('/pos/access/member-locations', { params: { user_id: Number(userId) } })
+        safe.get('/api/pos/access/v1/member-locations', { params: { user_id: Number(userId) } })
       );
       const raw = res as { locations?: RawMemberLocation[] };
       const list = Array.isArray(raw?.locations) ? raw.locations : [];
       return list
         .map((l) => ({
           id: Number(l.id ?? 0),
-          locationId: Number(l.locationId ?? l.location_id ?? 0),
-          canManagePosUsers: Boolean(l.canManagePosUsers ?? l.can_manage_pos_users),
-          canManageTerminals: Boolean(l.canManageTerminals ?? l.can_manage_terminals),
-          canViewReports: Boolean(l.canViewReports ?? l.can_view_reports),
+          locationId: Number(l.location_id ?? l.locationId ?? 0),
+          canManagePosUsers: Boolean(l.can_manage_pos_users ?? l.canManagePosUsers),
+          canManageTerminals: Boolean(l.can_manage_terminals ?? l.canManageTerminals),
+          canViewReports: Boolean(l.can_view_reports ?? l.canViewReports),
         }))
         .filter((l) => l.locationId > 0);
     },

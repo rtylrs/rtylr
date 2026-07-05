@@ -441,7 +441,7 @@ export const hrExtras = {
     safe.get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } }),
 
   // Settings
-  getSettings: () => safe.get<HrSettings>('/hr/dashboard', { params: { view: 'settings' } }),
+  getSettings: () => safe.get<HrSettings>('/hr/config'),
   updateSettings: (patch: Partial<HrSettings>) =>
     safe.put<HrSettings>('/hr/config', toSettingsPayload(patch)),
 };

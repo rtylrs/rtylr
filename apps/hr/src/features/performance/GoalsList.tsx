@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Target } from 'lucide-react';
-import type { ReviewGoalPayload } from '@voxire/contracts/hr/performance/v1/types';
+import type { ReviewGoalPayload } from '@voxire/voxie/hr/performance/v1/types';
 import { useListGoals, useCreateGoal } from '../../shared/hooks/queries/usePerformance';
 import { goalFormSchema } from '../../shared/schemas/performance';
 import {

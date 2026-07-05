@@ -4,7 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { CalendarCheck, Clock } from 'lucide-react';
 import { useGetMyAttendance } from '../../shared/hooks/queries/useAttendance';
-import type { AttendanceRecordPayload } from '@voxire/contracts/hr/attendance/v1/types';
+import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
 import {
   SectionHeader,
   Card,

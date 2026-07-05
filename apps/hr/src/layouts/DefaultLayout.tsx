@@ -49,7 +49,7 @@ import {
   Target,
   FileBarChart,
 } from 'lucide-react';
-import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/setup/v1/types';
+import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';

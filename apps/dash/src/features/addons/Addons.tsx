@@ -132,7 +132,7 @@ const Addons: React.FC = () => {
         throw new Error('addons unavailable during trial');
       }
       setEnablingId(addonId);
-      await unwrap(safe.post('/addons/enable', { addonId }));
+      await unwrap(safe.patch(`/api/hub/app/v1/addons/${encodeURIComponent(addonId)}/enable`));
     },
     onSuccess: (_, addonId) => {
       setShowEnableSuccess(addonId);
@@ -153,7 +153,7 @@ const Addons: React.FC = () => {
       if (isTrialMode) {
         throw new Error('addons unavailable during trial');
       }
-      await unwrap(safe.post('/addons/disable', { addonId }));
+      await unwrap(safe.patch(`/api/hub/app/v1/addons/${encodeURIComponent(addonId)}/disable`));
     },
     onSuccess: () => {
       setDisableTarget(null);
@@ -168,7 +168,7 @@ const Addons: React.FC = () => {
       if (isTrialMode) {
         throw new Error('addons unavailable during trial');
       }
-      await unwrap(safe.post('/addons/enable', { addonId }));
+      await unwrap(safe.patch(`/api/hub/app/v1/addons/${encodeURIComponent(addonId)}/enable`));
     },
     onSuccess: (_, addonId) => {
       const purchased = addons.find((addon) => addon.id === addonId);

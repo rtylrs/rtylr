@@ -1,15 +1,17 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { OvertimeRequestPayload } from '@voxire/contracts/hr/overtime/v1/types';
-import type {
-  ListOvertimeRequestsRequest,
-  ListOvertimeRequestsResponse,
-} from '@voxire/contracts/hr/overtime/v1/list_overtime_requests';
-import type { CreateOvertimeRequestRequest } from '@voxire/contracts/hr/overtime/v1/create_overtime_request';
-import type { ApproveOvertimeRequest } from '@voxire/contracts/hr/overtime/v1/approve_overtime';
+import {
+  OvertimeServiceClient,
+  type ListOvertimeRequestsRequest,
+  type CreateOvertimeRequestRequest,
+  type ApproveOvertimeRequest,
+  type OvertimeRequestPayload,
+} from '@voxire/voxie/hr/overtime/v1/service_client';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+const overtimeClient = createOneKitClient(OvertimeServiceClient, 'hr');
 
 interface OvertimeConfigData {
   dailyOtThresholdMinutes: number;
@@ -27,10 +29,10 @@ export const useListOvertimeRequests = (params?: ListOvertimeRequestsRequest) =>
   return useQuery<OvertimeRequestPayload[]>({
     queryKey: ['overtime-requests', params],
     queryFn: async (): Promise<OvertimeRequestPayload[]> => {
-      const res = await unwrap(
-        safe.get<ListOvertimeRequestsResponse>('/hr/overtime/requests', { params })
+      const res = await overtimeClient.listOvertimeRequests(
+        params ?? { employeeId: null, status: null }
       );
-      return (res as ListOvertimeRequestsResponse).requests;
+      return res.requests;
     },
   });
 };
@@ -40,15 +42,13 @@ export const useCreateOvertimeRequest = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateOvertimeRequestRequest): Promise<void> => {
-      await unwrap(safe.post('/hr/overtime/requests', data));
-    },
+    mutationFn: (data: CreateOvertimeRequestRequest) => overtimeClient.createOvertimeRequest(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overtime-requests'] });
       toast.success(t('overtime.requestCreated'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -58,25 +58,19 @@ export const useApproveOvertime = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ApproveOvertimeRequest): Promise<void> => {
-      await unwrap(
-        safe.post(`/hr/overtime/requests/${data.overtimeRequestId}/approve`, {
-          requestId: data.overtimeRequestId,
-          approved: data.approved,
-          multiplierApplied: data.multiplierApplied,
-        })
-      );
-    },
+    mutationFn: (data: ApproveOvertimeRequest) => overtimeClient.approveOvertime(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overtime-requests'] });
       toast.success(t('overtime.requestUpdated'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
 
+// No onekit contract exists for overtime config yet - stays on the legacy
+// REST endpoint until hr_overtime grows a matching rpc.
 export const useGetOvertimeConfig = () => {
   return useQuery<OvertimeConfigData>({
     queryKey: ['overtime-config'],

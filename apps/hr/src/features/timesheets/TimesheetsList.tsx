@@ -5,7 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { FileText, ChevronRight } from 'lucide-react';
 import { useListTimesheets } from '../../shared/hooks/queries/useTimesheets';
-import type { TimesheetPayload } from '@voxire/contracts/hr/time_entry/v1/types';
+import type { TimesheetPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import {
   SectionHeader,
   Card,

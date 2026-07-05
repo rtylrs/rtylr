@@ -10,7 +10,7 @@ export const useSecurity = () => {
   return useQuery({
     queryKey: ['security'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<{ state?: unknown }>('/security'));
+      const res = await unwrap(safe.get<{ state?: unknown }>('/api/hub/security/v1/state'));
       return securityStateSchema.parse(res?.state ?? res);
     },
   });
@@ -20,7 +20,7 @@ export const useToggleTwoFactor = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (enabled: boolean) => {
-      await unwrap(safe.post('/security/2fa', { enabled }));
+      await unwrap(safe.patch('/api/hub/security/v1/2fa', { enabled }));
       return enabled;
     },
     onSuccess: (enabled) => {
@@ -34,8 +34,8 @@ export const useToggleTwoFactor = () => {
 export const useRevokeSession = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      await unwrap(safe.post('/security/invalidate-sessions', { exceptSessionId: id }));
+    mutationFn: async (_id: string) => {
+      await unwrap(safe.post('/api/hub/security/v1/invalidate-sessions'));
     },
     onSuccess: () => {
       toast.success('Signed out of all sessions');

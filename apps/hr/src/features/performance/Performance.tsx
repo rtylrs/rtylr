@@ -15,7 +15,7 @@ import {
 } from '../../shared/components/ui';
 import { useListReviewCycles, useOpenReviewCycle } from '../../shared/hooks/queries/usePerformance';
 import CreateCycleForm from './CreateCycleForm';
-import type { ReviewCyclePayload } from '@voxire/contracts/hr/performance/v1/types';
+import type { ReviewCyclePayload } from '@voxire/voxie/hr/performance/v1/types';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-status-draft)',

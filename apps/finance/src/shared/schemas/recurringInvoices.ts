@@ -6,7 +6,7 @@ import { z } from 'zod';
  * converts the backend snake_case keys to camelCase before this schema runs,
  * so all fields are camelCase here.
  *
- * NOTE: the proto in @voxire/contracts/finance/v1/recurring_invoices declares a
+ * NOTE: the proto in @voxire/voxie/finance/v1/recurring_invoices declares a
  * richer shape (customerId, lines, subtotal, ...) that the backend does not yet
  * implement. The deployed wire shape below is the source of truth.
  */

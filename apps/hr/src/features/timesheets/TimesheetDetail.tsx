@@ -5,7 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
 import { useGetTimesheet, useSubmitTimesheet } from '../../shared/hooks/queries/useTimesheets';
-import type { TimeEntryPayload } from '@voxire/contracts/hr/time_entry/v1/types';
+import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import {
   SectionHeader,
   Card,

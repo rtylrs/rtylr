@@ -7,6 +7,11 @@ import type {
   RevenueByAppResponse,
   RevenueComparisonResponse,
 } from './types';
+import {
+  mapRevenueByApp,
+  mapRevenueComparison,
+  mapRevenueOverview,
+} from '../../utils/onekitMappers';
 
 export const useRevenueSeries = (
   params?: DateRangeParams
@@ -16,9 +21,11 @@ export const useRevenueSeries = (
     queryKey: ['insights-revenue', { from, to }],
     queryFn: async (): Promise<RevenueSeriesResponse> => {
       const res = await unwrap(
-        safe.get<RevenueSeriesResponse>('/insights/revenue', { params: { from, to } })
+        safe.get<Record<string, unknown>>('/api/insights/revenue/v1/overview', {
+          params: { period: `${from},${to}` },
+        })
       );
-      return res as RevenueSeriesResponse;
+      return mapRevenueOverview(res as Record<string, unknown>);
     },
   });
 };
@@ -27,8 +34,10 @@ export const useRevenueByApp = (): UseQueryResult<RevenueByAppResponse> => {
   return useQuery<RevenueByAppResponse>({
     queryKey: ['insights-revenue-by-app'],
     queryFn: async (): Promise<RevenueByAppResponse> => {
-      const res = await unwrap(safe.get<RevenueByAppResponse>('/insights/revenue/by-app'));
-      return res as RevenueByAppResponse;
+      const res = await unwrap(
+        safe.get<Record<string, unknown>>('/api/insights/revenue/v1/by-app')
+      );
+      return mapRevenueByApp(res as Record<string, unknown>);
     },
   });
 };
@@ -41,11 +50,11 @@ export const useRevenueComparison = (
     queryKey: ['insights-revenue-comparison', { from, to }],
     queryFn: async (): Promise<RevenueComparisonResponse> => {
       const res = await unwrap(
-        safe.get<RevenueComparisonResponse>('/insights/revenue/comparison', {
-          params: { from, to },
+        safe.get<Record<string, unknown>>('/api/insights/revenue/v1/comparison', {
+          params: { period: `${from},${to}`, compare_to: 'previous_period' },
         })
       );
-      return res as RevenueComparisonResponse;
+      return mapRevenueComparison(res as Record<string, unknown>);
     },
   });
 };

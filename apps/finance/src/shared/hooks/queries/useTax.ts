@@ -2,12 +2,12 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { ListTaxConfigResponse } from '@voxire/contracts/finance/report/v1/list_tax_config';
+import type { ListTaxConfigResponse } from '@voxire/voxie/finance/report/v1/list_tax_config';
 import type {
   CreateTaxConfigRequest,
   CreateTaxConfigResponse,
-} from '@voxire/contracts/finance/report/v1/create_tax_config';
-import type { GetTaxReportResponse } from '@voxire/contracts/finance/report/v1/get_tax_report';
+} from '@voxire/voxie/finance/report/v1/create_tax_config';
+import type { GetTaxReportResponse } from '@voxire/voxie/finance/report/v1/get_tax_report';
 import { safe } from '../../lib/api';
 
 interface TaxReportRange {

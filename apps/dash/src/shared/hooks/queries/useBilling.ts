@@ -40,8 +40,10 @@ export const useBilling = () => {
   return useQuery<BillingInfo>({
     queryKey: ['billing'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/billing/summary'));
-      const raw = billingSummarySchema.parse(res ?? {});
+      const res = await unwrap(safe.get('/api/hub/billing/v1/summary'));
+      const raw = billingSummarySchema.parse(
+        (res as { summary?: unknown })?.summary ?? res ?? {}
+      );
       const plan = raw.plan || 'free';
       const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
 
@@ -66,7 +68,7 @@ export const useInvoices = () => {
   return useQuery({
     queryKey: ['invoices'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/billing/invoices'));
+      const res = await unwrap(safe.get('/api/hub/billing/v1/invoices'));
       const raw = res?.invoices ?? res ?? [];
       return z.array(invoiceSchema).parse(Array.isArray(raw) ? raw : []);
     },

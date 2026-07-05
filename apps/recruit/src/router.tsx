@@ -75,7 +75,7 @@ const adminGuardRoute = createRoute({
     <AppGuard
       appId="recruit"
       fetchUser={(): Promise<Record<string, unknown>> =>
-        unwrap(safe.get<Record<string, unknown>>('/user/me'))
+        unwrap(safe.get<Record<string, unknown>>('/api/hub/user/v1/users/me'))
       }
     >
       <Outlet />

@@ -1,21 +1,19 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  LeaveTypePayload,
-  LeaveRequestPayload,
-  LeaveBalancePayload,
-} from '@voxire/contracts/hr/leave/v1/types';
-import type { ListLeaveTypesResponse } from '@voxire/contracts/hr/leave/v1/list_leave_types';
-import type {
-  ListLeaveRequestsRequest,
-  ListLeaveRequestsResponse,
-} from '@voxire/contracts/hr/leave/v1/list_leave_requests';
-import type { CreateLeaveRequestRequest } from '@voxire/contracts/hr/leave/v1/create_leave_request';
-import type { ApproveLeaveRequest } from '@voxire/contracts/hr/leave/v1/approve_leave';
-import type { ListLeaveBalancesResponse } from '@voxire/contracts/hr/leave/v1/list_leave_balances';
+import {
+  LeaveServiceClient,
+  type ListLeaveRequestsRequest,
+  type CreateLeaveRequestRequest,
+  type ApproveLeaveRequest,
+  type LeaveRequestPayload,
+  type LeaveTypePayload,
+  type LeaveBalancePayload,
+} from '@voxire/voxie/hr/leave/v1/service_client';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+const leaveClient = createOneKitClient(LeaveServiceClient, 'hr');
 
 interface LeaveCalendarParams {
   month: number;
@@ -32,8 +30,8 @@ export const useListLeaveTypes = () => {
   return useQuery<LeaveTypePayload[]>({
     queryKey: ['leave-types'],
     queryFn: async (): Promise<LeaveTypePayload[]> => {
-      const res = await unwrap(safe.get<ListLeaveTypesResponse>('/hr/leave/types'));
-      return (res as ListLeaveTypesResponse).leaveTypes;
+      const res = await leaveClient.listLeaveTypes({});
+      return res.leaveTypes;
     },
   });
 };
@@ -42,10 +40,8 @@ export const useListLeaveRequests = (params?: ListLeaveRequestsRequest) => {
   return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-requests', params],
     queryFn: async (): Promise<LeaveRequestPayload[]> => {
-      const res = await unwrap(
-        safe.get<ListLeaveRequestsResponse>('/hr/leave/requests', { params })
-      );
-      return (res as ListLeaveRequestsResponse).requests;
+      const res = await leaveClient.listLeaveRequests(params ?? { employeeId: null, status: null });
+      return res.requests;
     },
   });
 };
@@ -55,16 +51,14 @@ export const useCreateLeaveRequest = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateLeaveRequestRequest): Promise<void> => {
-      await unwrap(safe.post('/hr/leave/requests', data));
-    },
+    mutationFn: (data: CreateLeaveRequestRequest) => leaveClient.createLeaveRequest(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
       queryClient.invalidateQueries({ queryKey: ['leave-balances'] });
       toast.success(t('leave.requestCreated'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -74,23 +68,15 @@ export const useApproveLeave = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: ApproveLeaveRequest): Promise<void> => {
-      await unwrap(
-        safe.post(`/hr/leave/requests/${data.requestId}/approve`, {
-          requestId: data.requestId,
-          approved: data.approved,
-          rejectionReason: data.rejectionReason,
-        })
-      );
-    },
+    mutationFn: (data: ApproveLeaveRequest) => leaveClient.approveLeave(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
       queryClient.invalidateQueries({ queryKey: ['leave-balances'] });
       queryClient.invalidateQueries({ queryKey: ['leave-calendar'] });
       toast.success(t('leave.requestUpdated'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -99,12 +85,14 @@ export const useListLeaveBalances = () => {
   return useQuery<LeaveBalancePayload[]>({
     queryKey: ['leave-balances'],
     queryFn: async (): Promise<LeaveBalancePayload[]> => {
-      const res = await unwrap(safe.get<ListLeaveBalancesResponse>('/hr/leave/balances'));
-      return (res as ListLeaveBalancesResponse).balances;
+      const res = await leaveClient.listLeaveBalances({ employeeId: null, year: null });
+      return res.balances;
     },
   });
 };
 
+// No onekit contract exists for the leave calendar yet - stays on the legacy
+// REST endpoint until hr_leave grows a matching rpc.
 export const useGetLeaveCalendar = (params: LeaveCalendarParams) => {
   return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-calendar', params],

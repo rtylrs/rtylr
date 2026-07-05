@@ -18,7 +18,7 @@ export type StoredMessage = z.infer<typeof messageSchema>;
 
 /** Fetch a single chat's full message history. */
 export async function getChatMessages(chatId: string): Promise<StoredMessage[]> {
-  const res = await unwrap(safe.get(`/memory/chats/${encodeURIComponent(chatId)}/messages`));
+  const res = await unwrap(safe.get(`/api/hub/memory/v1/chats/${encodeURIComponent(chatId)}/messages`));
   const parsed = messagesResponseSchema.safeParse(res);
   if (parsed.success) return parsed.data.messages;
   return [];

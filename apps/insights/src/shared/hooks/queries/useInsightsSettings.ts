@@ -10,23 +10,25 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { safe } from '../../lib/api';
 import type { InsightsSettingsResponse, ScheduledReportsResponse, ScheduledReport } from './types';
+import {
+  mapInsightsSettingsResponse,
+  mapScheduledReport,
+  mapScheduledReportsResponse,
+  toScheduledReportPayload,
+} from '../../utils/onekitMappers';
 
 export const useInsightsSettings = (): UseQueryResult<InsightsSettingsResponse> => {
   return useQuery<InsightsSettingsResponse>({
     queryKey: ['insights-settings'],
     queryFn: async (): Promise<InsightsSettingsResponse> => {
-      const res = await unwrap(safe.get<InsightsSettingsResponse>('/insights/settings'));
-      return res as InsightsSettingsResponse;
+      const res = await unwrap(
+        safe.get<Record<string, unknown>>('/api/insights/setting/v1/settings')
+      );
+      return mapInsightsSettingsResponse(res as Record<string, unknown>);
     },
   });
 };
 
-// NOTE: the backend GET /insights/settings handler is live, but a matching
-// PUT /insights/settings is not yet wired in onion/internal/modules/insights.
-// The mutation below targets the expected contract and will start working
-// once the backend ships the update handler - the frontend is intentionally
-// ready in advance so the Settings screen can land together with the server
-// change.
 export const useUpdateInsightsSettings = (): UseMutationResult<
   InsightsSettingsResponse,
   unknown,
@@ -38,8 +40,18 @@ export const useUpdateInsightsSettings = (): UseMutationResult<
     mutationFn: async (
       data: Partial<InsightsSettingsResponse>
     ): Promise<InsightsSettingsResponse> => {
-      const res = await unwrap(safe.put<InsightsSettingsResponse>('/insights/settings', data));
-      return res as InsightsSettingsResponse;
+      const res = await unwrap(
+        safe.put<Record<string, unknown>>('/api/insights/setting/v1/settings', {
+          settings: {
+            default_period: 'this_month',
+            currency: data.defaultCurrency ?? 'USD',
+            compare_previous: false,
+            dashboard_widgets: [],
+            favorite_reports: [],
+          },
+        })
+      );
+      return mapInsightsSettingsResponse(res as Record<string, unknown>);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['insights-settings'] });
@@ -56,9 +68,9 @@ export const useScheduledReports = (): UseQueryResult<ScheduledReportsResponse> 
     queryKey: ['insights-scheduled-reports'],
     queryFn: async (): Promise<ScheduledReportsResponse> => {
       const res = await unwrap(
-        safe.get<ScheduledReportsResponse>('/insights/settings/scheduled-reports')
+        safe.get<Record<string, unknown>>('/api/insights/report/v1/scheduled')
       );
-      return res as ScheduledReportsResponse;
+      return mapScheduledReportsResponse(res as Record<string, unknown>);
     },
   });
 };
@@ -81,9 +93,10 @@ export const useCreateScheduledReport = (): UseMutationResult<
   return useMutation<ScheduledReport, unknown, CreateScheduledReportPayload>({
     mutationFn: async (data: CreateScheduledReportPayload): Promise<ScheduledReport> => {
       const res = await unwrap(
-        safe.post<ScheduledReport>('/insights/settings/scheduled-reports', data)
+        safe.post<Record<string, unknown>>('/api/insights/report/v1/scheduled', toScheduledReportPayload(data))
       );
-      return res as ScheduledReport;
+      const report = (res as Record<string, unknown>).report as Record<string, unknown>;
+      return mapScheduledReport(report);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
@@ -110,9 +123,12 @@ export const useUpdateScheduledReport = (): UseMutationResult<
   return useMutation<ScheduledReport, unknown, UpdateScheduledReportPayload>({
     mutationFn: async ({ id, data }: UpdateScheduledReportPayload): Promise<ScheduledReport> => {
       const res = await unwrap(
-        safe.put<ScheduledReport>(`/insights/settings/scheduled-reports/${id}`, data)
+        safe.put<Record<string, unknown>>(`/api/insights/report/v1/scheduled/${id}`, {
+          ...toScheduledReportPayload(data),
+        })
       );
-      return res as ScheduledReport;
+      const report = (res as Record<string, unknown>).report as Record<string, unknown>;
+      return mapScheduledReport(report);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
@@ -134,7 +150,7 @@ export const useDeleteScheduledReport = (): UseMutationResult<
   return useMutation<{ deleted: boolean }, unknown, number>({
     mutationFn: async (id: number): Promise<{ deleted: boolean }> => {
       const res = await unwrap(
-        safe.delete<{ deleted: boolean }>(`/insights/settings/scheduled-reports/${id}`)
+        safe.delete<{ deleted: boolean }>(`/api/insights/report/v1/scheduled/${id}`)
       );
       return res as { deleted: boolean };
     },

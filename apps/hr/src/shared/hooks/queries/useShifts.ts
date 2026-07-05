@@ -1,8 +1,8 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ShiftPayload } from '@voxire/contracts/hr/shift/v1/types';
-import type { CreateShiftRequest } from '@voxire/contracts/hr/shift/v1/create_shift';
-import type { ListShiftsResponse } from '@voxire/contracts/hr/shift/v1/list_shifts';
+import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
+import type { CreateShiftRequest } from '@voxire/voxie/hr/shift/v1/create_shift';
+import type { ListShiftsResponse } from '@voxire/voxie/hr/shift/v1/list_shifts';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

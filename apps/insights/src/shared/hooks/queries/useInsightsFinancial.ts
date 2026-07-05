@@ -3,6 +3,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type { CashFlowResponse, ExpensesByCategoryResponse, InvoiceAgingResponse } from './types';
+import { mapCashFlowAnalytics, mapExpenseAnalytics, mapInvoiceAging } from '../../utils/onekitMappers';
 
 export const useCashFlow = (params?: DateRangeParams): UseQueryResult<CashFlowResponse> => {
   const { from, to } = resolveDateRange(params);
@@ -10,9 +11,11 @@ export const useCashFlow = (params?: DateRangeParams): UseQueryResult<CashFlowRe
     queryKey: ['insights-financial-cash-flow', { from, to }],
     queryFn: async (): Promise<CashFlowResponse> => {
       const res = await unwrap(
-        safe.get<CashFlowResponse>('/insights/financial/cash-flow', { params: { from, to } })
+        safe.get<Record<string, unknown>>('/api/insights/financial/v1/cash-flow', {
+          params: { period: `${from},${to}` },
+        })
       );
-      return res as CashFlowResponse;
+      return mapCashFlowAnalytics(res as Record<string, unknown>);
     },
   });
 };
@@ -25,11 +28,11 @@ export const useExpensesByCategory = (
     queryKey: ['insights-financial-expenses', { from, to }],
     queryFn: async (): Promise<ExpensesByCategoryResponse> => {
       const res = await unwrap(
-        safe.get<ExpensesByCategoryResponse>('/insights/financial/expenses', {
-          params: { from, to },
+        safe.get<Record<string, unknown>>('/api/insights/financial/v1/expenses', {
+          params: { period: `${from},${to}` },
         })
       );
-      return res as ExpensesByCategoryResponse;
+      return mapExpenseAnalytics(res as Record<string, unknown>);
     },
   });
 };
@@ -38,8 +41,10 @@ export const useInvoiceAging = (): UseQueryResult<InvoiceAgingResponse> => {
   return useQuery<InvoiceAgingResponse>({
     queryKey: ['insights-financial-invoice-aging'],
     queryFn: async (): Promise<InvoiceAgingResponse> => {
-      const res = await unwrap(safe.get<InvoiceAgingResponse>('/insights/financial/invoice-aging'));
-      return res as InvoiceAgingResponse;
+      const res = await unwrap(
+        safe.get<Record<string, unknown>>('/api/insights/financial/v1/invoice-aging')
+      );
+      return mapInvoiceAging(res as Record<string, unknown>);
     },
   });
 };

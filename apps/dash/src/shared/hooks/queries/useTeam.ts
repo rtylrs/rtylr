@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { StaffUserPayload } from '@voxire/contracts/hub/team/members/v1/types';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
 import { z } from 'zod';
 import api, { safe } from '../../lib/api';
 import { teamMemberSchema } from '../../schemas/team';
@@ -54,7 +54,7 @@ export const useTeam = (params: UseTeamParams = {}) => {
     queryKey: ['team', { page, pageSize }],
     queryFn: async (): Promise<TeamListResult> => {
       const res = await unwrap(
-        safe.get('/team/members', { params: { page, page_size: pageSize } })
+        safe.get('/api/hub/team/members/v1/members')
       );
       const raw = res as Record<string, unknown>;
       const list = raw.users ?? raw.members ?? res;
@@ -84,7 +84,7 @@ export const useMember = (id: string | undefined) => {
     queryKey: ['team', id],
     queryFn: async () => {
       if (!id) return undefined;
-      const res = await unwrap(safe.get(`/team/members/${id}`));
+      const res = await unwrap(safe.get(`/api/hub/team/members/v1/members/${id}`));
       const m = res?.user ?? res;
       if (!m) return undefined;
       const parsed = teamMemberSchema.parse(m);
@@ -110,7 +110,7 @@ export const useInviteMember = () => {
       groupId?: number;
       password?: string;
     }) => {
-      const res = await unwrap(safe.post('/team/invite', payload));
+      const res = await unwrap(safe.post('/api/hub/team/invitations/v1/invitations', payload));
       return res;
     },
     onSuccess: () => {
@@ -132,7 +132,12 @@ export const useUpdateMember = () => {
       if (patch.apps !== undefined) payload.apps = patch.apps;
       if (patch.role !== undefined) payload.role = patch.role;
 
-      return unwrap(safe.put('/team/users/permissions', payload));
+      return unwrap(
+        safe.put(`/api/hub/team/permissions/v1/permissions/${id}`, {
+          apps: payload.apps ?? [],
+          role: payload.role ?? 'staff',
+        })
+      );
     },
     onSuccess: (_data, { id, patch }) => {
       toast.success('Member updated');
@@ -157,7 +162,7 @@ export const useDeactivateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.patch(`/team/members/${id}/deactivate`));
+      await unwrap(safe.delete(`/api/hub/team/members/v1/members/${id}`));
       return id;
     },
     onSuccess: () => {
@@ -181,7 +186,9 @@ export const useAccessRequests = () =>
   useQuery<AccessRequest[]>({
     queryKey: ['team', 'access-requests'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<{ requests: AccessRequest[] }>('/team/access-requests'));
+      const res = await unwrap(
+        safe.get<{ requests: AccessRequest[] }>('/api/hub/team/access/v1/requests')
+      );
       return res?.requests ?? [];
     },
     staleTime: 30_000,
@@ -191,7 +198,9 @@ export const useApproveAccessRequest = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, userId, app }: { id: number; userId: number; app: string }) =>
-      unwrap(safe.post(`/team/access-requests/${id}/approve`, { userId, app })),
+      unwrap(
+        safe.post(`/api/hub/team/access/v1/requests/${id}/approve`, { user_id: userId, app })
+      ),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['team', 'access-requests'] });
       void qc.invalidateQueries({ queryKey: ['team'] });

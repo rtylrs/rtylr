@@ -25,7 +25,7 @@ export const useIndustries = () => {
   return useQuery({
     queryKey: ['industries'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/industries'));
+      const res = await unwrap(safe.get('/api/hub/config/v1/industries'));
       return industriesResponseSchema.parse(res);
     },
     staleTime: 24 * 60 * 60 * 1000,

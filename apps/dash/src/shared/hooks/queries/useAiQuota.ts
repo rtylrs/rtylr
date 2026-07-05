@@ -5,7 +5,6 @@ import { safe } from '../../lib/api';
 
 export type AiQuotaMode = 'pool' | 'per_person';
 
-// Shape of GET /ai/usage (snake_case from onion, camelCased by @voxire/api).
 export interface AiUsage {
   planSlug: string;
   mode: AiQuotaMode;
@@ -21,7 +20,10 @@ export interface AiUsage {
 export const useAiUsage = () =>
   useQuery({
     queryKey: ['ai-usage'],
-    queryFn: () => unwrap(safe.get<AiUsage>('/ai/usage')),
+    queryFn: async (): Promise<AiUsage> => {
+      const res = await unwrap(safe.get<{ usage: AiUsage }>('/api/hub/ai/v1/usage'));
+      return (res as { usage: AiUsage }).usage;
+    },
     staleTime: 30_000,
   });
 
@@ -29,8 +31,8 @@ export const useAiQuotaMode = () =>
   useQuery({
     queryKey: ['ai-quota-settings'],
     queryFn: async (): Promise<AiQuotaMode> => {
-      const res = await unwrap(safe.get<{ mode: AiQuotaMode }>('/ai/quota-settings'));
-      return res?.mode ?? 'pool';
+      const res = await unwrap(safe.get<{ settings: { mode: AiQuotaMode } }>('/api/hub/ai/v1/quota-settings'));
+      return res?.settings?.mode ?? 'pool';
     },
     staleTime: 30_000,
   });
@@ -38,7 +40,7 @@ export const useAiQuotaMode = () =>
 export const useUpdateAiQuotaMode = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (mode: AiQuotaMode) => unwrap(safe.put('/ai/quota-settings', { mode })),
+    mutationFn: (mode: AiQuotaMode) => unwrap(safe.put('/api/hub/ai/v1/quota-settings', { mode })),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ai-quota-settings'] });
       qc.invalidateQueries({ queryKey: ['ai-usage'] });

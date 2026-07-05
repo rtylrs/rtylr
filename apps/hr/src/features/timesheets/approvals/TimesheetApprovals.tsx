@@ -9,7 +9,7 @@ import {
   useApproveTimesheet,
   useRejectTimesheet,
 } from '../../../shared/hooks/queries/useTimesheets';
-import type { TimesheetPayload } from '@voxire/contracts/hr/time_entry/v1/types';
+import type { TimesheetPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import {
   SectionHeader,
   Card,

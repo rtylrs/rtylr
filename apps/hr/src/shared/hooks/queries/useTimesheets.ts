@@ -3,19 +3,28 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   ListTimesheetsRequest,
   ListTimesheetsResponse,
-} from '@voxire/contracts/hr/time_entry/v1/list_timesheets';
-import type { TimesheetPayload } from '@voxire/contracts/hr/time_entry/v1/types';
-import type {
-  SubmitTimesheetRequest,
-  SubmitTimesheetResponse,
-} from '@voxire/contracts/hr/time_entry/v1/submit_timesheet';
-import type {
-  ApproveTimesheetRequest,
-  ApproveTimesheetResponse,
-} from '@voxire/contracts/hr/time_entry/v1/approve_timesheet';
+} from '@voxire/voxie/hr/time_entry/v1/list_timesheets';
+import type { TimesheetPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+interface SubmitTimesheetRequest {
+  timesheetId: number;
+}
+
+interface SubmitTimesheetResponse {
+  success: boolean;
+}
+
+interface ApproveTimesheetRequest {
+  timesheetId: number;
+  approved: boolean;
+}
+
+interface ApproveTimesheetResponse {
+  success: boolean;
+}
 
 interface RejectTimesheetRequest {
   timesheetId: number;

@@ -2,11 +2,11 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type { ListJournalEntriesResponse } from '@voxire/contracts/finance/journal/v1/list_journal_entries';
+import type { ListJournalEntriesResponse } from '@voxire/voxie/finance/journal/v1/list_journal_entries';
 import type {
   CreateJournalEntryRequest,
   CreateJournalEntryResponse,
-} from '@voxire/contracts/finance/journal/v1/create_journal_entry';
+} from '@voxire/voxie/finance/journal/v1/create_journal_entry';
 import { safe } from '../../lib/api';
 
 interface ListJournalParams {

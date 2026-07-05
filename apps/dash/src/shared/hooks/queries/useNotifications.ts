@@ -11,7 +11,7 @@ export const useNotifications = () => {
   return useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/notifications'));
+      const res = await unwrap(safe.get('/api/hub/notification/v1/notifications'));
       const raw = res?.notifications ?? res;
       return z.array(notificationSchema).parse(Array.isArray(raw) ? raw : []);
     },
@@ -23,7 +23,7 @@ export const useMarkNotificationRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post(`/notifications/${id}/read`));
+      await unwrap(safe.patch(`/api/hub/notification/v1/notifications/${encodeURIComponent(id)}/read`));
       return id;
     },
     onMutate: async (id) => {
@@ -44,7 +44,7 @@ export const useMarkAllNotificationsRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      await unwrap(safe.post('/notifications/read-all'));
+      await unwrap(safe.patch('/api/hub/notification/v1/notifications/read-all'));
     },
     onMutate: async () => {
       await qc.cancelQueries({ queryKey: ['notifications'] });

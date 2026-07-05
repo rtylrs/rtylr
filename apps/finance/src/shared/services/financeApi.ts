@@ -1,11 +1,26 @@
 import { safe } from '../lib/api';
-import type { InvoiceItem as InvoiceLine } from '@voxire/contracts/finance/invoices/v1/types';
-import type { CreateInvoiceRequest } from '@voxire/contracts/finance/invoices/v1/create_invoice';
-import type { CreateRecurringInvoiceRequest } from '@voxire/contracts/finance/recurring_invoice/v1/create_recurring_invoice';
-import type { CreateBillRequest } from '@voxire/contracts/finance/bill/v1/create_bill';
-import type { CreateBankAccountRequest } from '@voxire/contracts/finance/bank_account/v1/create_bank_account';
-import type { CreateAccountRequest } from '@voxire/contracts/finance/account/v1/create_account';
-import type { CreateJournalEntryRequest } from '@voxire/contracts/finance/journal/v1/create_journal_entry';
+import type { InvoiceItem as InvoiceLine } from '@voxire/voxie/finance/invoices/v1/types';
+import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/create_invoice';
+import type { CreateRecurringInvoiceRequest } from '@voxire/voxie/finance/recurring_invoice/v1/create_recurring_invoice';
+import type { CreateBillRequest } from '@voxire/voxie/finance/bill/v1/create_bill';
+import type { CreateBankAccountRequest } from '@voxire/voxie/finance/bank_account/v1/create_bank_account';
+import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/create_account';
+import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/create_journal_entry';
+
+export const plReportQueryParams = (params?: {
+  period?: string;
+  from?: string;
+  to?: string;
+  start?: string;
+  end?: string;
+  date?: string;
+}) => {
+  const from = params?.from ?? params?.start;
+  const to = params?.to ?? params?.end;
+  const date = params?.date ?? to ?? from ?? new Date().toISOString().slice(0, 10);
+  const period = params?.period ?? (from && to ? `${from},${to}` : 'month');
+  return { period, date };
+};
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -254,7 +269,10 @@ export const financeApi = {
     ),
 
   // P&L
-  getPL: (period: string) => safe.get<PLReport>('/finance/pl', { params: { period } }),
+  getPL: (period: string) =>
+    safe.get<PLReport>('/api/finance/report/v1/pl', {
+      params: plReportQueryParams({ period, date: new Date().toISOString().slice(0, 10) }),
+    }),
 
   // Tax
   getTaxConfig: () => safe.get<TaxConfig[]>('/finance/tax/config'),

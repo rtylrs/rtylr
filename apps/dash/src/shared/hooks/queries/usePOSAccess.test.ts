@@ -43,7 +43,7 @@ describe('usePOSLocations', () => {
     const { result } = renderHook(() => usePOSLocations(true), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockGet).toHaveBeenCalledWith('/pos/access/my-locations');
+    expect(mockGet).toHaveBeenCalledWith('/api/pos/access/v1/my-locations');
     expect(result.current.data).toEqual([{ id: 3, name: 'Main', address: 'A' }]);
   });
 });

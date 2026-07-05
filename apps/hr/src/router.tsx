@@ -89,7 +89,7 @@ const rootRoute = createRootRoute({
       <AppGuard
         appId="hr"
         fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/user/me'))
+          unwrap(safe.get<Record<string, unknown>>('/api/hub/user/v1/users/me'))
         }
       >
         <Suspense fallback={<PageLoader />}>

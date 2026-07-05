@@ -8,13 +8,14 @@ import {
   ScheduledReportPayload,
 } from '../../shared/services/insightsService';
 import { insightsSettingsSchema, scheduledReportSchema } from '../../shared/schemas/settings';
+import { mapInsightsSettingsResponse, mapScheduledReportsResponse } from '../../shared/utils/onekitMappers';
 
 export function useInsightsSettings() {
   return useQuery({
     queryKey: ['insights', 'settings'],
     queryFn: async () => {
       const res = await unwrap(insightsService.getInsightsSettings());
-      return insightsSettingsSchema.parse(res);
+      return insightsSettingsSchema.parse(mapInsightsSettingsResponse(res as Record<string, unknown>));
     },
   });
 }
@@ -36,8 +37,8 @@ export function useScheduledReports() {
     queryKey: ['insights', 'scheduled-reports'],
     queryFn: async () => {
       const res = await unwrap(insightsService.getScheduledReports());
-      const raw = (res as Record<string, unknown>)?.scheduledReports;
-      return z.array(scheduledReportSchema).parse(Array.isArray(raw) ? raw : []);
+      const mapped = mapScheduledReportsResponse(res as Record<string, unknown>);
+      return z.array(scheduledReportSchema).parse(mapped.scheduledReports);
     },
   });
 }

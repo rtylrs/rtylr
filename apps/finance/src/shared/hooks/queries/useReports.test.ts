@@ -105,6 +105,8 @@ describe('usePL', () => {
     });
     const { result } = renderHook(() => usePL(RANGE), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/pl', { params: RANGE });
+    expect(safe.get).toHaveBeenCalledWith('/api/finance/report/v1/pl', {
+      params: expect.objectContaining({ period: `${RANGE.from},${RANGE.to}`, date: RANGE.to }),
+    });
   });
 });

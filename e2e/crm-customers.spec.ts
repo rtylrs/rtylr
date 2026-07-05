@@ -9,8 +9,8 @@ import { test, expect, type Page, type Route } from './fixtures';
  * confirmation. Every `/crm/customers*` endpoint is stubbed via `page.route()`
  * so CI never touches the real backend and the test is deterministic.
  *
- * The CRM app is guarded by `AppGuard` (auth token cookie + `/user/me`), so
- * we seed a fake cookie per context and stub `/user/me`. AppGuard is
+ * The CRM app is guarded by `AppGuard` (auth token cookie + `/api/hub/user/v1/users/me`), so
+ * we seed a fake cookie per context and stub `/api/hub/user/v1/users/me`. AppGuard is
  * optimistic on error, but returning a valid user keeps the happy path honest.
  */
 
@@ -76,7 +76,7 @@ async function stubCrmAPI(page: Page): Promise<void> {
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
   );
 
-  // /user/me is called by AppGuard to confirm the user has CRM access.
+  // /api/hub/user/v1/users/me is called by AppGuard to confirm the user has CRM access.
   await page.route(/\/user\/me$/, async (route: Route) => {
     await route.fulfill({
       status: 200,

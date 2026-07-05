@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
-import type { CreateCustomerRequest } from '@voxire/contracts/crm/customer/v1/create_customer';
-import type { UpdateCustomerRequest } from '@voxire/contracts/crm/customer/v1/update_customer';
+import type { CreateCustomerRequest } from '@voxire/voxie/crm/customer/v1/create_customer';
+import type { UpdateCustomerRequest } from '@voxire/voxie/crm/customer/v1/update_customer';
 import {
   useMutation,
   useQuery,

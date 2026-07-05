@@ -13,7 +13,7 @@ export const usePermissions = () => {
   return useQuery<PermissionMatrix>({
     queryKey: ['permissions'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/permissions'));
+      const res = await unwrap(safe.get('/api/hub/permission/v1/permissions'));
       return permissionMatrixSchema.parse(res);
     },
   });
@@ -23,7 +23,7 @@ export const useCustomRoles = () => {
   return useQuery({
     queryKey: ['custom-roles'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/roles'));
+      const res = await unwrap(safe.get('/api/hub/permission/v1/roles'));
       const raw = res?.roles ?? res;
       return z.array(customRoleSchema).parse(Array.isArray(raw) ? raw : []);
     },

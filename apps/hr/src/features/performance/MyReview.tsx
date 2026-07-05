@@ -4,7 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import type {
   ReviewGoalPayload,
   PerformanceReviewPayload,
-} from '@voxire/contracts/hr/performance/v1/types';
+} from '@voxire/voxie/hr/performance/v1/types';
 import {
   useListReviews,
   useListGoals,

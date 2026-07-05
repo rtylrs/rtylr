@@ -11,19 +11,22 @@ export const sessionSchema = z
     location: z.string().optional(),
     ip: z.string().default(''),
     userAgent: z.string().optional(),
+    user_agent: z.string().optional(),
     current: z.boolean().optional(),
     isCurrent: z.boolean().optional(),
+    is_current: z.boolean().optional(),
     lastActive: z.string().optional(),
     createdAt: z.string().optional(),
+    created_at: z.string().optional(),
   })
   .transform((s) => ({
     id: s.id,
-    device: s.device ?? s.userAgent ?? 'Unknown device',
+    device: s.device ?? s.userAgent ?? s.user_agent ?? 'Unknown device',
     browser: s.browser ?? '',
     location: s.location ?? '',
     ip: s.ip,
-    current: s.current ?? s.isCurrent ?? false,
-    lastActive: s.lastActive ?? s.createdAt ?? '',
+    current: s.current ?? s.isCurrent ?? s.is_current ?? false,
+    lastActive: s.lastActive ?? s.createdAt ?? s.created_at ?? '',
   }));
 
 export const trustedDeviceSchema = z.object({
@@ -38,18 +41,20 @@ export const trustedDeviceSchema = z.object({
 // `activeSessions`; normalize to `sessions` which the page reads.
 export const securityStateSchema = z
   .object({
-    twoFactorEnabled: z.boolean().default(false),
+    twoFactorEnabled: z.boolean().optional(),
+    two_factor_enabled: z.boolean().optional(),
     twoFactorMethod: z.enum(['app', 'sms']).nullable().default(null),
     sessions: z.array(sessionSchema).optional(),
     activeSessions: z.array(sessionSchema).optional(),
+    active_sessions: z.array(sessionSchema).optional(),
     trustedDevices: z.array(trustedDeviceSchema).default([]),
     passwordChangedAt: z.string().optional(),
     ssoEnabled: z.boolean().default(false),
   })
   .transform((s) => ({
-    twoFactorEnabled: s.twoFactorEnabled,
+    twoFactorEnabled: s.twoFactorEnabled ?? s.two_factor_enabled ?? false,
     twoFactorMethod: s.twoFactorMethod,
-    sessions: s.sessions ?? s.activeSessions ?? [],
+    sessions: s.sessions ?? s.activeSessions ?? s.active_sessions ?? [],
     trustedDevices: s.trustedDevices,
     passwordChangedAt: s.passwordChangedAt,
     ssoEnabled: s.ssoEnabled,

@@ -8,13 +8,14 @@ import type {
   SlowMoversResponse,
   ProductCategoryMixResponse,
 } from './types';
+import { mapProductPerformance } from '../../utils/onekitMappers';
 
 export const useProductKPIs = (): UseQueryResult<ProductKPIResponse> => {
   return useQuery<ProductKPIResponse>({
     queryKey: ['insights-products'],
     queryFn: async (): Promise<ProductKPIResponse> => {
-      const res = await unwrap(safe.get<ProductKPIResponse>('/insights/products'));
-      return res as ProductKPIResponse;
+      const res = await unwrap(safe.get<Record<string, unknown>>('/api/insights/product/v1/performance'));
+      return mapProductPerformance(res as Record<string, unknown>);
     },
   });
 };
@@ -29,7 +30,7 @@ export const useBestSellers = (params?: BestSellersParams): UseQueryResult<BestS
     queryKey: ['insights-products-best-sellers', { limit }],
     queryFn: async (): Promise<BestSellersResponse> => {
       const res = await unwrap(
-        safe.get<BestSellersResponse>('/insights/products/best-sellers', { params: { limit } })
+        safe.get<BestSellersResponse>('/api/insights/product/v1/best-sellers', { params: { limit } })
       );
       return res as BestSellersResponse;
     },
@@ -40,7 +41,7 @@ export const useProductMargins = (): UseQueryResult<ProductMarginsResponse> => {
   return useQuery<ProductMarginsResponse>({
     queryKey: ['insights-products-margins'],
     queryFn: async (): Promise<ProductMarginsResponse> => {
-      const res = await unwrap(safe.get<ProductMarginsResponse>('/insights/products/margins'));
+      const res = await unwrap(safe.get<ProductMarginsResponse>('/api/insights/product/v1/margins'));
       return res as ProductMarginsResponse;
     },
   });
@@ -56,7 +57,7 @@ export const useSlowMovers = (params?: SlowMoversParams): UseQueryResult<SlowMov
     queryKey: ['insights-products-slow-movers', { days }],
     queryFn: async (): Promise<SlowMoversResponse> => {
       const res = await unwrap(
-        safe.get<SlowMoversResponse>('/insights/products/slow-movers', { params: { days } })
+        safe.get<SlowMoversResponse>('/api/insights/product/v1/slow-movers', { params: { days } })
       );
       return res as SlowMoversResponse;
     },
@@ -68,7 +69,7 @@ export const useProductCategoryMix = (): UseQueryResult<ProductCategoryMixRespon
     queryKey: ['insights-products-category-mix'],
     queryFn: async (): Promise<ProductCategoryMixResponse> => {
       const res = await unwrap(
-        safe.get<ProductCategoryMixResponse>('/insights/products/categories')
+        safe.get<ProductCategoryMixResponse>('/api/insights/product/v1/categories')
       );
       return res as ProductCategoryMixResponse;
     },

@@ -47,8 +47,9 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
 
     createRequest.mutate(
       {
-        employeeId: Number(userId),
+        employeeId: userId ?? '',
         ...result.data,
+        neededByDate: result.data.neededByDate ?? null,
       },
       {
         onSuccess: () => onClose(),

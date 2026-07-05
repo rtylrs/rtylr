@@ -121,10 +121,16 @@ const Overtime = (): React.JSX.Element => {
                 {req.status === 'Pending' && (
                   <ApprovalButtons
                     onApprove={() =>
-                      approveOvertime.mutate({ overtimeRequestId: req.id, approved: true })
+                      approveOvertime.mutate({
+                        overtimeRequestId: req.id,
+                        body: { approved: true, multiplierApplied: null, rejectionReason: null },
+                      })
                     }
                     onReject={() =>
-                      approveOvertime.mutate({ overtimeRequestId: req.id, approved: false })
+                      approveOvertime.mutate({
+                        overtimeRequestId: req.id,
+                        body: { approved: false, multiplierApplied: null, rejectionReason: null },
+                      })
                     }
                   />
                 )}

@@ -38,7 +38,7 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
     }
     setErrors({});
     createRequest.mutate(
-      { employeeId: Number(userId), ...result.data },
+      { employeeId: userId ?? '', ...result.data },
       {
         onSuccess: () => {
           setForm({ date: '', plannedExtraMinutes: 0, reason: '' });

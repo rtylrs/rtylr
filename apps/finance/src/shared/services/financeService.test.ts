@@ -104,9 +104,11 @@ describe('financeService', () => {
     expect(safe.put).toHaveBeenCalledWith('/finance/tax', data);
   });
 
-  it('getPLReport calls GET /finance/pl with params', () => {
+  it('getPLReport calls GET /api/finance/report/v1/pl with params', () => {
     const params = { period: '2026-Q1' };
     financeService.getPLReport(params);
-    expect(safe.get).toHaveBeenCalledWith('/finance/pl', { params });
+    expect(safe.get).toHaveBeenCalledWith('/api/finance/report/v1/pl', {
+      params: expect.objectContaining({ period: '2026-Q1' }),
+    });
   });
 });

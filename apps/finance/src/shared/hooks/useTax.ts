@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { safe } from '../lib/api';
 import type { TaxConfig, TaxReport, PLReport } from '../services/financeApi';
+import { plReportQueryParams } from '../services/financeApi';
 import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax';
 
 export function useTaxConfig() {
@@ -81,7 +82,9 @@ export function usePLByPeriod(period: string) {
   return useQuery({
     queryKey: ['pl', period],
     queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/finance/pl', { params: { from, to } }));
+      const res = await unwrap(
+        safe.get<unknown>('/api/finance/report/v1/pl', { params: plReportQueryParams({ from, to }) })
+      );
       return plReportSchema.parse(res ?? {}) as PLReport;
     },
     enabled: !!period,

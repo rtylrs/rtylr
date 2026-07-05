@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import { useClockIn, useClockOut, useSetPin } from '../../shared/hooks/queries/useAttendance';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
-import type { AttendanceRecordPayload } from '@voxire/contracts/hr/attendance/v1/types';
+import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
 import { Card, Button, Pill, Modal, ACCENT } from '../../shared/components/ui';
 
 interface ClockInWidgetProps {

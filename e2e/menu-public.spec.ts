@@ -1,29 +1,29 @@
 import { test, expect } from './fixtures';
 
 /**
- * Public menu e2e - /b/:businessId hits the new anonymous `/pos/public/*`
- * endpoints that landed this session. No auth required, matches the
- * "diner scans QR, no account" contract from CLAUDE.md.
+ * Public menu e2e - /b/:businessId hits anonymous OneKit menu endpoints.
  */
 
 const MENU_URL = process.env.MENU_URL ?? 'http://localhost:5174';
 
 async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('**/pos/public/business*', (route) =>
+  await page.route('**/api/hub/business/v1/businesses/public*', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        id: 42,
-        name: 'Acme Cafe',
-        logo_url: '',
-        currency: 'USD',
-        timezone: 'UTC',
+        business: {
+          id: 42,
+          name: 'Acme Cafe',
+          logo_url: '',
+          currency: 'USD',
+          timezone: 'UTC',
+        },
       }),
     })
   );
 
-  await page.route('**/pos/public/menu*', (route) =>
+  await page.route('**/api/pos/menu-item/v1/menu-items/public*', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

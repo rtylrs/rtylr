@@ -51,7 +51,7 @@ const rootRoute = createRootRoute({
       <AppGuard
         appId="insights"
         fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/user/me'))
+          unwrap(safe.get<Record<string, unknown>>('/api/hub/user/v1/users/me'))
         }
       >
         <AppFlagGuard flag={FLAG_KEYS.APP_INSIGHTS}>

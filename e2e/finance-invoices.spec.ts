@@ -8,7 +8,7 @@ import { test, expect } from './fixtures';
  * without a backend and without polluting prod data.
  *
  * The Finance app is guarded by `AppGuard`, which needs a `token` cookie
- * plus a `/user/me` response before it will render. We satisfy both in
+ * plus a `/api/hub/user/v1/users/me` response before it will render. We satisfy both in
  * the `beforeEach` so specs focus on the invoice UI itself.
  */
 
@@ -35,9 +35,9 @@ async function stubFinanceAPI(
   // Seed a store the route handlers mutate so create/delete appear in the list.
   const store: InvoiceRow[] = [...invoices];
 
-  // AppGuard fetches /user/me on mount. Return a minimal owner user so the
+  // AppGuard fetches /api/hub/user/v1/users/me on mount. Return a minimal owner user so the
   // guard admits us without bouncing to auth.rtylr.com.
-  await page.route('**/user/me', (route) =>
+  await page.route('**/api/hub/user/v1/users/me', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

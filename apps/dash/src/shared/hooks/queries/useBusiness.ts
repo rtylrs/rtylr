@@ -9,7 +9,9 @@ export const useSetBusinessSlug = () => {
   const setWebsiteData = useConfigStore((s) => s.setWebsiteData);
   return useMutation({
     mutationFn: async (slug: string) => {
-      return unwrap<{ slug: string }>(safe.put('/business/me/slug', { slug }));
+      return unwrap<{ slug: string }>(
+        safe.patch('/api/hub/business/v1/businesses/slug', { slug })
+      );
     },
     onSuccess: ({ slug }) => {
       const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
@@ -54,7 +56,9 @@ export const useUpdateBusiness = () => {
       setIfPresent('country');
       if (data.maintenanceMode !== undefined) payload.maintenance_mode = data.maintenanceMode;
 
-      return unwrap<{ config?: Record<string, unknown> }>(safe.put('/config/update', payload));
+      return unwrap<{ config?: Record<string, unknown> }>(
+        safe.put('/api/hub/config/v1/config', payload)
+      );
     },
     onSuccess: (res) => {
       if (res.config) {

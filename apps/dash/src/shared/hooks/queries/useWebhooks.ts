@@ -12,7 +12,7 @@ export const useWebhooks = () => {
   return useQuery<Webhook[]>({
     queryKey: ['webhooks'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/webhooks'));
+      const res = await unwrap(safe.get('/api/hub/developer/v1/webhooks'));
       const raw = res?.webhooks ?? res;
       return z.array(webhookSchema).parse(Array.isArray(raw) ? raw : []);
     },
@@ -23,10 +23,7 @@ export const useCreateWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
-      // The create endpoint returns an ack ({ id, message }), not a full webhook;
-      // don't run it through webhookSchema (which threw and made success look
-      // like failure). The ['webhooks'] refetch below surfaces the new row.
-      const res = await unwrap(safe.post('/webhooks', payload));
+      const res = await unwrap(safe.post('/api/hub/developer/v1/webhooks', payload));
       return res as { id: number; message?: string };
     },
     onSuccess: () => {
@@ -43,7 +40,7 @@ export const useDeleteWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.delete('/webhooks', { data: { id: Number(id) } }));
+      await unwrap(safe.delete(`/api/hub/developer/v1/webhooks/${encodeURIComponent(id)}`));
       return id;
     },
     onSuccess: () => {

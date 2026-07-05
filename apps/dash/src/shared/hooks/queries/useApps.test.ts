@@ -107,10 +107,10 @@ describe('useApps', () => {
     expect(result.current.data![0].key).toBe('crm');
   });
 
-  it('calls safe.get with /apps', async () => {
+  it('calls safe.get with /api/hub/app/v1/apps', async () => {
     mockGet.mockResolvedValue({ apps: [] });
 
     renderHook(() => useApps(), { wrapper: createWrapper() });
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/apps'));
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/api/hub/app/v1/apps'));
   });
 });

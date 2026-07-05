@@ -59,15 +59,17 @@ interface MenuApiResponse {
 }
 
 async function fetchPublicBusiness(businessId: number): Promise<PublicBusiness> {
-  const res = await api.get<BusinessApiResponse>('/pos/public/business', {
-    params: { business_id: businessId },
-  });
+  const res = await api.get<{ business: BusinessApiResponse }>(
+    '/api/hub/business/v1/businesses/public',
+    { params: { business_id: businessId } }
+  );
+  const data = res.data.business;
   return {
-    id: res.data.id,
-    name: res.data.name,
-    logoUrl: cdnImageUrl(res.data.logo_url) ?? '',
-    currency: res.data.currency,
-    timezone: res.data.timezone,
+    id: data.id,
+    name: data.name,
+    logoUrl: cdnImageUrl(data.logo_url) ?? '',
+    currency: data.currency,
+    timezone: data.timezone,
   };
 }
 
@@ -77,7 +79,7 @@ async function fetchPublicMenu(
 ): Promise<PublicMenuItem[]> {
   const params: Record<string, number> = { business_id: businessId };
   if (locationId && locationId > 0) params.location_id = locationId;
-  const res = await api.get<MenuApiResponse>('/pos/public/menu', { params });
+  const res = await api.get<MenuApiResponse>('/api/pos/menu-item/v1/menu-items/public', { params });
   return (res.data.items ?? []).map((i) => ({
     id: i.id,
     ownerId: i.owner_id,
@@ -139,7 +141,7 @@ export function usePublicBusinessBySlug(slug: string | null): {
     queryKey: ['public-business-by-slug', slug],
     queryFn: async (): Promise<PublicBusinessBySlugBundle> => {
       if (!slug) throw new Error('slug required');
-      const res = await api.get<PublicBusinessBySlugApi>('/pos/public/business/by-slug', {
+      const res = await api.get<PublicBusinessBySlugApi>('/api/hub/business/v1/businesses/by-slug', {
         params: { slug },
       });
       return {

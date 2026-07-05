@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
-import type { CreateCampaignRequest } from '@voxire/contracts/crm/campaign/v1/create_campaign';
-import type { UpdateCampaignRequest } from '@voxire/contracts/crm/campaign/v1/update_campaign';
-import type { UpdateCampaignStatusRequest } from '@voxire/contracts/crm/campaign/v1/update_campaign_status';
+import type { CreateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/create_campaign';
+import type { UpdateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/update_campaign';
+import type { UpdateCampaignStatusRequest } from '@voxire/voxie/crm/campaign/v1/update_campaign_status';
 import {
   useMutation,
   useQuery,

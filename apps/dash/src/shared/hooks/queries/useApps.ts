@@ -135,7 +135,7 @@ export const useApps = () => {
   return useQuery<RtylrApp[]>({
     queryKey: ['apps'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/apps'));
+      const res = await unwrap(safe.get('/api/hub/app/v1/apps'));
       const remote = res?.apps ?? res;
       if (!Array.isArray(remote)) return [];
       const validated = z.array(appContractSchema).parse(remote);

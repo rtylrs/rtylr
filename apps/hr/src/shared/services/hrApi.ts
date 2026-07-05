@@ -203,10 +203,10 @@ export const hrApi = {
     }),
 
   // Dashboard
-  getDashboard: () => safe.get<HRDashboardStats>('/hr/dashboard'),
-  getDashboardWidgets: () => safe.get<unknown>('/hr/dashboard/widgets'),
+  getDashboard: () => safe.get<HRDashboardStats>('/api/hr/dashboard/v1/dashboard'),
+  getDashboardWidgets: () => safe.get<unknown>('/api/hr/dashboard/v1/dashboard/widgets'),
   updateWidgetLayout: (widgets: unknown[]) =>
-    safe.put<{ success: boolean }>('/hr/dashboard/widgets', { widgets }),
+    safe.put<{ success: boolean }>('/api/hr/dashboard/v1/dashboard/widgets', { widgets }),
 
   // Reports
   generateReport: (request: unknown) => safe.post<unknown>('/hr/reports/generate', { request }),
