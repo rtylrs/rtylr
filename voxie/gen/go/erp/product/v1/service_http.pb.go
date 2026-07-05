@@ -55,7 +55,7 @@ func RegisterProductServiceServer(server ProductServiceServer, opts ...ServerOpt
 		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
 	)
 
-	config.mux.Handle("GET /api/erp/product/v1/products/barcode/{code}", getProductByBarcodeHandler)
+	config.mux.Handle("GET /api/erp/product/v1/barcodes/{code}/product", getProductByBarcodeHandler)
 
 	methodHeaders = getGetProductHeaders()
 	getProductHandler := BindingMiddleware[GetProductRequest](

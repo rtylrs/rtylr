@@ -1,6 +1,6 @@
 .PHONY: clean lint format breaking generate install-plugins install-js typecheck
 
-ONEKIT_VERSION := v0.3.0
+ONEKIT_VERSION := v0.3.2
 
 # Clean generated code
 clean:

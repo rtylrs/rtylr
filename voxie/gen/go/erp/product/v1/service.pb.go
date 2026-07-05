@@ -32,7 +32,7 @@ const file_erp_product_v1_service_proto_rawDesc = "" +
 	"\rCreateProduct\x12$.erp.product.v1.CreateProductRequest\x1a%.erp.product.v1.CreateProductResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/products\x10\x02\x12\x90\x01\n" +
 	"\x13GetProductByBarcode\x12*.erp.product.v1.GetProductByBarcodeRequest\x1a+.erp.product.v1.GetProductByBarcodeResponse\" \x9a\xb5\x18\x1c\n" +
-	"\x18/products/barcode/{code}\x10\x01\x12k\n" +
+	"\x18/barcodes/{code}/product\x10\x01\x12k\n" +
 	"\n" +
 	"GetProduct\x12!.erp.product.v1.GetProductRequest\x1a\".erp.product.v1.GetProductResponse\"\x16\x9a\xb5\x18\x12\n" +
 	"\x0e/products/{id}\x10\x01\x12|\n" +

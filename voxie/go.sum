@@ -20,6 +20,10 @@ github.com/rodaine/protogofakeit v0.1.1 h1:ZKouljuRM3A+TArppfBqnH8tGZHOwM/pjvtXe
 github.com/rodaine/protogofakeit v0.1.1/go.mod h1:pXn/AstBYMaSfc1/RqH3N82pBuxtWgejz1AlYpY1mI0=
 github.com/stackxio/onekit v0.3.0 h1:8unQBHlPn7xbuU1pv54PJ1XH/mJ1aRGR8V96btQapN8=
 github.com/stackxio/onekit v0.3.0/go.mod h1:mCYarCSfIyLcpWnEw/0/YyzHna00c7rzXp8Vn3Wd25Y=
+github.com/stackxio/onekit v0.3.1 h1:Z0/zQmxoNYZRS9obpqa36jnslf0qXuU8nnSVYlzz9BE=
+github.com/stackxio/onekit v0.3.1/go.mod h1:mCYarCSfIyLcpWnEw/0/YyzHna00c7rzXp8Vn3Wd25Y=
+github.com/stackxio/onekit v0.3.2 h1:U9A1P+cgsGMGQeaDCnOqEcizHzLXDsEMZZbsLzootB0=
+github.com/stackxio/onekit v0.3.2/go.mod h1:mCYarCSfIyLcpWnEw/0/YyzHna00c7rzXp8Vn3Wd25Y=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 go.yaml.in/yaml/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=

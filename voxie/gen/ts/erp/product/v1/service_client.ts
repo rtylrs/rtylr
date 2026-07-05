@@ -353,7 +353,7 @@ export class ProductServiceClient {
   }
 
   async getProductByBarcode(req: GetProductByBarcodeRequest, options?: ProductServiceCallOptions): Promise<GetProductByBarcodeResponse> {
-    let path = "/api/erp/product/v1/products/barcode/{code}";
+    let path = "/api/erp/product/v1/barcodes/{code}/product";
     path = path.replace("{code}", encodeURIComponent(String(req.code)));
     const url = this.baseURL + path;
 
