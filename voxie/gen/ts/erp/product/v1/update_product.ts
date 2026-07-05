@@ -33,6 +33,24 @@ export interface UpdateProductBody {
   isActive: boolean;
   /** track_inventory is the track inventory value for this contract. */
   trackInventory: boolean;
+  /** stock_quantity is the tracked quantity to store for this product. */
+  stockQuantity: number;
+  /** brand_id links the product to a brand when present. */
+  brandId: number;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
 }
 
 export interface UpdateProductRequest {

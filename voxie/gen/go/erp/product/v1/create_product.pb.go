@@ -51,8 +51,26 @@ type CreateProductRequest struct {
 	IsActive bool `protobuf:"varint,12,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	// track_inventory is the track inventory value for this contract.
 	TrackInventory bool `protobuf:"varint,13,opt,name=track_inventory,json=trackInventory,proto3" json:"track_inventory,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// stock_quantity is the opening tracked quantity for this product.
+	StockQuantity float64 `protobuf:"fixed64,14,opt,name=stock_quantity,json=stockQuantity,proto3" json:"stock_quantity,omitempty"`
+	// brand_id links the product to a brand when present.
+	BrandId         int64   `protobuf:"varint,15,opt,name=brand_id,json=brandId,proto3" json:"brand_id,omitempty"`
+	CompareAtPrice  float64 `protobuf:"fixed64,16,opt,name=compare_at_price,json=compareAtPrice,proto3" json:"compare_at_price,omitempty"`
+	TaxRate         float64 `protobuf:"fixed64,17,opt,name=tax_rate,json=taxRate,proto3" json:"tax_rate,omitempty"`
+	Currency        string  `protobuf:"bytes,18,opt,name=currency,proto3" json:"currency,omitempty"`
+	Weight          float64 `protobuf:"fixed64,19,opt,name=weight,proto3" json:"weight,omitempty"`
+	WeightUnit      string  `protobuf:"bytes,20,opt,name=weight_unit,json=weightUnit,proto3" json:"weight_unit,omitempty"`
+	Length          float64 `protobuf:"fixed64,21,opt,name=length,proto3" json:"length,omitempty"`
+	Width           float64 `protobuf:"fixed64,22,opt,name=width,proto3" json:"width,omitempty"`
+	Height          float64 `protobuf:"fixed64,23,opt,name=height,proto3" json:"height,omitempty"`
+	DimensionUnit   string  `protobuf:"bytes,24,opt,name=dimension_unit,json=dimensionUnit,proto3" json:"dimension_unit,omitempty"`
+	CountryOfOrigin string  `protobuf:"bytes,25,opt,name=country_of_origin,json=countryOfOrigin,proto3" json:"country_of_origin,omitempty"`
+	HsCode          string  `protobuf:"bytes,26,opt,name=hs_code,json=hsCode,proto3" json:"hs_code,omitempty"`
+	AllowBackorder  bool    `protobuf:"varint,27,opt,name=allow_backorder,json=allowBackorder,proto3" json:"allow_backorder,omitempty"`
+	LeadTimeDays    int32   `protobuf:"varint,28,opt,name=lead_time_days,json=leadTimeDays,proto3" json:"lead_time_days,omitempty"`
+	ImageUrl        string  `protobuf:"bytes,29,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreateProductRequest) Reset() {
@@ -176,6 +194,118 @@ func (x *CreateProductRequest) GetTrackInventory() bool {
 	return false
 }
 
+func (x *CreateProductRequest) GetStockQuantity() float64 {
+	if x != nil {
+		return x.StockQuantity
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetBrandId() int64 {
+	if x != nil {
+		return x.BrandId
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetCompareAtPrice() float64 {
+	if x != nil {
+		return x.CompareAtPrice
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetTaxRate() float64 {
+	if x != nil {
+		return x.TaxRate
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *CreateProductRequest) GetWeight() float64 {
+	if x != nil {
+		return x.Weight
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetWeightUnit() string {
+	if x != nil {
+		return x.WeightUnit
+	}
+	return ""
+}
+
+func (x *CreateProductRequest) GetLength() float64 {
+	if x != nil {
+		return x.Length
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetWidth() float64 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetHeight() float64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetDimensionUnit() string {
+	if x != nil {
+		return x.DimensionUnit
+	}
+	return ""
+}
+
+func (x *CreateProductRequest) GetCountryOfOrigin() string {
+	if x != nil {
+		return x.CountryOfOrigin
+	}
+	return ""
+}
+
+func (x *CreateProductRequest) GetHsCode() string {
+	if x != nil {
+		return x.HsCode
+	}
+	return ""
+}
+
+func (x *CreateProductRequest) GetAllowBackorder() bool {
+	if x != nil {
+		return x.AllowBackorder
+	}
+	return false
+}
+
+func (x *CreateProductRequest) GetLeadTimeDays() int32 {
+	if x != nil {
+		return x.LeadTimeDays
+	}
+	return 0
+}
+
+func (x *CreateProductRequest) GetImageUrl() string {
+	if x != nil {
+		return x.ImageUrl
+	}
+	return ""
+}
+
 type CreateProductResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// product_id is the product id value for this contract.
@@ -234,7 +364,7 @@ var File_erp_product_v1_create_product_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_create_product_proto_rawDesc = "" +
 	"\n" +
-	"#erp/product/v1/create_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc9\x04\n" +
+	"#erp/product/v1/create_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc2\t\n" +
 	"\x14CreateProductRequest\x12/\n" +
 	"\vcategory_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
 	"categoryId\x12/\n" +
@@ -258,7 +388,24 @@ const file_erp_product_v1_create_product_proto_rawDesc = "" +
 	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x11lowStockThreshold\x129\n" +
 	"\x10reorder_quantity\x18\v \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0freorderQuantity\x12\x1b\n" +
 	"\tis_active\x18\f \x01(\bR\bisActive\x12'\n" +
-	"\x0ftrack_inventory\x18\r \x01(\bR\x0etrackInventory\"V\n" +
+	"\x0ftrack_inventory\x18\r \x01(\bR\x0etrackInventory\x125\n" +
+	"\x0estock_quantity\x18\x0e \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\rstockQuantity\x12\x1f\n" +
+	"\bbrand_id\x18\x0f \x01(\x03B\x04е\x18\x01R\abrandId\x128\n" +
+	"\x10compare_at_price\x18\x10 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0ecompareAtPrice\x12)\n" +
+	"\btax_rate\x18\x11 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\ataxRate\x12\x1a\n" +
+	"\bcurrency\x18\x12 \x01(\tR\bcurrency\x12&\n" +
+	"\x06weight\x18\x13 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06weight\x12\x1f\n" +
+	"\vweight_unit\x18\x14 \x01(\tR\n" +
+	"weightUnit\x12&\n" +
+	"\x06length\x18\x15 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06length\x12$\n" +
+	"\x05width\x18\x16 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x05width\x12&\n" +
+	"\x06height\x18\x17 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06height\x12%\n" +
+	"\x0edimension_unit\x18\x18 \x01(\tR\rdimensionUnit\x12*\n" +
+	"\x11country_of_origin\x18\x19 \x01(\tR\x0fcountryOfOrigin\x12\x17\n" +
+	"\ahs_code\x18\x1a \x01(\tR\x06hsCode\x12'\n" +
+	"\x0fallow_backorder\x18\x1b \x01(\bR\x0eallowBackorder\x12-\n" +
+	"\x0elead_time_days\x18\x1c \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\fleadTimeDays\x12\x1b\n" +
+	"\timage_url\x18\x1d \x01(\tR\bimageUrl\"V\n" +
 	"\x15CreateProductResponse\x12#\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x03B\x04е\x18\x01R\tproductId\x12\x18\n" +

@@ -6,6 +6,7 @@ import "onekit/http/annotations.proto";
 import "pos/menu_item/v1/create_menu_item.proto";
 import "pos/menu_item/v1/list_public_menu_items.proto";
 import "pos/menu_item/v1/list_menu_items.proto";
+import "pos/menu_item/v1/update_menu_item.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
 
@@ -30,6 +31,14 @@ service MenuItemService {
     option (onekit.http.config) = {
       path: "/menu-items"
       method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateMenuItem(UpdateMenuItemRequest) returns (UpdateMenuItemResponse) {
+    option (onekit.http.config) = {
+      path: "/menu-items/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
     };
   }
 }

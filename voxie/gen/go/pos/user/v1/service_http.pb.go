@@ -16,6 +16,7 @@ type UserServiceServer interface {
 	UpdatePOSUser(context.Context, *UpdatePOSUserRequest) (*UpdatePOSUserResponse, error)
 	DeactivatePOSUser(context.Context, *DeactivatePOSUserRequest) (*DeactivatePOSUserResponse, error)
 	VerifyPOSUserPIN(context.Context, *VerifyPOSUserPINRequest) (*VerifyPOSUserPINResponse, error)
+	SetPIN(context.Context, *SetPINRequest) (*SetPINResponse, error)
 }
 
 // RegisterUserServiceServer registers the HTTP handlers for service UserService to the given mux.
@@ -69,6 +70,15 @@ func RegisterUserServiceServer(server UserServiceServer, opts ...ServerOption) e
 
 	config.mux.Handle("POST /api/pos/user/v1/users/verify-pin", verifyPOSUserPINHandler)
 
+	methodHeaders = getSetPINHeaders()
+	setPINHandler := BindingMiddleware[SetPINRequest](
+		genericHandler(server.SetPIN, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		setPINPathParams, setPINQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/pos/user/v1/users/set-pin", setPINHandler)
+
 	return nil
 }
 
@@ -99,6 +109,11 @@ func getDeactivatePOSUserHeaders() []*onekithttp.Header {
 
 // getVerifyPOSUserPINHeaders returns the method-level required headers for VerifyPOSUserPIN
 func getVerifyPOSUserPINHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getSetPINHeaders returns the method-level required headers for SetPIN
+func getSetPINHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -133,3 +148,9 @@ var verifyPOSUserPINPathParams = []PathParamConfig{}
 
 // verifyPOSUserPINQueryParams contains query parameter configuration for VerifyPOSUserPIN
 var verifyPOSUserPINQueryParams = []QueryParamConfig{}
+
+// setPINPathParams contains path parameter configuration for SetPIN
+var setPINPathParams = []PathParamConfig{}
+
+// setPINQueryParams contains query parameter configuration for SetPIN
+var setPINQueryParams = []QueryParamConfig{}

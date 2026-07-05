@@ -93,3 +93,103 @@ func (x *ListProductsRequest) UnmarshalJSONOnekit(data []byte, opts protojson.Un
 func (x *ListProductsRequest) UnmarshalJSON(data []byte) error {
 	return x.UnmarshalJSONOnekit(data, protojson.UnmarshalOptions{})
 }
+
+// MarshalJSONOnekit implements onekitMarshaler for ListProductsResponse.
+// This method handles int64_encoding=NUMBER fields: page, page_size, total
+// Warning: int64 fields with NUMBER encoding may lose precision for values > 2^53 in JavaScript.
+func (x *ListProductsResponse) MarshalJSONOnekit(opts protojson.MarshalOptions) ([]byte, error) {
+	if x == nil {
+		return []byte("null"), nil
+	}
+
+	// Use protojson for base serialization (handles all other fields correctly)
+	data, err := opts.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse into a map to modify NUMBER-encoded int64 fields
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	// Convert Page from string to number
+	if x.Page != 0 {
+		raw["page"], _ = json.Marshal(x.Page)
+	} else {
+		// Remove the field if zero (proto3 default behavior)
+		delete(raw, "page")
+	}
+
+	// Convert PageSize from string to number
+	if x.PageSize != 0 {
+		raw["pageSize"], _ = json.Marshal(x.PageSize)
+	} else {
+		// Remove the field if zero (proto3 default behavior)
+		delete(raw, "pageSize")
+	}
+
+	// Convert Total from string to number
+	if x.Total != 0 {
+		raw["total"], _ = json.Marshal(x.Total)
+	} else {
+		// Remove the field if zero (proto3 default behavior)
+		delete(raw, "total")
+	}
+
+	return json.Marshal(raw)
+}
+
+// MarshalJSON implements json.Marshaler for ListProductsResponse.
+func (x *ListProductsResponse) MarshalJSON() ([]byte, error) {
+	return x.MarshalJSONOnekit(protojson.MarshalOptions{})
+}
+
+// UnmarshalJSONOnekit implements onekitUnmarshaler for ListProductsResponse.
+// This method handles int64_encoding=NUMBER fields: page, page_size, total
+func (x *ListProductsResponse) UnmarshalJSONOnekit(data []byte, opts protojson.UnmarshalOptions) error {
+	// First, parse the raw JSON to extract NUMBER-encoded fields
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	// Convert page from number to string for protojson
+	if rawVal, ok := raw["page"]; ok {
+		var num int64
+		if err := json.Unmarshal(rawVal, &num); err == nil {
+			raw["page"], _ = json.Marshal(strconv.FormatInt(num, 10))
+		}
+	}
+
+	// Convert pageSize from number to string for protojson
+	if rawVal, ok := raw["pageSize"]; ok {
+		var num int64
+		if err := json.Unmarshal(rawVal, &num); err == nil {
+			raw["pageSize"], _ = json.Marshal(strconv.FormatInt(num, 10))
+		}
+	}
+
+	// Convert total from number to string for protojson
+	if rawVal, ok := raw["total"]; ok {
+		var num int64
+		if err := json.Unmarshal(rawVal, &num); err == nil {
+			raw["total"], _ = json.Marshal(strconv.FormatInt(num, 10))
+		}
+	}
+
+	// Re-marshal to JSON with string values for protojson
+	modified, err := json.Marshal(raw)
+	if err != nil {
+		return err
+	}
+
+	// Use protojson to unmarshal the rest
+	return opts.Unmarshal(modified, x)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for ListProductsResponse.
+func (x *ListProductsResponse) UnmarshalJSON(data []byte) error {
+	return x.UnmarshalJSONOnekit(data, protojson.UnmarshalOptions{})
+}

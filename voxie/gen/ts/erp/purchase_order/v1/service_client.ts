@@ -3,10 +3,15 @@
 
 export interface ListPurchaseOrdersRequest {
   status: string;
+  page: number;
+  pageSize: number;
 }
 
 export interface ListPurchaseOrdersResponse {
   purchaseOrders: PurchaseOrder[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
 }
 
 export interface PurchaseOrder {
@@ -153,6 +158,8 @@ export class PurchaseOrderServiceClient {
     let path = "/api/erp/purchase-order/v1/purchase-orders";
     const params = new URLSearchParams();
     if (req.status != null && req.status !== "") params.set("status", String(req.status));
+    if (req.page != null && req.page !== 0) params.set("page", String(req.page));
+    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {

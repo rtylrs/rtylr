@@ -12,6 +12,7 @@ import (
 // AccessServiceServer is the server API for AccessService service.
 type AccessServiceServer interface {
 	GetMyLocations(context.Context, *GetMyLocationsRequest) (*GetMyLocationsResponse, error)
+	GetLocationRoster(context.Context, *GetLocationRosterRequest) (*GetLocationRosterResponse, error)
 	AssignLocation(context.Context, *AssignLocationRequest) (*AssignLocationResponse, error)
 	RemoveLocation(context.Context, *RemoveLocationRequest) (*RemoveLocationResponse, error)
 }
@@ -30,6 +31,15 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 	)
 
 	config.mux.Handle("GET /api/pos/access/v1/my-locations", getMyLocationsHandler)
+
+	methodHeaders = getGetLocationRosterHeaders()
+	getLocationRosterHandler := BindingMiddleware[GetLocationRosterRequest](
+		genericHandler(server.GetLocationRoster, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getLocationRosterPathParams, getLocationRosterQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/pos/access/v1/location-roster", getLocationRosterHandler)
 
 	methodHeaders = getAssignLocationHeaders()
 	assignLocationHandler := BindingMiddleware[AssignLocationRequest](
@@ -62,6 +72,11 @@ func getGetMyLocationsHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetLocationRosterHeaders returns the method-level required headers for GetLocationRoster
+func getGetLocationRosterHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getAssignLocationHeaders returns the method-level required headers for AssignLocation
 func getAssignLocationHeaders() []*onekithttp.Header {
 	return nil
@@ -77,6 +92,14 @@ var getMyLocationsPathParams = []PathParamConfig{}
 
 // getMyLocationsQueryParams contains query parameter configuration for GetMyLocations
 var getMyLocationsQueryParams = []QueryParamConfig{}
+
+// getLocationRosterPathParams contains path parameter configuration for GetLocationRoster
+var getLocationRosterPathParams = []PathParamConfig{}
+
+// getLocationRosterQueryParams contains query parameter configuration for GetLocationRoster
+var getLocationRosterQueryParams = []QueryParamConfig{
+	{QueryName: "location_id", FieldName: "location_id", Required: false},
+}
 
 // assignLocationPathParams contains path parameter configuration for AssignLocation
 var assignLocationPathParams = []PathParamConfig{}

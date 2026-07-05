@@ -45,6 +45,22 @@ message Product {
   string created_at = 17;
   // updated_at is when the record was last updated.
   string updated_at = 18;
+  int64 business_id = 19 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 brand_id = 20 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  double compare_at_price = 21;
+  double tax_rate = 22;
+  string currency = 23;
+  double weight = 24;
+  string weight_unit = 25;
+  double length = 26;
+  double width = 27;
+  double height = 28;
+  string dimension_unit = 29;
+  string country_of_origin = 30;
+  string hs_code = 31;
+  bool allow_backorder = 32;
+  int32 lead_time_days = 33;
+  string image_url = 34;
 }
 
 message FullProduct {

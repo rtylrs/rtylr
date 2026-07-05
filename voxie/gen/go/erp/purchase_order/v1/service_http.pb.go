@@ -108,6 +108,8 @@ var listPurchaseOrdersPathParams = []PathParamConfig{}
 // listPurchaseOrdersQueryParams contains query parameter configuration for ListPurchaseOrders
 var listPurchaseOrdersQueryParams = []QueryParamConfig{
 	{QueryName: "status", FieldName: "status", Required: false},
+	{QueryName: "page", FieldName: "page", Required: false},
+	{QueryName: "page_size", FieldName: "page_size", Required: false},
 }
 
 // createPurchaseOrderPathParams contains path parameter configuration for CreatePurchaseOrder

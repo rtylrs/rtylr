@@ -27,4 +27,14 @@ export interface MenuItem {
   updatedAt: string;
   /** image_url is a public storefront image for the menu item. */
   imageUrl: string;
+  /** category is the display category name for the menu item. */
+  category: string;
+  /** barcode is the scanned barcode value for the menu item. */
+  barcode: string;
+  /** description is the customer-facing menu item description. */
+  description: string;
+  /** tax_rate is the sale tax rate for the menu item. */
+  taxRate: number;
+  /** stock is the current tracked stock quantity for the menu item. */
+  stock: number;
 }

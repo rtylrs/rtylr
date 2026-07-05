@@ -21,4 +21,8 @@ export interface ListProductsRequest {
 export interface ListProductsResponse {
   /** products is the products value for this contract. */
   products: Product[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+  total: number;
 }

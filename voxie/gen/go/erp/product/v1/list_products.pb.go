@@ -98,6 +98,10 @@ type ListProductsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// products is the products value for this contract.
 	Products      []*Product `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
+	HasMore       bool       `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	Page          int64      `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64      `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64      `protobuf:"varint,5,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -139,6 +143,34 @@ func (x *ListProductsResponse) GetProducts() []*Product {
 	return nil
 }
 
+func (x *ListProductsResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
+func (x *ListProductsResponse) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListProductsResponse) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListProductsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_erp_product_v1_list_products_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_list_products_proto_rawDesc = "" +
@@ -153,9 +185,13 @@ const file_erp_product_v1_list_products_proto_rawDesc = "" +
 	"\x05limit\x18\x03 \x01(\x03B\x0fµ\x18\a\n" +
 	"\x05limitе\x18\x02R\x05limit\x12(\n" +
 	"\x06offset\x18\x04 \x01(\x03B\x10µ\x18\b\n" +
-	"\x06offsetе\x18\x02R\x06offset\"K\n" +
+	"\x06offsetе\x18\x02R\x06offset\"\xbf\x01\n" +
 	"\x14ListProductsResponse\x123\n" +
-	"\bproducts\x18\x01 \x03(\v2\x17.erp.product.v1.ProductR\bproductsB/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"
+	"\bproducts\x18\x01 \x03(\v2\x17.erp.product.v1.ProductR\bproducts\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12\x18\n" +
+	"\x04page\x18\x03 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x04 \x01(\x03B\x04е\x18\x02R\bpageSize\x12\x1a\n" +
+	"\x05total\x18\x05 \x01(\x03B\x04е\x18\x02R\x05totalB/Z-github.com/voxire/voxie/gen/go/erp/product/v1b\x06proto3"
 
 var (
 	file_erp_product_v1_list_products_proto_rawDescOnce sync.Once

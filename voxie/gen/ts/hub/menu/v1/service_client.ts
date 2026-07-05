@@ -19,6 +19,11 @@ export interface MenuItem {
   createdAt: string;
   updatedAt: string;
   imageUrl: string;
+  category: string;
+  barcode: string;
+  description: string;
+  taxRate: number;
+  stock: number;
 }
 
 export interface UpdateMenuRequest {
