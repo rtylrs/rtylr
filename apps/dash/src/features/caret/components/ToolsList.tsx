@@ -6,16 +6,16 @@ export interface ToolsListProps {
   tools: ToolDef[];
 }
 
-/** Compact list of available tools, grouped by module. */
+/** Compact list of available tools, grouped by category. */
 export const ToolsList: React.FC<ToolsListProps> = ({ tools }) => {
   const grouped: Record<string, ToolDef[]> = {};
   for (const t of tools) {
-    (grouped[t.module] ??= []).push(t);
+    (grouped[t.category] ??= []).push(t);
   }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {Object.entries(grouped).map(([module, list]) => (
-        <section key={module}>
+      {Object.entries(grouped).map(([category, list]) => (
+        <section key={category}>
           <h3
             style={{
               margin: '0 0 6px',
@@ -26,7 +26,7 @@ export const ToolsList: React.FC<ToolsListProps> = ({ tools }) => {
               letterSpacing: 0.4,
             }}
           >
-            {module}
+            {category}
           </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {list.map((t) => (
