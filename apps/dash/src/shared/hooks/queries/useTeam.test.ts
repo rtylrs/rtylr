@@ -2,6 +2,46 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+
+const mockMembersClient = vi.hoisted(() => ({
+  listTeam: vi.fn(),
+  getMember: vi.fn(),
+  removeMember: vi.fn(),
+}));
+const mockPermissionsClient = vi.hoisted(() => ({
+  updatePermissions: vi.fn(),
+}));
+const mockInvitationsClient = vi.hoisted(() => ({
+  inviteUser: vi.fn(),
+  bulkInvite: vi.fn(),
+}));
+const mockAccessClient = vi.hoisted(() => ({
+  listAccessRequests: vi.fn(),
+  approveAccessRequest: vi.fn(),
+}));
+
+vi.mock('@voxire/api', () => ({
+  createOneKitClient: (Client: { name: string }) => {
+    switch (Client.name) {
+      case 'MembersServiceClient':
+        return mockMembersClient;
+      case 'PermissionsServiceClient':
+        return mockPermissionsClient;
+      case 'InvitationsServiceClient':
+        return mockInvitationsClient;
+      case 'AccessServiceClient':
+        return mockAccessClient;
+      default:
+        throw new Error(`unexpected client ${Client.name}`);
+    }
+  },
+  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
+}));
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
 import {
   useTeam,
   useMember,
@@ -9,31 +49,6 @@ import {
   useUpdateMember,
   useDeactivateMember,
 } from './useTeam';
-
-const mockGet = vi.fn();
-const mockPost = vi.fn();
-const mockPut = vi.fn();
-const mockPatch = vi.fn();
-
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((v) => v),
-}));
-
-const mockDelete = vi.fn();
-
-vi.mock('../../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-    put: (...args: unknown[]) => mockPut(...args),
-    patch: (...args: unknown[]) => mockPatch(...args),
-    delete: (...args: unknown[]) => mockDelete(...args),
-  },
-}));
-
-vi.mock('sonner', () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
-}));
 
 function createWrapper() {
   const client = new QueryClient({
@@ -46,8 +61,8 @@ function createWrapper() {
 describe('useTeam', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('fetches team members from .users key', async () => {
-    mockGet.mockResolvedValue({
+  it('fetches team members', async () => {
+    mockMembersClient.listTeam.mockResolvedValue({
       users: [
         {
           id: '1',
@@ -55,7 +70,8 @@ describe('useTeam', () => {
           email: 'alice@test.com',
           role: 'admin',
           apps: [],
-          status: 'active',
+          isActive: true,
+          createdAt: '',
         },
       ],
     });
@@ -67,43 +83,19 @@ describe('useTeam', () => {
     expect(result.current.data?.members[0].name).toBe('Alice');
   });
 
-  it('fetches team members from .members key', async () => {
-    mockGet.mockResolvedValue({
-      members: [
-        { id: 2, fullName: 'Bob', email: 'bob@test.com', role: 'staff', apps: [], isActive: true },
-      ],
-    });
-
-    const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.members).toHaveLength(1);
-  });
-
-  it('prefers fullName over name', async () => {
-    mockGet.mockResolvedValue({
+  it('falls back to email when no full name', async () => {
+    mockMembersClient.listTeam.mockResolvedValue({
       users: [
         {
           id: '1',
-          fullName: 'Full Name',
-          name: 'Short',
-          email: 'a@b.com',
-          role: 'admin',
+          fullName: '',
+          email: 'fallback@test.com',
+          role: 'viewer',
           apps: [],
-          status: 'active',
+          isActive: true,
+          createdAt: '',
         },
       ],
-    });
-
-    const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.members[0].name).toBe('Full Name');
-  });
-
-  it('falls back to email when no name', async () => {
-    mockGet.mockResolvedValue({
-      users: [{ id: '1', email: 'fallback@test.com', role: 'viewer', apps: [], status: 'active' }],
     });
 
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
@@ -112,17 +104,8 @@ describe('useTeam', () => {
     expect(result.current.data?.members[0].name).toBe('fallback@test.com');
   });
 
-  it('returns empty array for non-array response', async () => {
-    mockGet.mockResolvedValue('invalid');
-
-    const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.members).toEqual([]);
-  });
-
   it('handles API error', async () => {
-    mockGet.mockRejectedValue(new Error('fail'));
+    mockMembersClient.listTeam.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -133,7 +116,7 @@ describe('useMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches a single member by id', async () => {
-    mockGet.mockResolvedValue({
+    mockMembersClient.getMember.mockResolvedValue({
       user: {
         id: '5',
         fullName: 'Charlie',
@@ -141,12 +124,15 @@ describe('useMember', () => {
         role: 'staff',
         isActive: true,
         apps: ['pos'],
+        createdAt: '',
+        groups: [],
       },
     });
 
     const { result } = renderHook(() => useMember('5'), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
+    expect(mockMembersClient.getMember).toHaveBeenCalledWith({ userId: '5' });
     expect(result.current.data?.name).toBe('Charlie');
     expect(result.current.data?.status).toBe('active');
   });
@@ -160,8 +146,8 @@ describe('useMember', () => {
 describe('useInviteMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('calls post with invite data', async () => {
-    mockPost.mockResolvedValue({ success: true });
+  it('calls inviteUser with invite data', async () => {
+    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
 
     const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
 
@@ -174,11 +160,12 @@ describe('useInviteMember', () => {
       });
     });
 
-    expect(mockPost).toHaveBeenCalledWith('/api/hub/team/invitations/v1/invitations', {
+    expect(mockInvitationsClient.inviteUser).toHaveBeenCalledWith({
       email: 'new@test.com',
       fullName: 'New User',
       role: 'staff',
       apps: ['pos'],
+      password: '',
     });
   });
 });
@@ -186,8 +173,8 @@ describe('useInviteMember', () => {
 describe('useDeactivateMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('calls deactivate endpoint', async () => {
-    mockDelete.mockResolvedValue({ success: true });
+  it('calls removeMember with the member id', async () => {
+    mockMembersClient.removeMember.mockResolvedValue({ message: 'ok' });
 
     const { result } = renderHook(() => useDeactivateMember(), { wrapper: createWrapper() });
 
@@ -195,15 +182,15 @@ describe('useDeactivateMember', () => {
       await result.current.mutateAsync('42');
     });
 
-    expect(mockDelete).toHaveBeenCalledWith('/api/hub/team/members/v1/members/42');
+    expect(mockMembersClient.removeMember).toHaveBeenCalledWith({ userId: '42' });
   });
 });
 
 describe('useUpdateMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('sends profile and permission updates', async () => {
-    mockPut.mockResolvedValue({ success: true });
+  it('sends permission updates', async () => {
+    mockPermissionsClient.updatePermissions.mockResolvedValue({});
 
     const { result } = renderHook(() => useUpdateMember(), { wrapper: createWrapper() });
 
@@ -214,37 +201,40 @@ describe('useUpdateMember', () => {
       });
     });
 
-    expect(mockPut).toHaveBeenCalledWith('/api/hub/team/permissions/v1/permissions/42', {
+    expect(mockPermissionsClient.updatePermissions).toHaveBeenCalledWith({
+      userId: '42',
       apps: ['pos', 'finance'],
       role: 'admin',
     });
   });
 
   it('updates cached list and detail data after save', async () => {
-    mockGet
-      .mockResolvedValueOnce({
-        users: [
-          {
-            id: '42',
-            fullName: 'Old Name',
-            email: 'member@test.com',
-            role: 'staff',
-            apps: ['pos'],
-            isActive: true,
-          },
-        ],
-      })
-      .mockResolvedValueOnce({
-        user: {
+    mockMembersClient.listTeam.mockResolvedValueOnce({
+      users: [
+        {
           id: '42',
           fullName: 'Old Name',
           email: 'member@test.com',
           role: 'staff',
           apps: ['pos'],
           isActive: true,
+          createdAt: '',
         },
-      });
-    mockPut.mockResolvedValue({ success: true });
+      ],
+    });
+    mockMembersClient.getMember.mockResolvedValueOnce({
+      user: {
+        id: '42',
+        fullName: 'Old Name',
+        email: 'member@test.com',
+        role: 'staff',
+        apps: ['pos'],
+        isActive: true,
+        createdAt: '',
+        groups: [],
+      },
+    });
+    mockPermissionsClient.updatePermissions.mockResolvedValue({});
 
     const wrapper = createWrapper();
     const team = renderHook(() => useTeam({ pageSize: 50 }), { wrapper });

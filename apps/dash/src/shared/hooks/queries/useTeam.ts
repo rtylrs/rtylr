@@ -1,13 +1,27 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
+import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/service_client';
+import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/service_client';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
+import {
+  AccessServiceClient,
+  type AccessRequest as ApiAccessRequest,
+} from '@voxire/voxie/hub/team/access/v1/service_client';
+import type {
+  StaffUserPayload,
+  StaffUserWithGroups,
+} from '@voxire/voxie/hub/team/members/v1/service_client';
 import { z } from 'zod';
-import api, { safe } from '../../lib/api';
-import { teamMemberSchema } from '../../schemas/team';
 import { toast } from 'sonner';
+import { teamMemberSchema } from '../../schemas/team';
 
 export type { TeamMember } from '../../schemas/team';
 type TeamMember = z.infer<typeof teamMemberSchema> & { status: string };
+
+const membersClient = createOneKitClient(MembersServiceClient, 'dash');
+const permissionsClient = createOneKitClient(PermissionsServiceClient, 'dash');
+const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
+const accessClient = createOneKitClient(AccessServiceClient, 'dash');
 
 interface UseTeamParams {
   page?: number;
@@ -19,6 +33,21 @@ export interface TeamListResult {
   hasMore: boolean;
   page: number;
   pageSize: number;
+}
+
+function fromApiMember(u: StaffUserPayload | StaffUserWithGroups): TeamMember {
+  return {
+    id: u.id,
+    fullName: u.fullName,
+    name: u.fullName || u.email,
+    email: u.email,
+    role: u.role,
+    apps: u.apps ?? [],
+    isActive: u.isActive,
+    status: u.isActive ? 'active' : 'inactive',
+    createdAt: u.createdAt,
+    groups: 'groups' in u ? (u.groups ?? []).map((g) => ({ ...g, id: Number(g.id) })) : [],
+  };
 }
 
 function applyMemberPatch(member: TeamMember, patch: Partial<TeamMember>): TeamMember {
@@ -48,31 +77,19 @@ function isTeamListResult(value: unknown): value is TeamListResult {
   );
 }
 
+// hub.team.members.v1.ListTeam has no pagination support - the whole list is
+// always returned in one call. page/pageSize are UI-only and echoed back.
 export const useTeam = (params: UseTeamParams = {}) => {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<TeamListResult>({
     queryKey: ['team', { page, pageSize }],
     queryFn: async (): Promise<TeamListResult> => {
-      const res = await unwrap(
-        safe.get('/api/hub/team/members/v1/members')
-      );
-      const raw = res as Record<string, unknown>;
-      const list = raw.users ?? raw.members ?? res;
-      const arr = Array.isArray(list) ? list : [];
-      const members = arr.map((m: StaffUserPayload) => {
-        const parsed = teamMemberSchema.parse(m);
-        return {
-          ...parsed,
-          name: parsed.fullName || parsed.name || parsed.email,
-          status: parsed.isActive ? 'active' : 'inactive',
-          groups: parsed.groups ?? [],
-        } as TeamMember;
-      });
+      const res = await membersClient.listTeam({});
       return {
-        members,
-        hasMore: Boolean(raw.has_more),
-        page: Number(raw.page ?? page),
-        pageSize: Number(raw.page_size ?? pageSize),
+        members: res.users.map(fromApiMember),
+        hasMore: false,
+        page,
+        pageSize,
       };
     },
     staleTime: 30_000,
@@ -84,40 +101,41 @@ export const useMember = (id: string | undefined) => {
     queryKey: ['team', id],
     queryFn: async () => {
       if (!id) return undefined;
-      const res = await unwrap(safe.get(`/api/hub/team/members/v1/members/${id}`));
-      const m = res?.user ?? res;
-      if (!m) return undefined;
-      const parsed = teamMemberSchema.parse(m);
-      return {
-        ...parsed,
-        name: parsed.fullName || parsed.name || parsed.email,
-        apps: parsed.apps ?? [],
-        status: parsed.isActive ? 'active' : 'inactive',
-      } as TeamMember;
+      const res = await membersClient.getMember({ userId: id });
+      return res.user ? fromApiMember(res.user) : undefined;
     },
     enabled: !!id,
   });
 };
 
+interface InviteMemberPayload {
+  email: string;
+  fullName: string;
+  role: TeamMember['role'];
+  apps: string[];
+  groupId?: number;
+  password?: string;
+}
+
 export const useInviteMember = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: {
-      email: string;
-      fullName: string;
-      role: TeamMember['role'];
-      apps: string[];
-      groupId?: number;
-      password?: string;
-    }) => {
-      const res = await unwrap(safe.post('/api/hub/team/invitations/v1/invitations', payload));
-      return res;
+    mutationFn: async (payload: InviteMemberPayload) => {
+      // hub.team.invitations.v1.InviteUser has no group_id field - group
+      // assignment at invite time isn't supported by the backend yet.
+      return invitationsClient.inviteUser({
+        email: payload.email,
+        fullName: payload.fullName,
+        role: payload.role,
+        apps: payload.apps,
+        password: payload.password ?? '',
+      });
     },
     onSuccess: () => {
       toast.success('Invitation sent');
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error('Failed to send invitation'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to send invitation')),
   });
 };
 
@@ -125,19 +143,11 @@ export const useUpdateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
-      const payload: Record<string, unknown> = { userId: Number(id) };
-      if (patch.fullName !== undefined || patch.name !== undefined) {
-        payload.fullName = patch.fullName ?? patch.name ?? '';
-      }
-      if (patch.apps !== undefined) payload.apps = patch.apps;
-      if (patch.role !== undefined) payload.role = patch.role;
-
-      return unwrap(
-        safe.put(`/api/hub/team/permissions/v1/permissions/${id}`, {
-          apps: payload.apps ?? [],
-          role: payload.role ?? 'staff',
-        })
-      );
+      return permissionsClient.updatePermissions({
+        userId: id,
+        apps: patch.apps ?? [],
+        role: patch.role ?? 'staff',
+      });
     },
     onSuccess: (_data, { id, patch }) => {
       toast.success('Member updated');
@@ -154,7 +164,7 @@ export const useUpdateMember = () => {
         old ? applyMemberPatch(old, patch) : old
       );
     },
-    onError: () => toast.error('Failed to update member'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update member')),
   });
 };
 
@@ -162,14 +172,14 @@ export const useDeactivateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.delete(`/api/hub/team/members/v1/members/${id}`));
+      await membersClient.removeMember({ userId: id });
       return id;
     },
     onSuccess: () => {
       toast.success('Member deactivated');
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error('Failed to deactivate member'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to deactivate member')),
   });
 };
 
@@ -182,14 +192,23 @@ export interface AccessRequest {
   createdAt: string;
 }
 
+function fromApiAccessRequest(r: ApiAccessRequest): AccessRequest {
+  return {
+    id: Number(r.id),
+    userId: Number(r.userId),
+    app: r.app,
+    requesterName: r.requesterName,
+    requesterEmail: r.requesterEmail,
+    createdAt: r.createdAt,
+  };
+}
+
 export const useAccessRequests = () =>
   useQuery<AccessRequest[]>({
     queryKey: ['team', 'access-requests'],
     queryFn: async () => {
-      const res = await unwrap(
-        safe.get<{ requests: AccessRequest[] }>('/api/hub/team/access/v1/requests')
-      );
-      return res?.requests ?? [];
+      const res = await accessClient.listAccessRequests({});
+      return res.requests.map(fromApiAccessRequest);
     },
     staleTime: 30_000,
   });
@@ -198,13 +217,11 @@ export const useApproveAccessRequest = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, userId, app }: { id: number; userId: number; app: string }) =>
-      unwrap(
-        safe.post(`/api/hub/team/access/v1/requests/${id}/approve`, { user_id: userId, app })
-      ),
+      accessClient.approveAccessRequest({ id: String(id), userId: String(userId), app }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['team', 'access-requests'] });
       void qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error('Failed to grant access'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to grant access')),
   });
 };

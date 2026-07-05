@@ -1,7 +1,10 @@
-import { unwrap } from '@voxire/api';
+import { unwrap, createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
+
+const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
 
 // Types
 export type ResourcePermissionLevel = 'viewer' | 'editor';
@@ -156,7 +159,9 @@ export const useAddGroupMembers = (
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userIds: number[]) => {
-      await unwrap(safe.post(`/api/hub/team/groups/v1/groups/${groupId}/members`, { user_ids: userIds }));
+      await unwrap(
+        safe.post(`/api/hub/team/groups/v1/groups/${groupId}/members`, { user_ids: userIds })
+      );
     },
     onSuccess: () => {
       toast.success('Members added');
@@ -199,13 +204,26 @@ export const useBulkInvite = (): ReturnType<
       apps: string[];
       groupId?: number;
     }) => {
-      const res = await unwrap(safe.post('/api/hub/team/invitations/v1/invitations/bulk', payload));
-      return res as { results: BulkResult[]; message: string };
+      const res = await invitationsClient.bulkInvite({
+        emails: payload.emails,
+        role: payload.role,
+        apps: payload.apps,
+        groupId: payload.groupId ? String(payload.groupId) : '',
+      });
+      return {
+        results: res.results.map((r) => ({
+          email: r.email,
+          userId: Number(r.userId),
+          status: r.status as BulkResult['status'],
+          message: r.message,
+        })),
+        message: res.message,
+      };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['team'] });
       qc.invalidateQueries({ queryKey: ['groups'] });
     },
-    onError: () => toast.error('Bulk invite failed'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Bulk invite failed')),
   });
 };

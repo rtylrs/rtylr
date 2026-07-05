@@ -194,11 +194,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
       });
       if (posSelectedSingle) {
-        const userId = Number(
-          (res as { userId?: number; user_id?: number })?.userId ??
-            (res as { user_id?: number })?.user_id ??
-            0
-        );
+        const userId = Number(res.userId || 0);
         await assignLocations(userId, selectedLocations, role);
       }
       navigate({ to: '/team' });
