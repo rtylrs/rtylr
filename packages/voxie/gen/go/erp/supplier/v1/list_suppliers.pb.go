@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -22,7 +23,11 @@ const (
 )
 
 type ListSuppliersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// page is the 1-based page number.
+	Page int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the number of rows to return.
+	PageSize      int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -57,10 +62,30 @@ func (*ListSuppliersRequest) Descriptor() ([]byte, []int) {
 	return file_erp_supplier_v1_list_suppliers_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *ListSuppliersRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListSuppliersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type ListSuppliersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// suppliers is the suppliers value for this contract.
-	Suppliers     []*Supplier `protobuf:"bytes,1,rep,name=suppliers,proto3" json:"suppliers,omitempty"`
+	Suppliers []*Supplier `protobuf:"bytes,1,rep,name=suppliers,proto3" json:"suppliers,omitempty"`
+	// has_more is true when another page is available.
+	HasMore bool `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	// page is the returned 1-based page number.
+	Page int32 `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the returned page size.
+	PageSize      int32 `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -102,14 +127,43 @@ func (x *ListSuppliersResponse) GetSuppliers() []*Supplier {
 	return nil
 }
 
+func (x *ListSuppliersResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
+func (x *ListSuppliersResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListSuppliersResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 var File_erp_supplier_v1_list_suppliers_proto protoreflect.FileDescriptor
 
 const file_erp_supplier_v1_list_suppliers_proto_rawDesc = "" +
 	"\n" +
-	"$erp/supplier/v1/list_suppliers.proto\x12\x0ferp.supplier.v1\x1a\x1berp/supplier/v1/types.proto\"\x16\n" +
-	"\x14ListSuppliersRequest\"P\n" +
+	"$erp/supplier/v1/list_suppliers.proto\x12\x0ferp.supplier.v1\x1a\x1berp/supplier/v1/types.proto\x1a\x1donekit/http/annotations.proto\"d\n" +
+	"\x14ListSuppliersRequest\x12\x1e\n" +
+	"\x04page\x18\x01 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12,\n" +
+	"\tpage_size\x18\x02 \x01(\x05B\x0fµ\x18\v\n" +
+	"\tpage_sizeR\bpageSize\"\x9c\x01\n" +
 	"\x15ListSuppliersResponse\x127\n" +
-	"\tsuppliers\x18\x01 \x03(\v2\x19.erp.supplier.v1.SupplierR\tsuppliersB0Z.github.com/voxire/voxie/gen/go/erp/supplier/v1b\x06proto3"
+	"\tsuppliers\x18\x01 \x03(\v2\x19.erp.supplier.v1.SupplierR\tsuppliers\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSizeB0Z.github.com/voxire/voxie/gen/go/erp/supplier/v1b\x06proto3"
 
 var (
 	file_erp_supplier_v1_list_suppliers_proto_rawDescOnce sync.Once

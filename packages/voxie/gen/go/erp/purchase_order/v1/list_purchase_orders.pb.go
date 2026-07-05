@@ -25,7 +25,11 @@ const (
 type ListPurchaseOrdersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// status filters purchase orders by lifecycle state.
-	Status        string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	// page is the 1-based page number.
+	Page int32 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the number of rows to return.
+	PageSize      int32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,12 +71,32 @@ func (x *ListPurchaseOrdersRequest) GetStatus() string {
 	return ""
 }
 
+func (x *ListPurchaseOrdersRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListPurchaseOrdersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type ListPurchaseOrdersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// purchase_orders is the purchase orders value for this contract.
 	PurchaseOrders []*PurchaseOrder `protobuf:"bytes,1,rep,name=purchase_orders,json=purchaseOrders,proto3" json:"purchase_orders,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// has_more is true when another page is available.
+	HasMore bool `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	// page is the returned 1-based page number.
+	Page int32 `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the returned page size.
+	PageSize      int32 `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListPurchaseOrdersResponse) Reset() {
@@ -112,16 +136,45 @@ func (x *ListPurchaseOrdersResponse) GetPurchaseOrders() []*PurchaseOrder {
 	return nil
 }
 
+func (x *ListPurchaseOrdersResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
+func (x *ListPurchaseOrdersResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListPurchaseOrdersResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 var File_erp_purchase_order_v1_list_purchase_orders_proto protoreflect.FileDescriptor
 
 const file_erp_purchase_order_v1_list_purchase_orders_proto_rawDesc = "" +
 	"\n" +
-	"0erp/purchase_order/v1/list_purchase_orders.proto\x12\x15erp.purchase_order.v1\x1a!erp/purchase_order/v1/types.proto\x1a\x1donekit/http/annotations.proto\"A\n" +
+	"0erp/purchase_order/v1/list_purchase_orders.proto\x12\x15erp.purchase_order.v1\x1a!erp/purchase_order/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x8f\x01\n" +
 	"\x19ListPurchaseOrdersRequest\x12$\n" +
 	"\x06status\x18\x01 \x01(\tB\fµ\x18\b\n" +
-	"\x06statusR\x06status\"k\n" +
+	"\x06statusR\x06status\x12\x1e\n" +
+	"\x04page\x18\x02 \x01(\x05B\n" +
+	"µ\x18\x06\n" +
+	"\x04pageR\x04page\x12,\n" +
+	"\tpage_size\x18\x03 \x01(\x05B\x0fµ\x18\v\n" +
+	"\tpage_sizeR\bpageSize\"\xb7\x01\n" +
 	"\x1aListPurchaseOrdersResponse\x12M\n" +
-	"\x0fpurchase_orders\x18\x01 \x03(\v2$.erp.purchase_order.v1.PurchaseOrderR\x0epurchaseOrdersB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
+	"\x0fpurchase_orders\x18\x01 \x03(\v2$.erp.purchase_order.v1.PurchaseOrderR\x0epurchaseOrders\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSizeB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 
 var (
 	file_erp_purchase_order_v1_list_purchase_orders_proto_rawDescOnce sync.Once

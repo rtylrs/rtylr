@@ -2289,6 +2289,15 @@ export const contractValidationMetadata = {
   },
   "erp.price_list.v1.ListPriceListsRequest": {},
   "erp.product.v1.CreateProductRequest": {
+    "allowBackorder": {
+      "name": "allowBackorder",
+      "optional": false,
+      "protoName": "allow_backorder",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
     "barcode": {
       "minLen": 1,
       "name": "barcode",
@@ -2298,6 +2307,15 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    },
+    "brandId": {
+      "name": "brandId",
+      "optional": false,
+      "protoName": "brand_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
     },
     "categoryId": {
       "gt": 0,
@@ -2309,6 +2327,16 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "int64"
     },
+    "compareAtPrice": {
+      "gte": 0,
+      "name": "compareAtPrice",
+      "optional": false,
+      "protoName": "compare_at_price",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
     "costPrice": {
       "gte": 0,
       "name": "costPrice",
@@ -2318,6 +2346,24 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "double"
+    },
+    "countryOfOrigin": {
+      "name": "countryOfOrigin",
+      "optional": false,
+      "protoName": "country_of_origin",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "currency": {
+      "name": "currency",
+      "optional": false,
+      "protoName": "currency",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
     },
     "description": {
       "minLen": 1,
@@ -2329,6 +2375,43 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
+    "dimensionUnit": {
+      "name": "dimensionUnit",
+      "optional": false,
+      "protoName": "dimension_unit",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "height": {
+      "gte": 0,
+      "name": "height",
+      "optional": false,
+      "protoName": "height",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "hsCode": {
+      "name": "hsCode",
+      "optional": false,
+      "protoName": "hs_code",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "imageUrl": {
+      "name": "imageUrl",
+      "optional": false,
+      "protoName": "image_url",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
     "isActive": {
       "name": "isActive",
       "optional": false,
@@ -2337,6 +2420,26 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "bool"
+    },
+    "leadTimeDays": {
+      "gte": 0,
+      "name": "leadTimeDays",
+      "optional": false,
+      "protoName": "lead_time_days",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "length": {
+      "gte": 0,
+      "name": "length",
+      "optional": false,
+      "protoName": "length",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
     },
     "lowStockThreshold": {
       "gte": 0,
@@ -2388,6 +2491,16 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
+    "stockQuantity": {
+      "gte": 0,
+      "name": "stockQuantity",
+      "optional": false,
+      "protoName": "stock_quantity",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
     "supplierId": {
       "gt": 0,
       "name": "supplierId",
@@ -2397,6 +2510,16 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "int64"
+    },
+    "taxRate": {
+      "gte": 0,
+      "name": "taxRate",
+      "optional": false,
+      "protoName": "tax_rate",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
     },
     "trackInventory": {
       "name": "trackInventory",
@@ -2416,6 +2539,35 @@ export const contractValidationMetadata = {
       "required": true,
       "scalar": true,
       "type": "string"
+    },
+    "weight": {
+      "gte": 0,
+      "name": "weight",
+      "optional": false,
+      "protoName": "weight",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "weightUnit": {
+      "name": "weightUnit",
+      "optional": false,
+      "protoName": "weight_unit",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "width": {
+      "gte": 0,
+      "name": "width",
+      "optional": false,
+      "protoName": "width",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
     }
   },
   "erp.product.v1.DeleteProductRequest": {
@@ -2668,6 +2820,24 @@ export const contractValidationMetadata = {
     }
   },
   "erp.purchase_order.v1.ListPurchaseOrdersRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
     "status": {
       "name": "status",
       "optional": false,
@@ -3009,7 +3179,26 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
-  "erp.supplier.v1.ListSuppliersRequest": {},
+  "erp.supplier.v1.ListSuppliersRequest": {
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
   "erp.supplier.v1.UpdateSupplierRequest": {
     "body": {
       "name": "body",
@@ -12129,6 +12318,27 @@ export const contractValidationMetadata = {
       "protoName": "location_id",
       "repeated": false,
       "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "pos.menu_item.v1.UpdateMenuItemRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateMenuItemBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
       "scalar": true,
       "type": "int64"
     }

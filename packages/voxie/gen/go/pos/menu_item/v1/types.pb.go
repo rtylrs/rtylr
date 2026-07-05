@@ -43,7 +43,17 @@ type MenuItem struct {
 	// updated_at is when the record was last updated.
 	UpdatedAt string `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	// image_url is a public storefront image for the menu item.
-	ImageUrl      string `protobuf:"bytes,10,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	ImageUrl string `protobuf:"bytes,10,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	// category is the display category name for the menu item.
+	Category string `protobuf:"bytes,11,opt,name=category,proto3" json:"category,omitempty"`
+	// barcode is the scanned barcode value for the menu item.
+	Barcode string `protobuf:"bytes,12,opt,name=barcode,proto3" json:"barcode,omitempty"`
+	// description is the customer-facing menu item description.
+	Description string `protobuf:"bytes,13,opt,name=description,proto3" json:"description,omitempty"`
+	// tax_rate is the sale tax rate for the menu item.
+	TaxRate float64 `protobuf:"fixed64,14,opt,name=tax_rate,json=taxRate,proto3" json:"tax_rate,omitempty"`
+	// stock is the current tracked stock quantity for the menu item.
+	Stock         float64 `protobuf:"fixed64,15,opt,name=stock,proto3" json:"stock,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -148,11 +158,46 @@ func (x *MenuItem) GetImageUrl() string {
 	return ""
 }
 
+func (x *MenuItem) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *MenuItem) GetBarcode() string {
+	if x != nil {
+		return x.Barcode
+	}
+	return ""
+}
+
+func (x *MenuItem) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *MenuItem) GetTaxRate() float64 {
+	if x != nil {
+		return x.TaxRate
+	}
+	return 0
+}
+
+func (x *MenuItem) GetStock() float64 {
+	if x != nil {
+		return x.Stock
+	}
+	return 0
+}
+
 var File_pos_menu_item_v1_types_proto protoreflect.FileDescriptor
 
 const file_pos_menu_item_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/menu_item/v1/types.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\"\xa5\x02\n" +
+	"\x1cpos/menu_item/v1/types.proto\x12\x10pos.menu_item.v1\x1a\x1donekit/http/annotations.proto\"\xae\x03\n" +
 	"\bMenuItem\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
@@ -168,7 +213,12 @@ const file_pos_menu_item_v1_types_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\tR\tupdatedAt\x12\x1b\n" +
 	"\timage_url\x18\n" +
-	" \x01(\tR\bimageUrlB1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
+	" \x01(\tR\bimageUrl\x12\x1a\n" +
+	"\bcategory\x18\v \x01(\tR\bcategory\x12\x18\n" +
+	"\abarcode\x18\f \x01(\tR\abarcode\x12 \n" +
+	"\vdescription\x18\r \x01(\tR\vdescription\x12\x19\n" +
+	"\btax_rate\x18\x0e \x01(\x01R\ataxRate\x12\x14\n" +
+	"\x05stock\x18\x0f \x01(\x01R\x05stockB1Z/github.com/voxire/voxie/gen/go/pos/menu_item/v1b\x06proto3"
 
 var (
 	file_pos_menu_item_v1_types_proto_rawDescOnce sync.Once

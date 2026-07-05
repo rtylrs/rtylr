@@ -14,6 +14,7 @@ type GiftCardServiceServer interface {
 	ListGiftCards(context.Context, *ListGiftCardsRequest) (*ListGiftCardsResponse, error)
 	CreateGiftCard(context.Context, *CreateGiftCardRequest) (*CreateGiftCardResponse, error)
 	RedeemGiftCard(context.Context, *RedeemGiftCardRequest) (*RedeemGiftCardResponse, error)
+	GetGiftCardByCode(context.Context, *GetGiftCardByCodeRequest) (*GetGiftCardByCodeResponse, error)
 }
 
 // RegisterGiftCardServiceServer registers the HTTP handlers for service GiftCardService to the given mux.
@@ -49,6 +50,15 @@ func RegisterGiftCardServiceServer(server GiftCardServiceServer, opts ...ServerO
 
 	config.mux.Handle("POST /api/pos/gift-card/v1/gift-cards/{code}/redeem", redeemGiftCardHandler)
 
+	methodHeaders = getGetGiftCardByCodeHeaders()
+	getGiftCardByCodeHandler := BindingMiddleware[GetGiftCardByCodeRequest](
+		genericHandler(server.GetGiftCardByCode, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getGiftCardByCodePathParams, getGiftCardByCodeQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/pos/gift-card/v1/gift-cards/{code}", getGiftCardByCodeHandler)
+
 	return nil
 }
 
@@ -72,6 +82,11 @@ func getRedeemGiftCardHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetGiftCardByCodeHeaders returns the method-level required headers for GetGiftCardByCode
+func getGetGiftCardByCodeHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listGiftCardsPathParams contains path parameter configuration for ListGiftCards
 var listGiftCardsPathParams = []PathParamConfig{}
 
@@ -91,3 +106,11 @@ var redeemGiftCardPathParams = []PathParamConfig{
 
 // redeemGiftCardQueryParams contains query parameter configuration for RedeemGiftCard
 var redeemGiftCardQueryParams = []QueryParamConfig{}
+
+// getGiftCardByCodePathParams contains path parameter configuration for GetGiftCardByCode
+var getGiftCardByCodePathParams = []PathParamConfig{
+	{URLParam: "code", FieldName: "code"},
+}
+
+// getGiftCardByCodeQueryParams contains query parameter configuration for GetGiftCardByCode
+var getGiftCardByCodeQueryParams = []QueryParamConfig{}

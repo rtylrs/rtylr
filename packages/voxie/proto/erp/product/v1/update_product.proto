@@ -59,6 +59,24 @@ message UpdateProductBody {
   bool is_active = 12;
   // track_inventory is the track inventory value for this contract.
   bool track_inventory = 13;
+  // stock_quantity is the tracked quantity to store for this product.
+  double stock_quantity = 14 [(buf.validate.field).double.gte = 0];
+  // brand_id links the product to a brand when present.
+  int64 brand_id = 15 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  double compare_at_price = 16 [(buf.validate.field).double.gte = 0];
+  double tax_rate = 17 [(buf.validate.field).double.gte = 0];
+  string currency = 18;
+  double weight = 19 [(buf.validate.field).double.gte = 0];
+  string weight_unit = 20;
+  double length = 21 [(buf.validate.field).double.gte = 0];
+  double width = 22 [(buf.validate.field).double.gte = 0];
+  double height = 23 [(buf.validate.field).double.gte = 0];
+  string dimension_unit = 24;
+  string country_of_origin = 25;
+  string hs_code = 26;
+  bool allow_backorder = 27;
+  int32 lead_time_days = 28 [(buf.validate.field).int32.gte = 0];
+  string image_url = 29;
 }
 
 message UpdateProductRequest {

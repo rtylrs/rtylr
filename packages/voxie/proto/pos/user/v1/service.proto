@@ -6,6 +6,7 @@ import "onekit/http/annotations.proto";
 import "pos/user/v1/create_pos_user.proto";
 import "pos/user/v1/deactivate_pos_user.proto";
 import "pos/user/v1/list_pos_users.proto";
+import "pos/user/v1/set_pin.proto";
 import "pos/user/v1/update_pos_user.proto";
 import "pos/user/v1/verify_pos_user_pin.proto";
 
@@ -45,6 +46,13 @@ service UserService {
   rpc VerifyPOSUserPIN(VerifyPOSUserPINRequest) returns (VerifyPOSUserPINResponse) {
     option (onekit.http.config) = {
       path: "/users/verify-pin"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc SetPIN(SetPINRequest) returns (SetPINResponse) {
+    option (onekit.http.config) = {
+      path: "/users/set-pin"
       method: HTTP_METHOD_POST
     };
   }

@@ -10,6 +10,10 @@ export interface ListProductsRequest {
 
 export interface ListProductsResponse {
   products: Product[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+  total: number;
 }
 
 export interface Product {
@@ -31,6 +35,22 @@ export interface Product {
   trackInventory: boolean;
   createdAt: string;
   updatedAt: string;
+  businessId: string;
+  brandId: string;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
 }
 
 export interface CreateProductRequest {
@@ -47,6 +67,22 @@ export interface CreateProductRequest {
   reorderQuantity: number;
   isActive: boolean;
   trackInventory: boolean;
+  stockQuantity: number;
+  brandId: string;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
 }
 
 export interface CreateProductResponse {
@@ -149,6 +185,22 @@ export interface UpdateProductBody {
   reorderQuantity: number;
   isActive: boolean;
   trackInventory: boolean;
+  stockQuantity: number;
+  brandId: string;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
 }
 
 export interface UpdateProductResponse {

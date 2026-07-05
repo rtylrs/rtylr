@@ -47,6 +47,14 @@ export interface RedeemGiftCardResponse {
   message: string;
 }
 
+export interface GetGiftCardByCodeRequest {
+  code: string;
+}
+
+export interface GetGiftCardByCodeResponse {
+  giftCard?: GiftCard;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -180,6 +188,30 @@ export class GiftCardServiceClient {
     }
 
     return await resp.json() as RedeemGiftCardResponse;
+  }
+
+  async getGiftCardByCode(req: GetGiftCardByCodeRequest, options?: GiftCardServiceCallOptions): Promise<GetGiftCardByCodeResponse> {
+    let path = "/api/pos/gift-card/v1/gift-cards/{code}";
+    path = path.replace("{code}", encodeURIComponent(String(req.code)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetGiftCardByCodeResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

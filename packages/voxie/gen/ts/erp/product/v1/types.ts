@@ -43,6 +43,22 @@ export interface Product {
   createdAt: string;
   /** updated_at is when the record was last updated. */
   updatedAt: string;
+  businessId: number;
+  brandId: number;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  weightUnit: string;
+  length: number;
+  width: number;
+  height: number;
+  dimensionUnit: string;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+  imageUrl: string;
 }
 
 export interface FullProduct {

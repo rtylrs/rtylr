@@ -14,6 +14,7 @@ type MenuItemServiceServer interface {
 	ListMenuItems(context.Context, *ListMenuItemsRequest) (*ListMenuItemsResponse, error)
 	ListPublicMenuItems(context.Context, *ListPublicMenuItemsRequest) (*ListPublicMenuItemsResponse, error)
 	CreateMenuItem(context.Context, *CreateMenuItemRequest) (*CreateMenuItemResponse, error)
+	UpdateMenuItem(context.Context, *UpdateMenuItemRequest) (*UpdateMenuItemResponse, error)
 }
 
 // RegisterMenuItemServiceServer registers the HTTP handlers for service MenuItemService to the given mux.
@@ -49,6 +50,15 @@ func RegisterMenuItemServiceServer(server MenuItemServiceServer, opts ...ServerO
 
 	config.mux.Handle("POST /api/pos/menu-item/v1/menu-items", createMenuItemHandler)
 
+	methodHeaders = getUpdateMenuItemHeaders()
+	updateMenuItemHandler := BindingMiddleware[UpdateMenuItemRequest](
+		genericHandler(server.UpdateMenuItem, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateMenuItemPathParams, updateMenuItemQueryParams,
+		"PUT", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PUT /api/pos/menu-item/v1/menu-items/{id}", updateMenuItemHandler)
+
 	return nil
 }
 
@@ -72,6 +82,11 @@ func getCreateMenuItemHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getUpdateMenuItemHeaders returns the method-level required headers for UpdateMenuItem
+func getUpdateMenuItemHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listMenuItemsPathParams contains path parameter configuration for ListMenuItems
 var listMenuItemsPathParams = []PathParamConfig{}
 
@@ -92,3 +107,11 @@ var createMenuItemPathParams = []PathParamConfig{}
 
 // createMenuItemQueryParams contains query parameter configuration for CreateMenuItem
 var createMenuItemQueryParams = []QueryParamConfig{}
+
+// updateMenuItemPathParams contains path parameter configuration for UpdateMenuItem
+var updateMenuItemPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateMenuItemQueryParams contains query parameter configuration for UpdateMenuItem
+var updateMenuItemQueryParams = []QueryParamConfig{}

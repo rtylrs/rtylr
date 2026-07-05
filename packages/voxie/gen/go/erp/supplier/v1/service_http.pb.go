@@ -91,7 +91,10 @@ func getDeleteSupplierHeaders() []*onekithttp.Header {
 var listSuppliersPathParams = []PathParamConfig{}
 
 // listSuppliersQueryParams contains query parameter configuration for ListSuppliers
-var listSuppliersQueryParams = []QueryParamConfig{}
+var listSuppliersQueryParams = []QueryParamConfig{
+	{QueryName: "page", FieldName: "page", Required: false},
+	{QueryName: "page_size", FieldName: "page_size", Required: false},
+}
 
 // createSupplierPathParams contains path parameter configuration for CreateSupplier
 var createSupplierPathParams = []PathParamConfig{}

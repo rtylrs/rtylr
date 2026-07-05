@@ -10,9 +10,19 @@ import type { PurchaseOrder } from "./types";
 export interface ListPurchaseOrdersRequest {
   /** status filters purchase orders by lifecycle state. */
   status: string;
+  /** page is the 1-based page number. */
+  page: number;
+  /** page_size is the number of rows to return. */
+  pageSize: number;
 }
 
 export interface ListPurchaseOrdersResponse {
   /** purchase_orders is the purchase orders value for this contract. */
   purchaseOrders: PurchaseOrder[];
+  /** has_more is true when another page is available. */
+  hasMore: boolean;
+  /** page is the returned 1-based page number. */
+  page: number;
+  /** page_size is the returned page size. */
+  pageSize: number;
 }

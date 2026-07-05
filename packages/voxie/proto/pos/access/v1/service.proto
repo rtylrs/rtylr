@@ -4,6 +4,7 @@ package pos.access.v1;
 
 import "onekit/http/annotations.proto";
 import "pos/access/v1/assign_location.proto";
+import "pos/access/v1/get_location_roster.proto";
 import "pos/access/v1/get_my_locations.proto";
 import "pos/access/v1/remove_location.proto";
 
@@ -15,6 +16,13 @@ service AccessService {
   rpc GetMyLocations(GetMyLocationsRequest) returns (GetMyLocationsResponse) {
     option (onekit.http.config) = {
       path: "/my-locations"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetLocationRoster(GetLocationRosterRequest) returns (GetLocationRosterResponse) {
+    option (onekit.http.config) = {
+      path: "/location-roster"
       method: HTTP_METHOD_GET
     };
   }

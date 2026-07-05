@@ -19,6 +19,11 @@ export interface MenuItem {
   createdAt: string;
   updatedAt: string;
   imageUrl: string;
+  category: string;
+  barcode: string;
+  description: string;
+  taxRate: number;
+  stock: number;
 }
 
 export interface ListPublicMenuItemsRequest {
@@ -38,6 +43,22 @@ export interface CreateMenuItemRequest {
 
 export interface CreateMenuItemResponse {
   itemId: string;
+  message: string;
+}
+
+export interface UpdateMenuItemRequest {
+  id: string;
+  body?: UpdateMenuItemBody;
+}
+
+export interface UpdateMenuItemBody {
+  name: string;
+  salePrice: number;
+  isActive: boolean;
+  stock: number;
+}
+
+export interface UpdateMenuItemResponse {
   message: string;
 }
 
@@ -175,6 +196,31 @@ export class MenuItemServiceClient {
     }
 
     return await resp.json() as CreateMenuItemResponse;
+  }
+
+  async updateMenuItem(req: UpdateMenuItemRequest, options?: MenuItemServiceCallOptions): Promise<UpdateMenuItemResponse> {
+    let path = "/api/pos/menu-item/v1/menu-items/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(req.body ?? {}),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateMenuItemResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

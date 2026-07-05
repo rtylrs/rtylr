@@ -8,9 +8,19 @@
 import type { Supplier } from "./types";
 
 export interface ListSuppliersRequest {
+  /** page is the 1-based page number. */
+  page: number;
+  /** page_size is the number of rows to return. */
+  pageSize: number;
 }
 
 export interface ListSuppliersResponse {
   /** suppliers is the suppliers value for this contract. */
   suppliers: Supplier[];
+  /** has_more is true when another page is available. */
+  hasMore: boolean;
+  /** page is the returned 1-based page number. */
+  page: number;
+  /** page_size is the returned page size. */
+  pageSize: number;
 }

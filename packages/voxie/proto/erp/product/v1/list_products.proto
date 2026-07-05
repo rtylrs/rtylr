@@ -27,4 +27,8 @@ message ListProductsRequest {
 message ListProductsResponse {
   // products is the products value for this contract.
   repeated Product products = 1;
+  bool has_more = 2;
+  int64 page = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
+  int64 page_size = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
+  int64 total = 5 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
 }

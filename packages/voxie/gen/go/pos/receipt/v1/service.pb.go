@@ -25,21 +25,27 @@ var File_pos_receipt_v1_service_proto protoreflect.FileDescriptor
 
 const file_pos_receipt_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1cpos/receipt/v1/service.proto\x12\x0epos.receipt.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/receipt/v1/list_receipts.proto2\x99\x01\n" +
+	"\x1cpos/receipt/v1/service.proto\x12\x0epos.receipt.v1\x1a\x1donekit/http/annotations.proto\x1a\"pos/receipt/v1/email_receipt.proto\x1a\"pos/receipt/v1/list_receipts.proto2\x92\x02\n" +
 	"\x0eReceiptService\x12l\n" +
 	"\fListReceipts\x12#.pos.receipt.v1.ListReceiptsRequest\x1a$.pos.receipt.v1.ListReceiptsResponse\"\x11\x9a\xb5\x18\r\n" +
-	"\t/receipts\x10\x01\x1a\x19\xa2\xb5\x18\x15\n" +
+	"\t/receipts\x10\x01\x12w\n" +
+	"\fEmailReceipt\x12#.pos.receipt.v1.EmailReceiptRequest\x1a$.pos.receipt.v1.EmailReceiptResponse\"\x1c\x9a\xb5\x18\x18\n" +
+	"\x14/receipts/{id}/email\x10\x02\x1a\x19\xa2\xb5\x18\x15\n" +
 	"\x13/api/pos/receipt/v1B/Z-github.com/voxire/voxie/gen/go/pos/receipt/v1b\x06proto3"
 
 var file_pos_receipt_v1_service_proto_goTypes = []any{
 	(*ListReceiptsRequest)(nil),  // 0: pos.receipt.v1.ListReceiptsRequest
-	(*ListReceiptsResponse)(nil), // 1: pos.receipt.v1.ListReceiptsResponse
+	(*EmailReceiptRequest)(nil),  // 1: pos.receipt.v1.EmailReceiptRequest
+	(*ListReceiptsResponse)(nil), // 2: pos.receipt.v1.ListReceiptsResponse
+	(*EmailReceiptResponse)(nil), // 3: pos.receipt.v1.EmailReceiptResponse
 }
 var file_pos_receipt_v1_service_proto_depIdxs = []int32{
 	0, // 0: pos.receipt.v1.ReceiptService.ListReceipts:input_type -> pos.receipt.v1.ListReceiptsRequest
-	1, // 1: pos.receipt.v1.ReceiptService.ListReceipts:output_type -> pos.receipt.v1.ListReceiptsResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: pos.receipt.v1.ReceiptService.EmailReceipt:input_type -> pos.receipt.v1.EmailReceiptRequest
+	2, // 2: pos.receipt.v1.ReceiptService.ListReceipts:output_type -> pos.receipt.v1.ListReceiptsResponse
+	3, // 3: pos.receipt.v1.ReceiptService.EmailReceipt:output_type -> pos.receipt.v1.EmailReceiptResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -50,6 +56,7 @@ func file_pos_receipt_v1_service_proto_init() {
 	if File_pos_receipt_v1_service_proto != nil {
 		return
 	}
+	file_pos_receipt_v1_email_receipt_proto_init()
 	file_pos_receipt_v1_list_receipts_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

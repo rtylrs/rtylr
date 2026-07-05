@@ -2,10 +2,15 @@
 // source: erp/supplier/v1/service.proto
 
 export interface ListSuppliersRequest {
+  page: number;
+  pageSize: number;
 }
 
 export interface ListSuppliersResponse {
   suppliers: Supplier[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
 }
 
 export interface Supplier {
@@ -136,9 +141,12 @@ export class SupplierServiceClient {
     this.retry = options?.retry;
   }
 
-  async listSuppliers(_req: ListSuppliersRequest, options?: SupplierServiceCallOptions): Promise<ListSuppliersResponse> {
+  async listSuppliers(req: ListSuppliersRequest, options?: SupplierServiceCallOptions): Promise<ListSuppliersResponse> {
     let path = "/api/erp/supplier/v1/suppliers";
-    const url = this.baseURL + path;
+    const params = new URLSearchParams();
+    if (req.page != null && req.page !== 0) params.set("page", String(req.page));
+    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

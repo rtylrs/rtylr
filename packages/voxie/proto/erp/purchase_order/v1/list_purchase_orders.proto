@@ -10,9 +10,19 @@ option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
 message ListPurchaseOrdersRequest {
   // status filters purchase orders by lifecycle state.
   string status = 1 [(onekit.http.query).name = "status"];
+  // page is the 1-based page number.
+  int32 page = 2 [(onekit.http.query).name = "page"];
+  // page_size is the number of rows to return.
+  int32 page_size = 3 [(onekit.http.query).name = "page_size"];
 }
 
 message ListPurchaseOrdersResponse {
   // purchase_orders is the purchase orders value for this contract.
   repeated PurchaseOrder purchase_orders = 1;
+  // has_more is true when another page is available.
+  bool has_more = 2;
+  // page is the returned 1-based page number.
+  int32 page = 3;
+  // page_size is the returned page size.
+  int32 page_size = 4;
 }
