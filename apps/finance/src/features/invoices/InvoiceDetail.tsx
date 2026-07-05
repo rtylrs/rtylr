@@ -4,8 +4,7 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
-import { useInvoice } from './useInvoice';
-import { useDeleteInvoice } from './useInvoices';
+import { useInvoiceDetail, useDeleteInvoice } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import PaymentBadge from '../../shared/components/PaymentBadge';
@@ -20,7 +19,7 @@ import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens
 const InvoiceDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { data: invoice, isLoading } = useInvoice(id);
+  const { data: invoice, isLoading } = useInvoiceDetail(id);
   const deleteInvoice = useDeleteInvoice();
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);

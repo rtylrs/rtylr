@@ -1,21 +1,71 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { RecordPaymentResponse } from '@voxire/voxie/finance/invoices/payments/v1/record_payment';
-import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/create_invoice';
-import type { UpdateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/update_invoice';
-import { validateContractPayload } from '@voxire/voxie/validation/metadata';
-import { safe } from '../../shared/lib/api';
+import {
+  InvoicesServiceClient,
+  type CreateInvoiceRequest,
+  type InvoiceSummary,
+  type InvoiceDetail,
+} from '@voxire/voxie/finance/invoices/v1/service_client';
+import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/service_client';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
-import { unwrapList } from '../../shared/lib/unwrapList';
 
-function assertContractPayload(messageName: string, payload: Record<string, unknown>): void {
-  const issues = validateContractPayload(messageName, payload);
-  if (issues.length > 0) {
-    throw new Error(issues[0].message);
-  }
+const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
+const paymentsClient = createOneKitClient(InvoicePaymentServiceClient, 'finance');
+
+// finance.invoices.v1.Invoice statuses are lowercase (draft/sent/viewed/
+// partial/paid/overdue/cancelled/void); the UI works in capitalized labels
+// with only 4 states, so extra backend states fold into the closest one.
+const STATUS_FROM_API: Record<string, Invoice['status']> = {
+  draft: 'Draft',
+  sent: 'Sent',
+  viewed: 'Sent',
+  partial: 'Sent',
+  paid: 'Paid',
+  overdue: 'Overdue',
+  cancelled: 'Draft',
+  void: 'Draft',
+};
+
+function fromApiSummary(inv: InvoiceSummary): Invoice {
+  return invoiceSchema.parse({
+    id: inv.id,
+    client: inv.clientName,
+    amount: inv.total,
+    currency: inv.currency,
+    paid: inv.amountPaid,
+    status: STATUS_FROM_API[inv.status] ?? 'Draft',
+    dueDate: inv.dueDate,
+    issuedDate: inv.issueDate,
+    number: inv.invoiceNumber,
+  }) as Invoice;
+}
+
+function fromApiDetail(inv: InvoiceDetail): Invoice {
+  return invoiceSchema.parse({
+    id: inv.id,
+    client: inv.clientName,
+    clientEmail: inv.clientEmail,
+    amount: inv.total,
+    currency: inv.currency,
+    paid: inv.amountPaid,
+    status: STATUS_FROM_API[inv.status] ?? 'Draft',
+    dueDate: inv.dueDate,
+    issuedDate: inv.issueDate,
+    items: inv.items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      amount: item.total,
+    })),
+    notes: inv.notes,
+    discount: inv.discountValue,
+    tax: inv.taxAmount,
+    subtotal: inv.subtotal,
+    number: inv.invoiceNumber,
+  }) as Invoice;
 }
 
 interface UseInvoicesParams {
@@ -35,16 +85,19 @@ export function useInvoices(params: UseInvoicesParams = {}) {
   return useQuery<InvoiceListResult>({
     queryKey: ['invoices', { page, pageSize }],
     queryFn: async (): Promise<InvoiceListResult> => {
-      const res = await unwrap(
-        safe.get<unknown>('/finance/invoices', { params: { page, page_size: pageSize } })
-      );
-      const raw = res as Record<string, unknown>;
-      const invoices = z.array(invoiceSchema).parse(unwrapList(res, 'invoices')) as Invoice[];
+      const res = await invoicesClient.listInvoices({
+        status: '',
+        search: '',
+        dateFrom: '',
+        dateTo: '',
+        page,
+        pageSize,
+      });
       return {
-        invoices,
-        hasMore: Boolean(raw.has_more),
-        page: Number(raw.page ?? page),
-        pageSize: Number(raw.page_size ?? pageSize),
+        invoices: z.array(invoiceSchema).parse(res.invoices.map(fromApiSummary)) as Invoice[],
+        hasMore: res.hasMore,
+        page: res.page,
+        pageSize: res.pageSize,
       };
     },
   });
@@ -54,12 +107,9 @@ export function useInvoiceDetail(id: string | undefined) {
   return useQuery<Invoice>({
     queryKey: ['invoice', id],
     queryFn: async (): Promise<Invoice> => {
-      // Backend GetInvoiceHandler is registered at /finance/invoices/detail and
-      // reads the invoice id from the request (not a path param).
-      const res = await unwrap(
-        safe.get<unknown>('/finance/invoices/detail', { params: { id: Number(id) } })
-      );
-      return invoiceSchema.parse(res) as Invoice;
+      const res = await invoicesClient.getInvoice({ id: id ?? '' });
+      if (!res.invoice) throw new Error('Invoice not found');
+      return fromApiDetail(res.invoice);
     },
     enabled: !!id,
   });
@@ -68,67 +118,65 @@ export function useInvoiceDetail(id: string | undefined) {
 export function useCreateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateInvoiceRequest): Promise<Invoice> => {
-      assertContractPayload('finance.invoices.v1.CreateInvoiceRequest', {
-        ...(data as unknown as Record<string, unknown>),
-      });
-      return unwrap(safe.post<Invoice>('/finance/invoices', data));
+    mutationFn: async (data: CreateInvoiceRequest): Promise<Invoice> => {
+      const res = await invoicesClient.createInvoice(data);
+      if (!res.invoice) throw new Error('Invoice created but not returned');
+      return fromApiDetail(res.invoice);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) =>
-      toast.error(error instanceof Error ? error.message : 'Failed to create invoice'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create invoice')),
   });
 }
 
 export function useUpdateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    // Backend UpdateInvoiceHandler is registered at PUT /finance/invoices and
-    // reads the id from the request body.
-    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }): Promise<Invoice> => {
-      const payload = { id: Number(id), ...data } as UpdateInvoiceRequest;
-      assertContractPayload('finance.invoices.v1.UpdateInvoiceRequest', {
-        ...(payload as unknown as Record<string, unknown>),
-      });
-      return unwrap(safe.put<Invoice>('/finance/invoices', payload));
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Omit<CreateInvoiceRequest, never>;
+    }): Promise<Invoice> => {
+      const res = await invoicesClient.updateInvoice({ id, body: data });
+      if (!res.invoice) throw new Error('Invoice updated but not returned');
+      return fromApiDetail(res.invoice);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: () => toast.error('Failed to update invoice'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update invoice')),
   });
 }
 
 export function useDeleteInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    // Backend DeleteInvoiceHandler is registered at DELETE /finance/invoices and
-    // reads the id from the request body.
-    mutationFn: (id: string): Promise<void> =>
-      unwrap(safe.delete<void>('/finance/invoices', { data: { id: Number(id) } })),
+    mutationFn: (id: string) => invoicesClient.deleteInvoice({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: () => toast.error('Failed to delete invoice'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to delete invoice')),
   });
 }
+
+const STATUS_TO_API: Record<Invoice['status'], string> = {
+  Draft: 'draft',
+  Sent: 'sent',
+  Paid: 'paid',
+  Overdue: 'overdue',
+};
 
 export function useUpdateInvoiceStatus() {
   const qc = useQueryClient();
   return useMutation({
-    // Backend UpdateInvoiceStatusHandler is registered at PUT /finance/invoices/status
-    // and reads { id, status } from the request body.
-    mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }): Promise<void> => {
-      const payload = { id: Number(id), status };
-      assertContractPayload('finance.invoices.v1.UpdateInvoiceStatusRequest', payload);
-      return unwrap(safe.put<void>('/finance/invoices/status', payload));
-    },
+    mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
+      invoicesClient.updateInvoiceStatus({ id, body: { status: STATUS_TO_API[status] } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: () => toast.error('Failed to update invoice status'),
+    onError: (error) =>
+      toast.error(getOneKitErrorMessage(error, 'Failed to update invoice status')),
   });
 }
 
 export function useRecordPayment() {
   const qc = useQueryClient();
   return useMutation({
-    // Backend RecordPaymentHandler returns { payment, message }; expose the typed
-    // response so callers can read the recorded payment id/details.
     mutationFn: ({
       id,
       amount,
@@ -143,32 +191,20 @@ export function useRecordPayment() {
       paymentDate: string;
       method?: string;
       reference: string;
-    }): Promise<RecordPaymentResponse> => {
-      const payload = {
-        invoiceId: Number(id),
+    }) =>
+      paymentsClient.recordPayment({
+        invoiceId: id,
         amount,
         currency,
         paymentDate,
-        method,
+        method: method ?? 'cash',
         reference,
-      };
-      assertContractPayload('finance.invoices.payments.v1.RecordPaymentRequest', payload);
-      return unwrap(safe.post<RecordPaymentResponse>('/finance/invoices/payment', payload));
-    },
-    onSuccess: (
-      _data: RecordPaymentResponse,
-      variables: {
-        id: string;
-        amount: number;
-        currency: string;
-        paymentDate: string;
-        method?: string;
-        reference: string;
-      }
-    ) => {
+        notes: '',
+      }),
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['invoices'] });
       qc.invalidateQueries({ queryKey: ['invoice', variables.id] });
     },
-    onError: () => toast.error('Failed to record payment'),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to record payment')),
   });
 }

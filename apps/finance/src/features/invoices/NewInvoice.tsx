@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/create_invoice';
+import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/service_client';
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
@@ -82,7 +82,7 @@ const NewInvoice: React.FC = () => {
       unitPrice: it.unitPrice,
       taxRate: it.taxRate,
       discountPct: 0,
-      sortOrder: idx,
+      sortOrder: String(idx),
       total: it.quantity * it.unitPrice,
     }));
     const payload: CreateInvoiceRequest = {
