@@ -165,9 +165,7 @@ export function resolveCookieDomain(): string | undefined {
     'menu',
   ];
 
-  const hosts = appKeys
-    .map((k) => hostnameOf(urls[k]))
-    .filter((h): h is string => h !== null);
+  const hosts = appKeys.map((k) => hostnameOf(urls[k])).filter((h): h is string => h !== null);
 
   if (hosts.length === 0) return undefined;
 

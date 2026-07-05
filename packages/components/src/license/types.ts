@@ -6,13 +6,7 @@
  */
 export type LicenseMode = 'hosted' | 'self_hosted';
 
-export type LicenseStatus =
-  | 'hosted'
-  | 'valid'
-  | 'missing'
-  | 'expired'
-  | 'invalid'
-  | 'unreachable';
+export type LicenseStatus = 'hosted' | 'valid' | 'missing' | 'expired' | 'invalid' | 'unreachable';
 
 export interface LicenseState {
   mode: LicenseMode;
