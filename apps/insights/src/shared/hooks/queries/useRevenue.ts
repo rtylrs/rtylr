@@ -1,17 +1,16 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { RevenueServiceClient } from '@voxire/voxie/insights/revenue/v1/service_client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type {
   RevenueSeriesResponse,
   RevenueByAppResponse,
   RevenueComparisonResponse,
 } from './types';
-import {
-  mapRevenueByApp,
-  mapRevenueComparison,
-  mapRevenueOverview,
-} from '../../utils/onekitMappers';
+
+const revenueClient = createOneKitClient(RevenueServiceClient, 'insights');
+
+const majorToMinor = (value: number): number => Math.round(value * 100);
 
 export const useRevenueSeries = (
   params?: DateRangeParams
@@ -20,24 +19,31 @@ export const useRevenueSeries = (
   return useQuery<RevenueSeriesResponse>({
     queryKey: ['insights-revenue', { from, to }],
     queryFn: async (): Promise<RevenueSeriesResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/revenue/v1/overview', {
-          params: { period: `${from},${to}` },
-        })
-      );
-      return mapRevenueOverview(res as Record<string, unknown>);
+      const res = await revenueClient.getRevenueOverview({ period: `${from},${to}` });
+      const trend = res.overview?.trend ?? [];
+      return {
+        series: trend.map((point) => ({
+          date: point.date,
+          amountMinorUnits: majorToMinor(point.amount),
+        })),
+      };
     },
   });
 };
 
-export const useRevenueByApp = (): UseQueryResult<RevenueByAppResponse> => {
+export const useRevenueByApp = (params?: DateRangeParams): UseQueryResult<RevenueByAppResponse> => {
+  const { from, to } = resolveDateRange(params);
   return useQuery<RevenueByAppResponse>({
-    queryKey: ['insights-revenue-by-app'],
+    queryKey: ['insights-revenue-by-app', { from, to }],
     queryFn: async (): Promise<RevenueByAppResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/revenue/v1/by-app')
-      );
-      return mapRevenueByApp(res as Record<string, unknown>);
+      const res = await revenueClient.getRevenueByApp({ period: `${from},${to}` });
+      return {
+        byApp: res.apps.map((entry) => ({
+          app: entry.app,
+          amountMinorUnits: majorToMinor(entry.amount),
+          pct: entry.percentage,
+        })),
+      };
     },
   });
 };
@@ -49,12 +55,16 @@ export const useRevenueComparison = (
   return useQuery<RevenueComparisonResponse>({
     queryKey: ['insights-revenue-comparison', { from, to }],
     queryFn: async (): Promise<RevenueComparisonResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/revenue/v1/comparison', {
-          params: { period: `${from},${to}`, compare_to: 'previous_period' },
-        })
-      );
-      return mapRevenueComparison(res as Record<string, unknown>);
+      const res = await revenueClient.getRevenueComparison({
+        period: `${from},${to}`,
+        compareTo: 'previous_period',
+      });
+      const first = res.comparisons[0];
+      return {
+        thisPeriod: majorToMinor(first?.current ?? 0),
+        lastPeriod: majorToMinor(first?.previous ?? 0),
+        deltaPct: first?.change ?? 0,
+      };
     },
   });
 };

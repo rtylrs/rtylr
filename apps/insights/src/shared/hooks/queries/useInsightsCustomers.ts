@@ -1,27 +1,34 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { CustomerServiceClient } from '@voxire/voxie/insights/customer/v1/service_client';
+import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type {
   CustomerKPIResponse,
   TopCustomersResponse,
   CustomerLTVResponse,
   CustomerChurnResponse,
 } from './types';
-import {
-  mapCustomerAnalytics,
-  mapCustomerChurn,
-  mapCustomerLTV,
-  mapTopCustomers,
-} from '../../utils/onekitMappers';
 
-export const useCustomerKPIs = (): UseQueryResult<CustomerKPIResponse> => {
+const customerClient = createOneKitClient(CustomerServiceClient, 'insights');
+
+const majorToMinor = (value: number): number => Math.round(value * 100);
+
+export const useCustomerKPIs = (params?: DateRangeParams): UseQueryResult<CustomerKPIResponse> => {
+  const { from, to } = resolveDateRange(params);
   return useQuery<CustomerKPIResponse>({
-    queryKey: ['insights-customers'],
+    queryKey: ['insights-customers', { from, to }],
     queryFn: async (): Promise<CustomerKPIResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/customer/v1/analytics')
-      );
-      return mapCustomerAnalytics(res as Record<string, unknown>);
+      const res = await customerClient.getCustomerAnalytics({ period: `${from},${to}` });
+      const analytics = res.analytics;
+      const total = analytics?.total ?? 0;
+      const retentionRate = analytics?.retentionRate ?? 0;
+      const churnRate = analytics?.churnRate ?? 0;
+      return {
+        total,
+        newThisMonth: analytics?.newThisPeriod ?? 0,
+        active: Math.round((total * retentionRate) / 100),
+        churned: Math.round((total * churnRate) / 100),
+      };
     },
   });
 };
@@ -34,13 +41,26 @@ export const useTopCustomers = (
   params?: TopCustomersParams
 ): UseQueryResult<TopCustomersResponse> => {
   const limit = params?.limit ?? 10;
+  const { from, to } = resolveDateRange(undefined);
   return useQuery<TopCustomersResponse>({
-    queryKey: ['insights-customers-top', { limit }],
+    queryKey: ['insights-customers-top', { limit, from, to }],
     queryFn: async (): Promise<TopCustomersResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/customer/v1/top', { params: { limit } })
-      );
-      return mapTopCustomers(res as Record<string, unknown>);
+      const res = await customerClient.getTopCustomers({
+        page: 1,
+        limit,
+        sortBy: 'totalSpent',
+        sortDir: 'desc',
+        period: `${from},${to}`,
+      });
+      return {
+        customers: res.customers.map((entry) => ({
+          customerId: Number(entry.id),
+          name: entry.name,
+          email: '',
+          lifetimeSpendMinorUnits: majorToMinor(entry.totalSpent),
+          orderCount: entry.orderCount,
+        })),
+      };
     },
   });
 };
@@ -49,22 +69,42 @@ export const useCustomerLTV = (): UseQueryResult<CustomerLTVResponse> => {
   return useQuery<CustomerLTVResponse>({
     queryKey: ['insights-customers-ltv'],
     queryFn: async (): Promise<CustomerLTVResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/customer/v1/ltv')
-      );
-      return mapCustomerLTV(res as Record<string, unknown>);
+      const res = await customerClient.getLTVAnalysis({});
+      const segments = res.analysis?.segments ?? [];
+      return {
+        buckets: segments.map((entry) => {
+          const avg = majorToMinor(entry.avgLtv);
+          return {
+            label: entry.segment,
+            lowerMinorUnits: avg,
+            upperMinorUnits: avg,
+            customerCount: entry.customerCount,
+          };
+        }),
+      };
     },
   });
 };
 
-export const useCustomerChurn = (): UseQueryResult<CustomerChurnResponse> => {
+export const useCustomerChurn = (
+  params?: DateRangeParams
+): UseQueryResult<CustomerChurnResponse> => {
+  const { from, to } = resolveDateRange(params);
   return useQuery<CustomerChurnResponse>({
-    queryKey: ['insights-customers-churn'],
+    queryKey: ['insights-customers-churn', { from, to }],
     queryFn: async (): Promise<CustomerChurnResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/customer/v1/churn')
-      );
-      return mapCustomerChurn(res as Record<string, unknown>);
+      const res = await customerClient.getChurnAnalysis({ period: `${from},${to}` });
+      const analysis = res.analysis;
+      return {
+        windows: [
+          {
+            windowDays: 30,
+            churnedCount: analysis?.churnedCount ?? 0,
+            activeCount: 0,
+            churnPct: analysis?.churnRate ?? 0,
+          },
+        ],
+      };
     },
   });
 };

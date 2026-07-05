@@ -1,6 +1,6 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { ProductServiceClient } from '@voxire/voxie/insights/product/v1/service_client';
 import type {
   ProductKPIResponse,
   BestSellersResponse,
@@ -8,14 +8,20 @@ import type {
   SlowMoversResponse,
   ProductCategoryMixResponse,
 } from './types';
-import { mapProductPerformance } from '../../utils/onekitMappers';
+
+const productClient = createOneKitClient(ProductServiceClient, 'insights');
 
 export const useProductKPIs = (): UseQueryResult<ProductKPIResponse> => {
   return useQuery<ProductKPIResponse>({
     queryKey: ['insights-products'],
     queryFn: async (): Promise<ProductKPIResponse> => {
-      const res = await unwrap(safe.get<Record<string, unknown>>('/api/insights/product/v1/performance'));
-      return mapProductPerformance(res as Record<string, unknown>);
+      const res = await productClient.getProductPerformance({});
+      return {
+        totalSkus: Number(res.totalSkus),
+        activeSkus: Number(res.activeSkus),
+        outOfStock: Number(res.outOfStock),
+        avgMarginPct: res.avgMarginPct,
+      };
     },
   });
 };
@@ -29,10 +35,15 @@ export const useBestSellers = (params?: BestSellersParams): UseQueryResult<BestS
   return useQuery<BestSellersResponse>({
     queryKey: ['insights-products-best-sellers', { limit }],
     queryFn: async (): Promise<BestSellersResponse> => {
-      const res = await unwrap(
-        safe.get<BestSellersResponse>('/api/insights/product/v1/best-sellers', { params: { limit } })
-      );
-      return res as BestSellersResponse;
+      const res = await productClient.getBestSellers({ limit });
+      return {
+        products: res.products.map((p) => ({
+          productId: Number(p.productId),
+          name: p.name,
+          unitsSold: p.unitsSold,
+          revenueMinorUnits: Number(p.revenueMinorUnits),
+        })),
+      };
     },
   });
 };
@@ -41,8 +52,15 @@ export const useProductMargins = (): UseQueryResult<ProductMarginsResponse> => {
   return useQuery<ProductMarginsResponse>({
     queryKey: ['insights-products-margins'],
     queryFn: async (): Promise<ProductMarginsResponse> => {
-      const res = await unwrap(safe.get<ProductMarginsResponse>('/api/insights/product/v1/margins'));
-      return res as ProductMarginsResponse;
+      const res = await productClient.getProductMargins({});
+      return {
+        buckets: res.buckets.map((b) => ({
+          label: b.label,
+          lowerPct: b.lowerPct,
+          upperPct: b.upperPct,
+          productCount: Number(b.productCount),
+        })),
+      };
     },
   });
 };
@@ -56,10 +74,14 @@ export const useSlowMovers = (params?: SlowMoversParams): UseQueryResult<SlowMov
   return useQuery<SlowMoversResponse>({
     queryKey: ['insights-products-slow-movers', { days }],
     queryFn: async (): Promise<SlowMoversResponse> => {
-      const res = await unwrap(
-        safe.get<SlowMoversResponse>('/api/insights/product/v1/slow-movers', { params: { days } })
-      );
-      return res as SlowMoversResponse;
+      const res = await productClient.getSlowMovers({ days });
+      return {
+        products: res.products.map((p) => ({
+          productId: Number(p.productId),
+          name: p.name,
+          stockQuantity: p.stockQuantity,
+        })),
+      };
     },
   });
 };
@@ -68,10 +90,15 @@ export const useProductCategoryMix = (): UseQueryResult<ProductCategoryMixRespon
   return useQuery<ProductCategoryMixResponse>({
     queryKey: ['insights-products-category-mix'],
     queryFn: async (): Promise<ProductCategoryMixResponse> => {
-      const res = await unwrap(
-        safe.get<ProductCategoryMixResponse>('/api/insights/product/v1/categories')
-      );
-      return res as ProductCategoryMixResponse;
+      const res = await productClient.getCategoryPerformance({});
+      return {
+        categories: res.categories.map((c) => ({
+          categoryId: Number(c.categoryId),
+          categoryName: c.categoryName,
+          unitsSold: c.unitsSold,
+          revenueMinorUnits: Number(c.revenueMinorUnits),
+        })),
+      };
     },
   });
 };

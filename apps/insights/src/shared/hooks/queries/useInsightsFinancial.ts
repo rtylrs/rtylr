@@ -1,21 +1,27 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { FinancialServiceClient } from '@voxire/voxie/insights/financial/v1/service_client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type { CashFlowResponse, ExpensesByCategoryResponse, InvoiceAgingResponse } from './types';
-import { mapCashFlowAnalytics, mapExpenseAnalytics, mapInvoiceAging } from '../../utils/onekitMappers';
+
+const financialClient = createOneKitClient(FinancialServiceClient, 'insights');
+
+const majorToMinor = (value: number): number => Math.round(value * 100);
 
 export const useCashFlow = (params?: DateRangeParams): UseQueryResult<CashFlowResponse> => {
   const { from, to } = resolveDateRange(params);
   return useQuery<CashFlowResponse>({
     queryKey: ['insights-financial-cash-flow', { from, to }],
     queryFn: async (): Promise<CashFlowResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/financial/v1/cash-flow', {
-          params: { period: `${from},${to}` },
-        })
-      );
-      return mapCashFlowAnalytics(res as Record<string, unknown>);
+      const res = await financialClient.getCashFlowAnalytics({ period: `${from},${to}` });
+      const trend = res.analytics?.trend ?? [];
+      return {
+        series: trend.map((point) => ({
+          date: point.date,
+          inflowMinorUnits: majorToMinor(point.inflow),
+          outflowMinorUnits: majorToMinor(point.outflow),
+        })),
+      };
     },
   });
 };
@@ -27,12 +33,15 @@ export const useExpensesByCategory = (
   return useQuery<ExpensesByCategoryResponse>({
     queryKey: ['insights-financial-expenses', { from, to }],
     queryFn: async (): Promise<ExpensesByCategoryResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/financial/v1/expenses', {
-          params: { period: `${from},${to}` },
-        })
-      );
-      return mapExpenseAnalytics(res as Record<string, unknown>);
+      const res = await financialClient.getExpenseAnalytics({ period: `${from},${to}` });
+      const byCategory = res.analytics?.byCategory ?? [];
+      return {
+        categories: byCategory.map((entry, index) => ({
+          categoryId: index + 1,
+          categoryName: entry.category,
+          amountMinorUnits: majorToMinor(entry.amount),
+        })),
+      };
     },
   });
 };
@@ -41,10 +50,15 @@ export const useInvoiceAging = (): UseQueryResult<InvoiceAgingResponse> => {
   return useQuery<InvoiceAgingResponse>({
     queryKey: ['insights-financial-invoice-aging'],
     queryFn: async (): Promise<InvoiceAgingResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/financial/v1/invoice-aging')
-      );
-      return mapInvoiceAging(res as Record<string, unknown>);
+      const res = await financialClient.getInvoiceAging({});
+      const buckets = res.aging?.buckets ?? [];
+      return {
+        buckets: buckets.map((b) => ({
+          bucket: b.bucket,
+          invoiceCount: b.count,
+          amountMinorUnits: majorToMinor(b.amount),
+        })),
+      };
     },
   });
 };

@@ -1,6 +1,6 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { OperationServiceClient } from '@voxire/voxie/insights/operation/v1/service_client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type {
   OperationsKPIResponse,
@@ -9,34 +9,38 @@ import type {
   TimeOffResponse,
   UtilizationResponse,
 } from './types';
-import {
-  mapHeadcountMetrics,
-  mapOperationsSummary,
-  mapShiftMetrics,
-  mapTimeOffMetrics,
-  mapUtilizationMetrics,
-} from '../../utils/onekitMappers';
+
+const operationClient = createOneKitClient(OperationServiceClient, 'insights');
 
 export const useOperationsKPIs = (): UseQueryResult<OperationsKPIResponse> => {
   return useQuery<OperationsKPIResponse>({
     queryKey: ['insights-operations'],
     queryFn: async (): Promise<OperationsKPIResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/operation/v1/summary')
-      );
-      return mapOperationsSummary(res as Record<string, unknown>);
+      const res = await operationClient.getOperationsSummary({});
+      return {
+        activeStaff: Number(res.activeStaff),
+        shiftsThisWeek: Number(res.shiftsThisWeek),
+        pendingTimeOff: Number(res.pendingTimeOff),
+        openLeaveRequests: Number(res.openLeaveRequests),
+      };
     },
   });
 };
 
-export const useHeadcount = (): UseQueryResult<HeadcountResponse> => {
+export const useHeadcount = (params?: DateRangeParams): UseQueryResult<HeadcountResponse> => {
+  const { from, to } = resolveDateRange(params);
   return useQuery<HeadcountResponse>({
-    queryKey: ['insights-operations-headcount'],
+    queryKey: ['insights-operations-headcount', { from, to }],
     queryFn: async (): Promise<HeadcountResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/operation/v1/headcount')
-      );
-      return mapHeadcountMetrics(res as Record<string, unknown>);
+      const res = await operationClient.getHeadcountMetrics({ period: `${from},${to}` });
+      const metrics = res.metrics;
+      const hired = metrics?.hiredThisPeriod ?? 0;
+      const departed = metrics?.departedThisPeriod ?? 0;
+      return {
+        activeStaff: metrics?.current ?? 0,
+        momDelta: hired - departed,
+        momDeltaPct: metrics?.turnoverRate ?? 0,
+      };
     },
   });
 };
@@ -46,36 +50,44 @@ export const useShiftMetrics = (params?: DateRangeParams): UseQueryResult<ShiftM
   return useQuery<ShiftMetricsResponse>({
     queryKey: ['insights-operations-shifts', { from, to }],
     queryFn: async (): Promise<ShiftMetricsResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/operation/v1/shifts', {
-          params: { period: `${from},${to}` },
-        })
-      );
-      return mapShiftMetrics(res as Record<string, unknown>);
+      const res = await operationClient.getShiftMetrics({ period: `${from},${to}` });
+      const metrics = res.metrics;
+      return {
+        scheduled: metrics?.totalShifts ?? 0,
+        completed: metrics?.covered ?? 0,
+        noShows: metrics?.missed ?? 0,
+        completionRatePct: metrics?.coverageRate ?? 0,
+      };
     },
   });
 };
 
-export const useTimeOff = (): UseQueryResult<TimeOffResponse> => {
+export const useTimeOff = (params?: DateRangeParams): UseQueryResult<TimeOffResponse> => {
+  const { from, to } = resolveDateRange(params);
   return useQuery<TimeOffResponse>({
-    queryKey: ['insights-operations-time-off'],
+    queryKey: ['insights-operations-time-off', { from, to }],
     queryFn: async (): Promise<TimeOffResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/operation/v1/time-off')
-      );
-      return mapTimeOffMetrics(res as Record<string, unknown>);
+      const res = await operationClient.getTimeOffMetrics({ period: `${from},${to}` });
+      return {
+        pending: res.metrics?.pending ?? 0,
+        approved: res.metrics?.approved ?? 0,
+      };
     },
   });
 };
 
-export const useUtilization = (): UseQueryResult<UtilizationResponse> => {
+export const useUtilization = (params?: DateRangeParams): UseQueryResult<UtilizationResponse> => {
+  const { from, to } = resolveDateRange(params);
   return useQuery<UtilizationResponse>({
-    queryKey: ['insights-operations-utilization'],
+    queryKey: ['insights-operations-utilization', { from, to }],
     queryFn: async (): Promise<UtilizationResponse> => {
-      const res = await unwrap(
-        safe.get<Record<string, unknown>>('/api/insights/operation/v1/utilization')
-      );
-      return mapUtilizationMetrics(res as Record<string, unknown>);
+      const res = await operationClient.getUtilization({ period: `${from},${to}` });
+      const metrics = res.metrics;
+      return {
+        scheduledHours: metrics?.totalHours ?? 0,
+        availableHours: metrics?.availableHours ?? 0,
+        utilizationPct: metrics?.avgUtilization ?? 0,
+      };
     },
   });
 };

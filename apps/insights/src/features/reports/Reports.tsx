@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import {
   useReportTemplates,
   useGenerateRevenueReport,
-  useRevenueCSVExportURL,
+  useExportRevenueReport,
 } from '../../shared/hooks/queries/useInsightsReports';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
@@ -27,7 +27,7 @@ const Reports: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useReportTemplates();
   const generateRevenue = useGenerateRevenueReport();
-  const csvExportUrl = useRevenueCSVExportURL();
+  const exportRevenue = useExportRevenueReport();
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -48,18 +48,21 @@ const Reports: React.FC = (): React.JSX.Element => {
           {t('insights.reports.title')}
         </h2>
         <div className="flex items-center gap-2">
-          <a
-            href={csvExportUrl}
-            download
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => exportRevenue.mutate({})}
+            disabled={exportRevenue.isPending}
             className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
             style={{ background: 'var(--hub-active)', color: 'var(--hub-text)' }}
             aria-label={t('insights.reports.exportRevenue')}
           >
-            <Download size={12} />
+            {exportRevenue.isPending ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <Download size={12} />
+            )}
             {t('insights.reports.exportRevenue')}
-          </a>
+          </button>
           <button
             type="button"
             onClick={() =>
