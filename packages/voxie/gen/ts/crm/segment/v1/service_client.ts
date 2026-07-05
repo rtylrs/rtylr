@@ -42,10 +42,26 @@ export interface GetSegmentDetailResponse {
 
 export interface Customer {
   id: string;
+  ownerId: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  dateOfBirth: string | null;
+  gender: string;
+  address: string;
+  city: string;
+  country: string;
+  loyaltyPoints: string;
+  totalSpent: number;
+  visitCount: string;
+  lastVisitAt: string | null;
+  loyaltyTier: string;
+  tags: string[];
+  notes: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GetSegmentCustomersRequest {

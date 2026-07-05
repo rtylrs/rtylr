@@ -5,7 +5,7 @@
 // source: crm/segment/v1/get_segment_customers.proto
 
 /* eslint-disable */
-import type { Customer } from "../../../pos/customer/v1/types";
+import type { Customer } from "../../customer/v1/types";
 
 export interface GetSegmentCustomersRequest {
   /** segment_id is the segment id value for this contract. */
@@ -17,7 +17,11 @@ export interface GetSegmentCustomersRequest {
 }
 
 export interface GetSegmentCustomersResponse {
-  /** customers is the customers value for this contract. */
+  /**
+   * customers is the customers value for this contract. Uses the full
+   * crm.customer.v1.Customer (not pos.customer.v1's minimal projection) so
+   * consumers can render loyalty tier/points without a second lookup.
+   */
   customers: Customer[];
   /** total is the total number of matching records. */
   total: number;

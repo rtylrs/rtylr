@@ -9,7 +9,7 @@ package v1
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/stackxio/onekit/http"
-	v1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
+	v1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -73,7 +73,9 @@ type GetSegmentDetailResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// segment is the segment value for this contract.
 	Segment *Segment `protobuf:"bytes,1,opt,name=segment,proto3" json:"segment,omitempty"`
-	// customers is the customers value for this contract.
+	// customers is the customers value for this contract. Uses the full
+	// crm.customer.v1.Customer (not pos.customer.v1's minimal projection) so
+	// consumers can render loyalty tier/points without a second lookup.
 	Customers     []*v1.Customer `protobuf:"bytes,2,rep,name=customers,proto3" json:"customers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -127,12 +129,12 @@ var File_crm_segment_v1_get_segment_detail_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_get_segment_detail_proto_rawDesc = "" +
 	"\n" +
-	"'crm/segment/v1/get_segment_detail.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1acrm/segment/v1/types.proto\x1a\x1bpos/customer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"9\n" +
+	"'crm/segment/v1/get_segment_detail.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1acrm/segment/v1/types.proto\x1a\x1bcrm/customer/v1/types.proto\x1a\x1donekit/http/annotations.proto\"9\n" +
 	"\x17GetSegmentDetailRequest\x12\x1e\n" +
 	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\"\x86\x01\n" +
 	"\x18GetSegmentDetailResponse\x121\n" +
 	"\asegment\x18\x01 \x01(\v2\x17.crm.segment.v1.SegmentR\asegment\x127\n" +
-	"\tcustomers\x18\x02 \x03(\v2\x19.pos.customer.v1.CustomerR\tcustomersB/Z-github.com/voxire/voxie/gen/go/crm/segment/v1b\x06proto3"
+	"\tcustomers\x18\x02 \x03(\v2\x19.crm.customer.v1.CustomerR\tcustomersB/Z-github.com/voxire/voxie/gen/go/crm/segment/v1b\x06proto3"
 
 var (
 	file_crm_segment_v1_get_segment_detail_proto_rawDescOnce sync.Once
@@ -151,11 +153,11 @@ var file_crm_segment_v1_get_segment_detail_proto_goTypes = []any{
 	(*GetSegmentDetailRequest)(nil),  // 0: crm.segment.v1.GetSegmentDetailRequest
 	(*GetSegmentDetailResponse)(nil), // 1: crm.segment.v1.GetSegmentDetailResponse
 	(*Segment)(nil),                  // 2: crm.segment.v1.Segment
-	(*v1.Customer)(nil),              // 3: pos.customer.v1.Customer
+	(*v1.Customer)(nil),              // 3: crm.customer.v1.Customer
 }
 var file_crm_segment_v1_get_segment_detail_proto_depIdxs = []int32{
 	2, // 0: crm.segment.v1.GetSegmentDetailResponse.segment:type_name -> crm.segment.v1.Segment
-	3, // 1: crm.segment.v1.GetSegmentDetailResponse.customers:type_name -> pos.customer.v1.Customer
+	3, // 1: crm.segment.v1.GetSegmentDetailResponse.customers:type_name -> crm.customer.v1.Customer
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
