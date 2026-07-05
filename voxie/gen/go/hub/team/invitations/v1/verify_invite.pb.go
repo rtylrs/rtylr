@@ -74,7 +74,10 @@ type VerifyInviteResponse struct {
 	// full_name is the full name value for this contract.
 	FullName string `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	// valid is the valid value for this contract.
-	Valid         bool `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
+	Valid bool `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
+	// apps lists the app IDs the invited user will have access to, so the
+	// frontend can redirect to the right app after the invite is accepted.
+	Apps          []string `protobuf:"bytes,4,rep,name=apps,proto3" json:"apps,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -130,6 +133,13 @@ func (x *VerifyInviteResponse) GetValid() bool {
 	return false
 }
 
+func (x *VerifyInviteResponse) GetApps() []string {
+	if x != nil {
+		return x.Apps
+	}
+	return nil
+}
+
 var File_hub_team_invitations_v1_verify_invite_proto protoreflect.FileDescriptor
 
 const file_hub_team_invitations_v1_verify_invite_proto_rawDesc = "" +
@@ -137,11 +147,12 @@ const file_hub_team_invitations_v1_verify_invite_proto_rawDesc = "" +
 	"+hub/team/invitations/v1/verify_invite.proto\x12\x17hub.team.invitations.v1\x1a\x1bbuf/validate/validate.proto\"7\n" +
 	"\x13VerifyInviteRequest\x12 \n" +
 	"\x05token\x18\x01 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05token\"_\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05token\"s\n" +
 	"\x14VerifyInviteResponse\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1b\n" +
 	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x14\n" +
-	"\x05valid\x18\x03 \x01(\bR\x05validB8Z6github.com/voxire/voxie/gen/go/hub/team/invitations/v1b\x06proto3"
+	"\x05valid\x18\x03 \x01(\bR\x05valid\x12\x12\n" +
+	"\x04apps\x18\x04 \x03(\tR\x04appsB8Z6github.com/voxire/voxie/gen/go/hub/team/invitations/v1b\x06proto3"
 
 var (
 	file_hub_team_invitations_v1_verify_invite_proto_rawDescOnce sync.Once
