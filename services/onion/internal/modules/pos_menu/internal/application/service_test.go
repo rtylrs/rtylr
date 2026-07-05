@@ -12,6 +12,7 @@ type mockRepo struct {
 	list      []domain.MenuItem
 	createID  int64
 	createErr error
+	updateErr error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.MenuItem, error) {
@@ -20,6 +21,10 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.MenuItem, error) {
 
 func (m *mockRepo) QuickCreate(_ context.Context, _, _ int64, _ domain.MenuItemInput) (int64, error) {
 	return m.createID, m.createErr
+}
+
+func (m *mockRepo) Update(_ context.Context, _, _ int64, _ domain.MenuItemUpdateInput) error {
+	return m.updateErr
 }
 
 func (m *mockRepo) BusinessOwnerID(_ context.Context, businessID int64) (int64, error) {

@@ -26,3 +26,10 @@ type MenuItemInput struct {
 	SKU       string  `json:"sku"`
 	SalePrice float64 `json:"sale_price"`
 }
+
+type MenuItemUpdateInput struct {
+	Name      string  `json:"name"`
+	SalePrice float64 `json:"sale_price"`
+	Stock     float64 `json:"stock"`
+	IsActive  bool    `json:"is_active"`
+}

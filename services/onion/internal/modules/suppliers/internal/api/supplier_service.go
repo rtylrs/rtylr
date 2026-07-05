@@ -23,12 +23,24 @@ func NewSupplierAPI(service *application.Service) *SupplierAPI {
 	return &SupplierAPI{Service: service}
 }
 
-func (a *SupplierAPI) ListSuppliers(ctx context.Context, _ *erpsupplierv1.ListSuppliersRequest) (*erpsupplierv1.ListSuppliersResponse, error) {
+func (a *SupplierAPI) ListSuppliers(ctx context.Context, req *erpsupplierv1.ListSuppliersRequest) (*erpsupplierv1.ListSuppliersResponse, error) {
 	ownerID, err := supplierOwnerID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	suppliers, _, listErr := a.Service.ListSuppliers(ctx, ownerID, 1, 500)
+	page := req.GetPage()
+	if page <= 0 {
+		page = 1
+	}
+	pageSize := req.GetPageSize()
+	if pageSize <= 0 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+
+	suppliers, hasMore, listErr := a.Service.ListSuppliers(ctx, ownerID, int64(page), int64(pageSize))
 	if listErr != nil {
 		return nil, supplierStatusError(http.StatusInternalServerError, "Failed to list suppliers")
 	}
@@ -36,7 +48,12 @@ func (a *SupplierAPI) ListSuppliers(ctx context.Context, _ *erpsupplierv1.ListSu
 	for _, s := range suppliers {
 		out = append(out, newSupplierPayload(s))
 	}
-	return &erpsupplierv1.ListSuppliersResponse{Suppliers: out}, nil
+	return &erpsupplierv1.ListSuppliersResponse{
+		Suppliers: out,
+		HasMore:   hasMore,
+		Page:      page,
+		PageSize:  pageSize,
+	}, nil
 }
 
 func (a *SupplierAPI) CreateSupplier(ctx context.Context, req *erpsupplierv1.CreateSupplierRequest) (*erpsupplierv1.CreateSupplierResponse, error) {

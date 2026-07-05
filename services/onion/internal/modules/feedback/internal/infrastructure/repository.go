@@ -38,23 +38,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, filters domain.
 
 	offset := (page - 1) * pageSize
 
-	whereConds := squirrel.And{squirrel.Eq{"business_id": businessID}}
-
-	if filters.Type != "" {
-		whereConds = append(whereConds, squirrel.Eq{"type": filters.Type})
-	}
-
-	if filters.Source != "" {
-		whereConds = append(whereConds, squirrel.Eq{"source": filters.Source})
-	}
-
-	if filters.MinScoreSet {
-		whereConds = append(whereConds, squirrel.GtOrEq{"score": filters.MinScore})
-	}
-
-	if filters.MaxScoreSet {
-		whereConds = append(whereConds, squirrel.LtOrEq{"score": filters.MaxScore})
-	}
+	whereConds := feedbackWhereConds("", businessID, filters)
 
 	countQuery, countArgs, err := squirrel.Select("COUNT(*)").
 		From("crm_feedback").
@@ -81,12 +65,15 @@ func (r *Repository) List(ctx context.Context, businessID int64, filters domain.
 		return nil, 0, err
 	}
 
+	// cross-schema read from crm_customers — resolves a display name for each feedback row
 	listQuery, listArgs, err := squirrel.Select(
-		"id", "owner_id", "business_id", "customer_id", "type", "score", "comment", "source", "created_at",
+		"f.id", "f.owner_id", "f.business_id", "f.customer_id",
+		"COALESCE(TRIM(CONCAT_WS(' ', c.first_name, c.last_name)), '')", "f.type", "f.score", "f.comment", "f.source", "f.created_at",
 	).
-		From("crm_feedback").
-		Where(whereConds).
-		OrderBy("created_at DESC").
+		From("crm_feedback f").
+		LeftJoin("crm_customers c ON c.id = f.customer_id").
+		Where(feedbackWhereConds("f.", businessID, filters)).
+		OrderBy("f.created_at DESC").
 		Limit(uint64(pageSize)).
 		Offset(uint64(offset)).
 		PlaceholderFormat(squirrel.Question).
@@ -123,6 +110,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, filters domain.
 			ownerRowID    int64
 			businessRowID int64
 			customerID    int64
+			customerName  string
 			typeStr       string
 			score         sql.NullInt32
 			comment       sql.NullString
@@ -130,21 +118,22 @@ func (r *Repository) List(ctx context.Context, businessID int64, filters domain.
 			createdAt     sql.NullTime
 		)
 
-		if scanErr := rows.Scan(&id, &ownerRowID, &businessRowID, &customerID, &typeStr, &score, &comment, &source, &createdAt); scanErr != nil {
+		if scanErr := rows.Scan(&id, &ownerRowID, &businessRowID, &customerID, &customerName, &typeStr, &score, &comment, &source, &createdAt); scanErr != nil {
 			logger.Ctx(ctx).Error("Failed to scan feedback row", logger.Error(scanErr))
 
 			return nil, 0, scanErr
 		}
 
 		f := domain.Feedback{
-			ID:         id,
-			OwnerID:    ownerRowID,
-			BusinessID: businessRowID,
-			CustomerID: customerID,
-			Type:       typeStr,
-			Score:      int(score.Int32),
-			Comment:    comment.String,
-			Source:     source.String,
+			ID:           id,
+			OwnerID:      ownerRowID,
+			BusinessID:   businessRowID,
+			CustomerID:   customerID,
+			CustomerName: customerName,
+			Type:         typeStr,
+			Score:        int(score.Int32),
+			Comment:      comment.String,
+			Source:       source.String,
 		}
 
 		if createdAt.Valid {
@@ -159,6 +148,33 @@ func (r *Repository) List(ctx context.Context, businessID int64, filters domain.
 	}
 
 	return items, int(total), nil
+}
+
+// feedbackWhereConds builds the WHERE clause shared by the count and list
+// queries. prefix is the crm_feedback table alias (with trailing dot) to
+// disambiguate columns once the list query joins crm_customers, which also
+// has a business_id column; the count query passes "" since it queries
+// crm_feedback unaliased and unjoined.
+func feedbackWhereConds(prefix string, businessID int64, filters domain.ListFilters) squirrel.And {
+	conds := squirrel.And{squirrel.Eq{prefix + "business_id": businessID}}
+
+	if filters.Type != "" {
+		conds = append(conds, squirrel.Eq{prefix + "type": filters.Type})
+	}
+
+	if filters.Source != "" {
+		conds = append(conds, squirrel.Eq{prefix + "source": filters.Source})
+	}
+
+	if filters.MinScoreSet {
+		conds = append(conds, squirrel.GtOrEq{prefix + "score": filters.MinScore})
+	}
+
+	if filters.MaxScoreSet {
+		conds = append(conds, squirrel.LtOrEq{prefix + "score": filters.MaxScore})
+	}
+
+	return conds
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.FeedbackInput) (int64, error) {

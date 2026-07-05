@@ -16,6 +16,7 @@ const menuCacheTTL = 5 * time.Minute
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.MenuItem, error)
 	QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error)
+	Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error
 	BusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
 }
 
@@ -50,6 +51,14 @@ func (s *Service) QuickCreate(ctx context.Context, ownerID, businessID int64, in
 	}
 	invalidateMenuScope(ctx, businessID)
 	return id, nil
+}
+
+func (s *Service) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
+	if err := s.repo.Update(ctx, businessID, id, input); err != nil {
+		return err
+	}
+	invalidateMenuScope(ctx, businessID)
+	return nil
 }
 
 func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {

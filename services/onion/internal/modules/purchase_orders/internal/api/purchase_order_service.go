@@ -29,7 +29,19 @@ func (a *PurchaseOrderAPI) ListPurchaseOrders(ctx context.Context, req *erppurch
 	if err != nil {
 		return nil, err
 	}
-	orders, _, listErr := a.Service.ListPurchaseOrders(ctx, ownerID, req.GetStatus(), 1, 500)
+	page := req.GetPage()
+	if page <= 0 {
+		page = 1
+	}
+	pageSize := req.GetPageSize()
+	if pageSize <= 0 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+
+	orders, hasMore, listErr := a.Service.ListPurchaseOrders(ctx, ownerID, req.GetStatus(), int64(page), int64(pageSize))
 	if listErr != nil {
 		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to list purchase orders")
 	}
@@ -37,7 +49,12 @@ func (a *PurchaseOrderAPI) ListPurchaseOrders(ctx context.Context, req *erppurch
 	for _, po := range orders {
 		out = append(out, newPurchaseOrderPayload(po))
 	}
-	return &erppurchaseorderv1.ListPurchaseOrdersResponse{PurchaseOrders: out}, nil
+	return &erppurchaseorderv1.ListPurchaseOrdersResponse{
+		PurchaseOrders: out,
+		HasMore:        hasMore,
+		Page:           page,
+		PageSize:       pageSize,
+	}, nil
 }
 
 func (a *PurchaseOrderAPI) CreatePurchaseOrder(ctx context.Context, req *erppurchaseorderv1.CreatePurchaseOrderRequest) (*erppurchaseorderv1.CreatePurchaseOrderResponse, error) {

@@ -87,6 +87,30 @@ func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.Cre
 	return &posmenuitemv1.CreateMenuItemResponse{ItemId: id, Message: "Menu item created successfully"}, nil
 }
 
+func (a *MenuItemAPI) UpdateMenuItem(ctx context.Context, req *posmenuitemv1.UpdateMenuItemRequest) (*posmenuitemv1.UpdateMenuItemResponse, error) {
+	businessID, err := authenticatedMenuBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	body := req.GetBody()
+	if body == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Menu item body is required")
+	}
+	if body.GetSalePrice() < 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Sale price must be zero or greater")
+	}
+
+	if updateErr := a.Service.Update(ctx, businessID, req.GetId(), domain.MenuItemUpdateInput{
+		Name:      body.GetName(),
+		SalePrice: body.GetSalePrice(),
+		Stock:     body.GetStock(),
+		IsActive:  body.GetIsActive(),
+	}); updateErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update menu item")
+	}
+	return &posmenuitemv1.UpdateMenuItemResponse{Message: "Menu item updated successfully"}, nil
+}
+
 func authenticatedMenuBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil {
@@ -110,15 +134,20 @@ func toProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
 	}
 
 	return &posmenuitemv1.MenuItem{
-		Id:         item.ID,
-		OwnerId:    item.OwnerID,
-		CategoryId: item.CategoryID,
-		Name:       item.Name,
-		Sku:        item.SKU,
-		SalePrice:  item.SalePrice,
-		IsActive:   item.IsActive,
-		CreatedAt:  createdAt,
-		UpdatedAt:  updatedAt,
-		ImageUrl:   item.ImageURL,
+		Id:          item.ID,
+		OwnerId:     item.OwnerID,
+		CategoryId:  item.CategoryID,
+		Name:        item.Name,
+		Sku:         item.SKU,
+		SalePrice:   item.SalePrice,
+		IsActive:    item.IsActive,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
+		ImageUrl:    item.ImageURL,
+		Category:    item.Category,
+		Barcode:     item.Barcode,
+		Description: item.Description,
+		TaxRate:     item.TaxRate,
+		Stock:       item.Stock,
 	}
 }

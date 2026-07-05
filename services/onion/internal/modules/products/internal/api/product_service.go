@@ -42,7 +42,7 @@ func (a *ProductAPI) ListProducts(ctx context.Context, req *erpproductv1.ListPro
 	}
 	page := offset/limit + 1
 
-	products, _, _, listErr := a.Service.ListProducts(ctx, ownerID, req.GetSearch(), req.GetCategoryId(), page, limit)
+	products, total, hasMore, listErr := a.Service.ListProducts(ctx, ownerID, req.GetSearch(), req.GetCategoryId(), page, limit)
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list products")
 	}
@@ -51,7 +51,13 @@ func (a *ProductAPI) ListProducts(ctx context.Context, req *erpproductv1.ListPro
 	for _, product := range products {
 		out = append(out, newProductPayload(product))
 	}
-	return &erpproductv1.ListProductsResponse{Products: out}, nil
+	return &erpproductv1.ListProductsResponse{
+		Products: out,
+		HasMore:  hasMore,
+		Page:     page,
+		PageSize: limit,
+		Total:    total,
+	}, nil
 }
 
 func (a *ProductAPI) CreateProduct(ctx context.Context, req *erpproductv1.CreateProductRequest) (*erpproductv1.CreateProductResponse, error) {
@@ -70,10 +76,27 @@ func (a *ProductAPI) CreateProduct(ctx context.Context, req *erpproductv1.Create
 		Unit:              req.GetUnit(),
 		CostPrice:         req.GetCostPrice(),
 		SalePrice:         req.GetSalePrice(),
+		StockQuantity:     req.GetStockQuantity(),
+		StockQuantitySet:  true,
 		LowStockThreshold: req.GetLowStockThreshold(),
 		ReorderQuantity:   req.GetReorderQuantity(),
 		IsActive:          req.GetIsActive(),
 		TrackInventory:    req.GetTrackInventory(),
+		BrandID:           req.GetBrandId(),
+		CompareAtPrice:    req.GetCompareAtPrice(),
+		TaxRate:           req.GetTaxRate(),
+		Currency:          req.GetCurrency(),
+		Weight:            req.GetWeight(),
+		WeightUnit:        req.GetWeightUnit(),
+		Length:            req.GetLength(),
+		Width:             req.GetWidth(),
+		Height:            req.GetHeight(),
+		DimensionUnit:     req.GetDimensionUnit(),
+		CountryOfOrigin:   req.GetCountryOfOrigin(),
+		HSCode:            req.GetHsCode(),
+		AllowBackorder:    req.GetAllowBackorder(),
+		LeadTimeDays:      int(req.GetLeadTimeDays()),
+		ImageURL:          req.GetImageUrl(),
 	})
 	if createErr != nil {
 		return nil, productMutationError(createErr)
@@ -101,10 +124,27 @@ func (a *ProductAPI) UpdateProduct(ctx context.Context, req *erpproductv1.Update
 		Unit:              body.GetUnit(),
 		CostPrice:         body.GetCostPrice(),
 		SalePrice:         body.GetSalePrice(),
+		StockQuantity:     body.GetStockQuantity(),
+		StockQuantitySet:  true,
 		LowStockThreshold: body.GetLowStockThreshold(),
 		ReorderQuantity:   body.GetReorderQuantity(),
 		IsActive:          body.GetIsActive(),
 		TrackInventory:    body.GetTrackInventory(),
+		BrandID:           body.GetBrandId(),
+		CompareAtPrice:    body.GetCompareAtPrice(),
+		TaxRate:           body.GetTaxRate(),
+		Currency:          body.GetCurrency(),
+		Weight:            body.GetWeight(),
+		WeightUnit:        body.GetWeightUnit(),
+		Length:            body.GetLength(),
+		Width:             body.GetWidth(),
+		Height:            body.GetHeight(),
+		DimensionUnit:     body.GetDimensionUnit(),
+		CountryOfOrigin:   body.GetCountryOfOrigin(),
+		HSCode:            body.GetHsCode(),
+		AllowBackorder:    body.GetAllowBackorder(),
+		LeadTimeDays:      int(body.GetLeadTimeDays()),
+		ImageURL:          body.GetImageUrl(),
 	})
 	if updateErr != nil {
 		return nil, productMutationError(updateErr)

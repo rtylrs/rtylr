@@ -3,15 +3,16 @@ package domain
 import "time"
 
 type Feedback struct {
-	ID         int64     `json:"id"`
-	OwnerID    int64     `json:"owner_id"`
-	BusinessID int64     `json:"business_id"`
-	CustomerID int64     `json:"customer_id"`
-	Type       string    `json:"type"`
-	Score      int       `json:"score"`
-	Comment    string    `json:"comment"`
-	Source     string    `json:"source"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID           int64     `json:"id"`
+	OwnerID      int64     `json:"owner_id"`
+	BusinessID   int64     `json:"business_id"`
+	CustomerID   int64     `json:"customer_id"`
+	CustomerName string    `json:"customer_name"`
+	Type         string    `json:"type"`
+	Score        int       `json:"score"`
+	Comment      string    `json:"comment"`
+	Source       string    `json:"source"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type FeedbackInput struct {

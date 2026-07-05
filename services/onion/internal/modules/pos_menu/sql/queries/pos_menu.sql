@@ -58,3 +58,12 @@ ORDER BY name;
 -- name: QuickCreateMenuItem :execresult
 INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)
 VALUES (?, ?, ?, ?, ?, TRUE);
+
+-- name: UpdateMenuItem :exec
+UPDATE erp_products
+SET name = COALESCE(NULLIF(?, ''), name),
+    sale_price = ?,
+    stock_quantity = ?,
+    is_active = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE business_id = ? AND id = ?;

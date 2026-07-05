@@ -65,14 +65,15 @@ func (a *FeedbackAPI) ListFeedback(ctx context.Context, req *crmfeedbackv1.ListF
 	feedback := make([]*crmfeedbackv1.Feedback, len(items))
 	for i, item := range items {
 		feedback[i] = &crmfeedbackv1.Feedback{
-			Id:         item.ID,
-			OwnerId:    item.OwnerID,
-			CustomerId: item.CustomerID,
-			Type:       item.Type,
-			Score:      int32(item.Score),
-			Comment:    item.Comment,
-			Source:     item.Source,
-			CreatedAt:  item.CreatedAt.Format("2006-01-02T15:04:05Z"),
+			Id:           item.ID,
+			OwnerId:      item.OwnerID,
+			CustomerId:   item.CustomerID,
+			CustomerName: item.CustomerName,
+			Type:         item.Type,
+			Score:        int32(item.Score),
+			Comment:      item.Comment,
+			Source:       item.Source,
+			CreatedAt:    item.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		}
 	}
 

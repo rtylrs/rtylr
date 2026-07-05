@@ -36,15 +36,15 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 	items := make([]domain.MenuItem, 0, len(rows))
 	for _, row := range rows {
 		item := domain.MenuItem{
-			ID:          row.ID,
-			OwnerID:     row.OwnerID,
-			BusinessID:  row.BusinessID,
-			Name:        row.Name,
-			SalePrice:   decimalToFloat(row.SalePrice),
-			TaxRate:     decimalToFloat(row.TaxRate),
-			Stock:       decimalToFloat(row.StockQuantity),
-			IsActive:    row.IsActive.Valid && row.IsActive.Bool,
-			Category:    row.CategoryName,
+			ID:         row.ID,
+			OwnerID:    row.OwnerID,
+			BusinessID: row.BusinessID,
+			Name:       row.Name,
+			SalePrice:  decimalToFloat(row.SalePrice),
+			TaxRate:    decimalToFloat(row.TaxRate),
+			Stock:      decimalToFloat(row.StockQuantity),
+			IsActive:   row.IsActive.Valid && row.IsActive.Bool,
+			Category:   row.CategoryName,
 		}
 		if row.CategoryID.Valid {
 			item.CategoryID = row.CategoryID.Int64
@@ -85,6 +85,22 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
+	err := r.queries.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
+		Name:          input.Name,
+		SalePrice:     floatToDecimal(input.SalePrice),
+		StockQuantity: floatToDecimal(input.Stock),
+		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+		BusinessID:    businessID,
+		ID:            id,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update menu item", logger.Error(err))
+		return err
+	}
+	return nil
 }
 
 func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
