@@ -34,7 +34,9 @@ type CreateAccountRequest struct {
 	// balance is the balance value for this contract.
 	Balance float64 `protobuf:"fixed64,4,opt,name=balance,proto3" json:"balance,omitempty"`
 	// is_active is the is active value for this contract.
-	IsActive      bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	IsActive bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	// code is the optional account code/number.
+	Code          string `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -104,6 +106,13 @@ func (x *CreateAccountRequest) GetIsActive() bool {
 	return false
 }
 
+func (x *CreateAccountRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
 type CreateAccountResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
@@ -162,7 +171,7 @@ var File_finance_account_v1_create_account_proto protoreflect.FileDescriptor
 
 const file_finance_account_v1_create_account_proto_rawDesc = "" +
 	"\n" +
-	"'finance/account/v1/create_account.proto\x12\x12finance.account.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xc8\x01\n" +
+	"'finance/account/v1/create_account.proto\x12\x12finance.account.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xdc\x01\n" +
 	"\x14CreateAccountRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1e\n" +
@@ -171,7 +180,8 @@ const file_finance_account_v1_create_account_proto_rawDesc = "" +
 	"\bcurrency\x18\x03 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12+\n" +
 	"\abalance\x18\x04 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\abalance\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\"G\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x12\n" +
+	"\x04code\x18\x06 \x01(\tR\x04code\"G\n" +
 	"\x15CreateAccountResponse\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB3Z1github.com/voxire/voxie/gen/go/finance/account/v1b\x06proto3"

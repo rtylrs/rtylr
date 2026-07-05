@@ -39,7 +39,9 @@ type Account struct {
 	// is_active is the is active value for this contract.
 	IsActive bool `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	// created_at is when the record was created.
-	CreatedAt     string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CreatedAt string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// code is the optional account code/number.
+	Code          string `protobuf:"bytes,9,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -130,11 +132,18 @@ func (x *Account) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Account) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
 var File_finance_account_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_account_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1efinance/account/v1/types.proto\x12\x12finance.account.v1\x1a\x1donekit/http/annotations.proto\"\xda\x01\n" +
+	"\x1efinance/account/v1/types.proto\x12\x12finance.account.v1\x1a\x1donekit/http/annotations.proto\"\xee\x01\n" +
 	"\aAccount\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12\x12\n" +
@@ -144,7 +153,8 @@ const file_finance_account_v1_types_proto_rawDesc = "" +
 	"\abalance\x18\x06 \x01(\x01R\abalance\x12\x1b\n" +
 	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAtB3Z1github.com/voxire/voxie/gen/go/finance/account/v1b\x06proto3"
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x12\n" +
+	"\x04code\x18\t \x01(\tR\x04codeB3Z1github.com/voxire/voxie/gen/go/finance/account/v1b\x06proto3"
 
 var (
 	file_finance_account_v1_types_proto_rawDescOnce sync.Once

@@ -30,6 +30,8 @@ message CreateAccountRequest {
   ];
   // is_active is the is active value for this contract.
   bool is_active = 5;
+  // code is the optional account code/number.
+  string code = 6;
 }
 
 message CreateAccountResponse {
