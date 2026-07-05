@@ -18,4 +18,9 @@ export interface VerifyInviteResponse {
   fullName: string;
   /** valid is the valid value for this contract. */
   valid: boolean;
+  /**
+   * apps lists the app IDs the invited user will have access to, so the
+   * frontend can redirect to the right app after the invite is accepted.
+   */
+  apps: string[];
 }

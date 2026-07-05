@@ -22,6 +22,7 @@ export interface VerifyInviteResponse {
   email: string;
   fullName: string;
   valid: boolean;
+  apps: string[];
 }
 
 export interface AcceptInviteRequest {
