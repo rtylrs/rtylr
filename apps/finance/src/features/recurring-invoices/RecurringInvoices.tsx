@@ -50,7 +50,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
     }
     create.mutate(
       {
-        templateInvoiceId: form.templateInvoiceId,
+        templateInvoiceId: String(form.templateInvoiceId),
         frequency: form.frequency,
         nextInvoiceDate: form.nextInvoiceDate,
         isActive: true,
@@ -135,7 +135,7 @@ const RecurringInvoices: React.FC = () => {
   const setStatus = useSetRecurringStatus();
   const [showCreate, setShowCreate] = useState(false);
 
-  const togglePause = (id: number, isActive: boolean): void => {
+  const togglePause = (id: string, isActive: boolean): void => {
     const next = isActive ? 'paused' : 'active';
     setStatus.mutate(
       { id, status: next },
