@@ -9,16 +9,24 @@ import (
 )
 
 type mockRepo struct {
-	list        []domain.Segment
-	createID    int64
-	createInput domain.SegmentInput
-	createErr   error
-	updErr      error
-	delErr      error
+	list          []domain.Segment
+	getByIDResult domain.Segment
+	getByIDErr    error
+	createID      int64
+	createInput   domain.SegmentInput
+	createErr     error
+	updErr        error
+	delErr        error
+	customers     []domain.SegmentCustomer
+	customersErr  error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Segment, error) {
 	return m.list, nil
+}
+
+func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.Segment, error) {
+	return m.getByIDResult, m.getByIDErr
 }
 
 func (m *mockRepo) Create(_ context.Context, input domain.SegmentInput) (int64, error) {
@@ -32,6 +40,10 @@ func (m *mockRepo) Update(_ context.Context, _ domain.SegmentUpdateInput) error 
 
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.delErr
+}
+
+func (m *mockRepo) ListCustomers(_ context.Context, _ int64, _, _ int) ([]domain.SegmentCustomer, int, error) {
+	return m.customers, len(m.customers), m.customersErr
 }
 
 func TestList_Delegates(t *testing.T) {

@@ -107,6 +107,54 @@ func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput
 	return nil
 }
 
+// ListCustomers returns a paginated view of the business's active customers.
+// Segment membership isn't computed from filter rules yet - this mirrors the
+// customers module's pre-existing legacy behavior of returning all active
+// customers regardless of the segment's filters.
+func (r *Repository) ListCustomers(ctx context.Context, businessID int64, page, pageSize int) ([]domain.SegmentCustomer, int, error) {
+	if page < 1 {
+		page = 1
+	}
+
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	offset := (page - 1) * pageSize
+
+	total, err := r.queries.CountSegmentCustomers(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count segment customers", logger.Error(err))
+
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListSegmentCustomers(ctx, sqlc.ListSegmentCustomersParams{
+		BusinessID: businessID,
+		Limit:      int32(pageSize),
+		Offset:     int32(offset),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list segment customers", logger.Error(err))
+
+		return nil, 0, err
+	}
+
+	customers := make([]domain.SegmentCustomer, 0, len(rows))
+
+	for _, row := range rows {
+		customers = append(customers, domain.SegmentCustomer{
+			ID:        row.ID,
+			FirstName: row.FirstName,
+			LastName:  row.LastName.String,
+			Email:     row.Email.String,
+			Phone:     row.Phone.String,
+		})
+	}
+
+	return customers, int(total), nil
+}
+
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	_, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
 		ID:         id,

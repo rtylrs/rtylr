@@ -7,6 +7,7 @@ import (
 	"time"
 
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
+	poscustomerv1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
@@ -107,12 +108,63 @@ func (a *SegmentAPI) DeleteSegment(ctx context.Context, req *crmsegmentv1.Delete
 	return &crmsegmentv1.DeleteSegmentResponse{Message: "Segment deleted successfully"}, nil
 }
 
-func (a *SegmentAPI) GetSegmentDetail(context.Context, *crmsegmentv1.GetSegmentDetailRequest) (*crmsegmentv1.GetSegmentDetailResponse, error) {
-	return nil, notImplemented("Get segment detail")
+func (a *SegmentAPI) GetSegmentDetail(ctx context.Context, req *crmsegmentv1.GetSegmentDetailRequest) (*crmsegmentv1.GetSegmentDetailResponse, error) {
+	businessID, _, errModel := resolveRequestIdentity(ctx)
+	if errModel != nil {
+		return nil, errModel
+	}
+
+	detail, err := a.service.GetDetail(ctx, businessID, req.GetId())
+	if err != nil {
+		if errors.Is(err, domain.ErrSegmentNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Segment not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get segment detail")
+	}
+
+	return &crmsegmentv1.GetSegmentDetailResponse{
+		Segment:   newSegments([]domain.Segment{detail.Segment})[0],
+		Customers: newSegmentCustomers(detail.Customers),
+	}, nil
 }
 
-func (a *SegmentAPI) GetSegmentCustomers(context.Context, *crmsegmentv1.GetSegmentCustomersRequest) (*crmsegmentv1.GetSegmentCustomersResponse, error) {
-	return nil, notImplemented("Get segment customers")
+func (a *SegmentAPI) GetSegmentCustomers(ctx context.Context, req *crmsegmentv1.GetSegmentCustomersRequest) (*crmsegmentv1.GetSegmentCustomersResponse, error) {
+	businessID, _, errModel := resolveRequestIdentity(ctx)
+	if errModel != nil {
+		return nil, errModel
+	}
+
+	page := int(req.GetPage())
+	pageSize := int(req.GetPageSize())
+
+	customers, total, err := a.service.GetCustomers(ctx, businessID, req.GetSegmentId(), page, pageSize)
+	if err != nil {
+		if errors.Is(err, domain.ErrSegmentNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Segment not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get segment customers")
+	}
+
+	return &crmsegmentv1.GetSegmentCustomersResponse{
+		Customers: newSegmentCustomers(customers),
+		Total:     int64(total),
+		Page:      req.GetPage(),
+		PageSize:  req.GetPageSize(),
+	}, nil
+}
+
+func newSegmentCustomers(items []domain.SegmentCustomer) []*poscustomerv1.Customer {
+	out := make([]*poscustomerv1.Customer, 0, len(items))
+	for _, item := range items {
+		out = append(out, &poscustomerv1.Customer{
+			Id:        item.ID,
+			FirstName: item.FirstName,
+			LastName:  item.LastName,
+			Email:     item.Email,
+			Phone:     item.Phone,
+		})
+	}
+	return out
 }
 
 func resolveRequestIdentity(ctx context.Context) (businessID int64, ownerID int64, errModel error) {
@@ -163,8 +215,4 @@ func formatTime(t time.Time) string {
 		return ""
 	}
 	return t.UTC().Format(time.RFC3339)
-}
-
-func notImplemented(method string) error {
-	return onekiterrors.New(http.StatusNotImplemented, method+" is not implemented on OneKit yet")
 }

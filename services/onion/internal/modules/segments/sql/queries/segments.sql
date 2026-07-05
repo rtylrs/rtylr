@@ -14,3 +14,16 @@ UPDATE crm_segments SET name = ?, description = ?, rules = ? WHERE id = ? AND bu
 
 -- name: DeleteSegment :execresult
 DELETE FROM crm_segments WHERE id = ? AND business_id = ?;
+
+-- name: CountSegmentCustomers :one
+-- cross-schema read from crm_customers — segment membership isn't computed
+-- from rules yet (see infrastructure/repository.go), so this counts all
+-- active customers for the business, matching the pre-existing legacy
+-- behavior in the customers module.
+SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND is_active = TRUE;
+
+-- name: ListSegmentCustomers :many
+-- cross-schema read from crm_customers — see CountSegmentCustomers note above.
+SELECT id, first_name, last_name, email, phone
+FROM crm_customers WHERE business_id = ? AND is_active = TRUE
+ORDER BY created_at DESC LIMIT ? OFFSET ?;

@@ -35,3 +35,18 @@ type SegmentUpdateInput struct {
 	Description string
 	Filters     []byte
 }
+
+// SegmentCustomer is the minimal customer projection returned alongside a
+// segment - segments don't own customer data, this is a read-only view.
+type SegmentCustomer struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	Email     string
+	Phone     string
+}
+
+type SegmentDetail struct {
+	Segment   Segment
+	Customers []SegmentCustomer
+}
