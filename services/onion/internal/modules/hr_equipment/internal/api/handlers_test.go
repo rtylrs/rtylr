@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	stdErrors "errors"
-	onekithttp "github.com/stackxio/onekit/http"
+	onekithttp "github.com/corezio/onekit/http"
 	"net/http"
 	"testing"
 )

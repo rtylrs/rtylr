@@ -17,7 +17,7 @@ import (
 	"buf.build/go/protovalidate"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	onekithttp "github.com/stackxio/onekit/http"
+	onekithttp "github.com/corezio/onekit/http"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 

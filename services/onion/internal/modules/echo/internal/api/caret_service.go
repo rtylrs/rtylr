@@ -24,6 +24,7 @@ func (a *CaretAPI) ListCaretTools(_ context.Context, req *hubcaretv1.ListCaretTo
 			Description:      def.Description,
 			Category:         def.Module,
 			RequiresApproval: def.RequiresApproval,
+			Scope:            def.Scope,
 		})
 	}
 	return &hubcaretv1.ListCaretToolsResponse{Tools: tools}, nil

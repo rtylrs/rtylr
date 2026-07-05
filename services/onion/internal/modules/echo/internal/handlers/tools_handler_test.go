@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	onekithttp "github.com/stackxio/onekit/http"
+	onekithttp "github.com/corezio/onekit/http"
 	"strings"
 	"testing"
 )

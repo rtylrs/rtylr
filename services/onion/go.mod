@@ -26,13 +26,13 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1
 	github.com/axiomhq/axiom-go v0.32.0
 	github.com/coder/websocket v1.8.14
+	github.com/corezio/onekit v0.3.5
 	github.com/fogleman/gg v1.3.0
 	github.com/getsentry/sentry-go v0.45.1
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/koyachi/go-nude v0.0.1
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/stackxio/onekit v0.3.2
 	github.com/testcontainers/testcontainers-go v0.43.0
 	github.com/trinodb/trino-go-client v0.333.0
 	github.com/voxire/voxie v0.0.0-00010101000000-000000000000

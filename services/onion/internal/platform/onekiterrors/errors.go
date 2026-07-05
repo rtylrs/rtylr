@@ -3,7 +3,7 @@ package onekiterrors
 import (
 	"net/http"
 
-	onekithttp "github.com/stackxio/onekit/http"
+	onekithttp "github.com/corezio/onekit/http"
 )
 
 const PermissionDeniedMessage = "You don't have permission to access this resource"

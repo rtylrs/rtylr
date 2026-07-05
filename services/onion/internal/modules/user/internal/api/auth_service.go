@@ -7,7 +7,7 @@ import (
 	"net/netip"
 	"strings"
 
-	onekithttp "github.com/stackxio/onekit/http"
+	onekithttp "github.com/corezio/onekit/http"
 	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"

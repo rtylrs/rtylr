@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	onekithttp "github.com/stackxio/onekit/http"
+	onekithttp "github.com/corezio/onekit/http"
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 )
