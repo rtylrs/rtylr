@@ -18,6 +18,31 @@ export interface StaffUserPayload {
   isActive: boolean;
 }
 
+export interface GetMemberRequest {
+  userId: string;
+}
+
+export interface GetMemberResponse {
+  user?: StaffUserWithGroups;
+}
+
+export interface StaffUserWithGroups {
+  id: string;
+  email: string;
+  fullName: string;
+  createdAt: string;
+  apps: string[];
+  role: string;
+  isActive: boolean;
+  groups: GroupSummary[];
+}
+
+export interface GroupSummary {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface RemoveMemberRequest {
   userId: string;
 }
@@ -110,6 +135,30 @@ export class MembersServiceClient {
     }
 
     return await resp.json() as ListTeamResponse;
+  }
+
+  async getMember(req: GetMemberRequest, options?: MembersServiceCallOptions): Promise<GetMemberResponse> {
+    let path = "/api/hub/team/members/v1/members/{user_id}";
+    path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetMemberResponse;
   }
 
   async removeMember(req: RemoveMemberRequest, options?: MembersServiceCallOptions): Promise<RemoveMemberResponse> {
