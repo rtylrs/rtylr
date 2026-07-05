@@ -93,7 +93,9 @@ export const useCrmSubscription = (): ReturnType<typeof useQuery<Subscription | 
     staleTime: 5 * 60 * 1000,
   });
 
-export const useCrmSubscriptionBilling = (): ReturnType<typeof useQuery<BillingDetail | undefined>> =>
+export const useCrmSubscriptionBilling = (): ReturnType<
+  typeof useQuery<BillingDetail | undefined>
+> =>
   useQuery({
     queryKey: ['crm-subscription', 'billing'],
     queryFn: () => subscriptionClient.getBillingDetail({}),

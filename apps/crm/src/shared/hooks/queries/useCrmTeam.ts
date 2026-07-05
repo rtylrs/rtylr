@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { MembersServiceClient, type StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/service_client';
+import {
+  MembersServiceClient,
+  type StaffUserPayload,
+} from '@voxire/voxie/hub/team/members/v1/service_client';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
 
 export type CrmTeamMember = StaffUserPayload;
