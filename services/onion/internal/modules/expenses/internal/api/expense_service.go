@@ -125,6 +125,42 @@ func (a *ExpensesAPI) DeleteExpense(ctx context.Context, req *financeexpensesv1.
 	return &financeexpensesv1.DeleteExpenseResponse{Message: "Expense deleted successfully"}, nil
 }
 
+func (a *ExpensesAPI) GetExpense(ctx context.Context, req *financeexpensesv1.GetExpenseRequest) (*financeexpensesv1.GetExpenseResponse, error) {
+	businessID, err := expenseBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	expense, getErr := a.Service.GetByID(ctx, businessID, req.GetId())
+	if getErr != nil {
+		if errors.Is(getErr, domain.ErrExpenseNotFound) {
+			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
+		}
+		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to get expense")
+	}
+	return &financeexpensesv1.GetExpenseResponse{Expense: newExpensePayload(expense)}, nil
+}
+
+func (a *ExpensesAPI) UpdateExpenseStatus(ctx context.Context, req *financeexpensesv1.UpdateExpenseStatusRequest) (*financeexpensesv1.UpdateExpenseStatusResponse, error) {
+	businessID, err := expenseBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	body := req.GetBody()
+	if body == nil || body.GetStatus() == "" {
+		return nil, expenseStatusError(http.StatusBadRequest, "Status is required")
+	}
+	if _, valid := domain.ValidExpenseStatuses[body.GetStatus()]; !valid {
+		return nil, expenseStatusError(http.StatusBadRequest, "Invalid expense status")
+	}
+	if updateErr := a.Service.UpdateStatus(ctx, businessID, req.GetId(), body.GetStatus()); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
+			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
+		}
+		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to update expense status")
+	}
+	return &financeexpensesv1.UpdateExpenseStatusResponse{Message: "Expense status updated successfully"}, nil
+}
+
 func (a *ExpensesAPI) ListExpenseCategories(ctx context.Context, _ *financeexpensesv1.ListExpenseCategoriesRequest) (*financeexpensesv1.ListExpenseCategoriesResponse, error) {
 	businessID, err := expenseBusinessID(ctx)
 	if err != nil {
