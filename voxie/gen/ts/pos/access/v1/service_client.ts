@@ -15,6 +15,22 @@ export interface MyLocation {
   phone: string;
 }
 
+export interface GetMemberLocationsRequest {
+  userId: string;
+}
+
+export interface GetMemberLocationsResponse {
+  locations: MemberLocationEntry[];
+}
+
+export interface MemberLocationEntry {
+  id: string;
+  locationId: string;
+  canManagePosUsers: boolean;
+  canManageTerminals: boolean;
+  canViewReports: boolean;
+}
+
 export interface GetLocationRosterRequest {
   locationId: string;
 }
@@ -135,6 +151,31 @@ export class AccessServiceClient {
     }
 
     return await resp.json() as GetMyLocationsResponse;
+  }
+
+  async getMemberLocations(req: GetMemberLocationsRequest, options?: AccessServiceCallOptions): Promise<GetMemberLocationsResponse> {
+    let path = "/api/pos/access/v1/member-locations";
+    const params = new URLSearchParams();
+    if (req.userId != null && req.userId !== "0") params.set("user_id", String(req.userId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetMemberLocationsResponse;
   }
 
   async getLocationRoster(req: GetLocationRosterRequest, options?: AccessServiceCallOptions): Promise<GetLocationRosterResponse> {

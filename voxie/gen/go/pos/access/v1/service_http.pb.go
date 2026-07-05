@@ -12,6 +12,7 @@ import (
 // AccessServiceServer is the server API for AccessService service.
 type AccessServiceServer interface {
 	GetMyLocations(context.Context, *GetMyLocationsRequest) (*GetMyLocationsResponse, error)
+	GetMemberLocations(context.Context, *GetMemberLocationsRequest) (*GetMemberLocationsResponse, error)
 	GetLocationRoster(context.Context, *GetLocationRosterRequest) (*GetLocationRosterResponse, error)
 	AssignLocation(context.Context, *AssignLocationRequest) (*AssignLocationResponse, error)
 	RemoveLocation(context.Context, *RemoveLocationRequest) (*RemoveLocationResponse, error)
@@ -31,6 +32,15 @@ func RegisterAccessServiceServer(server AccessServiceServer, opts ...ServerOptio
 	)
 
 	config.mux.Handle("GET /api/pos/access/v1/my-locations", getMyLocationsHandler)
+
+	methodHeaders = getGetMemberLocationsHeaders()
+	getMemberLocationsHandler := BindingMiddleware[GetMemberLocationsRequest](
+		genericHandler(server.GetMemberLocations, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getMemberLocationsPathParams, getMemberLocationsQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/pos/access/v1/member-locations", getMemberLocationsHandler)
 
 	methodHeaders = getGetLocationRosterHeaders()
 	getLocationRosterHandler := BindingMiddleware[GetLocationRosterRequest](
@@ -72,6 +82,11 @@ func getGetMyLocationsHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetMemberLocationsHeaders returns the method-level required headers for GetMemberLocations
+func getGetMemberLocationsHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getGetLocationRosterHeaders returns the method-level required headers for GetLocationRoster
 func getGetLocationRosterHeaders() []*onekithttp.Header {
 	return nil
@@ -92,6 +107,14 @@ var getMyLocationsPathParams = []PathParamConfig{}
 
 // getMyLocationsQueryParams contains query parameter configuration for GetMyLocations
 var getMyLocationsQueryParams = []QueryParamConfig{}
+
+// getMemberLocationsPathParams contains path parameter configuration for GetMemberLocations
+var getMemberLocationsPathParams = []PathParamConfig{}
+
+// getMemberLocationsQueryParams contains query parameter configuration for GetMemberLocations
+var getMemberLocationsQueryParams = []QueryParamConfig{
+	{QueryName: "user_id", FieldName: "user_id", Required: false},
+}
 
 // getLocationRosterPathParams contains path parameter configuration for GetLocationRoster
 var getLocationRosterPathParams = []PathParamConfig{}

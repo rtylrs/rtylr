@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hub.team.members.v1;
 
+import "hub/team/members/v1/get_member.proto";
 import "hub/team/members/v1/list_members.proto";
 import "hub/team/members/v1/remove_member.proto";
 import "onekit/http/annotations.proto";
@@ -16,6 +17,14 @@ service MembersService {
   rpc ListTeam(ListTeamRequest) returns (ListTeamResponse) {
     option (onekit.http.config) = {
       path: "/members"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetMember returns a single team member by ID.
+  rpc GetMember(GetMemberRequest) returns (GetMemberResponse) {
+    option (onekit.http.config) = {
+      path: "/members/{user_id}"
       method: HTTP_METHOD_GET
     };
   }

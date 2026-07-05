@@ -12,6 +12,7 @@ import (
 // MembersServiceServer is the server API for MembersService service.
 type MembersServiceServer interface {
 	ListTeam(context.Context, *ListTeamRequest) (*ListTeamResponse, error)
+	GetMember(context.Context, *GetMemberRequest) (*GetMemberResponse, error)
 	RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error)
 }
 
@@ -29,6 +30,15 @@ func RegisterMembersServiceServer(server MembersServiceServer, opts ...ServerOpt
 	)
 
 	config.mux.Handle("GET /api/hub/team/members/v1/members", listTeamHandler)
+
+	methodHeaders = getGetMemberHeaders()
+	getMemberHandler := BindingMiddleware[GetMemberRequest](
+		genericHandler(server.GetMember, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getMemberPathParams, getMemberQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/hub/team/members/v1/members/{user_id}", getMemberHandler)
 
 	methodHeaders = getRemoveMemberHeaders()
 	removeMemberHandler := BindingMiddleware[RemoveMemberRequest](
@@ -52,6 +62,11 @@ func getListTeamHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetMemberHeaders returns the method-level required headers for GetMember
+func getGetMemberHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getRemoveMemberHeaders returns the method-level required headers for RemoveMember
 func getRemoveMemberHeaders() []*onekithttp.Header {
 	return nil
@@ -62,6 +77,14 @@ var listTeamPathParams = []PathParamConfig{}
 
 // listTeamQueryParams contains query parameter configuration for ListTeam
 var listTeamQueryParams = []QueryParamConfig{}
+
+// getMemberPathParams contains path parameter configuration for GetMember
+var getMemberPathParams = []PathParamConfig{
+	{URLParam: "user_id", FieldName: "user_id"},
+}
+
+// getMemberQueryParams contains query parameter configuration for GetMember
+var getMemberQueryParams = []QueryParamConfig{}
 
 // removeMemberPathParams contains path parameter configuration for RemoveMember
 var removeMemberPathParams = []PathParamConfig{
