@@ -330,9 +330,6 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@voxire/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -345,6 +342,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -369,9 +369,6 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@voxire/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -381,6 +378,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       axios:
         specifier: ^1.15.2
         version: 1.15.2
@@ -472,9 +472,6 @@ importers:
       '@voxire/consent':
         specifier: workspace:*
         version: link:../../packages/consent
-      '@voxire/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -490,6 +487,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       axios:
         specifier: ^1.15.2
         version: 1.15.2
@@ -725,9 +725,6 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@voxire/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -743,6 +740,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       axios:
         specifier: ^1.15.2
         version: 1.15.2
@@ -861,9 +861,6 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@voxire/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -876,6 +873,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       axios:
         specifier: ^1.15.2
         version: 1.15.2
@@ -1076,9 +1076,6 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@voxire/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
@@ -1088,6 +1085,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       axios:
         specifier: ^1.15.2
         version: 1.15.2
@@ -1629,12 +1629,6 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
-  packages/contracts:
-    devDependencies:
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-
   packages/i18n:
     dependencies:
       '@voxire/auth':
@@ -1808,6 +1802,15 @@ importers:
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
+
+  packages/voxie:
+    devDependencies:
+      ts-proto:
+        specifier: ^2.11.6
+        version: 2.12.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
 packages:
 
@@ -4727,6 +4730,10 @@ packages:
   caniuse-lite@1.0.30001790:
     resolution: {integrity: sha512-bOoxfJPyYo+ds6W0YfptaCWbFnJYjh2Y1Eow5lRv+vI2u8ganPZqNm1JwNh0t2ELQCqIWg4B3dWEusgAmsoyOw==}
 
+  case-anything@2.1.13:
+    resolution: {integrity: sha512-zlOQ80VrQ2Ue+ymH5OuM/DlDq64mEm+B9UTdHULv5osUMD6HalNTblf2b1u/m6QecjsnOkBpqVZ+XPwIVsy7Ng==}
+    engines: {node: '>=12.13'}
+
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
 
@@ -4950,6 +4957,11 @@ packages:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
 
+  detect-libc@1.0.3:
+    resolution: {integrity: sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==}
+    engines: {node: '>=0.10'}
+    hasBin: true
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -4996,6 +5008,9 @@ packages:
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
+
+  dprint-node@1.0.8:
+    resolution: {integrity: sha512-iVKnUtYfGrYcW1ZAlfR/F59cUVL8QIhWoBJoSjkkdua/dkWIgjZfiLMeTjiB06X0ZLkQ0M2C1VbUj/CxkIf1zg==}
 
   driver.js@1.4.0:
     resolution: {integrity: sha512-Gm64jm6PmcU+si21sQhBrTAM1JvUrR0QhNmjkprNLxohOBzul9+pNHXgQaT9lW84gwg9GMLB3NZGuGolsz5uew==}
@@ -7054,6 +7069,16 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  ts-poet@6.12.0:
+    resolution: {integrity: sha512-xo+iRNMWqyvXpFTaOAvLPA5QAWO6TZrSUs5s4Odaya3epqofBu/fMLHEWl8jPmjhA0s9sgj9sNvF1BmaQlmQkA==}
+
+  ts-proto-descriptors@2.1.0:
+    resolution: {integrity: sha512-S5EZYEQ6L9KLFfjSRpZWDIXDV/W7tAj8uW7pLsihIxyr62EAVSiKuVPwE8iWnr849Bqa53enex1jhDUcpgquzA==}
+
+  ts-proto@2.12.0:
+    resolution: {integrity: sha512-ezMxg57ZiK/ZTW14U7y38+qyWHJr8cn8ELKuppANER666YnUteuNFO/mM1qI+9/wAHoTAfRadnIwtVdp1xw0jQ==}
+    hasBin: true
+
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
     engines: {node: ^18 || >=20}
@@ -7108,6 +7133,11 @@ packages:
 
   typescript@5.4.5:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -10161,6 +10191,8 @@ snapshots:
 
   caniuse-lite@1.0.30001790: {}
 
+  case-anything@2.1.13: {}
+
   ccount@2.0.1: {}
 
   chai@6.2.2: {}
@@ -10367,6 +10399,8 @@ snapshots:
 
   dequal@2.0.3: {}
 
+  detect-libc@1.0.3: {}
+
   detect-libc@2.1.2: {}
 
   detect-node-es@1.1.0: {}
@@ -10409,6 +10443,10 @@ snapshots:
     dependencies:
       no-case: 3.0.4
       tslib: 2.8.1
+
+  dprint-node@1.0.8:
+    dependencies:
+      detect-libc: 1.0.3
 
   driver.js@1.4.0: {}
 
@@ -12996,6 +13034,21 @@ snapshots:
     dependencies:
       typescript: 6.0.3
 
+  ts-poet@6.12.0:
+    dependencies:
+      dprint-node: 1.0.8
+
+  ts-proto-descriptors@2.1.0:
+    dependencies:
+      '@bufbuild/protobuf': 2.11.0
+
+  ts-proto@2.12.0:
+    dependencies:
+      '@bufbuild/protobuf': 2.11.0
+      case-anything: 2.1.13
+      ts-poet: 6.12.0
+      ts-proto-descriptors: 2.1.0
+
   tsconfck@3.1.6(typescript@6.0.3):
     optionalDependencies:
       typescript: 6.0.3
@@ -13071,6 +13124,8 @@ snapshots:
       - supports-color
 
   typescript@5.4.5: {}
+
+  typescript@5.9.3: {}
 
   typescript@6.0.3: {}
 
