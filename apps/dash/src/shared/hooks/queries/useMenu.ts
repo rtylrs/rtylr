@@ -1,22 +1,13 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/service_client';
+import type { MenuItem as ApiMenuItem } from '@voxire/voxie/pos/menu_item/v1/service_client';
 import { useMenuStore } from '../../stores/menuStore';
 
-interface PosMenuItem {
-  id: number | string;
-  name: string;
-  sku?: string;
-  salePrice?: number;
-  sale_price?: number;
-  isActive?: boolean;
-  is_active?: boolean;
-}
+const menuItemClient = createOneKitClient(MenuItemServiceClient, 'dash');
 
-interface PosMenuItemsResponse {
-  items?: PosMenuItem[];
-}
+type PosMenuItem = ApiMenuItem;
 
 interface MenuListEntry {
   _id: string;
@@ -41,19 +32,6 @@ interface StoreMenuItem {
   };
 }
 
-function itemPrice(item: PosMenuItem): number {
-  return item.salePrice ?? item.sale_price ?? 0;
-}
-
-function itemActive(item: PosMenuItem): boolean {
-  return item.isActive ?? item.is_active ?? true;
-}
-
-function normalizeItems(response: PosMenuItemsResponse | PosMenuItem[]): PosMenuItem[] {
-  if (Array.isArray(response)) return response;
-  return response.items ?? [];
-}
-
 function toStoreItems(items: PosMenuItem[]): StoreMenuItem[] {
   return items.map((item) => {
     const id = String(item.id);
@@ -65,9 +43,9 @@ function toStoreItems(items: PosMenuItem[]): StoreMenuItem[] {
       details: {
         name: item.name,
         description: item.sku ? `SKU ${item.sku}` : '',
-        price: itemPrice(item),
-        sku: item.sku ?? '',
-        isActive: itemActive(item),
+        price: item.salePrice,
+        sku: item.sku,
+        isActive: item.isActive,
       },
     };
   });
@@ -93,8 +71,8 @@ export const useGetAllMenus = (restaurantId: string | null) => {
   const query = useQuery({
     queryKey: ['menus', restaurantId],
     queryFn: async () => {
-      const response = await unwrap(safe.get<PosMenuItemsResponse>('/pos/menu-items'));
-      return toMenuList(normalizeItems(response));
+      const res = await menuItemClient.listMenuItems({});
+      return toMenuList(res.items);
     },
     enabled: !!restaurantId,
   });
@@ -114,11 +92,10 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
   const query = useQuery({
     queryKey: ['menu', userId, disabled],
     queryFn: async () => {
-      const response = await unwrap(safe.get<PosMenuItemsResponse>('/pos/menu-items'));
-      const items = normalizeItems(response);
+      const res = await menuItemClient.listMenuItems({});
       return {
         _id: 'pos-menu',
-        items: toStoreItems(items),
+        items: toStoreItems(res.items),
       };
     },
     enabled: !!userId,
