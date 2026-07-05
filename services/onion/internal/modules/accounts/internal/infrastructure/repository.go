@@ -37,6 +37,7 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Accou
 			OwnerID:    row.OwnerID,
 			BusinessID: row.BusinessID,
 			Name:       row.Name,
+			Code:       nullStr(row.Code),
 			Type:       string(row.Type),
 			Currency:   nullStr(row.Currency),
 			Balance:    parseFloatNull(row.Balance),
@@ -89,6 +90,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		OwnerID:    businessID,
 		BusinessID: businessID,
 		Name:       input.Name,
+		Code:       nullableString(input.Code),
 		Type:       sqlc.FinanceAccountsType(input.Type),
 		Currency:   nullableString(currency),
 		Balance:    nullableString(fmtFloat(input.Balance)),
@@ -109,6 +111,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	}
 	res, err := r.queries.UpdateAccount(ctx, sqlc.UpdateAccountParams{
 		Name:       input.Name,
+		Code:       nullableString(input.Code),
 		Type:       sqlc.FinanceAccountsType(input.Type),
 		Currency:   nullableString(currency),
 		Balance:    nullableString(fmtFloat(input.Balance)),

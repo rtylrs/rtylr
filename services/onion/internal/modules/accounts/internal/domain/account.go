@@ -54,6 +54,7 @@ func (a *Account) FromRow(row *sql.Rows) error {
 
 type AccountInput struct {
 	Name     string  `json:"name"`
+	Code     string  `json:"code"`
 	Type     string  `json:"type"`
 	Currency string  `json:"currency"`
 	Balance  float64 `json:"balance"`

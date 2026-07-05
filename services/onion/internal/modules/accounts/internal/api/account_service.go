@@ -47,6 +47,7 @@ func (a *AccountAPI) CreateAccount(ctx context.Context, req *financeaccountv1.Cr
 	}
 	id, createErr := a.Service.Create(ctx, businessID, domain.AccountInput{
 		Name:     strings.TrimSpace(req.GetName()),
+		Code:     strings.TrimSpace(req.GetCode()),
 		Type:     strings.TrimSpace(req.GetType()),
 		Currency: req.GetCurrency(),
 		Balance:  req.GetBalance(),
@@ -72,6 +73,7 @@ func (a *AccountAPI) UpdateAccount(ctx context.Context, req *financeaccountv1.Up
 	}
 	updateErr := a.Service.Update(ctx, businessID, req.GetId(), domain.AccountInput{
 		Name:     strings.TrimSpace(body.GetName()),
+		Code:     strings.TrimSpace(body.GetCode()),
 		Type:     strings.TrimSpace(body.GetType()),
 		Currency: body.GetCurrency(),
 		Balance:  body.GetBalance(),
@@ -127,6 +129,7 @@ func newAccountProto(a domain.Account) *financeaccountv1.Account {
 		Id:        a.ID,
 		OwnerId:   a.OwnerID,
 		Name:      a.Name,
+		Code:      a.Code,
 		Type:      a.Type,
 		Currency:  a.Currency,
 		Balance:   a.Balance,

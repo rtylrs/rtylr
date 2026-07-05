@@ -1,5 +1,5 @@
 -- name: ListAccounts :many
-SELECT id, owner_id, business_id, name, type, currency, balance, is_active, created_at
+SELECT id, owner_id, business_id, name, code, type, currency, balance, is_active, created_at
 FROM finance_accounts
 WHERE business_id = ?
 ORDER BY type ASC, name ASC;
@@ -11,12 +11,12 @@ WHERE business_id = ?
 ORDER BY type ASC, code ASC, name ASC;
 
 -- name: CreateAccount :execresult
-INSERT INTO finance_accounts (owner_id, business_id, name, type, currency, balance, is_active)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO finance_accounts (owner_id, business_id, name, code, type, currency, balance, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateAccount :execresult
 UPDATE finance_accounts
-SET name = ?, type = ?, currency = ?, balance = ?, is_active = ?
+SET name = ?, code = ?, type = ?, currency = ?, balance = ?, is_active = ?
 WHERE id = ? AND business_id = ?;
 
 -- name: DeleteAccount :execresult
