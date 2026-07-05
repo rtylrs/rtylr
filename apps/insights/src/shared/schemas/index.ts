@@ -42,14 +42,6 @@ export type {
   HrDashboard,
 } from './operations';
 
-export {
-  profitLossSchema,
-  expenseBreakdownSchema,
-  invoiceAgingSchema,
-  cashFlowSchema,
-} from './financial';
-export type { ProfitLoss, ExpenseBreakdown, InvoiceAging, CashFlow } from './financial';
-
 export { reportTemplateSchema } from './reports';
 export type { ReportTemplate } from './reports';
 
