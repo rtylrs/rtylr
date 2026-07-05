@@ -1,10 +1,36 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../shared/lib/api';
+import {
+  QuoteServiceClient,
+  type Quote as ApiQuote,
+} from '@voxire/voxie/finance/quote/v1/service_client';
 import { quoteSchema } from '../../shared/schemas/quotes';
-import { unwrapList } from '../../shared/lib/unwrapList';
+
+const quoteClient = createOneKitClient(QuoteServiceClient, 'finance');
+
+// finance.quote.v1.Quote.status is lowercase (draft/sent/accepted/rejected/
+// expired/converted); the UI works in capitalized labels with "Declined"
+// instead of "rejected".
+const STATUS_FROM_API: Record<string, string> = {
+  draft: 'Draft',
+  sent: 'Sent',
+  accepted: 'Accepted',
+  rejected: 'Declined',
+  expired: 'Expired',
+  converted: 'Accepted',
+};
+
+function fromApiQuote(q: ApiQuote): ReturnType<typeof quoteSchema.parse> {
+  return quoteSchema.parse({
+    id: q.id,
+    client: q.customerName,
+    amount: q.total,
+    status: STATUS_FROM_API[q.status] ?? 'Draft',
+    issuedDate: q.createdAt,
+    expiresAt: q.validUntil,
+  });
+}
 
 interface UseQuotesParams {
   page?: number;
@@ -23,16 +49,12 @@ export function useQuotes(params: UseQuotesParams = {}) {
   return useQuery<QuoteListResult>({
     queryKey: ['quotes', { page, pageSize }],
     queryFn: async (): Promise<QuoteListResult> => {
-      const res = await unwrap(
-        safe.get<unknown>('/finance/quotes', { params: { page, page_size: pageSize } })
-      );
-      const raw = res as Record<string, unknown>;
-      const quotes = z.array(quoteSchema).parse(unwrapList(res, 'quotes'));
+      const res = await quoteClient.listQuotes({ page, pageSize });
       return {
-        quotes,
-        hasMore: Boolean(raw.has_more),
-        page: Number(raw.page ?? page),
-        pageSize: Number(raw.page_size ?? pageSize),
+        quotes: res.quotes.map(fromApiQuote),
+        hasMore: res.hasMore,
+        page: res.page,
+        pageSize: res.pageSize,
       };
     },
   });
@@ -47,50 +69,36 @@ interface CreateQuotePayload {
   description?: string;
 }
 
-interface BackendCreateQuotePayload {
-  customerName: string;
-  customerEmail: string;
-  status: string;
-  items: string;
-  subtotal: number;
-  tax: number;
-  discount: number;
-  total: number;
-  validUntil: string;
-  notes: string;
-}
-
-const toBackendCreateQuotePayload = (data: CreateQuotePayload): BackendCreateQuotePayload => ({
-  customerName: data.client,
-  customerEmail: '',
-  status: 'draft',
-  items: JSON.stringify([
-    {
-      description: data.description || 'Quote',
-      quantity: 1,
-      unit_price: data.amount,
-      total: data.amount,
-    },
-  ]),
-  subtotal: data.amount,
-  tax: 0,
-  discount: 0,
-  total: data.amount,
-  validUntil: data.expiresAt,
-  notes: data.description ?? '',
-});
-
 export function useCreateQuote() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: CreateQuotePayload): Promise<unknown> =>
-      unwrap(safe.post('/finance/quotes', toBackendCreateQuotePayload(data))),
+    mutationFn: (data: CreateQuotePayload) =>
+      quoteClient.createQuote({
+        customerName: data.client,
+        customerEmail: '',
+        status: 'draft',
+        lines: [
+          {
+            description: data.description || 'Quote',
+            quantity: 1,
+            unitPrice: data.amount,
+            taxRate: 0,
+            total: data.amount,
+          },
+        ],
+        subtotal: data.amount,
+        tax: 0,
+        discount: 0,
+        total: data.amount,
+        validUntil: data.expiresAt,
+        notes: data.description ?? '',
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
       toast.success('Quote created');
     },
-    onError: () => {
-      toast.error('Failed to create quote');
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to create quote'));
     },
   });
 }
@@ -98,13 +106,13 @@ export function useCreateQuote() {
 export function useUpdateQuoteStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }): Promise<unknown> =>
-      unwrap(safe.put(`/finance/quotes/${id}/status`, { status })),
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      quoteClient.updateQuoteStatus({ id, body: { status } }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
     },
-    onError: () => {
-      toast.error('Failed to update quote');
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to update quote'));
     },
   });
 }
@@ -112,15 +120,14 @@ export function useUpdateQuoteStatus() {
 export function useConvertQuote() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string): Promise<unknown> =>
-      unwrap(safe.post(`/finance/quotes/${id}/convert`, {})),
+    mutationFn: (id: string) => quoteClient.convertQuote({ id }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
       void qc.invalidateQueries({ queryKey: ['invoices'] });
       toast.success('Quote converted to invoice');
     },
-    onError: () => {
-      toast.error('Failed to convert quote');
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to convert quote'));
     },
   });
 }

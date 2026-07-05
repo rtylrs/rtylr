@@ -1,29 +1,46 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock('../../shared/lib/api', () => ({
-  safe: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
+const mockClient = vi.hoisted(() => ({
+  listQuotes: vi.fn(),
+  createQuote: vi.fn(),
+  updateQuoteStatus: vi.fn(),
+  convertQuote: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((val: unknown) => Promise.resolve(val)),
+  createOneKitClient: () => mockClient,
+  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
-import { useQuotes } from './useQuotes';
-import { safe } from '../../shared/lib/api';
+vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+
+import { useQuotes, useCreateQuote, useUpdateQuoteStatus, useConvertQuote } from './useQuotes';
 
 const createWrapper = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client }, children);
+};
+
+const baseQuote = {
+  id: '1',
+  ownerId: '1',
+  customerName: 'Alpha',
+  customerEmail: '',
+  status: 'draft',
+  lines: [],
+  subtotal: 100,
+  tax: 0,
+  discount: 0,
+  total: 100,
+  validUntil: '2026-07-01',
+  notes: '',
+  createdAt: '2026-06-01',
+  updatedAt: '',
 };
 
 describe('useQuotes', () => {
@@ -32,32 +49,33 @@ describe('useQuotes', () => {
   });
 
   it('fetches quotes on mount with default pagination', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      quotes: [{ id: '1', client: 'Alpha' }],
-      has_more: false,
+    mockClient.listQuotes.mockResolvedValue({
+      quotes: [baseQuote],
+      hasMore: false,
+      page: 1,
+      pageSize: 50,
     });
     const { result } = renderHook(() => useQuotes(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/quotes', {
-      params: { page: 1, page_size: 50 },
-    });
+    expect(mockClient.listQuotes).toHaveBeenCalledWith({ page: 1, pageSize: 50 });
+    expect(result.current.data?.quotes[0]?.client).toBe('Alpha');
   });
 
   it('accepts custom page and pageSize params', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ quotes: [], has_more: false });
+    mockClient.listQuotes.mockResolvedValue({ quotes: [], hasMore: false, page: 2, pageSize: 20 });
     const { result } = renderHook(() => useQuotes({ page: 2, pageSize: 20 }), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/quotes', {
-      params: { page: 2, page_size: 20 },
-    });
+    expect(mockClient.listQuotes).toHaveBeenCalledWith({ page: 2, pageSize: 20 });
   });
 
   it('exposes hasMore from response', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      quotes: [{ id: '2', client: 'Beta' }],
-      has_more: true,
+    mockClient.listQuotes.mockResolvedValue({
+      quotes: [{ ...baseQuote, id: '2', customerName: 'Beta' }],
+      hasMore: true,
+      page: 1,
+      pageSize: 50,
     });
     const { result } = renderHook(() => useQuotes(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -65,18 +83,84 @@ describe('useQuotes', () => {
   });
 
   it('starts in loading state', () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    mockClient.listQuotes.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useQuotes(), { wrapper: createWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('coerces numeric quote id to string', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      quotes: [{ id: 42, client: 'Gamma' }],
-      has_more: false,
+  it('keeps quote id as a string', async () => {
+    mockClient.listQuotes.mockResolvedValue({
+      quotes: [{ ...baseQuote, id: '42', customerName: 'Gamma' }],
+      hasMore: false,
+      page: 1,
+      pageSize: 50,
     });
     const { result } = renderHook(() => useQuotes(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.quotes[0]?.id).toBe('42');
+  });
+
+  it('maps backend status to the capitalized UI label', async () => {
+    mockClient.listQuotes.mockResolvedValue({
+      quotes: [{ ...baseQuote, status: 'rejected' }],
+      hasMore: false,
+      page: 1,
+      pageSize: 50,
+    });
+    const { result } = renderHook(() => useQuotes(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.quotes[0]?.status).toBe('Declined');
+  });
+});
+
+describe('useCreateQuote', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('creates a quote', async () => {
+    mockClient.createQuote.mockResolvedValue({ quote: baseQuote });
+    const { result } = renderHook(() => useCreateQuote(), { wrapper: createWrapper() });
+    await act(() =>
+      result.current.mutateAsync({
+        client: 'Alpha',
+        amount: 100,
+        currency: 'USD',
+        issuedDate: '2026-06-01',
+        expiresAt: '2026-07-01',
+      })
+    );
+    expect(mockClient.createQuote).toHaveBeenCalledWith(
+      expect.objectContaining({ customerName: 'Alpha', total: 100 })
+    );
+  });
+});
+
+describe('useUpdateQuoteStatus', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('updates quote status', async () => {
+    mockClient.updateQuoteStatus.mockResolvedValue({ message: 'ok' });
+    const { result } = renderHook(() => useUpdateQuoteStatus(), { wrapper: createWrapper() });
+    await act(() => result.current.mutateAsync({ id: '1', status: 'accepted' }));
+    expect(mockClient.updateQuoteStatus).toHaveBeenCalledWith({
+      id: '1',
+      body: { status: 'accepted' },
+    });
+  });
+});
+
+describe('useConvertQuote', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('converts a quote to an invoice', async () => {
+    mockClient.convertQuote.mockResolvedValue({ invoiceId: '9', message: 'ok' });
+    const { result } = renderHook(() => useConvertQuote(), { wrapper: createWrapper() });
+    await act(() => result.current.mutateAsync('1'));
+    expect(mockClient.convertQuote).toHaveBeenCalledWith({ id: '1' });
   });
 });
