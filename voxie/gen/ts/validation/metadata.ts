@@ -4360,15 +4360,24 @@ export const contractValidationMetadata = {
     }
   },
   "finance.quote.v1.CreateQuoteRequest": {
-    "customerId": {
-      "gt": 0,
-      "name": "customerId",
+    "customerEmail": {
+      "name": "customerEmail",
       "optional": false,
-      "protoName": "customer_id",
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "minLen": 1,
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
       "repeated": false,
       "required": true,
       "scalar": true,
-      "type": "int64"
+      "type": "string"
     },
     "discount": {
       "gte": 0,
@@ -4399,6 +4408,45 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "subtotal": {
+      "gte": 0,
+      "name": "subtotal",
+      "optional": false,
+      "protoName": "subtotal",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "tax": {
+      "gte": 0,
+      "name": "tax",
+      "optional": false,
+      "protoName": "tax",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "total": {
+      "gte": 0,
+      "name": "total",
+      "optional": false,
+      "protoName": "total",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
     "validUntil": {
       "minLen": 1,
       "name": "validUntil",
@@ -4423,24 +4471,6 @@ export const contractValidationMetadata = {
     }
   },
   "finance.quote.v1.ListQuotesRequest": {
-    "customerId": {
-      "name": "customerId",
-      "optional": false,
-      "protoName": "customer_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "limit": {
-      "name": "limit",
-      "optional": false,
-      "protoName": "limit",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
     "page": {
       "name": "page",
       "optional": false,
@@ -4448,34 +4478,16 @@ export const contractValidationMetadata = {
       "repeated": false,
       "required": false,
       "scalar": true,
-      "type": "int32"
+      "type": "int64"
     },
-    "sortBy": {
-      "name": "sortBy",
+    "pageSize": {
+      "name": "pageSize",
       "optional": false,
-      "protoName": "sort_by",
+      "protoName": "page_size",
       "repeated": false,
       "required": false,
       "scalar": true,
-      "type": "string"
-    },
-    "sortDir": {
-      "name": "sortDir",
-      "optional": false,
-      "protoName": "sort_dir",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
-    },
-    "status": {
-      "name": "status",
-      "optional": false,
-      "protoName": "status",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "string"
+      "type": "int64"
     }
   },
   "finance.quote.v1.UpdateQuoteStatusRequest": {

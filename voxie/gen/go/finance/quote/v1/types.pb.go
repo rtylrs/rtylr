@@ -26,14 +26,14 @@ type Quote struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id is the unique identifier for the resource.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// number is the number value for this contract.
-	Number string `protobuf:"bytes,2,opt,name=number,proto3" json:"number,omitempty"`
-	// customer_id is the customer id value for this contract.
-	CustomerId int64 `protobuf:"varint,3,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	// owner_id identifies the tenant that owns the resource.
+	OwnerId int64 `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
 	// customer_name is the customer name value for this contract.
-	CustomerName string `protobuf:"bytes,4,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	CustomerName string `protobuf:"bytes,3,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	// customer_email is the customer email value for this contract.
+	CustomerEmail string `protobuf:"bytes,4,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
 	// status is the current lifecycle state.
-	// draft, sent, accepted, rejected, expired
+	// draft, sent, accepted, rejected, expired, converted
 	Status string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	// lines is the lines value for this contract.
 	Lines []*QuoteLine `protobuf:"bytes,6,rep,name=lines,proto3" json:"lines,omitempty"`
@@ -94,16 +94,9 @@ func (x *Quote) GetId() int64 {
 	return 0
 }
 
-func (x *Quote) GetNumber() string {
+func (x *Quote) GetOwnerId() int64 {
 	if x != nil {
-		return x.Number
-	}
-	return ""
-}
-
-func (x *Quote) GetCustomerId() int64 {
-	if x != nil {
-		return x.CustomerId
+		return x.OwnerId
 	}
 	return 0
 }
@@ -111,6 +104,13 @@ func (x *Quote) GetCustomerId() int64 {
 func (x *Quote) GetCustomerName() string {
 	if x != nil {
 		return x.CustomerName
+	}
+	return ""
+}
+
+func (x *Quote) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
 	}
 	return ""
 }
@@ -270,13 +270,12 @@ var File_finance_quote_v1_types_proto protoreflect.FileDescriptor
 
 const file_finance_quote_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1cfinance/quote/v1/types.proto\x12\x10finance.quote.v1\x1a\x1donekit/http/annotations.proto\"\xa1\x03\n" +
+	"\x1cfinance/quote/v1/types.proto\x12\x10finance.quote.v1\x1a\x1donekit/http/annotations.proto\"\xaa\x03\n" +
 	"\x05Quote\x12\x14\n" +
-	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x16\n" +
-	"\x06number\x18\x02 \x01(\tR\x06number\x12%\n" +
-	"\vcustomer_id\x18\x03 \x01(\x03B\x04е\x18\x01R\n" +
-	"customerId\x12#\n" +
-	"\rcustomer_name\x18\x04 \x01(\tR\fcustomerName\x12\x16\n" +
+	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12#\n" +
+	"\rcustomer_name\x18\x03 \x01(\tR\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\x04 \x01(\tR\rcustomerEmail\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\tR\x06status\x121\n" +
 	"\x05lines\x18\x06 \x03(\v2\x1b.finance.quote.v1.QuoteLineR\x05lines\x12\x1a\n" +
 	"\bsubtotal\x18\a \x01(\x01R\bsubtotal\x12\x10\n" +

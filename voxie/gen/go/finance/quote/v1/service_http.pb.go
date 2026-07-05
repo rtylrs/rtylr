@@ -108,11 +108,7 @@ var listQuotesPathParams = []PathParamConfig{}
 // listQuotesQueryParams contains query parameter configuration for ListQuotes
 var listQuotesQueryParams = []QueryParamConfig{
 	{QueryName: "page", FieldName: "page", Required: false},
-	{QueryName: "limit", FieldName: "limit", Required: false},
-	{QueryName: "sort_by", FieldName: "sort_by", Required: false},
-	{QueryName: "sort_dir", FieldName: "sort_dir", Required: false},
-	{QueryName: "status", FieldName: "status", Required: false},
-	{QueryName: "customer_id", FieldName: "customer_id", Required: false},
+	{QueryName: "page_size", FieldName: "page_size", Required: false},
 }
 
 // createQuotePathParams contains path parameter configuration for CreateQuote

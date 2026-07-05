@@ -5,27 +5,22 @@
 // source: finance/quote/v1/list_quotes.proto
 
 /* eslint-disable */
-import type { PaginationResponse } from "../../../common/pagination/v1/pagination";
 import type { Quote } from "./types";
 
 export interface ListQuotesRequest {
-  /** page is the current result page. */
+  /** page is the one-based page number to return. */
   page: number;
-  /** limit is the maximum number of records to return. */
-  limit: number;
-  /** sort_by is the field to sort results by. */
-  sortBy: string;
-  /** sort_dir is the sort direction ("asc" or "desc"). */
-  sortDir: string;
-  /** status filters quotes by lifecycle state. */
-  status: string;
-  /** customer_id filters quotes for a single customer. */
-  customerId: number;
+  /** page_size is the maximum number of quotes to return. */
+  pageSize: number;
 }
 
 export interface ListQuotesResponse {
   /** quotes is the quotes value for this contract. */
   quotes: Quote[];
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationResponse | undefined;
+  /** page is the current result page. */
+  page: number;
+  /** page_size is the number of records requested per page. */
+  pageSize: number;
+  /** has_more indicates whether additional pages are available. */
+  hasMore: boolean;
 }

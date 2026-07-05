@@ -8,7 +8,6 @@ package v1
 
 import (
 	_ "github.com/stackxio/onekit/http"
-	v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,18 +24,10 @@ const (
 
 type ListQuotesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// page is the current result page.
-	Page int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	// limit is the maximum number of records to return.
-	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	// sort_by is the field to sort results by.
-	SortBy string `protobuf:"bytes,3,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
-	// sort_dir is the sort direction ("asc" or "desc").
-	SortDir string `protobuf:"bytes,4,opt,name=sort_dir,json=sortDir,proto3" json:"sort_dir,omitempty"`
-	// status filters quotes by lifecycle state.
-	Status string `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	// customer_id filters quotes for a single customer.
-	CustomerId    int64 `protobuf:"varint,6,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	// page is the one-based page number to return.
+	Page int64 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the maximum number of quotes to return.
+	PageSize      int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -71,44 +62,16 @@ func (*ListQuotesRequest) Descriptor() ([]byte, []int) {
 	return file_finance_quote_v1_list_quotes_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ListQuotesRequest) GetPage() int32 {
+func (x *ListQuotesRequest) GetPage() int64 {
 	if x != nil {
 		return x.Page
 	}
 	return 0
 }
 
-func (x *ListQuotesRequest) GetLimit() int32 {
+func (x *ListQuotesRequest) GetPageSize() int64 {
 	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-func (x *ListQuotesRequest) GetSortBy() string {
-	if x != nil {
-		return x.SortBy
-	}
-	return ""
-}
-
-func (x *ListQuotesRequest) GetSortDir() string {
-	if x != nil {
-		return x.SortDir
-	}
-	return ""
-}
-
-func (x *ListQuotesRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *ListQuotesRequest) GetCustomerId() int64 {
-	if x != nil {
-		return x.CustomerId
+		return x.PageSize
 	}
 	return 0
 }
@@ -117,8 +80,12 @@ type ListQuotesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// quotes is the quotes value for this contract.
 	Quotes []*Quote `protobuf:"bytes,1,rep,name=quotes,proto3" json:"quotes,omitempty"`
-	// pagination is the pagination value for this contract.
-	Pagination    *v1.PaginationResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	// page is the current result page.
+	Page int64 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the number of records requested per page.
+	PageSize int64 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// has_more indicates whether additional pages are available.
+	HasMore       bool `protobuf:"varint,4,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -160,39 +127,42 @@ func (x *ListQuotesResponse) GetQuotes() []*Quote {
 	return nil
 }
 
-func (x *ListQuotesResponse) GetPagination() *v1.PaginationResponse {
+func (x *ListQuotesResponse) GetPage() int64 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
+}
+
+func (x *ListQuotesResponse) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListQuotesResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
 }
 
 var File_finance_quote_v1_list_quotes_proto protoreflect.FileDescriptor
 
 const file_finance_quote_v1_list_quotes_proto_rawDesc = "" +
 	"\n" +
-	"\"finance/quote/v1/list_quotes.proto\x12\x10finance.quote.v1\x1a%common/pagination/v1/pagination.proto\x1a\x1cfinance/quote/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x87\x02\n" +
-	"\x11ListQuotesRequest\x12\x1e\n" +
-	"\x04page\x18\x01 \x01(\x05B\n" +
-	"µ\x18\x06\n" +
-	"\x04pageR\x04page\x12!\n" +
-	"\x05limit\x18\x02 \x01(\x05B\vµ\x18\a\n" +
-	"\x05limitR\x05limit\x12&\n" +
-	"\asort_by\x18\x03 \x01(\tB\rµ\x18\t\n" +
-	"\asort_byR\x06sortBy\x12)\n" +
-	"\bsort_dir\x18\x04 \x01(\tB\x0eµ\x18\n" +
-	"\n" +
-	"\bsort_dirR\asortDir\x12$\n" +
-	"\x06status\x18\x05 \x01(\tB\fµ\x18\b\n" +
-	"\x06statusR\x06status\x126\n" +
-	"\vcustomer_id\x18\x06 \x01(\x03B\x15µ\x18\r\n" +
-	"\vcustomer_idе\x18\x01R\n" +
-	"customerId\"\x95\x01\n" +
+	"\"finance/quote/v1/list_quotes.proto\x12\x10finance.quote.v1\x1a\x1cfinance/quote/v1/types.proto\x1a\x1donekit/http/annotations.proto\"i\n" +
+	"\x11ListQuotesRequest\x12\"\n" +
+	"\x04page\x18\x01 \x01(\x03B\x0eµ\x18\x06\n" +
+	"\x04pageе\x18\x02R\x04page\x120\n" +
+	"\tpage_size\x18\x02 \x01(\x03B\x13µ\x18\v\n" +
+	"\tpage_sizeе\x18\x02R\bpageSize\"\x9d\x01\n" +
 	"\x12ListQuotesResponse\x12/\n" +
-	"\x06quotes\x18\x01 \x03(\v2\x17.finance.quote.v1.QuoteR\x06quotes\x12N\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2(.common.pagination.v1.PaginationResponseB\x04\xf0\xb5\x18\x03R\n" +
-	"paginationB1Z/github.com/voxire/voxie/gen/go/finance/quote/v1b\x06proto3"
+	"\x06quotes\x18\x01 \x03(\v2\x17.finance.quote.v1.QuoteR\x06quotes\x12\x18\n" +
+	"\x04page\x18\x02 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x03 \x01(\x03B\x04е\x18\x02R\bpageSize\x12\x19\n" +
+	"\bhas_more\x18\x04 \x01(\bR\ahasMoreB1Z/github.com/voxire/voxie/gen/go/finance/quote/v1b\x06proto3"
 
 var (
 	file_finance_quote_v1_list_quotes_proto_rawDescOnce sync.Once
@@ -208,19 +178,17 @@ func file_finance_quote_v1_list_quotes_proto_rawDescGZIP() []byte {
 
 var file_finance_quote_v1_list_quotes_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_finance_quote_v1_list_quotes_proto_goTypes = []any{
-	(*ListQuotesRequest)(nil),     // 0: finance.quote.v1.ListQuotesRequest
-	(*ListQuotesResponse)(nil),    // 1: finance.quote.v1.ListQuotesResponse
-	(*Quote)(nil),                 // 2: finance.quote.v1.Quote
-	(*v1.PaginationResponse)(nil), // 3: common.pagination.v1.PaginationResponse
+	(*ListQuotesRequest)(nil),  // 0: finance.quote.v1.ListQuotesRequest
+	(*ListQuotesResponse)(nil), // 1: finance.quote.v1.ListQuotesResponse
+	(*Quote)(nil),              // 2: finance.quote.v1.Quote
 }
 var file_finance_quote_v1_list_quotes_proto_depIdxs = []int32{
 	2, // 0: finance.quote.v1.ListQuotesResponse.quotes:type_name -> finance.quote.v1.Quote
-	3, // 1: finance.quote.v1.ListQuotesResponse.pagination:type_name -> common.pagination.v1.PaginationResponse
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_finance_quote_v1_list_quotes_proto_init() }

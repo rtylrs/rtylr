@@ -3,23 +3,21 @@
 
 export interface ListQuotesRequest {
   page: number;
-  limit: number;
-  sortBy: string;
-  sortDir: string;
-  status: string;
-  customerId: string;
+  pageSize: number;
 }
 
 export interface ListQuotesResponse {
   quotes: Quote[];
-  pagination?: PaginationResponse;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
 }
 
 export interface Quote {
   id: string;
-  number: string;
-  customerId: string;
+  ownerId: string;
   customerName: string;
+  customerEmail: string;
   status: string;
   lines: QuoteLine[];
   subtotal: number;
@@ -40,20 +38,16 @@ export interface QuoteLine {
   total: number;
 }
 
-export interface PaginationResponse {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
 export interface CreateQuoteRequest {
-  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  status: string;
   lines: QuoteLine[];
+  subtotal: number;
+  tax: number;
   validUntil: string;
   discount: number;
+  total: number;
   notes: string;
 }
 
@@ -158,11 +152,7 @@ export class QuoteServiceClient {
     let path = "/api/finance/quote/v1/quotes";
     const params = new URLSearchParams();
     if (req.page != null && req.page !== 0) params.set("page", String(req.page));
-    if (req.limit != null && req.limit !== 0) params.set("limit", String(req.limit));
-    if (req.sortBy != null && req.sortBy !== "") params.set("sort_by", String(req.sortBy));
-    if (req.sortDir != null && req.sortDir !== "") params.set("sort_dir", String(req.sortDir));
-    if (req.status != null && req.status !== "") params.set("status", String(req.status));
-    if (req.customerId != null && req.customerId !== "0") params.set("customer_id", String(req.customerId));
+    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {

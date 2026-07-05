@@ -9,15 +9,15 @@
 export interface Quote {
   /** id is the unique identifier for the resource. */
   id: number;
-  /** number is the number value for this contract. */
-  number: string;
-  /** customer_id is the customer id value for this contract. */
-  customerId: number;
+  /** owner_id identifies the tenant that owns the resource. */
+  ownerId: number;
   /** customer_name is the customer name value for this contract. */
   customerName: string;
+  /** customer_email is the customer email value for this contract. */
+  customerEmail: string;
   /**
    * status is the current lifecycle state.
-   * draft, sent, accepted, rejected, expired
+   * draft, sent, accepted, rejected, expired, converted
    */
   status: string;
   /** lines is the lines value for this contract. */
