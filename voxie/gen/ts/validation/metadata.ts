@@ -4156,6 +4156,24 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
     "search": {
       "name": "search",
       "optional": false,

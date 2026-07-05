@@ -31,7 +31,11 @@ type ListInvoicesRequest struct {
 	// date_from is the inclusive start date filter.
 	DateFrom string `protobuf:"bytes,3,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
 	// date_to is the inclusive end date filter.
-	DateTo        string `protobuf:"bytes,4,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	DateTo string `protobuf:"bytes,4,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	// page is the one-based page number to return.
+	Page int64 `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the maximum number of invoices to return.
+	PageSize      int64 `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -94,10 +98,30 @@ func (x *ListInvoicesRequest) GetDateTo() string {
 	return ""
 }
 
+func (x *ListInvoicesRequest) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListInvoicesRequest) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type ListInvoicesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// invoices is the invoices value for this contract.
-	Invoices      []*InvoiceSummary `protobuf:"bytes,1,rep,name=invoices,proto3" json:"invoices,omitempty"`
+	Invoices []*InvoiceSummary `protobuf:"bytes,1,rep,name=invoices,proto3" json:"invoices,omitempty"`
+	// page is the current result page.
+	Page int64 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	// page_size is the number of records requested per page.
+	PageSize int64 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// has_more indicates whether additional pages are available.
+	HasMore       bool `protobuf:"varint,4,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -139,11 +163,32 @@ func (x *ListInvoicesResponse) GetInvoices() []*InvoiceSummary {
 	return nil
 }
 
+func (x *ListInvoicesResponse) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListInvoicesResponse) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListInvoicesResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
 var File_finance_invoices_v1_list_invoices_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_list_invoices_proto_rawDesc = "" +
 	"\n" +
-	"'finance/invoices/v1/list_invoices.proto\x12\x13finance.invoices.v1\x1a\x1ffinance/invoices/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xb7\x01\n" +
+	"'finance/invoices/v1/list_invoices.proto\x12\x13finance.invoices.v1\x1a\x1ffinance/invoices/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\x8d\x02\n" +
 	"\x13ListInvoicesRequest\x12$\n" +
 	"\x06status\x18\x01 \x01(\tB\fµ\x18\b\n" +
 	"\x06statusR\x06status\x12$\n" +
@@ -152,9 +197,16 @@ const file_finance_invoices_v1_list_invoices_proto_rawDesc = "" +
 	"\tdate_from\x18\x03 \x01(\tB\x0fµ\x18\v\n" +
 	"\tdate_fromR\bdateFrom\x12&\n" +
 	"\adate_to\x18\x04 \x01(\tB\rµ\x18\t\n" +
-	"\adate_toR\x06dateTo\"W\n" +
+	"\adate_toR\x06dateTo\x12\"\n" +
+	"\x04page\x18\x05 \x01(\x03B\x0eµ\x18\x06\n" +
+	"\x04pageе\x18\x02R\x04page\x120\n" +
+	"\tpage_size\x18\x06 \x01(\x03B\x13µ\x18\v\n" +
+	"\tpage_sizeе\x18\x02R\bpageSize\"\xaf\x01\n" +
 	"\x14ListInvoicesResponse\x12?\n" +
-	"\binvoices\x18\x01 \x03(\v2#.finance.invoices.v1.InvoiceSummaryR\binvoicesB4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"
+	"\binvoices\x18\x01 \x03(\v2#.finance.invoices.v1.InvoiceSummaryR\binvoices\x12\x18\n" +
+	"\x04page\x18\x02 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
+	"\tpage_size\x18\x03 \x01(\x03B\x04е\x18\x02R\bpageSize\x12\x19\n" +
+	"\bhas_more\x18\x04 \x01(\bR\ahasMoreB4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"
 
 var (
 	file_finance_invoices_v1_list_invoices_proto_rawDescOnce sync.Once

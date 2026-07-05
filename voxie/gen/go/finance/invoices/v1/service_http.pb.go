@@ -141,6 +141,8 @@ var listInvoicesQueryParams = []QueryParamConfig{
 	{QueryName: "search", FieldName: "search", Required: false},
 	{QueryName: "date_from", FieldName: "date_from", Required: false},
 	{QueryName: "date_to", FieldName: "date_to", Required: false},
+	{QueryName: "page", FieldName: "page", Required: false},
+	{QueryName: "page_size", FieldName: "page_size", Required: false},
 }
 
 // createInvoicePathParams contains path parameter configuration for CreateInvoice
