@@ -1501,6 +1501,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.99.2
         version: 5.99.2(react@19.2.5)
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../voxie
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
