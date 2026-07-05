@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package finance.bill.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/bill/v1";
+
+// ── Bills ───────────────────────────────────────────────────────────
+
+message Bill {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // supplier_id is the supplier id value for this contract.
+  int64 supplier_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // amount is the amount value for this contract.
+  double amount = 4;
+  // currency is the currency value for this contract.
+  string currency = 5;
+  // due_date is the due date value for this contract.
+  string due_date = 6;
+  // status is the current lifecycle state.
+  string status = 7;
+  // description is the description value for this contract.
+  string description = 8;
+  // created_at is when the record was created.
+  string created_at = 9;
+  // updated_at is when the record was last updated.
+  string updated_at = 10;
+}

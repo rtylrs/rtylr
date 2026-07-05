@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package erp.category.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/category/v1";
+
+message CreateCategoryRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string description = 2;
+}
+
+message CreateCategoryResponse {
+  int64 category_id = 1;
+  string message = 2;
+}

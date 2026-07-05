@@ -13,7 +13,7 @@ Shared frontend packages for the voxire platform. Used as a git submodule in `vo
 | `@voxire/components`      | Core UI component library                      |
 | `@voxire/config`          | App config, feature flags, app guards          |
 | `@voxire/consent`         | Cookie consent banner and `useConsent` hook    |
-| `@voxire/contracts`       | Shared TypeScript types for all API contracts  |
+| `@voxire/voxie`       | Shared TypeScript types for all API contracts  |
 | `@voxire/i18n`            | i18next setup and language definitions         |
 | `@voxire/menu`            | Public digital menu components and layouts     |
 | `@voxire/observability`   | Sentry + PostHog boot helpers                  |

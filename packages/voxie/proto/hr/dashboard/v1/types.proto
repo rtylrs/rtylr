@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package hr.dashboard.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/dashboard/v1";
+
+// ── HR Dashboard ────────────────────────────────────────────────────
+
+message DashboardStats {
+  // total_staff is the total staff value for this contract.
+  int64 total_staff = 1;
+  // on_shift_today is the on shift today value for this contract.
+  int64 on_shift_today = 2;
+  // pending_time_off is the pending time off value for this contract.
+  int64 pending_time_off = 3;
+  // payroll_draft is the payroll draft value for this contract.
+  int64 payroll_draft = 4;
+}
+
+// ── Dashboard Widget ───────────────────────────────────────────────
+
+message DashboardWidgetPayload {
+  // Unique identifier for the widget.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this widget belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Role that owns this widget layout.
+  int64 role_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Widget type identifier (e.g. headcount_chart, leave_summary).
+  string widget_type = 4;
+  // Horizontal grid position.
+  int32 position_x = 5;
+  // Vertical grid position.
+  int32 position_y = 6;
+  // Widget width in grid units.
+  int32 width = 7;
+  // Widget height in grid units.
+  int32 height = 8;
+  // Widget-specific configuration serialised as JSON.
+  bytes config = 9 [
+    (onekit.http.bytes_encoding) = BYTES_ENCODING_BASE64
+  ];
+  // Unix timestamp when this widget was created.
+  int64 created_at = 10;
+  // Unix timestamp when this widget was last updated.
+  int64 updated_at = 11;
+}
+
+// ── Dashboard Data ─────────────────────────────────────────────────
+
+message DashboardDataPayload {
+  // Widget type this data corresponds to.
+  string widget_type = 1;
+  // Serialised widget data as JSON.
+  bytes data = 2 [
+    (onekit.http.bytes_encoding) = BYTES_ENCODING_BASE64
+  ];
+}
+
+// ── Get Dashboard ──────────────────────────────────────────────────
+
+message GetDashboardWidgetsResponse {
+  // Widget layout definitions for the requesting user's dashboard.
+  repeated DashboardWidgetPayload widgets = 1;
+  // Pre-loaded data keyed by widget type.
+  map<string, DashboardDataPayload> data = 2;
+}
+
+// ── Update Widget Layout ───────────────────────────────────────────
+
+message UpdateDashboardWidgetsRequest {
+  // Updated widget positions and sizes.
+  repeated DashboardWidgetPayload widgets = 1 [(buf.validate.field).repeated.min_items = 1];
+}

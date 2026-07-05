@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package insights.financial.v1;
+
+import "insights/financial/v1/get_cash_flow_analytics.proto";
+import "insights/financial/v1/get_expense_analytics.proto";
+import "insights/financial/v1/get_invoice_aging.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/financial/v1";
+
+// FinancialService defines insights financial analytics endpoints.
+service FinancialService {
+  option (onekit.http.service_config) = {base_path: "/api/insights/financial/v1"};
+
+  // GetCashFlowAnalytics returns cash flow analytics for a period.
+  rpc GetCashFlowAnalytics(GetCashFlowAnalyticsRequest) returns (GetCashFlowAnalyticsResponse) {
+    option (onekit.http.config) = {
+      path: "/cash-flow"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetExpenseAnalytics returns expense analytics for a period.
+  rpc GetExpenseAnalytics(GetExpenseAnalyticsRequest) returns (GetExpenseAnalyticsResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetInvoiceAging returns invoice aging analysis.
+  rpc GetInvoiceAging(GetInvoiceAgingRequest) returns (GetInvoiceAgingResponse) {
+    option (onekit.http.config) = {
+      path: "/invoice-aging"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

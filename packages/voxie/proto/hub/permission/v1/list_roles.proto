@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.permission.v1;
+
+import "hub/permission/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/permission/v1";
+
+message ListRolesRequest {}
+
+message ListRolesResponse {
+  // roles is the roles value for this contract.
+  repeated CustomRole roles = 1;
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package erp.price_list.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/price_list/v1";
+
+message PriceList {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 3;
+  string currency = 4;
+  bool is_default = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}

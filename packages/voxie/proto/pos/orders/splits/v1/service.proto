@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.orders.splits.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/orders/splits/v1/split_order.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/splits/v1";
+
+service OrderSplitService {
+  option (onekit.http.service_config) = {base_path: "/api/pos/orders/splits/v1"};
+
+  rpc SplitOrder(SplitOrderRequest) returns (SplitOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/split"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

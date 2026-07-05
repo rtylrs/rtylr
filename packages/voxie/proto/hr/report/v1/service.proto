@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hr.report.v1;
+
+import "hr/report/v1/generate_report.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/report/v1";
+
+// ReportService defines HR report generation endpoints.
+service ReportService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/report/v1"};
+
+  // GenerateReport generates an HR report.
+  rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse) {
+    option (onekit.http.config) = {
+      path: "/reports/generate"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

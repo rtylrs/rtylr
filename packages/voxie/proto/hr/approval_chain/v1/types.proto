@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package hr.approval_chain.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/approval_chain/v1";
+
+// ── Approval Chain Level ──────────────────────────────────────────
+
+message ApprovalChainLevelPayload {
+  // Unique identifier for this approval level.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this level belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Parent approval chain this level is part of.
+  int64 chain_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Position in the approval sequence (1 = first approver).
+  int32 level_order = 4;
+  // Type of approver (direct_manager | dept_head | hr_admin | role | specific_person).
+  string approver_type = 5;
+  // Role that can approve at this level; absent unless approver_type is role.
+  optional int64 approver_role_id = 6 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // Specific employee who approves; absent unless approver_type is specific_person.
+  optional int64 approver_employee_id = 7 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // Minimum value that triggers this level; absent if no lower bound.
+  optional double threshold_min_value = 8 [
+    (onekit.http.nullable) = true
+  ];
+  // Maximum value that triggers this level; absent if no upper bound.
+  optional double threshold_max_value = 9 [
+    (onekit.http.nullable) = true
+  ];
+  // Days before the level times out and the timeout_action fires.
+  int32 timeout_days = 10;
+  // What happens on timeout (escalate | auto_approve | do_nothing).
+  string timeout_action = 11;
+  // Unix timestamp when this record was created.
+  int64 created_at = 12;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 13;
+}
+
+// ── Approval Chain ────────────────────────────────────────────────
+
+message ApprovalChainPayload {
+  // Unique identifier for the approval chain.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this chain belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
+  string request_type = 3;
+  // Human-readable name for the chain.
+  string name = 4;
+  // Whether approvers can delegate their approval authority.
+  bool delegation_enabled = 5;
+  // Ordered levels that make up the approval pipeline.
+  repeated ApprovalChainLevelPayload levels = 6;
+  // Unix timestamp when this record was created.
+  int64 created_at = 7;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 8;
+}

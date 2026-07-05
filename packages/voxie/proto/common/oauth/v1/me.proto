@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package common.oauth.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/common/oauth/v1";
+
+message MeRequest {}
+
+message MeResponse {
+  int64 user_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 business_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string role = 3;
+}

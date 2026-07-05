@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package erp.stock_take.v1;
+
+import "erp/stock_take/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/stock_take/v1";
+
+message ListStockTakesRequest {
+  int64 page = 1 [(onekit.http.query).name = "page",
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
+  int64 page_size = 2 [(onekit.http.query).name = "page_size",
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
+}
+
+message ListStockTakesResponse {
+  repeated StockTake stock_takes = 1;
+  bool has_more = 2;
+  int64 page = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
+  int64 page_size = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
+}

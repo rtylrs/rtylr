@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package erp.warehouse.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/warehouse/v1";
+
+message UpdateWarehouseBody {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string address = 2;
+  string city = 3;
+  string country = 4;
+  string manager_name = 5;
+  int64 capacity = 6;
+  bool is_default = 7;
+  bool is_active = 8;
+}
+
+message UpdateWarehouseRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  UpdateWarehouseBody body = 2;
+}
+
+message UpdateWarehouseResponse {
+  string message = 1;
+}

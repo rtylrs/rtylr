@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package flow.project.v1;
+
+import "flow/project/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
+
+message ListProjectsRequest {
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 1 [(onekit.http.query).name = "workspace_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message ListProjectsResponse {
+  // projects is the projects value for this contract.
+  repeated Project projects = 1;
+}

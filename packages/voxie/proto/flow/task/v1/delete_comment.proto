@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+message DeleteCommentRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message DeleteCommentResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

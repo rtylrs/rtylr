@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package hub.app.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/app/v1";
+
+message DisableAddonRequest {
+  // addon_id identifies the addon to disable.
+  string addon_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message DisableAddonResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

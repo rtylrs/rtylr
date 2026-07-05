@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package erp.supplier.v1;
+
+import "erp/supplier/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/supplier/v1";
+
+message ListSuppliersRequest {}
+
+message ListSuppliersResponse {
+  // suppliers is the suppliers value for this contract.
+  repeated Supplier suppliers = 1;
+}

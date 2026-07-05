@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package hub.security.v1;
+
+import "hub/security/v1/get_security_state.proto";
+import "hub/security/v1/invalidate_sessions.proto";
+import "hub/security/v1/login_history.proto";
+import "hub/security/v1/update2_fa.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/security/v1";
+
+// SecurityService defines hub security endpoints.
+service SecurityService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/security/v1"};
+
+  // GetSecurityState returns the current security settings.
+  rpc GetSecurityState(GetSecurityStateRequest) returns (GetSecurityStateResponse) {
+    option (onekit.http.config) = {
+      path: "/state"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // LoginHistory returns recent login events.
+  rpc LoginHistory(LoginHistoryRequest) returns (LoginHistoryResponse) {
+    option (onekit.http.config) = {
+      path: "/login-history"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // InvalidateSessions revokes all active sessions.
+  rpc InvalidateSessions(InvalidateSessionsRequest) returns (InvalidateSessionsResponse) {
+    option (onekit.http.config) = {
+      path: "/invalidate-sessions"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // Update2FA toggles two-factor authentication.
+  rpc Update2FA(Update2FARequest) returns (Update2FAResponse) {
+    option (onekit.http.config) = {
+      path: "/2fa"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+}

@@ -1,0 +1,173 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+import "flow/task/v1/add_comment.proto";
+import "flow/task/v1/create_attachment.proto";
+import "flow/task/v1/create_subtask.proto";
+import "flow/task/v1/create_task.proto";
+import "flow/task/v1/create_time_log.proto";
+import "flow/task/v1/delete_attachment.proto";
+import "flow/task/v1/delete_comment.proto";
+import "flow/task/v1/delete_task.proto";
+import "flow/task/v1/delete_time_log.proto";
+import "flow/task/v1/get_attachments.proto";
+import "flow/task/v1/get_my_tasks.proto";
+import "flow/task/v1/get_my_tasks_project.proto";
+import "flow/task/v1/get_subtasks.proto";
+import "flow/task/v1/get_task_activity.proto";
+import "flow/task/v1/get_task_detail.proto";
+import "flow/task/v1/get_time_logs.proto";
+import "flow/task/v1/list_tasks.proto";
+import "flow/task/v1/search_tasks.proto";
+import "flow/task/v1/update_task.proto";
+import "flow/task/v1/update_task_status.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+service TaskService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/task/v1"};
+
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetMyTasks(GetMyTasksRequest) returns (GetMyTasksResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/my"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetMyTasksProject(GetMyTasksProjectRequest) returns (GetMyTasksProjectResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/my-project"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc SearchTasks(SearchTasksRequest) returns (SearchTasksResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/search"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetTaskDetail(GetTaskDetailRequest) returns (GetTaskDetailResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc UpdateTaskStatus(UpdateTaskStatusRequest) returns (UpdateTaskStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{id}/status"
+      method: HTTP_METHOD_PATCH
+      body: "body"
+    };
+  }
+
+  rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc CreateSubtask(CreateSubtaskRequest) returns (CreateSubtaskResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/subtasks"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetSubtasks(GetSubtasksRequest) returns (GetSubtasksResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{task_id}/subtasks"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc AddComment(AddCommentRequest) returns (AddCommentResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{task_id}/comments"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/comments/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc GetTaskActivity(GetTaskActivityRequest) returns (GetTaskActivityResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{task_id}/activity"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateAttachment(CreateAttachmentRequest) returns (CreateAttachmentResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/attachments"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetAttachments(GetAttachmentsRequest) returns (GetAttachmentsResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{task_id}/attachments"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc DeleteAttachment(DeleteAttachmentRequest) returns (DeleteAttachmentResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/attachments/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc CreateTimeLog(CreateTimeLogRequest) returns (CreateTimeLogResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{task_id}/time-logs"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetTimeLogs(GetTimeLogsRequest) returns (GetTimeLogsResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/{task_id}/time-logs"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc DeleteTimeLog(DeleteTimeLogRequest) returns (DeleteTimeLogResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/time-logs/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

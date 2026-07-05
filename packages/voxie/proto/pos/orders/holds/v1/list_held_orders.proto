@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pos.orders.holds.v1;
+
+import "pos/orders/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/holds/v1";
+
+// ── List Held Orders ──────────────────────────────────────────────
+
+message ListHeldOrdersRequest {}
+
+message ListHeldOrdersResponse {
+  // orders is the orders value for this contract.
+  repeated .pos.orders.v1.Order orders = 1;
+}

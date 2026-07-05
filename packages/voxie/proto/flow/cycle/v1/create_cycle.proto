@@ -1,0 +1,14 @@
+syntax = "proto3";
+package flow.cycle.v1;
+import "buf/validate/validate.proto";
+import "flow/cycle/v1/types.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/cycle/v1";
+message CreateCycleRequest {
+  string name = 1 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1];
+  string workspace_id = 2;
+  string start_date = 3;
+  string end_date = 4;
+}
+message CreateCycleResponse {
+  Cycle cycle = 1;
+}

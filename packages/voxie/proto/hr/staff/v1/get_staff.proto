@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package hr.staff.v1;
+
+import "buf/validate/validate.proto";
+import "hr/staff/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/staff/v1";
+
+message GetStaffRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message GetStaffResponse {
+  // staff is the staff value for this contract.
+  Staff staff = 1;
+}

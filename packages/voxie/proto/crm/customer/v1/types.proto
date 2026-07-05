@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package crm.customer.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
+
+// ── Customers ───────────────────────────────────────────────────────
+
+message Customer {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // first_name is the first name value for this contract.
+  string first_name = 3;
+  // last_name is the last name value for this contract.
+  string last_name = 4;
+  // email is the email address used for lookup or contact.
+  string email = 5;
+  // phone is the phone value for this contract.
+  string phone = 6;
+  // date_of_birth is the date of birth value for this contract.
+  optional string date_of_birth = 7 [(onekit.http.nullable) = true];
+  // gender is the gender value for this contract.
+  string gender = 8;
+  // address is the address value for this contract.
+  string address = 9;
+  // city is the city value for this contract.
+  string city = 10;
+  // country is the country value for this contract.
+  string country = 11;
+  // loyalty_points is the loyalty points value for this contract.
+  int64 loyalty_points = 12;
+  // total_spent is the total spent value for this contract.
+  double total_spent = 13;
+  // visit_count is the visit count value for this contract.
+  int64 visit_count = 14;
+  // last_visit_at is the last visit at value for this contract.
+  optional string last_visit_at = 15 [(onekit.http.nullable) = true];
+  // loyalty_tier is the loyalty tier value for this contract.
+  string loyalty_tier = 16;
+  // tags is the tags value for this contract.
+  repeated string tags = 17;
+  // notes is the notes value for this contract.
+  string notes = 18;
+  // is_active is the is active value for this contract.
+  bool is_active = 19;
+  // created_at is when the record was created.
+  string created_at = 20;
+  // updated_at is when the record was last updated.
+  string updated_at = 21;
+}

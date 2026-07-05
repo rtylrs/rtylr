@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.billing.v1;
+
+import "hub/billing/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/billing/v1";
+
+message GetBillingSummaryRequest {}
+
+message GetBillingSummaryResponse {
+  // summary is the summary value for this contract.
+  BillingSummary summary = 1;
+}

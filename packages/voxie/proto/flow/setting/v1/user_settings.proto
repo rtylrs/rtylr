@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package flow.setting.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/setting/v1";
+
+message GetUserSettingsRequest {}
+
+message GetUserSettingsResponse {
+  bool task_assigned = 1;
+  bool task_comments = 2;
+  bool mentions = 3;
+  bool status_changes = 4;
+  bool weekly_digest = 5;
+  bool email_notifications = 6;
+}
+
+message UpdateUserSettingsRequest {
+  bool task_assigned = 1;
+  bool task_comments = 2;
+  bool mentions = 3;
+  bool status_changes = 4;
+  bool weekly_digest = 5;
+  bool email_notifications = 6;
+}
+
+message UpdateUserSettingsResponse {}

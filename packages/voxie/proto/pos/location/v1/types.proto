@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package pos.location.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/location/v1";
+
+// ── Location ──────────────────────────────────────────────────────
+
+message Location {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the name value for this contract.
+  string name = 3;
+  // address is the address value for this contract.
+  string address = 4;
+  // phone is the phone value for this contract.
+  string phone = 5;
+  // is_active is the is active value for this contract.
+  bool is_active = 6;
+  // created_at is when the record was created.
+  string created_at = 7;
+  // updated_at is when the record was last updated.
+  string updated_at = 8;
+}

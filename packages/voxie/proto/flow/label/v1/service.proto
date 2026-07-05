@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package flow.label.v1;
+
+import "flow/label/v1/create_label.proto";
+import "flow/label/v1/delete_label.proto";
+import "flow/label/v1/list_labels.proto";
+import "flow/label/v1/set_task_labels.proto";
+import "flow/label/v1/update_label.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/label/v1";
+
+service LabelService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/label/v1"};
+
+  rpc ListLabels(ListLabelsRequest) returns (ListLabelsResponse) {
+    option (onekit.http.config) = {
+      path: "/labels"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateLabel(CreateLabelRequest) returns (CreateLabelResponse) {
+    option (onekit.http.config) = {
+      path: "/labels"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateLabel(UpdateLabelRequest) returns (UpdateLabelResponse) {
+    option (onekit.http.config) = {
+      path: "/labels/{id}"
+      method: HTTP_METHOD_PUT
+    };
+  }
+
+  rpc DeleteLabel(DeleteLabelRequest) returns (DeleteLabelResponse) {
+    option (onekit.http.config) = {
+      path: "/labels/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc SetTaskLabels(SetTaskLabelsRequest) returns (SetTaskLabelsResponse) {
+    option (onekit.http.config) = {
+      path: "/tasks/labels"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

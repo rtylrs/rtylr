@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package insights.operation.v1;
+
+import "insights/operation/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/operation/v1";
+
+message GetHeadcountMetricsRequest {
+  // period is the period value for this contract.
+  string period = 1 [(onekit.http.query).name = "period"];
+}
+
+message GetHeadcountMetricsResponse {
+  // metrics is the metrics value for this contract.
+  HeadcountMetrics metrics = 1;
+}

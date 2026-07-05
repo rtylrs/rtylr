@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package flow.dashboard.v1;
+
+import "buf/validate/validate.proto";
+import "flow/task/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/dashboard/v1";
+
+// ── Flow Dashboard ──────────────────────────────────────────────────
+
+message GetFlowDashboardRequest {
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "workspace_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message GetFlowDashboardResponse {
+  // open_tasks is the open tasks value for this contract.
+  int64 open_tasks = 1;
+  // in_progress_tasks is the in progress tasks value for this contract.
+  int64 in_progress_tasks = 2;
+  // completed_this_week is the completed this week value for this contract.
+  int64 completed_this_week = 3;
+  // overdue_tasks is the overdue tasks value for this contract.
+  int64 overdue_tasks = 4;
+  // my_tasks is the my tasks value for this contract.
+  repeated .flow.task.v1.Task my_tasks = 5;
+}

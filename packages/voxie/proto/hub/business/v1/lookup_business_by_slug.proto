@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "buf/validate/validate.proto";
+import "hub/business/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message LookupBusinessBySlugRequest {
+  // slug is the public business slug to resolve.
+  string slug = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      pattern: "^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$"
+    },
+    (onekit.http.query).name = "slug"
+  ];
+}
+
+message LookupBusinessBySlugResponse {
+  // business is the business value for this contract.
+  PublicBusinessSummary business = 1;
+  // locations is the locations value for this contract.
+  repeated PublicLocation locations = 2;
+}

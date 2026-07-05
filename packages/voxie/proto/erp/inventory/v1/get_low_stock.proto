@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package erp.inventory.v1;
+
+import "erp/inventory/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/inventory/v1";
+
+// -- Low Stock --
+
+message GetLowStockRequest {}
+
+message GetLowStockResponse {
+  // items is the items value for this contract.
+  repeated InventoryReportItem items = 1;
+  // count is the count value for this contract.
+  int64 count = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
+}

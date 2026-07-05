@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+// SetSlugRequest updates the authenticated user's business public slug.
+message SetSlugRequest {
+  // slug is the public business slug to assign.
+  string slug = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      pattern: "^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$"
+    }
+  ];
+}
+
+// SetSlugResponse returns the normalized public business slug.
+message SetSlugResponse {
+  // slug is the public business slug saved for the business.
+  string slug = 1;
+}

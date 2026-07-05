@@ -1,0 +1,8 @@
+syntax = "proto3";
+package flow.notification.v1;
+import "flow/notification/v1/types.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/notification/v1";
+message ListNotificationsRequest {}
+message ListNotificationsResponse {
+  repeated Notification notifications = 1;
+}

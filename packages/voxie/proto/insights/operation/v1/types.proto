@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package insights.operation.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/operation/v1";
+
+// ── Operations Analytics ────────────────────────────────────────────
+
+message UtilizationMetrics {
+  // avg_utilization is the avg utilization value for this contract.
+  double avg_utilization = 1;
+  // total_staff is the total staff value for this contract.
+  int32 total_staff = 2;
+  // active_today is the active today value for this contract.
+  int32 active_today = 3;
+  // total_hours is the total hours value for this contract.
+  double total_hours = 4;
+  // available_hours is the available hours capacity for the period.
+  double available_hours = 7;
+  // overtime_hours is the overtime hours value for this contract.
+  double overtime_hours = 5;
+  // by_staff is the by staff value for this contract.
+  repeated StaffUtilization by_staff = 6;
+}
+
+message StaffUtilization {
+  // staff_id is the staff id value for this contract.
+  int64 staff_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the name value for this contract.
+  string name = 2;
+  // hours_worked is the hours worked value for this contract.
+  double hours_worked = 3;
+  // hours_scheduled is the hours scheduled value for this contract.
+  double hours_scheduled = 4;
+  // utilization is the utilization value for this contract.
+  double utilization = 5;
+}
+
+message ShiftMetrics {
+  // total_shifts is the total shifts value for this contract.
+  int32 total_shifts = 1;
+  // covered is the covered value for this contract.
+  int32 covered = 2;
+  // missed is the missed value for this contract.
+  int32 missed = 3;
+  // coverage_rate is the coverage rate value for this contract.
+  double coverage_rate = 4;
+  // by_day is the by day value for this contract.
+  repeated ShiftsByDay by_day = 5;
+}
+
+message ShiftsByDay {
+  // day is the day value for this contract.
+  string day = 1;
+  // scheduled is the scheduled value for this contract.
+  int32 scheduled = 2;
+  // completed is the completed value for this contract.
+  int32 completed = 3;
+}
+
+message TimeOffMetrics {
+  // total_requests is the total requests value for this contract.
+  int32 total_requests = 1;
+  // approved is the approved value for this contract.
+  int32 approved = 2;
+  // pending is the pending value for this contract.
+  int32 pending = 3;
+  // rejected is the rejected value for this contract.
+  int32 rejected = 4;
+  // by_type is the by type value for this contract.
+  repeated TimeOffByType by_type = 5;
+}
+
+message TimeOffByType {
+  // type is the type value for this contract.
+  string type = 1;
+  // days is the days value for this contract.
+  int32 days = 2;
+  // requests is the requests value for this contract.
+  int32 requests = 3;
+}
+
+message HeadcountMetrics {
+  // current is the current value for this contract.
+  int32 current = 1;
+  // hired_this_period is the hired this period value for this contract.
+  int32 hired_this_period = 2;
+  // departed_this_period is the departed this period value for this contract.
+  int32 departed_this_period = 3;
+  // turnover_rate is the turnover rate value for this contract.
+  double turnover_rate = 4;
+  // trend is the trend value for this contract.
+  repeated HeadcountPoint trend = 5;
+}
+
+message HeadcountPoint {
+  // date is the date value for this contract.
+  string date = 1;
+  // count is the count value for this contract.
+  int32 count = 2;
+}

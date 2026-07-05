@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hub.ai.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/ai/v1";
+
+message AiQuotaStatus {
+  string plan_slug = 1;
+  string mode = 2;
+  int64 allowance_tokens = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 used_tokens = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 remaining_tokens = 5 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 overage_tokens = 6 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  bool allow_overage = 7;
+  bool blocked = 8;
+  string period_end = 9;
+}
+
+message AiQuotaSettings {
+  string mode = 1;
+}

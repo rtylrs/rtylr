@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package hub.activity.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/activity/v1";
+
+// ── Activity ────────────────────────────────────────────────────────
+
+message ActivityEntry {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // app is the app value for this contract.
+  string app = 3;
+  // entity_type is the entity type value for this contract.
+  string entity_type = 4;
+  // entity_id is the entity id value for this contract.
+  int64 entity_id = 5 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // action is the action value for this contract.
+  string action = 6;
+  // description is the description value for this contract.
+  string description = 7;
+  // user_id identifies the user associated with this request.
+  int64 user_id = 8 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // user_name is the user name value for this contract.
+  string user_name = 9;
+  // created_at is when the record was created.
+  string created_at = 10;
+}

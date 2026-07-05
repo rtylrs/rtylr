@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package hub.team.members.v1;
+
+import "hub/team/groups/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/team/members/v1";
+
+// ── Team ────────────────────────────────────────────────────────────
+
+message StaffUserPayload {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // email is the email address used for lookup or contact.
+  string email = 2;
+  // full_name is the full name value for this contract.
+  string full_name = 3;
+  // created_at is when the record was created.
+  string created_at = 4;
+  // apps is the apps value for this contract.
+  repeated string apps = 5;
+  // role is the role value for this contract.
+  string role = 6;
+  // is_active is the is active value for this contract.
+  bool is_active = 7;
+}
+
+message StaffUserWithGroups {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // email is the email address used for lookup or contact.
+  string email = 2;
+  // full_name is the full name value for this contract.
+  string full_name = 3;
+  // created_at is when the record was created.
+  string created_at = 4;
+  // apps is the apps value for this contract.
+  repeated string apps = 5;
+  // role is the role value for this contract.
+  string role = 6;
+  // is_active is the is active value for this contract.
+  bool is_active = 7;
+  // groups contains the groups the staff user belongs to.
+  repeated hub.team.groups.v1.GroupSummary groups = 8;
+}

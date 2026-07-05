@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package hub.permission.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/permission/v1";
+
+message UpdateRoleRequest {
+  // id is the unique identifier for the role.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the role name.
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // permissions is the permissions value for this contract.
+  repeated string permissions = 3;
+}
+
+message UpdateRoleResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

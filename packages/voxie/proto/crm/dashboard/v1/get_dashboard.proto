@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package crm.dashboard.v1;
+
+import "crm/dashboard/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/dashboard/v1";
+
+message GetDashboardRequest {}
+
+message GetDashboardResponse {
+  // total_customers is the total customers value for this contract.
+  int64 total_customers = 1;
+  // new_this_month is the new this month value for this contract.
+  int64 new_this_month = 2;
+  // active_loyalty_members is the active loyalty members value for this contract.
+  int64 active_loyalty_members = 3;
+  // top_customers is the top customers value for this contract.
+  repeated TopCustomer top_customers = 4;
+}

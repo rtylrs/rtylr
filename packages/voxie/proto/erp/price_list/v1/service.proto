@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package erp.price_list.v1;
+
+import "erp/price_list/v1/create_price_list.proto";
+import "erp/price_list/v1/list_price_lists.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/price_list/v1";
+
+service PriceListService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/price-list/v1"};
+
+  rpc ListPriceLists(ListPriceListsRequest) returns (ListPriceListsResponse) {
+    option (onekit.http.config) = {
+      path: "/price-lists"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreatePriceList(CreatePriceListRequest) returns (CreatePriceListResponse) {
+    option (onekit.http.config) = {
+      path: "/price-lists"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

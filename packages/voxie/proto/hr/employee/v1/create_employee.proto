@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package hr.employee.v1;
+
+import "buf/validate/validate.proto";
+import "hr/staff/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateEmployeeRequest {
+  // department_id is the department assignment; zero leaves it unset.
+  int64 department_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // location_id is the work location assignment; zero leaves it unset.
+  int64 location_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // work_schedule_id is the work schedule assignment; zero leaves it unset.
+  int64 work_schedule_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // first_name is the employee's given name.
+  string first_name = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // last_name is the employee's family name.
+  string last_name = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // email is the employee email address.
+  string email = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
+  // phone is the employee phone number.
+  string phone = 7;
+  // employment_type is the employment type label.
+  string employment_type = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // salary is the monthly or salaried compensation amount.
+  double salary = 9 [(buf.validate.field).double.gte = 0];
+  // hourly_rate is the employee hourly pay rate.
+  double hourly_rate = 10 [(buf.validate.field).double.gte = 0];
+  // overtime_rate is the employee overtime pay rate.
+  double overtime_rate = 11 [(buf.validate.field).double.gte = 0];
+  // start_date is the start date in YYYY-MM-DD format.
+  string start_date = 12 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // address is the employee address.
+  string address = 13;
+}
+
+message CreateEmployeeResponse {
+  // The newly created employee record.
+  hr.staff.v1.Staff employee = 1;
+}

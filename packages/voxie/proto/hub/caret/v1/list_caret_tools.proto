@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hub.caret.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/caret/v1";
+
+message CaretTool {
+  string name = 1;
+  string label = 2;
+  string description = 3;
+  string category = 4;
+  bool requires_approval = 5;
+}
+
+message ListCaretToolsRequest {
+  string mode = 1;
+}
+
+message ListCaretToolsResponse {
+  repeated CaretTool tools = 1;
+}

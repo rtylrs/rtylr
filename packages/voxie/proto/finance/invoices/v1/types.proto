@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+package finance.invoices.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/v1";
+
+// ── Invoices ────────────────────────────────────────────────────────
+
+message InvoiceItem {
+  // description is the description value for this contract.
+  string description = 1;
+  // quantity is the quantity value for this contract.
+  double quantity = 2;
+  // unit is the unit value for this contract.
+  string unit = 3;
+  // unit_price is the unit price value for this contract.
+  double unit_price = 4;
+  // tax_rate is the tax rate value for this contract.
+  double tax_rate = 5;
+  // discount_pct is the discount pct value for this contract.
+  double discount_pct = 6;
+  // sort_order is the sort order value for this contract.
+  int64 sort_order = 7;
+  // total is the total number of matching records.
+  double total = 8;
+}
+
+message InvoiceSummary {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // invoice_number is the invoice number value for this contract.
+  string invoice_number = 2;
+  // client_name is the client name value for this contract.
+  string client_name = 3;
+  // status is the current lifecycle state.
+  string status = 4;
+  // issue_date is the issue date value for this contract.
+  string issue_date = 5;
+  // due_date is the due date value for this contract.
+  string due_date = 6;
+  // paid_date is the paid date value for this contract.
+  string paid_date = 7;
+  // currency is the currency value for this contract.
+  string currency = 8;
+  // total is the total number of matching records.
+  double total = 9;
+  // amount_paid is the amount paid value for this contract.
+  double amount_paid = 10;
+  // amount_due is the amount due value for this contract.
+  double amount_due = 11;
+  // created_at is when the record was created.
+  string created_at = 12;
+}
+
+message InvoiceDetail {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // invoice_number is the invoice number value for this contract.
+  string invoice_number = 3;
+  // client_name is the client name value for this contract.
+  string client_name = 4;
+  // client_email is the client email value for this contract.
+  string client_email = 5;
+  // client_address is the client address value for this contract.
+  string client_address = 6;
+  // client_tax_id is the client tax id value for this contract.
+  string client_tax_id = 7;
+  // status is the current lifecycle state.
+  string status = 8;
+  // issue_date is the issue date value for this contract.
+  string issue_date = 9;
+  // due_date is the due date value for this contract.
+  string due_date = 10;
+  // paid_date is the paid date value for this contract.
+  string paid_date = 11;
+  // currency is the currency value for this contract.
+  string currency = 12;
+  // subtotal is the subtotal value for this contract.
+  double subtotal = 13;
+  // discount_type is the discount type value for this contract.
+  string discount_type = 14;
+  // discount_value is the discount value value for this contract.
+  double discount_value = 15;
+  // discount_amount is the discount amount value for this contract.
+  double discount_amount = 16;
+  // tax_rate is the tax rate value for this contract.
+  double tax_rate = 17;
+  // tax_amount is the tax amount value for this contract.
+  double tax_amount = 18;
+  // total is the total number of matching records.
+  double total = 19;
+  // amount_paid is the amount paid value for this contract.
+  double amount_paid = 20;
+  // amount_due is the amount due value for this contract.
+  double amount_due = 21;
+  // notes is the notes value for this contract.
+  string notes = 22;
+  // terms is the terms value for this contract.
+  string terms = 23;
+  // created_at is when the record was created.
+  string created_at = 24;
+  // updated_at is when the record was last updated.
+  string updated_at = 25;
+  // items is the items value for this contract.
+  repeated InvoiceItem items = 26;
+}
+
+message Payment {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // amount is the amount value for this contract.
+  double amount = 2;
+  // currency is the currency value for this contract.
+  string currency = 3;
+  // payment_date is the payment date value for this contract.
+  string payment_date = 4;
+  // method is the method value for this contract.
+  string method = 5;
+  // reference is the reference value for this contract.
+  string reference = 6;
+  // notes is the notes value for this contract.
+  string notes = 7;
+}
+
+message RecordPaymentResponsePayload {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // invoice_id is the invoice id value for this contract.
+  int64 invoice_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // amount is the amount value for this contract.
+  double amount = 3;
+  // currency is the currency value for this contract.
+  string currency = 4;
+  // payment_date is the payment date value for this contract.
+  string payment_date = 5;
+  // method is the method value for this contract.
+  string method = 6;
+  // reference is the reference value for this contract.
+  string reference = 7;
+  // notes is the notes value for this contract.
+  string notes = 8;
+}

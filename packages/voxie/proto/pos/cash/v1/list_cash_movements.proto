@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package pos.cash.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+import "pos/cash/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/cash/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListCashMovementsRequest {
+  // session_id is the session id value for this contract.
+  int64 session_id = 1 [
+    (onekit.http.query).name = "session_id",
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}
+
+message ListCashMovementsResponse {
+  // movements is the movements value for this contract.
+  repeated CashMovement movements = 1;
+}

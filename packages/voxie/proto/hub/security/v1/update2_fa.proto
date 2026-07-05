@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hub.security.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/security/v1";
+
+message Update2FARequest {
+  // enabled is the enabled value for this contract.
+  bool enabled = 1;
+}
+
+message Update2FAResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

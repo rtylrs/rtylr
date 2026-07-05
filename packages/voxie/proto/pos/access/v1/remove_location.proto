@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.access.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/access/v1";
+
+// ── Remove ────────────────────────────────────────────────────────
+
+message RemoveLocationRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}
+
+message RemoveLocationResponse {
+  // success is the success value for this contract.
+  bool success = 1;
+}

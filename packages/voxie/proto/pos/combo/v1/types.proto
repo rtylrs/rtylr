@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package pos.combo.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/combo/v1";
+
+// ── Combo ─────────────────────────────────────────────────────────
+
+message Combo {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the name value for this contract.
+  string name = 3;
+  // description is the description value for this contract.
+  string description = 4;
+  // price is the price value for this contract.
+  double price = 5;
+  // items is the items value for this contract.
+  string items = 6;
+  // is_active is the is active value for this contract.
+  bool is_active = 7;
+  // created_at is when the record was created.
+  string created_at = 8;
+  // updated_at is when the record was last updated.
+  string updated_at = 9;
+}

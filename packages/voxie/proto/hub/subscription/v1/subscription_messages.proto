@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package hub.subscription.v1;
+
+import "hub/subscription/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/subscription/v1";
+
+message GetMySubscriptionRequest {}
+
+message GetMySubscriptionResponse {
+  Subscription subscription = 1;
+}
+
+message ListPlansRequest {}
+
+message ListPlansResponse {
+  repeated Plan plans = 1;
+}
+
+message GetBillingDetailRequest {}
+
+message GetBillingDetailResponse {
+  BillingDetail billing = 1;
+}
+
+message GetBillingHistoryRequest {}
+
+message GetBillingHistoryResponse {
+  repeated BillingHistoryMonth history = 1;
+}
+
+message UpsertSubscriptionRequest {
+  string plan_slug = 1;
+}
+
+message UpsertSubscriptionResponse {
+  string message = 1;
+}
+
+message CreateCheckoutRequest {
+  string plan_slug = 1;
+  string email = 2;
+}
+
+message CreateCheckoutResponse {
+  string checkout_url = 1;
+}

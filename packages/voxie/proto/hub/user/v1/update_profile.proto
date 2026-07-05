@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hub.user.v1;
+
+import "buf/validate/validate.proto";
+import "hub/user/v1/get_me.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/user/v1";
+
+message UpdateProfileRequest {
+  // name is the name value for this contract.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // email is reserved for future profile email changes.
+  optional string email = 2 [
+    (buf.validate.field).string.email = true,
+    (onekit.http.nullable) = true
+  ];
+}
+
+message UpdateProfileResponse {
+  // user is the user value for this contract.
+  GetMeResponse user = 1;
+}

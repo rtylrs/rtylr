@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package pos.menu_item.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
+
+// ── Create ────────────────────────────────────────────────────────
+
+message CreateMenuItemRequest {
+  // name is the name value for this contract.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // sku is the sku value for this contract.
+  string sku = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // sale_price is the sale price value for this contract.
+  double sale_price = 3 [(buf.validate.field).double.gte = 0];
+}
+
+message CreateMenuItemResponse {
+  // item_id is the item id value for this contract.
+  int64 item_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // message is a human-readable result message.
+  string message = 2;
+}

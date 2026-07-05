@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package insights.product.v1;
+
+import "insights/product/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/product/v1";
+
+message GetCategoryPerformanceRequest {}
+
+message GetCategoryPerformanceResponse {
+  // categories is the categories value for this contract.
+  repeated CategorySales categories = 1;
+}

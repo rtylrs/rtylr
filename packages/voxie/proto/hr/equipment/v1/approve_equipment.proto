@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package hr.equipment.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
+
+// ── Approve Equipment Request ────────────────────────────────────
+
+message ApproveEquipmentBody {
+  // True to approve, false to reject.
+  bool approved = 1;
+}
+
+message ApproveEquipmentRequest {
+  // ID of the equipment request being reviewed.
+  int64 equipment_request_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries approval decision fields bound from the HTTP payload.
+  ApproveEquipmentBody body = 2;
+}
+
+message ApproveEquipmentResponse {
+  // Whether the approval action was processed.
+  bool success = 1;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.integration.v1;
+
+import "hub/integration/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/integration/v1";
+
+message ListIntegrationsRequest {}
+
+message ListIntegrationsResponse {
+  // integrations is the integrations value for this contract.
+  repeated Integration integrations = 1;
+}

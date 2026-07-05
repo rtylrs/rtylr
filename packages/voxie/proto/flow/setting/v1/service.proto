@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package flow.setting.v1;
+
+import "flow/setting/v1/user_settings.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/setting/v1";
+
+service SettingService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/setting/v1"};
+
+  rpc GetUserSettings(GetUserSettingsRequest) returns (GetUserSettingsResponse) {
+    option (onekit.http.config) = {
+      path: "/settings"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdateUserSettings(UpdateUserSettingsRequest) returns (UpdateUserSettingsResponse) {
+    option (onekit.http.config) = {
+      path: "/settings"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

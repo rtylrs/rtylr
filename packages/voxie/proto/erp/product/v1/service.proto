@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+import "erp/product/v1/create_product.proto";
+import "erp/product/v1/delete_product.proto";
+import "erp/product/v1/get_dashboard.proto";
+import "erp/product/v1/get_product.proto";
+import "erp/product/v1/get_product_by_barcode.proto";
+import "erp/product/v1/get_product_full.proto";
+import "erp/product/v1/list_expiring_items.proto";
+import "erp/product/v1/list_product_attributes.proto";
+import "erp/product/v1/list_products.proto";
+import "erp/product/v1/list_reorder_suggestions.proto";
+import "erp/product/v1/update_product.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+// ProductService defines ERP product endpoints.
+service ProductService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/product/v1"};
+
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {
+    option (onekit.http.config) = {
+      path: "/products"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetProductByBarcode(GetProductByBarcodeRequest) returns (GetProductByBarcodeResponse) {
+    option (onekit.http.config) = {
+      path: "/products/barcode/{code}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetProductFull(GetProductFullRequest) returns (GetProductFullResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}/full"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListProductAttributes(ListProductAttributesRequest) returns (ListProductAttributesResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}/attributes"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {
+    option (onekit.http.config) = {
+      path: "/products/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc GetDashboard(GetDashboardRequest) returns (GetDashboardResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListReorderSuggestions(ListReorderSuggestionsRequest) returns (ListReorderSuggestionsResponse) {
+    option (onekit.http.config) = {
+      path: "/reorder-suggestions"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListExpiringItems(ListExpiringItemsRequest) returns (ListExpiringItemsResponse) {
+    option (onekit.http.config) = {
+      path: "/expiry"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

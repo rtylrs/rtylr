@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package pos.stock.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/stock/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
+
+// ── List Movements ────────────────────────────────────────────────
+
+message ListStockMovementsRequest {
+  // branch_id is the branch id value for this contract.
+  int64 branch_id = 1 [(onekit.http.query).name = "branch_id", (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // product_id is the product id value for this contract.
+  int64 product_id = 2 [(onekit.http.query).name = "product_id", (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}
+
+message ListStockMovementsResponse {
+  // movements is the movements value for this contract.
+  repeated StockMovement movements = 1;
+}

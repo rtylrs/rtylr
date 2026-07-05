@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package hub.team.access.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/team/access/v1";
+
+message AccessRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // user_id identifies the user who requested access.
+  int64 user_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // app is the app value for this contract.
+  string app = 3;
+  // requester_name is the requester name value for this contract.
+  string requester_name = 4;
+  // requester_email is the requester email value for this contract.
+  string requester_email = 5;
+  // created_at is when the record was created.
+  string created_at = 6;
+}
+
+message ListAccessRequestsRequest {}
+
+message ListAccessRequestsResponse {
+  // requests is the requests value for this contract.
+  repeated AccessRequest requests = 1;
+}

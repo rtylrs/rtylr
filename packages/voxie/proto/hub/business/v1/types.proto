@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+// ── Business ────────────────────────────────────────────────────────
+
+message Business {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the name value for this contract.
+  string name = 2;
+  // type is the type value for this contract.
+  // restaurant, retail, services, etc.
+  string type = 3;
+  // logo_url is the logo url value for this contract.
+  string logo_url = 4;
+  // address is the address value for this contract.
+  string address = 5;
+  // phone is the phone value for this contract.
+  string phone = 6;
+  // email is the email address used for lookup or contact.
+  string email = 7;
+  // website is the website value for this contract.
+  string website = 8;
+  // timezone is the timezone value for this contract.
+  string timezone = 9;
+  // currency is the currency value for this contract.
+  string currency = 10;
+  // country is the country value for this contract.
+  string country = 11;
+  // plan is the plan value for this contract.
+  string plan = 12;
+  // created_at is when the record was created.
+  string created_at = 13;
+  // URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+  string slug = 14;
+}
+
+// BusinessEntry is a compact business row for ownership listings.
+message BusinessEntry {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the name value for this contract.
+  string name = 2;
+  // logo_url is the logo url value for this contract.
+  string logo_url = 3;
+  // parent_id identifies the parent business, zero for top-level businesses.
+  int64 parent_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // is_active is the is active value for this contract.
+  bool is_active = 5;
+}
+
+// ── Public lookup ───────────────────────────────────────────────────
+// Powers menu.rtylr.com/<slug>: resolves a public slug into a business
+// summary plus its visible locations so the menu app can render a
+// location picker before drilling into a specific menu.
+
+message PublicLocation {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the name value for this contract.
+  string name = 2;
+  // slug is the slug value for this contract.
+  string slug = 3;
+  // address is the address value for this contract.
+  string address = 4;
+  // timezone is the timezone value for this contract.
+  string timezone = 5;
+  // is_active is the is active value for this contract.
+  bool is_active = 6;
+}
+
+message PublicBusinessSummary {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // name is the name value for this contract.
+  string name = 2;
+  // slug is the slug value for this contract.
+  string slug = 3;
+  // logo_url is the logo url value for this contract.
+  string logo_url = 4;
+  // currency is the currency value for this contract.
+  string currency = 5;
+  // type is the type value for this contract.
+  string type = 6;
+  // timezone is the timezone value for this contract.
+  string timezone = 7;
+}

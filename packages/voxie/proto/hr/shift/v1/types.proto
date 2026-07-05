@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package hr.shift.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
+
+// ── Shift ─────────────────────────────────────────────────────────
+
+message ShiftPayload {
+  // Unique identifier for the shift template.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this shift belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Location where this shift takes place.
+  int64 location_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Human-readable shift name (e.g. "Morning", "Night").
+  string name = 4;
+  // Shift start time (HH:MM 24-hour format).
+  string start_time = 5;
+  // Shift end time (HH:MM 24-hour format).
+  string end_time = 6;
+  // Hex colour code used to render this shift on the roster (e.g. "#4CAF50").
+  string color = 7;
+  // Unix timestamp when this record was created.
+  int64 created_at = 8;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 9;
+}
+
+// ── Shift Assignment ──────────────────────────────────────────────
+
+message ShiftAssignmentPayload {
+  // Unique identifier for the assignment.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this assignment belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Employee assigned to the shift.
+  int64 employee_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Shift template being assigned.
+  int64 shift_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Date the assignment is for (ISO-8601 date).
+  string date = 5;
+  // Assignment status (scheduled | worked | missed | swapped).
+  string status = 6;
+  // Unix timestamp when this record was created.
+  int64 created_at = 7;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 8;
+}

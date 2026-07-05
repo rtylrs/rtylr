@@ -1,0 +1,21 @@
+syntax = "proto3";
+package flow.milestone.v1;
+import "onekit/http/annotations.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/milestone/v1";
+message MilestoneProject {
+  string name = 1;
+  string color = 2;
+}
+message Milestone {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 project_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 3;
+  string target_date = 4;
+  int32 progress = 5;
+  int32 computed_progress = 6;
+  int32 done_count = 7;
+  int32 task_count = 8;
+  string status = 9;
+  string description = 10;
+  MilestoneProject project = 11;
+}

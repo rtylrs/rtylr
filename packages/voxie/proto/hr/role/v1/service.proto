@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package hr.role.v1;
+
+import "hr/role/v1/assign_role.proto";
+import "hr/role/v1/create_role.proto";
+import "hr/role/v1/update_role.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
+
+// RoleService defines HR role endpoints.
+service RoleService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/role/v1"};
+
+  // CreateRole creates a new role.
+  rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse) {
+    option (onekit.http.config) = {
+      path: "/roles"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateRole updates an existing role.
+  rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {
+    option (onekit.http.config) = {
+      path: "/roles/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  // AssignRole assigns a role to an employee.
+  rpc AssignRole(AssignRoleRequest) returns (AssignRoleResponse) {
+    option (onekit.http.config) = {
+      path: "/roles/assign"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

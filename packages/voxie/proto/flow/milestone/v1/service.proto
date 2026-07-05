@@ -1,0 +1,19 @@
+syntax = "proto3";
+package flow.milestone.v1;
+import "flow/milestone/v1/create_milestone.proto";
+import "flow/milestone/v1/list_milestones.proto";
+import "flow/milestone/v1/update_milestone.proto";
+import "onekit/http/annotations.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/milestone/v1";
+service MilestoneService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/milestone/v1"};
+  rpc ListMilestones(ListMilestonesRequest) returns (ListMilestonesResponse) {
+    option (onekit.http.config) = { path: "/milestones" method: HTTP_METHOD_GET };
+  }
+  rpc CreateMilestone(CreateMilestoneRequest) returns (CreateMilestoneResponse) {
+    option (onekit.http.config) = { path: "/milestones" method: HTTP_METHOD_POST };
+  }
+  rpc UpdateMilestone(UpdateMilestoneRequest) returns (UpdateMilestoneResponse) {
+    option (onekit.http.config) = { path: "/milestones/{id}" method: HTTP_METHOD_PUT };
+  }
+}

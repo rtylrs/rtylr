@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package insights.operation.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/operation/v1";
+
+message GetOperationsSummaryRequest {}
+
+message GetOperationsSummaryResponse {
+  // active_staff is the active staff count.
+  int64 active_staff = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // shifts_this_week is the scheduled shift count this week.
+  int64 shifts_this_week = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // pending_time_off is the pending time-off request count.
+  int64 pending_time_off = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // open_leave_requests is the open leave request count.
+  int64 open_leave_requests = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}

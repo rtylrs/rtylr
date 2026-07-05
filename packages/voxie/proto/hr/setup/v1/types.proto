@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package hr.setup.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/setup/v1";
+
+// ── Setup Wizard ───────────────────────────────────────────────────
+
+message SetupWizardStepPayload {
+  // Unique identifier for the setup step record.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this step belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Which setup step this represents (company_profile | work_schedule | leave_policy | org_structure | locations | roles_permissions | payroll | notifications | employees).
+  string step_key = 3;
+  // Unix timestamp when this step was completed; absent if not yet completed.
+  optional int64 completed_at = 4 [
+    (onekit.http.nullable) = true
+  ];
+  // Unix timestamp when this step record was created.
+  int64 created_at = 5;
+  // Unix timestamp when this step record was last updated.
+  int64 updated_at = 6;
+}
+
+// ── HR Company Config ──────────────────────────────────────────────
+
+message HRCompanyConfigPayload {
+  // Unique identifier for the config record.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this config belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // How time is tracked (time_logging | attendance | both).
+  string time_tracking_model = 3;
+  // Period for timesheet submission (weekly | biweekly | monthly).
+  string timesheet_period = 4;
+  // Period for payroll runs (weekly | biweekly | monthly).
+  string payroll_period = 5;
+  // How gross pay is calculated (hourly | salary | both).
+  string payroll_gross_model = 6;
+  // Unix timestamp when the full setup wizard was completed; absent if still in progress.
+  optional int64 setup_completed_at = 7 [
+    (onekit.http.nullable) = true
+  ];
+  // Unix timestamp when this config was created.
+  int64 created_at = 8;
+  // Unix timestamp when this config was last updated.
+  int64 updated_at = 9;
+  // Enabled clock-in methods for attendance tracking
+  // (values: "app", "pin", "gps", "kiosk"). Empty defaults to ["app"].
+  repeated string clock_in_methods = 10;
+  // App IDs this tenant is subscribed to (values: "flow", "finance",
+  // "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
+  // the "Import from Flow" button on HR timesheets.
+  repeated string subscribed_apps = 11;
+}
+
+// ── Get Setup Status ───────────────────────────────────────────────
+
+message GetSetupStatusResponse {
+  // All wizard steps and their completion state.
+  repeated SetupWizardStepPayload steps = 1;
+  // Current HR configuration for the tenant.
+  HRCompanyConfigPayload config = 2;
+  // Whether every setup step has been completed.
+  bool is_complete = 3;
+}

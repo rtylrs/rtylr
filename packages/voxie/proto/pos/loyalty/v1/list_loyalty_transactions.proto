@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package pos.loyalty.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/loyalty/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
+
+// ── List Transactions ─────────────────────────────────────────────
+
+message ListLoyaltyTransactionsRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1 [(onekit.http.query).name = "customer_id", (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}
+
+message ListLoyaltyTransactionsResponse {
+  // transactions is the transactions value for this contract.
+  repeated LoyaltyTransaction transactions = 1;
+}

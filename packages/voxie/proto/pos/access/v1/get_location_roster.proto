@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package pos.access.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+import "pos/access/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/access/v1";
+
+// ── Get Location Roster ───────────────────────────────────────────
+
+message GetLocationRosterRequest {
+  // location_id is the location id value for this contract.
+  int64 location_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "location_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message GetLocationRosterResponse {
+  // roster is the roster value for this contract.
+  repeated RosterEntry roster = 1;
+}

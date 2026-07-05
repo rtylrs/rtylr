@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.team.members.v1;
+
+import "hub/team/members/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/team/members/v1";
+
+message ListTeamRequest {}
+
+message ListTeamResponse {
+  // users is the users value for this contract.
+  repeated StaffUserPayload users = 1;
+}

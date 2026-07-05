@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package insights.setting.v1;
+
+import "insights/setting/v1/get_insights_settings.proto";
+import "insights/setting/v1/update_insights_settings.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/setting/v1";
+
+// SettingService defines insights settings endpoints.
+service SettingService {
+  option (onekit.http.service_config) = {base_path: "/api/insights/setting/v1"};
+
+  // GetInsightsSettings returns insights configuration.
+  rpc GetInsightsSettings(GetInsightsSettingsRequest) returns (GetInsightsSettingsResponse) {
+    option (onekit.http.config) = {
+      path: "/settings"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UpdateInsightsSettings replaces insights configuration.
+  rpc UpdateInsightsSettings(UpdateInsightsSettingsRequest) returns (UpdateInsightsSettingsResponse) {
+    option (onekit.http.config) = {
+      path: "/settings"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

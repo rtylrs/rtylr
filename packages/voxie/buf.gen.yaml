@@ -1,0 +1,30 @@
+version: v2
+
+inputs:
+  - directory: proto
+
+plugins:
+  - local: protoc-gen-go
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+  - local: protoc-gen-onekit-go-http
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+  - local: scripts/protoc-gen-ts_proto.sh
+    out: gen/ts
+    opt:
+      - esModuleInterop=true
+      - outputServices=false
+      - env=browser
+      - useExactTypes=false
+      - exportCommonSymbols=false
+      - onlyTypes=true
+
+  - local: protoc-gen-onekit-ts-client
+    out: gen/ts
+    opt:
+      - paths=source_relative

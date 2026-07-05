@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package pos.table.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/table/v1";
+
+// ── Table ─────────────────────────────────────────────────────────
+
+message Table {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // location_id is the location id value for this contract.
+  optional int64 location_id = 3 [(onekit.http.nullable) = true, (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // label is the label value for this contract.
+  string label = 4;
+  // seats is the seats value for this contract.
+  int32 seats = 5;
+  // status is the current lifecycle state.
+  string status = 6;
+  // created_at is when the record was created.
+  string created_at = 7;
+  // updated_at is when the record was last updated.
+  string updated_at = 8;
+}

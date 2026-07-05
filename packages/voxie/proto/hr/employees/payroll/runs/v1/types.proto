@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package hr.employees.payroll.runs.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
+
+// ── Payroll Entry ────────────────────────────────────────────────────
+
+message PayrollEntryPayload {
+  // Unique identifier for the payroll entry.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this entry belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Payroll run this entry is part of.
+  int64 payroll_run_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Employee this entry compensates.
+  int64 employee_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Gross base pay for the period.
+  double base_pay = 5;
+  // Compensation for overtime hours worked.
+  double overtime_pay = 6;
+  // Total deductions applied (tax, insurance, etc.).
+  double deductions = 7;
+  // Additional bonuses awarded in this period.
+  double bonuses = 8;
+  // Final take-home pay after deductions and bonuses.
+  double net_pay = 9;
+  // Total regular hours worked in the period.
+  double hours_worked = 10;
+  // Total overtime hours worked in the period.
+  double overtime_hours = 11;
+  // Unix timestamp when this record was created.
+  int64 created_at = 12;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 13;
+}
+
+// ── Payroll Run ──────────────────────────────────────────────────────
+
+message PayrollRunPayload {
+  // Unique identifier for the payroll run.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this run belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Start of the pay period (ISO-8601 date).
+  string period_start = 3;
+  // End of the pay period (ISO-8601 date).
+  string period_end = 4;
+  // Workflow status (draft | in_review | approved | exported).
+  string status = 5;
+  // Employee who initiated the payroll run.
+  int64 created_by = 6;
+  // Employee who approved the run; absent if not yet approved.
+  optional int64 approved_by = 7 [
+    (onekit.http.nullable) = true
+  ];
+  // Unix timestamp when the run was exported; absent if not yet exported.
+  optional int64 exported_at = 8 [
+    (onekit.http.nullable) = true
+  ];
+  // Sum of all entry gross pay amounts in this run.
+  double total_gross = 9;
+  // Sum of all entry net pay amounts in this run.
+  double total_net = 10;
+  // Individual payroll entries included in this run.
+  repeated PayrollEntryPayload entries = 11;
+  // Unix timestamp when this record was created.
+  int64 created_at = 12;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 13;
+}

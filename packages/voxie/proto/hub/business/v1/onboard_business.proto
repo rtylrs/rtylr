@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message OnboardBusinessRequest {
+  // name is the first business name created during owner onboarding.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message OnboardBusinessResponse {
+  // token is a fresh JWT carrying the new business_id.
+  string token = 1;
+}

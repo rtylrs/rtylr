@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package hr.employees.payroll.runs.v1;
+
+import "hr/employees/payroll/runs/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
+
+// ── List Payroll Runs ────────────────────────────────────────────────
+
+message ListPayrollRunsRequest {}
+
+message ListPayrollRunsResponse {
+  // Page of payroll runs.
+  repeated PayrollRunPayload runs = 1;
+  // Total number of payroll runs across all pages.
+  int64 total = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

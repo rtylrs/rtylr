@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package pos.receipt.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/receipt/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/receipt/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListReceiptsRequest {
+  // from is the from value for this contract.
+  string from = 1 [(onekit.http.query).name = "from"];
+  // to is the to value for this contract.
+  string to = 2 [(onekit.http.query).name = "to"];
+}
+
+message ListReceiptsResponse {
+  // receipts is the receipts value for this contract.
+  repeated Receipt receipts = 1;
+}

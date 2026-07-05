@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hub.security.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/security/v1";
+
+message InvalidateSessionsRequest {}
+
+message InvalidateSessionsResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

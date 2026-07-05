@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message GetPublicBusinessRequest {
+  int64 business_id = 1 [
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "business_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message PublicBusinessProfile {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 2;
+  string logo_url = 3;
+  string currency = 4;
+  string timezone = 5;
+}
+
+message GetPublicBusinessResponse {
+  PublicBusinessProfile business = 1;
+}

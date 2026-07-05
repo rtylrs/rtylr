@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package flow.dashboard.v1;
+
+import "flow/dashboard/v1/get_flow_dashboard.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/dashboard/v1";
+
+service DashboardService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/dashboard/v1"};
+
+  rpc GetFlowDashboard(GetFlowDashboardRequest) returns (GetFlowDashboardResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

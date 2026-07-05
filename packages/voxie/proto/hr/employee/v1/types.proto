@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package hr.employee.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
+
+// ── Employee ───────────────────────────────────────────────────────
+
+message EmployeePayload {
+  // Unique identifier for the employee record.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this employee belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Linked user account ID.
+  int64 user_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Department the employee is assigned to.
+  int64 department_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Work location the employee reports to.
+  int64 location_id = 5 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Direct manager; absent if top-level.
+  optional int64 manager_id = 6 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // Employment arrangement (full_time | part_time | freelancer).
+  string contract_type = 7;
+  // Current employment status (active | probation | inactive | terminated).
+  string status = 8;
+  // Date the employee was hired (ISO-8601 format).
+  string hire_date = 9;
+  // End of probation period; absent if no probation (ISO-8601 format).
+  optional string probation_end_date = 10 [
+    (onekit.http.nullable) = true
+  ];
+  // Date employment was terminated; absent if still employed (ISO-8601 format).
+  optional string termination_date = 11 [
+    (onekit.http.nullable) = true
+  ];
+  // Pay rate per hour for hourly employees; absent if salaried only.
+  optional double hourly_rate = 12 [
+    (onekit.http.nullable) = true
+  ];
+  // Monthly gross salary; absent if hourly only.
+  optional double monthly_salary = 13 [
+    (onekit.http.nullable) = true
+  ];
+  // ISO-4217 currency code for compensation (e.g. "USD").
+  string currency = 14;
+  // Assigned work schedule; absent if using department default.
+  optional int64 work_schedule_id = 15 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // How the employee account was created (hr_created | invite_link).
+  string account_creation_mode = 16;
+  // Employee's job title or position name.
+  string job_title = 17;
+  // Unix timestamp when this record was created.
+  int64 created_at = 18;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 19;
+}

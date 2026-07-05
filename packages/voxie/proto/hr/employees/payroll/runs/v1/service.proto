@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package hr.employees.payroll.runs.v1;
+
+import "hr/employees/payroll/runs/v1/approve_payroll_run.proto";
+import "hr/employees/payroll/runs/v1/export_payroll.proto";
+import "hr/employees/payroll/runs/v1/list_payroll_runs.proto";
+import "hr/employees/payroll/runs/v1/trigger_payroll_run.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
+
+// RunsService defines HR payroll run endpoints.
+service RunsService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/employees/payroll/runs/v1"};
+
+  // ListPayrollRuns returns payroll runs.
+  rpc ListPayrollRuns(ListPayrollRunsRequest) returns (ListPayrollRunsResponse) {
+    option (onekit.http.config) = {
+      path: "/runs"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // TriggerPayrollRun triggers a new payroll run.
+  rpc TriggerPayrollRun(TriggerPayrollRunRequest) returns (TriggerPayrollRunResponse) {
+    option (onekit.http.config) = {
+      path: "/runs/trigger"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ApprovePayrollRun approves a payroll run.
+  rpc ApprovePayrollRun(ApprovePayrollRunRequest) returns (ApprovePayrollRunResponse) {
+    option (onekit.http.config) = {
+      path: "/runs/{id}/approve"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  // ExportPayroll exports payroll data.
+  rpc ExportPayroll(ExportPayrollRequest) returns (ExportPayrollResponse) {
+    option (onekit.http.config) = {
+      path: "/runs/export"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

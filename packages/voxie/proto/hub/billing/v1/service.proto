@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package hub.billing.v1;
+
+import "hub/billing/v1/get_billing_summary.proto";
+import "hub/billing/v1/list_invoices.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/billing/v1";
+
+// BillingService defines hub billing endpoints.
+service BillingService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/billing/v1"};
+
+  // GetBillingSummary returns billing summary for the active business.
+  rpc GetBillingSummary(GetBillingSummaryRequest) returns (GetBillingSummaryResponse) {
+    option (onekit.http.config) = {
+      path: "/summary"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // ListInvoices returns billing invoices.
+  rpc ListInvoices(ListInvoicesRequest) returns (ListInvoicesResponse) {
+    option (onekit.http.config) = {
+      path: "/invoices"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

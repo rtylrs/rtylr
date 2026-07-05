@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package crm.loyalty.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
+
+message RedeemPointsRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // points is the points value for this contract.
+  int64 points = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+  // description is the description value for this contract.
+  string description = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // reference_id is the reference id value for this contract.
+  optional int64 reference_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
+  // reference_type is the reference type value for this contract.
+  string reference_type = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message RedeemPointsResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

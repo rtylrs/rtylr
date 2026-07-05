@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hub.permission.v1;
+
+import "buf/validate/validate.proto";
+import "hub/permission/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/permission/v1";
+
+message CreateRoleRequest {
+  // name is the name value for this contract.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // description is the description value for this contract.
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // permissions is the permissions value for this contract.
+  repeated string permissions = 3 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message CreateRoleResponse {
+  // role is the role value for this contract.
+  CustomRole role = 1;
+}

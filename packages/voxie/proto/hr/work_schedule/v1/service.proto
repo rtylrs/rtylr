@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package hr.work_schedule.v1;
+
+import "hr/work_schedule/v1/create_work_schedule.proto";
+import "hr/work_schedule/v1/update_work_schedule.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/work_schedule/v1";
+
+// WorkScheduleService defines HR work schedule endpoints.
+service WorkScheduleService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/work-schedule/v1"};
+
+  // CreateWorkSchedule creates a new work schedule.
+  rpc CreateWorkSchedule(CreateWorkScheduleRequest) returns (CreateWorkScheduleResponse) {
+    option (onekit.http.config) = {
+      path: "/work-schedules"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateWorkSchedule updates an existing work schedule.
+  rpc UpdateWorkSchedule(UpdateWorkScheduleRequest) returns (UpdateWorkScheduleResponse) {
+    option (onekit.http.config) = {
+      path: "/work-schedules/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+}

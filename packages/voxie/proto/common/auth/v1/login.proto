@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package common.auth.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
+
+// ── Auth ────────────────────────────────────────────────────────────
+
+message LoginRequest {
+  // email is the email address used for lookup or contact.
+  string email = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
+  // password is the user-provided secret for authentication.
+  string password = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message LoginResponse {
+  // token is the opaque token used to complete the operation.
+  string token = 1;
+  // message is a human-readable result message.
+  string message = 2;
+  // user_id identifies the user associated with this request.
+  int64 user_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // email is the email address used for lookup or contact.
+  string email = 4;
+  // name is the name value for this contract.
+  string name = 5;
+  // is_console_admin indicates the user can access the internal console.
+  bool is_console_admin = 6;
+}

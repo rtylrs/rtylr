@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package hr.staff.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/staff/v1";
+
+message CreateStaffRequest {
+  // user_id identifies the user associated with this request.
+  int64 user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // department_id is the department id value for this contract.
+  int64 department_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // first_name is the first name value for this contract.
+  string first_name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // last_name is the last name value for this contract.
+  string last_name = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // email is the email address used for lookup or contact.
+  string email = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
+  // phone is the phone value for this contract.
+  string phone = 6;
+  // role is the role value for this contract.
+  string role = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // employment_type is the employment type value for this contract.
+  string employment_type = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // status is the current lifecycle state.
+  string status = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // salary is the salary value for this contract.
+  double salary = 10 [(buf.validate.field).double.gte = 0];
+  // hourly_rate is the hourly rate value for this contract.
+  double hourly_rate = 11 [(buf.validate.field).double.gte = 0];
+  // overtime_rate is the overtime rate value for this contract.
+  double overtime_rate = 12 [(buf.validate.field).double.gte = 0];
+  // start_date is the start date value for this contract.
+  string start_date = 13 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // end_date is the end date value for this contract.
+  string end_date = 14 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // address is the address value for this contract.
+  string address = 15;
+  // emergency_contact_name is the emergency contact name value for this contract.
+  string emergency_contact_name = 16 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // emergency_contact_phone is the emergency contact phone value for this contract.
+  string emergency_contact_phone = 17 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // apps is the apps value for this contract.
+  string apps = 18 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // notes is the notes value for this contract.
+  string notes = 19;
+}
+
+message CreateStaffResponse {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}

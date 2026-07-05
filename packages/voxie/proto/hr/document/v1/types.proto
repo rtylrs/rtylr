@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package hr.document.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
+
+// ── Employee Document ────────────────────────────────────────────
+
+message EmployeeDocumentPayload {
+  // Unique identifier for the document.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this document belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Employee this document is associated with.
+  int64 employee_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Category of document (e.g. "id_card", "contract", "certificate", "visa").
+  string document_type = 4;
+  // Human-readable name for the document.
+  string name = 5;
+  // How the document is stored (stored | linked).
+  string storage_mode = 6;
+  // URL to access the document file.
+  string file_url = 7;
+  // Date the document expires (ISO-8601 date); absent if no expiry.
+  optional string expiry_date = 8 [
+    (onekit.http.nullable) = true
+  ];
+  // Employee who uploaded or linked the document.
+  int64 uploaded_by = 9;
+  // Unix timestamp when the document was uploaded.
+  int64 uploaded_at = 10;
+  // Unix timestamp when this record was created.
+  int64 created_at = 11;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 12;
+}

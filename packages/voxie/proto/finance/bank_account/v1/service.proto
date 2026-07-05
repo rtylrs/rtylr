@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package finance.bank_account.v1;
+
+import "finance/bank_account/v1/create_bank_account.proto";
+import "finance/bank_account/v1/get_bank_account.proto";
+import "finance/bank_account/v1/list_bank_accounts.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/bank_account/v1";
+
+// BankAccountService defines bank account endpoints.
+service BankAccountService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/bank-account/v1"};
+
+  rpc ListBankAccounts(ListBankAccountsRequest) returns (ListBankAccountsResponse) {
+    option (onekit.http.config) = {
+      path: "/bank-accounts"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateBankAccount(CreateBankAccountRequest) returns (CreateBankAccountResponse) {
+    option (onekit.http.config) = {
+      path: "/bank-accounts"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetBankAccount(GetBankAccountRequest) returns (GetBankAccountResponse) {
+    option (onekit.http.config) = {
+      path: "/bank-accounts/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

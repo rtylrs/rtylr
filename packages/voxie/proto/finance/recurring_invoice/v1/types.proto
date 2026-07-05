@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package finance.recurring_invoice.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
+
+// ── Recurring Invoices ──────────────────────────────────────────────
+
+message RecurringInvoice {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id is the business owner for this recurring invoice.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // template_invoice_id is the invoice used as the recurring invoice template.
+  int64 template_invoice_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // frequency is how often the recurring invoice should be generated.
+  string frequency = 4;
+  // next_invoice_date is the next generation date.
+  string next_invoice_date = 5;
+  // end_date is when recurring generation should stop; absent when open-ended.
+  optional string end_date = 6 [(onekit.http.nullable) = true];
+  // is_active is the is active value for this contract.
+  bool is_active = 7;
+  // created_at is when the record was created.
+  string created_at = 8;
+}
