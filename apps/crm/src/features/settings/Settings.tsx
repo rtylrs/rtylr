@@ -388,7 +388,7 @@ const TeamTab: React.FC = () => {
                   color: 'var(--crm-accent, #3b82f6)',
                 }}
               >
-                {m.name.charAt(0).toUpperCase()}
+                {(m.fullName || m.email).charAt(0).toUpperCase()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
@@ -402,7 +402,7 @@ const TeamTab: React.FC = () => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {m.name}
+                  {m.fullName || m.email}
                 </p>
                 <p
                   style={{
@@ -432,7 +432,7 @@ const TeamTab: React.FC = () => {
               </span>
               <button
                 type="button"
-                aria-label={`Remove ${m.name}`}
+                aria-label={`Remove ${m.fullName || m.email}`}
                 onClick={() => {
                   deactivate.mutate(m.id);
                 }}

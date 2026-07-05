@@ -31,25 +31,23 @@ import {
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
 import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
+import { AppServiceClient, type Addon } from '@voxire/voxie/hub/app/v1/service_client';
+import { UserServiceClient } from '@voxire/voxie/hub/user/v1/service_client';
 
 const ACCENT = '#3b82f6';
 
-interface AddonEntry {
-  id: string;
-  isEnabled: boolean;
-}
+const appClient = createOneKitClient(AppServiceClient, 'crm');
+const userClient = createOneKitClient(UserServiceClient, 'crm');
 
 function useAddonEnabled(addonId: string): boolean {
-  const { data } = useQuery<AddonEntry[]>({
+  const { data } = useQuery<Addon[]>({
     queryKey: ['crm-addons'],
-    queryFn: async (): Promise<AddonEntry[]> => {
+    queryFn: async (): Promise<Addon[]> => {
       try {
-        // Re-uses the CRM API client (same cookie auth, same backend).
-        // The /addons endpoint is shared across apps via the same backend service.
-        const res = await unwrap(safe.get<{ addons?: AddonEntry[] }>('/addons'));
-        return res?.addons ?? [];
+        const res = await appClient.listAddons({});
+        return res.addons;
       } catch {
         return [];
       }
@@ -191,11 +189,10 @@ const DefaultLayout: React.FC = () => {
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
     if (crmUser?.name || crmUser?.email) return;
-    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+    userClient
+      .getMe({})
       .then((res) => {
-        if (res?.user) {
-          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
-        }
+        setAuthUser({ id: String(res.id), name: res.fullName, email: res.email });
       })
       .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps

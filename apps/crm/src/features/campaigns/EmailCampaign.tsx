@@ -49,7 +49,7 @@ const EmailCampaign: React.FC = () => {
   }, [existingCampaign, isEditing, segmentId, segments]);
 
   const applyTemplate = (templateId: string): void => {
-    const template = templates.find((item) => item.id === Number(templateId));
+    const template = templates.find((item) => item.id === templateId);
     if (!template) return;
     setSubject(template.subject || '');
     setBody(template.body);

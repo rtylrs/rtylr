@@ -8,13 +8,15 @@ const Feedback: React.FC = () => {
   const { data: fetched, isLoading } = useListFeedback();
   const feedback = fetched ?? [];
 
-  const promoters = feedback.filter((f) => f.nps >= 9).length;
-  const passives = feedback.filter((f) => f.nps >= 7 && f.nps < 9).length;
-  const detractors = feedback.filter((f) => f.nps < 7).length;
-  const total = feedback.length || 1;
-  const nps = Math.round(((promoters - detractors) / total) * 100);
+  const npsResponses = feedback.filter((f) => f.type === 'nps');
+  const reviews = feedback.filter((f) => f.type === 'review');
+
+  const promoters = npsResponses.filter((f) => f.score >= 9).length;
+  const detractors = npsResponses.filter((f) => f.score < 7).length;
+  const npsTotal = npsResponses.length || 1;
+  const nps = Math.round(((promoters - detractors) / npsTotal) * 100);
   const avgRating =
-    feedback.length > 0 ? feedback.reduce((s, f) => s + f.rating, 0) / feedback.length : 0;
+    reviews.length > 0 ? reviews.reduce((s, f) => s + f.score, 0) / reviews.length : 0;
 
   return (
     <>
@@ -88,7 +90,7 @@ const Feedback: React.FC = () => {
               {promoters}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {Math.round((promoters / total) * 100)}% of responses
+              {Math.round((promoters / npsTotal) * 100)}% of nps responses
             </div>
           </Card>
           <Card>
@@ -107,7 +109,7 @@ const Feedback: React.FC = () => {
               {detractors}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {Math.round((detractors / total) * 100)}% of responses
+              {Math.round((detractors / npsTotal) * 100)}% of nps responses
             </div>
           </Card>
         </div>
@@ -156,37 +158,40 @@ const Feedback: React.FC = () => {
                     }}
                   >
                     <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                      {f.customer}
+                      {f.customerName}
                     </div>
-                    <div style={{ display: 'flex', gap: '1px' }}>
-                      {Array.from({ length: 5 }).map((_, idx) => (
-                        <Star
-                          key={idx}
-                          size={12}
-                          style={{
-                            color: idx < f.rating ? '#f59e0b' : 'var(--hub-text-dim)',
-                            fill: idx < f.rating ? '#f59e0b' : 'none',
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: '9999px',
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        background:
-                          f.nps >= 9
-                            ? 'rgba(16,185,129,0.12)'
-                            : f.nps >= 7
-                              ? 'rgba(245,158,11,0.12)'
-                              : 'rgba(239,68,68,0.12)',
-                        color: f.nps >= 9 ? '#10b981' : f.nps >= 7 ? '#f59e0b' : '#ef4444',
-                      }}
-                    >
-                      NPS {f.nps}
-                    </span>
+                    {f.type === 'review' ? (
+                      <div style={{ display: 'flex', gap: '1px' }}>
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <Star
+                            key={idx}
+                            size={12}
+                            style={{
+                              color: idx < f.score ? '#f59e0b' : 'var(--hub-text-dim)',
+                              fill: idx < f.score ? '#f59e0b' : 'none',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <span
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          background:
+                            f.score >= 9
+                              ? 'rgba(16,185,129,0.12)'
+                              : f.score >= 7
+                                ? 'rgba(245,158,11,0.12)'
+                                : 'rgba(239,68,68,0.12)',
+                          color: f.score >= 9 ? '#10b981' : f.score >= 7 ? '#f59e0b' : '#ef4444',
+                        }}
+                      >
+                        NPS {f.score}
+                      </span>
+                    )}
                     <span
                       style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginLeft: 'auto' }}
                     >

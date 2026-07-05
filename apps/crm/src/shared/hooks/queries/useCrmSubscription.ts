@@ -1,39 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../lib/api';
+import { createOneKitClient } from '@voxire/api';
+import {
+  SubscriptionServiceClient,
+  type Subscription,
+  type BillingDetail,
+} from '@voxire/voxie/hub/subscription/v1/service_client';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+export type CrmSubscription = Subscription;
+export type CrmBillingDetail = BillingDetail;
+export type CrmBillingLineItem = BillingDetail['lineItems'][number];
 
-export interface CrmSubscription {
-  id: number;
-  planName: string;
-  planSlug: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  seatCount: number;
-  pricePerSeatCents: number;
-  trialEndsAt: string | null;
-  nextBillingDate: string | null;
-  paddleSubscriptionId: string | null;
-}
-
-export interface CrmBillingLineItem {
-  periodStart: string;
-  periodEnd: string | null;
-  seatCount: number;
-  pricePerSeatCents: number;
-  amountCents: number;
-}
-
-export interface CrmBillingDetail {
-  billingMonth: string;
-  nextBillingDate: string | null;
-  lineItems: CrmBillingLineItem[];
-  totalCents: number;
-  planName: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  trialEndsAt: string | null;
-  paddleSubscriptionId: string | null;
-}
+const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -108,26 +85,18 @@ export function formatPeriodRange(start: string, end: string | null): string {
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
-interface SubResponse {
-  subscription: CrmSubscription | null;
-}
-
-interface BillingResponse {
-  billing: CrmBillingDetail | null;
-}
-
-export const useCrmSubscription = (): ReturnType<typeof useQuery<CrmSubscription | null>> =>
+export const useCrmSubscription = (): ReturnType<typeof useQuery<Subscription | undefined>> =>
   useQuery({
     queryKey: ['crm-subscription'],
-    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
+    queryFn: () => subscriptionClient.getMySubscription({}),
     select: (d) => d.subscription,
     staleTime: 5 * 60 * 1000,
   });
 
-export const useCrmSubscriptionBilling = (): ReturnType<typeof useQuery<CrmBillingDetail | null>> =>
+export const useCrmSubscriptionBilling = (): ReturnType<typeof useQuery<BillingDetail | undefined>> =>
   useQuery({
     queryKey: ['crm-subscription', 'billing'],
-    queryFn: () => unwrap(safe.get<BillingResponse>('/subscriptions/billing')),
+    queryFn: () => subscriptionClient.getBillingDetail({}),
     select: (d) => d.billing,
     staleTime: 2 * 60 * 1000,
   });

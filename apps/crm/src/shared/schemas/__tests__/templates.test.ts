@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { templateSchema } from '../templates';
 
 const baseTemplate = {
-  id: 1,
+  id: '1',
   name: 'Welcome Email',
   channel: 'email',
   category: 'onboarding',
@@ -13,13 +13,13 @@ const baseTemplate = {
 describe('templateSchema', () => {
   it('parses a valid email template', () => {
     const result = templateSchema.parse(baseTemplate);
-    expect(result.id).toBe(1);
+    expect(result.id).toBe('1');
     expect(result.name).toBe('Welcome Email');
     expect(result.channel).toBe('email');
   });
 
   it('parses a valid sms template', () => {
-    const result = templateSchema.parse({ ...baseTemplate, channel: 'sms', id: 2 });
+    const result = templateSchema.parse({ ...baseTemplate, channel: 'sms', id: '2' });
     expect(result.channel).toBe('sms');
   });
 
@@ -28,9 +28,9 @@ describe('templateSchema', () => {
     expect(result.channel).toBe('email');
   });
 
-  it('coerces string id to number', () => {
+  it('keeps id as a string', () => {
     const result = templateSchema.parse({ ...baseTemplate, id: '7' });
-    expect(result.id).toBe(7);
+    expect(result.id).toBe('7');
   });
 
   it('allows optional subject', () => {

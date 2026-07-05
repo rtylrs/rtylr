@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import {
   useMutation,
   useQuery,
@@ -8,17 +8,18 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { safe } from '../../lib/api';
+import { SettingsServiceClient } from '@voxire/voxie/crm/settings/v1/service_client';
 import { settingsSchema } from '../../schemas/settings';
 import type { Settings } from '../../schemas/settings';
+
+const settingsClient = createOneKitClient(SettingsServiceClient, 'crm');
 
 export const useCrmSettings = (): UseQueryResult<Settings> =>
   useQuery<Settings>({
     queryKey: ['crm-settings'],
     queryFn: async (): Promise<Settings> => {
-      const res = await unwrap(safe.get<unknown>('/crm/settings'));
-      const envelope = res as { settings?: unknown };
-      return settingsSchema.parse(envelope?.settings ?? res);
+      const res = await settingsClient.getSettings({});
+      return settingsSchema.parse(res.settings ?? {});
     },
   });
 
@@ -27,15 +28,26 @@ export const useUpdateCrmSettings = (): UseMutationResult<Settings, unknown, Par
   const { t } = useTranslation();
   return useMutation<Settings, unknown, Partial<Settings>>({
     mutationFn: async (data: Partial<Settings>): Promise<Settings> => {
-      const res = await unwrap(safe.put<Settings>('/crm/settings', data));
-      return res as Settings;
+      const current = qc.getQueryData<Settings>(['crm-settings']);
+      const merged = settingsSchema.parse({ ...current, ...data });
+      // UpdateSettingsResponse only returns a confirmation message, not the
+      // updated record - businessName/atRiskDays/currency aren't part of the
+      // backend contract yet either, so we optimistically merge locally.
+      await settingsClient.updateSettings({
+        defaultConsent: merged.defaultConsent,
+        fromEmail: merged.fromEmail,
+        fromName: merged.fromName,
+        smsSenderId: merged.smsSenderId,
+        timezone: merged.timezone,
+      });
+      return merged;
     },
-    onSuccess: (): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-settings'] });
+    onSuccess: (settings): void => {
+      qc.setQueryData(['crm-settings'], settings);
       toast.success(t('crm.settings.updated'));
     },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };

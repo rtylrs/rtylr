@@ -1,10 +1,16 @@
 import { z } from 'zod';
 
+// crm.feedback.v1.Feedback.type is either "nps" or "review" - a single row is
+// one or the other, never both. score's scale/meaning depends on this: a 0-10
+// NPS response, or a 1-5 star rating.
+export const FEEDBACK_TYPES = ['nps', 'review'] as const;
+export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
+
 export const feedbackItemSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  customer: z.string(),
-  rating: z.number(),
-  nps: z.number(),
+  id: z.string(),
+  customerName: z.string(),
+  type: z.enum(FEEDBACK_TYPES),
+  score: z.number(),
   comment: z.string(),
   createdAt: z.string(),
   source: z.string(),
@@ -24,17 +30,17 @@ export function isFeedbackSource(value: string): value is FeedbackSource {
 }
 
 export function isPositiveFeedback(item: FeedbackItem): boolean {
-  return item.rating >= 4;
+  return item.type === 'review' && item.score >= 4;
 }
 
 export function isNegativeFeedback(item: FeedbackItem): boolean {
-  return item.rating <= 2;
+  return item.type === 'review' && item.score <= 2;
 }
 
 export function isPromoter(item: FeedbackItem): boolean {
-  return item.nps >= 9;
+  return item.type === 'nps' && item.score >= 9;
 }
 
 export function isDetractor(item: FeedbackItem): boolean {
-  return item.nps <= 6;
+  return item.type === 'nps' && item.score <= 6;
 }

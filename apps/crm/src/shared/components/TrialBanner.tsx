@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
-import { safe } from '../lib/api';
+import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/service_client';
 import { APP_URLS } from '@voxire/config';
 
-interface SubResponse {
-  subscription: { status: string; trialEndsAt: string | null } | null;
-}
+const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 
 function daysLeft(trialEndsAt: string | null): number {
   if (!trialEndsAt) return 0;
@@ -22,7 +20,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
 
   const { data } = useQuery({
     queryKey: ['subscription-banner'],
-    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
+    queryFn: () => subscriptionClient.getMySubscription({}),
     select: (d) => d.subscription,
     staleTime: 5 * 60 * 1000,
   });
