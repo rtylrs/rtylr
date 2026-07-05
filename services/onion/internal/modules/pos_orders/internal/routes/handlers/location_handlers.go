@@ -7,7 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // ─── List Locations ───────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ func newLocationPayload(loc domain.Location) LocationPayload {
 	}
 }
 
-func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, *errorModels.ServerError) {
+func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return ListLocationsResponse{}, authErr
@@ -57,11 +57,7 @@ func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsReques
 
 	locations, err := h.Service.ListLocations(ctx, businessID)
 	if err != nil {
-		return ListLocationsResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to list locations",
-		}
+		return ListLocationsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list locations")
 	}
 
 	payloads := make([]LocationPayload, 0, len(locations))
@@ -87,19 +83,15 @@ type CreateLocationResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateLocationHandler) Validate(_ context.Context, req *CreateLocationRequest) *errorModels.ServerError {
+func (h *CreateLocationHandler) Validate(_ context.Context, req *CreateLocationRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Location name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Location name is required")
 	}
 
 	return nil
 }
 
-func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, *errorModels.ServerError) {
+func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return CreateLocationResponse{}, authErr
@@ -116,11 +108,7 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 		Phone:   req.Phone,
 	})
 	if err != nil {
-		return CreateLocationResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to create location",
-		}
+		return CreateLocationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create location")
 	}
 
 	return CreateLocationResponse{ID: id, Message: "Location created"}, nil
@@ -141,7 +129,7 @@ type DashboardResponse struct {
 	TableTurnover float64 `json:"table_turnover"`
 }
 
-func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {
+func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return DashboardResponse{}, authErr
@@ -154,11 +142,7 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 
 	stats, err := h.Service.GetDashboardStats(ctx, businessID)
 	if err != nil {
-		return DashboardResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to get dashboard stats",
-		}
+		return DashboardResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get dashboard stats")
 	}
 
 	return DashboardResponse{

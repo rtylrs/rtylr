@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
@@ -77,23 +77,20 @@ type ListCampaignsResponse struct {
 	Campaigns []*crmcampaignv1.Campaign `json:"campaigns"`
 }
 
-func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequest) (ListCampaignsResponse, *errorModels.ServerError) {
+func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequest) (ListCampaignsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListCampaignsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListCampaignsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	campaigns, err := h.CRMService.ListCampaigns(ctx, businessID, req.Status)
 	if err != nil {
-		return ListCampaignsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list campaigns",
-		}
+		return ListCampaignsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list campaigns")
 	}
 
 	payloads := make([]*crmcampaignv1.Campaign, len(campaigns))
@@ -125,40 +122,31 @@ type CreateCampaignResponse struct {
 	Message    string `json:"message"`
 }
 
-func (h *CreateCampaignHandler) Validate(_ context.Context, req *CreateCampaignRequest) *errorModels.ServerError {
+func (h *CreateCampaignHandler) Validate(_ context.Context, req *CreateCampaignRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign name is required")
 	}
 
 	if req.Channel == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign channel is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign channel is required")
 	}
 
 	if req.Content == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign content is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign content is required")
 	}
 
 	return nil
 }
 
-func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRequest) (CreateCampaignResponse, *errorModels.ServerError) {
+func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRequest) (CreateCampaignResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.CampaignInput{
@@ -175,20 +163,14 @@ func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRe
 	if req.ScheduledAt != "" {
 		t, err := time.Parse("2006-01-02T15:04:05Z", req.ScheduledAt)
 		if err != nil {
-			return CreateCampaignResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Invalid scheduled_at format, expected RFC3339 (YYYY-MM-DDTHH:MM:SSZ)",
-			}
+			return CreateCampaignResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid scheduled_at format, expected RFC3339 (YYYY-MM-DDTHH:MM:SSZ)")
 		}
 		input.ScheduledAt = &t
 	}
 
 	id, err := h.CRMService.CreateCampaign(ctx, input)
 	if err != nil {
-		return CreateCampaignResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create campaign",
-		}
+		return CreateCampaignResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create campaign")
 	}
 
 	return CreateCampaignResponse{CampaignID: id, Message: "Campaign created successfully"}, nil
@@ -215,40 +197,31 @@ type UpdateCampaignResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateCampaignHandler) Validate(_ context.Context, req *UpdateCampaignRequest) *errorModels.ServerError {
+func (h *UpdateCampaignHandler) Validate(_ context.Context, req *UpdateCampaignRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign ID is required")
 	}
 
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign name is required")
 	}
 
 	if req.Content == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign content is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign content is required")
 	}
 
 	return nil
 }
 
-func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRequest) (UpdateCampaignResponse, *errorModels.ServerError) {
+func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRequest) (UpdateCampaignResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateCampaignResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.CampaignUpdateInput{
@@ -266,26 +239,17 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 	if req.ScheduledAt != "" {
 		t, err := time.Parse("2006-01-02T15:04:05Z", req.ScheduledAt)
 		if err != nil {
-			return UpdateCampaignResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Invalid scheduled_at format, expected RFC3339 (YYYY-MM-DDTHH:MM:SSZ)",
-			}
+			return UpdateCampaignResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid scheduled_at format, expected RFC3339 (YYYY-MM-DDTHH:MM:SSZ)")
 		}
 		input.ScheduledAt = &t
 	}
 
 	if err := h.CRMService.UpdateCampaign(ctx, input); err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
-			return UpdateCampaignResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Campaign not found",
-			}
+			return UpdateCampaignResponse{}, onekiterrors.New(http.StatusNotFound, "Campaign not found")
 		}
 
-		return UpdateCampaignResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update campaign",
-		}
+		return UpdateCampaignResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update campaign")
 	}
 
 	return UpdateCampaignResponse{Message: "Campaign updated successfully"}, nil
@@ -306,12 +270,9 @@ type UpdateCampaignStatusResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateCampaignStatusHandler) Validate(_ context.Context, req *UpdateCampaignStatusRequest) *errorModels.ServerError {
+func (h *UpdateCampaignStatusHandler) Validate(_ context.Context, req *UpdateCampaignStatusRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign ID is required")
 	}
 
 	validStatuses := map[string]bool{
@@ -320,38 +281,29 @@ func (h *UpdateCampaignStatusHandler) Validate(_ context.Context, req *UpdateCam
 	}
 
 	if !validStatuses[req.Status] {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid campaign status",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Invalid campaign status")
 	}
 
 	return nil
 }
 
-func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCampaignStatusRequest) (UpdateCampaignStatusResponse, *errorModels.ServerError) {
+func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCampaignStatusRequest) (UpdateCampaignStatusResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateCampaignStatusResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateCampaignStatusResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.CRMService.UpdateCampaignStatus(ctx, businessID, req.ID, req.Status); err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
-			return UpdateCampaignStatusResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Campaign not found",
-			}
+			return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Campaign not found")
 		}
 
-		return UpdateCampaignStatusResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update campaign status",
-		}
+		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update campaign status")
 	}
 
 	return UpdateCampaignStatusResponse{Message: "Campaign status updated successfully"}, nil

@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
@@ -33,41 +33,32 @@ type ExportCustomerResponse struct {
 	Timeline     []TimelineEntryPayload             `json:"timeline"`
 }
 
-func (h *ExportCustomerHandler) Validate(_ context.Context, req *ExportCustomerRequest) *errorModels.ServerError {
+func (h *ExportCustomerHandler) Validate(_ context.Context, req *ExportCustomerRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	return nil
 }
 
-func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRequest) (ExportCustomerResponse, *errorModels.ServerError) {
+func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRequest) (ExportCustomerResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ExportCustomerResponse{}, errorModels.PermissionDeniedServerError()
+		return ExportCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ExportCustomerResponse{}, errorModels.PermissionDeniedServerError()
+		return ExportCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	export, err := h.CRMService.ExportCustomerData(ctx, businessID, req.CustomerID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
-			return ExportCustomerResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Customer not found",
-			}
+			return ExportCustomerResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 
-		return ExportCustomerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to export customer data",
-		}
+		return ExportCustomerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export customer data")
 	}
 
 	txPayloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(export.Transactions))

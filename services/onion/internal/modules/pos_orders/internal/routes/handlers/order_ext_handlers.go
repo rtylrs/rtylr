@@ -10,29 +10,21 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // resolveOrderID returns the order id from either the chi URL param or the request body.
 // The URL param takes precedence when present.
-func resolveOrderID(ctx context.Context, bodyID int64) (int64, *errorModels.ServerError) {
+func resolveOrderID(ctx context.Context, bodyID int64) (int64, error) {
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
-			return 0, &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Invalid order id",
-			}
+			return 0, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
 		}
 		return parsed, nil
 	}
 	if bodyID == 0 {
-		return 0, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Order id is required",
-		}
+		return 0, onekiterrors.New(http.StatusBadRequest, "Order id is required")
 	}
 	return bodyID, nil
 }
@@ -53,17 +45,17 @@ type SplitOrderResponse struct {
 	Message  string  `json:"message"`
 }
 
-func (h *SplitOrderHandler) Validate(ctx context.Context, req *SplitOrderRequest) *errorModels.ServerError {
+func (h *SplitOrderHandler) Validate(ctx context.Context, req *SplitOrderRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	if len(req.Splits) < 2 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "At least two splits are required"}
+		return onekiterrors.New(http.StatusBadRequest, "At least two splits are required")
 	}
 	return nil
 }
 
-func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (SplitOrderResponse, *errorModels.ServerError) {
+func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (SplitOrderResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return SplitOrderResponse{}, authErr
@@ -81,9 +73,9 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 	orderIDs, err := h.Service.SplitOrder(ctx, businessID, orderID, req.Splits)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+			return SplitOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
-		return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to split order"}
+		return SplitOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to split order")
 	}
 	return SplitOrderResponse{OrderIDs: orderIDs, Message: "Order split successfully"}, nil
 }
@@ -107,17 +99,17 @@ type DiscountOrderResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DiscountOrderHandler) Validate(ctx context.Context, req *DiscountOrderRequest) *errorModels.ServerError {
+func (h *DiscountOrderHandler) Validate(ctx context.Context, req *DiscountOrderRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	if req.DiscountValue <= 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Discount value must be positive"}
+		return onekiterrors.New(http.StatusBadRequest, "Discount value must be positive")
 	}
 	return nil
 }
 
-func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequest) (DiscountOrderResponse, *errorModels.ServerError) {
+func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequest) (DiscountOrderResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return DiscountOrderResponse{}, authErr
@@ -139,9 +131,9 @@ func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequ
 		Reason:        req.Reason,
 	}); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return DiscountOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+			return DiscountOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
-		return DiscountOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to apply discount"}
+		return DiscountOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to apply discount")
 	}
 	return DiscountOrderResponse{Message: "Discount applied successfully"}, nil
 }
@@ -161,17 +153,17 @@ type VoidOrderResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *VoidOrderHandler) Validate(ctx context.Context, req *VoidOrderRequest) *errorModels.ServerError {
+func (h *VoidOrderHandler) Validate(ctx context.Context, req *VoidOrderRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	if req.Reason == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Reason is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Reason is required")
 	}
 	return nil
 }
 
-func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (VoidOrderResponse, *errorModels.ServerError) {
+func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (VoidOrderResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return VoidOrderResponse{}, authErr
@@ -188,9 +180,9 @@ func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (Vo
 
 	if err := h.Service.VoidOrder(ctx, businessID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+			return VoidOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
-		return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to void order"}
+		return VoidOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order")
 	}
 	return VoidOrderResponse{Message: "Order voided successfully"}, nil
 }
@@ -210,14 +202,14 @@ type HoldOrderResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *HoldOrderHandler) Validate(ctx context.Context, req *HoldOrderRequest) *errorModels.ServerError {
+func (h *HoldOrderHandler) Validate(ctx context.Context, req *HoldOrderRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	return nil
 }
 
-func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (HoldOrderResponse, *errorModels.ServerError) {
+func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (HoldOrderResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return HoldOrderResponse{}, authErr
@@ -234,9 +226,9 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 
 	if err := h.Service.HoldOrder(ctx, businessID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+			return HoldOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
-		return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to hold order"}
+		return HoldOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to hold order")
 	}
 	return HoldOrderResponse{Message: "Order held successfully"}, nil
 }
@@ -257,14 +249,14 @@ type SendToKitchenResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *SendToKitchenHandler) Validate(ctx context.Context, req *SendToKitchenRequest) *errorModels.ServerError {
+func (h *SendToKitchenHandler) Validate(ctx context.Context, req *SendToKitchenRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	return nil
 }
 
-func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequest) (SendToKitchenResponse, *errorModels.ServerError) {
+func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequest) (SendToKitchenResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return SendToKitchenResponse{}, authErr
@@ -281,9 +273,9 @@ func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequ
 
 	if err := h.Service.SendToKitchen(ctx, businessID, orderID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+			return SendToKitchenResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
-		return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: err.Error()}
+		return SendToKitchenResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, err.Error())
 	}
 	return SendToKitchenResponse{Success: true}, nil
 }
@@ -302,17 +294,17 @@ type VoidOrderItemResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *VoidOrderItemHandler) Validate(ctx context.Context, _ *VoidOrderItemRequest) *errorModels.ServerError {
+func (h *VoidOrderItemHandler) Validate(ctx context.Context, _ *VoidOrderItemRequest) error {
 	if chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	if chi.URLParamFromCtx(ctx, "itemId") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Item ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Item ID is required")
 	}
 	return nil
 }
 
-func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemRequest) (VoidOrderItemResponse, *errorModels.ServerError) {
+func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemRequest) (VoidOrderItemResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return VoidOrderItemResponse{}, authErr
@@ -330,14 +322,14 @@ func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemReques
 	rawItemID := chi.URLParamFromCtx(ctx, "itemId")
 	itemID, err := strconv.ParseInt(rawItemID, 10, 64)
 	if err != nil || itemID <= 0 {
-		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid item id"}
+		return VoidOrderItemResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid item id")
 	}
 
 	if err := h.Service.VoidOrderItem(ctx, businessID, orderID, itemID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order item not found"}
+			return VoidOrderItemResponse{}, onekiterrors.New(http.StatusNotFound, "Order item not found")
 		}
-		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to void order item"}
+		return VoidOrderItemResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order item")
 	}
 	return VoidOrderItemResponse{Success: true}, nil
 }
@@ -359,17 +351,17 @@ type TransferTableResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *TransferTableHandler) Validate(ctx context.Context, req *TransferTableRequest) *errorModels.ServerError {
+func (h *TransferTableHandler) Validate(ctx context.Context, req *TransferTableRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Order ID is required")
 	}
 	if req.NewTableID <= 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "New table ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "New table ID is required")
 	}
 	return nil
 }
 
-func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequest) (TransferTableResponse, *errorModels.ServerError) {
+func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequest) (TransferTableResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return TransferTableResponse{}, authErr
@@ -386,12 +378,12 @@ func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequ
 
 	if err := h.Service.TransferTable(ctx, businessID, orderID, req.NewTableID); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+			return TransferTableResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
 		if errors.Is(err, domain.ErrOrderCannotBeTransferred) {
-			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: err.Error()}
+			return TransferTableResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, err.Error())
 		}
-		return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to transfer table"}
+		return TransferTableResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to transfer table")
 	}
 	return TransferTableResponse{Success: true}, nil
 }
@@ -408,7 +400,7 @@ type ListHeldOrdersResponse struct {
 	Orders []OrderPayload `json:"orders"`
 }
 
-func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequest) (ListHeldOrdersResponse, *errorModels.ServerError) {
+func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequest) (ListHeldOrdersResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return ListHeldOrdersResponse{}, authErr
@@ -420,7 +412,7 @@ func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequ
 
 	orders, err := h.Service.ListHeldOrders(ctx, businessID)
 	if err != nil {
-		return ListHeldOrdersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list held orders"}
+		return ListHeldOrdersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list held orders")
 	}
 
 	payloads := make([]OrderPayload, 0, len(orders))

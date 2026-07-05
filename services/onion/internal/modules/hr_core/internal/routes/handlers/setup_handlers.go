@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type SetupStepPayload struct {
@@ -44,16 +44,16 @@ type (
 	}
 )
 
-func (h *GetSetupStatusHandler) Serve(ctx context.Context, _ *GetSetupStatusRequest) (GetSetupStatusResponse, *errorModels.ServerError) {
+func (h *GetSetupStatusHandler) Serve(ctx context.Context, _ *GetSetupStatusRequest) (GetSetupStatusResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return GetSetupStatusResponse{}, errorModels.PermissionDeniedServerError()
+		return GetSetupStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	steps, err := h.Service.GetSetupStatus(ctx, device.User.UserID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get setup status", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return GetSetupStatusResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get setup status"}
+		return GetSetupStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get setup status")
 	}
 
 	payloads := make([]*SetupStepPayload, 0, len(steps))
@@ -75,21 +75,21 @@ type (
 	}
 )
 
-func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupStepRequest) (CompleteSetupStepResponse, *errorModels.ServerError) {
+func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupStepRequest) (CompleteSetupStepResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CompleteSetupStepResponse{}, errorModels.PermissionDeniedServerError()
+		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	stepKey := chi.URLParamFromCtx(ctx, "step_key")
 	if stepKey == "" {
-		return CompleteSetupStepResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "step_key is required"}
+		return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusBadRequest, "step_key is required")
 	}
 
 	step, err := h.Service.CompleteSetupStep(ctx, device.User.UserID, stepKey)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("owner_id", device.User.UserID), logger.String("step_key", stepKey), logger.Error(err))
-		return CompleteSetupStepResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to complete setup step"}
+		return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to complete setup step")
 	}
 
 	return CompleteSetupStepResponse{Step: stepToPayload(*step)}, nil

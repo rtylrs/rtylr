@@ -3,11 +3,16 @@ package time_off
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/time_off/internal/api"
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
-	"github.com/voxire/onion/internal/modules/time_off/internal/routes"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 type Module struct {
@@ -20,8 +25,23 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hrtimeoffv1.RegisterTimeOffServiceServer(
+		api.NewTimeOffAPI(m.service),
+		hrtimeoffv1.WithMux(mux),
+		hrtimeoffv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register HR time off service: %w", err))
+	}
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	serverHttp.RegisterPOSTWithValidation[api.ApproveTimeOffRequest, api.ApproveTimeOffResponse](
+		ctx,
+		router,
+		api.ApproveTimeOffRoutes(),
+		&api.ApproveTimeOffHandler{Service: m.service},
+	)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

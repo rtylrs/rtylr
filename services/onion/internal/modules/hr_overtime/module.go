@@ -3,15 +3,19 @@ package hr_overtime
 import (
 	"context"
 	"database/sql"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	"github.com/voxire/onion/internal/modules/hr_overtime/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
 	internaljobs "github.com/voxire/onion/internal/modules/hr_overtime/internal/jobs"
-	"github.com/voxire/onion/internal/modules/hr_overtime/internal/routes"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hrovertimev1 "github.com/voxire/voxie/gen/go/hr/overtime/v1"
 )
 
 type hrCoreApprovalAdapter struct {
@@ -53,7 +57,23 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	serverHttp.RegisterGET[api.GetOvertimeConfigRequest, api.GetOvertimeConfigResponse](
+		ctx, router, api.GetOvertimeConfigRoutes(), &api.GetOvertimeConfigHandler{Service: m.service},
+	)
+	serverHttp.RegisterPUTWithValidation[api.UpsertOvertimeConfigRequest, api.UpsertOvertimeConfigResponse](
+		ctx, router, api.UpsertOvertimeConfigRoutes(), &api.UpsertOvertimeConfigHandler{Service: m.service},
+	)
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	err := hrovertimev1.RegisterOvertimeServiceServer(
+		api.NewOvertimeService(m.service),
+		hrovertimev1.WithMux(mux),
+		hrovertimev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

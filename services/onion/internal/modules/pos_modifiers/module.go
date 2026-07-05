@@ -3,11 +3,13 @@ package pos_modifiers
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
+	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/routes"
+	posmodifierv1 "github.com/voxire/voxie/gen/go/pos/modifier/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -18,8 +20,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := posmodifierv1.RegisterModifierServiceServer(
+		api.NewModifierAPI(m.service),
+		posmodifierv1.WithMux(mux),
+		posmodifierv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS modifier service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

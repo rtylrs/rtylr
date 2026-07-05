@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/application"
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -62,15 +62,15 @@ func toPayload(t domain.BankFeedTransaction) BankFeedTransactionPayload {
 	}
 }
 
-func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse, *errorModels.ServerError) {
+func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	limit := req.Limit
@@ -87,7 +87,7 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 
 	items, total, err := h.Service.List(ctx, businessID, limit, offset)
 	if err != nil {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list bank feed transactions"}
+		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list bank feed transactions")
 	}
 
 	payloads := make([]BankFeedTransactionPayload, 0, len(items))
@@ -111,18 +111,18 @@ type (
 	}
 )
 
-func (h *SyncHandler) Serve(ctx context.Context, _ *SyncRequest) (SyncResponse, *errorModels.ServerError) {
+func (h *SyncHandler) Serve(ctx context.Context, _ *SyncRequest) (SyncResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return SyncResponse{}, errorModels.PermissionDeniedServerError()
+		return SyncResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return SyncResponse{}, errorModels.PermissionDeniedServerError()
+		return SyncResponse{}, onekiterrors.PermissionDenied()
 	}
 	imported, err := h.Service.Sync(ctx, businessID)
 	if err != nil {
-		return SyncResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to sync bank feeds"}
+		return SyncResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to sync bank feeds")
 	}
 	return SyncResponse{Imported: imported}, nil
 }

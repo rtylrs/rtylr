@@ -6,7 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 func CareersRoutes() []string {
@@ -51,13 +51,10 @@ func newCareer(career domain.Career) *Career {
 	}
 }
 
-func (h *CareersHandler) Serve(ctx context.Context, _ *GetActiveCareersRequest) (GetActiveCareersResponse, *errorModels.ServerError) {
+func (h *CareersHandler) Serve(ctx context.Context, _ *GetActiveCareersRequest) (GetActiveCareersResponse, error) {
 	domainCareers, err := h.CareersService.GetActiveCareers(ctx)
 	if err != nil {
-		return GetActiveCareersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get active careers",
-		}
+		return GetActiveCareersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get active careers")
 	}
 
 	careers := make([]*Career, 0, len(domainCareers))

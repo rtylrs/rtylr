@@ -11,8 +11,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type LocationPayload struct {
@@ -50,16 +50,16 @@ type (
 	}
 )
 
-func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, *errorModels.ServerError) {
+func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListLocationsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLocationsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	locations, err := h.Service.ListLocations(ctx, device.User.UserID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list locations", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListLocationsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list locations"}
+		return ListLocationsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list locations")
 	}
 
 	payloads := make([]*LocationPayload, 0, len(locations))
@@ -89,18 +89,18 @@ type CreateLocationResponse struct {
 	Location *LocationPayload `json:"location"`
 }
 
-func (h *CreateLocationHandler) Validate(_ context.Context, req *CreateLocationRequest) *errorModels.ServerError {
+func (h *CreateLocationHandler) Validate(_ context.Context, req *CreateLocationRequest) error {
 	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, *errorModels.ServerError) {
+func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateLocationResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateLocationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	loc := domain.LocationRecord{
@@ -110,7 +110,7 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 	created, err := h.Service.CreateLocation(ctx, device.User.UserID, loc)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create location", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateLocationResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create location"}
+		return CreateLocationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create location")
 	}
 
 	return CreateLocationResponse{Location: locationToPayload(*created)}, nil
@@ -136,24 +136,24 @@ type UpdateLocationResponse struct {
 	Location *LocationPayload `json:"location"`
 }
 
-func (h *UpdateLocationHandler) Validate(_ context.Context, req *UpdateLocationRequest) *errorModels.ServerError {
+func (h *UpdateLocationHandler) Validate(_ context.Context, req *UpdateLocationRequest) error {
 	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRequest) (UpdateLocationResponse, *errorModels.ServerError) {
+func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRequest) (UpdateLocationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpdateLocationResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLocationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateLocationResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid location id"}
+		return UpdateLocationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid location id")
 	}
 
 	loc := domain.LocationRecord{
@@ -163,7 +163,7 @@ func (h *UpdateLocationHandler) Serve(ctx context.Context, req *UpdateLocationRe
 	updated, err := h.Service.UpdateLocation(ctx, device.User.UserID, loc)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update location", logger.Any("owner_id", device.User.UserID), logger.Any("location_id", id), logger.Error(err))
-		return UpdateLocationResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update location"}
+		return UpdateLocationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update location")
 	}
 
 	return UpdateLocationResponse{Location: locationToPayload(*updated)}, nil

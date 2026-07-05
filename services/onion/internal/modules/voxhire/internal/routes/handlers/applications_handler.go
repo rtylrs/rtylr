@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,8 +13,9 @@ import (
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/application"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/storage"
 )
 
@@ -181,14 +183,7 @@ func allowedVoxhireResumeContentType(contentType string) bool {
 }
 
 func writeApplyError(w http.ResponseWriter, code int, msg string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	if err := json.NewEncoder(w).Encode(errorModels.ErrorResponse{
-		Error:  errorModels.ServerError{Code: code, Message: msg},
-		Status: "error",
-	}); err != nil {
-		logger.Global().Error("Failed to encode application error response", logger.Error(err))
-	}
+	serverHttp.WriteOneKitError(context.Background(), w, onekiterrors.New(code, msg))
 }
 
 // slugify lowercases and turns whitespace + slashes into hyphens for

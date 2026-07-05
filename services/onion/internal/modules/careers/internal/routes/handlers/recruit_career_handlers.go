@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -87,22 +87,19 @@ type ListRecruitCareersResponse struct {
 	Careers []*RecruitCareerPayload `json:"careers"`
 }
 
-func (h *ListRecruitCareersHandler) Serve(ctx context.Context, req *ListRecruitCareersRequest) (ListRecruitCareersResponse, *errorModels.ServerError) {
+func (h *ListRecruitCareersHandler) Serve(ctx context.Context, req *ListRecruitCareersRequest) (ListRecruitCareersResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListRecruitCareersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListRecruitCareersResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListRecruitCareersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListRecruitCareersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	careers, err := h.CareersService.ListRecruitCareers(ctx, businessID, req.PublishedOnly == "1" || req.PublishedOnly == "true")
 	if err != nil {
-		return ListRecruitCareersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list careers",
-		}
+		return ListRecruitCareersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list careers")
 	}
 
 	payloads := make([]*RecruitCareerPayload, 0, len(careers))
@@ -140,24 +137,24 @@ type CreateRecruitCareerResponse struct {
 	Career *RecruitCareerPayload `json:"career"`
 }
 
-func (h *CreateRecruitCareerHandler) Validate(_ context.Context, req *CreateRecruitCareerRequest) *errorModels.ServerError {
+func (h *CreateRecruitCareerHandler) Validate(_ context.Context, req *CreateRecruitCareerRequest) error {
 	if req.Title == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Title is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Title is required")
 	}
 	if req.Details == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Details are required"}
+		return onekiterrors.New(http.StatusBadRequest, "Details are required")
 	}
 	return nil
 }
 
-func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecruitCareerRequest) (CreateRecruitCareerResponse, *errorModels.ServerError) {
+func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecruitCareerRequest) (CreateRecruitCareerResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.RecruitCareerInput{
@@ -180,10 +177,7 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 
 	id, err := h.CareersService.CreateCareer(ctx, input)
 	if err != nil {
-		return CreateRecruitCareerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create career",
-		}
+		return CreateRecruitCareerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create career")
 	}
 
 	// Round-trip the freshly-created row so the client gets the
@@ -227,24 +221,24 @@ type UpdateRecruitCareerResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateRecruitCareerHandler) Validate(_ context.Context, req *UpdateRecruitCareerRequest) *errorModels.ServerError {
+func (h *UpdateRecruitCareerHandler) Validate(_ context.Context, req *UpdateRecruitCareerRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	if req.Title == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Title is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Title is required")
 	}
 	return nil
 }
 
-func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecruitCareerRequest) (UpdateRecruitCareerResponse, *errorModels.ServerError) {
+func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecruitCareerRequest) (UpdateRecruitCareerResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.RecruitCareerInput{
@@ -267,10 +261,7 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 	}
 
 	if err := h.CareersService.UpdateCareer(ctx, input); err != nil {
-		return UpdateRecruitCareerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update career",
-		}
+		return UpdateRecruitCareerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update career")
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return UpdateRecruitCareerResponse{Message: "Career updated"}, nil
@@ -292,34 +283,28 @@ type DeleteRecruitCareerResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteRecruitCareerHandler) Validate(_ context.Context, req *DeleteRecruitCareerRequest) *errorModels.ServerError {
+func (h *DeleteRecruitCareerHandler) Validate(_ context.Context, req *DeleteRecruitCareerRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	return nil
 }
 
-func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecruitCareerRequest) (DeleteRecruitCareerResponse, *errorModels.ServerError) {
+func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecruitCareerRequest) (DeleteRecruitCareerResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return DeleteRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return DeleteRecruitCareerResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.CareersService.DeleteCareer(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return DeleteRecruitCareerResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Career not found",
-			}
+			return DeleteRecruitCareerResponse{}, onekiterrors.New(http.StatusNotFound, "Career not found")
 		}
-		return DeleteRecruitCareerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to archive career",
-		}
+		return DeleteRecruitCareerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to archive career")
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return DeleteRecruitCareerResponse{Message: "Career archived"}, nil

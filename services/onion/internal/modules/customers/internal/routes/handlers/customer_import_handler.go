@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -44,26 +44,23 @@ type ImportCustomersResponse struct {
 	Message        string `json:"message"`
 }
 
-func (h *ImportCustomersHandler) Validate(_ context.Context, req *ImportCustomersRequest) *errorModels.ServerError {
+func (h *ImportCustomersHandler) Validate(_ context.Context, req *ImportCustomersRequest) error {
 	if len(req.Customers) == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "At least one customer is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "At least one customer is required")
 	}
 
 	return nil
 }
 
-func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomersRequest) (ImportCustomersResponse, *errorModels.ServerError) {
+func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomersRequest) (ImportCustomersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ImportCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return ImportCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ImportCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return ImportCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	items := make([]domain.CustomerImportItem, len(req.Customers))
@@ -85,10 +82,7 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 
 	result, err := h.CRMService.ImportCustomers(ctx, businessID, items)
 	if err != nil {
-		return ImportCustomersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to import customers",
-		}
+		return ImportCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to import customers")
 	}
 
 	return ImportCustomersResponse{

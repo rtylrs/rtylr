@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/loyalty/internal/application"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -43,10 +43,10 @@ type ListTransactionsResponse struct {
 	PageSize     int                  `json:"page_size"`
 }
 
-func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactionsRequest) (ListTransactionsResponse, *errorModels.ServerError) {
+func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactionsRequest) (ListTransactionsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListTransactionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTransactionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	if req.Page < 1 {
 		req.Page = 1
@@ -56,11 +56,11 @@ func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactio
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListTransactionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTransactionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	txs, total, err := h.Service.ListTransactions(ctx, businessID, req.CustomerID, req.Page, req.PageSize)
 	if err != nil {
-		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list loyalty transactions"}
+		return ListTransactionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty transactions")
 	}
 	payloads := make([]TransactionPayload, len(txs))
 	for i, tx := range txs {
@@ -97,24 +97,24 @@ type AwardPointsResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest) *errorModels.ServerError {
+func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Customer ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 	if req.Points <= 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Points must be greater than zero"}
+		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 	return nil
 }
 
-func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest) (AwardPointsResponse, *errorModels.ServerError) {
+func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest) (AwardPointsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return AwardPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return AwardPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 	err := h.Service.AwardPoints(ctx, domain.AwardInput{
 		OwnerID:       device.User.UserID,
@@ -126,7 +126,7 @@ func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest)
 		ReferenceType: req.ReferenceType,
 	})
 	if err != nil {
-		return AwardPointsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to award points"}
+		return AwardPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to award points")
 	}
 	return AwardPointsResponse{Message: "Points awarded successfully"}, nil
 }
@@ -149,24 +149,24 @@ type RedeemPointsResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *RedeemPointsHandler) Validate(_ context.Context, req *RedeemPointsRequest) *errorModels.ServerError {
+func (h *RedeemPointsHandler) Validate(_ context.Context, req *RedeemPointsRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Customer ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 	if req.Points <= 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Points must be greater than zero"}
+		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 	return nil
 }
 
-func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsRequest) (RedeemPointsResponse, *errorModels.ServerError) {
+func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsRequest) (RedeemPointsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 	err := h.Service.RedeemPoints(ctx, domain.RedeemInput{
 		OwnerID:       device.User.UserID,
@@ -178,7 +178,7 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 		ReferenceType: req.ReferenceType,
 	})
 	if err != nil {
-		return RedeemPointsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to redeem points"}
+		return RedeemPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")
 	}
 	return RedeemPointsResponse{Message: "Points redeemed successfully"}, nil
 }
@@ -206,18 +206,18 @@ type GetLoyaltyConfigResponse struct {
 	Config LoyaltyConfigPayload `json:"config"`
 }
 
-func (h *GetLoyaltyConfigHandler) Serve(ctx context.Context, _ *GetLoyaltyConfigRequest) (GetLoyaltyConfigResponse, *errorModels.ServerError) {
+func (h *GetLoyaltyConfigHandler) Serve(ctx context.Context, _ *GetLoyaltyConfigRequest) (GetLoyaltyConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return GetLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return GetLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 	cfg, err := h.Service.GetConfig(ctx, businessID)
 	if err != nil {
-		return GetLoyaltyConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get loyalty config"}
+		return GetLoyaltyConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get loyalty config")
 	}
 	return GetLoyaltyConfigResponse{Config: LoyaltyConfigPayload{
 		ID:                  cfg.ID,
@@ -248,24 +248,24 @@ type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) *errorModels.ServerError {
+func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) error {
 	if req.PointsPerDollar <= 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "points_per_dollar must be greater than zero"}
+		return onekiterrors.New(http.StatusBadRequest, "points_per_dollar must be greater than zero")
 	}
 	if req.PointsValue <= 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "points_value must be greater than zero"}
+		return onekiterrors.New(http.StatusBadRequest, "points_value must be greater than zero")
 	}
 	return nil
 }
 
-func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyaltyConfigRequest) (UpdateLoyaltyConfigResponse, *errorModels.ServerError) {
+func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyaltyConfigRequest) (UpdateLoyaltyConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 	err := h.Service.UpdateConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:             device.User.UserID,
@@ -277,9 +277,9 @@ func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyal
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidLoyaltyConfig) {
-			return UpdateLoyaltyConfigResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid loyalty config"}
+			return UpdateLoyaltyConfigResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid loyalty config")
 		}
-		return UpdateLoyaltyConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update loyalty config"}
+		return UpdateLoyaltyConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update loyalty config")
 	}
 	return UpdateLoyaltyConfigResponse{Message: "Loyalty config updated successfully"}, nil
 }

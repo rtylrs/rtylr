@@ -29,26 +29,7 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Webho
 
 	webhooks := make([]domain.Webhook, 0, len(rows))
 	for _, row := range rows {
-		var w domain.Webhook
-		w.ID = row.ID
-		w.OwnerID = row.OwnerID
-		w.BusinessID = row.BusinessID
-		w.URL = row.Url
-		w.Secret = row.Secret
-		w.IsActive = row.IsActive
-		if row.LastTriggeredAt.Valid {
-			w.LastTriggeredAt = &row.LastTriggeredAt.Time
-		}
-		if row.CreatedAt.Valid {
-			w.CreatedAt = row.CreatedAt.Time
-		}
-		if row.UpdatedAt.Valid {
-			w.UpdatedAt = row.UpdatedAt.Time
-		}
-		if err := json.Unmarshal(row.Events, &w.Events); err != nil {
-			w.Events = []string{}
-		}
-		webhooks = append(webhooks, w)
+		webhooks = append(webhooks, rowToWebhook(row))
 	}
 
 	return webhooks, nil
@@ -86,4 +67,61 @@ func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) er
 	}
 
 	return nil
+}
+
+func (r *Repository) Get(ctx context.Context, businessID, webhookID int64) (domain.Webhook, error) {
+	row, err := r.queries.GetWebhook(ctx, sqlc.GetWebhookParams{
+		ID:         webhookID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get webhook", logger.Error(err))
+		return domain.Webhook{}, err
+	}
+
+	return rowToWebhook(row), nil
+}
+
+func (r *Repository) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) error {
+	eventsJSON, err := json.Marshal(events)
+	if err != nil {
+		return err
+	}
+
+	err = r.queries.UpdateWebhook(ctx, sqlc.UpdateWebhookParams{
+		Url:        url,
+		Events:     eventsJSON,
+		IsActive:   isActive,
+		ID:         webhookID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update webhook", logger.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func rowToWebhook(row sqlc.HubWebhook) domain.Webhook {
+	var w domain.Webhook
+	w.ID = row.ID
+	w.OwnerID = row.OwnerID
+	w.BusinessID = row.BusinessID
+	w.URL = row.Url
+	w.Secret = row.Secret
+	w.IsActive = row.IsActive
+	if row.LastTriggeredAt.Valid {
+		w.LastTriggeredAt = &row.LastTriggeredAt.Time
+	}
+	if row.CreatedAt.Valid {
+		w.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		w.UpdatedAt = row.UpdatedAt.Time
+	}
+	if err := json.Unmarshal(row.Events, &w.Events); err != nil {
+		w.Events = []string{}
+	}
+	return w
 }

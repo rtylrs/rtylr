@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -39,60 +39,51 @@ type CreateCustomerResponse struct {
 	Message    string `json:"message"`
 }
 
-func (h *CreateCustomerHandler) Validate(_ context.Context, req *CreateCustomerRequest) *errorModels.ServerError {
+func (h *CreateCustomerHandler) Validate(_ context.Context, req *CreateCustomerRequest) error {
 	if req.FirstName == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "First name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "First name is required")
 	}
 
 	return nil
 }
 
-func (h *CreateCustomerHandler) Serve(ctx context.Context, req *CreateCustomerRequest) (CreateCustomerResponse, *errorModels.ServerError) {
+func (h *CreateCustomerHandler) Serve(ctx context.Context, req *CreateCustomerRequest) (CreateCustomerResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.CustomerInput{
 		OwnerID:    device.User.UserID,
 		BusinessID: businessID,
 		FirstName:  req.FirstName,
-		LastName:  req.LastName,
-		Email:     req.Email,
-		Phone:     req.Phone,
-		Gender:    req.Gender,
-		Address:   req.Address,
-		City:      req.City,
-		Country:   req.Country,
-		Tags:      req.Tags,
-		Notes:     req.Notes,
+		LastName:   req.LastName,
+		Email:      req.Email,
+		Phone:      req.Phone,
+		Gender:     req.Gender,
+		Address:    req.Address,
+		City:       req.City,
+		Country:    req.Country,
+		Tags:       req.Tags,
+		Notes:      req.Notes,
 	}
 
 	if req.DateOfBirth != "" {
 		t, err := time.Parse("2006-01-02", req.DateOfBirth)
 		if err != nil {
-			return CreateCustomerResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Invalid date of birth format, expected YYYY-MM-DD",
-			}
+			return CreateCustomerResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid date of birth format, expected YYYY-MM-DD")
 		}
 		input.DateOfBirth = &t
 	}
 
 	id, err := h.CRMService.CreateCustomer(ctx, input)
 	if err != nil {
-		return CreateCustomerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create customer",
-		}
+		return CreateCustomerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create customer")
 	}
 
 	return CreateCustomerResponse{

@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // publicCareersCacheScope namespaces the per-owner public careers page
@@ -62,26 +62,20 @@ type GetPublicBrandingResponse struct {
 	Customization *CustomizationPayload `json:"customization"`
 }
 
-func (h *GetPublicBrandingHandler) Validate(_ context.Context, req *GetPublicBrandingRequest) *errorModels.ServerError {
+func (h *GetPublicBrandingHandler) Validate(_ context.Context, req *GetPublicBrandingRequest) error {
 	if req.Slug == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "slug is required"}
+		return onekiterrors.New(http.StatusBadRequest, "slug is required")
 	}
 	return nil
 }
 
-func (h *GetPublicBrandingHandler) Serve(ctx context.Context, req *GetPublicBrandingRequest) (GetPublicBrandingResponse, *errorModels.ServerError) {
+func (h *GetPublicBrandingHandler) Serve(ctx context.Context, req *GetPublicBrandingRequest) (GetPublicBrandingResponse, error) {
 	c, err := h.CareersService.GetCustomizationBySlug(ctx, req.Slug)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return GetPublicBrandingResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Careers page not found",
-			}
+			return GetPublicBrandingResponse{}, onekiterrors.New(http.StatusNotFound, "Careers page not found")
 		}
-		return GetPublicBrandingResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to load branding",
-		}
+		return GetPublicBrandingResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load branding")
 	}
 	return GetPublicBrandingResponse{Customization: toCustomizationPayload(c)}, nil
 }
@@ -107,26 +101,20 @@ type ListPublicCareersResponse struct {
 	Sections []*SectionPayload `json:"sections"`
 }
 
-func (h *ListPublicCareersHandler) Validate(_ context.Context, req *ListPublicCareersRequest) *errorModels.ServerError {
+func (h *ListPublicCareersHandler) Validate(_ context.Context, req *ListPublicCareersRequest) error {
 	if req.Slug == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "slug is required"}
+		return onekiterrors.New(http.StatusBadRequest, "slug is required")
 	}
 	return nil
 }
 
-func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCareersRequest) (ListPublicCareersResponse, *errorModels.ServerError) {
+func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCareersRequest) (ListPublicCareersResponse, error) {
 	custom, err := h.CareersService.GetCustomizationBySlug(ctx, req.Slug)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return ListPublicCareersResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Careers page not found",
-			}
+			return ListPublicCareersResponse{}, onekiterrors.New(http.StatusNotFound, "Careers page not found")
 		}
-		return ListPublicCareersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to load careers",
-		}
+		return ListPublicCareersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load careers")
 	}
 
 	res, cacheErr := cacher.Of[ListPublicCareersResponse]().GetOrComputeSingle(
@@ -143,10 +131,7 @@ func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCar
 
 	res, computeErr := h.computePublicCareers(ctx, custom)
 	if computeErr != nil {
-		return ListPublicCareersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to load careers",
-		}
+		return ListPublicCareersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load careers")
 	}
 	return res, nil
 }
@@ -203,34 +188,25 @@ type GetPublicCareerResponse struct {
 	Fields []*FormFieldPayload `json:"fields"`
 }
 
-func (h *GetPublicCareerHandler) Validate(_ context.Context, req *GetPublicCareerRequest) *errorModels.ServerError {
+func (h *GetPublicCareerHandler) Validate(_ context.Context, req *GetPublicCareerRequest) error {
 	if req.Slug == "" || req.CareerSlug == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "slug and career_slug are required"}
+		return onekiterrors.New(http.StatusBadRequest, "slug and career_slug are required")
 	}
 	return nil
 }
 
-func (h *GetPublicCareerHandler) Serve(ctx context.Context, req *GetPublicCareerRequest) (GetPublicCareerResponse, *errorModels.ServerError) {
+func (h *GetPublicCareerHandler) Serve(ctx context.Context, req *GetPublicCareerRequest) (GetPublicCareerResponse, error) {
 	custom, err := h.CareersService.GetCustomizationBySlug(ctx, req.Slug)
 	if err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return GetPublicCareerResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Careers page not found",
-			}
+			return GetPublicCareerResponse{}, onekiterrors.New(http.StatusNotFound, "Careers page not found")
 		}
-		return GetPublicCareerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to load career",
-		}
+		return GetPublicCareerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load career")
 	}
 
 	c, err := h.CareersService.GetCareerBySlug(ctx, custom.BusinessID, req.CareerSlug)
 	if err != nil || !c.IsPublished {
-		return GetPublicCareerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusNotFound,
-			Message: "Role not found",
-		}
+		return GetPublicCareerResponse{}, onekiterrors.New(http.StatusNotFound, "Role not found")
 	}
 
 	// Pull custom form fields inline — a broken fetch shouldn't take
@@ -278,38 +254,32 @@ type SubmitApplicationResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *SubmitApplicationHandler) Validate(_ context.Context, req *SubmitApplicationRequest) *errorModels.ServerError {
+func (h *SubmitApplicationHandler) Validate(_ context.Context, req *SubmitApplicationRequest) error {
 	if req.Slug == "" || req.CareerSlug == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "slug and career_slug are required"}
+		return onekiterrors.New(http.StatusBadRequest, "slug and career_slug are required")
 	}
 	if req.CandidateName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Name is required")
 	}
 	if req.Email == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Email is required")
 	}
 	return nil
 }
 
-func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplicationRequest) (SubmitApplicationResponse, *errorModels.ServerError) {
+func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplicationRequest) (SubmitApplicationResponse, error) {
 	// Resolve owner + career via the slug pair. Looking both up here
 	// means the candidate never sends a tenant id; a malicious client
 	// can only apply to careers that are actually published by the
 	// given brand.
 	custom, err := h.CareersService.GetCustomizationBySlug(ctx, req.Slug)
 	if err != nil {
-		return SubmitApplicationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusNotFound,
-			Message: "Careers page not found",
-		}
+		return SubmitApplicationResponse{}, onekiterrors.New(http.StatusNotFound, "Careers page not found")
 	}
 
 	career, err := h.CareersService.GetCareerBySlug(ctx, custom.BusinessID, req.CareerSlug)
 	if err != nil || !career.IsPublished {
-		return SubmitApplicationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusNotFound,
-			Message: "Role not found or no longer open",
-		}
+		return SubmitApplicationResponse{}, onekiterrors.New(http.StatusNotFound, "Role not found or no longer open")
 	}
 
 	input := domain.SubmissionInput{
@@ -326,10 +296,7 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 
 	id, err := h.CareersService.CreateSubmission(ctx, input)
 	if err != nil {
-		return SubmitApplicationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to submit application",
-		}
+		return SubmitApplicationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to submit application")
 	}
 
 	// Fire-and-forget confirmation + HR notification emails. The

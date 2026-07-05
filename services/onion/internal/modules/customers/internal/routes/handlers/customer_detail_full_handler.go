@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
@@ -33,41 +33,32 @@ type GetCustomerDetailFullResponse struct {
 	RecentVisits        []TimelineEntryPayload             `json:"recent_visits"`
 }
 
-func (h *GetCustomerDetailFullHandler) Validate(_ context.Context, req *GetCustomerDetailFullRequest) *errorModels.ServerError {
+func (h *GetCustomerDetailFullHandler) Validate(_ context.Context, req *GetCustomerDetailFullRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	return nil
 }
 
-func (h *GetCustomerDetailFullHandler) Serve(ctx context.Context, req *GetCustomerDetailFullRequest) (GetCustomerDetailFullResponse, *errorModels.ServerError) {
+func (h *GetCustomerDetailFullHandler) Serve(ctx context.Context, req *GetCustomerDetailFullRequest) (GetCustomerDetailFullResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetCustomerDetailFullResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCustomerDetailFullResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetCustomerDetailFullResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCustomerDetailFullResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	detail, err := h.CRMService.GetCustomerDetail(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
-			return GetCustomerDetailFullResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Customer not found",
-			}
+			return GetCustomerDetailFullResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 
-		return GetCustomerDetailFullResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get customer detail",
-		}
+		return GetCustomerDetailFullResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get customer detail")
 	}
 
 	txPayloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(detail.LoyaltyTransactions))

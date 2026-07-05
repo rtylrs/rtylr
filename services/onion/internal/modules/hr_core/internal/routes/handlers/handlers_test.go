@@ -2,11 +2,21 @@ package handlers
 
 import (
 	"context"
+	stdErrors "errors"
+	onekithttp "github.com/stackxio/onekit/http"
 	"net/http"
 	"testing"
 )
 
 // --- CreateEmployeeHandler ---
+
+func oneKitStatus(err error) int {
+	var oneKitErr *onekithttp.Error
+	if stdErrors.As(err, &oneKitErr) {
+		return int(oneKitErr.GetStatusCode())
+	}
+	return 0
+}
 
 func TestCreateEmployeeHandler_Validate_MissingFirstName(t *testing.T) {
 	h := &CreateEmployeeHandler{}
@@ -17,8 +27,8 @@ func TestCreateEmployeeHandler_Validate_MissingFirstName(t *testing.T) {
 	if se == nil {
 		t.Fatal("expected validation error for missing first_name")
 	}
-	if se.Code != http.StatusBadRequest {
-		t.Errorf("expected 400, got %d", se.Code)
+	if oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", oneKitStatus(se))
 	}
 }
 
@@ -146,7 +156,7 @@ func TestUpdateEmployeeHandler_Validate_ValidRequest(t *testing.T) {
 func TestCreateHRCoreDepartmentHandler_Validate_MissingName(t *testing.T) {
 	h := &CreateHRCoreDepartmentHandler{}
 	se := h.Validate(context.Background(), &CreateHRCoreDepartmentRequest{})
-	if se == nil || se.Code != http.StatusBadRequest {
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
 		t.Errorf("expected 400 for missing name, got %v", se)
 	}
 }

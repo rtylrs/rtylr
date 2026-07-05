@@ -11,8 +11,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type RolePayload struct {
@@ -47,16 +47,16 @@ type (
 	}
 )
 
-func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (ListRolesResponse, *errorModels.ServerError) {
+func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (ListRolesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListRolesResponse{}, errorModels.PermissionDeniedServerError()
+		return ListRolesResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	roles, err := h.Service.ListRoles(ctx, device.User.UserID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list roles", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListRolesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list roles"}
+		return ListRolesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list roles")
 	}
 
 	payloads := make([]*RolePayload, 0, len(roles))
@@ -83,24 +83,24 @@ type CreateRoleResponse struct {
 	Role *RolePayload `json:"role"`
 }
 
-func (h *CreateRoleHandler) Validate(_ context.Context, req *CreateRoleRequest) *errorModels.ServerError {
+func (h *CreateRoleHandler) Validate(_ context.Context, req *CreateRoleRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (CreateRoleResponse, *errorModels.ServerError) {
+func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (CreateRoleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateRoleResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateRoleResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	role := domain.RoleRecord{Name: req.Name, Description: req.Description, Permissions: req.Permissions}
 	created, err := h.Service.CreateRole(ctx, device.User.UserID, role)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create role", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateRoleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create role"}
+		return CreateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create role")
 	}
 
 	return CreateRoleResponse{Role: roleToPayload(*created)}, nil
@@ -123,30 +123,30 @@ type UpdateRoleResponse struct {
 	Role *RolePayload `json:"role"`
 }
 
-func (h *UpdateRoleHandler) Validate(_ context.Context, req *UpdateRoleRequest) *errorModels.ServerError {
+func (h *UpdateRoleHandler) Validate(_ context.Context, req *UpdateRoleRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (UpdateRoleResponse, *errorModels.ServerError) {
+func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (UpdateRoleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpdateRoleResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateRoleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid role id"}
+		return UpdateRoleResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid role id")
 	}
 
 	role := domain.RoleRecord{ID: id, Name: req.Name, Description: req.Description, Permissions: req.Permissions}
 	updated, err := h.Service.UpdateRole(ctx, device.User.UserID, role)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update role", logger.Any("owner_id", device.User.UserID), logger.Any("role_id", id), logger.Error(err))
-		return UpdateRoleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update role"}
+		return UpdateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}
 
 	return UpdateRoleResponse{Role: roleToPayload(*updated)}, nil
@@ -167,29 +167,29 @@ type AssignRoleResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *AssignRoleHandler) Validate(_ context.Context, req *AssignRoleRequest) *errorModels.ServerError {
+func (h *AssignRoleHandler) Validate(_ context.Context, req *AssignRoleRequest) error {
 	if req.RoleID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "role_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "role_id is required")
 	}
 	return nil
 }
 
-func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (AssignRoleResponse, *errorModels.ServerError) {
+func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (AssignRoleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return AssignRoleResponse{}, errorModels.PermissionDeniedServerError()
+		return AssignRoleResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	employeeID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return AssignRoleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid employee id"}
+		return AssignRoleResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
 	err := h.Service.AssignRole(ctx, device.User.UserID, employeeID, req.RoleID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to assign role", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(err))
-		return AssignRoleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to assign role"}
+		return AssignRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to assign role")
 	}
 
 	return AssignRoleResponse{Success: true}, nil

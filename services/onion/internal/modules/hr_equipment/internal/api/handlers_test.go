@@ -1,0 +1,200 @@
+package api
+
+import (
+	"context"
+	stdErrors "errors"
+	onekithttp "github.com/stackxio/onekit/http"
+	"net/http"
+	"testing"
+)
+
+// --- CreateEquipmentRequestHandler ---
+
+func oneKitStatus(err error) int {
+	var oneKitErr *onekithttp.Error
+	if stdErrors.As(err, &oneKitErr) {
+		return int(oneKitErr.GetStatusCode())
+	}
+	return 0
+}
+
+func TestCreateEquipmentRequestHandler_Validate_MissingEmployeeID(t *testing.T) {
+	h := &CreateEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &CreateEquipmentRequestRequest{
+		ItemName: "Laptop",
+		Quantity: 1,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400, got %v", se)
+	}
+}
+
+func TestCreateEquipmentRequestHandler_Validate_MissingItemName(t *testing.T) {
+	h := &CreateEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &CreateEquipmentRequestRequest{
+		EmployeeID: 1,
+		Quantity:   1,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for missing item_name, got %v", se)
+	}
+}
+
+func TestCreateEquipmentRequestHandler_Validate_WhitespaceItemName(t *testing.T) {
+	h := &CreateEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &CreateEquipmentRequestRequest{
+		EmployeeID: 1,
+		ItemName:   "   ",
+		Quantity:   1,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for whitespace item_name, got %v", se)
+	}
+}
+
+func TestCreateEquipmentRequestHandler_Validate_ZeroQuantity(t *testing.T) {
+	h := &CreateEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &CreateEquipmentRequestRequest{
+		EmployeeID: 1,
+		ItemName:   "Monitor",
+		Quantity:   0,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for zero quantity, got %v", se)
+	}
+}
+
+func TestCreateEquipmentRequestHandler_Validate_NegativeQuantity(t *testing.T) {
+	h := &CreateEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &CreateEquipmentRequestRequest{
+		EmployeeID: 1,
+		ItemName:   "Monitor",
+		Quantity:   -1,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for negative quantity, got %v", se)
+	}
+}
+
+func TestCreateEquipmentRequestHandler_Validate_ValidRequest(t *testing.T) {
+	h := &CreateEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &CreateEquipmentRequestRequest{
+		EmployeeID: 1,
+		ItemName:   "Laptop",
+		Quantity:   2,
+	})
+	if se != nil {
+		t.Errorf("expected nil for valid request, got %v", se)
+	}
+}
+
+// --- CreateAssetHandler ---
+
+func TestCreateAssetHandler_Validate_MissingName(t *testing.T) {
+	h := &CreateAssetHandler{}
+	se := h.Validate(context.Background(), &CreateAssetRequest{
+		Category:      "Electronics",
+		PurchasePrice: 0,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for missing name, got %v", se)
+	}
+}
+
+func TestCreateAssetHandler_Validate_MissingCategory(t *testing.T) {
+	h := &CreateAssetHandler{}
+	se := h.Validate(context.Background(), &CreateAssetRequest{
+		Name: "MacBook Pro",
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for missing category, got %v", se)
+	}
+}
+
+func TestCreateAssetHandler_Validate_NegativePurchasePrice(t *testing.T) {
+	h := &CreateAssetHandler{}
+	se := h.Validate(context.Background(), &CreateAssetRequest{
+		Name:          "MacBook Pro",
+		Category:      "Electronics",
+		PurchasePrice: -100,
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for negative purchase_price, got %v", se)
+	}
+}
+
+func TestCreateAssetHandler_Validate_ValidRequest(t *testing.T) {
+	h := &CreateAssetHandler{}
+	se := h.Validate(context.Background(), &CreateAssetRequest{
+		Name:          "MacBook Pro",
+		Category:      "Electronics",
+		PurchasePrice: 2500,
+	})
+	if se != nil {
+		t.Errorf("expected nil for valid request, got %v", se)
+	}
+}
+
+func TestCreateAssetHandler_Validate_ZeroPriceIsValid(t *testing.T) {
+	h := &CreateAssetHandler{}
+	se := h.Validate(context.Background(), &CreateAssetRequest{
+		Name:     "Donated Chair",
+		Category: "Furniture",
+	})
+	if se != nil {
+		t.Errorf("zero purchase_price should be valid, got %v", se)
+	}
+}
+
+// --- ApproveEquipmentRequestHandler ---
+
+func TestApproveEquipmentRequestHandler_Validate_RejectWithoutReason(t *testing.T) {
+	h := &ApproveEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &ApproveEquipmentRequestRequest{
+		Approve: false,
+		Reason:  "",
+	})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for rejection without reason, got %v", se)
+	}
+}
+
+func TestApproveEquipmentRequestHandler_Validate_ApproveWithoutReason_IsValid(t *testing.T) {
+	h := &ApproveEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &ApproveEquipmentRequestRequest{
+		Approve: true,
+		Reason:  "",
+	})
+	if se != nil {
+		t.Errorf("approve without reason should pass, got %v", se)
+	}
+}
+
+func TestApproveEquipmentRequestHandler_Validate_RejectWithReason_IsValid(t *testing.T) {
+	h := &ApproveEquipmentRequestHandler{}
+	se := h.Validate(context.Background(), &ApproveEquipmentRequestRequest{
+		Approve: false,
+		Reason:  "Budget constraints",
+	})
+	if se != nil {
+		t.Errorf("reject with reason should pass, got %v", se)
+	}
+}
+
+// --- AssignAssetHandler ---
+
+func TestAssignAssetHandler_Validate_MissingEmployeeID(t *testing.T) {
+	h := &AssignAssetHandler{}
+	se := h.Validate(context.Background(), &AssignAssetRequest{EmployeeID: 0})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for missing employee_id, got %v", se)
+	}
+}
+
+func TestAssignAssetHandler_Validate_ValidRequest(t *testing.T) {
+	h := &AssignAssetHandler{}
+	se := h.Validate(context.Background(), &AssignAssetRequest{EmployeeID: 5})
+	if se != nil {
+		t.Errorf("expected nil for valid request, got %v", se)
+	}
+}

@@ -3,11 +3,14 @@ package pos_audit
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/pos_audit/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_audit/internal/routes"
 )
 
 type Module struct {
@@ -18,8 +21,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := posauditv1.RegisterAuditServiceServer(
+		api.NewAuditAPI(m.service),
+		posauditv1.WithMux(mux),
+		posauditv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS audit service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

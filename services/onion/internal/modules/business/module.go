@@ -3,16 +3,20 @@ package business
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/business/internal/api"
 	"github.com/voxire/onion/internal/modules/business/internal/application"
-	"github.com/voxire/onion/internal/modules/business/internal/routes"
-	"github.com/voxire/onion/internal/modules/business/internal/routes/handlers"
+	usermodule "github.com/voxire/onion/internal/modules/user"
 )
 
 type Module struct {
-	service *application.Service
+	service     *application.Service
+	userService usermodule.OnboardingPort
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
@@ -21,14 +25,29 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) WithUserService(userService usermodule.OnboardingPort) *Module {
+	m.userService = userService
+	return m
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	businessAPI := api.NewBusinessAPI(m.service)
+	if m.userService != nil {
+		businessAPI.WithUserService(m.userService)
+	}
+	if err := hubbusinessv1.RegisterBusinessServiceServer(
+		businessAPI,
+		hubbusinessv1.WithMux(mux),
+		hubbusinessv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hub business service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	// Public reads for the customer-facing menu app.
-	// Every other route in this module requires a JWT.
-	out := handlers.PublicBusinessRoutes()
-	out = append(out, handlers.PublicBusinessBySlugRoutes()...)
-	return out
+	return []string{
+		"/api/hub/business/v1/businesses/by-slug",
+		"/api/hub/business/v1/businesses/public",
+		"/api/hub/business/v1/businesses/name-exists",
+	}
 }

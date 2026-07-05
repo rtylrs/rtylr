@@ -3,13 +3,14 @@ package config
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hubconfigv1 "github.com/voxire/voxie/gen/go/hub/config/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/config/internal/api"
 	"github.com/voxire/onion/internal/modules/config/internal/application"
-	"github.com/voxire/onion/internal/modules/config/internal/routes"
-	"github.com/voxire/onion/internal/modules/config/internal/routes/handlers"
-	"github.com/voxire/onion/internal/platform/utils/sliceutils"
 )
 
 type Module struct {
@@ -19,23 +20,27 @@ type Module struct {
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	configService := application.NewService(ctx, db)
 
-	module := &Module{
+	return &Module{
 		ConfigService: configService,
 	}
-
-	return module
 }
 
 func (m *Module) GetService() *application.Service {
 	return m.ConfigService
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.ConfigService)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hubconfigv1.RegisterConfigServiceServer(
+		api.NewConfigAPI(m.ConfigService),
+		hubconfigv1.WithMux(mux),
+		hubconfigv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hub config service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return sliceutils.Concat(
-		handlers.IndustriesRoutes(),
-	)
+	return []string{
+		"/api/hub/config/v1/industries",
+	}
 }

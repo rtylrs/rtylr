@@ -14,8 +14,8 @@ import (
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/platform/aicache"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/snips"
 )
@@ -100,30 +100,21 @@ type GenerateTextStreamResponse struct {
 	SessionID  string `json:"sessionId"`
 }
 
-func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTextStreamRequest) *errorModels.ServerError {
+func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTextStreamRequest) error {
 	if req.Prompt == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Prompt is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Prompt is required")
 	}
 
 	if req.UserID <= 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "User ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "User ID is required")
 	}
 
 	return nil
 }
 
-func (h *GenerateTextStreamHandler) Serve(_ context.Context, _ *GenerateTextStreamRequest) (GenerateTextStreamResponse, *errorModels.ServerError) {
+func (h *GenerateTextStreamHandler) Serve(_ context.Context, _ *GenerateTextStreamRequest) (GenerateTextStreamResponse, error) {
 	if !h.AiService.IsAvailable() {
-		return GenerateTextStreamResponse{}, &errorModels.ServerError{
-			Code:    http.StatusServiceUnavailable,
-			Message: "AI service not available",
-		}
+		return GenerateTextStreamResponse{}, onekiterrors.New(http.StatusServiceUnavailable, "AI service not available")
 	}
 
 	return GenerateTextStreamResponse{}, nil
@@ -147,7 +138,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 
 	if err := h.validateRequest(ctx, req); err != nil {
 		log.Error("Request validation failed", logger.Error(err))
-		http.Error(w, err.Message, err.Code)
+		serverHttp.WriteOneKitError(ctx, w, err)
 
 		return
 	}
@@ -373,7 +364,7 @@ func (h *GenerateTextStreamHandler) parseAndValidateRequest(w http.ResponseWrite
 	return &req, nil
 }
 
-func (h *GenerateTextStreamHandler) validateRequest(ctx context.Context, req *GenerateTextStreamRequest) *errorModels.ServerError {
+func (h *GenerateTextStreamHandler) validateRequest(ctx context.Context, req *GenerateTextStreamRequest) error {
 	return h.Validate(ctx, req)
 }
 

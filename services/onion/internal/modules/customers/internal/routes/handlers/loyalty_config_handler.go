@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
@@ -52,23 +52,20 @@ func newLoyaltyConfigPayload(cfg domain.LoyaltyConfig) *crmloyaltyv1.LoyaltyConf
 	}
 }
 
-func (h *GetLoyaltyConfigHandler) Serve(ctx context.Context, _ *GetLoyaltyConfigRequest) (GetLoyaltyConfigResponse, *errorModels.ServerError) {
+func (h *GetLoyaltyConfigHandler) Serve(ctx context.Context, _ *GetLoyaltyConfigRequest) (GetLoyaltyConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return GetLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return GetLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	cfg, err := h.CRMService.GetLoyaltyConfig(ctx, businessID)
 	if err != nil {
-		return GetLoyaltyConfigResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get loyalty config",
-		}
+		return GetLoyaltyConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get loyalty config")
 	}
 
 	return GetLoyaltyConfigResponse{Config: newLoyaltyConfigPayload(cfg)}, nil
@@ -99,37 +96,28 @@ type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) *errorModels.ServerError {
+func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) error {
 	if req.PointsPerCurrencyUnit < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Points per currency unit must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Points per currency unit must not be negative")
 	}
 	if req.CurrencyPerPoint < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Currency per point must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Currency per point must not be negative")
 	}
 	if req.BronzeDiscountPct < 0 || req.SilverDiscountPct < 0 || req.GoldDiscountPct < 0 || req.PlatinumDiscountPct < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Discount percentages must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Discount percentages must not be negative")
 	}
 	return nil
 }
 
-func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyaltyConfigRequest) (UpdateLoyaltyConfigResponse, *errorModels.ServerError) {
+func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyaltyConfigRequest) (UpdateLoyaltyConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateLoyaltyConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.LoyaltyConfigInput{
@@ -150,10 +138,7 @@ func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyal
 	}
 
 	if err := h.CRMService.UpsertLoyaltyConfig(ctx, input); err != nil {
-		return UpdateLoyaltyConfigResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update loyalty config",
-		}
+		return UpdateLoyaltyConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update loyalty config")
 	}
 
 	return UpdateLoyaltyConfigResponse{Message: "Loyalty config updated successfully"}, nil

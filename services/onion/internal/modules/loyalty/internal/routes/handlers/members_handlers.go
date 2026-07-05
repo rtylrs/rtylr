@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/loyalty/internal/application"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -38,22 +38,18 @@ type ListMembersResponse struct {
 	Members []MemberPayload `json:"members"`
 }
 
-func (h *ListMembersHandler) Serve(ctx context.Context, req *ListMembersRequest) (ListMembersResponse, *errorModels.ServerError) {
+func (h *ListMembersHandler) Serve(ctx context.Context, req *ListMembersRequest) (ListMembersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListMembersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListMembersResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListMembersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListMembersResponse{}, onekiterrors.PermissionDenied()
 	}
 	members, err := h.Service.ListMembers(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
-		return ListMembersResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to list loyalty members",
-		}
+		return ListMembersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty members")
 	}
 	payloads := make([]MemberPayload, 0, len(members))
 	for _, m := range members {
@@ -96,22 +92,18 @@ type ListRewardsResponse struct {
 	Rewards []RewardPayload `json:"rewards"`
 }
 
-func (h *ListRewardsHandler) Serve(ctx context.Context, req *ListRewardsRequest) (ListRewardsResponse, *errorModels.ServerError) {
+func (h *ListRewardsHandler) Serve(ctx context.Context, req *ListRewardsRequest) (ListRewardsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListRewardsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListRewardsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListRewardsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListRewardsResponse{}, onekiterrors.PermissionDenied()
 	}
 	rewards, err := h.Service.ListRewards(ctx, businessID, req.ActiveOnly)
 	if err != nil {
-		return ListRewardsResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to list loyalty rewards",
-		}
+		return ListRewardsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty rewards")
 	}
 	payloads := make([]RewardPayload, 0, len(rewards))
 	for _, rw := range rewards {
@@ -151,28 +143,20 @@ type UpsertRewardResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpsertRewardHandler) Validate(_ context.Context, req *UpsertRewardRequest) *errorModels.ServerError {
+func (h *UpsertRewardHandler) Validate(_ context.Context, req *UpsertRewardRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Reward name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Reward name is required")
 	}
 	if req.PointsCost < 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Points cost cannot be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Points cost cannot be negative")
 	}
 	return nil
 }
 
-func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardRequest) (UpsertRewardResponse, *errorModels.ServerError) {
+func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardRequest) (UpsertRewardResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpsertRewardResponse{}, errorModels.PermissionDeniedServerError()
+		return UpsertRewardResponse{}, onekiterrors.PermissionDenied()
 	}
 	active := true
 	if req.Active != nil {
@@ -183,7 +167,7 @@ func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardReques
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpsertRewardResponse{}, errorModels.PermissionDeniedServerError()
+		return UpsertRewardResponse{}, onekiterrors.PermissionDenied()
 	}
 	id, err := h.Service.UpsertReward(ctx, domain.LoyaltyReward{
 		ID:          req.ID,
@@ -198,11 +182,7 @@ func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardReques
 		Active:      active,
 	})
 	if err != nil {
-		return UpsertRewardResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to save reward",
-		}
+		return UpsertRewardResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to save reward")
 	}
 	msg := "Reward created"
 	if req.ID != 0 {

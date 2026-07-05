@@ -3,11 +3,19 @@ package team
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hubteamaccessv1 "github.com/voxire/voxie/gen/go/hub/team/access/v1"
+	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
+	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
+	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
+	hubteamonboardingv1 "github.com/voxire/voxie/gen/go/hub/team/onboarding/v1"
+	hubteampermissionsv1 "github.com/voxire/voxie/gen/go/hub/team/permissions/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/team/internal/api"
 	"github.com/voxire/onion/internal/modules/team/internal/application"
-	"github.com/voxire/onion/internal/modules/team/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +28,55 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	marshalOpts := protojson.MarshalOptions{UseProtoNames: true}
+	if err := hubteammembersv1.RegisterMembersServiceServer(
+		api.NewMembersAPI(m.service),
+		hubteammembersv1.WithMux(mux),
+		hubteammembersv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub team members service: %w", err))
+	}
+
+	if err := hubteaminvitationsv1.RegisterInvitationsServiceServer(
+		api.NewInvitationsAPI(m.service),
+		hubteaminvitationsv1.WithMux(mux),
+		hubteaminvitationsv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub team invitations service: %w", err))
+	}
+
+	if err := hubteampermissionsv1.RegisterPermissionsServiceServer(
+		api.NewPermissionsAPI(m.service),
+		hubteampermissionsv1.WithMux(mux),
+		hubteampermissionsv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub team permissions service: %w", err))
+	}
+
+	if err := hubteamonboardingv1.RegisterOnboardingServiceServer(
+		api.NewOnboardingAPI(m.service),
+		hubteamonboardingv1.WithMux(mux),
+		hubteamonboardingv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub team onboarding service: %w", err))
+	}
+
+	if err := hubteamaccessv1.RegisterAccessServiceServer(
+		api.NewAccessAPI(m.service),
+		hubteamaccessv1.WithMux(mux),
+		hubteamaccessv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub team access service: %w", err))
+	}
+
+	if err := hubteamgroupsv1.RegisterGroupsServiceServer(
+		api.NewGroupsAPI(m.service),
+		hubteamgroupsv1.WithMux(mux),
+		hubteamgroupsv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub team groups service: %w", err))
+	}
 }
 
 func (m *Module) Service() *application.Service {
@@ -30,7 +85,7 @@ func (m *Module) Service() *application.Service {
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
-		"/auth/invite/verify",
-		"/auth/invite/accept",
+		"/api/hub/team/invitations/v1/invitations/verify",
+		"/api/hub/team/invitations/v1/invitations/accept",
 	}
 }

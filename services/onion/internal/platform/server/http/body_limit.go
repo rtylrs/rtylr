@@ -2,12 +2,11 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	stdErrors "errors"
 	"net/http"
 
-	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // DefaultMaxRequestBodyBytes is the global ceiling for POST/PUT/PATCH bodies on
@@ -61,18 +60,5 @@ func isRequestBodyTooLarge(err error) bool {
 func writeRequestEntityTooLarge(ctx context.Context, w http.ResponseWriter) {
 	logger.Ctx(ctx).Warn("Request body too large")
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusRequestEntityTooLarge)
-
-	response := errors.ErrorResponse{
-		Error: errors.ServerError{
-			Code:    http.StatusRequestEntityTooLarge,
-			Message: "Request body too large",
-		},
-		Status: "error",
-	}
-
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		logger.Ctx(ctx).Error("Failed to encode error response", logger.Error(err))
-	}
+	WriteOneKitError(ctx, w, onekiterrors.New(http.StatusRequestEntityTooLarge, "Request body too large"))
 }

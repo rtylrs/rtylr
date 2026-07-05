@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -53,18 +53,18 @@ type ListShiftsResponse struct {
 	Shifts []*ShiftPayload `json:"shifts"`
 }
 
-func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, *errorModels.ServerError) {
+func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListShiftsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListShiftsResponse{}, onekiterrors.PermissionDenied()
 	}
 	shifts, err := h.Service.ListShifts(ctx, businessID, req.StaffID, req.Date)
 	if err != nil {
-		return ListShiftsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
+		return ListShiftsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list shifts")
 	}
 	payloads := make([]*ShiftPayload, 0, len(shifts))
 	for _, s := range shifts {
@@ -91,30 +91,30 @@ type CreateShiftResponse struct {
 	ID int64 `json:"id"`
 }
 
-func (h *CreateShiftHandler) Validate(_ context.Context, req *CreateShiftRequest) *errorModels.ServerError {
+func (h *CreateShiftHandler) Validate(_ context.Context, req *CreateShiftRequest) error {
 	if req.StaffID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "staff_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "staff_id is required")
 	}
 	if req.Date == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+		return onekiterrors.New(http.StatusBadRequest, "date is required")
 	}
 	if req.StartTime == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_time is required"}
+		return onekiterrors.New(http.StatusBadRequest, "start_time is required")
 	}
 	if req.EndTime == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "end_time is required"}
+		return onekiterrors.New(http.StatusBadRequest, "end_time is required")
 	}
 	return nil
 }
 
-func (h *CreateShiftHandler) Serve(ctx context.Context, req *CreateShiftRequest) (CreateShiftResponse, *errorModels.ServerError) {
+func (h *CreateShiftHandler) Serve(ctx context.Context, req *CreateShiftRequest) (CreateShiftResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateShiftResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateShiftResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateShiftResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateShiftResponse{}, onekiterrors.PermissionDenied()
 	}
 	input := domain.ShiftInput{
 		OwnerID: device.User.UserID, BusinessID: businessID, StaffID: req.StaffID, Date: req.Date,
@@ -123,7 +123,7 @@ func (h *CreateShiftHandler) Serve(ctx context.Context, req *CreateShiftRequest)
 	}
 	id, err := h.Service.CreateShift(ctx, input)
 	if err != nil {
-		return CreateShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create shift"}
+		return CreateShiftResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create shift")
 	}
 	return CreateShiftResponse{ID: id}, nil
 }
@@ -146,28 +146,28 @@ type UpdateShiftResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *UpdateShiftHandler) Validate(_ context.Context, req *UpdateShiftRequest) *errorModels.ServerError {
+func (h *UpdateShiftHandler) Validate(_ context.Context, req *UpdateShiftRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	return nil
 }
 
-func (h *UpdateShiftHandler) Serve(ctx context.Context, req *UpdateShiftRequest) (UpdateShiftResponse, *errorModels.ServerError) {
+func (h *UpdateShiftHandler) Serve(ctx context.Context, req *UpdateShiftRequest) (UpdateShiftResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpdateShiftResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateShiftResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateShiftResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateShiftResponse{}, onekiterrors.PermissionDenied()
 	}
 	input := domain.ShiftUpdateInput{
 		ID: req.ID, Date: req.Date, StartTime: req.StartTime, EndTime: req.EndTime,
 		BreakDurationMinutes: req.BreakMinutes, Status: req.Status, Notes: req.Notes,
 	}
 	if err := h.Service.UpdateShift(ctx, businessID, input); err != nil {
-		return UpdateShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update shift"}
+		return UpdateShiftResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update shift")
 	}
 	return UpdateShiftResponse{Success: true}, nil
 }
@@ -184,24 +184,24 @@ type DeleteShiftResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *DeleteShiftHandler) Validate(_ context.Context, req *DeleteShiftRequest) *errorModels.ServerError {
+func (h *DeleteShiftHandler) Validate(_ context.Context, req *DeleteShiftRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	return nil
 }
 
-func (h *DeleteShiftHandler) Serve(ctx context.Context, req *DeleteShiftRequest) (DeleteShiftResponse, *errorModels.ServerError) {
+func (h *DeleteShiftHandler) Serve(ctx context.Context, req *DeleteShiftRequest) (DeleteShiftResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return DeleteShiftResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteShiftResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteShiftResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteShiftResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.DeleteShift(ctx, businessID, req.ID); err != nil {
-		return DeleteShiftResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete shift"}
+		return DeleteShiftResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete shift")
 	}
 	return DeleteShiftResponse{Success: true}, nil
 }

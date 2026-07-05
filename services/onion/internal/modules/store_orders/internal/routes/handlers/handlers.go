@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -24,18 +25,18 @@ type (
 	}
 )
 
-func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
+func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return ListResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list orders"}
+		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list orders")
 	}
 	return ListResponse{Orders: items}, nil
 }
@@ -52,25 +53,25 @@ type DetailResponse struct {
 	Items []domain.StoreOrderItem `json:"items"`
 }
 
-func (h *DetailHandler) Validate(_ context.Context, req *DetailRequest) *errorModels.ServerError {
+func (h *DetailHandler) Validate(_ context.Context, req *DetailRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	return nil
 }
 
-func (h *DetailHandler) Serve(ctx context.Context, req *DetailRequest) (DetailResponse, *errorModels.ServerError) {
+func (h *DetailHandler) Serve(ctx context.Context, req *DetailRequest) (DetailResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return DetailResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return DetailResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return DetailResponse{}, errorModels.PermissionDeniedServerError()
+		return DetailResponse{}, onekiterrors.PermissionDenied()
 	}
 	detail, err := h.Service.GetDetail(ctx, businessID, req.ID)
 	if err != nil {
-		return DetailResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to get order detail"}
+		return DetailResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get order detail")
 	}
 	return DetailResponse{Order: detail.Order, Items: detail.Items}, nil
 }
@@ -97,32 +98,32 @@ type CreateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 	if req.CustomerEmail == "" && req.CustomerName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Customer info is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Customer info is required")
 	}
 	if req.Subtotal < 0 || req.Tax < 0 || req.ShippingCost < 0 || req.Total < 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Monetary amounts cannot be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "Monetary amounts cannot be negative")
 	}
 	for _, item := range req.Items {
 		if item.Quantity <= 0 {
-			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Item quantity must be positive"}
+			return onekiterrors.New(http.StatusBadRequest, "Item quantity must be positive")
 		}
 		if item.Price < 0 || item.Total < 0 {
-			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Item amounts cannot be negative"}
+			return onekiterrors.New(http.StatusBadRequest, "Item amounts cannot be negative")
 		}
 	}
 	return nil
 }
 
-func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, *errorModels.ServerError) {
+func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateResponse{}, onekiterrors.PermissionDenied()
 	}
 	id, err := h.Service.Create(ctx, authUser.UserID, businessID, domain.StoreOrderInput{
 		CustomerEmail:   req.CustomerEmail,
@@ -138,7 +139,10 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		Items:           req.Items,
 	})
 	if err != nil {
-		return CreateResponse{}, errorModels.FromError(err, "Failed to create order")
+		if errors.Is(err, domain.ErrInvalidAmount) {
+			return CreateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		return CreateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create order")
 	}
 	return CreateResponse{ID: id, Message: "Order created successfully"}, nil
 }
@@ -164,24 +168,24 @@ type UpdateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
+func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	if req.Subtotal < 0 || req.Tax < 0 || req.ShippingCost < 0 || req.Total < 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Monetary amounts cannot be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "Monetary amounts cannot be negative")
 	}
 	return nil
 }
 
-func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, *errorModels.ServerError) {
+func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.Update(ctx, businessID, req.ID, domain.StoreOrderInput{
 		CustomerEmail:   req.CustomerEmail,
@@ -195,7 +199,10 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		ShippingAddress: req.ShippingAddress,
 		Notes:           req.Notes,
 	}); err != nil {
-		return UpdateResponse{}, errorModels.FromError(err, "Failed to update order")
+		if errors.Is(err, domain.ErrInvalidAmount) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update order")
 	}
 	return UpdateResponse{Message: "Order updated successfully"}, nil
 }

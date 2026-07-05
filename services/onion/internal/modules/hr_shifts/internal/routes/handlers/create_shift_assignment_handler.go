@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
@@ -29,31 +29,31 @@ type CreateShiftAssignmentResponse struct {
 	Assignment *hrshiftv1.ShiftAssignmentPayload `json:"assignment"`
 }
 
-func (h *CreateShiftAssignmentHandler) Validate(_ context.Context, req *CreateShiftAssignmentRequest) *errorModels.ServerError {
+func (h *CreateShiftAssignmentHandler) Validate(_ context.Context, req *CreateShiftAssignmentRequest) error {
 	if req.EmployeeID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 	if req.ShiftID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "shift_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "shift_id is required")
 	}
 	if req.Date == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "date is required"}
+		return onekiterrors.New(http.StatusBadRequest, "date is required")
 	}
 	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
+		return onekiterrors.New(http.StatusBadRequest, "date must be in YYYY-MM-DD format")
 	}
 	return nil
 }
 
-func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShiftAssignmentRequest) (CreateShiftAssignmentResponse, *errorModels.ServerError) {
+func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShiftAssignmentRequest) (CreateShiftAssignmentResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateShiftAssignmentResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateShiftAssignmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateShiftAssignmentResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateShiftAssignmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	created, err := h.Service.CreateShiftAssignment(ctx, businessID, domain.ShiftAssignmentRecord{
@@ -63,13 +63,13 @@ func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShi
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrShiftNotFound) {
-			return CreateShiftAssignmentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Shift not found"}
+			return CreateShiftAssignmentResponse{}, onekiterrors.New(http.StatusNotFound, "Shift not found")
 		}
 		if errors.Is(err, domain.ErrRosterConflict) {
-			return CreateShiftAssignmentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Shift assignment conflicts with approved leave or another shift"}
+			return CreateShiftAssignmentResponse{}, onekiterrors.New(http.StatusConflict, "Shift assignment conflicts with approved leave or another shift")
 		}
 		logger.Ctx(ctx).Error("failed to create shift assignment", logger.Any("business_id", businessID), logger.Error(err))
-		return CreateShiftAssignmentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create shift assignment"}
+		return CreateShiftAssignmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create shift assignment")
 	}
 
 	return CreateShiftAssignmentResponse{Assignment: assignmentToProto(*created)}, nil

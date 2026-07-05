@@ -3,15 +3,19 @@ package hr_leave
 import (
 	"context"
 	"database/sql"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	"github.com/voxire/onion/internal/modules/hr_leave/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	internaljobs "github.com/voxire/onion/internal/modules/hr_leave/internal/jobs"
-	"github.com/voxire/onion/internal/modules/hr_leave/internal/routes"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
 type hrCoreApprovalAdapter struct {
@@ -53,7 +57,20 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	serverHttp.RegisterGET[api.GetLeaveCalendarRequest, api.GetLeaveCalendarResponse](
+		ctx, router, api.GetLeaveCalendarRoutes(), &api.GetLeaveCalendarHandler{Service: m.service},
+	)
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	err := hrleavev1.RegisterLeaveServiceServer(
+		api.NewLeaveService(m.service),
+		hrleavev1.WithMux(mux),
+		hrleavev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

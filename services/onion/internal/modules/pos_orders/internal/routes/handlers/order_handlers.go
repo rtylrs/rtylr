@@ -11,7 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // ─── Shared payloads ──────────────────────────────────────────────────────────
@@ -140,30 +140,22 @@ type ListOrdersResponse struct {
 	PageSize int64          `json:"page_size"`
 }
 
-func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) *errorModels.ServerError {
+func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) error {
 	const layout = "2006-01-02"
 	if req.DateFrom != "" {
 		if _, err := time.Parse(layout, req.DateFrom); err != nil {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "date_from must be in YYYY-MM-DD format",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "date_from must be in YYYY-MM-DD format")
 		}
 	}
 	if req.DateTo != "" {
 		if _, err := time.Parse(layout, req.DateTo); err != nil {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "date_to must be in YYYY-MM-DD format",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "date_to must be in YYYY-MM-DD format")
 		}
 	}
 	return nil
 }
 
-func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, *errorModels.ServerError) {
+func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return ListOrdersResponse{}, authErr
@@ -188,11 +180,7 @@ func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (
 
 	orders, total, hasMore, err := h.Service.ListOrdersPage(ctx, businessID, req.SessionID, req.Status, req.DateFrom, req.DateTo, req.Search, page, pageSize)
 	if err != nil {
-		return ListOrdersResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to list orders",
-		}
+		return ListOrdersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list orders")
 	}
 
 	payloads := make([]OrderPayload, 0, len(orders))
@@ -237,53 +225,33 @@ type CreateOrderResponse struct {
 	Message     string `json:"message"`
 }
 
-func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest) *errorModels.ServerError {
+func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest) error {
 	if len(req.Items) == 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Order must have at least one item",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Order must have at least one item")
 	}
 
 	if req.Type != "" && !domain.IsOrderType(domain.OrderType(req.Type)) {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Unsupported order type",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Unsupported order type")
 	}
 
 	for _, item := range req.Items {
 		if item.Name == "" {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Each item must have a name",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "Each item must have a name")
 		}
 
 		if item.Quantity <= 0 {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Item quantity must be positive",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "Item quantity must be positive")
 		}
 
 		if item.UnitPrice < 0 {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Item unit price cannot be negative",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "Item unit price cannot be negative")
 		}
 	}
 
 	return nil
 }
 
-func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest) (CreateOrderResponse, *errorModels.ServerError) {
+func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest) (CreateOrderResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return CreateOrderResponse{}, authErr
@@ -322,11 +290,7 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 		Items:         items,
 	})
 	if err != nil {
-		return CreateOrderResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to create order",
-		}
+		return CreateOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create order")
 	}
 
 	order, getErr := h.Service.GetOrder(ctx, businessID, orderID)
@@ -351,7 +315,7 @@ type GetOrderDetailResponse struct {
 	Order *OrderPayload `json:"order"`
 }
 
-func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRequest) (GetOrderDetailResponse, *errorModels.ServerError) {
+func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRequest) (GetOrderDetailResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return GetOrderDetailResponse{}, authErr
@@ -366,11 +330,7 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
-			return GetOrderDetailResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Invalid order id",
-			}
+			return GetOrderDetailResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
 		}
 		orderID = parsed
 	}
@@ -378,18 +338,10 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 	order, err := h.Service.GetOrder(ctx, businessID, orderID)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return GetOrderDetailResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusNotFound,
-				Code:     http.StatusNotFound,
-				Message:  "Order not found",
-			}
+			return GetOrderDetailResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
 
-		return GetOrderDetailResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to get order",
-		}
+		return GetOrderDetailResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get order")
 	}
 
 	payload := newOrderPayload(*order)
@@ -414,27 +366,19 @@ type UpdateOrderStatusResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateOrderStatusHandler) Validate(ctx context.Context, req *UpdateOrderStatusRequest) *errorModels.ServerError {
+func (h *UpdateOrderStatusHandler) Validate(ctx context.Context, req *UpdateOrderStatusRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Order id is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Order id is required")
 	}
 
 	if req.Status == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Status is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Status is required")
 	}
 
 	return nil
 }
 
-func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderStatusRequest) (UpdateOrderStatusResponse, *errorModels.ServerError) {
+func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderStatusRequest) (UpdateOrderStatusResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return UpdateOrderStatusResponse{}, authErr
@@ -449,21 +393,13 @@ func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderSt
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
-			return UpdateOrderStatusResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Invalid order id",
-			}
+			return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
 		}
 		orderID = parsed
 	}
 
 	if err := h.Service.UpdateOrderStatus(ctx, businessID, orderID, domain.OrderStatus(req.Status)); err != nil {
-		return UpdateOrderStatusResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to update order status",
-		}
+		return UpdateOrderStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update order status")
 	}
 
 	return UpdateOrderStatusResponse{Message: "Order status updated"}, nil
@@ -485,27 +421,19 @@ type UpdateOrderItemStatusResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateOrderItemStatusHandler) Validate(_ context.Context, req *UpdateOrderItemStatusRequest) *errorModels.ServerError {
+func (h *UpdateOrderItemStatusHandler) Validate(_ context.Context, req *UpdateOrderItemStatusRequest) error {
 	if req.OrderID == 0 || req.ItemID == 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Order id and item id are required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Order id and item id are required")
 	}
 
 	if req.Status == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Status is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Status is required")
 	}
 
 	return nil
 }
 
-func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrderItemStatusRequest) (UpdateOrderItemStatusResponse, *errorModels.ServerError) {
+func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrderItemStatusRequest) (UpdateOrderItemStatusResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return UpdateOrderItemStatusResponse{}, authErr
@@ -516,11 +444,7 @@ func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrd
 		return UpdateOrderItemStatusResponse{}, bizErr
 	}
 	if err := h.Service.UpdateOrderItemStatus(ctx, businessID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
-		return UpdateOrderItemStatusResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to update item status",
-		}
+		return UpdateOrderItemStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update item status")
 	}
 
 	return UpdateOrderItemStatusResponse{Message: "Item status updated"}, nil
@@ -544,27 +468,19 @@ type ProcessPaymentResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *ProcessPaymentHandler) Validate(ctx context.Context, req *ProcessPaymentRequest) *errorModels.ServerError {
+func (h *ProcessPaymentHandler) Validate(ctx context.Context, req *ProcessPaymentRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Order id is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Order id is required")
 	}
 
 	if req.AmountPaid < 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Amount paid cannot be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Amount paid cannot be negative")
 	}
 
 	return nil
 }
 
-func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRequest) (ProcessPaymentResponse, *errorModels.ServerError) {
+func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRequest) (ProcessPaymentResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return ProcessPaymentResponse{}, authErr
@@ -579,11 +495,7 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
-			return ProcessPaymentResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Invalid order id",
-			}
+			return ProcessPaymentResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
 		}
 		orderID = parsed
 	}
@@ -594,18 +506,10 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 		AmountPaid:    req.AmountPaid,
 	}); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
-			return ProcessPaymentResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusNotFound,
-				Code:     http.StatusNotFound,
-				Message:  "Order not found",
-			}
+			return ProcessPaymentResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
 
-		return ProcessPaymentResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to process payment",
-		}
+		return ProcessPaymentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process payment")
 	}
 
 	return ProcessPaymentResponse{Message: "Payment processed"}, nil
@@ -628,27 +532,19 @@ type ProcessRefundResponse struct {
 	Message  string `json:"message"`
 }
 
-func (h *ProcessRefundHandler) Validate(ctx context.Context, req *ProcessRefundRequest) *errorModels.ServerError {
+func (h *ProcessRefundHandler) Validate(ctx context.Context, req *ProcessRefundRequest) error {
 	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Order id is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Order id is required")
 	}
 
 	if req.Amount <= 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Refund amount must be positive",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Refund amount must be positive")
 	}
 
 	return nil
 }
 
-func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, *errorModels.ServerError) {
+func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return ProcessRefundResponse{}, authErr
@@ -664,11 +560,7 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
 		parsed, err := strconv.ParseInt(raw, 10, 64)
 		if err != nil || parsed <= 0 {
-			return ProcessRefundResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Invalid order id",
-			}
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
 		}
 		orderID = parsed
 	}
@@ -679,11 +571,7 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 		Reason:  req.Reason,
 	})
 	if err != nil {
-		return ProcessRefundResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to process refund",
-		}
+		return ProcessRefundResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
 	}
 
 	return ProcessRefundResponse{RefundID: refundID, Message: "Refund processed"}, nil

@@ -3,12 +3,27 @@ package workspaces
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
+
+	flowcyclev1 "github.com/voxire/voxie/gen/go/flow/cycle/v1"
+	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
+	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
+	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
+	flowmilestonev1 "github.com/voxire/voxie/gen/go/flow/milestone/v1"
+	flownotificationv1 "github.com/voxire/voxie/gen/go/flow/notification/v1"
+	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
+	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
+	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
+	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/workspaces/internal/api"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
-	"github.com/voxire/onion/internal/modules/workspaces/internal/routes"
-	"github.com/voxire/onion/internal/modules/workspaces/internal/routes/handlers"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/realtime"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -30,12 +45,92 @@ func (m *Module) Service() *application.Service {
 	return m.service
 }
 
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := flowworkspacev1.RegisterWorkspaceServiceServer(
+		api.NewWorkspaceAPI(m.service),
+		flowworkspacev1.WithMux(mux),
+		flowworkspacev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register flow workspace service: %w", err))
+	}
+	if err := flowprojectv1.RegisterProjectServiceServer(
+		api.NewProjectAPI(m.service),
+		flowprojectv1.WithMux(mux),
+		flowprojectv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register flow project service: %w", err))
+	}
+	if err := flowlabelv1.RegisterLabelServiceServer(
+		api.NewLabelAPI(m.service),
+		flowlabelv1.WithMux(mux),
+		flowlabelv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register flow label service: %w", err))
+	}
+	if err := flowtaskv1.RegisterTaskServiceServer(
+		api.NewTaskAPI(m.service),
+		flowtaskv1.WithMux(mux),
+		flowtaskv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register flow task service: %w", err))
+	}
+	if err := flowdashboardv1.RegisterDashboardServiceServer(
+		api.NewDashboardAPI(m.service),
+		flowdashboardv1.WithMux(mux),
+		flowdashboardv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register flow dashboard service: %w", err))
+	}
+	marshal := protojson.MarshalOptions{UseProtoNames: true}
+	if err := flowinsightsv1.RegisterInsightsServiceServer(
+		api.NewInsightsAPI(m.service),
+		flowinsightsv1.WithMux(mux),
+		flowinsightsv1.WithMarshalOptions(marshal),
+	); err != nil {
+		panic(fmt.Errorf("register flow insights service: %w", err))
+	}
+	if err := flowmilestonev1.RegisterMilestoneServiceServer(
+		api.NewMilestoneAPI(m.service),
+		flowmilestonev1.WithMux(mux),
+		flowmilestonev1.WithMarshalOptions(marshal),
+	); err != nil {
+		panic(fmt.Errorf("register flow milestone service: %w", err))
+	}
+	if err := flowcyclev1.RegisterCycleServiceServer(
+		api.NewCycleAPI(m.service),
+		flowcyclev1.WithMux(mux),
+		flowcyclev1.WithMarshalOptions(marshal),
+	); err != nil {
+		panic(fmt.Errorf("register flow cycle service: %w", err))
+	}
+	if err := flowviewv1.RegisterViewServiceServer(
+		api.NewViewAPI(m.service),
+		flowviewv1.WithMux(mux),
+		flowviewv1.WithMarshalOptions(marshal),
+	); err != nil {
+		panic(fmt.Errorf("register flow view service: %w", err))
+	}
+	if err := flownotificationv1.RegisterNotificationServiceServer(
+		api.NewNotificationAPI(m.service),
+		flownotificationv1.WithMux(mux),
+		flownotificationv1.WithMarshalOptions(marshal),
+	); err != nil {
+		panic(fmt.Errorf("register flow notification service: %w", err))
+	}
+	if err := flowsettingv1.RegisterSettingServiceServer(
+		api.NewSettingAPI(m.service),
+		flowsettingv1.WithMux(mux),
+		flowsettingv1.WithMarshalOptions(marshal),
+	); err != nil {
+		panic(fmt.Errorf("register flow setting service: %w", err))
+	}
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
 	// Realtime WebSocket endpoint. Registered as a raw chi handler — the
 	// standard RegisterGET wrapper would try to decode the request body
 	// and serialize a JSON response, both of which break the WS upgrade.
-	router.Get("/flow/ws", handlers.ServeRealtime)
+	router.Get("/flow/ws", realtime.ServeRealtime)
 }
 
 // GetAnonymousRoutes tells the global auth middleware to skip bearer-token

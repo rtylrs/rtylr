@@ -3,11 +3,13 @@ package pos_receipts
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
+	"github.com/voxire/onion/internal/modules/pos_receipts/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_receipts/internal/routes"
+	posreceiptv1 "github.com/voxire/voxie/gen/go/pos/receipt/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -18,8 +20,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := posreceiptv1.RegisterReceiptServiceServer(
+		api.NewReceiptAPI(m.service),
+		posreceiptv1.WithMux(mux),
+		posreceiptv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS receipt service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

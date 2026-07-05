@@ -22,6 +22,8 @@ const (
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.Webhook, error)
 	Create(ctx context.Context, ownerID, businessID int64, url, secret string, events []string) (int64, error)
+	Get(ctx context.Context, businessID, webhookID int64) (domain.Webhook, error)
+	Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) error
 	Delete(ctx context.Context, businessID, webhookID int64) error
 }
 
@@ -79,6 +81,28 @@ func (s *Service) Delete(ctx context.Context, businessID, webhookID int64) error
 	}
 	invalidateWebhooksScope(ctx, businessID)
 	return nil
+}
+
+func (s *Service) Update(ctx context.Context, businessID, webhookID int64, url string, events []string, isActive bool) (domain.Webhook, error) {
+	if webhookID == 0 {
+		return domain.Webhook{}, errors.New("webhook id is required")
+	}
+	if url == "" {
+		return domain.Webhook{}, errors.New("url is required")
+	}
+	if events == nil {
+		events = []string{}
+	}
+	if err := s.repo.Update(ctx, businessID, webhookID, url, events, isActive); err != nil {
+		return domain.Webhook{}, err
+	}
+	invalidateWebhooksScope(ctx, businessID)
+
+	webhook, err := s.repo.Get(ctx, businessID, webhookID)
+	if err != nil {
+		return domain.Webhook{}, err
+	}
+	return webhook, nil
 }
 
 func generateSecret() (string, error) {

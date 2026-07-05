@@ -7,9 +7,9 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
@@ -30,15 +30,15 @@ type ListTimesheetsResponse struct {
 	Offset     int32                             `json:"offset"`
 }
 
-func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRequest) (ListTimesheetsResponse, *errorModels.ServerError) {
+func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRequest) (ListTimesheetsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListTimesheetsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTimesheetsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListTimesheetsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTimesheetsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	timesheets, total, err := h.Service.ListTimesheets(ctx, businessID, domain.ListTimesheetsParams{
@@ -48,7 +48,7 @@ func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRe
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list timesheets", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListTimesheetsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list timesheets"}
+		return ListTimesheetsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list timesheets")
 	}
 
 	payloads := make([]*hrtimeentryv1.TimesheetPayload, 0, len(timesheets))

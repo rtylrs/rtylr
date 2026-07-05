@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
@@ -32,28 +32,28 @@ type UploadDocumentResponse struct {
 	Document *hrdocumentv1.EmployeeDocumentPayload `json:"document"`
 }
 
-func (h *UploadDocumentHandler) Validate(_ context.Context, req *UploadDocumentRequest) *errorModels.ServerError {
+func (h *UploadDocumentHandler) Validate(_ context.Context, req *UploadDocumentRequest) error {
 	if req.EmployeeID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 	if strings.TrimSpace(req.Title) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "title is required"}
+		return onekiterrors.New(http.StatusBadRequest, "title is required")
 	}
 	if strings.TrimSpace(req.StorageMode) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "storage_mode is required"}
+		return onekiterrors.New(http.StatusBadRequest, "storage_mode is required")
 	}
 	return nil
 }
 
-func (h *UploadDocumentHandler) Serve(ctx context.Context, req *UploadDocumentRequest) (UploadDocumentResponse, *errorModels.ServerError) {
+func (h *UploadDocumentHandler) Serve(ctx context.Context, req *UploadDocumentRequest) (UploadDocumentResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UploadDocumentResponse{}, errorModels.PermissionDeniedServerError()
+		return UploadDocumentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UploadDocumentResponse{}, errorModels.PermissionDeniedServerError()
+		return UploadDocumentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	doc, err := h.Service.UploadDocument(ctx, businessID, domain.CreateDocumentParams{
@@ -67,10 +67,10 @@ func (h *UploadDocumentHandler) Serve(ctx context.Context, req *UploadDocumentRe
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrStorageModeInvalid) {
-			return UploadDocumentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "storage_mode must be 'stored' or 'linked'; stored requires file_url, linked requires external_url"}
+			return UploadDocumentResponse{}, onekiterrors.New(http.StatusBadRequest, "storage_mode must be 'stored' or 'linked'; stored requires file_url, linked requires external_url")
 		}
 		logger.Ctx(ctx).Error("failed to upload document", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return UploadDocumentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to upload document"}
+		return UploadDocumentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to upload document")
 	}
 
 	return UploadDocumentResponse{Document: documentToProto(*doc)}, nil

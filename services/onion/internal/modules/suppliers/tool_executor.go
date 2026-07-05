@@ -12,7 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -62,7 +62,7 @@ func (m *Module) executeGetSupplierTool(ctx context.Context, input map[string]an
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 	supplier, err := m.service.GetSupplierByID(ctx, businessID, parsed.SupplierID)
 	if err != nil {
@@ -87,7 +87,7 @@ func (m *Module) executeListSuppliersTool(ctx context.Context, input map[string]
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 	suppliers, hasMore, err := m.service.ListSuppliers(ctx, businessID, parsed.Page, parsed.PageSize)
 	if err != nil {
@@ -121,7 +121,7 @@ func (m *Module) executeCreateSupplierTool(ctx context.Context, input map[string
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 	id, err := m.service.CreateSupplier(ctx, businessID, parsed)
 	if err != nil {

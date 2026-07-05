@@ -7,8 +7,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
@@ -29,15 +29,15 @@ type ListShiftsResponse struct {
 	Offset int32                     `json:"offset"`
 }
 
-func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, *errorModels.ServerError) {
+func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListShiftsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListShiftsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListShiftsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	shifts, total, err := h.Service.ListShifts(ctx, businessID, domain.ListShiftsParams{
@@ -45,7 +45,7 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list shifts", logger.Any("business_id", businessID), logger.Error(err))
-		return ListShiftsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
+		return ListShiftsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list shifts")
 	}
 
 	payloads := make([]*hrshiftv1.ShiftPayload, 0, len(shifts))

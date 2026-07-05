@@ -21,7 +21,6 @@ require (
 
 require (
 	buf.build/go/protovalidate v1.2.0
-	github.com/1homsi/onekit v0.2.0
 	github.com/aws/aws-sdk-go-v2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1
@@ -33,6 +32,7 @@ require (
 	github.com/koyachi/go-nude v0.0.1
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/stackxio/onekit v0.3.2
 	github.com/testcontainers/testcontainers-go v0.43.0
 	github.com/trinodb/trino-go-client v0.333.0
 	github.com/voxire/voxie v0.0.0-00010101000000-000000000000

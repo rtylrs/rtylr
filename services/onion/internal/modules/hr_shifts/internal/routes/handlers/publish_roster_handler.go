@@ -6,8 +6,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -24,31 +24,31 @@ type PublishRosterResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *PublishRosterHandler) Validate(_ context.Context, req *PublishRosterRequest) *errorModels.ServerError {
+func (h *PublishRosterHandler) Validate(_ context.Context, req *PublishRosterRequest) error {
 	if req.LocationID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "location_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "location_id is required")
 	}
 	if req.WeekStart == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "week_start is required"}
+		return onekiterrors.New(http.StatusBadRequest, "week_start is required")
 	}
 	return nil
 }
 
-func (h *PublishRosterHandler) Serve(ctx context.Context, req *PublishRosterRequest) (PublishRosterResponse, *errorModels.ServerError) {
+func (h *PublishRosterHandler) Serve(ctx context.Context, req *PublishRosterRequest) (PublishRosterResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return PublishRosterResponse{}, errorModels.PermissionDeniedServerError()
+		return PublishRosterResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return PublishRosterResponse{}, errorModels.PermissionDeniedServerError()
+		return PublishRosterResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	err := h.Service.PublishRoster(ctx, businessID, req.LocationID, req.WeekStart)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to publish roster", logger.Any("business_id", businessID), logger.Error(err))
-		return PublishRosterResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to publish roster"}
+		return PublishRosterResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to publish roster")
 	}
 
 	return PublishRosterResponse{Success: true}, nil

@@ -6,8 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/quotes/internal/api"
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
-	"github.com/voxire/onion/internal/modules/quotes/internal/routes"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 type Module struct {
@@ -19,7 +20,30 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	serverHttp.RegisterGET[api.ListRequest, api.ListResponse](
+		ctx, router, api.ListRoutes(), &api.ListHandler{Service: m.service},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.CreateRequest, api.CreateResponse](
+		ctx, router, api.CreateRoutes(), &api.CreateHandler{Service: m.service},
+	)
+	serverHttp.RegisterPUTWithValidation[api.UpdateRequest, api.UpdateResponse](
+		ctx, router, api.UpdateRoutes(), &api.UpdateHandler{Service: m.service},
+	)
+	serverHttp.RegisterDELETEWithValidation[api.DeleteRequest, api.DeleteResponse](
+		ctx, router, api.DeleteRoutes(), &api.DeleteHandler{Service: m.service},
+	)
+	serverHttp.RegisterPUTWithValidation[api.UpdateQuoteByIDRequest, api.UpdateQuoteByIDResponse](
+		ctx, router, api.UpdateQuoteByIDRoutes(), &api.UpdateQuoteByIDHandler{Service: m.service},
+	)
+	serverHttp.RegisterPUTWithValidation[api.UpdateQuoteStatusRequest, api.UpdateQuoteStatusResponse](
+		ctx, router, api.UpdateQuoteStatusRoutes(), &api.UpdateQuoteStatusHandler{Service: m.service},
+	)
+	serverHttp.RegisterDELETEWithValidation[api.DeleteQuoteByIDRequest, api.DeleteQuoteByIDResponse](
+		ctx, router, api.DeleteQuoteByIDRoutes(), &api.DeleteQuoteByIDHandler{Service: m.service},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.ConvertQuoteRequest, api.ConvertQuoteResponse](
+		ctx, router, api.ConvertQuoteRoutes(), &api.ConvertQuoteHandler{Service: m.service},
+	)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

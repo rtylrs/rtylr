@@ -1,0 +1,203 @@
+package api
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/voxire/onion/internal/modules/insights/internal/application"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	insightsreportv1 "github.com/voxire/voxie/gen/go/insights/report/v1"
+)
+
+type ReportAPI struct {
+	Service *application.Service
+}
+
+func NewReportAPI(service *application.Service) *ReportAPI {
+	return &ReportAPI{Service: service}
+}
+
+func scheduledReportToProto(row application.ScheduledReportPayload) *insightsreportv1.ScheduledReport {
+	templateID, _ := strconv.ParseInt(row.TemplateID, 10, 64)
+	return &insightsreportv1.ScheduledReport{
+		Id:             row.ID,
+		TemplateId:     templateID,
+		TemplateName:   row.TemplateID,
+		Frequency:      row.Cadence,
+		Channel:        row.Channel,
+		RecipientEmail: row.Recipient,
+		IsActive:       row.IsActive,
+		CreatedAt:      row.CreatedAt,
+	}
+}
+
+func scheduledReportInput(reqTemplateSlug, frequency, channel, recipient string, isActive bool) application.ScheduledReportPayload {
+	return application.ScheduledReportPayload{
+		TemplateID: reqTemplateSlug,
+		Cadence:    frequency,
+		Channel:    channel,
+		Recipient:  recipient,
+		IsActive:   isActive,
+	}
+}
+
+func (a *ReportAPI) ListReportTemplates(ctx context.Context, _ *insightsreportv1.ListReportTemplatesRequest) (*insightsreportv1.ListReportTemplatesResponse, error) {
+	_, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rows := a.Service.ListReportTemplates(ctx)
+	templates := make([]*insightsreportv1.ReportTemplate, 0, len(rows))
+	for i, row := range rows {
+		templates = append(templates, &insightsreportv1.ReportTemplate{
+			Id:          int64(i + 1),
+			Name:        row.Name,
+			Description: row.Description,
+			Type:        row.ID,
+		})
+	}
+
+	return &insightsreportv1.ListReportTemplatesResponse{Templates: templates}, nil
+}
+
+func (a *ReportAPI) CreateReportTemplate(context.Context, *insightsreportv1.CreateReportTemplateRequest) (*insightsreportv1.CreateReportTemplateResponse, error) {
+	return nil, notImplemented("CreateReportTemplate")
+}
+
+func (a *ReportAPI) GetReportTemplate(context.Context, *insightsreportv1.GetReportTemplateRequest) (*insightsreportv1.GetReportTemplateResponse, error) {
+	return nil, notImplemented("GetReportTemplate")
+}
+
+func (a *ReportAPI) ListScheduledReports(ctx context.Context, _ *insightsreportv1.ListScheduledReportsRequest) (*insightsreportv1.ListScheduledReportsResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := a.Service.ListScheduledReports(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list scheduled reports")
+	}
+
+	reports := make([]*insightsreportv1.ScheduledReport, 0, len(rows))
+	for _, row := range rows {
+		reports = append(reports, scheduledReportToProto(row))
+	}
+
+	return &insightsreportv1.ListScheduledReportsResponse{Reports: reports}, nil
+}
+
+func (a *ReportAPI) CreateScheduledReport(ctx context.Context, req *insightsreportv1.CreateScheduledReportRequest) (*insightsreportv1.CreateScheduledReportResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := a.Service.CreateScheduledReport(ctx, businessID, scheduledReportInput(
+		req.GetTemplateSlug(),
+		req.GetFrequency(),
+		req.GetChannel(),
+		req.GetRecipientEmail(),
+		req.GetIsActive(),
+	))
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+
+	return &insightsreportv1.CreateScheduledReportResponse{Report: scheduledReportToProto(out)}, nil
+}
+
+func (a *ReportAPI) UpdateScheduledReport(ctx context.Context, req *insightsreportv1.UpdateScheduledReportRequest) (*insightsreportv1.UpdateScheduledReportResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := a.Service.UpdateScheduledReport(ctx, businessID, req.GetId(), scheduledReportInput(
+		req.GetTemplateSlug(),
+		req.GetFrequency(),
+		req.GetChannel(),
+		req.GetRecipientEmail(),
+		req.GetIsActive(),
+	))
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+
+	return &insightsreportv1.UpdateScheduledReportResponse{Report: scheduledReportToProto(out)}, nil
+}
+
+func (a *ReportAPI) DeleteScheduledReport(ctx context.Context, req *insightsreportv1.DeleteScheduledReportRequest) (*insightsreportv1.DeleteScheduledReportResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := a.Service.DeleteScheduledReport(ctx, businessID, req.GetId()); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete scheduled report")
+	}
+
+	return &insightsreportv1.DeleteScheduledReportResponse{Deleted: true}, nil
+}
+
+func (a *ReportAPI) GenerateRevenueReport(ctx context.Context, _ *insightsreportv1.GenerateRevenueReportRequest) (*insightsreportv1.GenerateRevenueReportResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := a.Service.QueueRevenueReport(ctx, businessID)
+	var url string
+	if result.URL != nil {
+		url = *result.URL
+	}
+
+	return &insightsreportv1.GenerateRevenueReportResponse{
+		ReportId: result.ReportID,
+		Url:      url,
+		Status:   result.Status,
+	}, nil
+}
+
+func (a *ReportAPI) ExportRevenueReport(ctx context.Context, req *insightsreportv1.ExportRevenueReportRequest) (*insightsreportv1.ExportRevenueReportResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	from, to, err := application.ResolveDateRange(strings.TrimSpace(req.GetFrom()), strings.TrimSpace(req.GetTo()))
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid date range")
+	}
+
+	series, err := a.Service.GetRevenueSeries(ctx, businessID, from, to)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load revenue export")
+	}
+
+	rows := make([]*insightsreportv1.ExportRevenueRow, 0, len(series))
+	var b strings.Builder
+	b.WriteString("date,amount_minor_units\n")
+	for _, point := range series {
+		rows = append(rows, &insightsreportv1.ExportRevenueRow{
+			Date:             point.Date,
+			AmountMinorUnits: point.AmountMinorUnits,
+		})
+		b.WriteString(point.Date)
+		b.WriteByte(',')
+		b.WriteString(strconv.FormatInt(point.AmountMinorUnits, 10))
+		b.WriteByte('\n')
+	}
+
+	filename := fmt.Sprintf("revenue_%s_%s.csv", from.Format("2006-01-02"), to.Format("2006-01-02"))
+	return &insightsreportv1.ExportRevenueReportResponse{
+		Filename:    filename,
+		ContentType: "text/csv",
+		Csv:         b.String(),
+		Rows:        rows,
+	}, nil
+}

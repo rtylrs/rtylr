@@ -12,8 +12,8 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -33,21 +33,21 @@ type ListContactsResponse struct {
 	Contacts []domain.Contact `json:"contacts"`
 }
 
-func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsRequest) (ListContactsResponse, *errorModels.ServerError) {
+func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsRequest) (ListContactsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListContactsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListContactsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListContactsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListContactsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contacts, err := h.Service.ListContacts(ctx, businessID, req.LeadID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contacts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListContactsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list contacts"}
+		return ListContactsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list contacts")
 	}
 
 	return ListContactsResponse{Contacts: contacts}, nil
@@ -67,27 +67,27 @@ type (
 	}
 )
 
-func (h *ListLeadTouchpointsHandler) Serve(ctx context.Context, _ *ListLeadTouchpointsRequest) (ListLeadTouchpointsResponse, *errorModels.ServerError) {
+func (h *ListLeadTouchpointsHandler) Serve(ctx context.Context, _ *ListLeadTouchpointsRequest) (ListLeadTouchpointsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListLeadTouchpointsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLeadTouchpointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	leadID, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return ListLeadTouchpointsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
+		return ListLeadTouchpointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListLeadTouchpointsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLeadTouchpointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	tps, err := h.Service.ListTouchpoints(ctx, businessID, leadID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list touchpoints", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", leadID), logger.Error(err))
-		return ListLeadTouchpointsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list touchpoints"}
+		return ListLeadTouchpointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list touchpoints")
 	}
 
 	return ListLeadTouchpointsResponse{Touchpoints: tps}, nil
@@ -116,25 +116,25 @@ type CreateContactResponse struct {
 	Contact domain.Contact `json:"contact"`
 }
 
-func (h *CreateContactHandler) Validate(_ context.Context, req *CreateContactRequest) *errorModels.ServerError {
+func (h *CreateContactHandler) Validate(_ context.Context, req *CreateContactRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	if req.LeadID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "lead_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "lead_id is required")
 	}
 	return nil
 }
 
-func (h *CreateContactHandler) Serve(ctx context.Context, req *CreateContactRequest) (CreateContactResponse, *errorModels.ServerError) {
+func (h *CreateContactHandler) Serve(ctx context.Context, req *CreateContactRequest) (CreateContactResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateContactResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateContactResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateContactResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateContactResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contact, err := h.Service.CreateContact(ctx, businessID, domain.CreateContactRequest{
@@ -149,7 +149,7 @@ func (h *CreateContactHandler) Serve(ctx context.Context, req *CreateContactRequ
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create contact", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create contact"}
+		return CreateContactResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create contact")
 	}
 
 	return CreateContactResponse{Contact: contact}, nil
@@ -177,28 +177,28 @@ type UpdateContactResponse struct {
 	Contact domain.Contact `json:"contact"`
 }
 
-func (h *UpdateContactHandler) Validate(_ context.Context, req *UpdateContactRequest) *errorModels.ServerError {
+func (h *UpdateContactHandler) Validate(_ context.Context, req *UpdateContactRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequest) (UpdateContactResponse, *errorModels.ServerError) {
+func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequest) (UpdateContactResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateContactResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateContactResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contact id"}
+		return UpdateContactResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contact id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateContactResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateContactResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contact, err := h.Service.UpdateContact(ctx, id, businessID, domain.UpdateContactRequest{
@@ -212,10 +212,10 @@ func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequ
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrContactNotFound) {
-			return UpdateContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contact not found"}
+			return UpdateContactResponse{}, onekiterrors.New(http.StatusNotFound, "Contact not found")
 		}
 		logger.Ctx(ctx).Error("failed to update contact", logger.Any("owner_id", device.User.UserID), logger.Any("contact_id", id), logger.Error(err))
-		return UpdateContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update contact"}
+		return UpdateContactResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update contact")
 	}
 
 	return UpdateContactResponse{Contact: contact}, nil
@@ -235,29 +235,29 @@ type (
 	}
 )
 
-func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactRequest) (DeleteContactResponse, *errorModels.ServerError) {
+func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactRequest) (DeleteContactResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DeleteContactResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteContactResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return DeleteContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contact id"}
+		return DeleteContactResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contact id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteContactResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteContactResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.Service.DeleteContact(ctx, id, businessID); err != nil {
 		if errors.Is(err, domain.ErrContactNotFound) {
-			return DeleteContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contact not found"}
+			return DeleteContactResponse{}, onekiterrors.New(http.StatusNotFound, "Contact not found")
 		}
 		logger.Ctx(ctx).Error("failed to delete contact", logger.Any("owner_id", device.User.UserID), logger.Any("contact_id", id), logger.Error(err))
-		return DeleteContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to delete contact"}
+		return DeleteContactResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete contact")
 	}
 
 	return DeleteContactResponse{Success: true}, nil

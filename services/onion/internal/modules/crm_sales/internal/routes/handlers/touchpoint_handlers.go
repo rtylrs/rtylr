@@ -11,8 +11,8 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -37,22 +37,22 @@ type CreateTouchpointResponse struct {
 	Touchpoint domain.Touchpoint `json:"touchpoint"`
 }
 
-func (h *CreateTouchpointHandler) Validate(_ context.Context, req *CreateTouchpointRequest) *errorModels.ServerError {
+func (h *CreateTouchpointHandler) Validate(_ context.Context, req *CreateTouchpointRequest) error {
 	if req.LeadID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "lead_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "lead_id is required")
 	}
 	return nil
 }
 
-func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpointRequest) (CreateTouchpointResponse, *errorModels.ServerError) {
+func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpointRequest) (CreateTouchpointResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateTouchpointResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateTouchpointResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateTouchpointResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateTouchpointResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	tp, err := h.Service.CreateTouchpoint(ctx, businessID, device.User.UserID, domain.CreateTouchpointRequest{
@@ -65,7 +65,7 @@ func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpoi
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create touchpoint", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create touchpoint"}
+		return CreateTouchpointResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create touchpoint")
 	}
 
 	return CreateTouchpointResponse{Touchpoint: tp}, nil
@@ -85,29 +85,29 @@ type (
 	}
 )
 
-func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpointRequest) (DeleteTouchpointResponse, *errorModels.ServerError) {
+func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpointRequest) (DeleteTouchpointResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DeleteTouchpointResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteTouchpointResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return DeleteTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid touchpoint id"}
+		return DeleteTouchpointResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid touchpoint id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteTouchpointResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteTouchpointResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.Service.DeleteTouchpoint(ctx, id, businessID); err != nil {
 		if errors.Is(err, domain.ErrTouchpointNotFound) {
-			return DeleteTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Touchpoint not found"}
+			return DeleteTouchpointResponse{}, onekiterrors.New(http.StatusNotFound, "Touchpoint not found")
 		}
 		logger.Ctx(ctx).Error("failed to delete touchpoint", logger.Any("owner_id", device.User.UserID), logger.Any("touchpoint_id", id), logger.Error(err))
-		return DeleteTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to delete touchpoint"}
+		return DeleteTouchpointResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete touchpoint")
 	}
 
 	return DeleteTouchpointResponse{Success: true}, nil

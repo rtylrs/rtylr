@@ -1,0 +1,62 @@
+package api
+
+import (
+	"context"
+	"net/http"
+
+	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
+
+	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+)
+
+type SettingAPI struct {
+	Service *application.Service
+}
+
+func NewSettingAPI(service *application.Service) *SettingAPI {
+	return &SettingAPI{Service: service}
+}
+
+func (a *SettingAPI) GetUserSettings(ctx context.Context, _ *flowsettingv1.GetUserSettingsRequest) (*flowsettingv1.GetUserSettingsResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	s, err := a.Service.GetUserSettings(ctx, authUser.UserID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+	}
+
+	return &flowsettingv1.GetUserSettingsResponse{
+		TaskAssigned:       s.TaskAssigned,
+		TaskComments:       s.TaskComments,
+		Mentions:           s.Mentions,
+		StatusChanges:      s.StatusChanges,
+		WeeklyDigest:       s.WeeklyDigest,
+		EmailNotifications: s.EmailNotifications,
+	}, nil
+}
+
+func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.UpdateUserSettingsRequest) (*flowsettingv1.UpdateUserSettingsResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	if err := a.Service.UpdateUserSettings(ctx, domain.UserSettings{
+		UserID:             authUser.UserID,
+		TaskAssigned:       req.GetTaskAssigned(),
+		TaskComments:       req.GetTaskComments(),
+		Mentions:           req.GetMentions(),
+		StatusChanges:      req.GetStatusChanges(),
+		WeeklyDigest:       req.GetWeeklyDigest(),
+		EmailNotifications: req.GetEmailNotifications(),
+	}); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+	}
+	return &flowsettingv1.UpdateUserSettingsResponse{}, nil
+}

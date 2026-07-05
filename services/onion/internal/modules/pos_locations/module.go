@@ -3,11 +3,13 @@ package pos_locations
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
+	"github.com/voxire/onion/internal/modules/pos_locations/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_locations/internal/routes"
+	poslocationv1 "github.com/voxire/voxie/gen/go/pos/location/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -18,8 +20,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := poslocationv1.RegisterLocationServiceServer(
+		api.NewLocationAPI(m.service),
+		poslocationv1.WithMux(mux),
+		poslocationv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS location service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

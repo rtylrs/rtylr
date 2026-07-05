@@ -12,7 +12,7 @@ import (
 
 	insightsapp "github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -85,11 +85,11 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	switch name {

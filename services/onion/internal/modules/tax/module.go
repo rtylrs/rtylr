@@ -3,11 +3,14 @@ package tax
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	financetaxv1 "github.com/voxire/voxie/gen/go/finance/tax/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/tax/internal/api"
 	"github.com/voxire/onion/internal/modules/tax/internal/application"
-	"github.com/voxire/onion/internal/modules/tax/internal/routes"
 )
 
 type Module struct {
@@ -18,8 +21,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := financetaxv1.RegisterTaxServiceServer(
+		api.NewTaxAPI(m.service),
+		financetaxv1.WithMux(mux),
+		financetaxv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register finance tax service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

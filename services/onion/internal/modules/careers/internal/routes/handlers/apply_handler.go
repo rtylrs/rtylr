@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,8 +13,9 @@ import (
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/storage"
 )
 
@@ -149,12 +151,5 @@ func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Servic
 }
 
 func writeApplyError(w http.ResponseWriter, code int, msg string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	if err := json.NewEncoder(w).Encode(errorModels.ErrorResponse{
-		Error:  errorModels.ServerError{Code: code, Message: msg},
-		Status: "error",
-	}); err != nil {
-		logger.Global().Warn("failed to write apply error response", logger.Error(err))
-	}
+	serverHttp.WriteOneKitError(context.Background(), w, onekiterrors.New(code, msg))
 }

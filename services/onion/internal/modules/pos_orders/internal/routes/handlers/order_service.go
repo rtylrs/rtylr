@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,7 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type OrderAPI struct {
@@ -120,6 +122,72 @@ func (a *OrderAPI) CreateOrder(ctx context.Context, req *posordersv1.CreateOrder
 	return &posordersv1.CreateOrderResponse{OrderId: orderID, OrderNumber: order.OrderNumber, Message: "Order created"}, nil
 }
 
+func (a *OrderAPI) CreatePublicOrder(ctx context.Context, req *posordersv1.CreatePublicOrderRequest) (*posordersv1.CreatePublicOrderResponse, error) {
+	if req.GetOwnerId() <= 0 {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "owner_id is required")
+	}
+	if len(req.GetItems()) == 0 {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "order must have at least one item")
+	}
+	for _, item := range req.GetItems() {
+		if item.GetMenuItemId() <= 0 {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "each item must have a menu_item_id")
+		}
+		if item.GetQuantity() <= 0 {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "item quantity must be positive")
+		}
+	}
+
+	items := make([]application.PublicOrderItemInput, 0, len(req.GetItems()))
+	for _, it := range req.GetItems() {
+		items = append(items, application.PublicOrderItemInput{
+			MenuItemID: it.GetMenuItemId(),
+			Name:       it.GetName(),
+			Quantity:   it.GetQuantity(),
+			UnitPrice:  it.GetUnitPrice(),
+			Notes:      it.GetNotes(),
+		})
+	}
+
+	orderID, orderNumber, err := a.Service.CreatePublicOrder(ctx, req.GetOwnerId(), application.PublicOrderInput{
+		CustomerName:  req.GetCustomerName(),
+		CustomerPhone: req.GetCustomerPhone(),
+		CustomerEmail: req.GetCustomerEmail(),
+		Notes:         req.GetNotes(),
+		Items:         items,
+	})
+	if err != nil {
+		return nil, orderAPIStatusError(http.StatusInternalServerError, fmt.Sprintf("Failed to create order: %v", err))
+	}
+
+	return &posordersv1.CreatePublicOrderResponse{
+		OrderId:     orderID,
+		OrderNumber: orderNumber,
+		Status:      "pending",
+	}, nil
+}
+
+func (a *OrderAPI) GetPublicOrderStatus(ctx context.Context, req *posordersv1.GetPublicOrderStatusRequest) (*posordersv1.GetPublicOrderStatusResponse, error) {
+	orderID := req.GetOrderId()
+	if orderID <= 0 {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "Invalid order id")
+	}
+
+	orderNumber, status, err := a.Service.GetPublicOrderStatus(ctx, orderID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
+		}
+		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to fetch order status")
+	}
+
+	return &posordersv1.GetPublicOrderStatusResponse{
+		OrderId:     orderID,
+		OrderNumber: orderNumber,
+		Status:      status,
+	}, nil
+}
+
 func (a *OrderAPI) GetOrderDetail(ctx context.Context, req *posordersv1.GetOrderDetailRequest) (*posordersv1.GetOrderDetailResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
@@ -153,7 +221,12 @@ func (a *OrderAPI) UpdateOrderStatus(ctx context.Context, req *posordersv1.Updat
 		return nil, orderAPIError(bizErr)
 	}
 
-	if err := a.Service.UpdateOrderStatus(ctx, businessID, req.GetOrderId(), domain.OrderStatus(req.GetStatus())); err != nil {
+	body := req.GetBody()
+	if body == nil || body.GetStatus() == "" {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "Status is required")
+	}
+
+	if err := a.Service.UpdateOrderStatus(ctx, businessID, req.GetOrderId(), domain.OrderStatus(body.GetStatus())); err != nil {
 		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to update order status")
 	}
 
@@ -181,12 +254,12 @@ func (a *OrderAPI) VoidOrder(ctx context.Context, req *posordersv1.VoidOrderRequ
 	return &posordersv1.VoidOrderResponse{Message: "Order voided successfully"}, nil
 }
 
-func orderAPIError(err *errorModels.ServerError) error {
+func orderAPIError(err error) error {
 	return err
 }
 
 func orderAPIStatusError(status int, message string) error {
-	return &errorModels.ServerError{HTTPCode: status, Code: status, Message: message}
+	return onekiterrors.New(status, message)
 }
 
 func validateOrderListDates(req *posordersv1.ListOrdersRequest) error {
@@ -293,4 +366,59 @@ func formatOrderTimePtr(t *time.Time) string {
 		return ""
 	}
 	return formatOrderTime(*t)
+}
+
+func (a *OrderAPI) SendToKitchen(ctx context.Context, req *posordersv1.SendToKitchenRequest) (*posordersv1.SendToKitchenResponse, error) {
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return nil, orderAPIError(authErr)
+	}
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return nil, orderAPIError(bizErr)
+	}
+
+	orderID := req.GetOrderId()
+	if orderID <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Order ID is required")
+	}
+
+	if err := a.Service.SendToKitchen(ctx, businessID, orderID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Order not found")
+		}
+		return nil, onekiterrors.New(http.StatusUnprocessableEntity, err.Error())
+	}
+	return &posordersv1.SendToKitchenResponse{Success: true}, nil
+}
+
+func (a *OrderAPI) TransferTable(ctx context.Context, req *posordersv1.TransferTableRequest) (*posordersv1.TransferTableResponse, error) {
+	user, authErr := authenticatedPOSUser(ctx)
+	if authErr != nil {
+		return nil, orderAPIError(authErr)
+	}
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return nil, orderAPIError(bizErr)
+	}
+
+	orderID := req.GetOrderId()
+	newTableID := req.GetNewTableId()
+	if orderID <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Order ID is required")
+	}
+	if newTableID <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "New table ID is required")
+	}
+
+	if err := a.Service.TransferTable(ctx, businessID, orderID, newTableID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Order not found")
+		}
+		if errors.Is(err, domain.ErrOrderCannotBeTransferred) {
+			return nil, onekiterrors.New(http.StatusUnprocessableEntity, err.Error())
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to transfer table")
+	}
+	return &posordersv1.TransferTableResponse{Success: true}, nil
 }

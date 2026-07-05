@@ -12,7 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -32,7 +32,7 @@ func (m *Module) executeCreateQuoteTool(ctx context.Context, input map[string]an
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	parsed, err := parseCreateQuoteToolInput(input)

@@ -3,15 +3,19 @@ package user
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
+	hubuserv1 "github.com/voxire/voxie/gen/go/hub/user/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/user/internal/api"
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
-	"github.com/voxire/onion/internal/modules/user/internal/routes"
-	"github.com/voxire/onion/internal/modules/user/internal/routes/handlers"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/hubprofile"
 	"github.com/voxire/onion/internal/platform/utils/sliceutils"
 )
 
@@ -22,6 +26,8 @@ type Module struct {
 	UserRepository      *infrastructure.Repository
 	tokenValidator      authPkg.TokenValidator
 	ProvisionerResolver authPkg.PlatformProvisionerResolver
+	ProfileResolver     hubprofile.Resolver
+	inviteAccepter      api.InviteAccepter
 }
 
 type userTokenValidator struct {
@@ -93,6 +99,30 @@ func (m *Module) GetTokenValidator() authPkg.TokenValidator {
 	return m.tokenValidator
 }
 
+func (m *Module) WithInviteAccepter(accepter api.InviteAccepter) *Module {
+	m.inviteAccepter = accepter
+	return m
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	marshalOpts := protojson.MarshalOptions{UseProtoNames: true}
+	if err := hubuserv1.RegisterUserServiceServer(
+		api.NewUserAPI(m.UserService, m.ProfileResolver),
+		hubuserv1.WithMux(mux),
+		hubuserv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register hub user service: %w", err))
+	}
+
+	if err := commonauthv1.RegisterAuthServiceServer(
+		api.NewAuthAPI(m.UserService, m.ProvisionerResolver, m.inviteAccepter, OnUserCreated, OnUserLogin),
+		commonauthv1.WithMux(mux),
+		commonauthv1.WithMarshalOptions(marshalOpts),
+	); err != nil {
+		panic(fmt.Errorf("register common auth service: %w", err))
+	}
+}
+
 // OnUserCreated is an optional hook called after each successful user registration.
 // Set it before RegisterRoutes is called (e.g., from main to create personal workspaces).
 var OnUserCreated func(ctx context.Context, userID int64)
@@ -101,16 +131,19 @@ var OnUserCreated func(ctx context.Context, userID int64)
 // Idempotent operations (e.g. ensure personal workspace exists) should be wired here.
 var OnUserLogin func(ctx context.Context, userID int64)
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...any) {
-	routes.RegisterRoutes(ctx, router, m.UserService, m.ProvisionerResolver, OnUserCreated, OnUserLogin)
-}
-
 func (m *Module) GetAnonymousRoutes() []string {
 	return sliceutils.Concat(
-		handlers.LoginRoutes(),
-		handlers.RegisterRoutes(),
-		handlers.GoogleAuthRoutes(),
-		handlers.GoogleAuthorizeRoutes(),
-		handlers.EmailExistsRoutes(),
+		[]string{
+			"/api/common/auth/v1/register",
+			"/api/common/auth/v1/login",
+			"/api/common/auth/v1/register/google",
+			"/api/common/auth/v1/password-reset/request",
+			"/api/common/auth/v1/password-reset/confirm",
+			"/api/common/auth/v1/verify-email",
+			"/api/common/auth/v1/resend-verification",
+			"/api/common/auth/v1/invite/accept",
+			"/api/common/auth/v1/email-exists",
+			"/api/common/auth/v1/social/authorize",
+		},
 	)
 }

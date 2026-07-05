@@ -3,12 +3,15 @@ package pos_settings
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	possettingsv1 "github.com/voxire/voxie/gen/go/pos/settings/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/pos_settings/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
-	"github.com/voxire/onion/internal/modules/pos_settings/internal/routes"
 )
 
 const (
@@ -49,8 +52,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := possettingsv1.RegisterSettingsServiceServer(
+		api.NewSettingsAPI(m.service),
+		possettingsv1.WithMux(mux),
+		possettingsv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS settings service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -11,7 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -58,44 +58,38 @@ type ResumeUploadURLResponse struct {
 	MaxBytes int64 `json:"max_bytes"`
 }
 
-func (h *ResumeUploadURLHandler) Validate(_ context.Context, req *ResumeUploadURLRequest) *errorModels.ServerError {
+func (h *ResumeUploadURLHandler) Validate(_ context.Context, req *ResumeUploadURLRequest) error {
 	if req.Slug == "" || req.CareerSlug == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "slug and career_slug are required"}
+		return onekiterrors.New(http.StatusBadRequest, "slug and career_slug are required")
 	}
 	if req.FileName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "file_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "file_name is required")
 	}
 	if req.ContentType == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "content_type is required"}
+		return onekiterrors.New(http.StatusBadRequest, "content_type is required")
 	}
 	if !storage.AllowedResumeContentTypes[req.ContentType] {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Only PDF or Word resumes are accepted"}
+		return onekiterrors.New(http.StatusBadRequest, "Only PDF or Word resumes are accepted")
 	}
 	return nil
 }
 
-func (h *ResumeUploadURLHandler) Serve(ctx context.Context, req *ResumeUploadURLRequest) (ResumeUploadURLResponse, *errorModels.ServerError) {
+func (h *ResumeUploadURLHandler) Serve(ctx context.Context, req *ResumeUploadURLRequest) (ResumeUploadURLResponse, error) {
 	// Resolve the career before handing out an upload URL — stops
 	// anyone from using the presigner as free S3 for unrelated files.
 	custom, err := h.CareersService.GetCustomizationBySlug(ctx, req.Slug)
 	if err != nil {
-		return ResumeUploadURLResponse{}, &errorModels.ServerError{
-			Code:    http.StatusNotFound,
-			Message: "Careers page not found",
-		}
+		return ResumeUploadURLResponse{}, onekiterrors.New(http.StatusNotFound, "Careers page not found")
 	}
 	career, err := h.CareersService.GetCareerBySlug(ctx, custom.BusinessID, req.CareerSlug)
 	if err != nil || !career.IsPublished {
-		return ResumeUploadURLResponse{}, &errorModels.ServerError{
-			Code:    http.StatusNotFound,
-			Message: "Role not found or no longer open",
-		}
+		return ResumeUploadURLResponse{}, onekiterrors.New(http.StatusNotFound, "Role not found or no longer open")
 	}
 
 	client, err := storage.Default()
 	if err != nil {
 		code, msg := storage.BuildHTTPError(err)
-		return ResumeUploadURLResponse{}, &errorModels.ServerError{Code: code, Message: msg}
+		return ResumeUploadURLResponse{}, onekiterrors.New(code, msg)
 	}
 
 	// Object layout: resumes/<owner>/<career>/<uuid>-<sanitized-name>
@@ -107,10 +101,7 @@ func (h *ResumeUploadURLHandler) Serve(ctx context.Context, req *ResumeUploadURL
 	const expiresIn = 15 * time.Minute
 	uploadURL, err := client.PresignUpload(ctx, key, req.ContentType, expiresIn)
 	if err != nil {
-		return ResumeUploadURLResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to generate upload URL",
-		}
+		return ResumeUploadURLResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to generate upload URL")
 	}
 
 	return ResumeUploadURLResponse{
@@ -143,21 +134,21 @@ type ResumeDownloadURLResponse struct {
 	ExpiresAt string `json:"expires_at"`
 }
 
-func (h *ResumeDownloadURLHandler) Validate(_ context.Context, req *ResumeDownloadURLRequest) *errorModels.ServerError {
+func (h *ResumeDownloadURLHandler) Validate(_ context.Context, req *ResumeDownloadURLRequest) error {
 	if req.SubmissionID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "submission_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "submission_id is required")
 	}
 	return nil
 }
 
-func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloadURLRequest) (ResumeDownloadURLResponse, *errorModels.ServerError) {
+func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloadURLRequest) (ResumeDownloadURLResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ResumeDownloadURLResponse{}, errorModels.PermissionDeniedServerError()
+		return ResumeDownloadURLResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ResumeDownloadURLResponse{}, errorModels.PermissionDeniedServerError()
+		return ResumeDownloadURLResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	// Look up the submission, scoped to the caller's tenant. The list
@@ -165,10 +156,7 @@ func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloa
 	// caller owns it.
 	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, "")
 	if err != nil {
-		return ResumeDownloadURLResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to locate submission",
-		}
+		return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to locate submission")
 	}
 	var resumeKey string
 	for _, s := range submissions {
@@ -178,10 +166,7 @@ func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloa
 		}
 	}
 	if resumeKey == "" {
-		return ResumeDownloadURLResponse{}, &errorModels.ServerError{
-			Code:    http.StatusNotFound,
-			Message: "Submission not found or has no resume",
-		}
+		return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusNotFound, "Submission not found or has no resume")
 	}
 
 	// Legacy rows may still carry a full URL rather than an R2 key.
@@ -197,16 +182,13 @@ func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloa
 	client, err := storage.Default()
 	if err != nil {
 		code, msg := storage.BuildHTTPError(err)
-		return ResumeDownloadURLResponse{}, &errorModels.ServerError{Code: code, Message: msg}
+		return ResumeDownloadURLResponse{}, onekiterrors.New(code, msg)
 	}
 
 	const expiresIn = time.Hour
 	downloadURL, err := client.PresignDownload(ctx, resumeKey, expiresIn)
 	if err != nil {
-		return ResumeDownloadURLResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to generate resume URL",
-		}
+		return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to generate resume URL")
 	}
 	return ResumeDownloadURLResponse{
 		URL:       downloadURL,

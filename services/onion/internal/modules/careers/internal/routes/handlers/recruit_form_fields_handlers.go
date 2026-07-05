@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -72,28 +72,25 @@ type ListFormFieldsResponse struct {
 	Fields []*FormFieldPayload `json:"fields"`
 }
 
-func (h *ListFormFieldsHandler) Validate(_ context.Context, req *ListFormFieldsRequest) *errorModels.ServerError {
+func (h *ListFormFieldsHandler) Validate(_ context.Context, req *ListFormFieldsRequest) error {
 	if req.CareerID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "career_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "career_id is required")
 	}
 	return nil
 }
 
-func (h *ListFormFieldsHandler) Serve(ctx context.Context, req *ListFormFieldsRequest) (ListFormFieldsResponse, *errorModels.ServerError) {
+func (h *ListFormFieldsHandler) Serve(ctx context.Context, req *ListFormFieldsRequest) (ListFormFieldsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListFormFieldsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListFormFieldsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListFormFieldsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListFormFieldsResponse{}, onekiterrors.PermissionDenied()
 	}
 	fields, err := h.CareersService.ListFormFields(ctx, businessID, req.CareerID)
 	if err != nil {
-		return ListFormFieldsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list form fields",
-		}
+		return ListFormFieldsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list form fields")
 	}
 	payloads := make([]*FormFieldPayload, 0, len(fields))
 	for _, f := range fields {
@@ -124,27 +121,27 @@ type CreateFormFieldResponse struct {
 	Field *FormFieldPayload `json:"field"`
 }
 
-func (h *CreateFormFieldHandler) Validate(_ context.Context, req *CreateFormFieldRequest) *errorModels.ServerError {
+func (h *CreateFormFieldHandler) Validate(_ context.Context, req *CreateFormFieldRequest) error {
 	if req.CareerID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "career_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "career_id is required")
 	}
 	if req.Kind == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "kind is required"}
+		return onekiterrors.New(http.StatusBadRequest, "kind is required")
 	}
 	if req.Label == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "label is required"}
+		return onekiterrors.New(http.StatusBadRequest, "label is required")
 	}
 	return nil
 }
 
-func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormFieldRequest) (CreateFormFieldResponse, *errorModels.ServerError) {
+func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormFieldRequest) (CreateFormFieldResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateFormFieldResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateFormFieldResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	in := domain.FormFieldInput{
@@ -159,10 +156,7 @@ func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormField
 		Position:    req.Position,
 	}
 	if _, err := h.CareersService.CreateFormField(ctx, in); err != nil {
-		return CreateFormFieldResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create field",
-		}
+		return CreateFormFieldResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create field")
 	}
 
 	// Return the full field list so the client stays in sync without
@@ -198,24 +192,24 @@ type UpdateFormFieldResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateFormFieldHandler) Validate(_ context.Context, req *UpdateFormFieldRequest) *errorModels.ServerError {
+func (h *UpdateFormFieldHandler) Validate(_ context.Context, req *UpdateFormFieldRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	if req.Label == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "label is required"}
+		return onekiterrors.New(http.StatusBadRequest, "label is required")
 	}
 	return nil
 }
 
-func (h *UpdateFormFieldHandler) Serve(ctx context.Context, req *UpdateFormFieldRequest) (UpdateFormFieldResponse, *errorModels.ServerError) {
+func (h *UpdateFormFieldHandler) Serve(ctx context.Context, req *UpdateFormFieldRequest) (UpdateFormFieldResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateFormFieldResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateFormFieldResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	in := domain.FormFieldInput{
@@ -232,15 +226,9 @@ func (h *UpdateFormFieldHandler) Serve(ctx context.Context, req *UpdateFormField
 	}
 	if err := h.CareersService.UpdateFormField(ctx, in); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return UpdateFormFieldResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Field not found",
-			}
+			return UpdateFormFieldResponse{}, onekiterrors.New(http.StatusNotFound, "Field not found")
 		}
-		return UpdateFormFieldResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update field",
-		}
+		return UpdateFormFieldResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update field")
 	}
 	return UpdateFormFieldResponse{Message: "Field saved"}, nil
 }
@@ -261,33 +249,27 @@ type DeleteFormFieldResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteFormFieldHandler) Validate(_ context.Context, req *DeleteFormFieldRequest) *errorModels.ServerError {
+func (h *DeleteFormFieldHandler) Validate(_ context.Context, req *DeleteFormFieldRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	return nil
 }
 
-func (h *DeleteFormFieldHandler) Serve(ctx context.Context, req *DeleteFormFieldRequest) (DeleteFormFieldResponse, *errorModels.ServerError) {
+func (h *DeleteFormFieldHandler) Serve(ctx context.Context, req *DeleteFormFieldRequest) (DeleteFormFieldResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return DeleteFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteFormFieldResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return DeleteFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteFormFieldResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.CareersService.DeleteFormField(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return DeleteFormFieldResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Field not found",
-			}
+			return DeleteFormFieldResponse{}, onekiterrors.New(http.StatusNotFound, "Field not found")
 		}
-		return DeleteFormFieldResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to delete field",
-		}
+		return DeleteFormFieldResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete field")
 	}
 	return DeleteFormFieldResponse{Message: "Field deleted"}, nil
 }

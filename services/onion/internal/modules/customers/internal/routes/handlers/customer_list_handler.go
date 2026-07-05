@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 )
@@ -71,15 +71,15 @@ func newCustomerPayload(c domain.Customer) *crmcustomerv1.Customer {
 	return p
 }
 
-func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequest) (ListCustomersResponse, *errorModels.ServerError) {
+func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequest) (ListCustomersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if req.Page < 1 {
@@ -99,10 +99,7 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 		PageSize:   req.PageSize,
 	})
 	if err != nil {
-		return ListCustomersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list customers",
-		}
+		return ListCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list customers")
 	}
 
 	payloads := make([]*crmcustomerv1.Customer, len(result.Customers))

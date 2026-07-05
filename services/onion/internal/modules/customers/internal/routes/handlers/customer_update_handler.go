@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -42,33 +42,27 @@ type UpdateCustomerResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateCustomerHandler) Validate(_ context.Context, req *UpdateCustomerRequest) *errorModels.ServerError {
+func (h *UpdateCustomerHandler) Validate(_ context.Context, req *UpdateCustomerRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	if req.FirstName == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "First name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "First name is required")
 	}
 
 	return nil
 }
 
-func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRequest) (UpdateCustomerResponse, *errorModels.ServerError) {
+func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRequest) (UpdateCustomerResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateCustomerResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.CustomerUpdateInput{
@@ -92,26 +86,17 @@ func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRe
 	if req.DateOfBirth != "" {
 		t, err := time.Parse("2006-01-02", req.DateOfBirth)
 		if err != nil {
-			return UpdateCustomerResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Invalid date of birth format, expected YYYY-MM-DD",
-			}
+			return UpdateCustomerResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid date of birth format, expected YYYY-MM-DD")
 		}
 		input.DateOfBirth = &t
 	}
 
 	if err := h.CRMService.UpdateCustomer(ctx, input); err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
-			return UpdateCustomerResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Customer not found",
-			}
+			return UpdateCustomerResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 
-		return UpdateCustomerResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update customer",
-		}
+		return UpdateCustomerResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update customer")
 	}
 
 	return UpdateCustomerResponse{Message: "Customer updated successfully"}, nil

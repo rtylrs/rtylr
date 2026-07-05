@@ -3,11 +3,17 @@ package notifications
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
+
+	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	"github.com/voxire/onion/internal/modules/notifications/internal/routes"
+	"github.com/voxire/onion/internal/modules/notifications/internal/routes/handlers"
 )
 
 type Module struct {
@@ -17,6 +23,16 @@ type Module struct {
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
 		service: application.NewService(ctx, db),
+	}
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hubnotificationv1.RegisterNotificationServiceServer(
+		handlers.NewNotificationAPI(m.service),
+		hubnotificationv1.WithMux(mux),
+		hubnotificationv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hub notification service: %w", err))
 	}
 }
 

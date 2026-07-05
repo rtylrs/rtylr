@@ -12,8 +12,8 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -31,21 +31,21 @@ type (
 	}
 )
 
-func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (GetPipelineResponse, *errorModels.ServerError) {
+func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (GetPipelineResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetPipelineResponse{}, errorModels.PermissionDeniedServerError()
+		return GetPipelineResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetPipelineResponse{}, errorModels.PermissionDeniedServerError()
+		return GetPipelineResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	summaries, err := h.Service.GetPipeline(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get pipeline", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return GetPipelineResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get pipeline"}
+		return GetPipelineResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get pipeline")
 	}
 
 	return GetPipelineResponse{Pipeline: summaries}, nil
@@ -65,21 +65,21 @@ type (
 	}
 )
 
-func (h *ListLeadsHandler) Serve(ctx context.Context, _ *ListLeadsRequest) (ListLeadsResponse, *errorModels.ServerError) {
+func (h *ListLeadsHandler) Serve(ctx context.Context, _ *ListLeadsRequest) (ListLeadsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListLeadsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLeadsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListLeadsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLeadsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	leads, err := h.Service.ListLeads(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list leads", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListLeadsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list leads"}
+		return ListLeadsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list leads")
 	}
 
 	return ListLeadsResponse{Leads: leads}, nil
@@ -108,22 +108,22 @@ type CreateLeadResponse struct {
 	Lead domain.Lead `json:"lead"`
 }
 
-func (h *CreateLeadHandler) Validate(_ context.Context, req *CreateLeadRequest) *errorModels.ServerError {
+func (h *CreateLeadHandler) Validate(_ context.Context, req *CreateLeadRequest) error {
 	if strings.TrimSpace(req.CompanyName) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "company_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "company_name is required")
 	}
 	return nil
 }
 
-func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (CreateLeadResponse, *errorModels.ServerError) {
+func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (CreateLeadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	lead, err := h.Service.CreateLead(ctx, businessID, domain.CreateLeadRequest{
@@ -138,7 +138,7 @@ func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create lead", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create lead"}
+		return CreateLeadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create lead")
 	}
 
 	return CreateLeadResponse{Lead: lead}, nil
@@ -158,30 +158,30 @@ type (
 	}
 )
 
-func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadResponse, *errorModels.ServerError) {
+func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return GetLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return GetLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
+		return GetLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return GetLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	lead, err := h.Service.GetLead(ctx, id, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrLeadNotFound) {
-			return GetLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
+			return GetLeadResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
 		}
 		logger.Ctx(ctx).Error("failed to get lead", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", id), logger.Error(err))
-		return GetLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get lead"}
+		return GetLeadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get lead")
 	}
 
 	return GetLeadResponse{Lead: lead}, nil
@@ -210,28 +210,28 @@ type UpdateLeadResponse struct {
 	Lead domain.Lead `json:"lead"`
 }
 
-func (h *UpdateLeadHandler) Validate(_ context.Context, req *UpdateLeadRequest) *errorModels.ServerError {
+func (h *UpdateLeadHandler) Validate(_ context.Context, req *UpdateLeadRequest) error {
 	if strings.TrimSpace(req.CompanyName) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "company_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "company_name is required")
 	}
 	return nil
 }
 
-func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (UpdateLeadResponse, *errorModels.ServerError) {
+func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (UpdateLeadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
+		return UpdateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	lead, err := h.Service.UpdateLead(ctx, id, businessID, domain.UpdateLeadRequest{
@@ -246,10 +246,10 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrLeadNotFound) {
-			return UpdateLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
+			return UpdateLeadResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
 		}
 		logger.Ctx(ctx).Error("failed to update lead", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", id), logger.Error(err))
-		return UpdateLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update lead"}
+		return UpdateLeadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update lead")
 	}
 
 	return UpdateLeadResponse{Lead: lead}, nil
@@ -269,29 +269,29 @@ type (
 	}
 )
 
-func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (DeleteLeadResponse, *errorModels.ServerError) {
+func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (DeleteLeadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DeleteLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return DeleteLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid lead id"}
+		return DeleteLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteLeadResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteLeadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.Service.DeleteLead(ctx, id, businessID); err != nil {
 		if errors.Is(err, domain.ErrLeadNotFound) {
-			return DeleteLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
+			return DeleteLeadResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
 		}
 		logger.Ctx(ctx).Error("failed to delete lead", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", id), logger.Error(err))
-		return DeleteLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to delete lead"}
+		return DeleteLeadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete lead")
 	}
 
 	return DeleteLeadResponse{Success: true}, nil

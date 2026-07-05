@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func ProviderStatusRoutes() []string {
@@ -25,7 +24,7 @@ type GetProviderStatusResponse struct {
 	Providers       map[string]bool `json:"providers"`
 }
 
-func (h *ProviderStatusHandler) Serve(ctx context.Context, _ *GetProviderStatusRequest) (GetProviderStatusResponse, *errorModels.ServerError) {
+func (h *ProviderStatusHandler) Serve(ctx context.Context, _ *GetProviderStatusRequest) (GetProviderStatusResponse, error) {
 	status := h.SnipsService.GetProviderDetails(ctx)
 
 	return GetProviderStatusResponse{

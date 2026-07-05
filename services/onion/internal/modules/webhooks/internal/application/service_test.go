@@ -13,6 +13,9 @@ type mockRepo struct {
 	listErr    error
 	createID   int64
 	createErr  error
+	getResult  domain.Webhook
+	getErr     error
+	updateErr  error
 	deleteErr  error
 	createGot  struct {
 		ownerID    int64
@@ -24,6 +27,13 @@ type mockRepo struct {
 	deleteGot struct {
 		businessID int64
 		id         int64
+	}
+	updateGot struct {
+		businessID int64
+		id         int64
+		url        string
+		events     []string
+		isActive   bool
 	}
 }
 
@@ -38,6 +48,19 @@ func (m *mockRepo) Create(_ context.Context, ownerID, businessID int64, url, sec
 	m.createGot.secret = secret
 	m.createGot.events = events
 	return m.createID, m.createErr
+}
+
+func (m *mockRepo) Get(_ context.Context, _ int64, _ int64) (domain.Webhook, error) {
+	return m.getResult, m.getErr
+}
+
+func (m *mockRepo) Update(_ context.Context, businessID, id int64, url string, events []string, isActive bool) error {
+	m.updateGot.businessID = businessID
+	m.updateGot.id = id
+	m.updateGot.url = url
+	m.updateGot.events = events
+	m.updateGot.isActive = isActive
+	return m.updateErr
 }
 
 func (m *mockRepo) Delete(_ context.Context, businessID, id int64) error {

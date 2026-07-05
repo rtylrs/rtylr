@@ -6,7 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/application"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 func ContactRoutes() []string { return []string{"/voxhire/contact"} }
@@ -37,23 +37,23 @@ type ContactResponse struct {
 	Status  string `json:"status"`
 }
 
-func (h *ContactHandler) Validate(_ context.Context, req *ContactRequest) *errorModels.ServerError {
+func (h *ContactHandler) Validate(_ context.Context, req *ContactRequest) error {
 	if req.CompanyName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "company_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "company_name is required")
 	}
 	if req.YourName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "your_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "your_name is required")
 	}
 	if req.WorkEmail == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "work_email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "work_email is required")
 	}
 	if req.Role == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "role is required"}
+		return onekiterrors.New(http.StatusBadRequest, "role is required")
 	}
 	return nil
 }
 
-func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (ContactResponse, *errorModels.ServerError) {
+func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (ContactResponse, error) {
 	id, err := h.Service.SubmitCompanyLead(ctx, domain.CompanyLeadInput{
 		CompanyName:  req.CompanyName,
 		ContactName:  req.YourName,
@@ -68,10 +68,7 @@ func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (Contac
 		AgencyOptIn:  req.AgencyOptIn,
 	})
 	if err != nil {
-		return ContactResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to submit hiring inquiry",
-		}
+		return ContactResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to submit hiring inquiry")
 	}
 
 	return ContactResponse{

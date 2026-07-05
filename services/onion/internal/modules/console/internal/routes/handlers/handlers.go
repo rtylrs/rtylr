@@ -10,18 +10,18 @@ import (
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	"github.com/voxire/onion/internal/platform/aicache"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-func requireConsoleAdmin(ctx context.Context) *errorModels.ServerError {
+func requireConsoleAdmin(ctx context.Context) error {
 	user, ok := authPkg.GetAuthUser(ctx)
 	if !ok || user == nil {
-		return &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "Unauthorized"}
+		return onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
 	if user.Role != "console_admin" {
-		return &errorModels.ServerError{Code: http.StatusForbidden, Message: "Console admin access required"}
+		return onekiterrors.New(http.StatusForbidden, "Console admin access required")
 	}
 	return nil
 }
@@ -48,13 +48,13 @@ type (
 
 type StatsHandler struct{ Service *application.Service }
 
-func (h *StatsHandler) Serve(ctx context.Context, _ *StatsRequest) (StatsResponse, *errorModels.ServerError) {
+func (h *StatsHandler) Serve(ctx context.Context, _ *StatsRequest) (StatsResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return StatsResponse{}, sErr
 	}
 	stats, err := h.Service.GetStats(ctx)
 	if err != nil {
-		return StatsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to fetch stats"}
+		return StatsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to fetch stats")
 	}
 	return *stats, nil
 }
@@ -68,7 +68,7 @@ type (
 
 type AICacheAnalyticsHandler struct{}
 
-func (h *AICacheAnalyticsHandler) Serve(ctx context.Context, _ *AICacheAnalyticsRequest) (AICacheAnalyticsResponse, *errorModels.ServerError) {
+func (h *AICacheAnalyticsHandler) Serve(ctx context.Context, _ *AICacheAnalyticsRequest) (AICacheAnalyticsResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return AICacheAnalyticsResponse{}, sErr
 	}
@@ -90,7 +90,7 @@ type ListUsersResponse = application.ListUsersResult
 
 type ListUsersHandler struct{ Service *application.Service }
 
-func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (ListUsersResponse, *errorModels.ServerError) {
+func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (ListUsersResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListUsersResponse{}, sErr
 	}
@@ -104,7 +104,7 @@ func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (Li
 	}
 	result, err := h.Service.ListUsers(ctx, limit, req.Offset, req.ID, req.Email, name)
 	if err != nil {
-		return ListUsersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list users"}
+		return ListUsersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list users")
 	}
 	return *result, nil
 }
@@ -125,20 +125,20 @@ type CreateUserResponse struct {
 
 type CreateUserHandler struct{ Service *application.Service }
 
-func (h *CreateUserHandler) Validate(_ context.Context, req *CreateUserRequest) *errorModels.ServerError {
+func (h *CreateUserHandler) Validate(_ context.Context, req *CreateUserRequest) error {
 	if req.Email == "" || req.Password == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Email and password are required"}
+		return onekiterrors.New(http.StatusBadRequest, "Email and password are required")
 	}
 	return nil
 }
 
-func (h *CreateUserHandler) Serve(ctx context.Context, req *CreateUserRequest) (CreateUserResponse, *errorModels.ServerError) {
+func (h *CreateUserHandler) Serve(ctx context.Context, req *CreateUserRequest) (CreateUserResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return CreateUserResponse{}, sErr
 	}
 	user, err := h.Service.CreateUser(ctx, req.Email, req.Password, req.FullName, req.IsConsoleAdmin)
 	if err != nil {
-		return CreateUserResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: err.Error()}
+		return CreateUserResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return CreateUserResponse{User: *user, Message: "User created"}, nil
 }
@@ -164,14 +164,14 @@ type CreateBusinessOwnerResponse = application.CreateBusinessOwnerResult
 
 type CreateBusinessOwnerHandler struct{ Service *application.Service }
 
-func (h *CreateBusinessOwnerHandler) Validate(_ context.Context, req *CreateBusinessOwnerRequest) *errorModels.ServerError {
+func (h *CreateBusinessOwnerHandler) Validate(_ context.Context, req *CreateBusinessOwnerRequest) error {
 	if req.Email == "" || req.Password == "" || req.BusinessName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Email, password, and business name are required"}
+		return onekiterrors.New(http.StatusBadRequest, "Email, password, and business name are required")
 	}
 	return nil
 }
 
-func (h *CreateBusinessOwnerHandler) Serve(ctx context.Context, req *CreateBusinessOwnerRequest) (CreateBusinessOwnerResponse, *errorModels.ServerError) {
+func (h *CreateBusinessOwnerHandler) Serve(ctx context.Context, req *CreateBusinessOwnerRequest) (CreateBusinessOwnerResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return CreateBusinessOwnerResponse{}, sErr
 	}
@@ -190,7 +190,7 @@ func (h *CreateBusinessOwnerHandler) Serve(ctx context.Context, req *CreateBusin
 		GrantDays:          req.GrantDays,
 	})
 	if err != nil {
-		return CreateBusinessOwnerResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: err.Error()}
+		return CreateBusinessOwnerResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return *result, nil
 }
@@ -208,7 +208,7 @@ type UpdateUserResponse struct {
 
 type UpdateUserHandler struct{ Service *application.Service }
 
-func (h *UpdateUserHandler) Serve(_ context.Context, _ *UpdateUserRequest) (UpdateUserResponse, *errorModels.ServerError) {
+func (h *UpdateUserHandler) Serve(_ context.Context, _ *UpdateUserRequest) (UpdateUserResponse, error) {
 	return UpdateUserResponse{}, nil // raw HTTP via route
 }
 
@@ -223,7 +223,7 @@ type (
 
 type DeleteUserHandler struct{ Service *application.Service }
 
-func (h *DeleteUserHandler) Serve(_ context.Context, _ *DeleteUserRequest) (DeleteUserResponse, *errorModels.ServerError) {
+func (h *DeleteUserHandler) Serve(_ context.Context, _ *DeleteUserRequest) (DeleteUserResponse, error) {
 	return DeleteUserResponse{}, nil // raw HTTP via route
 }
 
@@ -239,7 +239,7 @@ type BanUserResponse struct {
 
 type BanUserHandler struct{ Service *application.Service }
 
-func (h *BanUserHandler) Serve(_ context.Context, _ *BanUserRequest) (BanUserResponse, *errorModels.ServerError) {
+func (h *BanUserHandler) Serve(_ context.Context, _ *BanUserRequest) (BanUserResponse, error) {
 	return BanUserResponse{}, nil // raw HTTP via route
 }
 
@@ -254,7 +254,7 @@ type (
 
 type UnbanUserHandler struct{ Service *application.Service }
 
-func (h *UnbanUserHandler) Serve(_ context.Context, _ *UnbanUserRequest) (UnbanUserResponse, *errorModels.ServerError) {
+func (h *UnbanUserHandler) Serve(_ context.Context, _ *UnbanUserRequest) (UnbanUserResponse, error) {
 	return UnbanUserResponse{}, nil // raw HTTP via route
 }
 
@@ -272,7 +272,7 @@ type ListBusinessesResponse = application.ListBusinessesResult
 
 type ListBusinessesHandler struct{ Service *application.Service }
 
-func (h *ListBusinessesHandler) Serve(ctx context.Context, req *ListBusinessesRequest) (ListBusinessesResponse, *errorModels.ServerError) {
+func (h *ListBusinessesHandler) Serve(ctx context.Context, req *ListBusinessesRequest) (ListBusinessesResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListBusinessesResponse{}, sErr
 	}
@@ -282,7 +282,7 @@ func (h *ListBusinessesHandler) Serve(ctx context.Context, req *ListBusinessesRe
 	}
 	result, err := h.Service.ListBusinesses(ctx, limit, req.Offset, req.ID, req.Name, req.OwnerID)
 	if err != nil {
-		return ListBusinessesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list businesses"}
+		return ListBusinessesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list businesses")
 	}
 	return *result, nil
 }
@@ -297,7 +297,7 @@ type UpdateBusinessResponse struct {
 
 type UpdateBusinessHandler struct{ Service *application.Service }
 
-func (h *UpdateBusinessHandler) Serve(_ context.Context, _ *UpdateBusinessRequest) (UpdateBusinessResponse, *errorModels.ServerError) {
+func (h *UpdateBusinessHandler) Serve(_ context.Context, _ *UpdateBusinessRequest) (UpdateBusinessResponse, error) {
 	return UpdateBusinessResponse{}, nil // raw HTTP via route
 }
 
@@ -313,7 +313,7 @@ type ListSubscriptionsResponse = application.ListSubscriptionsResult
 
 type ListSubscriptionsHandler struct{ Service *application.Service }
 
-func (h *ListSubscriptionsHandler) Serve(ctx context.Context, req *ListSubscriptionsRequest) (ListSubscriptionsResponse, *errorModels.ServerError) {
+func (h *ListSubscriptionsHandler) Serve(ctx context.Context, req *ListSubscriptionsRequest) (ListSubscriptionsResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListSubscriptionsResponse{}, sErr
 	}
@@ -323,7 +323,7 @@ func (h *ListSubscriptionsHandler) Serve(ctx context.Context, req *ListSubscript
 	}
 	result, err := h.Service.ListSubscriptions(ctx, limit, req.Offset, req.Status)
 	if err != nil {
-		return ListSubscriptionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list subscriptions"}
+		return ListSubscriptionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list subscriptions")
 	}
 	return *result, nil
 }
@@ -346,7 +346,7 @@ type UpdateSubscriptionResponse struct {
 
 type UpdateSubscriptionHandler struct{ Service *application.Service }
 
-func (h *UpdateSubscriptionHandler) Serve(_ context.Context, _ *UpdateSubscriptionRequest) (UpdateSubscriptionResponse, *errorModels.ServerError) {
+func (h *UpdateSubscriptionHandler) Serve(_ context.Context, _ *UpdateSubscriptionRequest) (UpdateSubscriptionResponse, error) {
 	return UpdateSubscriptionResponse{}, nil // raw HTTP via route
 }
 
@@ -372,36 +372,36 @@ type UpsertSubscriptionResponse struct {
 
 type UpsertSubscriptionHandler struct{ Service *application.Service }
 
-func (h *UpsertSubscriptionHandler) Validate(_ context.Context, req *UpsertSubscriptionRequest) *errorModels.ServerError {
+func (h *UpsertSubscriptionHandler) Validate(_ context.Context, req *UpsertSubscriptionRequest) error {
 	if req.OwnerID == 0 || req.PlanID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "owner_id and plan_id are required"}
+		return onekiterrors.New(http.StatusBadRequest, "owner_id and plan_id are required")
 	}
 	if req.Status == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "status is required"}
+		return onekiterrors.New(http.StatusBadRequest, "status is required")
 	}
 	return nil
 }
 
-func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscriptionRequest) (UpsertSubscriptionResponse, *errorModels.ServerError) {
+func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscriptionRequest) (UpsertSubscriptionResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return UpsertSubscriptionResponse{}, sErr
 	}
 	trialEndsAt, err := parseOptionalConsoleTime(req.TrialEndsAt)
 	if err != nil {
-		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid trial_ends_at"}
+		return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid trial_ends_at")
 	}
 	nextBillingDate, err := parseOptionalConsoleTime(req.NextBillingDate)
 	if err != nil {
-		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid next_billing_date"}
+		return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid next_billing_date")
 	}
 	currentPeriodEndsAt, err := parseOptionalConsoleTime(req.CurrentPeriodEndsAt)
 	if err != nil {
-		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid current_period_ends_at"}
+		return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid current_period_ends_at")
 	}
 	if currentPeriodEndsAt == nil && req.ExpiresAt != "" {
 		currentPeriodEndsAt, err = parseOptionalConsoleTime(req.ExpiresAt)
 		if err != nil {
-			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expires_at"}
+			return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid expires_at")
 		}
 	}
 
@@ -418,12 +418,12 @@ func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscr
 		PaddleCustomerID:     req.PaddleCustomerID,
 	}); err != nil {
 		if errors.Is(err, application.ErrNotOrganizationOwner) {
-			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Subscriptions can only be set for organization owners"}
+			return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusBadRequest, "Subscriptions can only be set for organization owners")
 		}
 		if errors.Is(err, application.ErrInvalidSubscription) {
-			return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: err.Error()}
+			return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
 		}
-		return UpsertSubscriptionResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to upsert subscription"}
+		return UpsertSubscriptionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to upsert subscription")
 	}
 	return UpsertSubscriptionResponse{Message: "Subscription updated"}, nil
 }
@@ -448,13 +448,13 @@ type (
 
 type ListPlansHandler struct{ Service *application.Service }
 
-func (h *ListPlansHandler) Serve(ctx context.Context, _ *ListPlansRequest) (ListPlansResponse, *errorModels.ServerError) {
+func (h *ListPlansHandler) Serve(ctx context.Context, _ *ListPlansRequest) (ListPlansResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListPlansResponse{}, sErr
 	}
 	plans, err := h.Service.ListPlans(ctx)
 	if err != nil {
-		return ListPlansResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list plans"}
+		return ListPlansResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list plans")
 	}
 	return ListPlansResponse{Plans: plans}, nil
 }
@@ -472,7 +472,7 @@ type UpdatePlanResponse struct {
 
 type UpdatePlanHandler struct{ Service *application.Service }
 
-func (h *UpdatePlanHandler) Serve(_ context.Context, _ *UpdatePlanRequest) (UpdatePlanResponse, *errorModels.ServerError) {
+func (h *UpdatePlanHandler) Serve(_ context.Context, _ *UpdatePlanRequest) (UpdatePlanResponse, error) {
 	return UpdatePlanResponse{}, nil // raw HTTP via route
 }
 
@@ -487,7 +487,7 @@ type ListGrantsResponse = application.ListGrantsResult
 
 type ListGrantsHandler struct{ Service *application.Service }
 
-func (h *ListGrantsHandler) Serve(ctx context.Context, req *ListGrantsRequest) (ListGrantsResponse, *errorModels.ServerError) {
+func (h *ListGrantsHandler) Serve(ctx context.Context, req *ListGrantsRequest) (ListGrantsResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListGrantsResponse{}, sErr
 	}
@@ -497,7 +497,7 @@ func (h *ListGrantsHandler) Serve(ctx context.Context, req *ListGrantsRequest) (
 	}
 	result, err := h.Service.ListGrants(ctx, limit, req.Offset)
 	if err != nil {
-		return ListGrantsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list grants"}
+		return ListGrantsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list grants")
 	}
 	return *result, nil
 }
@@ -516,20 +516,20 @@ type CreateGrantResponse struct {
 
 type CreateGrantHandler struct{ Service *application.Service }
 
-func (h *CreateGrantHandler) Validate(_ context.Context, req *CreateGrantRequest) *errorModels.ServerError {
+func (h *CreateGrantHandler) Validate(_ context.Context, req *CreateGrantRequest) error {
 	if req.UserID == 0 || req.PlanID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id and plan_id are required"}
+		return onekiterrors.New(http.StatusBadRequest, "user_id and plan_id are required")
 	}
 	return nil
 }
 
-func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest) (CreateGrantResponse, *errorModels.ServerError) {
+func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest) (CreateGrantResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return CreateGrantResponse{}, sErr
 	}
 	admin, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateGrantResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "Unauthorized"}
+		return CreateGrantResponse{}, onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
 	var expiresAt *time.Time
 	if req.ExpiresAt != "" {
@@ -541,9 +541,9 @@ func (h *CreateGrantHandler) Serve(ctx context.Context, req *CreateGrantRequest)
 	grant, err := h.Service.CreateGrant(ctx, req.UserID, req.PlanID, admin.UserID, req.Note, expiresAt)
 	if err != nil {
 		if errors.Is(err, application.ErrNotOrganizationOwner) {
-			return CreateGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Access grants can only be created for organization owners"}
+			return CreateGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Access grants can only be created for organization owners")
 		}
-		return CreateGrantResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create grant"}
+		return CreateGrantResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create grant")
 	}
 	return CreateGrantResponse{Grant: *grant, Message: "Access grant created"}, nil
 }
@@ -556,13 +556,13 @@ type ListAddonsResponse = application.ListAddonsResult
 
 type ListAddonsHandler struct{ Service *application.Service }
 
-func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (ListAddonsResponse, *errorModels.ServerError) {
+func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (ListAddonsResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListAddonsResponse{}, sErr
 	}
 	result, err := h.Service.ListAddons(ctx)
 	if err != nil {
-		return ListAddonsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list addons"}
+		return ListAddonsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list addons")
 	}
 	return *result, nil
 }
@@ -576,7 +576,7 @@ type ListAddonGrantsResponse = application.ListAddonGrantsResult
 
 type ListAddonGrantsHandler struct{ Service *application.Service }
 
-func (h *ListAddonGrantsHandler) Serve(ctx context.Context, req *ListAddonGrantsRequest) (ListAddonGrantsResponse, *errorModels.ServerError) {
+func (h *ListAddonGrantsHandler) Serve(ctx context.Context, req *ListAddonGrantsRequest) (ListAddonGrantsResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return ListAddonGrantsResponse{}, sErr
 	}
@@ -586,7 +586,7 @@ func (h *ListAddonGrantsHandler) Serve(ctx context.Context, req *ListAddonGrants
 	}
 	result, err := h.Service.ListAddonGrants(ctx, limit, req.Offset)
 	if err != nil {
-		return ListAddonGrantsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list addon grants"}
+		return ListAddonGrantsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list addon grants")
 	}
 	return *result, nil
 }
@@ -606,20 +606,20 @@ type CreateAddonGrantResponse struct {
 
 type CreateAddonGrantHandler struct{ Service *application.Service }
 
-func (h *CreateAddonGrantHandler) Validate(_ context.Context, req *CreateAddonGrantRequest) *errorModels.ServerError {
+func (h *CreateAddonGrantHandler) Validate(_ context.Context, req *CreateAddonGrantRequest) error {
 	if req.UserID == 0 || req.AddonID == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id and addon_id are required"}
+		return onekiterrors.New(http.StatusBadRequest, "user_id and addon_id are required")
 	}
 	return nil
 }
 
-func (h *CreateAddonGrantHandler) Serve(ctx context.Context, req *CreateAddonGrantRequest) (CreateAddonGrantResponse, *errorModels.ServerError) {
+func (h *CreateAddonGrantHandler) Serve(ctx context.Context, req *CreateAddonGrantRequest) (CreateAddonGrantResponse, error) {
 	if sErr := requireConsoleAdmin(ctx); sErr != nil {
 		return CreateAddonGrantResponse{}, sErr
 	}
 	admin, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "Unauthorized"}
+		return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusUnauthorized, "Unauthorized")
 	}
 	var expiresAt *time.Time
 	if req.ExpiresAt != "" {
@@ -632,13 +632,13 @@ func (h *CreateAddonGrantHandler) Serve(ctx context.Context, req *CreateAddonGra
 	if err != nil {
 		switch {
 		case errors.Is(err, application.ErrNotOrganizationOwner):
-			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Addon grants can only be created for organization owners"}
+			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Addon grants can only be created for organization owners")
 		case errors.Is(err, application.ErrBusinessNotOwnedByUser):
-			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Business does not belong to this owner"}
+			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Business does not belong to this owner")
 		case errors.Is(err, application.ErrAddonNotFound):
-			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Addon not found"}
+			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusBadRequest, "Addon not found")
 		default:
-			return CreateAddonGrantResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create addon grant"}
+			return CreateAddonGrantResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create addon grant")
 		}
 	}
 	return CreateAddonGrantResponse{Grant: *grant, Message: "Addon grant created"}, nil

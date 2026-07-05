@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	stdErrors "errors"
+	onekithttp "github.com/stackxio/onekit/http"
 	"net/http"
 	"testing"
 )
@@ -10,6 +12,14 @@ import (
 // this package; all other handlers embed the auth check inside Serve and
 // therefore require a running service.  These tests cover all documented
 // validation rules without touching the database.
+
+func oneKitStatus(err error) int {
+	var oneKitErr *onekithttp.Error
+	if stdErrors.As(err, &oneKitErr) {
+		return int(oneKitErr.GetStatusCode())
+	}
+	return 0
+}
 
 func TestUploadDocumentHandler_Validate_MissingEmployeeID(t *testing.T) {
 	h := &UploadDocumentHandler{}
@@ -20,8 +30,8 @@ func TestUploadDocumentHandler_Validate_MissingEmployeeID(t *testing.T) {
 	if se == nil {
 		t.Fatal("expected validation error, got nil")
 	}
-	if se.HTTPCode != http.StatusBadRequest {
-		t.Errorf("expected 400, got %d", se.HTTPCode)
+	if oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", oneKitStatus(se))
 	}
 }
 
@@ -34,8 +44,8 @@ func TestUploadDocumentHandler_Validate_MissingTitle(t *testing.T) {
 	if se == nil {
 		t.Fatal("expected validation error for missing title")
 	}
-	if se.HTTPCode != http.StatusBadRequest {
-		t.Errorf("expected 400, got %d", se.HTTPCode)
+	if oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", oneKitStatus(se))
 	}
 }
 
@@ -48,8 +58,8 @@ func TestUploadDocumentHandler_Validate_MissingStorageMode(t *testing.T) {
 	if se == nil {
 		t.Fatal("expected validation error for missing storage_mode")
 	}
-	if se.HTTPCode != http.StatusBadRequest {
-		t.Errorf("expected 400, got %d", se.HTTPCode)
+	if oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", oneKitStatus(se))
 	}
 }
 

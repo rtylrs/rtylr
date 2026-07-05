@@ -3,11 +3,14 @@ package billing
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hubbillingv1 "github.com/voxire/voxie/gen/go/hub/billing/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/billing/internal/api"
 	"github.com/voxire/onion/internal/modules/billing/internal/application"
-	"github.com/voxire/onion/internal/modules/billing/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hubbillingv1.RegisterBillingServiceServer(
+		api.NewBillingAPI(m.service),
+		hubbillingv1.WithMux(mux),
+		hubbillingv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hub billing service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

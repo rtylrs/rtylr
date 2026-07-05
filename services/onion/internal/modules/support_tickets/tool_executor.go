@@ -116,7 +116,7 @@ func (m *Module) executeGetSupportTicketTool(ctx context.Context, input map[stri
 func parseListSupportTicketsToolInput(input map[string]any) (listSupportTicketsToolInput, error) {
 	statusRaw := firstSupportTicketToolValue(input, "status")
 	status := normalizeSupportTicketToolStatus(statusRaw)
-	if strings.TrimSpace(supportTicketToolString(statusRaw)) != "" && status == "" {
+	if rawStatus := normalizeSupportTicketToolStatusToken(statusRaw); rawStatus != "" && status == "" && rawStatus != "all" && rawStatus != "any" {
 		return listSupportTicketsToolInput{}, errors.New("status must be one of open, pending, resolved, closed, or all")
 	}
 
@@ -159,9 +159,7 @@ func supportTicketsToolBusinessID(ctx context.Context) (int64, error) {
 }
 
 func normalizeSupportTicketToolStatus(value any) string {
-	status := strings.ToLower(strings.TrimSpace(supportTicketToolString(value)))
-	status = strings.ReplaceAll(status, "-", "_")
-	status = strings.ReplaceAll(status, " ", "_")
+	status := normalizeSupportTicketToolStatusToken(value)
 	switch status {
 	case "", "all", "any":
 		return ""
@@ -170,6 +168,13 @@ func normalizeSupportTicketToolStatus(value any) string {
 	default:
 		return ""
 	}
+}
+
+func normalizeSupportTicketToolStatusToken(value any) string {
+	status := strings.ToLower(strings.TrimSpace(supportTicketToolString(value)))
+	status = strings.ReplaceAll(status, "-", "_")
+	status = strings.ReplaceAll(status, " ", "_")
+	return status
 }
 
 func supportTicketToolPayload(ticket domain.Ticket) map[string]any {

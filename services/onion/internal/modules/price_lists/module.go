@@ -3,11 +3,14 @@ package price_lists
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	erppricelistv1 "github.com/voxire/voxie/gen/go/erp/price_list/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/price_lists/internal/api"
 	"github.com/voxire/onion/internal/modules/price_lists/internal/application"
-	"github.com/voxire/onion/internal/modules/price_lists/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erppricelistv1.RegisterPriceListServiceServer(
+		api.NewPriceListAPI(m.service),
+		erppricelistv1.WithMux(mux),
+		erppricelistv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register ERP price list service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

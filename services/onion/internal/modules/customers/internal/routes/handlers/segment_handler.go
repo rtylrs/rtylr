@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
@@ -36,7 +36,7 @@ func newSegmentPayload(seg domain.Segment) *crmsegmentv1.Segment {
 		OwnerId:       seg.OwnerID,
 		Name:          seg.Name,
 		Description:   seg.Description,
-		Rules:         string(seg.Rules),
+		Filters:       string(seg.Rules),
 		CustomerCount: int64(seg.CustomerCount),
 		CreatedAt:     seg.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:     seg.UpdatedAt.Format("2006-01-02T15:04:05Z"),
@@ -62,23 +62,20 @@ type ListSegmentsResponse struct {
 	Segments []*crmsegmentv1.Segment `json:"segments"`
 }
 
-func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest) (ListSegmentsResponse, *errorModels.ServerError) {
+func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest) (ListSegmentsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListSegmentsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListSegmentsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListSegmentsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListSegmentsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	segments, err := h.CRMService.ListSegments(ctx, businessID)
 	if err != nil {
-		return ListSegmentsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list segments",
-		}
+		return ListSegmentsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list segments")
 	}
 
 	payloads := make([]*crmsegmentv1.Segment, len(segments))
@@ -106,33 +103,27 @@ type CreateSegmentResponse struct {
 	Message   string `json:"message"`
 }
 
-func (h *CreateSegmentHandler) Validate(_ context.Context, req *CreateSegmentRequest) *errorModels.ServerError {
+func (h *CreateSegmentHandler) Validate(_ context.Context, req *CreateSegmentRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment name is required")
 	}
 
 	if len(req.Rules) == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment rules are required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment rules are required")
 	}
 
 	return nil
 }
 
-func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequest) (CreateSegmentResponse, *errorModels.ServerError) {
+func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequest) (CreateSegmentResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	rules := []byte(req.Rules)
@@ -148,10 +139,7 @@ func (h *CreateSegmentHandler) Serve(ctx context.Context, req *CreateSegmentRequ
 		Rules:       rules,
 	})
 	if err != nil {
-		return CreateSegmentResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create segment",
-		}
+		return CreateSegmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create segment")
 	}
 
 	return CreateSegmentResponse{SegmentID: id, Message: "Segment created successfully"}, nil
@@ -174,33 +162,27 @@ type UpdateSegmentResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateSegmentHandler) Validate(_ context.Context, req *UpdateSegmentRequest) *errorModels.ServerError {
+func (h *UpdateSegmentHandler) Validate(_ context.Context, req *UpdateSegmentRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
 	}
 
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment name is required")
 	}
 
 	return nil
 }
 
-func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequest) (UpdateSegmentResponse, *errorModels.ServerError) {
+func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequest) (UpdateSegmentResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateSegmentResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	rules := []byte(req.Rules)
@@ -217,16 +199,10 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 		Rules:       rules,
 	}); err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
-			return UpdateSegmentResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Segment not found",
-			}
+			return UpdateSegmentResponse{}, onekiterrors.New(http.StatusNotFound, "Segment not found")
 		}
 
-		return UpdateSegmentResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update segment",
-		}
+		return UpdateSegmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update segment")
 	}
 
 	return UpdateSegmentResponse{Message: "Segment updated successfully"}, nil
@@ -246,40 +222,31 @@ type DeleteSegmentResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteSegmentHandler) Validate(_ context.Context, req *DeleteSegmentRequest) *errorModels.ServerError {
+func (h *DeleteSegmentHandler) Validate(_ context.Context, req *DeleteSegmentRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
 	}
 
 	return nil
 }
 
-func (h *DeleteSegmentHandler) Serve(ctx context.Context, req *DeleteSegmentRequest) (DeleteSegmentResponse, *errorModels.ServerError) {
+func (h *DeleteSegmentHandler) Serve(ctx context.Context, req *DeleteSegmentRequest) (DeleteSegmentResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DeleteSegmentResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteSegmentResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.CRMService.DeleteSegment(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
-			return DeleteSegmentResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Segment not found",
-			}
+			return DeleteSegmentResponse{}, onekiterrors.New(http.StatusNotFound, "Segment not found")
 		}
 
-		return DeleteSegmentResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to delete segment",
-		}
+		return DeleteSegmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete segment")
 	}
 
 	return DeleteSegmentResponse{Message: "Segment deleted successfully"}, nil

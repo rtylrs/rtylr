@@ -3,11 +3,14 @@ package booking_appointments
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	bookingappointmentv1 "github.com/voxire/voxie/gen/go/booking/appointment/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/booking_appointments/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/application"
-	"github.com/voxire/onion/internal/modules/booking_appointments/internal/routes"
 )
 
 type Module struct{ service *application.Service }
@@ -16,7 +19,13 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := bookingappointmentv1.RegisterAppointmentServiceServer(
+		api.NewAppointmentAPI(m.service),
+		bookingappointmentv1.WithMux(mux),
+		bookingappointmentv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register booking appointment service: %w", err))
+	}
 }
 func (m *Module) GetAnonymousRoutes() []string { return []string{} }

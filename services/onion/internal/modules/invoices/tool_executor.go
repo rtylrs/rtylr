@@ -12,7 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -65,7 +65,7 @@ func (m *Module) executeListInvoicesTool(ctx context.Context, input map[string]a
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	parsed, err := parseListInvoicesToolInput(input)
@@ -106,7 +106,7 @@ func (m *Module) executeGetInvoiceTool(ctx context.Context, input map[string]any
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	invoiceID, err := parseGetInvoiceToolInput(input)
@@ -132,7 +132,7 @@ func (m *Module) executeCreateInvoiceTool(ctx context.Context, input map[string]
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	parsed, err := parseCreateInvoiceToolInput(input, time.Now())
@@ -194,7 +194,7 @@ func (m *Module) executeRecordPaymentTool(ctx context.Context, input map[string]
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	parsed, err := parseRecordPaymentToolInput(input, time.Now())
@@ -229,7 +229,7 @@ func (m *Module) executeSendInvoiceTool(ctx context.Context, input map[string]an
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return nil, errorModels.PermissionDeniedServerError()
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	invoiceID, err := parseSendInvoiceToolInput(input)

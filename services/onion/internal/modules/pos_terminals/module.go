@@ -3,11 +3,13 @@ package pos_terminals
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
+	"github.com/voxire/onion/internal/modules/pos_terminals/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_terminals/internal/routes"
+	posterminalv1 "github.com/voxire/voxie/gen/go/pos/terminal/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -18,8 +20,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := posterminalv1.RegisterTerminalServiceServer(
+		api.NewTerminalAPI(m.service),
+		posterminalv1.WithMux(mux),
+		posterminalv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS terminal service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

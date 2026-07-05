@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_payments/internal/application"
 	"github.com/voxire/onion/internal/modules/store_payments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -24,18 +24,18 @@ type (
 	}
 )
 
-func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
+func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return ListResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list payment methods"}
+		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list payment methods")
 	}
 	return ListResponse{Methods: items}, nil
 }
@@ -54,25 +54,25 @@ type CreateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 	if strings.TrimSpace(req.Provider) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Provider is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Provider is required")
 	}
 	return nil
 }
 
-func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, *errorModels.ServerError) {
+func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateResponse{}, onekiterrors.PermissionDenied()
 	}
 	id, err := h.Service.Create(ctx, authUser.UserID, businessID, domain.PaymentMethodInput{Provider: req.Provider, Config: req.Config, IsActive: req.IsActive})
 	if err != nil {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create payment method"}
+		return CreateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create payment method")
 	}
 	return CreateResponse{ID: id, Message: "Payment method created"}, nil
 }
@@ -91,24 +91,24 @@ type UpdateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
+func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	return nil
 }
 
-func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, *errorModels.ServerError) {
+func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.Update(ctx, businessID, req.ID, domain.PaymentMethodInput{Provider: req.Provider, Config: req.Config, IsActive: req.IsActive}); err != nil {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update payment method"}
+		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update payment method")
 	}
 	return UpdateResponse{Message: "Payment method updated"}, nil
 }

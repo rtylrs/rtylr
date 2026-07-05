@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -29,33 +29,27 @@ type RecordVisitResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *RecordVisitHandler) Validate(_ context.Context, req *RecordVisitRequest) *errorModels.ServerError {
+func (h *RecordVisitHandler) Validate(_ context.Context, req *RecordVisitRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	if req.Amount < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Amount must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Amount must not be negative")
 	}
 
 	return nil
 }
 
-func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest) (RecordVisitResponse, *errorModels.ServerError) {
+func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest) (RecordVisitResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return RecordVisitResponse{}, errorModels.PermissionDeniedServerError()
+		return RecordVisitResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return RecordVisitResponse{}, errorModels.PermissionDeniedServerError()
+		return RecordVisitResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	err := h.CRMService.RecordVisit(ctx, domain.RecordVisitInput{
@@ -66,10 +60,7 @@ func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest)
 		AwardPoints: req.AwardPoints,
 	})
 	if err != nil {
-		return RecordVisitResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to record visit",
-		}
+		return RecordVisitResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to record visit")
 	}
 
 	return RecordVisitResponse{Message: "Visit recorded successfully"}, nil

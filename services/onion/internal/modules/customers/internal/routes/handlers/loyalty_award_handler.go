@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -32,33 +32,27 @@ type AwardPointsResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest) *errorModels.ServerError {
+func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	if req.Points <= 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Points must be greater than zero",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 
 	return nil
 }
 
-func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest) (AwardPointsResponse, *errorModels.ServerError) {
+func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest) (AwardPointsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return AwardPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return AwardPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	err := h.CRMService.AwardPoints(ctx, domain.AwardPointsInput{
@@ -72,16 +66,10 @@ func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest)
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
-			return AwardPointsResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Customer not found",
-			}
+			return AwardPointsResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 
-		return AwardPointsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to award points",
-		}
+		return AwardPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to award points")
 	}
 
 	return AwardPointsResponse{Message: "Points awarded successfully"}, nil

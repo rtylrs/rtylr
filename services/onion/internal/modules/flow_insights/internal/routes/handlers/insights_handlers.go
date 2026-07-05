@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/application"
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -41,23 +41,20 @@ type GetInsightsResponse struct {
 	TasksByPriority   map[string]int64 `json:"tasksByPriority"`
 }
 
-func (h *GetInsightsHandler) Serve(ctx context.Context, _ *GetInsightsRequest) (GetInsightsResponse, *errorModels.ServerError) {
+func (h *GetInsightsHandler) Serve(ctx context.Context, _ *GetInsightsRequest) (GetInsightsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return GetInsightsResponse{}, errorModels.PermissionDeniedServerError()
+		return GetInsightsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return GetInsightsResponse{}, errorModels.PermissionDeniedServerError()
+		return GetInsightsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	stats, err := h.Service.GetInsights(ctx, businessID)
 	if err != nil {
-		return GetInsightsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get insights",
-		}
+		return GetInsightsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get insights")
 	}
 
 	return toInsightsResponse(stats), nil
@@ -100,23 +97,20 @@ type GetTeamWorkloadResponse struct {
 	Members []TeamMemberPayload `json:"members"`
 }
 
-func (h *GetTeamWorkloadHandler) Serve(ctx context.Context, _ *GetTeamWorkloadRequest) (GetTeamWorkloadResponse, *errorModels.ServerError) {
+func (h *GetTeamWorkloadHandler) Serve(ctx context.Context, _ *GetTeamWorkloadRequest) (GetTeamWorkloadResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return GetTeamWorkloadResponse{}, errorModels.PermissionDeniedServerError()
+		return GetTeamWorkloadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return GetTeamWorkloadResponse{}, errorModels.PermissionDeniedServerError()
+		return GetTeamWorkloadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	result, err := h.Service.GetTeamWorkload(ctx, businessID)
 	if err != nil {
-		return GetTeamWorkloadResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get team workload",
-		}
+		return GetTeamWorkloadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get team workload")
 	}
 
 	members := make([]TeamMemberPayload, 0, len(result.Members))
@@ -165,23 +159,20 @@ type GetRoadmapResponse struct {
 	Projects []RoadmapProjectPayload `json:"projects"`
 }
 
-func (h *GetRoadmapHandler) Serve(ctx context.Context, _ *GetRoadmapRequest) (GetRoadmapResponse, *errorModels.ServerError) {
+func (h *GetRoadmapHandler) Serve(ctx context.Context, _ *GetRoadmapRequest) (GetRoadmapResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return GetRoadmapResponse{}, errorModels.PermissionDeniedServerError()
+		return GetRoadmapResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return GetRoadmapResponse{}, errorModels.PermissionDeniedServerError()
+		return GetRoadmapResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	result, err := h.Service.GetRoadmap(ctx, businessID)
 	if err != nil {
-		return GetRoadmapResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get roadmap",
-		}
+		return GetRoadmapResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get roadmap")
 	}
 
 	projects := make([]RoadmapProjectPayload, 0, len(result.Projects))

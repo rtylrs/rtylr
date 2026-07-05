@@ -2,12 +2,8 @@ package routes
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	posordersv1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes/handlers"
@@ -15,109 +11,12 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
-	registerOrderService(router, service)
-
-	// Sessions
-	serverHttp.RegisterGET[handlers.GetCurrentSessionRequest, handlers.GetCurrentSessionResponse](
-		ctx, router, handlers.GetCurrentSessionRoutes(),
-		&handlers.GetCurrentSessionHandler{Service: service},
-	)
-
-	serverHttp.RegisterPUTWithValidation[handlers.UpdateOrderItemStatusRequest, handlers.UpdateOrderItemStatusResponse](
-		ctx, router, handlers.UpdateOrderItemStatusRoutes(),
-		&handlers.UpdateOrderItemStatusHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.ProcessPaymentRequest, handlers.ProcessPaymentResponse](
-		ctx, router, handlers.ProcessPaymentRoutes(),
-		&handlers.ProcessPaymentHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.ProcessRefundRequest, handlers.ProcessRefundResponse](
-		ctx, router, handlers.ProcessRefundRoutes(),
-		&handlers.ProcessRefundHandler{Service: service},
-	)
-
-	// Dashboard
-	serverHttp.RegisterGET[handlers.DashboardRequest, handlers.DashboardResponse](
-		ctx, router, handlers.DashboardRoutes(),
-		&handlers.DashboardHandler{Service: service},
-	)
-
-	// Order extensions
-	serverHttp.RegisterPOSTWithValidation[handlers.SplitOrderRequest, handlers.SplitOrderResponse](
-		ctx, router, handlers.SplitOrderRoutes(),
-		&handlers.SplitOrderHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.DiscountOrderRequest, handlers.DiscountOrderResponse](
-		ctx, router, handlers.DiscountOrderRoutes(),
-		&handlers.DiscountOrderHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.HoldOrderRequest, handlers.HoldOrderResponse](
-		ctx, router, handlers.HoldOrderRoutes(),
-		&handlers.HoldOrderHandler{Service: service},
-	)
-
-	serverHttp.RegisterGET[handlers.ListHeldOrdersRequest, handlers.ListHeldOrdersResponse](
-		ctx, router, handlers.ListHeldOrdersRoutes(),
-		&handlers.ListHeldOrdersHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.TransferTableRequest, handlers.TransferTableResponse](
-		ctx, router, handlers.TransferTableRoutes(),
-		&handlers.TransferTableHandler{Service: service},
-	)
-
-	serverHttp.RegisterDELETEWithValidation[handlers.VoidOrderItemRequest, handlers.VoidOrderItemResponse](
-		ctx, router, handlers.VoidOrderItemRoutes(),
-		&handlers.VoidOrderItemHandler{Service: service},
-	)
-
-	serverHttp.RegisterPOSTWithValidation[handlers.SendToKitchenRequest, handlers.SendToKitchenResponse](
-		ctx, router, handlers.SendToKitchenRoutes(),
-		&handlers.SendToKitchenHandler{Service: service},
-	)
-
-	// Paddle billing
 	serverHttp.RegisterPOSTWithValidation[handlers.PayOrderRequest, handlers.PayOrderResponse](
 		ctx, router, handlers.PayOrderRoutes(),
 		&handlers.PayOrderHandler{Service: service},
 	)
 
-	// Paddle webhook (anonymous, raw body for HMAC verification)
 	router.Post("/pos/payments/webhook", handlers.PaddlePOSWebhookHTTPHandler(service))
 
-	// Public online ordering (anonymous)
-	serverHttp.RegisterPOSTWithValidation[handlers.CreatePublicOrderRequest, handlers.CreatePublicOrderResponse](
-		ctx, router, handlers.CreatePublicOrderRoutes(),
-		&handlers.CreatePublicOrderHandler{Service: service},
-	)
-
-	serverHttp.RegisterGET[handlers.GetPublicOrderStatusRequest, handlers.GetPublicOrderStatusResponse](
-		ctx, router, handlers.GetPublicOrderStatusRoutes(),
-		&handlers.GetPublicOrderStatusHandler{Service: service},
-	)
-
-	// POS WebSocket realtime endpoint (anonymous at middleware layer; token validated in handler)
 	router.Get("/pos/ws", handlers.ServePOSWebSocket)
-}
-
-func registerOrderService(router *chi.Mux, service *application.Service) {
-	mux := http.NewServeMux()
-	if err := posordersv1.RegisterOrderServiceServer(
-		handlers.NewOrderAPI(service),
-		posordersv1.WithMux(mux),
-		posordersv1.WithErrorHandler(serverHttp.OneKitErrorHandler),
-		posordersv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
-	); err != nil {
-		panic(fmt.Errorf("register POS order service: %w", err))
-	}
-
-	router.Method(http.MethodGet, "/api/pos/orders/v1/orders", mux)
-	router.Method(http.MethodPost, "/api/pos/orders/v1/orders", mux)
-	router.Method(http.MethodGet, "/api/pos/orders/v1/orders/{order_id}", mux)
-	router.Method(http.MethodPut, "/api/pos/orders/v1/orders/{order_id}/status", mux)
-	router.Method(http.MethodPost, "/api/pos/orders/v1/orders/{order_id}/void", mux)
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // ─── Session payload ──────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ type GetCurrentSessionResponse struct {
 	Session *SessionPayload `json:"session"`
 }
 
-func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessionRequest) (GetCurrentSessionResponse, *errorModels.ServerError) {
+func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessionRequest) (GetCurrentSessionResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return GetCurrentSessionResponse{}, authErr
@@ -83,11 +83,7 @@ func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessi
 
 	sess, err := h.Service.GetCurrentOpenSession(ctx, businessID, staffID)
 	if err != nil {
-		return GetCurrentSessionResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to get current session",
-		}
+		return GetCurrentSessionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get current session")
 	}
 
 	if sess == nil {
@@ -115,19 +111,15 @@ type OpenSessionResponse struct {
 	Message   string `json:"message"`
 }
 
-func (h *OpenSessionHandler) Validate(_ context.Context, req *OpenSessionRequest) *errorModels.ServerError {
+func (h *OpenSessionHandler) Validate(_ context.Context, req *OpenSessionRequest) error {
 	if req.OpeningCash < 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Opening cash cannot be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Opening cash cannot be negative")
 	}
 
 	return nil
 }
 
-func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest) (OpenSessionResponse, *errorModels.ServerError) {
+func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest) (OpenSessionResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return OpenSessionResponse{}, authErr
@@ -145,18 +137,10 @@ func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest)
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrSessionAlreadyOpen) {
-			return OpenSessionResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusConflict,
-				Code:     http.StatusConflict,
-				Message:  "You already have an open session",
-			}
+			return OpenSessionResponse{}, onekiterrors.New(http.StatusConflict, "You already have an open session")
 		}
 
-		return OpenSessionResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to open session",
-		}
+		return OpenSessionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to open session")
 	}
 
 	return OpenSessionResponse{SessionID: id, Message: "Session opened"}, nil
@@ -178,19 +162,15 @@ type CloseSessionResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CloseSessionHandler) Validate(_ context.Context, req *CloseSessionRequest) *errorModels.ServerError {
+func (h *CloseSessionHandler) Validate(_ context.Context, req *CloseSessionRequest) error {
 	if req.SessionID == 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Session id is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Session id is required")
 	}
 
 	return nil
 }
 
-func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionRequest) (CloseSessionResponse, *errorModels.ServerError) {
+func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionRequest) (CloseSessionResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return CloseSessionResponse{}, authErr
@@ -207,26 +187,14 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 		Notes:       req.Notes,
 	}); err != nil {
 		if errors.Is(err, domain.ErrSessionNotFound) {
-			return CloseSessionResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusNotFound,
-				Code:     http.StatusNotFound,
-				Message:  "Session not found",
-			}
+			return CloseSessionResponse{}, onekiterrors.New(http.StatusNotFound, "Session not found")
 		}
 
 		if errors.Is(err, domain.ErrSessionNotOpen) {
-			return CloseSessionResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "Session is not open",
-			}
+			return CloseSessionResponse{}, onekiterrors.New(http.StatusBadRequest, "Session is not open")
 		}
 
-		return CloseSessionResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to close session",
-		}
+		return CloseSessionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to close session")
 	}
 
 	return CloseSessionResponse{Message: "Session closed"}, nil
@@ -248,30 +216,22 @@ type ListSessionsResponse struct {
 	Sessions []SessionPayload `json:"sessions"`
 }
 
-func (h *ListSessionsHandler) Validate(_ context.Context, req *ListSessionsRequest) *errorModels.ServerError {
+func (h *ListSessionsHandler) Validate(_ context.Context, req *ListSessionsRequest) error {
 	const layout = "2006-01-02"
 	if req.DateFrom != "" {
 		if _, err := time.Parse(layout, req.DateFrom); err != nil {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "date_from must be in YYYY-MM-DD format",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "date_from must be in YYYY-MM-DD format")
 		}
 	}
 	if req.DateTo != "" {
 		if _, err := time.Parse(layout, req.DateTo); err != nil {
-			return &errorModels.ServerError{
-				HTTPCode: http.StatusBadRequest,
-				Code:     http.StatusBadRequest,
-				Message:  "date_to must be in YYYY-MM-DD format",
-			}
+			return onekiterrors.New(http.StatusBadRequest, "date_to must be in YYYY-MM-DD format")
 		}
 	}
 	return nil
 }
 
-func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
+func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsRequest) (ListSessionsResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return ListSessionsResponse{}, authErr
@@ -284,11 +244,7 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsReques
 
 	sessions, err := h.Service.ListSessions(ctx, businessID, req.LocationID, req.DateFrom, req.DateTo)
 	if err != nil {
-		return ListSessionsResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to list sessions",
-		}
+		return ListSessionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list sessions")
 	}
 
 	payloads := make([]SessionPayload, 0, len(sessions))

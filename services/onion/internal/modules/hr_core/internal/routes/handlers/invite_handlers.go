@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // --- Invite Employee ---
@@ -33,26 +33,26 @@ type InviteEmployeeResponse struct {
 	Token string `json:"token"`
 }
 
-func (h *InviteEmployeeHandler) Validate(_ context.Context, req *InviteEmployeeRequest) *errorModels.ServerError {
+func (h *InviteEmployeeHandler) Validate(_ context.Context, req *InviteEmployeeRequest) error {
 	req.Email = strings.TrimSpace(req.Email)
 	req.FirstName = strings.TrimSpace(req.FirstName)
 	req.LastName = strings.TrimSpace(req.LastName)
 	if req.Email == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "email is required")
 	}
 	if req.FirstName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "first_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "first_name is required")
 	}
 	if req.LastName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "last_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "last_name is required")
 	}
 	return nil
 }
 
-func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRequest) (InviteEmployeeResponse, *errorModels.ServerError) {
+func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRequest) (InviteEmployeeResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return InviteEmployeeResponse{}, errorModels.PermissionDeniedServerError()
+		return InviteEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	emp := domain.EmployeeRecord{
@@ -68,7 +68,7 @@ func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRe
 	token, err := h.Service.InviteEmployee(ctx, device.User.UserID, emp)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to invite employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return InviteEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to invite employee"}
+		return InviteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to invite employee")
 	}
 
 	return InviteEmployeeResponse{Token: token}, nil
@@ -90,13 +90,13 @@ type VerifyInviteResponse struct {
 	OwnerID    int64 `json:"owner_id"`
 }
 
-func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {
+func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, error) {
 	invite, err := h.Service.VerifyInviteToken(ctx, req.Token)
 	if err != nil {
 		if errors.Is(err, domain.ErrInviteTokenInvalid) || errors.Is(err, domain.ErrInviteTokenExpired) {
 			return VerifyInviteResponse{Valid: false}, nil
 		}
-		return VerifyInviteResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to verify invite"}
+		return VerifyInviteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to verify invite")
 	}
 
 	return VerifyInviteResponse{Valid: true, EmployeeID: invite.EmployeeID, OwnerID: invite.OwnerID}, nil
@@ -117,27 +117,27 @@ type AcceptInviteResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *AcceptInviteHandler) Validate(_ context.Context, req *AcceptInviteRequest) *errorModels.ServerError {
+func (h *AcceptInviteHandler) Validate(_ context.Context, req *AcceptInviteRequest) error {
 	if req.Token == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "token is required"}
+		return onekiterrors.New(http.StatusBadRequest, "token is required")
 	}
 	if req.UserID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "user_id is required")
 	}
 	return nil
 }
 
-func (h *AcceptInviteHandler) Serve(ctx context.Context, req *AcceptInviteRequest) (AcceptInviteResponse, *errorModels.ServerError) {
+func (h *AcceptInviteHandler) Serve(ctx context.Context, req *AcceptInviteRequest) (AcceptInviteResponse, error) {
 	err := h.Service.AcceptInvite(ctx, req.Token, req.UserID)
 	if err != nil {
 		if errors.Is(err, domain.ErrInviteTokenInvalid) {
-			return AcceptInviteResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid invite token"}
+			return AcceptInviteResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid invite token")
 		}
 		if errors.Is(err, domain.ErrInviteTokenExpired) {
-			return AcceptInviteResponse{}, &errorModels.ServerError{HTTPCode: http.StatusGone, Code: http.StatusGone, Message: "Invite token has expired"}
+			return AcceptInviteResponse{}, onekiterrors.New(http.StatusGone, "Invite token has expired")
 		}
 		logger.Ctx(ctx).Error("failed to accept invite", logger.String("token", req.Token), logger.Error(err))
-		return AcceptInviteResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to accept invite"}
+		return AcceptInviteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to accept invite")
 	}
 
 	return AcceptInviteResponse{Success: true}, nil

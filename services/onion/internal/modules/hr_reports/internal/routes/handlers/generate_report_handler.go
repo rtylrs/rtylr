@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -13,8 +14,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_reports/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_reports/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -43,82 +44,54 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		writeError(w, errorModels.PermissionDeniedServerError())
+		writeError(w, onekiterrors.PermissionDenied())
 		return
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		writeError(w, errorModels.PermissionDeniedServerError())
+		writeError(w, onekiterrors.PermissionDenied())
 		return
 	}
 
 	var req GenerateReportRequest
 	if err := serverHttp.DecodeJSONRequestBody(w, r, &req); err != nil {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Invalid request body",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "Invalid request body"))
 		return
 	}
 
 	req.ReportType = strings.TrimSpace(req.ReportType)
 	if req.ReportType == "" {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "report_type is required",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "report_type is required"))
 		return
 	}
 
 	req.DateFrom = strings.TrimSpace(req.DateFrom)
 	if req.DateFrom == "" {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "date_from is required",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "date_from is required"))
 		return
 	}
 
 	req.DateTo = strings.TrimSpace(req.DateTo)
 	if req.DateTo == "" {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "date_to is required",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "date_to is required"))
 		return
 	}
 
 	dateFrom, err := time.Parse("2006-01-02", req.DateFrom)
 	if err != nil {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Invalid date_from format, expected ISO-8601 date (YYYY-MM-DD)",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "Invalid date_from format, expected ISO-8601 date (YYYY-MM-DD)"))
 		return
 	}
 
 	dateTo, err := time.Parse("2006-01-02", req.DateTo)
 	if err != nil {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Invalid date_to format, expected ISO-8601 date (YYYY-MM-DD)",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "Invalid date_to format, expected ISO-8601 date (YYYY-MM-DD)"))
 		return
 	}
 
 	if dateTo.Before(dateFrom) {
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "date_to must not be before date_from",
-		})
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "date_to must not be before date_from"))
 		return
 	}
 
@@ -136,11 +109,7 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	rows, serviceErr := h.Service.GenerateReport(ctx, businessID, req.ReportType, params)
 	if serviceErr != nil {
 		if errors.Is(serviceErr, domain.ErrUnsupportedReportType) {
-			writeError(w, &errorModels.ServerError{
-				HTTPCode: http.StatusUnprocessableEntity,
-				Code:     http.StatusUnprocessableEntity,
-				Message:  "Unsupported report type",
-			})
+			writeError(w, onekiterrors.New(http.StatusUnprocessableEntity, "Unsupported report type"))
 			return
 		}
 		if errors.Is(serviceErr, domain.ErrReportGenerationFailed) {
@@ -148,22 +117,14 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 				logger.Any("owner_id", device.User.UserID),
 				logger.Any("report_type", req.ReportType),
 				logger.Error(serviceErr))
-			writeError(w, &errorModels.ServerError{
-				HTTPCode: http.StatusInternalServerError,
-				Code:     http.StatusInternalServerError,
-				Message:  "Report generation failed",
-			})
+			writeError(w, onekiterrors.New(http.StatusInternalServerError, "Report generation failed"))
 			return
 		}
 		logger.Ctx(ctx).Error("failed to generate report",
 			logger.Any("owner_id", device.User.UserID),
 			logger.Any("report_type", req.ReportType),
 			logger.Error(serviceErr))
-		writeError(w, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to generate report",
-		})
+		writeError(w, onekiterrors.New(http.StatusInternalServerError, "Failed to generate report"))
 		return
 	}
 
@@ -221,16 +182,6 @@ func writeJSON(w http.ResponseWriter, rows []map[string]interface{}) {
 	}
 }
 
-func writeError(w http.ResponseWriter, serverError *errorModels.ServerError) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(serverError.HTTPCode)
-
-	response := errorModels.ErrorResponse{
-		Error:  *serverError,
-		Status: "error",
-	}
-
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		return
-	}
+func writeError(w http.ResponseWriter, serverError error) {
+	serverHttp.WriteOneKitError(context.Background(), w, serverError)
 }

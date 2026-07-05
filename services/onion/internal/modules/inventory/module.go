@@ -3,11 +3,14 @@ package inventory
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/inventory/internal/api"
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
-	"github.com/voxire/onion/internal/modules/inventory/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erpinventoryv1.RegisterInventoryServiceServer(
+		api.NewInventoryAPI(m.service),
+		erpinventoryv1.WithMux(mux),
+		erpinventoryv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register ERP inventory service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -71,21 +71,18 @@ type ListSectionsResponse struct {
 	Sections []*SectionPayload `json:"sections"`
 }
 
-func (h *ListSectionsHandler) Serve(ctx context.Context, _ *ListSectionsRequest) (ListSectionsResponse, *errorModels.ServerError) {
+func (h *ListSectionsHandler) Serve(ctx context.Context, _ *ListSectionsRequest) (ListSectionsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListSectionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListSectionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListSectionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListSectionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	sections, err := h.CareersService.ListSections(ctx, businessID, false)
 	if err != nil {
-		return ListSectionsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list sections",
-		}
+		return ListSectionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list sections")
 	}
 	payloads := make([]*SectionPayload, 0, len(sections))
 	for _, s := range sections {
@@ -116,41 +113,38 @@ type CreateSectionResponse struct {
 	Section *SectionPayload `json:"section"`
 }
 
-func (h *CreateSectionHandler) Validate(_ context.Context, req *CreateSectionRequest) *errorModels.ServerError {
+func (h *CreateSectionHandler) Validate(_ context.Context, req *CreateSectionRequest) error {
 	if req.Kind == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "kind is required"}
+		return onekiterrors.New(http.StatusBadRequest, "kind is required")
 	}
 	return nil
 }
 
-func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequest) (CreateSectionResponse, *errorModels.ServerError) {
+func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequest) (CreateSectionResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateSectionResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateSectionResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateSectionResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateSectionResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	in := domain.SectionInput{
 		OwnerID:    authUser.UserID,
 		BusinessID: businessID,
 		Kind:       req.Kind,
-		Title:     req.Title,
-		Body:      req.Body,
-		MediaURL:  req.MediaURL,
-		ItemsJSON: req.ItemsJSON,
-		Position:  req.Position,
-		Enabled:   req.Enabled,
+		Title:      req.Title,
+		Body:       req.Body,
+		MediaURL:   req.MediaURL,
+		ItemsJSON:  req.ItemsJSON,
+		Position:   req.Position,
+		Enabled:    req.Enabled,
 	}
 
 	_, err := h.CareersService.CreateSection(ctx, in)
 	if err != nil {
-		return CreateSectionResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create section",
-		}
+		return CreateSectionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create section")
 	}
 
 	// Refetch list and return the newly-added row (tail of ordered
@@ -188,24 +182,24 @@ type UpdateSectionResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateSectionHandler) Validate(_ context.Context, req *UpdateSectionRequest) *errorModels.ServerError {
+func (h *UpdateSectionHandler) Validate(_ context.Context, req *UpdateSectionRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	if req.Kind == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "kind is required"}
+		return onekiterrors.New(http.StatusBadRequest, "kind is required")
 	}
 	return nil
 }
 
-func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequest) (UpdateSectionResponse, *errorModels.ServerError) {
+func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequest) (UpdateSectionResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateSectionResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateSectionResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateSectionResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateSectionResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	in := domain.SectionInput{
@@ -213,25 +207,19 @@ func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequ
 		OwnerID:    authUser.UserID,
 		BusinessID: businessID,
 		Kind:       req.Kind,
-		Title:     req.Title,
-		Body:      req.Body,
-		MediaURL:  req.MediaURL,
-		ItemsJSON: req.ItemsJSON,
-		Position:  req.Position,
-		Enabled:   req.Enabled,
+		Title:      req.Title,
+		Body:       req.Body,
+		MediaURL:   req.MediaURL,
+		ItemsJSON:  req.ItemsJSON,
+		Position:   req.Position,
+		Enabled:    req.Enabled,
 	}
 
 	if err := h.CareersService.UpdateSection(ctx, in); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return UpdateSectionResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Section not found",
-			}
+			return UpdateSectionResponse{}, onekiterrors.New(http.StatusNotFound, "Section not found")
 		}
-		return UpdateSectionResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update section",
-		}
+		return UpdateSectionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update section")
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return UpdateSectionResponse{Message: "Section saved"}, nil
@@ -253,34 +241,28 @@ type DeleteSectionResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteSectionHandler) Validate(_ context.Context, req *DeleteSectionRequest) *errorModels.ServerError {
+func (h *DeleteSectionHandler) Validate(_ context.Context, req *DeleteSectionRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	return nil
 }
 
-func (h *DeleteSectionHandler) Serve(ctx context.Context, req *DeleteSectionRequest) (DeleteSectionResponse, *errorModels.ServerError) {
+func (h *DeleteSectionHandler) Serve(ctx context.Context, req *DeleteSectionRequest) (DeleteSectionResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return DeleteSectionResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteSectionResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return DeleteSectionResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteSectionResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.CareersService.DeleteSection(ctx, businessID, req.ID); err != nil {
 		if errors.Is(err, application.ErrNotFound) {
-			return DeleteSectionResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Section not found",
-			}
+			return DeleteSectionResponse{}, onekiterrors.New(http.StatusNotFound, "Section not found")
 		}
-		return DeleteSectionResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to delete section",
-		}
+		return DeleteSectionResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete section")
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return DeleteSectionResponse{Message: "Section deleted"}, nil
@@ -302,27 +284,24 @@ type ReorderSectionsResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *ReorderSectionsHandler) Validate(_ context.Context, req *ReorderSectionsRequest) *errorModels.ServerError {
+func (h *ReorderSectionsHandler) Validate(_ context.Context, req *ReorderSectionsRequest) error {
 	if len(req.OrderedIDs) == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "ordered_ids is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ordered_ids is required")
 	}
 	return nil
 }
 
-func (h *ReorderSectionsHandler) Serve(ctx context.Context, req *ReorderSectionsRequest) (ReorderSectionsResponse, *errorModels.ServerError) {
+func (h *ReorderSectionsHandler) Serve(ctx context.Context, req *ReorderSectionsRequest) (ReorderSectionsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ReorderSectionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ReorderSectionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ReorderSectionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ReorderSectionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.CareersService.ReorderSections(ctx, businessID, req.OrderedIDs); err != nil {
-		return ReorderSectionsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to reorder sections",
-		}
+		return ReorderSectionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to reorder sections")
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return ReorderSectionsResponse{Message: "Order saved"}, nil

@@ -40,7 +40,7 @@ func TestLicenseEnforcementHostedIsNoOp(t *testing.T) {
 	mw := LicenseEnforcementMiddleware(validator, NewRouteAccessPolicy())
 
 	rec := httptest.NewRecorder()
-	mw(okHandler()).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/erp/products", nil))
+	mw(okHandler()).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/erp/product/v1/products", nil))
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("hosted mode must pass through, got %d", rec.Code)
@@ -57,7 +57,7 @@ func TestLicenseEnforcementSelfHostInvalidBlocks(t *testing.T) {
 	mw := LicenseEnforcementMiddleware(validator, NewRouteAccessPolicy())
 
 	rec := httptest.NewRecorder()
-	mw(okHandler()).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/erp/products", nil))
+	mw(okHandler()).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/erp/product/v1/products", nil))
 
 	if rec.Code != http.StatusPaymentRequired {
 		t.Fatalf("self-host invalid must return 402, got %d", rec.Code)
@@ -71,7 +71,7 @@ func TestLicenseEnforcementSelfHostValidPasses(t *testing.T) {
 	mw := LicenseEnforcementMiddleware(validator, NewRouteAccessPolicy())
 
 	rec := httptest.NewRecorder()
-	mw(okHandler()).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/erp/products", nil))
+	mw(okHandler()).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/erp/product/v1/products", nil))
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("self-host valid must pass through, got %d", rec.Code)

@@ -12,8 +12,8 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/email"
-	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
@@ -52,7 +52,7 @@ type ListTemplatesResponse struct {
 
 type ListTemplatesHandler struct{}
 
-func (h *ListTemplatesHandler) Serve(ctx context.Context, _ *ListTemplatesRequest) (ListTemplatesResponse, *errors.ServerError) {
+func (h *ListTemplatesHandler) Serve(ctx context.Context, _ *ListTemplatesRequest) (ListTemplatesResponse, error) {
 	if err := requireAuthenticatedNonProduction(ctx); err != nil {
 		return ListTemplatesResponse{}, err
 	}
@@ -77,7 +77,7 @@ type TestEmailResponse struct {
 
 type TestEmailHandler struct{ DB *sql.DB }
 
-func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (TestEmailResponse, *errors.ServerError) {
+func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (TestEmailResponse, error) {
 	if err := requireAuthenticatedNonProduction(ctx); err != nil {
 		return TestEmailResponse{}, err
 	}
@@ -91,11 +91,7 @@ func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (Te
 	}
 
 	if h.DB == nil {
-		return TestEmailResponse{}, &errors.ServerError{
-			HTTPCode: http.StatusServiceUnavailable,
-			Code:     http.StatusServiceUnavailable,
-			Message:  "email queue unavailable (no database)",
-		}
+		return TestEmailResponse{}, onekiterrors.New(http.StatusServiceUnavailable, "email queue unavailable (no database)")
 	}
 
 	subject := req.Subject
@@ -113,27 +109,23 @@ func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (Te
 	if err := email.EnqueueTemplate(ctx, h.DB, email.PriorityNormal, req.To, subject, tmpl, data); err != nil {
 		logger.Ctx(ctx).Error("test email enqueue failed",
 			logger.String("template", req.Template), logger.Error(err))
-		return TestEmailResponse{}, &errors.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "failed to enqueue test email",
-		}
+		return TestEmailResponse{}, onekiterrors.New(http.StatusInternalServerError, "failed to enqueue test email")
 	}
 
 	return TestEmailResponse{Queued: true, Template: req.Template, To: req.To}, nil
 }
 
-func badRequest(msg string) *errors.ServerError {
-	return &errors.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: msg}
+func badRequest(msg string) error {
+	return onekiterrors.New(http.StatusBadRequest, msg)
 }
 
-func requireAuthenticatedNonProduction(ctx context.Context) *errors.ServerError {
+func requireAuthenticatedNonProduction(ctx context.Context) error {
 	if config.IsProduction() {
-		return &errors.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Not found"}
+		return onekiterrors.New(http.StatusNotFound, "Not found")
 	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return errors.PermissionDeniedServerError()
+		return onekiterrors.PermissionDenied()
 	}
 	return nil
 }

@@ -3,13 +3,16 @@ package hr_equipment
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
+	"github.com/voxire/onion/internal/modules/hr_equipment/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
-	"github.com/voxire/onion/internal/modules/hr_equipment/internal/routes"
 )
 
 type hrCoreApprovalAdapter struct {
@@ -50,8 +53,14 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hrequipmentv1.RegisterEquipmentServiceServer(
+		api.NewEquipmentAPI(m.service),
+		hrequipmentv1.WithMux(mux),
+		hrequipmentv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register HR equipment service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

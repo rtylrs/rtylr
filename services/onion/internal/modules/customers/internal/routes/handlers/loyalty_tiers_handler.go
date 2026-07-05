@@ -12,7 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
@@ -59,23 +59,20 @@ type ListLoyaltyTiersResponse struct {
 	Tiers []*crmloyaltyv1.LoyaltyTier `json:"tiers"`
 }
 
-func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, *errorModels.ServerError) {
+func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListLoyaltyTiersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLoyaltyTiersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListLoyaltyTiersResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLoyaltyTiersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	tiers, err := h.CRMService.ListLoyaltyTiers(ctx, businessID)
 	if err != nil {
-		return ListLoyaltyTiersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list loyalty tiers",
-		}
+		return ListLoyaltyTiersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty tiers")
 	}
 
 	payloads := make([]*crmloyaltyv1.LoyaltyTier, len(tiers))
@@ -105,40 +102,31 @@ type CreateLoyaltyTierResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateLoyaltyTierHandler) Validate(_ context.Context, req *CreateLoyaltyTierRequest) *errorModels.ServerError {
+func (h *CreateLoyaltyTierHandler) Validate(_ context.Context, req *CreateLoyaltyTierRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Tier name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Tier name is required")
 	}
 
 	if req.MinPoints < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Minimum points must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Minimum points must not be negative")
 	}
 
 	if req.DiscountPct < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Discount percentage must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Discount percentage must not be negative")
 	}
 
 	return nil
 }
 
-func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyaltyTierRequest) (CreateLoyaltyTierResponse, *errorModels.ServerError) {
+func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyaltyTierRequest) (CreateLoyaltyTierResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	perks := []byte(req.Perks)
@@ -156,10 +144,7 @@ func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyalty
 		SortOrder:   req.SortOrder,
 	})
 	if err != nil {
-		return CreateLoyaltyTierResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create loyalty tier",
-		}
+		return CreateLoyaltyTierResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create loyalty tier")
 	}
 
 	return CreateLoyaltyTierResponse{TierID: id, Message: "Loyalty tier created successfully"}, nil
@@ -184,47 +169,35 @@ type UpdateLoyaltyTierResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateLoyaltyTierHandler) Validate(_ context.Context, req *UpdateLoyaltyTierRequest) *errorModels.ServerError {
+func (h *UpdateLoyaltyTierHandler) Validate(_ context.Context, req *UpdateLoyaltyTierRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Tier ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Tier ID is required")
 	}
 
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Tier name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Tier name is required")
 	}
 
 	if req.MinPoints < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Minimum points must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Minimum points must not be negative")
 	}
 
 	if req.DiscountPct < 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Discount percentage must not be negative",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Discount percentage must not be negative")
 	}
 
 	return nil
 }
 
-func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyaltyTierRequest) (UpdateLoyaltyTierResponse, *errorModels.ServerError) {
+func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyaltyTierRequest) (UpdateLoyaltyTierResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	perks := []byte(req.Perks)
@@ -243,16 +216,10 @@ func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyalty
 		SortOrder:   req.SortOrder,
 	}); err != nil {
 		if errors.Is(err, domain.ErrTierNotFound) {
-			return UpdateLoyaltyTierResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Loyalty tier not found",
-			}
+			return UpdateLoyaltyTierResponse{}, onekiterrors.New(http.StatusNotFound, "Loyalty tier not found")
 		}
 
-		return UpdateLoyaltyTierResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update loyalty tier",
-		}
+		return UpdateLoyaltyTierResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update loyalty tier")
 	}
 
 	return UpdateLoyaltyTierResponse{Message: "Loyalty tier updated successfully"}, nil
@@ -270,47 +237,33 @@ type DeleteLoyaltyTierResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTierRequest) (DeleteLoyaltyTierResponse, *errorModels.ServerError) {
+func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTierRequest) (DeleteLoyaltyTierResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DeleteLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
-		return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid tier ID",
-		}
+		return DeleteLoyaltyTierResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid tier ID")
 	}
 
 	if err := h.CRMService.DeleteLoyaltyTier(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrTierNotFound) {
-			return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusNotFound,
-				Code:     http.StatusNotFound,
-				Message:  "Loyalty tier not found",
-			}
+			return DeleteLoyaltyTierResponse{}, onekiterrors.New(http.StatusNotFound, "Loyalty tier not found")
 		}
 
 		if errors.Is(err, domain.ErrTierInUse) {
-			return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusConflict,
-				Code:     http.StatusConflict,
-				Message:  "Loyalty tier has active members and cannot be deleted",
-			}
+			return DeleteLoyaltyTierResponse{}, onekiterrors.New(http.StatusConflict, "Loyalty tier has active members and cannot be deleted")
 		}
 
-		return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to delete loyalty tier",
-		}
+		return DeleteLoyaltyTierResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete loyalty tier")
 	}
 
 	return DeleteLoyaltyTierResponse{Message: "Loyalty tier deleted successfully"}, nil

@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
@@ -49,26 +49,23 @@ func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmloyaltyv1.Lo
 	}
 }
 
-func (h *ListLoyaltyTransactionsHandler) Validate(_ context.Context, req *ListLoyaltyTransactionsRequest) *errorModels.ServerError {
+func (h *ListLoyaltyTransactionsHandler) Validate(_ context.Context, req *ListLoyaltyTransactionsRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	return nil
 }
 
-func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoyaltyTransactionsRequest) (ListLoyaltyTransactionsResponse, *errorModels.ServerError) {
+func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoyaltyTransactionsRequest) (ListLoyaltyTransactionsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListLoyaltyTransactionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLoyaltyTransactionsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListLoyaltyTransactionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListLoyaltyTransactionsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if req.Page < 1 {
@@ -81,10 +78,7 @@ func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoy
 
 	txs, total, err := h.CRMService.ListLoyaltyTransactions(ctx, businessID, req.CustomerID, req.Page, req.PageSize)
 	if err != nil {
-		return ListLoyaltyTransactionsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list loyalty transactions",
-		}
+		return ListLoyaltyTransactionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list loyalty transactions")
 	}
 
 	payloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(txs))

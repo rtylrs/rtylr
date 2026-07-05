@@ -9,7 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
 )
@@ -28,24 +28,20 @@ type ListResponse struct {
 	Notifications []*hubnotificationv1.Notification `json:"notifications"`
 }
 
-func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
+func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	notifications, err := h.Service.List(ctx, businessID, device.User.UserID)
 	if err != nil {
-		return ListResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to list notifications",
-		}
+		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list notifications")
 	}
 
 	payloads := make([]*hubnotificationv1.Notification, 0, len(notifications))
@@ -76,34 +72,26 @@ type MarkReadResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *MarkReadHandler) Validate(_ context.Context, req *MarkReadRequest) *errorModels.ServerError {
+func (h *MarkReadHandler) Validate(_ context.Context, req *MarkReadRequest) error {
 	if req.ID <= 0 {
-		return &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Notification id is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Notification id is required")
 	}
 	return nil
 }
 
-func (h *MarkReadHandler) Serve(ctx context.Context, req *MarkReadRequest) (MarkReadResponse, *errorModels.ServerError) {
+func (h *MarkReadHandler) Serve(ctx context.Context, req *MarkReadRequest) (MarkReadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+		return MarkReadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+		return MarkReadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.Service.MarkRead(ctx, businessID, device.User.UserID, req.ID); err != nil {
-		return MarkReadResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to mark notification as read",
-		}
+		return MarkReadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to mark notification as read")
 	}
 
 	return MarkReadResponse{Message: "Notification marked as read"}, nil
@@ -117,37 +105,29 @@ type MarkReadByIDHandler struct{ Service *application.Service }
 
 type MarkReadByIDRequest struct{}
 
-func (h *MarkReadByIDHandler) Validate(_ context.Context, _ *MarkReadByIDRequest) *errorModels.ServerError {
+func (h *MarkReadByIDHandler) Validate(_ context.Context, _ *MarkReadByIDRequest) error {
 	return nil
 }
 
-func (h *MarkReadByIDHandler) Serve(ctx context.Context, _ *MarkReadByIDRequest) (MarkReadResponse, *errorModels.ServerError) {
+func (h *MarkReadByIDHandler) Serve(ctx context.Context, _ *MarkReadByIDRequest) (MarkReadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+		return MarkReadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+		return MarkReadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
-		return MarkReadResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Invalid notification id",
-		}
+		return MarkReadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid notification id")
 	}
 
 	if err := h.Service.MarkRead(ctx, businessID, device.User.UserID, id); err != nil {
-		return MarkReadResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to mark notification as read",
-		}
+		return MarkReadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to mark notification as read")
 	}
 
 	return MarkReadResponse{Message: "Notification marked as read"}, nil
@@ -163,23 +143,19 @@ type MarkAllReadResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *MarkAllReadHandler) Serve(ctx context.Context, _ *MarkAllReadRequest) (MarkAllReadResponse, *errorModels.ServerError) {
+func (h *MarkAllReadHandler) Serve(ctx context.Context, _ *MarkAllReadRequest) (MarkAllReadResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return MarkAllReadResponse{}, errorModels.PermissionDeniedServerError()
+		return MarkAllReadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return MarkAllReadResponse{}, errorModels.PermissionDeniedServerError()
+		return MarkAllReadResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.Service.MarkAllRead(ctx, businessID, device.User.UserID); err != nil {
-		return MarkAllReadResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to mark all notifications as read",
-		}
+		return MarkAllReadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to mark all notifications as read")
 	}
 
 	return MarkAllReadResponse{Message: "All notifications marked as read"}, nil

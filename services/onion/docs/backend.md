@@ -182,23 +182,25 @@ All endpoints are relative to `https://api.voxire.dev`.
 | PUT | `/hub/users/permissions` | Update user app permissions / role |
 | GET | `/hub/me` | Current user hub profile |
 
-### ERP module
+### ERP module (OneKit — `/api/erp/*`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/erp/products` | List products |
-| POST | `/erp/products` | Create product |
-| PUT | `/erp/products` | Update product |
-| DELETE | `/erp/products` | Delete product |
-| GET | `/erp/suppliers` | List suppliers |
-| POST | `/erp/suppliers` | Create supplier |
-| PUT | `/erp/suppliers` | Update supplier |
-| GET | `/erp/purchase-orders` | List purchase orders |
-| POST | `/erp/purchase-orders` | Create purchase order |
-| PUT | `/erp/purchase-orders/status` | Update PO status |
-| POST | `/erp/inventory/adjust` | Adjust inventory |
-| GET | `/erp/inventory/report` | Inventory report |
-| GET | `/erp/inventory/low-stock` | Low-stock items |
+| GET | `/api/erp/product/v1/products` | List products |
+| POST | `/api/erp/product/v1/products` | Create product |
+| GET | `/api/erp/product/v1/products/{id}` | Get product |
+| PUT | `/api/erp/product/v1/products/{id}` | Update product |
+| DELETE | `/api/erp/product/v1/products/{id}` | Delete product |
+| GET | `/api/erp/product/v1/dashboard` | ERP dashboard stats |
+| GET | `/api/erp/supplier/v1/suppliers` | List suppliers |
+| POST | `/api/erp/supplier/v1/suppliers` | Create supplier |
+| GET | `/api/erp/purchase-order/v1/purchase-orders` | List purchase orders |
+| PATCH | `/api/erp/purchase-order/v1/purchase-orders/{id}/status` | Update PO status |
+| POST | `/api/erp/inventory/v1/adjust` | Adjust inventory |
+| GET | `/api/erp/inventory/v1/report` | Inventory report |
+| GET | `/api/erp/inventory/v1/low-stock` | Low-stock items |
+
+Legacy chi `/erp/*` routes are removed — use OneKit paths above. Voxie protos under `proto/erp/` are the source of truth.
 
 ### HR module
 

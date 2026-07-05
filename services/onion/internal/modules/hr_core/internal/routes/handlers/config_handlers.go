@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type HRConfigPayload struct {
@@ -49,19 +49,19 @@ type (
 	}
 )
 
-func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (GetHRConfigResponse, *errorModels.ServerError) {
+func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (GetHRConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return GetHRConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return GetHRConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	cfg, err := h.Service.GetHRConfig(ctx, device.User.UserID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSetupNotComplete) {
-			return GetHRConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "HR configuration not found. Please complete setup first."}
+			return GetHRConfigResponse{}, onekiterrors.New(http.StatusNotFound, "HR configuration not found. Please complete setup first.")
 		}
 		logger.Ctx(ctx).Error("failed to get hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return GetHRConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get HR config"}
+		return GetHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get HR config")
 	}
 
 	return GetHRConfigResponse{Config: configToPayload(*cfg)}, nil
@@ -88,18 +88,18 @@ type UpsertHRConfigResponse struct {
 	Config *HRConfigPayload `json:"config"`
 }
 
-func (h *UpsertHRConfigHandler) Validate(_ context.Context, req *UpsertHRConfigRequest) *errorModels.ServerError {
+func (h *UpsertHRConfigHandler) Validate(_ context.Context, req *UpsertHRConfigRequest) error {
 	req.CompanyName = strings.TrimSpace(req.CompanyName)
 	if req.CompanyName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "company_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "company_name is required")
 	}
 	return nil
 }
 
-func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRequest) (UpsertHRConfigResponse, *errorModels.ServerError) {
+func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRequest) (UpsertHRConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpsertHRConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return UpsertHRConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	cfg := domain.HRCompanyConfigRecord{
@@ -115,7 +115,7 @@ func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRe
 	updated, err := h.Service.UpsertHRConfig(ctx, device.User.UserID, cfg)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return UpsertHRConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update HR config"}
+		return UpsertHRConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update HR config")
 	}
 
 	return UpsertHRConfigResponse{Config: configToPayload(*updated)}, nil

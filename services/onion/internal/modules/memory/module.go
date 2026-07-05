@@ -3,11 +3,17 @@ package memory
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
+
+	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	"github.com/voxire/onion/internal/modules/memory/internal/routes"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 type Module struct {
@@ -26,8 +32,53 @@ func (m *Module) GetService() *application.Service {
 	return m.memoryService
 }
 
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hubmemoryv1.RegisterMemoryServiceServer(
+		api.NewMemoryAPI(m.memoryService),
+		hubmemoryv1.WithMux(mux),
+		hubmemoryv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hub memory service: %w", err))
+	}
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.memoryService)
+	serverHttp.RegisterPOSTWithValidation[api.SessionRequest, api.SessionResponse](
+		ctx,
+		router,
+		[]string{"/memory/sessions"},
+		&api.SessionHandler{MemoryService: m.memoryService},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.MemoryRequest, api.MemoryResponse](
+		ctx,
+		router,
+		[]string{"/memory/store"},
+		&api.MemoryHandler{MemoryService: m.memoryService},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.ContextRequest, api.ContextResponse](
+		ctx,
+		router,
+		[]string{"/memory/context"},
+		&api.ContextHandler{MemoryService: m.memoryService},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.SearchRequest, api.SearchResponse](
+		ctx,
+		router,
+		[]string{"/memory/search"},
+		&api.SearchHandler{MemoryService: m.memoryService},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.StatsRequest, api.StatsResponse](
+		ctx,
+		router,
+		[]string{"/memory/stats"},
+		&api.StatsHandler{MemoryService: m.memoryService},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.SummarizeRequest, api.SummarizeResponse](
+		ctx,
+		router,
+		[]string{"/memory/summarize"},
+		&api.SummarizeHandler{MemoryService: m.memoryService},
+	)
 }
 
 func (m *Module) CreateSession(ctx context.Context, userID int, title string) (string, error) {

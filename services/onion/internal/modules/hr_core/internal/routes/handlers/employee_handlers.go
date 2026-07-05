@@ -13,8 +13,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 )
 
@@ -62,16 +62,16 @@ type ListEmployeesResponse struct {
 	Offset    int32              `json:"offset"`
 }
 
-func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequest) (ListEmployeesResponse, *errorModels.ServerError) {
+func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequest) (ListEmployeesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListEmployeesResponse{}, errorModels.PermissionDeniedServerError()
+		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	employees, total, err := h.Service.ListEmployees(ctx, device.User.UserID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list employees", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListEmployeesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list employees"}
+		return ListEmployeesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list employees")
 	}
 
 	payloads := make([]*hrstaffv1.Staff, 0, len(employees))
@@ -94,25 +94,25 @@ type GetEmployeeResponse struct {
 	Employee *hrstaffv1.Staff `json:"employee"`
 }
 
-func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (GetEmployeeResponse, *errorModels.ServerError) {
+func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (GetEmployeeResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return GetEmployeeResponse{}, errorModels.PermissionDeniedServerError()
+		return GetEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return GetEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid employee id"}
+		return GetEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
 	emp, err := h.Service.GetEmployee(ctx, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
-			return GetEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Employee not found"}
+			return GetEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
 		logger.Ctx(ctx).Error("failed to get employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
-		return GetEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get employee"}
+		return GetEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get employee")
 	}
 
 	return GetEmployeeResponse{Employee: employeeToProto(*emp)}, nil
@@ -144,28 +144,28 @@ type CreateEmployeeResponse struct {
 	Employee *hrstaffv1.Staff `json:"employee"`
 }
 
-func (h *CreateEmployeeHandler) Validate(_ context.Context, req *CreateEmployeeRequest) *errorModels.ServerError {
+func (h *CreateEmployeeHandler) Validate(_ context.Context, req *CreateEmployeeRequest) error {
 	if strings.TrimSpace(req.FirstName) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "first_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "first_name is required")
 	}
 	if strings.TrimSpace(req.LastName) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "last_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "last_name is required")
 	}
 	if strings.TrimSpace(req.Email) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "email is required")
 	}
 	if req.StartDate != "" {
 		if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
-			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date must be in YYYY-MM-DD format"}
+			return onekiterrors.New(http.StatusBadRequest, "start_date must be in YYYY-MM-DD format")
 		}
 	}
 	return nil
 }
 
-func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRequest) (CreateEmployeeResponse, *errorModels.ServerError) {
+func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRequest) (CreateEmployeeResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateEmployeeResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	emp := domain.EmployeeRecord{
@@ -191,7 +191,7 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 	created, err := h.Service.CreateEmployee(ctx, device.User.UserID, emp)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create employee"}
+		return CreateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create employee")
 	}
 
 	return CreateEmployeeResponse{Employee: employeeToProto(*created)}, nil
@@ -228,36 +228,36 @@ type UpdateEmployeeResponse struct {
 	Employee *hrstaffv1.Staff `json:"employee"`
 }
 
-func (h *UpdateEmployeeHandler) Validate(_ context.Context, req *UpdateEmployeeRequest) *errorModels.ServerError {
+func (h *UpdateEmployeeHandler) Validate(_ context.Context, req *UpdateEmployeeRequest) error {
 	if strings.TrimSpace(req.FirstName) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "first_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "first_name is required")
 	}
 	if strings.TrimSpace(req.LastName) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "last_name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "last_name is required")
 	}
 	if req.StartDate != "" {
 		if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
-			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date must be in YYYY-MM-DD format"}
+			return onekiterrors.New(http.StatusBadRequest, "start_date must be in YYYY-MM-DD format")
 		}
 	}
 	if req.EndDate != "" {
 		if _, err := time.Parse("2006-01-02", req.EndDate); err != nil {
-			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "end_date must be in YYYY-MM-DD format"}
+			return onekiterrors.New(http.StatusBadRequest, "end_date must be in YYYY-MM-DD format")
 		}
 	}
 	return nil
 }
 
-func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRequest) (UpdateEmployeeResponse, *errorModels.ServerError) {
+func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRequest) (UpdateEmployeeResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpdateEmployeeResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid employee id"}
+		return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
 	emp := domain.EmployeeRecord{
@@ -293,10 +293,10 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 	updated, err := h.Service.UpdateEmployee(ctx, device.User.UserID, emp)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
-			return UpdateEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Employee not found"}
+			return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
 		logger.Ctx(ctx).Error("failed to update employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
-		return UpdateEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update employee"}
+		return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update employee")
 	}
 
 	return UpdateEmployeeResponse{Employee: employeeToProto(*updated)}, nil
@@ -314,23 +314,23 @@ type DeleteEmployeeResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequest) (DeleteEmployeeResponse, *errorModels.ServerError) {
+func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequest) (DeleteEmployeeResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return DeleteEmployeeResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return DeleteEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid employee id"}
+		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
 	emp := domain.EmployeeRecord{ID: id, Status: "terminated"}
 	_, err := h.Service.UpdateEmployee(ctx, device.User.UserID, emp)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to delete employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
-		return DeleteEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to delete employee"}
+		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete employee")
 	}
 
 	return DeleteEmployeeResponse{Success: true}, nil

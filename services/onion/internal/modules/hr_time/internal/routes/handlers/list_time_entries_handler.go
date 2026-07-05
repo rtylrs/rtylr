@@ -8,9 +8,9 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/utils/times"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
@@ -35,15 +35,15 @@ type ListTimeEntriesResponse struct {
 	Offset  int32                             `json:"offset"`
 }
 
-func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntriesRequest) (ListTimeEntriesResponse, *errorModels.ServerError) {
+func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntriesRequest) (ListTimeEntriesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListTimeEntriesResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTimeEntriesResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListTimeEntriesResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTimeEntriesResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	periodStart := req.PeriodStart
@@ -51,7 +51,7 @@ func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntries
 	if req.Date != "" && periodStart == "" {
 		d, err := time.Parse(times.FormatWithDate, req.Date)
 		if err != nil {
-			return ListTimeEntriesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "invalid date format"}
+			return ListTimeEntriesResponse{}, onekiterrors.New(http.StatusBadRequest, "invalid date format")
 		}
 		periodStart = d.Format(times.FormatWithDate)
 		periodEnd = d.AddDate(0, 0, times.DaysPerWeek-1).Format(times.FormatWithDate)
@@ -66,7 +66,7 @@ func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntries
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list time entries", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListTimeEntriesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list time entries"}
+		return ListTimeEntriesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list time entries")
 	}
 
 	payloads := make([]*hrtimeentryv1.TimeEntryPayload, 0, len(entries))

@@ -6,7 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/application"
 	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 func ContactRoutes() []string { return []string{"/contact"} }
@@ -24,17 +24,17 @@ type ContactResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *ContactHandler) Validate(_ context.Context, req *ContactRequest) *errorModels.ServerError {
+func (h *ContactHandler) Validate(_ context.Context, req *ContactRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	if req.Email == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "email is required")
 	}
 	return nil
 }
 
-func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (ContactResponse, *errorModels.ServerError) {
+func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (ContactResponse, error) {
 	_, err := h.Service.Submit(ctx, domain.LeadInput{
 		Name:    req.Name,
 		Email:   req.Email,
@@ -43,10 +43,7 @@ func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (Contac
 		Project: req.Message,
 	})
 	if err != nil {
-		return ContactResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to submit contact request",
-		}
+		return ContactResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to submit contact request")
 	}
 
 	return ContactResponse{Message: "Message received"}, nil

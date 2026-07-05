@@ -11,8 +11,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type WorkSchedulePayload struct {
@@ -46,16 +46,16 @@ type (
 	}
 )
 
-func (h *ListWorkSchedulesHandler) Serve(ctx context.Context, _ *ListWorkSchedulesRequest) (ListWorkSchedulesResponse, *errorModels.ServerError) {
+func (h *ListWorkSchedulesHandler) Serve(ctx context.Context, _ *ListWorkSchedulesRequest) (ListWorkSchedulesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListWorkSchedulesResponse{}, errorModels.PermissionDeniedServerError()
+		return ListWorkSchedulesResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	schedules, err := h.Service.ListWorkSchedules(ctx, device.User.UserID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list work schedules", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListWorkSchedulesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list work schedules"}
+		return ListWorkSchedulesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list work schedules")
 	}
 
 	payloads := make([]*WorkSchedulePayload, 0, len(schedules))
@@ -82,24 +82,24 @@ type CreateWorkScheduleResponse struct {
 	WorkSchedule *WorkSchedulePayload `json:"work_schedule"`
 }
 
-func (h *CreateWorkScheduleHandler) Validate(_ context.Context, req *CreateWorkScheduleRequest) *errorModels.ServerError {
+func (h *CreateWorkScheduleHandler) Validate(_ context.Context, req *CreateWorkScheduleRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *CreateWorkScheduleHandler) Serve(ctx context.Context, req *CreateWorkScheduleRequest) (CreateWorkScheduleResponse, *errorModels.ServerError) {
+func (h *CreateWorkScheduleHandler) Serve(ctx context.Context, req *CreateWorkScheduleRequest) (CreateWorkScheduleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateWorkScheduleResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateWorkScheduleResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	ws := domain.WorkScheduleRecord{Name: req.Name, ScheduleData: req.ScheduleData, IsDefault: req.IsDefault}
 	created, err := h.Service.CreateWorkSchedule(ctx, device.User.UserID, ws)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create work schedule", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateWorkScheduleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create work schedule"}
+		return CreateWorkScheduleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create work schedule")
 	}
 
 	return CreateWorkScheduleResponse{WorkSchedule: wsToPayload(*created)}, nil
@@ -122,30 +122,30 @@ type UpdateWorkScheduleResponse struct {
 	WorkSchedule *WorkSchedulePayload `json:"work_schedule"`
 }
 
-func (h *UpdateWorkScheduleHandler) Validate(_ context.Context, req *UpdateWorkScheduleRequest) *errorModels.ServerError {
+func (h *UpdateWorkScheduleHandler) Validate(_ context.Context, req *UpdateWorkScheduleRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	return nil
 }
 
-func (h *UpdateWorkScheduleHandler) Serve(ctx context.Context, req *UpdateWorkScheduleRequest) (UpdateWorkScheduleResponse, *errorModels.ServerError) {
+func (h *UpdateWorkScheduleHandler) Serve(ctx context.Context, req *UpdateWorkScheduleRequest) (UpdateWorkScheduleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpdateWorkScheduleResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateWorkScheduleResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateWorkScheduleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid work schedule id"}
+		return UpdateWorkScheduleResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid work schedule id")
 	}
 
 	ws := domain.WorkScheduleRecord{ID: id, Name: req.Name, ScheduleData: req.ScheduleData, IsDefault: req.IsDefault}
 	updated, err := h.Service.UpdateWorkSchedule(ctx, device.User.UserID, ws)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to update work schedule", logger.Any("owner_id", device.User.UserID), logger.Any("schedule_id", id), logger.Error(err))
-		return UpdateWorkScheduleResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update work schedule"}
+		return UpdateWorkScheduleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update work schedule")
 	}
 
 	return UpdateWorkScheduleResponse{WorkSchedule: wsToPayload(*updated)}, nil

@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 
-	platformErrors "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 func TestValidateProtoMessagesRejectsInvalidGeneratedMessage(t *testing.T) {
@@ -49,18 +49,14 @@ type validatedGETHandler struct {
 	seenID int64
 }
 
-func (h *validatedGETHandler) Validate(_ context.Context, req *validatedGETRequest) *platformErrors.ServerError {
+func (h *validatedGETHandler) Validate(_ context.Context, req *validatedGETRequest) error {
 	if req.ID <= 0 {
-		return &platformErrors.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "id is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	return nil
 }
 
-func (h *validatedGETHandler) Serve(_ context.Context, req *validatedGETRequest) (validatedGETResponse, *platformErrors.ServerError) {
+func (h *validatedGETHandler) Serve(_ context.Context, req *validatedGETRequest) (validatedGETResponse, error) {
 	h.called = true
 	h.seenID = req.ID
 	return validatedGETResponse{OK: true}, nil
@@ -161,7 +157,7 @@ type emptyRequest struct{}
 
 type invalidProtoResponseHandler struct{}
 
-func (h invalidProtoResponseHandler) Serve(_ context.Context, _ *emptyRequest) (*commonauthv1.LoginRequest, *platformErrors.ServerError) {
+func (h invalidProtoResponseHandler) Serve(_ context.Context, _ *emptyRequest) (*commonauthv1.LoginRequest, error) {
 	return &commonauthv1.LoginRequest{}, nil
 }
 
@@ -220,7 +216,7 @@ type jsonBodyHandler struct {
 	seen   string
 }
 
-func (h *jsonBodyHandler) Serve(_ context.Context, req *jsonBodyRequest) (jsonBodyResponse, *platformErrors.ServerError) {
+func (h *jsonBodyHandler) Serve(_ context.Context, req *jsonBodyRequest) (jsonBodyResponse, error) {
 	h.called = true
 	h.seen = req.Name
 	return jsonBodyResponse{Name: req.Name}, nil

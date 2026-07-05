@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmdashboardv1 "github.com/voxire/voxie/gen/go/crm/dashboard/v1"
 )
@@ -41,23 +41,20 @@ func newTopCustomerPayload(tc domain.TopCustomer) *crmdashboardv1.TopCustomer {
 	}
 }
 
-func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {
+func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+		return DashboardResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DashboardResponse{}, errorModels.PermissionDeniedServerError()
+		return DashboardResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	stats, err := h.CRMService.GetDashboardStats(ctx, businessID)
 	if err != nil {
-		return DashboardResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get dashboard stats",
-		}
+		return DashboardResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get dashboard stats")
 	}
 
 	topCustomers := make([]*crmdashboardv1.TopCustomer, len(stats.TopCustomers))

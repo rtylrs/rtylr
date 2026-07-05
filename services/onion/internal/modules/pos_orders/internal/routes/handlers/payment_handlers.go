@@ -10,7 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // ─── Pay Order via Paddle ────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ type PayOrderResponse struct {
 	CheckoutURL   string `json:"checkout_url"`
 }
 
-func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayOrderResponse, *errorModels.ServerError) {
+func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayOrderResponse, error) {
 	user, authErr := authenticatedPOSUser(ctx)
 	if authErr != nil {
 		return PayOrderResponse{}, authErr
@@ -42,27 +42,15 @@ func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayO
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	orderID, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || orderID <= 0 {
-		return PayOrderResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Invalid order id",
-		}
+		return PayOrderResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
 	}
 
 	result, payErr := h.Service.CreatePaddlePayment(ctx, businessID, orderID, req.CustomerEmail, req.Currency)
 	if payErr != nil {
 		if errors.Is(payErr, domain.ErrOrderNotFound) {
-			return PayOrderResponse{}, &errorModels.ServerError{
-				HTTPCode: http.StatusNotFound,
-				Code:     http.StatusNotFound,
-				Message:  "Order not found",
-			}
+			return PayOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
-		return PayOrderResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to create payment",
-		}
+		return PayOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create payment")
 	}
 
 	return PayOrderResponse{

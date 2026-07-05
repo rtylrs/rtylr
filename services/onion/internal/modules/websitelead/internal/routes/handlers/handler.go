@@ -8,7 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/application"
 	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 func SubmitRoutes() []string { return []string{"/quote"} }
@@ -32,20 +32,20 @@ type SubmitResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *SubmitHandler) Validate(_ context.Context, req *SubmitRequest) *errorModels.ServerError {
+func (h *SubmitHandler) Validate(_ context.Context, req *SubmitRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "name is required")
 	}
 	if req.Email == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "email is required")
 	}
 	if req.Service == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "service is required"}
+		return onekiterrors.New(http.StatusBadRequest, "service is required")
 	}
 	return nil
 }
 
-func (h *SubmitHandler) Serve(ctx context.Context, req *SubmitRequest) (SubmitResponse, *errorModels.ServerError) {
+func (h *SubmitHandler) Serve(ctx context.Context, req *SubmitRequest) (SubmitResponse, error) {
 	// Prepend timeline to the project brief so it surfaces in the notification email
 	// and Google Sheets without requiring a dedicated column.
 	project := req.Project
@@ -64,7 +64,7 @@ func (h *SubmitHandler) Serve(ctx context.Context, req *SubmitRequest) (SubmitRe
 		Source:  req.Source,
 	})
 	if err != nil {
-		return SubmitResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to submit quote request"}
+		return SubmitResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to submit quote request")
 	}
 
 	return SubmitResponse{ID: id, Message: "Quote request received"}, nil

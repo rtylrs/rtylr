@@ -12,8 +12,8 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -31,21 +31,21 @@ type (
 	}
 )
 
-func (h *ListContractsHandler) Serve(ctx context.Context, _ *ListContractsRequest) (ListContractsResponse, *errorModels.ServerError) {
+func (h *ListContractsHandler) Serve(ctx context.Context, _ *ListContractsRequest) (ListContractsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListContractsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListContractsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListContractsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListContractsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contracts, err := h.Service.ListContracts(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contracts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListContractsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list contracts"}
+		return ListContractsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list contracts")
 	}
 
 	return ListContractsResponse{Contracts: contracts}, nil
@@ -74,25 +74,25 @@ type CreateContractResponse struct {
 	Contract domain.Contract `json:"contract"`
 }
 
-func (h *CreateContractHandler) Validate(_ context.Context, req *CreateContractRequest) *errorModels.ServerError {
+func (h *CreateContractHandler) Validate(_ context.Context, req *CreateContractRequest) error {
 	if req.LeadID == 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "lead_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "lead_id is required")
 	}
 	if req.MRR < 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "mrr must not be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
 	}
 	return nil
 }
 
-func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRequest) (CreateContractResponse, *errorModels.ServerError) {
+func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRequest) (CreateContractResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateContractResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateContractResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateContractResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateContractResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contract, err := h.Service.CreateContract(ctx, businessID, domain.CreateContractRequest{
@@ -107,7 +107,7 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create contract", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create contract"}
+		return CreateContractResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create contract")
 	}
 
 	return CreateContractResponse{Contract: contract}, nil
@@ -127,30 +127,30 @@ type (
 	}
 )
 
-func (h *GetContractHandler) Serve(ctx context.Context, _ *GetContractRequest) (GetContractResponse, *errorModels.ServerError) {
+func (h *GetContractHandler) Serve(ctx context.Context, _ *GetContractRequest) (GetContractResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetContractResponse{}, errorModels.PermissionDeniedServerError()
+		return GetContractResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return GetContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contract id"}
+		return GetContractResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contract id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetContractResponse{}, errorModels.PermissionDeniedServerError()
+		return GetContractResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contract, err := h.Service.GetContract(ctx, id, businessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrContractNotFound) {
-			return GetContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contract not found"}
+			return GetContractResponse{}, onekiterrors.New(http.StatusNotFound, "Contract not found")
 		}
 		logger.Ctx(ctx).Error("failed to get contract", logger.Any("owner_id", device.User.UserID), logger.Any("contract_id", id), logger.Error(err))
-		return GetContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get contract"}
+		return GetContractResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get contract")
 	}
 
 	return GetContractResponse{Contract: contract}, nil
@@ -178,31 +178,31 @@ type UpdateContractResponse struct {
 	Contract domain.Contract `json:"contract"`
 }
 
-func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractRequest) *errorModels.ServerError {
+func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractRequest) error {
 	if strings.TrimSpace(req.Plan) == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "plan is required"}
+		return onekiterrors.New(http.StatusBadRequest, "plan is required")
 	}
 	if req.MRR < 0 {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "mrr must not be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
 	}
 	return nil
 }
 
-func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRequest) (UpdateContractResponse, *errorModels.ServerError) {
+func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRequest) (UpdateContractResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateContractResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateContractResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid contract id"}
+		return UpdateContractResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid contract id")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateContractResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateContractResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	contract, err := h.Service.UpdateContract(ctx, id, businessID, domain.UpdateContractRequest{
@@ -216,10 +216,10 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrContractNotFound) {
-			return UpdateContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contract not found"}
+			return UpdateContractResponse{}, onekiterrors.New(http.StatusNotFound, "Contract not found")
 		}
 		logger.Ctx(ctx).Error("failed to update contract", logger.Any("owner_id", device.User.UserID), logger.Any("contract_id", id), logger.Error(err))
-		return UpdateContractResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update contract"}
+		return UpdateContractResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update contract")
 	}
 
 	return UpdateContractResponse{Contract: contract}, nil

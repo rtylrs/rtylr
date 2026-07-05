@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -28,40 +28,31 @@ type MergeCustomersResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *MergeCustomersHandler) Validate(_ context.Context, req *MergeCustomersRequest) *errorModels.ServerError {
+func (h *MergeCustomersHandler) Validate(_ context.Context, req *MergeCustomersRequest) error {
 	if req.PrimaryID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Primary customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Primary customer ID is required")
 	}
 
 	if req.SecondaryID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Secondary customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Secondary customer ID is required")
 	}
 
 	if req.PrimaryID == req.SecondaryID {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Cannot merge a customer with itself",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Cannot merge a customer with itself")
 	}
 
 	return nil
 }
 
-func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRequest) (MergeCustomersResponse, *errorModels.ServerError) {
+func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRequest) (MergeCustomersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return MergeCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return MergeCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return MergeCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return MergeCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	err := h.CRMService.MergeCustomers(ctx, domain.MergeCustomersInput{
@@ -71,10 +62,7 @@ func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRe
 		SecondaryID: req.SecondaryID,
 	})
 	if err != nil {
-		return MergeCustomersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to merge customers",
-		}
+		return MergeCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to merge customers")
 	}
 
 	return MergeCustomersResponse{Message: "Customers merged successfully"}, nil

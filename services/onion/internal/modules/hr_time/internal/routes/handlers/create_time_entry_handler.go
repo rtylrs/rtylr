@@ -9,9 +9,9 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
@@ -37,31 +37,31 @@ type CreateTimeEntryResponse struct {
 	Entry *hrtimeentryv1.TimeEntryPayload `json:"entry"`
 }
 
-func (h *CreateTimeEntryHandler) Validate(_ context.Context, req *CreateTimeEntryRequest) *errorModels.ServerError {
+func (h *CreateTimeEntryHandler) Validate(_ context.Context, req *CreateTimeEntryRequest) error {
 	if req.EmployeeID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "employee_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 	if req.DurationMinutes <= 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
+		return onekiterrors.New(http.StatusBadRequest, "duration_minutes must be greater than 0")
 	}
 	if req.Date == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+		return onekiterrors.New(http.StatusBadRequest, "date is required")
 	}
 	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
+		return onekiterrors.New(http.StatusBadRequest, "date must be in YYYY-MM-DD format")
 	}
 	return nil
 }
 
-func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntryRequest) (CreateTimeEntryResponse, *errorModels.ServerError) {
+func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntryRequest) (CreateTimeEntryResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return CreateTimeEntryResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateTimeEntryResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateTimeEntryResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateTimeEntryResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	entry := domain.TimeEntryRecord{
@@ -81,13 +81,13 @@ func (h *CreateTimeEntryHandler) Serve(ctx context.Context, req *CreateTimeEntry
 	created, err := h.Service.CreateTimeEntry(ctx, businessID, entry)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidDuration) {
-			return CreateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Duration must be greater than 0"}
+			return CreateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Duration must be greater than 0")
 		}
 		if errors.Is(err, domain.ErrDateInLockedPeriod) {
-			return CreateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Cannot add entry to a locked period"}
+			return CreateTimeEntryResponse{}, onekiterrors.New(http.StatusConflict, "Cannot add entry to a locked period")
 		}
 		logger.Ctx(ctx).Error("failed to create time entry", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return CreateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create time entry"}
+		return CreateTimeEntryResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create time entry")
 	}
 
 	return CreateTimeEntryResponse{Entry: timeEntryToProto(*created)}, nil

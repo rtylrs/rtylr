@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -26,7 +25,7 @@ type AnalyticsEventResponse struct {
 	Logged bool `json:"logged"`
 }
 
-func (h *AnalyticsEventHandler) Serve(ctx context.Context, req *AnalyticsEventRequest) (AnalyticsEventResponse, *errorModels.ServerError) {
+func (h *AnalyticsEventHandler) Serve(ctx context.Context, req *AnalyticsEventRequest) (AnalyticsEventResponse, error) {
 	logger.Ctx(ctx).Info("website analytics event",
 		logger.Any("event", req.Event),
 		logger.Any("page", req.Page),

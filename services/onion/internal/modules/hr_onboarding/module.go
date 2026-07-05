@@ -3,11 +3,15 @@ package hr_onboarding
 import (
 	"context"
 	"database/sql"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
-	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/routes"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
 type Module struct {
@@ -19,7 +23,23 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	serverHttp.RegisterGET[api.GetEmployeeChecklistRequest, api.GetEmployeeChecklistResponse](
+		ctx, router, api.GetEmployeeChecklistRoutes(), &api.GetEmployeeChecklistHandler{Service: m.service},
+	)
+	serverHttp.RegisterPOSTWithValidation[api.CompleteChecklistItemRequest, api.CompleteChecklistItemResponse](
+		ctx, router, api.CompleteChecklistItemRoutes(), &api.CompleteChecklistItemHandler{Service: m.service},
+	)
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	err := hronboardingv1.RegisterOnboardingServiceServer(
+		api.NewOnboardingService(m.service),
+		hronboardingv1.WithMux(mux),
+		hronboardingv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -1,0 +1,224 @@
+package api
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/staff/internal/application"
+	"github.com/voxire/onion/internal/modules/staff/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
+	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
+)
+
+type StaffAPI struct {
+	Service *application.Service
+}
+
+func NewStaffAPI(service *application.Service) *StaffAPI {
+	return &StaffAPI{Service: service}
+}
+
+func (a *StaffAPI) ListStaff(ctx context.Context, req *hrstaffv1.ListStaffRequest) (*hrstaffv1.ListStaffResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	staffList, listErr := a.Service.ListStaff(ctx, businessID, req.GetSearch(), req.GetDepartmentId(), req.GetStatus())
+	if listErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list staff")
+	}
+
+	payloads := make([]*hrstaffv1.Staff, 0, len(staffList))
+	for _, staff := range staffList {
+		payloads = append(payloads, newStaffPayload(staff))
+	}
+
+	return &hrstaffv1.ListStaffResponse{Staff: payloads}, nil
+}
+
+func (a *StaffAPI) CreateStaff(ctx context.Context, req *hrstaffv1.CreateStaffRequest) (*hrstaffv1.CreateStaffResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	id, createErr := a.Service.CreateStaff(ctx, domain.StaffInput{
+		OwnerID:               device.User.UserID,
+		BusinessID:            businessID,
+		UserID:                req.GetUserId(),
+		DepartmentID:          req.GetDepartmentId(),
+		FirstName:             req.GetFirstName(),
+		LastName:              req.GetLastName(),
+		Email:                 req.GetEmail(),
+		Phone:                 req.GetPhone(),
+		Role:                  req.GetRole(),
+		EmploymentType:        req.GetEmploymentType(),
+		Status:                req.GetStatus(),
+		Salary:                req.GetSalary(),
+		HourlyRate:            req.GetHourlyRate(),
+		OvertimeRate:          req.GetOvertimeRate(),
+		StartDate:             req.GetStartDate(),
+		EndDate:               req.GetEndDate(),
+		Address:               req.GetAddress(),
+		EmergencyContactName:  req.GetEmergencyContactName(),
+		EmergencyContactPhone: req.GetEmergencyContactPhone(),
+		Apps:                  req.GetApps(),
+		Notes:                 req.GetNotes(),
+	})
+	if createErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create staff member")
+	}
+
+	return &hrstaffv1.CreateStaffResponse{Id: id}, nil
+}
+
+func (a *StaffAPI) GetStaff(ctx context.Context, req *hrstaffv1.GetStaffRequest) (*hrstaffv1.GetStaffResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	staff, getErr := a.Service.GetStaffByID(ctx, businessID, req.GetId())
+	if getErr != nil {
+		if errors.Is(getErr, domain.ErrStaffNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Staff member not found")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get staff member")
+	}
+
+	return &hrstaffv1.GetStaffResponse{Staff: newStaffPayload(*staff)}, nil
+}
+
+func (a *StaffAPI) UpdateStaff(ctx context.Context, req *hrstaffv1.UpdateStaffRequest) (*hrstaffv1.UpdateStaffResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	body := req.GetBody()
+	if body == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "body is required")
+	}
+
+	updateErr := a.Service.UpdateStaff(ctx, businessID, domain.StaffUpdateInput{
+		ID:                    req.GetId(),
+		DepartmentID:          body.GetDepartmentId(),
+		FirstName:             body.GetFirstName(),
+		LastName:              body.GetLastName(),
+		Email:                 body.GetEmail(),
+		Phone:                 body.GetPhone(),
+		Role:                  body.GetRole(),
+		EmploymentType:        body.GetEmploymentType(),
+		Status:                body.GetStatus(),
+		Salary:                body.GetSalary(),
+		HourlyRate:            body.GetHourlyRate(),
+		OvertimeRate:          body.GetOvertimeRate(),
+		EndDate:               body.GetEndDate(),
+		Address:               body.GetAddress(),
+		EmergencyContactName:  body.GetEmergencyContactName(),
+		EmergencyContactPhone: body.GetEmergencyContactPhone(),
+		Apps:                  body.GetApps(),
+		Notes:                 body.GetNotes(),
+	})
+	if updateErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update staff member")
+	}
+
+	return &hrstaffv1.UpdateStaffResponse{Success: true}, nil
+}
+
+func (a *StaffAPI) DeleteStaff(ctx context.Context, req *hrstaffv1.DeleteStaffRequest) (*hrstaffv1.DeleteStaffResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if deleteErr := a.Service.DeleteStaff(ctx, businessID, req.GetId()); deleteErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to terminate staff member")
+	}
+
+	return &hrstaffv1.DeleteStaffResponse{Success: true}, nil
+}
+
+func (a *StaffAPI) ClockIn(ctx context.Context, req *hrstaffv1.ClockInRequest) (*hrstaffv1.ClockInResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if clockErr := a.Service.ClockIn(ctx, businessID, req.GetStaffId()); clockErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to clock in")
+	}
+
+	return &hrstaffv1.ClockInResponse{Success: true}, nil
+}
+
+func (a *StaffAPI) ClockOut(ctx context.Context, req *hrstaffv1.ClockOutRequest) (*hrstaffv1.ClockOutResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if clockErr := a.Service.ClockOut(ctx, businessID, req.GetStaffId()); clockErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to clock out")
+	}
+
+	return &hrstaffv1.ClockOutResponse{Success: true}, nil
+}
+
+func resolveBusinessID(ctx context.Context) (int64, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return 0, onekiterrors.PermissionDenied()
+	}
+
+	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if err != nil {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	return businessID, nil
+}
+
+func newStaffPayload(staff domain.Staff) *hrstaffv1.Staff {
+	return &hrstaffv1.Staff{
+		Id:                    staff.ID,
+		OwnerId:               staff.OwnerID,
+		UserId:                staff.UserID,
+		DepartmentId:          staff.DepartmentID,
+		FirstName:             staff.FirstName,
+		LastName:              staff.LastName,
+		Email:                 staff.Email,
+		Phone:                 staff.Phone,
+		Role:                  staff.Role,
+		EmploymentType:        staff.EmploymentType,
+		Status:                staff.Status,
+		Salary:                staff.Salary,
+		HourlyRate:            staff.HourlyRate,
+		OvertimeRate:          staff.OvertimeRate,
+		StartDate:             formatStaffTime(staff.StartDate),
+		EndDate:               formatStaffTime(staff.EndDate),
+		Address:               staff.Address,
+		EmergencyContactName:  staff.EmergencyContactName,
+		EmergencyContactPhone: staff.EmergencyContactPhone,
+		Apps:                  staff.Apps,
+		Notes:                 staff.Notes,
+		CreatedAt:             formatStaffTime(staff.CreatedAt),
+		UpdatedAt:             formatStaffTime(staff.UpdatedAt),
+	}
+}
+
+func formatStaffTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.Format("2006-01-02T15:04:05Z")
+}

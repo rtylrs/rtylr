@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
@@ -37,41 +37,32 @@ type GetSegmentDetailResponse struct {
 	Customers []*crmcustomerv1.Customer `json:"customers"`
 }
 
-func (h *GetSegmentDetailHandler) Validate(_ context.Context, req *GetSegmentDetailRequest) *errorModels.ServerError {
+func (h *GetSegmentDetailHandler) Validate(_ context.Context, req *GetSegmentDetailRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
 	}
 
 	return nil
 }
 
-func (h *GetSegmentDetailHandler) Serve(ctx context.Context, req *GetSegmentDetailRequest) (GetSegmentDetailResponse, *errorModels.ServerError) {
+func (h *GetSegmentDetailHandler) Serve(ctx context.Context, req *GetSegmentDetailRequest) (GetSegmentDetailResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetSegmentDetailResponse{}, errorModels.PermissionDeniedServerError()
+		return GetSegmentDetailResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetSegmentDetailResponse{}, errorModels.PermissionDeniedServerError()
+		return GetSegmentDetailResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	detail, err := h.CRMService.GetSegmentDetail(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
-			return GetSegmentDetailResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Segment not found",
-			}
+			return GetSegmentDetailResponse{}, onekiterrors.New(http.StatusNotFound, "Segment not found")
 		}
 
-		return GetSegmentDetailResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get segment detail",
-		}
+		return GetSegmentDetailResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get segment detail")
 	}
 
 	custPayloads := make([]*crmcustomerv1.Customer, len(detail.Customers))
@@ -104,26 +95,23 @@ type GetSegmentCustomersResponse struct {
 	PageSize  int                       `json:"page_size"`
 }
 
-func (h *GetSegmentCustomersHandler) Validate(_ context.Context, req *GetSegmentCustomersRequest) *errorModels.ServerError {
+func (h *GetSegmentCustomersHandler) Validate(_ context.Context, req *GetSegmentCustomersRequest) error {
 	if req.SegmentID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Segment ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Segment ID is required")
 	}
 
 	return nil
 }
 
-func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentCustomersRequest) (GetSegmentCustomersResponse, *errorModels.ServerError) {
+func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentCustomersRequest) (GetSegmentCustomersResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetSegmentCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return GetSegmentCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetSegmentCustomersResponse{}, errorModels.PermissionDeniedServerError()
+		return GetSegmentCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if req.Page < 1 {
@@ -137,16 +125,10 @@ func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentC
 	customers, total, err := h.CRMService.GetSegmentCustomers(ctx, businessID, req.SegmentID, req.Page, req.PageSize)
 	if err != nil {
 		if errors.Is(err, domain.ErrSegmentNotFound) {
-			return GetSegmentCustomersResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Segment not found",
-			}
+			return GetSegmentCustomersResponse{}, onekiterrors.New(http.StatusNotFound, "Segment not found")
 		}
 
-		return GetSegmentCustomersResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get segment customers",
-		}
+		return GetSegmentCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get segment customers")
 	}
 
 	payloads := make([]*crmcustomerv1.Customer, len(customers))

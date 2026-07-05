@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	stdhttp "net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -54,6 +55,7 @@ import (
 	hrattendance "github.com/voxire/onion/internal/modules/hr_attendance"
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	hrdashboard "github.com/voxire/onion/internal/modules/hr_dashboard"
+	hrdashboardstats "github.com/voxire/onion/internal/modules/hr_dashboard/stats"
 	hrdocuments "github.com/voxire/onion/internal/modules/hr_documents"
 	hrequipment "github.com/voxire/onion/internal/modules/hr_equipment"
 	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
@@ -65,6 +67,7 @@ import (
 	hrsetup "github.com/voxire/onion/internal/modules/hr_setup"
 	hrshifts "github.com/voxire/onion/internal/modules/hr_shifts"
 	hrtime "github.com/voxire/onion/internal/modules/hr_time"
+	hubmenu "github.com/voxire/onion/internal/modules/hub_menu"
 	"github.com/voxire/onion/internal/modules/insights"
 	"github.com/voxire/onion/internal/modules/integrations"
 	"github.com/voxire/onion/internal/modules/inventory"
@@ -350,6 +353,7 @@ type apiModules struct {
 	HRCore                *hrcore.Module
 	HRDashboard           *hrdashboard.Module
 	HRDocuments           *hrdocuments.Module
+	HubMenu               *hubmenu.Module
 	HREquipment           *hrequipment.Module
 	HRLeave               *hrleave.Module
 	HROnboarding          *hronboarding.Module
@@ -548,6 +552,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HRCore:                hrCoreModule,
 		HRDashboard:           hrdashboard.NewModule(ctx, dbclient.Pool()),
 		HRDocuments:           hrdocuments.NewModule(ctx, dbclient.Pool()),
+		HubMenu:               hubmenu.NewModule(),
 		HREquipment:           hrequipment.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRLeave:               hrLeaveModule,
 		HROnboarding:          hronboarding.NewModule(ctx, dbclient.Pool()),
@@ -700,6 +705,23 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		nil,
 	)
 	modules.User.ProvisionerResolver = provisionerResolver
+	modules.User.ProfileResolver = team.NewHubProfileResolver(modules.Team.Service())
+	modules.User.WithInviteAccepter(modules.Team.Service())
+	modules.HRDashboard.WithStatsLoader(func(ctx context.Context, businessID int64) (hrdashboardstats.DashboardStats, error) {
+		totalStaff, onShiftToday, pendingTimeOff, payrollDraft, err := modules.Staff.LoadDashboardStats(ctx, businessID)
+		if err != nil {
+			return hrdashboardstats.DashboardStats{}, err
+		}
+		return hrdashboardstats.DashboardStats{
+			TotalStaff:     totalStaff,
+			OnShiftToday:   onShiftToday,
+			PendingTimeOff: pendingTimeOff,
+			PayrollDraft:   payrollDraft,
+		}, nil
+	})
+	modules.Business.WithUserService(modules.User.UserService)
+	modules.Apps.SetAddonProvider(addons.NewHubAddonProvider(modules.Addons.GetService()))
+	modules.APIKeys.SetWebhooksProvider(webhooks.NewHubWebhooksProvider(modules.Webhooks.GetService()))
 
 	// Wire personal workspace creation into user registration and login (idempotent).
 	ensurePersonalWorkspace := func(ctx context.Context, userID int64) {
@@ -752,6 +774,14 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	if license.IsSelfHosted(platformConfig.GlobalConfig) {
 		go licenseValidator.Refresh(ctx)
 	}
+
+	// oneKit contract services: every module's generated service servers
+	// register on one shared mux; the generated code owns every /api/... path.
+	// Runs before RegisterRoutes so module escape hatches (rate-limited or
+	// special routes) can reference the mux captured in RegisterAPI.
+	oneKitMux := stdhttp.NewServeMux()
+	http.AutoRegisterAPIs(ctx, modules, oneKitMux)
+	http.MountOneKit(r, oneKitMux)
 
 	http.AutoRegisterRoutes(ctx, modules, r)
 }

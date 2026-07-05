@@ -3,11 +3,14 @@ package categories
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/categories/internal/api"
 	"github.com/voxire/onion/internal/modules/categories/internal/application"
-	"github.com/voxire/onion/internal/modules/categories/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erpcategoryv1.RegisterCategoryServiceServer(
+		api.NewCategoryAPI(m.service),
+		erpcategoryv1.WithMux(mux),
+		erpcategoryv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register ERP category service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -3,11 +3,14 @@ package purchase_orders
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/purchase_orders/internal/api"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
-	"github.com/voxire/onion/internal/modules/purchase_orders/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erppurchaseorderv1.RegisterPurchaseOrderServiceServer(
+		api.NewPurchaseOrderAPI(m.service),
+		erppurchaseorderv1.WithMux(mux),
+		erppurchaseorderv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register ERP purchase order service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -4,9 +4,19 @@ import (
 	"context"
 	"errors"
 	"net/http"
+
+	onekithttp "github.com/stackxio/onekit/http"
 	"strings"
 	"testing"
 )
+
+func oneKitStatus(err error) int {
+	var oneKitErr *onekithttp.Error
+	if errors.As(err, &oneKitErr) {
+		return int(oneKitErr.GetStatusCode())
+	}
+	return 0
+}
 
 func TestListToolsHandlerHonorsModeCapability(t *testing.T) {
 	handler := &ListToolsHandler{}
@@ -62,7 +72,7 @@ func TestToolDecisionValidateRequiresKnownDecision(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected validation error")
 	}
-	if err.Code != http.StatusBadRequest {
+	if oneKitStatus(err) != http.StatusBadRequest {
 		t.Fatalf("expected bad request, got %#v", err)
 	}
 }

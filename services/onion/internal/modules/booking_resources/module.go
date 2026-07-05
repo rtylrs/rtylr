@@ -3,11 +3,14 @@ package booking_resources
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	bookingresourcev1 "github.com/voxire/voxie/gen/go/booking/resource/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/booking_resources/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/application"
-	"github.com/voxire/onion/internal/modules/booking_resources/internal/routes"
 )
 
 type Module struct{ service *application.Service }
@@ -16,7 +19,13 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := bookingresourcev1.RegisterResourceServiceServer(
+		api.NewResourceAPI(m.service),
+		bookingresourcev1.WithMux(mux),
+		bookingresourcev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register booking resource service: %w", err))
+	}
 }
 func (m *Module) GetAnonymousRoutes() []string { return []string{} }

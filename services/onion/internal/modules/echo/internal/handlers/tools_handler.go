@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // ListToolsRoutes is the HTTP path for the tool registry endpoint.
@@ -58,12 +58,12 @@ type ToolDecisionResponse struct {
 	Output     map[string]any `json:"output,omitempty"`
 }
 
-func (h *ListToolsHandler) Serve(_ context.Context, req *ListToolsRequest) (ListToolsResponse, *errorModels.ServerError) {
+func (h *ListToolsHandler) Serve(_ context.Context, req *ListToolsRequest) (ListToolsResponse, error) {
 	mode := ParseMode(req.Mode)
 	return ListToolsResponse{Tools: ToolsForMode(mode)}, nil
 }
 
-func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionRequest) *errorModels.ServerError {
+func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionRequest) error {
 	if strings.TrimSpace(req.ToolCallID) == "" {
 		return toolDecisionValidationError("tool_call_id is required")
 	}
@@ -78,7 +78,7 @@ func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionReque
 	}
 }
 
-func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionRequest) (ToolDecisionResponse, *errorModels.ServerError) {
+func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionRequest) (ToolDecisionResponse, error) {
 	decision := strings.TrimSpace(strings.ToLower(req.Decision))
 	name := strings.TrimSpace(req.Name)
 	tool, ok := ToolByName(name)
@@ -223,10 +223,6 @@ func (h *ToolDecisionHandler) logDecision(ctx context.Context, req *ToolDecision
 	logger.Ctx(ctx).Info("caret tool decision recorded", fields...)
 }
 
-func toolDecisionValidationError(message string) *errorModels.ServerError {
-	return &errorModels.ServerError{
-		HTTPCode: http.StatusBadRequest,
-		Code:     http.StatusBadRequest,
-		Message:  message,
-	}
+func toolDecisionValidationError(message string) error {
+	return onekiterrors.New(http.StatusBadRequest, message)
 }

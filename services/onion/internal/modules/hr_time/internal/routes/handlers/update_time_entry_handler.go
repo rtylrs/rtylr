@@ -12,9 +12,9 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
@@ -40,34 +40,34 @@ type UpdateTimeEntryResponse struct {
 	Entry *hrtimeentryv1.TimeEntryPayload `json:"entry"`
 }
 
-func (h *UpdateTimeEntryHandler) Validate(_ context.Context, req *UpdateTimeEntryRequest) *errorModels.ServerError {
+func (h *UpdateTimeEntryHandler) Validate(_ context.Context, req *UpdateTimeEntryRequest) error {
 	if req.DurationMinutes <= 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
+		return onekiterrors.New(http.StatusBadRequest, "duration_minutes must be greater than 0")
 	}
 	if req.Date == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+		return onekiterrors.New(http.StatusBadRequest, "date is required")
 	}
 	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
+		return onekiterrors.New(http.StatusBadRequest, "date must be in YYYY-MM-DD format")
 	}
 	return nil
 }
 
-func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntryRequest) (UpdateTimeEntryResponse, *errorModels.ServerError) {
+func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntryRequest) (UpdateTimeEntryResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return UpdateTimeEntryResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateTimeEntryResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateTimeEntryResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateTimeEntryResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return UpdateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid time entry id"}
+		return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid time entry id")
 	}
 
 	entry := domain.TimeEntryRecord{
@@ -88,10 +88,10 @@ func (h *UpdateTimeEntryHandler) Serve(ctx context.Context, req *UpdateTimeEntry
 	updated, err := h.Service.UpdateTimeEntry(ctx, businessID, entry)
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidDuration) {
-			return UpdateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Duration must be greater than 0"}
+			return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusBadRequest, "Duration must be greater than 0")
 		}
 		logger.Ctx(ctx).Error("failed to update time entry", logger.Any("owner_id", device.User.UserID), logger.Any("entry_id", id), logger.Error(err))
-		return UpdateTimeEntryResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update time entry"}
+		return UpdateTimeEntryResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update time entry")
 	}
 
 	return UpdateTimeEntryResponse{Entry: timeEntryToProto(*updated)}, nil

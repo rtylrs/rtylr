@@ -3,12 +3,14 @@ package pos_menu
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/pos_menu/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_menu/internal/routes"
-	"github.com/voxire/onion/internal/modules/pos_menu/internal/routes/handlers"
 )
 
 type Module struct {
@@ -19,12 +21,18 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := posmenuitemv1.RegisterMenuItemServiceServer(
+		api.NewMenuItemAPI(m.service),
+		posmenuitemv1.WithMux(mux),
+		posmenuitemv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS menu item service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	// Public-menu read is the one anonymous surface in pos_menu.
-	// Every other route is tenant-scoped and requires a JWT.
-	return handlers.PublicListMenuItemsRoutes()
+	return []string{
+		"/api/pos/menu-item/v1/menu-items/public",
+	}
 }

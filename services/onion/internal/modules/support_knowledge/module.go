@@ -3,11 +3,14 @@ package supportknowledge
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	supportknowledgev1 "github.com/voxire/voxie/gen/go/support/knowledge/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/support_knowledge/internal/api"
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/application"
-	"github.com/voxire/onion/internal/modules/support_knowledge/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := supportknowledgev1.RegisterKnowledgeServiceServer(
+		api.NewKnowledgeAPI(m.service),
+		supportknowledgev1.WithMux(mux),
+		supportknowledgev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register support knowledge service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

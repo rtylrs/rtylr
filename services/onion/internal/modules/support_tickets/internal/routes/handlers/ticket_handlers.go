@@ -8,8 +8,8 @@ import (
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/application"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 // -- LIST --------------------------------------------------------------------
@@ -31,10 +31,10 @@ type ListTicketsResponse struct {
 	PageSize int             `json:"page_size"`
 }
 
-func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest) (ListTicketsResponse, *errorModels.ServerError) {
+func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest) (ListTicketsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListTicketsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListTicketsResponse{}, onekiterrors.PermissionDenied()
 	}
 	if req.Page < 1 {
 		req.Page = 1
@@ -44,7 +44,7 @@ func (h *ListTicketsHandler) Serve(ctx context.Context, req *ListTicketsRequest)
 	}
 	items, total, err := h.Service.List(ctx, device.User.BusinessID, req.Status, req.Page, req.PageSize)
 	if err != nil {
-		return ListTicketsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list support tickets"}
+		return ListTicketsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list support tickets")
 	}
 	return ListTicketsResponse{Tickets: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
@@ -64,25 +64,25 @@ type GetTicketResponse struct {
 	Messages []domain.Message `json:"messages"`
 }
 
-func (h *GetTicketHandler) Validate(_ context.Context, req *GetTicketRequest) *errorModels.ServerError {
+func (h *GetTicketHandler) Validate(_ context.Context, req *GetTicketRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	return nil
 }
 
-func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (GetTicketResponse, *errorModels.ServerError) {
+func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (GetTicketResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetTicketResponse{}, errorModels.PermissionDeniedServerError()
+		return GetTicketResponse{}, onekiterrors.PermissionDenied()
 	}
 	ticket, err := h.Service.GetByID(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
-		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support ticket"}
+		return GetTicketResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get support ticket")
 	}
 	msgs, err := h.Service.ListMessages(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
-		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list ticket messages"}
+		return GetTicketResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list ticket messages")
 	}
 	return GetTicketResponse{Ticket: ticket, Messages: msgs}, nil
 }
@@ -109,20 +109,20 @@ type CreateTicketResponse struct {
 	Message  string `json:"message"`
 }
 
-func (h *CreateTicketHandler) Validate(_ context.Context, req *CreateTicketRequest) *errorModels.ServerError {
+func (h *CreateTicketHandler) Validate(_ context.Context, req *CreateTicketRequest) error {
 	if strings.TrimSpace(req.Subject) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Subject is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Subject is required")
 	}
 	if strings.TrimSpace(req.CustomerEmail) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Customer email is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Customer email is required")
 	}
 	return nil
 }
 
-func (h *CreateTicketHandler) Serve(ctx context.Context, req *CreateTicketRequest) (CreateTicketResponse, *errorModels.ServerError) {
+func (h *CreateTicketHandler) Serve(ctx context.Context, req *CreateTicketRequest) (CreateTicketResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateTicketResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateTicketResponse{}, onekiterrors.PermissionDenied()
 	}
 	ticketID, err := h.Service.Create(ctx, domain.TicketInput{
 		BusinessID:    device.User.BusinessID,
@@ -134,7 +134,7 @@ func (h *CreateTicketHandler) Serve(ctx context.Context, req *CreateTicketReques
 		AssignedTo:    req.AssignedTo,
 	})
 	if err != nil {
-		return CreateTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create support ticket"}
+		return CreateTicketResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create support ticket")
 	}
 	if req.Body != "" {
 		senderName := req.SenderName
@@ -180,17 +180,17 @@ type UpdateTicketResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateTicketHandler) Validate(_ context.Context, req *UpdateTicketRequest) *errorModels.ServerError {
+func (h *UpdateTicketHandler) Validate(_ context.Context, req *UpdateTicketRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	return nil
 }
 
-func (h *UpdateTicketHandler) Serve(ctx context.Context, req *UpdateTicketRequest) (UpdateTicketResponse, *errorModels.ServerError) {
+func (h *UpdateTicketHandler) Serve(ctx context.Context, req *UpdateTicketRequest) (UpdateTicketResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateTicketResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateTicketResponse{}, onekiterrors.PermissionDenied()
 	}
 	err := h.Service.Update(ctx, domain.TicketUpdateInput{
 		BusinessID: device.User.BusinessID,
@@ -202,7 +202,7 @@ func (h *UpdateTicketHandler) Serve(ctx context.Context, req *UpdateTicketReques
 		Channel:    req.Channel,
 	})
 	if err != nil {
-		return UpdateTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update support ticket"}
+		return UpdateTicketResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update support ticket")
 	}
 	return UpdateTicketResponse{Message: "Support ticket updated"}, nil
 }

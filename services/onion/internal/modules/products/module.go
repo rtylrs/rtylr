@@ -3,11 +3,14 @@ package products
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/products/internal/api"
 	"github.com/voxire/onion/internal/modules/products/internal/application"
-	"github.com/voxire/onion/internal/modules/products/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erpproductv1.RegisterProductServiceServer(
+		api.NewProductAPI(m.service),
+		erpproductv1.WithMux(mux),
+		erpproductv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register ERP product service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

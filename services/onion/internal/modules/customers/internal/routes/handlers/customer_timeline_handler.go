@@ -7,7 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -36,34 +36,28 @@ type GetTimelineResponse struct {
 	Entries []TimelineEntryPayload `json:"entries"`
 }
 
-func (h *GetTimelineHandler) Validate(_ context.Context, req *GetTimelineRequest) *errorModels.ServerError {
+func (h *GetTimelineHandler) Validate(_ context.Context, req *GetTimelineRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	return nil
 }
 
-func (h *GetTimelineHandler) Serve(ctx context.Context, req *GetTimelineRequest) (GetTimelineResponse, *errorModels.ServerError) {
+func (h *GetTimelineHandler) Serve(ctx context.Context, req *GetTimelineRequest) (GetTimelineResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetTimelineResponse{}, errorModels.PermissionDeniedServerError()
+		return GetTimelineResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetTimelineResponse{}, errorModels.PermissionDeniedServerError()
+		return GetTimelineResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	entries, err := h.CRMService.GetCustomerTimeline(ctx, businessID, req.CustomerID)
 	if err != nil {
-		return GetTimelineResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get customer timeline",
-		}
+		return GetTimelineResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get customer timeline")
 	}
 
 	payloads := make([]TimelineEntryPayload, len(entries))

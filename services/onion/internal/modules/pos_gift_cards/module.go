@@ -3,11 +3,13 @@ package pos_gift_cards
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
-
+	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/routes"
+	posgiftcardv1 "github.com/voxire/voxie/gen/go/pos/gift_card/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -18,8 +20,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := posgiftcardv1.RegisterGiftCardServiceServer(
+		api.NewGiftCardAPI(m.service),
+		posgiftcardv1.WithMux(mux),
+		posgiftcardv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register POS gift card service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

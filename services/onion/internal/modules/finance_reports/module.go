@@ -3,11 +3,14 @@ package financereports
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	financestatementv1 "github.com/voxire/voxie/gen/go/finance/statement/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/finance_reports/internal/api"
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/application"
-	"github.com/voxire/onion/internal/modules/finance_reports/internal/routes"
 )
 
 type Module struct {
@@ -18,8 +21,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := financestatementv1.RegisterStatementServiceServer(
+		api.NewStatementAPI(m.service),
+		financestatementv1.WithMux(mux),
+		financestatementv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register finance statement service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

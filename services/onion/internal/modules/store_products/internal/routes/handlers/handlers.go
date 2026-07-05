@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_products/internal/application"
 	"github.com/voxire/onion/internal/modules/store_products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -25,18 +26,18 @@ type (
 	}
 )
 
-func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
+func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return ListResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListResponse{}, errorModels.PermissionDeniedServerError()
+		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
 	items, err := h.Service.List(ctx, businessID)
 	if err != nil {
-		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list store products"}
+		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list store products")
 	}
 	return ListResponse{Products: items}, nil
 }
@@ -61,27 +62,27 @@ type CreateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 	if strings.TrimSpace(req.Title) == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Title is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Title is required")
 	}
 	if req.Price < 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Price cannot be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "Price cannot be negative")
 	}
 	if req.CompareAtPrice < 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Compare-at price cannot be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "Compare-at price cannot be negative")
 	}
 	return nil
 }
 
-func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, *errorModels.ServerError) {
+func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateResponse{}, onekiterrors.PermissionDenied()
 	}
 	id, err := h.Service.Create(ctx, authUser.UserID, businessID, domain.StoreProductInput{
 		ProductID: req.ProductID, Title: req.Title, Slug: req.Slug, Description: req.Description,
@@ -89,7 +90,10 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		IsPublished: req.IsPublished, SortOrder: req.SortOrder,
 	})
 	if err != nil {
-		return CreateResponse{}, errorModels.FromError(err, "Failed to create store product")
+		if errors.Is(err, domain.ErrInvalidPrice) {
+			return CreateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		return CreateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create store product")
 	}
 	return CreateResponse{ID: id, Message: "Store product created successfully"}, nil
 }
@@ -114,34 +118,40 @@ type UpdateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
+func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	if req.Price < 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Price cannot be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "Price cannot be negative")
 	}
 	if req.CompareAtPrice < 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Compare-at price cannot be negative"}
+		return onekiterrors.New(http.StatusBadRequest, "Compare-at price cannot be negative")
 	}
 	return nil
 }
 
-func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, *errorModels.ServerError) {
+func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.Update(ctx, businessID, req.ID, domain.StoreProductInput{
 		ProductID: req.ProductID, Title: req.Title, Slug: req.Slug, Description: req.Description,
 		Images: req.Images, Price: req.Price, CompareAtPrice: req.CompareAtPrice,
 		IsPublished: req.IsPublished, SortOrder: req.SortOrder,
 	}); err != nil {
-		return UpdateResponse{}, errorModels.FromError(err, "Failed to update store product")
+		if errors.Is(err, domain.ErrInvalidPrice) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		if errors.Is(err, domain.ErrStoreProductNotFound) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusNotFound, "Store product not found")
+		}
+		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update store product")
 	}
 	return UpdateResponse{Message: "Store product updated successfully"}, nil
 }
@@ -157,24 +167,24 @@ type DeleteResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteHandler) Validate(_ context.Context, req *DeleteRequest) *errorModels.ServerError {
+func (h *DeleteHandler) Validate(_ context.Context, req *DeleteRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	return nil
 }
 
-func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteResponse, *errorModels.ServerError) {
+func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return DeleteResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return DeleteResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
-		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to delete store product"}
+		return DeleteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete store product")
 	}
 	return DeleteResponse{Message: "Store product deleted successfully"}, nil
 }

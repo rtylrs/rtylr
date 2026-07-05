@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -102,14 +102,14 @@ type GetCustomizationResponse struct {
 	Customization *CustomizationPayload `json:"customization"`
 }
 
-func (h *GetCustomizationHandler) Serve(ctx context.Context, _ *GetCustomizationRequest) (GetCustomizationResponse, *errorModels.ServerError) {
+func (h *GetCustomizationHandler) Serve(ctx context.Context, _ *GetCustomizationRequest) (GetCustomizationResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return GetCustomizationResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCustomizationResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return GetCustomizationResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCustomizationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	c, err := h.CareersService.GetMyCustomization(ctx, businessID)
@@ -120,10 +120,7 @@ func (h *GetCustomizationHandler) Serve(ctx context.Context, _ *GetCustomization
 			// empty state without branching on error shape.
 			return GetCustomizationResponse{Customization: nil}, nil
 		}
-		return GetCustomizationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to load customization",
-		}
+		return GetCustomizationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to load customization")
 	}
 	return GetCustomizationResponse{Customization: toCustomizationPayload(c)}, nil
 }
@@ -167,24 +164,24 @@ type PutCustomizationResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *PutCustomizationHandler) Validate(_ context.Context, req *PutCustomizationRequest) *errorModels.ServerError {
+func (h *PutCustomizationHandler) Validate(_ context.Context, req *PutCustomizationRequest) error {
 	if req.Slug == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Slug is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Slug is required")
 	}
 	if req.BrandName == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Brand name is required"}
+		return onekiterrors.New(http.StatusBadRequest, "Brand name is required")
 	}
 	return nil
 }
 
-func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizationRequest) (PutCustomizationResponse, *errorModels.ServerError) {
+func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizationRequest) (PutCustomizationResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return PutCustomizationResponse{}, errorModels.PermissionDeniedServerError()
+		return PutCustomizationResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return PutCustomizationResponse{}, errorModels.PermissionDeniedServerError()
+		return PutCustomizationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.CustomizationInput{
@@ -217,10 +214,7 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 	}
 
 	if err := h.CareersService.UpsertCustomization(ctx, input); err != nil {
-		return PutCustomizationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to save customization",
-		}
+		return PutCustomizationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to save customization")
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return PutCustomizationResponse{Message: "Customization saved"}, nil

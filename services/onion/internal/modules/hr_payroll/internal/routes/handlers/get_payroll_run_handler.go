@@ -11,8 +11,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -29,25 +29,25 @@ type GetPayrollRunResponse struct {
 	Entries []*hremployeespayrollrunsv1.PayrollEntryPayload `json:"entries"`
 }
 
-func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunRequest) (GetPayrollRunResponse, *errorModels.ServerError) {
+func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunRequest) (GetPayrollRunResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return GetPayrollRunResponse{}, errorModels.PermissionDeniedServerError()
+		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
-		return GetPayrollRunResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid payroll run id"}
+		return GetPayrollRunResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid payroll run id")
 	}
 
 	run, entries, err := h.Service.GetPayrollRun(ctx, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollRunNotFound) {
-			return GetPayrollRunResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Payroll run not found"}
+			return GetPayrollRunResponse{}, onekiterrors.New(http.StatusNotFound, "Payroll run not found")
 		}
 		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", device.User.UserID), logger.Any("run_id", id), logger.Error(err))
-		return GetPayrollRunResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get payroll run"}
+		return GetPayrollRunResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get payroll run")
 	}
 
 	runPayload := payrollRunToProto(*run)

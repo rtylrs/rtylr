@@ -2,14 +2,13 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 const (
@@ -17,26 +16,8 @@ const (
 	BearerPrefix  = "Bearer "
 )
 
-func writeUnauthorizedResponse(w http.ResponseWriter, message string, logoff bool) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusUnauthorized)
-
-	responseData := errors.ErrorResponse{
-		Error: errors.ServerError{
-			Code:    http.StatusUnauthorized,
-			Message: message,
-			Logoff:  &logoff,
-		},
-		Status: "error",
-	}
-
-	if jsonBytes, err := json.Marshal(responseData); err == nil {
-		if _, writeErr := w.Write(jsonBytes); writeErr != nil {
-			logger.Global().Error("failed to write unauthorized response",
-				logger.Error(writeErr),
-			)
-		}
-	}
+func writeUnauthorizedResponse(ctx context.Context, w http.ResponseWriter, message string) {
+	WriteOneKitError(ctx, w, onekiterrors.New(http.StatusUnauthorized, message))
 }
 
 func extractToken(authHeader string) string {
@@ -51,10 +32,7 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 	if tokenValidator == nil {
 		logger.Ctx(ctx).Error("TokenValidator is not available for token validation")
 
-		return nil, &errors.ServerError{
-			Code:    500,
-			Message: "Authentication service unavailable",
-		}
+		return nil, onekiterrors.New(500, "Authentication service unavailable")
 	}
 
 	claims, err := tokenValidator.ValidateTokenFull(ctx, token)
@@ -118,7 +96,7 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 			authHeader := r.Header.Get(AuthHeaderKey)
 			if authHeader == "" {
-				writeUnauthorizedResponse(w, "Unauthorized", false)
+				writeUnauthorizedResponse(ctx, w, "Unauthorized")
 
 				return
 			}
@@ -132,7 +110,7 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 			authUser, err := processTokenAuthentication(ctx, token, path, r.RemoteAddr, tokenValidator)
 			if err != nil {
-				writeUnauthorizedResponse(w, "Unauthorized", true)
+				writeUnauthorizedResponse(ctx, w, "Unauthorized")
 
 				return
 			}

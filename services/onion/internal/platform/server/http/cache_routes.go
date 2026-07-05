@@ -10,11 +10,8 @@ import (
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
-
-type cacheErrorResponse struct {
-	Error string `json:"error"`
-}
 
 type cacheOKResponse struct {
 	Status string `json:"status"`
@@ -26,26 +23,17 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 	r.Post("/invalidate-cache", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if !hasValidInternalToken(r) {
-			w.WriteHeader(http.StatusForbidden)
-			if err := json.NewEncoder(w).Encode(cacheErrorResponse{Error: "Forbidden"}); err != nil {
-				logger.Ctx(ctx).Warn("Failed to encode forbidden response", logger.Error(err))
-			}
+			WriteOneKitError(ctx, w, onekiterrors.New(http.StatusForbidden, "Forbidden"))
 			return
 		}
 
 		var req invalidation.Request
 		if err := DecodeJSONRequestBody(w, r, &req); err != nil {
 			if isRequestBodyTooLarge(err) {
-				w.WriteHeader(http.StatusRequestEntityTooLarge)
-				if encErr := json.NewEncoder(w).Encode(cacheErrorResponse{Error: "Request body too large"}); encErr != nil {
-					logger.Ctx(ctx).Warn("Failed to encode error response", logger.Error(encErr))
-				}
+				WriteOneKitError(ctx, w, onekiterrors.New(http.StatusRequestEntityTooLarge, "Request body too large"))
 				return
 			}
-			w.WriteHeader(http.StatusBadRequest)
-			if err := json.NewEncoder(w).Encode(cacheErrorResponse{Error: "Invalid request body"}); err != nil {
-				logger.Ctx(ctx).Warn("Failed to encode error response", logger.Error(err))
-			}
+			WriteOneKitError(ctx, w, onekiterrors.New(http.StatusBadRequest, "Invalid request body"))
 			return
 		}
 
@@ -53,17 +41,7 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 
 		_, serverErr := handler.Serve(ctx, &req)
 		if serverErr != nil {
-			status := serverErr.HTTPCode
-			if status < 400 || status >= 600 {
-				status = serverErr.Code
-			}
-			if status < 400 || status >= 600 {
-				status = http.StatusInternalServerError
-			}
-			w.WriteHeader(status)
-			if err := json.NewEncoder(w).Encode(cacheErrorResponse{Error: serverErr.Message}); err != nil {
-				logger.Ctx(ctx).Warn("Failed to encode error response", logger.Error(err))
-			}
+			WriteOneKitError(ctx, w, serverErr)
 			return
 		}
 

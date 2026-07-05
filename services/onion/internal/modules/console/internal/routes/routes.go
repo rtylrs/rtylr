@@ -15,8 +15,8 @@ import (
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	"github.com/voxire/onion/internal/modules/console/internal/routes/handlers"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
@@ -141,14 +141,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func writeError(w http.ResponseWriter, status int, msg string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(errorModels.ErrorResponse{
-		Error:  errorModels.ServerError{Code: status, Message: msg},
-		Status: "error",
-	}); err != nil {
-		logger.Global().Error("Failed to encode error response", logger.Error(err))
-	}
+	serverHttp.WriteOneKitError(context.Background(), w, onekiterrors.New(status, msg))
 }
 
 func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {

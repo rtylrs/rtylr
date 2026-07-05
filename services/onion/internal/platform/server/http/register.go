@@ -17,10 +17,12 @@ import (
 	"buf.build/go/protovalidate"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	onekithttp "github.com/stackxio/onekit/http"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 var (
@@ -38,11 +40,11 @@ func ApplyMiddlewares(r *chi.Mux, middlewares []MiddlewareFunc) {
 }
 
 type HandlerFunc[Req any, Res any] interface {
-	Serve(ctx context.Context, req *Req) (Res, *errors.ServerError)
+	Serve(ctx context.Context, req *Req) (Res, error)
 }
 
 type ValidatorFunc[Req any] interface {
-	Validate(ctx context.Context, req *Req) *errors.ServerError
+	Validate(ctx context.Context, req *Req) error
 }
 
 func RegisterGET[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
@@ -179,7 +181,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 		if validate {
 			if vErr := validateRequest(reqCtx, handler, &req); vErr != nil {
-				writeServerError(reqCtx, w, vErr)
+				WriteOneKitError(reqCtx, w, vErr)
 
 				return
 			}
@@ -187,7 +189,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 		res, serverError := handler.Serve(reqCtx, &req)
 		if serverError != nil {
-			writeServerError(reqCtx, w, serverError)
+			WriteOneKitError(reqCtx, w, serverError)
 
 			return
 		}
@@ -195,11 +197,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 		if validateResponses {
 			if err := validateProtoMessages(res); err != nil {
 				logger.Ctx(reqCtx).Error("Response proto validation failed", logger.Error(err))
-				writeServerError(reqCtx, w, &errors.ServerError{
-					HTTPCode: http.StatusInternalServerError,
-					Code:     http.StatusInternalServerError,
-					Message:  "Response validation failed",
-				})
+				WriteOneKitError(reqCtx, w, onekiterrors.New(http.StatusInternalServerError, "Response validation failed"))
 
 				return
 			}
@@ -270,23 +268,10 @@ func DecodeJSONRequestBody(w http.ResponseWriter, r *http.Request, dst interface
 func writeBadRequest(ctx context.Context, w http.ResponseWriter) {
 	logger.Ctx(ctx).Warn("Bad request")
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-
-	response := errors.ErrorResponse{
-		Error: errors.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid request",
-		},
-		Status: "error",
-	}
-
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		logger.Ctx(ctx).Error("Failed to encode error response", logger.Error(err))
-	}
+	WriteOneKitError(ctx, w, onekiterrors.New(http.StatusBadRequest, "Invalid request"))
 }
 
-func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req) *errors.ServerError {
+func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req) error {
 	// First run structural validation using struct tags if present
 	if err := validateInstance.Struct(req); err != nil {
 		var msg string
@@ -301,19 +286,11 @@ func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req
 			msg = "Validation error: " + err.Error()
 		}
 
-		return &errors.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  msg,
-		}
+		return onekiterrors.New(http.StatusBadRequest, msg)
 	}
 
 	if err := validateProtoMessages(req); err != nil {
-		return &errors.ServerError{
-			HTTPCode: http.StatusBadRequest,
-			Code:     http.StatusBadRequest,
-			Message:  "Proto validation failed: " + err.Error(),
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Proto validation failed: "+err.Error())
 	}
 
 	// Then run custom logic validation if the handler implements ValidatorFunc
@@ -586,29 +563,35 @@ func parseQueryPrimitive(value string) any {
 	return value
 }
 
-func writeServerError(ctx context.Context, w http.ResponseWriter, serverError *errors.ServerError) {
+func WriteOneKitError(ctx context.Context, w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Most call sites set Code (the app-level status) and leave HTTPCode
-	// blank. Falling back to Code keeps a 400 from being silently
-	// promoted to a 500 just because HTTPCode wasn't filled in. Only
-	// promote to 500 when neither is set.
-	if serverError.HTTPCode == 0 {
-		if serverError.Code >= 400 && serverError.Code < 600 {
-			serverError.HTTPCode = serverError.Code
-		} else {
-			serverError.HTTPCode = http.StatusInternalServerError
+	statusCode := http.StatusInternalServerError
+	var response proto.Message
+
+	var validationErr *onekithttp.ValidationError
+	if stdErrors.As(err, &validationErr) {
+		statusCode = http.StatusBadRequest
+		response = validationErr
+	} else {
+		var oneKitErr *onekithttp.Error
+		if !stdErrors.As(err, &oneKitErr) {
+			oneKitErr = onekithttp.NewError(http.StatusInternalServerError, err.Error())
 		}
+		statusCode = oneKitErr.HTTPStatusCode()
+		response = oneKitErr
 	}
 
-	w.WriteHeader(serverError.HTTPCode)
+	payload, marshalErr := protojson.MarshalOptions{EmitUnpopulated: false}.Marshal(response)
+	if marshalErr != nil {
+		logger.Ctx(ctx).Error("Failed to encode error response", logger.Error(marshalErr))
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 
-	response := errors.ErrorResponse{
-		Error:  *serverError,
-		Status: "error",
+		return
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		logger.Ctx(ctx).Error("Failed to encode error response", logger.Error(err))
+	w.WriteHeader(statusCode)
+	if _, writeErr := w.Write(payload); writeErr != nil {
+		logger.Ctx(ctx).Error("Failed to write error response", logger.Error(writeErr))
 	}
 }

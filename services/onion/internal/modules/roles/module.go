@@ -3,11 +3,14 @@ package roles
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hubpermissionv1 "github.com/voxire/voxie/gen/go/hub/permission/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/roles/internal/api"
 	"github.com/voxire/onion/internal/modules/roles/internal/application"
-	"github.com/voxire/onion/internal/modules/roles/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hubpermissionv1.RegisterPermissionServiceServer(
+		api.NewPermissionAPI(m.service),
+		hubpermissionv1.WithMux(mux),
+		hubpermissionv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hub permission service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

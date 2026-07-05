@@ -3,11 +3,14 @@ package booking_reminders
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	bookingreminderv1 "github.com/voxire/voxie/gen/go/booking/reminder/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/booking_reminders/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/application"
-	"github.com/voxire/onion/internal/modules/booking_reminders/internal/routes"
 )
 
 type Module struct{ service *application.Service }
@@ -16,7 +19,13 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := bookingreminderv1.RegisterReminderServiceServer(
+		api.NewReminderAPI(m.service),
+		bookingreminderv1.WithMux(mux),
+		bookingreminderv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register booking reminder service: %w", err))
+	}
 }
 func (m *Module) GetAnonymousRoutes() []string { return []string{} }

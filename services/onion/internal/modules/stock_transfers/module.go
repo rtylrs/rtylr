@@ -3,11 +3,14 @@ package stocktransfers
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	erpstocktransferv1 "github.com/voxire/voxie/gen/go/erp/stock_transfer/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/api"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/application"
-	"github.com/voxire/onion/internal/modules/stock_transfers/internal/routes"
 )
 
 type Module struct {
@@ -20,8 +23,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := erpstocktransferv1.RegisterStockTransferServiceServer(
+		api.NewStockTransferAPI(m.service),
+		erpstocktransferv1.WithMux(mux),
+		erpstocktransferv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register ERP stock transfer service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

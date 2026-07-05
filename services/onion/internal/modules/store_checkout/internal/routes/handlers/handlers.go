@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/application"
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -31,22 +31,22 @@ type CreateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 	if req.SessionID == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "session_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "session_id is required")
 	}
 	return nil
 }
 
-func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, *errorModels.ServerError) {
+func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return CreateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CreateResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	id, err := h.Service.Create(ctx, businessID, authUser.UserID, domain.CheckoutCreateInput{
@@ -54,7 +54,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		Subtotal: req.Subtotal, Tax: req.Tax, Total: req.Total,
 	})
 	if err != nil {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create checkout"}
+		return CreateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create checkout")
 	}
 	return CreateResponse{ID: id, Message: "Checkout created"}, nil
 }
@@ -70,26 +70,26 @@ type CompleteResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CompleteHandler) Validate(_ context.Context, req *CompleteRequest) *errorModels.ServerError {
+func (h *CompleteHandler) Validate(_ context.Context, req *CompleteRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+		return onekiterrors.New(http.StatusBadRequest, "ID is required")
 	}
 	return nil
 }
 
-func (h *CompleteHandler) Serve(ctx context.Context, req *CompleteRequest) (CompleteResponse, *errorModels.ServerError) {
+func (h *CompleteHandler) Serve(ctx context.Context, req *CompleteRequest) (CompleteResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+		return CompleteResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return CompleteResponse{}, errorModels.PermissionDeniedServerError()
+		return CompleteResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.Service.Complete(ctx, businessID, req.ID, authUser.UserID); err != nil {
-		return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to complete checkout"}
+		return CompleteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to complete checkout")
 	}
 	return CompleteResponse{Message: "Checkout completed"}, nil
 }

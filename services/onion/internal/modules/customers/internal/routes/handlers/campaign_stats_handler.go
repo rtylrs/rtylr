@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
@@ -48,41 +48,32 @@ type GetCampaignStatsResponse struct {
 	Stats *crmcampaignv1.CampaignStats `json:"stats"`
 }
 
-func (h *GetCampaignStatsHandler) Validate(_ context.Context, req *GetCampaignStatsRequest) *errorModels.ServerError {
+func (h *GetCampaignStatsHandler) Validate(_ context.Context, req *GetCampaignStatsRequest) error {
 	if req.CampaignID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign ID is required")
 	}
 
 	return nil
 }
 
-func (h *GetCampaignStatsHandler) Serve(ctx context.Context, req *GetCampaignStatsRequest) (GetCampaignStatsResponse, *errorModels.ServerError) {
+func (h *GetCampaignStatsHandler) Serve(ctx context.Context, req *GetCampaignStatsRequest) (GetCampaignStatsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetCampaignStatsResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCampaignStatsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetCampaignStatsResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCampaignStatsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	stats, err := h.CRMService.GetCampaignStats(ctx, businessID, req.CampaignID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
-			return GetCampaignStatsResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Campaign not found",
-			}
+			return GetCampaignStatsResponse{}, onekiterrors.New(http.StatusNotFound, "Campaign not found")
 		}
 
-		return GetCampaignStatsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get campaign stats",
-		}
+		return GetCampaignStatsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get campaign stats")
 	}
 
 	return GetCampaignStatsResponse{
@@ -105,41 +96,32 @@ type GetCampaignDetailResponse struct {
 	Stats    *crmcampaignv1.CampaignStats `json:"stats"`
 }
 
-func (h *GetCampaignDetailHandler) Validate(_ context.Context, req *GetCampaignDetailRequest) *errorModels.ServerError {
+func (h *GetCampaignDetailHandler) Validate(_ context.Context, req *GetCampaignDetailRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Campaign ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Campaign ID is required")
 	}
 
 	return nil
 }
 
-func (h *GetCampaignDetailHandler) Serve(ctx context.Context, req *GetCampaignDetailRequest) (GetCampaignDetailResponse, *errorModels.ServerError) {
+func (h *GetCampaignDetailHandler) Serve(ctx context.Context, req *GetCampaignDetailRequest) (GetCampaignDetailResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return GetCampaignDetailResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCampaignDetailResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return GetCampaignDetailResponse{}, errorModels.PermissionDeniedServerError()
+		return GetCampaignDetailResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	detail, err := h.CRMService.GetCampaignDetail(ctx, businessID, req.ID)
 	if err != nil {
 		if errors.Is(err, domain.ErrCampaignNotFound) {
-			return GetCampaignDetailResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Campaign not found",
-			}
+			return GetCampaignDetailResponse{}, onekiterrors.New(http.StatusNotFound, "Campaign not found")
 		}
 
-		return GetCampaignDetailResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to get campaign detail",
-		}
+		return GetCampaignDetailResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get campaign detail")
 	}
 
 	return GetCampaignDetailResponse{

@@ -8,8 +8,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 func GetPayrollConfigRoutes() []string { return []string{"/hr/payroll/config"} }
@@ -28,19 +28,19 @@ type GetPayrollConfigResponse struct {
 	UpdatedAt       int64  `json:"updated_at"`
 }
 
-func (h *GetPayrollConfigHandler) Serve(ctx context.Context, _ *GetPayrollConfigRequest) (GetPayrollConfigResponse, *errorModels.ServerError) {
+func (h *GetPayrollConfigHandler) Serve(ctx context.Context, _ *GetPayrollConfigRequest) (GetPayrollConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return GetPayrollConfigResponse{}, errorModels.PermissionDeniedServerError()
+		return GetPayrollConfigResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	cfg, err := h.Service.GetPayrollConfig(ctx, device.User.UserID)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollNotConfigured) {
-			return GetPayrollConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Payroll not configured for this company"}
+			return GetPayrollConfigResponse{}, onekiterrors.New(http.StatusNotFound, "Payroll not configured for this company")
 		}
 		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return GetPayrollConfigResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get payroll config"}
+		return GetPayrollConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get payroll config")
 	}
 
 	return GetPayrollConfigResponse{

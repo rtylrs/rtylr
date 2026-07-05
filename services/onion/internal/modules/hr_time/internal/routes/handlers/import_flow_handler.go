@@ -7,9 +7,9 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
@@ -28,41 +28,41 @@ type ImportFlowResponse struct {
 	Count    int32                             `json:"count"`
 }
 
-func (h *ImportFlowHandler) Validate(_ context.Context, req *ImportFlowRequest) *errorModels.ServerError {
+func (h *ImportFlowHandler) Validate(_ context.Context, req *ImportFlowRequest) error {
 	if req.EmployeeID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "employee_id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 	if req.PeriodStart == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_start is required"}
+		return onekiterrors.New(http.StatusBadRequest, "period_start is required")
 	}
 	if req.PeriodEnd == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_end is required"}
+		return onekiterrors.New(http.StatusBadRequest, "period_end is required")
 	}
 	if _, err := time.Parse("2006-01-02", req.PeriodStart); err != nil {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_start must be in YYYY-MM-DD format"}
+		return onekiterrors.New(http.StatusBadRequest, "period_start must be in YYYY-MM-DD format")
 	}
 	if _, err := time.Parse("2006-01-02", req.PeriodEnd); err != nil {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_end must be in YYYY-MM-DD format"}
+		return onekiterrors.New(http.StatusBadRequest, "period_end must be in YYYY-MM-DD format")
 	}
 	return nil
 }
 
-func (h *ImportFlowHandler) Serve(ctx context.Context, req *ImportFlowRequest) (ImportFlowResponse, *errorModels.ServerError) {
+func (h *ImportFlowHandler) Serve(ctx context.Context, req *ImportFlowRequest) (ImportFlowResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ImportFlowResponse{}, errorModels.PermissionDeniedServerError()
+		return ImportFlowResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ImportFlowResponse{}, errorModels.PermissionDeniedServerError()
+		return ImportFlowResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	entries, err := h.Service.ImportFlowTasks(ctx, businessID, req.EmployeeID, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to import flow tasks",
 			logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
-		return ImportFlowResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to import flow tasks"}
+		return ImportFlowResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to import flow tasks")
 	}
 
 	payloads := make([]*hrtimeentryv1.TimeEntryPayload, 0, len(entries))

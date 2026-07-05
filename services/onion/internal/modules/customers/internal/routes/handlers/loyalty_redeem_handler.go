@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -32,33 +32,27 @@ type RedeemPointsResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *RedeemPointsHandler) Validate(_ context.Context, req *RedeemPointsRequest) *errorModels.ServerError {
+func (h *RedeemPointsHandler) Validate(_ context.Context, req *RedeemPointsRequest) error {
 	if req.CustomerID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Customer ID is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
 	}
 
 	if req.Points <= 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Points must be greater than zero",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 
 	return nil
 }
 
-func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsRequest) (RedeemPointsResponse, *errorModels.ServerError) {
+func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsRequest) (RedeemPointsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return RedeemPointsResponse{}, errorModels.PermissionDeniedServerError()
+		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	err := h.CRMService.RedeemPoints(ctx, domain.RedeemPointsInput{
@@ -72,23 +66,14 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrCustomerNotFound) {
-			return RedeemPointsResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Customer not found",
-			}
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusNotFound, "Customer not found")
 		}
 
 		if errors.Is(err, domain.ErrInsufficientPoints) {
-			return RedeemPointsResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Insufficient loyalty points",
-			}
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusBadRequest, "Insufficient loyalty points")
 		}
 
-		return RedeemPointsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to redeem points",
-		}
+		return RedeemPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")
 	}
 
 	return RedeemPointsResponse{Message: "Points redeemed successfully"}, nil

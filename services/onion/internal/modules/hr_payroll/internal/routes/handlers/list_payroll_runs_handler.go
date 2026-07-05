@@ -7,8 +7,8 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -28,10 +28,10 @@ type ListPayrollRunsResponse struct {
 	Offset int32                                         `json:"offset"`
 }
 
-func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRunsRequest) (ListPayrollRunsResponse, *errorModels.ServerError) {
+func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRunsRequest) (ListPayrollRunsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
-		return ListPayrollRunsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListPayrollRunsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	runs, total, err := h.Service.ListPayrollRuns(ctx, device.User.UserID, domain.ListPayrollRunsParams{
@@ -39,7 +39,7 @@ func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRuns
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list payroll runs", logger.Any("owner_id", device.User.UserID), logger.Error(err))
-		return ListPayrollRunsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list payroll runs"}
+		return ListPayrollRunsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list payroll runs")
 	}
 
 	payloads := make([]*hremployeespayrollrunsv1.PayrollRunPayload, 0, len(runs))

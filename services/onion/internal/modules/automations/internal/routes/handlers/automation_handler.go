@@ -15,7 +15,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -94,15 +94,15 @@ type ListAutomationsResponse struct {
 	Automations []AutomationPayload `json:"automations"`
 }
 
-func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRequest) (ListAutomationsResponse, *errorModels.ServerError) {
+func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRequest) (ListAutomationsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return ListAutomationsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListAutomationsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return ListAutomationsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListAutomationsResponse{}, onekiterrors.PermissionDenied()
 	}
 	res, cacheErr := cacher.Of[ListAutomationsResponse]().GetOrComputeSingle(
 		ctx,
@@ -118,10 +118,7 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 
 	res, computeErr := h.computeList(ctx, businessID)
 	if computeErr != nil {
-		return ListAutomationsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list automations",
-		}
+		return ListAutomationsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list automations")
 	}
 	return res, nil
 }
@@ -159,28 +156,22 @@ type CreateAutomationResponse struct {
 	Message      string `json:"message"`
 }
 
-func (h *CreateAutomationHandler) Validate(_ context.Context, req *CreateAutomationRequest) *errorModels.ServerError {
+func (h *CreateAutomationHandler) Validate(_ context.Context, req *CreateAutomationRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Automation name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Automation name is required")
 	}
 
 	if req.TriggerType == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Trigger type is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Trigger type is required")
 	}
 
 	return nil
 }
 
-func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomationRequest) (CreateAutomationResponse, *errorModels.ServerError) {
+func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomationRequest) (CreateAutomationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return CreateAutomationResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	triggerConfig := []byte(req.TriggerConfig)
@@ -195,7 +186,7 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return CreateAutomationResponse{}, errorModels.PermissionDeniedServerError()
+		return CreateAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
 	id, err := h.Service.Create(ctx, domain.AutomationInput{
 		OwnerID:       device.User.UserID,
@@ -207,10 +198,7 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 		IsActive:      req.IsActive,
 	})
 	if err != nil {
-		return CreateAutomationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to create automation",
-		}
+		return CreateAutomationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create automation")
 	}
 
 	invalidateAutomationsCache(ctx, businessID)
@@ -236,30 +224,24 @@ type UpdateAutomationResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateAutomationHandler) Validate(_ context.Context, req *UpdateAutomationRequest) *errorModels.ServerError {
+func (h *UpdateAutomationHandler) Validate(_ context.Context, req *UpdateAutomationRequest) error {
 	if req.Name == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Automation name is required",
-		}
+		return onekiterrors.New(http.StatusBadRequest, "Automation name is required")
 	}
 
 	return nil
 }
 
-func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomationRequest) (UpdateAutomationResponse, *errorModels.ServerError) {
+func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomationRequest) (UpdateAutomationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return UpdateAutomationResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
-		return UpdateAutomationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid automation ID",
-		}
+		return UpdateAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid automation ID")
 	}
 
 	triggerConfig := []byte(req.TriggerConfig)
@@ -274,7 +256,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return UpdateAutomationResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.Update(ctx, domain.AutomationUpdateInput{
 		ID:            id,
@@ -287,16 +269,10 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		IsActive:      req.IsActive,
 	}); err != nil {
 		if errors.Is(err, domain.ErrAutomationNotFound) {
-			return UpdateAutomationResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Automation not found",
-			}
+			return UpdateAutomationResponse{}, onekiterrors.New(http.StatusNotFound, "Automation not found")
 		}
 
-		return UpdateAutomationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update automation",
-		}
+		return UpdateAutomationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update automation")
 	}
 
 	invalidateAutomationsCache(ctx, businessID)
@@ -316,37 +292,28 @@ type DeleteAutomationResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomationRequest) (DeleteAutomationResponse, *errorModels.ServerError) {
+func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomationRequest) (DeleteAutomationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
-		return DeleteAutomationResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil || id <= 0 {
-		return DeleteAutomationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid automation ID",
-		}
+		return DeleteAutomationResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid automation ID")
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
-		return DeleteAutomationResponse{}, errorModels.PermissionDeniedServerError()
+		return DeleteAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
 	if err := h.Service.Delete(ctx, businessID, id); err != nil {
 		if errors.Is(err, domain.ErrAutomationNotFound) {
-			return DeleteAutomationResponse{}, &errorModels.ServerError{
-				Code:    http.StatusNotFound,
-				Message: "Automation not found",
-			}
+			return DeleteAutomationResponse{}, onekiterrors.New(http.StatusNotFound, "Automation not found")
 		}
 
-		return DeleteAutomationResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to delete automation",
-		}
+		return DeleteAutomationResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete automation")
 	}
 
 	invalidateAutomationsCache(ctx, businessID)

@@ -3,11 +3,14 @@ package reviews
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	hrreviewv1 "github.com/voxire/voxie/gen/go/hr/review/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 
+	"github.com/voxire/onion/internal/modules/reviews/internal/api"
 	"github.com/voxire/onion/internal/modules/reviews/internal/application"
-	"github.com/voxire/onion/internal/modules/reviews/internal/routes"
 )
 
 type Module struct {
@@ -18,8 +21,14 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := hrreviewv1.RegisterReviewServiceServer(
+		api.NewReviewAPI(m.service),
+		hrreviewv1.WithMux(mux),
+		hrreviewv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
+	); err != nil {
+		panic(fmt.Errorf("register hr review service: %w", err))
+	}
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -12,7 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/reviews/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -123,7 +123,7 @@ func reviewToolBusinessID(ctx context.Context) (int64, error) {
 	if device.User != nil && device.User.UserID > 0 {
 		businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 		if bizErr != nil {
-			return 0, errorModels.PermissionDeniedServerError()
+			return 0, onekiterrors.PermissionDenied()
 		}
 		return businessID, nil
 	}
@@ -131,7 +131,7 @@ func reviewToolBusinessID(ctx context.Context) (int64, error) {
 	if ok && authUser != nil && authUser.UserID > 0 {
 		businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 		if bizErr != nil {
-			return 0, errorModels.PermissionDeniedServerError()
+			return 0, onekiterrors.PermissionDenied()
 		}
 		return businessID, nil
 	}

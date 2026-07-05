@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -74,22 +74,19 @@ type ListSubmissionsResponse struct {
 	Submissions []*SubmissionPayload `json:"submissions"`
 }
 
-func (h *ListSubmissionsHandler) Serve(ctx context.Context, req *ListSubmissionsRequest) (ListSubmissionsResponse, *errorModels.ServerError) {
+func (h *ListSubmissionsHandler) Serve(ctx context.Context, req *ListSubmissionsRequest) (ListSubmissionsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return ListSubmissionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListSubmissionsResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return ListSubmissionsResponse{}, errorModels.PermissionDeniedServerError()
+		return ListSubmissionsResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, req.Status)
 	if err != nil {
-		return ListSubmissionsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to list submissions",
-		}
+		return ListSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list submissions")
 	}
 
 	payloads := make([]*SubmissionPayload, 0, len(submissions))
@@ -116,31 +113,28 @@ type UpdateSubmissionStatusResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateSubmissionStatusHandler) Validate(_ context.Context, req *UpdateSubmissionStatusRequest) *errorModels.ServerError {
+func (h *UpdateSubmissionStatusHandler) Validate(_ context.Context, req *UpdateSubmissionStatusRequest) error {
 	if req.ID == 0 {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
 	if req.Status == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "status is required"}
+		return onekiterrors.New(http.StatusBadRequest, "status is required")
 	}
 	return nil
 }
 
-func (h *UpdateSubmissionStatusHandler) Serve(ctx context.Context, req *UpdateSubmissionStatusRequest) (UpdateSubmissionStatusResponse, *errorModels.ServerError) {
+func (h *UpdateSubmissionStatusHandler) Serve(ctx context.Context, req *UpdateSubmissionStatusRequest) (UpdateSubmissionStatusResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
-		return UpdateSubmissionStatusResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateSubmissionStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return UpdateSubmissionStatusResponse{}, errorModels.PermissionDeniedServerError()
+		return UpdateSubmissionStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 
 	if err := h.CareersService.UpdateSubmissionStatus(ctx, businessID, req.ID, req.Status); err != nil {
-		return UpdateSubmissionStatusResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to update submission status",
-		}
+		return UpdateSubmissionStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update submission status")
 	}
 	return UpdateSubmissionStatusResponse{Message: "Submission updated"}, nil
 }
