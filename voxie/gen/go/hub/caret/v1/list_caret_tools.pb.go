@@ -28,8 +28,12 @@ type CaretTool struct {
 	Description      string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Category         string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
 	RequiresApproval bool                   `protobuf:"varint,5,opt,name=requires_approval,json=requiresApproval,proto3" json:"requires_approval,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Access scope of this tool: "read" or "write". Mirrors the server-side
+	// gating already applied in ask/analyst modes; exposed so the UI can
+	// surface it too (e.g. counting write-scoped tools).
+	Scope         string `protobuf:"bytes,6,opt,name=scope,proto3" json:"scope,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CaretTool) Reset() {
@@ -95,6 +99,13 @@ func (x *CaretTool) GetRequiresApproval() bool {
 		return x.RequiresApproval
 	}
 	return false
+}
+
+func (x *CaretTool) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
 }
 
 type ListCaretToolsRequest struct {
@@ -189,13 +200,14 @@ var File_hub_caret_v1_list_caret_tools_proto protoreflect.FileDescriptor
 
 const file_hub_caret_v1_list_caret_tools_proto_rawDesc = "" +
 	"\n" +
-	"#hub/caret/v1/list_caret_tools.proto\x12\fhub.caret.v1\"\xa0\x01\n" +
+	"#hub/caret/v1/list_caret_tools.proto\x12\fhub.caret.v1\"\xb6\x01\n" +
 	"\tCaretTool\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1a\n" +
 	"\bcategory\x18\x04 \x01(\tR\bcategory\x12+\n" +
-	"\x11requires_approval\x18\x05 \x01(\bR\x10requiresApproval\"+\n" +
+	"\x11requires_approval\x18\x05 \x01(\bR\x10requiresApproval\x12\x14\n" +
+	"\x05scope\x18\x06 \x01(\tR\x05scope\"+\n" +
 	"\x15ListCaretToolsRequest\x12\x12\n" +
 	"\x04mode\x18\x01 \x01(\tR\x04mode\"G\n" +
 	"\x16ListCaretToolsResponse\x12-\n" +

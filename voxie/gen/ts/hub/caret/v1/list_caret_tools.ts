@@ -12,6 +12,12 @@ export interface CaretTool {
   description: string;
   category: string;
   requiresApproval: boolean;
+  /**
+   * Access scope of this tool: "read" or "write". Mirrors the server-side
+   * gating already applied in ask/analyst modes; exposed so the UI can
+   * surface it too (e.g. counting write-scoped tools).
+   */
+  scope: string;
 }
 
 export interface ListCaretToolsRequest {

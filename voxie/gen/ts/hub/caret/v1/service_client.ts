@@ -15,6 +15,7 @@ export interface CaretTool {
   description: string;
   category: string;
   requiresApproval: boolean;
+  scope: string;
 }
 
 export interface FieldViolation {
