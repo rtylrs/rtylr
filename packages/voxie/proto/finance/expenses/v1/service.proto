@@ -4,9 +4,11 @@ package finance.expenses.v1;
 
 import "finance/expenses/v1/create_expense.proto";
 import "finance/expenses/v1/delete_expense.proto";
+import "finance/expenses/v1/get_expense.proto";
 import "finance/expenses/v1/list_expense_categories.proto";
 import "finance/expenses/v1/list_expenses.proto";
 import "finance/expenses/v1/update_expense.proto";
+import "finance/expenses/v1/update_expense_status.proto";
 import "onekit/http/annotations.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/expenses/v1";
@@ -41,6 +43,21 @@ service ExpensesService {
     option (onekit.http.config) = {
       path: "/expenses/{id}"
       method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc GetExpense(GetExpenseRequest) returns (GetExpenseResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdateExpenseStatus(UpdateExpenseStatusRequest) returns (UpdateExpenseStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/expenses/{id}/status"
+      method: HTTP_METHOD_PATCH
+      body: "body"
     };
   }
 

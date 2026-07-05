@@ -8,7 +8,6 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	_ "github.com/stackxio/onekit/http"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,16 +24,26 @@ const (
 
 type CreateQuoteRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// customer_id is the customer id value for this contract.
-	CustomerId int64 `protobuf:"varint,1,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	// customer_name is the customer name value for this contract.
+	CustomerName string `protobuf:"bytes,1,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
+	// customer_email is the customer email value for this contract.
+	CustomerEmail string `protobuf:"bytes,2,opt,name=customer_email,json=customerEmail,proto3" json:"customer_email,omitempty"`
+	// status is the initial lifecycle state - defaults to "draft" if empty.
+	Status string `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
 	// lines is the lines value for this contract.
-	Lines []*QuoteLine `protobuf:"bytes,2,rep,name=lines,proto3" json:"lines,omitempty"`
+	Lines []*QuoteLine `protobuf:"bytes,4,rep,name=lines,proto3" json:"lines,omitempty"`
+	// subtotal is the subtotal value for this contract.
+	Subtotal float64 `protobuf:"fixed64,5,opt,name=subtotal,proto3" json:"subtotal,omitempty"`
+	// tax is the tax value for this contract.
+	Tax float64 `protobuf:"fixed64,6,opt,name=tax,proto3" json:"tax,omitempty"`
 	// valid_until is the valid until value for this contract.
-	ValidUntil string `protobuf:"bytes,3,opt,name=valid_until,json=validUntil,proto3" json:"valid_until,omitempty"`
+	ValidUntil string `protobuf:"bytes,7,opt,name=valid_until,json=validUntil,proto3" json:"valid_until,omitempty"`
 	// discount is the discount value for this contract.
-	Discount float64 `protobuf:"fixed64,4,opt,name=discount,proto3" json:"discount,omitempty"`
+	Discount float64 `protobuf:"fixed64,8,opt,name=discount,proto3" json:"discount,omitempty"`
+	// total is the total number of matching records.
+	Total float64 `protobuf:"fixed64,9,opt,name=total,proto3" json:"total,omitempty"`
 	// notes is the notes value for this contract.
-	Notes         string `protobuf:"bytes,5,opt,name=notes,proto3" json:"notes,omitempty"`
+	Notes         string `protobuf:"bytes,10,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -69,11 +78,25 @@ func (*CreateQuoteRequest) Descriptor() ([]byte, []int) {
 	return file_finance_quote_v1_create_quote_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CreateQuoteRequest) GetCustomerId() int64 {
+func (x *CreateQuoteRequest) GetCustomerName() string {
 	if x != nil {
-		return x.CustomerId
+		return x.CustomerName
 	}
-	return 0
+	return ""
+}
+
+func (x *CreateQuoteRequest) GetCustomerEmail() string {
+	if x != nil {
+		return x.CustomerEmail
+	}
+	return ""
+}
+
+func (x *CreateQuoteRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 func (x *CreateQuoteRequest) GetLines() []*QuoteLine {
@@ -81,6 +104,20 @@ func (x *CreateQuoteRequest) GetLines() []*QuoteLine {
 		return x.Lines
 	}
 	return nil
+}
+
+func (x *CreateQuoteRequest) GetSubtotal() float64 {
+	if x != nil {
+		return x.Subtotal
+	}
+	return 0
+}
+
+func (x *CreateQuoteRequest) GetTax() float64 {
+	if x != nil {
+		return x.Tax
+	}
+	return 0
 }
 
 func (x *CreateQuoteRequest) GetValidUntil() string {
@@ -93,6 +130,13 @@ func (x *CreateQuoteRequest) GetValidUntil() string {
 func (x *CreateQuoteRequest) GetDiscount() float64 {
 	if x != nil {
 		return x.Discount
+	}
+	return 0
+}
+
+func (x *CreateQuoteRequest) GetTotal() float64 {
+	if x != nil {
+		return x.Total
 	}
 	return 0
 }
@@ -153,16 +197,22 @@ var File_finance_quote_v1_create_quote_proto protoreflect.FileDescriptor
 
 const file_finance_quote_v1_create_quote_proto_rawDesc = "" +
 	"\n" +
-	"#finance/quote/v1/create_quote.proto\x12\x10finance.quote.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cfinance/quote/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xf4\x01\n" +
+	"#finance/quote/v1/create_quote.proto\x12\x10finance.quote.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cfinance/quote/v1/types.proto\"\xa7\x03\n" +
 	"\x12CreateQuoteRequest\x12/\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\n" +
-	"customerId\x12;\n" +
-	"\x05lines\x18\x02 \x03(\v2\x1b.finance.quote.v1.QuoteLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\x12+\n" +
-	"\vvalid_until\x18\x03 \x01(\tB\n" +
+	"\rcustomer_name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\fcustomerName\x12%\n" +
+	"\x0ecustomer_email\x18\x02 \x01(\tR\rcustomerEmail\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12;\n" +
+	"\x05lines\x18\x04 \x03(\v2\x1b.finance.quote.v1.QuoteLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\x12*\n" +
+	"\bsubtotal\x18\x05 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\bsubtotal\x12 \n" +
+	"\x03tax\x18\x06 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x03tax\x12+\n" +
+	"\vvalid_until\x18\a \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
 	"validUntil\x12-\n" +
-	"\bdiscount\x18\x04 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\bdiscount\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\"D\n" +
+	"\bdiscount\x18\b \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\bdiscount\x12$\n" +
+	"\x05total\x18\t \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x05total\x12\x14\n" +
+	"\x05notes\x18\n" +
+	" \x01(\tR\x05notes\"D\n" +
 	"\x13CreateQuoteResponse\x12-\n" +
 	"\x05quote\x18\x01 \x01(\v2\x17.finance.quote.v1.QuoteR\x05quoteB1Z/github.com/voxire/voxie/gen/go/finance/quote/v1b\x06proto3"
 

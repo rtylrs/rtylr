@@ -6,10 +6,15 @@ export interface ListInvoicesRequest {
   search: string;
   dateFrom: string;
   dateTo: string;
+  page: number;
+  pageSize: number;
 }
 
 export interface ListInvoicesResponse {
   invoices: InvoiceSummary[];
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
 }
 
 export interface InvoiceSummary {
@@ -152,6 +157,14 @@ export interface DeleteInvoiceResponse {
   message: string;
 }
 
+export interface SendInvoiceRequest {
+  id: string;
+}
+
+export interface SendInvoiceResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -222,6 +235,8 @@ export class InvoicesServiceClient {
     if (req.search != null && req.search !== "") params.set("search", String(req.search));
     if (req.dateFrom != null && req.dateFrom !== "") params.set("date_from", String(req.dateFrom));
     if (req.dateTo != null && req.dateTo !== "") params.set("date_to", String(req.dateTo));
+    if (req.page != null && req.page !== 0) params.set("page", String(req.page));
+    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
@@ -363,6 +378,31 @@ export class InvoicesServiceClient {
     }
 
     return await resp.json() as DeleteInvoiceResponse;
+  }
+
+  async sendInvoice(req: SendInvoiceRequest, options?: InvoicesServiceCallOptions): Promise<SendInvoiceResponse> {
+    let path = "/api/finance/invoices/v1/invoices/{id}/send";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SendInvoiceResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

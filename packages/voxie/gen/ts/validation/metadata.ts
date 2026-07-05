@@ -3857,6 +3857,18 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "finance.expenses.v1.GetExpenseRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.expenses.v1.ListExpenseCategoriesRequest": {},
   "finance.expenses.v1.ListExpensesRequest": {},
   "finance.expenses.v1.UpdateExpenseRequest": {
@@ -3868,6 +3880,27 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": false,
       "type": "UpdateExpenseBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "finance.expenses.v1.UpdateExpenseStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateExpenseStatusBody"
     },
     "id": {
       "gt": 0,
@@ -4123,6 +4156,24 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
+    "page": {
+      "name": "page",
+      "optional": false,
+      "protoName": "page",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "pageSize": {
+      "name": "pageSize",
+      "optional": false,
+      "protoName": "page_size",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
     "search": {
       "name": "search",
       "optional": false,
@@ -4140,6 +4191,18 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "string"
+    }
+  },
+  "finance.invoices.v1.SendInvoiceRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
     }
   },
   "finance.invoices.v1.UpdateInvoiceRequest": {
@@ -4284,16 +4347,37 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
-  "finance.quote.v1.CreateQuoteRequest": {
-    "customerId": {
+  "finance.quote.v1.ConvertQuoteRequest": {
+    "id": {
       "gt": 0,
-      "name": "customerId",
+      "name": "id",
       "optional": false,
-      "protoName": "customer_id",
+      "protoName": "id",
       "repeated": false,
       "required": true,
       "scalar": true,
       "type": "int64"
+    }
+  },
+  "finance.quote.v1.CreateQuoteRequest": {
+    "customerEmail": {
+      "name": "customerEmail",
+      "optional": false,
+      "protoName": "customer_email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "customerName": {
+      "minLen": 1,
+      "name": "customerName",
+      "optional": false,
+      "protoName": "customer_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
     },
     "discount": {
       "gte": 0,
@@ -4324,6 +4408,45 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "string"
     },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "subtotal": {
+      "gte": 0,
+      "name": "subtotal",
+      "optional": false,
+      "protoName": "subtotal",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "tax": {
+      "gte": 0,
+      "name": "tax",
+      "optional": false,
+      "protoName": "tax",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
+    "total": {
+      "gte": 0,
+      "name": "total",
+      "optional": false,
+      "protoName": "total",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "double"
+    },
     "validUntil": {
       "minLen": 1,
       "name": "validUntil",
@@ -4348,24 +4471,6 @@ export const contractValidationMetadata = {
     }
   },
   "finance.quote.v1.ListQuotesRequest": {
-    "customerId": {
-      "name": "customerId",
-      "optional": false,
-      "protoName": "customer_id",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int64"
-    },
-    "limit": {
-      "name": "limit",
-      "optional": false,
-      "protoName": "limit",
-      "repeated": false,
-      "required": false,
-      "scalar": true,
-      "type": "int32"
-    },
     "page": {
       "name": "page",
       "optional": false,
@@ -4373,34 +4478,37 @@ export const contractValidationMetadata = {
       "repeated": false,
       "required": false,
       "scalar": true,
-      "type": "int32"
+      "type": "int64"
     },
-    "sortBy": {
-      "name": "sortBy",
+    "pageSize": {
+      "name": "pageSize",
       "optional": false,
-      "protoName": "sort_by",
+      "protoName": "page_size",
       "repeated": false,
       "required": false,
       "scalar": true,
-      "type": "string"
-    },
-    "sortDir": {
-      "name": "sortDir",
+      "type": "int64"
+    }
+  },
+  "finance.quote.v1.UpdateQuoteStatusRequest": {
+    "body": {
+      "name": "body",
       "optional": false,
-      "protoName": "sort_dir",
+      "protoName": "body",
       "repeated": false,
       "required": false,
-      "scalar": true,
-      "type": "string"
+      "scalar": false,
+      "type": "UpdateQuoteStatusBody"
     },
-    "status": {
-      "name": "status",
+    "id": {
+      "gt": 0,
+      "name": "id",
       "optional": false,
-      "protoName": "status",
+      "protoName": "id",
       "repeated": false,
-      "required": false,
+      "required": true,
       "scalar": true,
-      "type": "string"
+      "type": "int64"
     }
   },
   "finance.reconciliation.v1.GetOverviewRequest": {},

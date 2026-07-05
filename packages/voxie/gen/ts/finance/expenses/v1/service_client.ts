@@ -65,6 +65,27 @@ export interface DeleteExpenseResponse {
   message: string;
 }
 
+export interface GetExpenseRequest {
+  id: string;
+}
+
+export interface GetExpenseResponse {
+  expense?: Expense;
+}
+
+export interface UpdateExpenseStatusRequest {
+  id: string;
+  body?: UpdateExpenseStatusBody;
+}
+
+export interface UpdateExpenseStatusBody {
+  status: string;
+}
+
+export interface UpdateExpenseStatusResponse {
+  message: string;
+}
+
 export interface ListExpenseCategoriesRequest {
 }
 
@@ -237,6 +258,55 @@ export class ExpensesServiceClient {
     }
 
     return await resp.json() as DeleteExpenseResponse;
+  }
+
+  async getExpense(req: GetExpenseRequest, options?: ExpensesServiceCallOptions): Promise<GetExpenseResponse> {
+    let path = "/api/finance/expenses/v1/expenses/{id}";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "GET",
+      headers,
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as GetExpenseResponse;
+  }
+
+  async updateExpenseStatus(req: UpdateExpenseStatusRequest, options?: ExpensesServiceCallOptions): Promise<UpdateExpenseStatusResponse> {
+    let path = "/api/finance/expenses/v1/expenses/{id}/status";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(req.body ?? {}),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateExpenseStatusResponse;
   }
 
   async listExpenseCategories(_req: ListExpenseCategoriesRequest, options?: ExpensesServiceCallOptions): Promise<ListExpenseCategoriesResponse> {

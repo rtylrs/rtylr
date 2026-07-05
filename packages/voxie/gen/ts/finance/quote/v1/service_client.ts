@@ -3,23 +3,21 @@
 
 export interface ListQuotesRequest {
   page: number;
-  limit: number;
-  sortBy: string;
-  sortDir: string;
-  status: string;
-  customerId: string;
+  pageSize: number;
 }
 
 export interface ListQuotesResponse {
   quotes: Quote[];
-  pagination?: PaginationResponse;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
 }
 
 export interface Quote {
   id: string;
-  number: string;
-  customerId: string;
+  ownerId: string;
   customerName: string;
+  customerEmail: string;
   status: string;
   lines: QuoteLine[];
   subtotal: number;
@@ -40,20 +38,16 @@ export interface QuoteLine {
   total: number;
 }
 
-export interface PaginationResponse {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
 export interface CreateQuoteRequest {
-  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  status: string;
   lines: QuoteLine[];
+  subtotal: number;
+  tax: number;
   validUntil: string;
   discount: number;
+  total: number;
   notes: string;
 }
 
@@ -67,6 +61,28 @@ export interface GetQuoteRequest {
 
 export interface GetQuoteResponse {
   quote?: Quote;
+}
+
+export interface UpdateQuoteStatusRequest {
+  id: string;
+  body?: UpdateQuoteStatusBody;
+}
+
+export interface UpdateQuoteStatusBody {
+  status: string;
+}
+
+export interface UpdateQuoteStatusResponse {
+  message: string;
+}
+
+export interface ConvertQuoteRequest {
+  id: string;
+}
+
+export interface ConvertQuoteResponse {
+  invoiceId: string;
+  message: string;
 }
 
 export interface FieldViolation {
@@ -136,11 +152,7 @@ export class QuoteServiceClient {
     let path = "/api/finance/quote/v1/quotes";
     const params = new URLSearchParams();
     if (req.page != null && req.page !== 0) params.set("page", String(req.page));
-    if (req.limit != null && req.limit !== 0) params.set("limit", String(req.limit));
-    if (req.sortBy != null && req.sortBy !== "") params.set("sort_by", String(req.sortBy));
-    if (req.sortDir != null && req.sortDir !== "") params.set("sort_dir", String(req.sortDir));
-    if (req.status != null && req.status !== "") params.set("status", String(req.status));
-    if (req.customerId != null && req.customerId !== "0") params.set("customer_id", String(req.customerId));
+    if (req.pageSize != null && req.pageSize !== 0) params.set("page_size", String(req.pageSize));
     const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
@@ -208,6 +220,56 @@ export class QuoteServiceClient {
     }
 
     return await resp.json() as GetQuoteResponse;
+  }
+
+  async updateQuoteStatus(req: UpdateQuoteStatusRequest, options?: QuoteServiceCallOptions): Promise<UpdateQuoteStatusResponse> {
+    let path = "/api/finance/quote/v1/quotes/{id}/status";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(req.body ?? {}),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateQuoteStatusResponse;
+  }
+
+  async convertQuote(req: ConvertQuoteRequest, options?: QuoteServiceCallOptions): Promise<ConvertQuoteResponse> {
+    let path = "/api/finance/quote/v1/quotes/{id}/convert";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ConvertQuoteResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

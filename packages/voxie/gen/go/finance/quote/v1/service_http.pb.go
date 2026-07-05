@@ -14,6 +14,8 @@ type QuoteServiceServer interface {
 	ListQuotes(context.Context, *ListQuotesRequest) (*ListQuotesResponse, error)
 	CreateQuote(context.Context, *CreateQuoteRequest) (*CreateQuoteResponse, error)
 	GetQuote(context.Context, *GetQuoteRequest) (*GetQuoteResponse, error)
+	UpdateQuoteStatus(context.Context, *UpdateQuoteStatusRequest) (*UpdateQuoteStatusResponse, error)
+	ConvertQuote(context.Context, *ConvertQuoteRequest) (*ConvertQuoteResponse, error)
 }
 
 // RegisterQuoteServiceServer registers the HTTP handlers for service QuoteService to the given mux.
@@ -49,6 +51,24 @@ func RegisterQuoteServiceServer(server QuoteServiceServer, opts ...ServerOption)
 
 	config.mux.Handle("GET /api/finance/quote/v1/quotes/{id}", getQuoteHandler)
 
+	methodHeaders = getUpdateQuoteStatusHeaders()
+	updateQuoteStatusHandler := BindingMiddleware[UpdateQuoteStatusRequest](
+		genericHandler(server.UpdateQuoteStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateQuoteStatusPathParams, updateQuoteStatusQueryParams,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PATCH /api/finance/quote/v1/quotes/{id}/status", updateQuoteStatusHandler)
+
+	methodHeaders = getConvertQuoteHeaders()
+	convertQuoteHandler := BindingMiddleware[ConvertQuoteRequest](
+		genericHandler(server.ConvertQuote, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		convertQuotePathParams, convertQuoteQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/finance/quote/v1/quotes/{id}/convert", convertQuoteHandler)
+
 	return nil
 }
 
@@ -72,17 +92,23 @@ func getGetQuoteHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getUpdateQuoteStatusHeaders returns the method-level required headers for UpdateQuoteStatus
+func getUpdateQuoteStatusHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getConvertQuoteHeaders returns the method-level required headers for ConvertQuote
+func getConvertQuoteHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // listQuotesPathParams contains path parameter configuration for ListQuotes
 var listQuotesPathParams = []PathParamConfig{}
 
 // listQuotesQueryParams contains query parameter configuration for ListQuotes
 var listQuotesQueryParams = []QueryParamConfig{
 	{QueryName: "page", FieldName: "page", Required: false},
-	{QueryName: "limit", FieldName: "limit", Required: false},
-	{QueryName: "sort_by", FieldName: "sort_by", Required: false},
-	{QueryName: "sort_dir", FieldName: "sort_dir", Required: false},
-	{QueryName: "status", FieldName: "status", Required: false},
-	{QueryName: "customer_id", FieldName: "customer_id", Required: false},
+	{QueryName: "page_size", FieldName: "page_size", Required: false},
 }
 
 // createQuotePathParams contains path parameter configuration for CreateQuote
@@ -98,3 +124,19 @@ var getQuotePathParams = []PathParamConfig{
 
 // getQuoteQueryParams contains query parameter configuration for GetQuote
 var getQuoteQueryParams = []QueryParamConfig{}
+
+// updateQuoteStatusPathParams contains path parameter configuration for UpdateQuoteStatus
+var updateQuoteStatusPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateQuoteStatusQueryParams contains query parameter configuration for UpdateQuoteStatus
+var updateQuoteStatusQueryParams = []QueryParamConfig{}
+
+// convertQuotePathParams contains path parameter configuration for ConvertQuote
+var convertQuotePathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// convertQuoteQueryParams contains query parameter configuration for ConvertQuote
+var convertQuoteQueryParams = []QueryParamConfig{}

@@ -15,6 +15,8 @@ type ExpensesServiceServer interface {
 	CreateExpense(context.Context, *CreateExpenseRequest) (*CreateExpenseResponse, error)
 	UpdateExpense(context.Context, *UpdateExpenseRequest) (*UpdateExpenseResponse, error)
 	DeleteExpense(context.Context, *DeleteExpenseRequest) (*DeleteExpenseResponse, error)
+	GetExpense(context.Context, *GetExpenseRequest) (*GetExpenseResponse, error)
+	UpdateExpenseStatus(context.Context, *UpdateExpenseStatusRequest) (*UpdateExpenseStatusResponse, error)
 	ListExpenseCategories(context.Context, *ListExpenseCategoriesRequest) (*ListExpenseCategoriesResponse, error)
 }
 
@@ -60,6 +62,24 @@ func RegisterExpensesServiceServer(server ExpensesServiceServer, opts ...ServerO
 
 	config.mux.Handle("DELETE /api/finance/expenses/v1/expenses/{id}", deleteExpenseHandler)
 
+	methodHeaders = getGetExpenseHeaders()
+	getExpenseHandler := BindingMiddleware[GetExpenseRequest](
+		genericHandler(server.GetExpense, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		getExpensePathParams, getExpenseQueryParams,
+		"GET", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("GET /api/finance/expenses/v1/expenses/{id}", getExpenseHandler)
+
+	methodHeaders = getUpdateExpenseStatusHeaders()
+	updateExpenseStatusHandler := BindingMiddleware[UpdateExpenseStatusRequest](
+		genericHandler(server.UpdateExpenseStatus, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		updateExpenseStatusPathParams, updateExpenseStatusQueryParams,
+		"PATCH", "body", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("PATCH /api/finance/expenses/v1/expenses/{id}/status", updateExpenseStatusHandler)
+
 	methodHeaders = getListExpenseCategoriesHeaders()
 	listExpenseCategoriesHandler := BindingMiddleware[ListExpenseCategoriesRequest](
 		genericHandler(server.ListExpenseCategories, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
@@ -97,6 +117,16 @@ func getDeleteExpenseHeaders() []*onekithttp.Header {
 	return nil
 }
 
+// getGetExpenseHeaders returns the method-level required headers for GetExpense
+func getGetExpenseHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getUpdateExpenseStatusHeaders returns the method-level required headers for UpdateExpenseStatus
+func getUpdateExpenseStatusHeaders() []*onekithttp.Header {
+	return nil
+}
+
 // getListExpenseCategoriesHeaders returns the method-level required headers for ListExpenseCategories
 func getListExpenseCategoriesHeaders() []*onekithttp.Header {
 	return nil
@@ -129,6 +159,22 @@ var deleteExpensePathParams = []PathParamConfig{
 
 // deleteExpenseQueryParams contains query parameter configuration for DeleteExpense
 var deleteExpenseQueryParams = []QueryParamConfig{}
+
+// getExpensePathParams contains path parameter configuration for GetExpense
+var getExpensePathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// getExpenseQueryParams contains query parameter configuration for GetExpense
+var getExpenseQueryParams = []QueryParamConfig{}
+
+// updateExpenseStatusPathParams contains path parameter configuration for UpdateExpenseStatus
+var updateExpenseStatusPathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// updateExpenseStatusQueryParams contains query parameter configuration for UpdateExpenseStatus
+var updateExpenseStatusQueryParams = []QueryParamConfig{}
 
 // listExpenseCategoriesPathParams contains path parameter configuration for ListExpenseCategories
 var listExpenseCategoriesPathParams = []PathParamConfig{}

@@ -6,6 +6,7 @@ import "finance/invoices/v1/create_invoice.proto";
 import "finance/invoices/v1/delete_invoice.proto";
 import "finance/invoices/v1/get_invoice.proto";
 import "finance/invoices/v1/list_invoices.proto";
+import "finance/invoices/v1/send_invoice.proto";
 import "finance/invoices/v1/update_invoice.proto";
 import "finance/invoices/v1/update_invoice_status.proto";
 import "onekit/http/annotations.proto";
@@ -57,6 +58,13 @@ service InvoicesService {
     option (onekit.http.config) = {
       path: "/invoices/{id}"
       method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc SendInvoice(SendInvoiceRequest) returns (SendInvoiceResponse) {
+    option (onekit.http.config) = {
+      path: "/invoices/{id}/send"
+      method: HTTP_METHOD_POST
     };
   }
 }

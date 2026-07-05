@@ -11,14 +11,14 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
 message Quote {
   // id is the unique identifier for the resource.
   int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
-  // number is the number value for this contract.
-  string number = 2;
-  // customer_id is the customer id value for this contract.
-  int64 customer_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   // customer_name is the customer name value for this contract.
-  string customer_name = 4;
+  string customer_name = 3;
+  // customer_email is the customer email value for this contract.
+  string customer_email = 4;
   // status is the current lifecycle state.
-  // draft, sent, accepted, rejected, expired
+  // draft, sent, accepted, rejected, expired, converted
   string status = 5;
   // lines is the lines value for this contract.
   repeated QuoteLine lines = 6;

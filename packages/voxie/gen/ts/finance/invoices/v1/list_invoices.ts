@@ -16,9 +16,19 @@ export interface ListInvoicesRequest {
   dateFrom: string;
   /** date_to is the inclusive end date filter. */
   dateTo: string;
+  /** page is the one-based page number to return. */
+  page: number;
+  /** page_size is the maximum number of invoices to return. */
+  pageSize: number;
 }
 
 export interface ListInvoicesResponse {
   /** invoices is the invoices value for this contract. */
   invoices: InvoiceSummary[];
+  /** page is the current result page. */
+  page: number;
+  /** page_size is the number of records requested per page. */
+  pageSize: number;
+  /** has_more indicates whether additional pages are available. */
+  hasMore: boolean;
 }

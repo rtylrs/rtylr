@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package finance.expenses.v1;
+
+import "buf/validate/validate.proto";
+import "finance/expenses/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/expenses/v1";
+
+message GetExpenseRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message GetExpenseResponse {
+  // expense is the expense value for this contract.
+  Expense expense = 1;
+}

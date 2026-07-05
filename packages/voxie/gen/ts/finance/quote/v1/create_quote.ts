@@ -8,14 +8,24 @@
 import type { Quote, QuoteLine } from "./types";
 
 export interface CreateQuoteRequest {
-  /** customer_id is the customer id value for this contract. */
-  customerId: number;
+  /** customer_name is the customer name value for this contract. */
+  customerName: string;
+  /** customer_email is the customer email value for this contract. */
+  customerEmail: string;
+  /** status is the initial lifecycle state - defaults to "draft" if empty. */
+  status: string;
   /** lines is the lines value for this contract. */
   lines: QuoteLine[];
+  /** subtotal is the subtotal value for this contract. */
+  subtotal: number;
+  /** tax is the tax value for this contract. */
+  tax: number;
   /** valid_until is the valid until value for this contract. */
   validUntil: string;
   /** discount is the discount value for this contract. */
   discount: number;
+  /** total is the total number of matching records. */
+  total: number;
   /** notes is the notes value for this contract. */
   notes: string;
 }
