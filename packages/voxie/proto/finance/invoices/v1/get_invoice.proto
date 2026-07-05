@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package finance.invoices.v1;
+
+import "buf/validate/validate.proto";
+import "finance/invoices/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/v1";
+
+message GetInvoiceRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message GetInvoiceResponse {
+  // invoice is the invoice value for this contract.
+  InvoiceDetail invoice = 1;
+  // payments is the payments value for this contract.
+  repeated Payment payments = 2;
+}

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package pos.user.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
+
+// ── POSUser ───────────────────────────────────────────────────────
+
+message POSUser {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // business_id is the business id value for this contract.
+  int64 business_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // location_id is the location id value for this contract.
+  int64 location_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the name value for this contract.
+  string name = 4;
+  // role is the role value for this contract.
+  string role = 5;
+  // is_active is the is active value for this contract.
+  bool is_active = 6;
+  // max_discount_pct is the max discount pct value for this contract.
+  double max_discount_pct = 7;
+  // can_void is the can void value for this contract.
+  bool can_void = 8;
+  // can_refund is the can refund value for this contract.
+  bool can_refund = 9;
+  // can_open_drawer is the can open drawer value for this contract.
+  bool can_open_drawer = 10;
+  // can_apply_discount is the can apply discount value for this contract.
+  bool can_apply_discount = 11;
+}

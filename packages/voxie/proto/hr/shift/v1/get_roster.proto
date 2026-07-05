@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package hr.shift.v1;
+
+import "buf/validate/validate.proto";
+import "hr/shift/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
+
+// ── Get Roster ────────────────────────────────────────────────────
+
+message GetRosterRequest {
+  // Location to fetch the roster for.
+  int64 location_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Monday of the week to retrieve (ISO-8601 date).
+  string week_start = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (onekit.http.query).name = "week_start"
+  ];
+}
+
+message GetRosterResponse {
+  // All shift assignments for the requested week and location.
+  repeated ShiftAssignmentPayload assignments = 1;
+  // Human-readable conflict descriptions (e.g. "John Smith: double-booked on 2026-04-15").
+  repeated string conflicts = 2;
+}

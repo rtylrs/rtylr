@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package pos.orders.items.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/orders/items/v1/update_order_item_status.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/items/v1";
+
+service OrderItemService {
+  option (onekit.http.service_config) = {base_path: "/api/pos/orders/items/v1"};
+
+  rpc UpdateOrderItemStatus(UpdateOrderItemStatusRequest) returns (UpdateOrderItemStatusResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/items/{item_id}/status"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+}

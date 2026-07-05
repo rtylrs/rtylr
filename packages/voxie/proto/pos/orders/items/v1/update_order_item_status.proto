@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package pos.orders.items.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/items/v1";
+
+// ── Update Order Item Status ──────────────────────────────────────
+
+message UpdateOrderItemStatusBody {
+  // status is the current lifecycle state.
+  string status = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message UpdateOrderItemStatusRequest {
+  // order_id is the order id value for this contract.
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // item_id is the item id value for this contract.
+  int64 item_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries the new order item status bound from the HTTP payload.
+  UpdateOrderItemStatusBody body = 3;
+}
+
+message UpdateOrderItemStatusResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package pos.user.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
+
+// ── Create ────────────────────────────────────────────────────────
+
+message CreatePOSUserRequest {
+  // location_id is the location id value for this contract.
+  int64 location_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the name value for this contract.
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // pin is the pin value for this contract.
+  string pin = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // role is the role value for this contract.
+  string role = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // hourly_rate is the hourly rate value for this contract.
+  double hourly_rate = 5 [(buf.validate.field).double.gte = 0];
+  // max_discount_pct is the max discount pct value for this contract.
+  double max_discount_pct = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
+  // can_void is the can void value for this contract.
+  bool can_void = 7;
+  // can_refund is the can refund value for this contract.
+  bool can_refund = 8;
+  // can_open_drawer is the can open drawer value for this contract.
+  bool can_open_drawer = 9;
+  // can_apply_discount is the can apply discount value for this contract.
+  bool can_apply_discount = 10;
+}
+
+message CreatePOSUserResponse {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}

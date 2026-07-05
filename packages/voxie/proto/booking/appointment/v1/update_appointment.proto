@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package booking.appointment.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/appointment/v1";
+
+message UpdateAppointmentRequest {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+  int64 service_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 resource_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 staff_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string customer_name = 5;
+  string customer_email = 6;
+  string customer_phone = 7;
+  string start_time = 8;
+  string end_time = 9;
+  string status = 10;
+  string notes = 11;
+}
+
+message UpdateAppointmentResponse {
+  string message = 1;
+}

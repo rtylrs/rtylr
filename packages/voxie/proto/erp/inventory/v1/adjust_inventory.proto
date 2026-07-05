@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package erp.inventory.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/inventory/v1";
+
+// ── Inventory ───────────────────────────────────────────────────────
+
+// -- Adjust Inventory --
+
+message AdjustInventoryRequest {
+  // product_id is the product id value for this contract.
+  int64 product_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // change is the change value for this contract.
+  double change = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
+  // type is the type value for this contract.
+  string type = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // notes is the notes value for this contract.
+  string notes = 4;
+}
+
+message AdjustInventoryResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

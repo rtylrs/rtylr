@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package crm.feedback.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/feedback/v1";
+
+message Feedback {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  int64 customer_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string type = 4;
+  int32 score = 5;
+  string comment = 6;
+  string source = 7;
+  string created_at = 8;
+}

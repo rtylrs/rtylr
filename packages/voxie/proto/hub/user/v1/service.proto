@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package hub.user.v1;
+
+import "hub/user/v1/change_password.proto";
+import "hub/user/v1/get_me.proto";
+import "hub/user/v1/switch_business.proto";
+import "hub/user/v1/update_profile.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/user/v1";
+
+// UserService defines hub user profile endpoints.
+service UserService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/user/v1"};
+
+  // GetMe returns the authenticated user profile.
+  rpc GetMe(GetMeRequest) returns (GetMeResponse) {
+    option (onekit.http.config) = {
+      path: "/users/me"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UpdateProfile updates the authenticated user profile.
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {
+    option (onekit.http.config) = {
+      path: "/users/me"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  // ChangePassword changes the authenticated user password.
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
+    option (onekit.http.config) = {
+      path: "/users/password"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // SwitchBusiness issues a fresh JWT scoped to the selected business.
+  rpc SwitchBusiness(SwitchBusinessRequest) returns (SwitchBusinessResponse) {
+    option (onekit.http.config) = {
+      path: "/users/switch-business"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

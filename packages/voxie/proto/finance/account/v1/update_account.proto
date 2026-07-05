@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package finance.account.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/account/v1";
+
+message UpdateAccountBody {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string currency = 3;
+  double balance = 4 [(buf.validate.field).double.gte = 0];
+  bool is_active = 5;
+}
+
+message UpdateAccountRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  UpdateAccountBody body = 2;
+}
+
+message UpdateAccountResponse {
+  string message = 1;
+}

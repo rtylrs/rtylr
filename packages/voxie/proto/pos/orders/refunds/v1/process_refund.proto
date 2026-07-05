@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package pos.orders.refunds.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/refunds/v1";
+
+// ── Process Refund ────────────────────────────────────────────────
+
+message ProcessRefundRequest {
+  // order_id is the order id value for this contract.
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // amount is the amount value for this contract.
+  double amount = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
+  // reason is the reason value for this contract.
+  string reason = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message ProcessRefundResponse {
+  // refund_id is the refund id value for this contract.
+  int64 refund_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // message is a human-readable result message.
+  string message = 2;
+}

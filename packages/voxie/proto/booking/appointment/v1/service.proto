@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package booking.appointment.v1;
+
+import "booking/appointment/v1/create_appointment.proto";
+import "booking/appointment/v1/delete_appointment.proto";
+import "booking/appointment/v1/list_appointments.proto";
+import "booking/appointment/v1/list_today_appointments.proto";
+import "booking/appointment/v1/update_appointment.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/appointment/v1";
+
+service AppointmentService {
+  option (onekit.http.service_config) = {base_path: "/api/booking/appointment/v1"};
+
+  rpc ListAppointments(ListAppointmentsRequest) returns (ListAppointmentsResponse) {
+    option (onekit.http.config) = {
+      path: "/appointments"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc ListTodayAppointments(ListTodayAppointmentsRequest) returns (ListTodayAppointmentsResponse) {
+    option (onekit.http.config) = {
+      path: "/appointments/today"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateAppointment(CreateAppointmentRequest) returns (CreateAppointmentResponse) {
+    option (onekit.http.config) = {
+      path: "/appointments"
+      method: HTTP_METHOD_POST
+      body: "*"
+    };
+  }
+
+  rpc UpdateAppointment(UpdateAppointmentRequest) returns (UpdateAppointmentResponse) {
+    option (onekit.http.config) = {
+      path: "/appointments/{id}"
+      method: HTTP_METHOD_PUT
+      body: "*"
+    };
+  }
+
+  rpc DeleteAppointment(DeleteAppointmentRequest) returns (DeleteAppointmentResponse) {
+    option (onekit.http.config) = {
+      path: "/appointments/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

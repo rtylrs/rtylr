@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package support.canned.v1;
+
+import "onekit/http/annotations.proto";
+import "support/canned/v1/create_canned_response.proto";
+import "support/canned/v1/delete_canned_response.proto";
+import "support/canned/v1/list_canned_responses.proto";
+import "support/canned/v1/update_canned_response.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/canned/v1";
+
+service CannedResponseService {
+  option (onekit.http.service_config) = {base_path: "/api/support/canned/v1"};
+
+  rpc ListCannedResponses(ListCannedResponsesRequest) returns (ListCannedResponsesResponse) {
+    option (onekit.http.config) = {
+      path: "/canned-responses"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateCannedResponse(CreateCannedResponseRequest) returns (CreateCannedResponseResponse) {
+    option (onekit.http.config) = {
+      path: "/canned-responses"
+      method: HTTP_METHOD_POST
+      body: "*"
+    };
+  }
+
+  rpc UpdateCannedResponse(UpdateCannedResponseRequest) returns (UpdateCannedResponseResponse) {
+    option (onekit.http.config) = {
+      path: "/canned-responses/{id}"
+      method: HTTP_METHOD_PUT
+      body: "*"
+    };
+  }
+
+  rpc DeleteCannedResponse(DeleteCannedResponseRequest) returns (DeleteCannedResponseResponse) {
+    option (onekit.http.config) = {
+      path: "/canned-responses/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

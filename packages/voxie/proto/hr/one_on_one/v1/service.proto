@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hr.one_on_one.v1;
+
+import "hr/one_on_one/v1/create_one_on_one.proto";
+import "hr/one_on_one/v1/list_one_on_ones.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/one_on_one/v1";
+
+service OneOnOneService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/one-on-one/v1"};
+
+  rpc ListOneOnOnes(ListOneOnOnesRequest) returns (ListOneOnOnesResponse) {
+    option (onekit.http.config) = {
+      path: "/one-on-ones"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateOneOnOne(CreateOneOnOneRequest) returns (CreateOneOnOneResponse) {
+    option (onekit.http.config) = {
+      path: "/one-on-ones"
+      method: HTTP_METHOD_POST
+      body: "*"
+    };
+  }
+}

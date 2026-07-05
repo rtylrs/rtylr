@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package hr.document.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
+
+message Document {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 staff_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 4;
+  string type = 5;
+  string file_url = 6;
+  string expiry_date = 7;
+  string created_at = 8;
+}
+
+message EmployeeDocumentPayload {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 employee_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string document_type = 4;
+  string name = 5;
+  string storage_mode = 6;
+  string file_url = 7;
+  optional string expiry_date = 8 [
+    (onekit.http.nullable) = true
+  ];
+  int64 uploaded_by = 9 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 uploaded_at = 10;
+  int64 created_at = 11;
+  int64 updated_at = 12;
+}

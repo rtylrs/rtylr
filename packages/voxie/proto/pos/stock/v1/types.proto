@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package pos.stock.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
+
+// ── StockMovement ─────────────────────────────────────────────────
+
+message StockMovement {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // business_id is the business id value for this contract.
+  int64 business_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // branch_id is the branch id value for this contract.
+  int64 branch_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // product_id is the product id value for this contract.
+  int64 product_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // type is the type value for this contract.
+  string type = 5;
+  // quantity is the quantity value for this contract.
+  double quantity = 6;
+  // reference_id is the reference id value for this contract.
+  optional int64 reference_id = 7 [(onekit.http.nullable) = true, (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // reference_type is the reference type value for this contract.
+  optional string reference_type = 8 [(onekit.http.nullable) = true];
+  // note is the note value for this contract.
+  optional string note = 9 [(onekit.http.nullable) = true];
+  // employee_id is the employee id value for this contract.
+  optional int64 employee_id = 10 [(onekit.http.nullable) = true, (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // created_at is when the record was created.
+  string created_at = 11;
+}
+
+// ── BranchInventory ───────────────────────────────────────────────
+
+message BranchInventory {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // business_id is the business id value for this contract.
+  int64 business_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // branch_id is the branch id value for this contract.
+  int64 branch_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // product_id is the product id value for this contract.
+  int64 product_id = 4 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // quantity is the quantity value for this contract.
+  double quantity = 5;
+  // reorder_point is the reorder point value for this contract.
+  double reorder_point = 6;
+  // reorder_quantity is the reorder quantity value for this contract.
+  double reorder_quantity = 7;
+  // updated_at is when the record was last updated.
+  string updated_at = 8;
+  // item_id is an alias for product_id used by POS catalog UIs.
+  int64 item_id = 9 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // name is the ERP product display name.
+  string name = 10;
+  // sku is the ERP product SKU.
+  string sku = 11;
+  // unit is the product stock unit.
+  string unit = 12;
+  // current_qty is an alias for quantity used by POS inventory UIs.
+  double current_qty = 13;
+  // low_stock_threshold is the ERP product low-stock threshold.
+  double low_stock_threshold = 14;
+}

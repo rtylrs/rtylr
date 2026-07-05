@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package finance.invoices.v1;
+
+import "finance/invoices/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/v1";
+
+message ListInvoicesRequest {
+  // status filters invoices by lifecycle state.
+  string status = 1 [(onekit.http.query).name = "status"];
+  // search filters by customer or invoice number.
+  string search = 2 [(onekit.http.query).name = "search"];
+  // date_from is the inclusive start date filter.
+  string date_from = 3 [(onekit.http.query).name = "date_from"];
+  // date_to is the inclusive end date filter.
+  string date_to = 4 [(onekit.http.query).name = "date_to"];
+}
+
+message ListInvoicesResponse {
+  // invoices is the invoices value for this contract.
+  repeated InvoiceSummary invoices = 1;
+}

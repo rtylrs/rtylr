@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package crm.segment.v1;
+
+import "crm/segment/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
+
+message ListSegmentsRequest {}
+
+message ListSegmentsResponse {
+  // segments is the segments value for this contract.
+  repeated Segment segments = 1;
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package crm.settings.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/settings/v1";
+
+message Settings {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  bool default_consent = 3;
+  string from_email = 4;
+  string from_name = 5;
+  string sms_sender_id = 6;
+  string timezone = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}

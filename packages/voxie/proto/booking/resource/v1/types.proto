@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package booking.resource.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/resource/v1";
+
+message Resource {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 business_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 4;
+  string type = 5;
+  int32 capacity = 6;
+  bool is_active = 7;
+  string created_at = 8;
+}

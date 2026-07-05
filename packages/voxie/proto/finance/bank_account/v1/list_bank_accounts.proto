@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package finance.bank_account.v1;
+
+import "common/pagination/v1/pagination.proto";
+import "finance/bank_account/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/bank_account/v1";
+
+message ListBankAccountsRequest {
+  // page is the current result page.
+  int32 page = 1 [(onekit.http.query).name = "page"];
+  // limit is the maximum number of records to return.
+  int32 limit = 2 [(onekit.http.query).name = "limit"];
+  // sort_by is the field to sort results by.
+  string sort_by = 3 [(onekit.http.query).name = "sort_by"];
+  // sort_dir is the sort direction ("asc" or "desc").
+  string sort_dir = 4 [(onekit.http.query).name = "sort_dir"];
+}
+
+message ListBankAccountsResponse {
+  // accounts is the accounts value for this contract.
+  repeated BankAccount accounts = 1;
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationResponse pagination = 2 [(onekit.http.empty_behavior) = EMPTY_BEHAVIOR_OMIT];
+}

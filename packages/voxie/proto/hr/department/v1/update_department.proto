@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package hr.department.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateDepartmentBody {
+  // name is the updated department name.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string description = 2;
+  int64 manager_staff_id = 3;
+}
+
+message UpdateDepartmentRequest {
+  // ID of the department to update.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries updatable department fields bound from the HTTP payload.
+  UpdateDepartmentBody body = 2;
+}
+
+message UpdateDepartmentResponse {
+  bool success = 1;
+}

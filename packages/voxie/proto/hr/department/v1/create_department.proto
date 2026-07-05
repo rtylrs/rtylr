@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package hr.department.v1;
+
+import "buf/validate/validate.proto";
+option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
+
+message CreateDepartmentRequest {
+  // Display name of the department.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string description = 2;
+  int64 manager_staff_id = 3;
+}
+
+message CreateDepartmentResponse {
+  int64 id = 1;
+}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hr.document.v1;
+
+import "hr/document/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
+
+message ListDocumentsRequest {}
+
+message ListDocumentsResponse {
+  repeated Document documents = 1;
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package finance.dashboard.v1;
+
+import "finance/dashboard/v1/get_finance_dashboard.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/dashboard/v1";
+
+// DashboardService defines the finance dashboard endpoint.
+service DashboardService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/dashboard/v1"};
+
+  rpc GetFinanceDashboard(GetFinanceDashboardRequest) returns (GetFinanceDashboardResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

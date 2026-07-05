@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pos.settings.v1;
+
+import "pos/settings/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/settings/v1";
+
+// GetPOSSettingsRequest reads the current business POS settings.
+message GetPOSSettingsRequest {}
+
+// GetPOSSettingsResponse returns the current business POS settings.
+message GetPOSSettingsResponse {
+  // settings is the current business POS settings.
+  POSBusinessSettings settings = 1;
+}

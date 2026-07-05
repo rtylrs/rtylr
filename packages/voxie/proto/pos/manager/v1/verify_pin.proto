@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package pos.manager.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/manager/v1";
+
+// ── Manager ───────────────────────────────────────────────────────
+
+message VerifyPINRequest {
+  // pin is the pin value for this contract.
+  string pin = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message VerifyPINResponse {
+  // valid is the valid value for this contract.
+  bool valid = 1;
+  // staff_id is the staff id value for this contract.
+  int64 staff_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // message is a human-readable result message.
+  string message = 3;
+}

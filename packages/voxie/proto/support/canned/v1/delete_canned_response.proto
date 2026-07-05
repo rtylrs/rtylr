@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package support.canned.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/canned/v1";
+
+message DeleteCannedResponseRequest {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
+}
+
+message DeleteCannedResponseResponse {
+  string message = 1;
+}

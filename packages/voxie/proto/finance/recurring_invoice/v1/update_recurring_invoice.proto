@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package finance.recurring_invoice.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
+
+message UpdateRecurringInvoiceBody {
+  // template_invoice_id is the invoice used as the recurring invoice template.
+  optional int64 template_invoice_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING, (onekit.http.nullable) = true];
+  // frequency is how often the recurring invoice should be generated.
+  string frequency = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // next_invoice_date is the next generation date, formatted as YYYY-MM-DD.
+  string next_invoice_date = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+    }
+  ];
+  // end_date is when recurring generation should stop; absent when open-ended.
+  optional string end_date = 4 [(onekit.http.nullable) = true];
+  // is_active indicates whether the recurring invoice is active.
+  optional bool is_active = 5 [(onekit.http.nullable) = true];
+}
+
+message UpdateRecurringInvoiceRequest {
+  // id is the recurring invoice to update.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries updatable recurring invoice fields bound from the HTTP payload.
+  UpdateRecurringInvoiceBody body = 2;
+}
+
+message UpdateRecurringInvoiceResponse {
+  // message is the backend confirmation message.
+  string message = 1;
+}

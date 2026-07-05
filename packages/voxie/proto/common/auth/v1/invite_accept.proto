@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package common.auth.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
+
+message InviteAcceptRequest {
+  // token is the opaque token used to complete the operation.
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // password is the user-provided secret for authentication.
+  string password = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message InviteAcceptResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

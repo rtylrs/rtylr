@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package support.settings.v1;
+
+import "support/settings/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/settings/v1";
+
+message GetSettingsRequest {}
+
+message GetSettingsResponse {
+  Settings settings = 1;
+}

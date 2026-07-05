@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package finance.reconciliation.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/reconciliation/v1";
+
+message UnmatchedBankTransaction {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 bank_account_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 amount_minor_units = 3;
+  string currency = 4;
+  string occurred_at = 5;
+  string description = 6;
+  string external_id = 7;
+}
+
+message UnmatchedInvoice {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string invoice_number = 2;
+  string client_name = 3;
+  int64 amount_minor_units = 4;
+  string currency = 5;
+  string issue_date = 6;
+  string due_date = 7;
+}
+
+message MatchSuggestion {
+  int64 bank_feed_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string target_type = 2;
+  int64 target_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 amount_minor_units = 4;
+  int32 days_apart = 5;
+  double score = 6;
+}

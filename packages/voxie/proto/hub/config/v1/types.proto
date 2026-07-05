@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package hub.config.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/config/v1";
+
+// ── Config ──────────────────────────────────────────────────────────
+
+message ConfigPayload {
+  // owner_id identifies the business that owns this config.
+  // Serialized as a string in the legacy payload.
+  string owner_id = 1;
+  // site_name is the site name value for this contract.
+  string site_name = 2;
+  // logo_url is the logo url value for this contract.
+  string logo_url = 3;
+  // favicon_url is the favicon url value for this contract.
+  string favicon_url = 4;
+  // meta_tags is the meta tags value for this contract.
+  repeated string meta_tags = 5;
+  // contact_email is the contact email value for this contract.
+  string contact_email = 6;
+  // contact_number is the contact number value for this contract.
+  string contact_number = 7;
+  // sender_email is the sender email value for this contract.
+  string sender_email = 8;
+  // website is the website value for this contract.
+  string website = 9;
+  // maps_url is the maps url value for this contract.
+  string maps_url = 10;
+  // address is the address value for this contract.
+  string address = 11;
+  // city is the city value for this contract.
+  string city = 12;
+  // zipcode is the zipcode value for this contract.
+  string zipcode = 13;
+  // country is the country value for this contract.
+  string country = 14;
+  // instagram is the instagram value for this contract.
+  string instagram = 15;
+  // maintenance_mode is the maintenance mode value for this contract.
+  bool maintenance_mode = 16;
+  // maintenance_notice is the maintenance notice value for this contract.
+  string maintenance_notice = 17;
+  // addons_enabled is the addons enabled value for this contract.
+  bool addons_enabled = 18;
+  // enable_reviews is the enable reviews value for this contract.
+  bool enable_reviews = 19;
+  // enable_wishlist is the enable wishlist value for this contract.
+  bool enable_wishlist = 20;
+  // enable_newsletter_signup is the enable newsletter signup value for this contract.
+  bool enable_newsletter_signup = 21;
+  // about_content is the about content value for this contract.
+  string about_content = 22;
+  // footer_sub_text is the footer sub text value for this contract.
+  string footer_sub_text = 23;
+  // slug is the slug value for this contract.
+  string slug = 24;
+}

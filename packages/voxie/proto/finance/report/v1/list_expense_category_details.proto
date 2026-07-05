@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package finance.report.v1;
+
+import "finance/report/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/report/v1";
+
+message ListExpenseCategoryDetailsRequest {}
+
+message ListExpenseCategoryDetailsResponse {
+  // categories is the categories value for this contract.
+  repeated ExpenseCategoryDetail categories = 1;
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package flow.label.v1;
+
+import "flow/label/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/label/v1";
+
+message ListLabelsRequest {
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 1 [
+    (onekit.http.query).name = "workspace_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message ListLabelsResponse {
+  // labels is the labels value for this contract.
+  repeated Label labels = 1;
+}

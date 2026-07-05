@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package booking.calendar.v1;
+
+import "booking/calendar/v1/types.proto";
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/calendar/v1";
+
+message GetCalendarRequest {
+  string from = 1 [
+    (onekit.http.query).name = "from",
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string to = 2 [
+    (onekit.http.query).name = "to",
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message GetCalendarResponse {
+  repeated CalendarDay days = 1;
+}

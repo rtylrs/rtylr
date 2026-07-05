@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package pos.orders.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
+
+message PublicOrderItemInput {
+  int64 menu_item_id = 1 [
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 2;
+  double quantity = 3 [(buf.validate.field).double.gt = 0];
+  double unit_price = 4;
+  string notes = 5;
+}
+
+message CreatePublicOrderRequest {
+  int64 owner_id = 1 [
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string customer_name = 2;
+  string customer_phone = 3;
+  string customer_email = 4;
+  string notes = 5;
+  repeated PublicOrderItemInput items = 6 [(buf.validate.field).repeated.min_items = 1];
+}
+
+message CreatePublicOrderResponse {
+  int64 order_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string order_number = 2;
+  string status = 3;
+}

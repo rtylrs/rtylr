@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package hr.equipment.v1;
+
+import "buf/validate/validate.proto";
+import "hr/equipment/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
+
+// ── Create Equipment Request ─────────────────────────────────────
+
+message CreateEquipmentRequestRequest {
+  // Employee who needs the equipment.
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Category of equipment being requested.
+  string equipment_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // Free-text description of the specific equipment needed.
+  string description = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // Priority level (low | medium | high).
+  string urgency = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
+  optional string needed_by_date = 5 [
+    (onekit.http.nullable) = true
+  ];
+}
+
+message CreateEquipmentRequestResponse {
+  // The newly created equipment request.
+  EquipmentRequestPayload request = 1;
+}

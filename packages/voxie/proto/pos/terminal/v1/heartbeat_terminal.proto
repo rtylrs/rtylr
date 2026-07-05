@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.terminal.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
+
+// ── Heartbeat ─────────────────────────────────────────────────────
+
+message HeartbeatTerminalRequest {
+  // terminal_id is the terminal id value for this contract.
+  int64 terminal_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}
+
+message HeartbeatTerminalResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

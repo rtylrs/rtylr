@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package hub.feature.v1;
+
+import "buf/validate/validate.proto";
+import "hub/feature/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/feature/v1";
+
+message ListTargetsRequest {
+  string feature_key = 1 [
+    (onekit.http.query).name = "feature_key",
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message ListTargetsResponse {
+  repeated FeatureTarget targets = 1;
+}
+
+message UpsertTargetRequest {
+  string feature_key = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  bool enabled = 3;
+  string variant = 4;
+}
+
+message UpsertTargetResponse {
+  string message = 1;
+}
+
+message DeleteTargetRequest {
+  string feature_key = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+}
+
+message DeleteTargetResponse {
+  string message = 1;
+}

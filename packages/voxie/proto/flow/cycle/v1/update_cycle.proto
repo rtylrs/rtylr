@@ -1,0 +1,11 @@
+syntax = "proto3";
+package flow.cycle.v1;
+import "onekit/http/annotations.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/cycle/v1";
+message UpdateCycleRequest {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 2;
+  string status = 3;
+  string end_date = 4;
+}
+message UpdateCycleResponse {}

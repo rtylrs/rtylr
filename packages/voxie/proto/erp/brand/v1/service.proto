@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package erp.brand.v1;
+
+import "erp/brand/v1/create_brand.proto";
+import "erp/brand/v1/delete_brand.proto";
+import "erp/brand/v1/list_brands.proto";
+import "erp/brand/v1/update_brand.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/brand/v1";
+
+service BrandService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/brand/v1"};
+
+  rpc ListBrands(ListBrandsRequest) returns (ListBrandsResponse) {
+    option (onekit.http.config) = {
+      path: "/brands"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateBrand(CreateBrandRequest) returns (CreateBrandResponse) {
+    option (onekit.http.config) = {
+      path: "/brands"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateBrand(UpdateBrandRequest) returns (UpdateBrandResponse) {
+    option (onekit.http.config) = {
+      path: "/brands/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc DeleteBrand(DeleteBrandRequest) returns (DeleteBrandResponse) {
+    option (onekit.http.config) = {
+      path: "/brands/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

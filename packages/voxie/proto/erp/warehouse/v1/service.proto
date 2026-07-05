@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package erp.warehouse.v1;
+
+import "erp/warehouse/v1/create_warehouse.proto";
+import "erp/warehouse/v1/delete_warehouse.proto";
+import "erp/warehouse/v1/list_warehouses.proto";
+import "erp/warehouse/v1/update_warehouse.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/warehouse/v1";
+
+service WarehouseService {
+  option (onekit.http.service_config) = {base_path: "/api/erp/warehouse/v1"};
+
+  rpc ListWarehouses(ListWarehousesRequest) returns (ListWarehousesResponse) {
+    option (onekit.http.config) = {
+      path: "/warehouses"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateWarehouse(CreateWarehouseRequest) returns (CreateWarehouseResponse) {
+    option (onekit.http.config) = {
+      path: "/warehouses"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateWarehouse(UpdateWarehouseRequest) returns (UpdateWarehouseResponse) {
+    option (onekit.http.config) = {
+      path: "/warehouses/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc DeleteWarehouse(DeleteWarehouseRequest) returns (DeleteWarehouseResponse) {
+    option (onekit.http.config) = {
+      path: "/warehouses/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

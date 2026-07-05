@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package finance.bill.v1;
+
+import "finance/bill/v1/create_bill.proto";
+import "finance/bill/v1/delete_bill.proto";
+import "finance/bill/v1/get_bill.proto";
+import "finance/bill/v1/list_bills.proto";
+import "finance/bill/v1/update_bill.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/bill/v1";
+
+// BillService defines accounts-payable bill endpoints.
+service BillService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/bill/v1"};
+
+  rpc ListBills(ListBillsRequest) returns (ListBillsResponse) {
+    option (onekit.http.config) = {
+      path: "/bills"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateBill(CreateBillRequest) returns (CreateBillResponse) {
+    option (onekit.http.config) = {
+      path: "/bills"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateBill(UpdateBillRequest) returns (UpdateBillResponse) {
+    option (onekit.http.config) = {
+      path: "/bills/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc GetBill(GetBillRequest) returns (GetBillResponse) {
+    option (onekit.http.config) = {
+      path: "/bills/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc DeleteBill(DeleteBillRequest) returns (DeleteBillResponse) {
+    option (onekit.http.config) = {
+      path: "/bills/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+}

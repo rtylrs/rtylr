@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package insights.dashboard.v1;
+
+import "insights/dashboard/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/dashboard/v1";
+
+message GetRoadmapRequest {}
+
+message GetRoadmapResponse {
+  // projects is the projects value for this contract.
+  repeated RoadmapProject projects = 1;
+}

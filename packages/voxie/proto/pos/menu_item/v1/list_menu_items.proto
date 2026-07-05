@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pos.menu_item.v1;
+
+import "pos/menu_item/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListMenuItemsRequest {}
+
+message ListMenuItemsResponse {
+  // items is the items value for this contract.
+  repeated MenuItem items = 1;
+}

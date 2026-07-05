@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package pos.orders.discounts.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/discounts/v1";
+
+// ── Apply Discount ────────────────────────────────────────────────
+
+message DiscountOrderRequest {
+  // order_id is the order id value for this contract.
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  , (onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // discount_type is the discount type value for this contract.
+  string discount_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // discount_value is the discount value value for this contract.
+  double discount_value = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
+  // reason is the reason value for this contract.
+  string reason = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message DiscountOrderResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package support.canned.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/canned/v1";
+
+message CannedResponse {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 business_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 3;
+  string body = 4;
+  string category = 5;
+  string shortcut = 6;
+  string created_at = 7;
+}

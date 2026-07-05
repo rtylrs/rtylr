@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package hr.work_schedule.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/work_schedule/v1";
+
+// ── Work Schedule ──────────────────────────────────────────────────
+
+message WorkSchedulePayload {
+  // Unique identifier for the work schedule.
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Tenant owner this schedule belongs to.
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Display name of the schedule (e.g. "Standard 9-5").
+  string name = 3;
+  // Days of the week this schedule applies to (e.g. ["monday", "tuesday"]).
+  repeated string working_days = 4;
+  // Shift start time in HH:MM 24-hour format.
+  string start_time = 5;
+  // Shift end time in HH:MM 24-hour format.
+  string end_time = 6;
+  // Duration of the daily break in minutes.
+  int32 break_minutes = 7;
+  // Total contracted hours per week (e.g. 40.0).
+  double contracted_hours_per_week = 8;
+  // Daily overtime threshold in minutes; hours beyond this count as OT.
+  int32 daily_ot_threshold_minutes = 9;
+  // Weekly overtime threshold in minutes; hours beyond this count as OT.
+  int32 weekly_ot_threshold_minutes = 10;
+  // Unix timestamp when this schedule was created.
+  int64 created_at = 11;
+  // Unix timestamp when this schedule was last updated.
+  int64 updated_at = 12;
+}
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListWorkSchedulesResponse {
+  // All work schedules for the tenant.
+  repeated WorkSchedulePayload schedules = 1;
+}

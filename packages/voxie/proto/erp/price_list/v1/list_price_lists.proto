@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package erp.price_list.v1;
+
+import "erp/price_list/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/price_list/v1";
+
+message ListPriceListsRequest {}
+
+message ListPriceListsResponse {
+  repeated PriceList price_lists = 1;
+}

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package booking.reminder.v1;
+
+import "booking/reminder/v1/create_reminder.proto";
+import "booking/reminder/v1/list_reminders.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/reminder/v1";
+
+service ReminderService {
+  option (onekit.http.service_config) = {base_path: "/api/booking/reminder/v1"};
+
+  rpc ListReminders(ListRemindersRequest) returns (ListRemindersResponse) {
+    option (onekit.http.config) = {
+      path: "/reminders"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateReminder(CreateReminderRequest) returns (CreateReminderResponse) {
+    option (onekit.http.config) = {
+      path: "/reminders"
+      method: HTTP_METHOD_POST
+      body: "*"
+    };
+  }
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package common.oauth.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/common/oauth/v1";
+
+message RevokeRequest {
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  string client_id = 2;
+}
+
+message RevokeResponse {
+  bool ok = 1;
+}

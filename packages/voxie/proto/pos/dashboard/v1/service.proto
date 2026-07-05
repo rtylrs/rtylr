@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.dashboard.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/dashboard/v1/dashboard.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/dashboard/v1";
+
+service DashboardService {
+  option (onekit.http.service_config) = {base_path: "/api/pos/dashboard/v1"};
+
+  rpc Dashboard(DashboardRequest) returns (DashboardResponse) {
+    option (onekit.http.config) = {
+      path: "/dashboard"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

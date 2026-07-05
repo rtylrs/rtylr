@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package pos.settings.v1;
+
+import "pos/settings/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/settings/v1";
+
+// UpdatePOSSettingsRequest updates the current business POS settings.
+message UpdatePOSSettingsRequest {
+  // business_profile is one of retail, restaurant, or quick_service.
+  string business_profile = 1;
+  // theme is the default POS theme for this business.
+  string theme = 2;
+  // features are the business-specific POS modules to expose.
+  POSFeatureSettings features = 3;
+  // receipt_footer is the default footer printed on receipts.
+  string receipt_footer = 4;
+}
+
+// UpdatePOSSettingsResponse returns the saved POS settings.
+message UpdatePOSSettingsResponse {
+  // settings is the saved business POS settings.
+  POSBusinessSettings settings = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

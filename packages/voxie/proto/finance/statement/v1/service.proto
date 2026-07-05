@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package finance.statement.v1;
+
+import "finance/statement/v1/get_balance_sheet.proto";
+import "finance/statement/v1/get_cash_flow.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/statement/v1";
+
+service StatementService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/statement/v1"};
+
+  rpc GetBalanceSheet(GetBalanceSheetRequest) returns (GetBalanceSheetResponse) {
+    option (onekit.http.config) = {
+      path: "/balance-sheet"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc GetCashFlow(GetCashFlowRequest) returns (GetCashFlowResponse) {
+    option (onekit.http.config) = {
+      path: "/cash-flow"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

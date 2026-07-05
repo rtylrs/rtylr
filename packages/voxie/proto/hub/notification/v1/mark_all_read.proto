@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hub.notification.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/notification/v1";
+
+message MarkAllReadRequest {}
+
+message MarkAllReadResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

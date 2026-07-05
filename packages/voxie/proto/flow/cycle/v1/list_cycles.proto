@@ -1,0 +1,11 @@
+syntax = "proto3";
+package flow.cycle.v1;
+import "flow/cycle/v1/types.proto";
+import "onekit/http/annotations.proto";
+option go_package = "github.com/voxire/voxie/gen/go/flow/cycle/v1";
+message ListCyclesRequest {
+  string workspace_id = 1 [(onekit.http.query).name = "workspace_id"];
+}
+message ListCyclesResponse {
+  repeated Cycle cycles = 1;
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package booking.service.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/service/v1";
+
+message BookingService {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 business_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string name = 4;
+  string description = 5;
+  int32 duration_minutes = 6;
+  double price = 7;
+  string color = 8;
+  bool is_active = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}

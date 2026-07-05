@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package crm.campaign.v1;
+
+import "buf/validate/validate.proto";
+import "crm/campaign/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
+
+message GetCampaignDetailRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+}
+
+message GetCampaignDetailResponse {
+  // campaign is the campaign value for this contract.
+  Campaign campaign = 1;
+  // stats is the stats value for this contract.
+  CampaignStats stats = 2 [(onekit.http.empty_behavior) = EMPTY_BEHAVIOR_OMIT];
+}

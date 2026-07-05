@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package hr.staff.v1;
+
+import "hr/staff/v1/clock_in.proto";
+import "hr/staff/v1/clock_out.proto";
+import "hr/staff/v1/create_staff.proto";
+import "hr/staff/v1/delete_staff.proto";
+import "hr/staff/v1/get_staff.proto";
+import "hr/staff/v1/list_staff.proto";
+import "hr/staff/v1/update_staff.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/staff/v1";
+
+// StaffService defines HR staff endpoints.
+service StaffService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/staff/v1"};
+
+  // ListStaff returns staff members with optional filters.
+  rpc ListStaff(ListStaffRequest) returns (ListStaffResponse) {
+    option (onekit.http.config) = {
+      path: "/staff"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateStaff creates a new staff member.
+  rpc CreateStaff(CreateStaffRequest) returns (CreateStaffResponse) {
+    option (onekit.http.config) = {
+      path: "/staff"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // GetStaff returns a staff member by ID.
+  rpc GetStaff(GetStaffRequest) returns (GetStaffResponse) {
+    option (onekit.http.config) = {
+      path: "/staff/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UpdateStaff updates an existing staff member.
+  rpc UpdateStaff(UpdateStaffRequest) returns (UpdateStaffResponse) {
+    option (onekit.http.config) = {
+      path: "/staff/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  // DeleteStaff removes a staff member by ID.
+  rpc DeleteStaff(DeleteStaffRequest) returns (DeleteStaffResponse) {
+    option (onekit.http.config) = {
+      path: "/staff/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  // ClockIn records a staff clock-in event.
+  rpc ClockIn(ClockInRequest) returns (ClockInResponse) {
+    option (onekit.http.config) = {
+      path: "/staff/clock-in"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ClockOut records a staff clock-out event.
+  rpc ClockOut(ClockOutRequest) returns (ClockOutResponse) {
+    option (onekit.http.config) = {
+      path: "/staff/clock-out"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

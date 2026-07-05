@@ -1,0 +1,5 @@
+syntax = "proto3";
+package flow.notification.v1;
+option go_package = "github.com/voxire/voxie/gen/go/flow/notification/v1";
+message MarkAllNotificationsReadRequest {}
+message MarkAllNotificationsReadResponse {}

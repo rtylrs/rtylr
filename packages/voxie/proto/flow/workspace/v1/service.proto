@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package flow.workspace.v1;
+
+import "flow/workspace/v1/add_workspace_member.proto";
+import "flow/workspace/v1/create_workspace.proto";
+import "flow/workspace/v1/delete_workspace.proto";
+import "flow/workspace/v1/list_workspace_members.proto";
+import "flow/workspace/v1/list_workspaces.proto";
+import "flow/workspace/v1/remove_workspace_member.proto";
+import "flow/workspace/v1/update_workspace.proto";
+import "flow/workspace/v1/update_workspace_member_role.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/workspace/v1";
+
+service WorkspaceService {
+  option (onekit.http.service_config) = {base_path: "/api/flow/workspace/v1"};
+
+  rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateWorkspace(UpdateWorkspaceRequest) returns (UpdateWorkspaceResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc ListWorkspaceMembers(ListWorkspaceMembersRequest) returns (ListWorkspaceMembersResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces/members"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc AddWorkspaceMember(AddWorkspaceMemberRequest) returns (AddWorkspaceMemberResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces/members"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc RemoveWorkspaceMember(RemoveWorkspaceMemberRequest) returns (RemoveWorkspaceMemberResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces/members"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc UpdateWorkspaceMemberRole(UpdateWorkspaceMemberRoleRequest) returns (UpdateWorkspaceMemberRoleResponse) {
+    option (onekit.http.config) = {
+      path: "/workspaces/members/role"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

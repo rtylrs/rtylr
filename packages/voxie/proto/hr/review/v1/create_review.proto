@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package hr.review.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/review/v1";
+
+message CreateReviewRequest {
+  int64 staff_id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (buf.validate.field).required = true
+  ];
+  int64 reviewer_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string period = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  double rating = 4;
+  double goals_rating = 5;
+  double values_rating = 6;
+  double skills_rating = 7;
+  string notes = 8;
+  string status = 9;
+}
+
+message CreateReviewResponse {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string message = 2;
+}

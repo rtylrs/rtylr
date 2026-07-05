@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package support.inbox.v1;
+
+import "support/inbox/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/support/inbox/v1";
+
+message ListInboxRequest {
+  int32 page = 1 [
+    (onekit.http.query).name = "page"
+  ];
+  int32 page_size = 2 [
+    (onekit.http.query).name = "page_size"
+  ];
+}
+
+message ListInboxResponse {
+  repeated InboxItem inbox = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}

@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package hr.leave.v1;
+
+import "hr/leave/v1/approve_leave.proto";
+import "hr/leave/v1/create_leave_request.proto";
+import "hr/leave/v1/create_leave_type.proto";
+import "hr/leave/v1/list_leave_balances.proto";
+import "hr/leave/v1/list_leave_requests.proto";
+import "hr/leave/v1/list_leave_types.proto";
+import "hr/leave/v1/update_leave_type.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
+
+// LeaveService defines HR leave endpoints.
+service LeaveService {
+  option (onekit.http.service_config) = {base_path: "/api/hr/leave/v1"};
+
+  // ListLeaveRequests returns leave requests with optional filters.
+  rpc ListLeaveRequests(ListLeaveRequestsRequest) returns (ListLeaveRequestsResponse) {
+    option (onekit.http.config) = {
+      path: "/requests"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateLeaveRequest submits a leave request.
+  rpc CreateLeaveRequest(CreateLeaveRequestRequest) returns (CreateLeaveRequestResponse) {
+    option (onekit.http.config) = {
+      path: "/requests"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // ApproveLeave approves a leave request.
+  rpc ApproveLeave(ApproveLeaveRequest) returns (ApproveLeaveResponse) {
+    option (onekit.http.config) = {
+      path: "/requests/{request_id}/approve"
+      method: HTTP_METHOD_PATCH
+      body: "body"
+    };
+  }
+
+  // ListLeaveTypes returns configured leave types.
+  rpc ListLeaveTypes(ListLeaveTypesRequest) returns (ListLeaveTypesResponse) {
+    option (onekit.http.config) = {
+      path: "/types"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // CreateLeaveType creates a leave type.
+  rpc CreateLeaveType(CreateLeaveTypeRequest) returns (CreateLeaveTypeResponse) {
+    option (onekit.http.config) = {
+      path: "/types"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  // UpdateLeaveType updates an existing leave type.
+  rpc UpdateLeaveType(UpdateLeaveTypeRequest) returns (UpdateLeaveTypeResponse) {
+    option (onekit.http.config) = {
+      path: "/types/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  // ListLeaveBalances returns leave balances with optional filters.
+  rpc ListLeaveBalances(ListLeaveBalancesRequest) returns (ListLeaveBalancesResponse) {
+    option (onekit.http.config) = {
+      path: "/balances"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

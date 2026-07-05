@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+message ExpiringItem {
+  int64 product_id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string name = 2;
+  string sku = 3;
+  string batch_id = 4;
+  string expiry_date = 5;
+  double quantity = 6;
+  string warehouse_name = 7;
+}
+
+message ListExpiringItemsRequest {
+  int32 days_ahead = 1 [(onekit.http.query).name = "days_ahead"];
+}
+
+message ListExpiringItemsResponse {
+  repeated ExpiringItem items = 1;
+}

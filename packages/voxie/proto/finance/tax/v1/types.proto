@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package finance.tax.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/tax/v1";
+
+message TaxConfig {
+  int64 id = 1 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  int64 owner_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  string tax_name = 3;
+  double tax_rate = 4;
+  bool is_inclusive = 5;
+  bool is_active = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}

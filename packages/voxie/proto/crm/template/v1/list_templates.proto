@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package crm.template.v1;
+
+import "crm/template/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/template/v1";
+
+message ListTemplatesRequest {}
+
+message ListTemplatesResponse {
+  repeated Template templates = 1;
+}

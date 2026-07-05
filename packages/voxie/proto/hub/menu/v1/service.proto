@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package hub.menu.v1;
+
+import "hub/menu/v1/list_menu.proto";
+import "hub/menu/v1/update_menu.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/menu/v1";
+
+// MenuService defines hub navigation menu endpoints.
+service MenuService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/menu/v1"};
+
+  // ListMenu returns the navigation menu for the current user.
+  rpc ListMenu(ListMenuRequest) returns (ListMenuResponse) {
+    option (onekit.http.config) = {
+      path: "/menu"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // UpdateMenu replaces the navigation menu items.
+  rpc UpdateMenu(UpdateMenuRequest) returns (UpdateMenuResponse) {
+    option (onekit.http.config) = {
+      path: "/menu"
+      method: HTTP_METHOD_PUT
+    };
+  }
+}

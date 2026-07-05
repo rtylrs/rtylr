@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "hub/business/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message ListMyBusinessesRequest {}
+
+message ListMyBusinessesResponse {
+  // businesses is the businesses value for this contract.
+  repeated BusinessEntry businesses = 1;
+}

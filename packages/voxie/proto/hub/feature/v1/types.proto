@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package hub.feature.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/feature/v1";
+
+message FeatureResolution {
+  string key = 1;
+  bool enabled = 2;
+  string variant = 3;
+}
+
+message FeatureFlag {
+  string key = 1;
+  string description = 2;
+  bool enabled = 3;
+  int32 rollout_percentage = 4;
+  string variant_on = 5;
+  string variant_off = 6;
+}
+
+message FeatureTarget {
+  string feature_key = 1;
+  int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  bool enabled = 3;
+  string variant = 4;
+}
+
+message FeatureCondition {
+  string attribute = 1;
+  string operator = 2;
+  string value = 3;
+}
+
+message FeatureRule {
+  int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  string feature_key = 2;
+  int32 priority = 3;
+  string description = 4;
+  string variant = 5;
+  int32 rollout_percentage = 6;
+  bool enabled = 7;
+  repeated FeatureCondition conditions = 8;
+}

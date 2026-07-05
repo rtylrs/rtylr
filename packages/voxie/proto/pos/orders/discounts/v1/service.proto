@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.orders.discounts.v1;
+
+import "onekit/http/annotations.proto";
+import "pos/orders/discounts/v1/discount_order.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/discounts/v1";
+
+service OrderDiscountService {
+  option (onekit.http.service_config) = {base_path: "/api/pos/orders/discounts/v1"};
+
+  rpc DiscountOrder(DiscountOrderRequest) returns (DiscountOrderResponse) {
+    option (onekit.http.config) = {
+      path: "/orders/{order_id}/discount"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

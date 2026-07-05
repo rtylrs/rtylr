@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package booking.resource.v1;
+
+import "booking/resource/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/booking/resource/v1";
+
+message ListResourcesRequest {}
+
+message ListResourcesResponse {
+  repeated Resource resources = 1;
+}

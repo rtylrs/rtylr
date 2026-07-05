@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package insights.dashboard.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/dashboard/v1";
+
+// ── Flow Insights ──────────────────────────────────────────────────
+
+message GetInsightsRequest {}
+
+message GetInsightsResponse {
+  // total_tasks is the total tasks value for this contract.
+  int64 total_tasks = 1;
+  // completed_tasks is the completed tasks value for this contract.
+  int64 completed_tasks = 2;
+  // in_progress_tasks is the in progress tasks value for this contract.
+  int64 in_progress_tasks = 3;
+  // overdue_tasks is the overdue tasks value for this contract.
+  int64 overdue_tasks = 4;
+  // avg_cycle_time_days is the avg cycle time days value for this contract.
+  double avg_cycle_time_days = 5;
+  // velocity is the velocity value for this contract.
+  int64 velocity = 6;
+  // velocity_change is the velocity change value for this contract.
+  int64 velocity_change = 7;
+}

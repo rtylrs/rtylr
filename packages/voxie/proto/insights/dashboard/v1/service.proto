@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package insights.dashboard.v1;
+
+import "insights/dashboard/v1/get_dashboard_summary.proto";
+import "insights/dashboard/v1/get_insights.proto";
+import "insights/dashboard/v1/get_kpis.proto";
+import "insights/dashboard/v1/get_roadmap.proto";
+import "insights/dashboard/v1/get_workload.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/dashboard/v1";
+
+// DashboardService defines insights dashboard endpoints.
+service DashboardService {
+  option (onekit.http.service_config) = {base_path: "/api/insights/dashboard/v1"};
+
+  // GetInsights returns high-level insights summary.
+  rpc GetInsights(GetInsightsRequest) returns (GetInsightsResponse) {
+    option (onekit.http.config) = {
+      path: "/insights"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetKPIs returns key performance indicators.
+  rpc GetKPIs(GetKPIsRequest) returns (GetKPIsResponse) {
+    option (onekit.http.config) = {
+      path: "/kpis"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetRoadmap returns the product roadmap view.
+  rpc GetRoadmap(GetRoadmapRequest) returns (GetRoadmapResponse) {
+    option (onekit.http.config) = {
+      path: "/roadmap"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetWorkload returns team workload metrics.
+  rpc GetWorkload(GetWorkloadRequest) returns (GetWorkloadResponse) {
+    option (onekit.http.config) = {
+      path: "/workload"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  // GetDashboardSummary returns MTD headline KPI cards for the insights home dashboard.
+  rpc GetDashboardSummary(GetDashboardSummaryRequest) returns (GetDashboardSummaryResponse) {
+    option (onekit.http.config) = {
+      path: "/summary"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

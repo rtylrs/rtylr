@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hub.caret.v1;
+
+import "hub/caret/v1/list_caret_tools.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/caret/v1";
+
+service CaretService {
+  option (onekit.http.service_config) = {base_path: "/api/hub/caret/v1"};
+
+  rpc ListCaretTools(ListCaretToolsRequest) returns (ListCaretToolsResponse) {
+    option (onekit.http.config) = {
+      path: "/tools"
+      method: HTTP_METHOD_POST
+    };
+  }
+}

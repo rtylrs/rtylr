@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package finance.quote.v1;
+
+import "buf/validate/validate.proto";
+import "finance/quote/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
+
+message CreateQuoteRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // lines is the lines value for this contract.
+  repeated QuoteLine lines = 2 [(buf.validate.field).repeated.min_items = 1];
+  // valid_until is the valid until value for this contract.
+  string valid_until = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // discount is the discount value for this contract.
+  double discount = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
+  // notes is the notes value for this contract.
+  string notes = 5;
+}
+
+message CreateQuoteResponse {
+  // quote is the quote value for this contract.
+  Quote quote = 1;
+}

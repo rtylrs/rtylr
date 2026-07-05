@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package hr.time_entry.v1;
+
+import "buf/validate/validate.proto";
+import "hr/time_entry/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
+
+// ── Create Time Entry ─────────────────────────────────────────────
+
+message CreateTimeEntryRequest {
+  // Employee who logged the time.
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // Associated project; absent if not project-based.
+  optional int64 project_id = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // Associated task; absent if not task-level tracking.
+  optional int64 task_id = 3 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // Time category for reporting; absent if uncategorised.
+  optional int64 category_id = 4 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING,
+    (onekit.http.nullable) = true
+  ];
+  // Date the work was performed (ISO-8601 format).
+  string date = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // Total duration of work in minutes.
+  int32 duration_minutes = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
+  // Clock-in time; absent if duration-only entry.
+  optional string start_time = 7 [
+    (onekit.http.nullable) = true
+  ];
+  // Clock-out time; absent if duration-only entry.
+  optional string end_time = 8 [
+    (onekit.http.nullable) = true
+  ];
+  // Free-text description of the work performed.
+  string description = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // Whether this time is billable to a client.
+  bool is_billable = 10;
+  // How the entry was created (manual | timer | flow_import).
+  string source = 11 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message CreateTimeEntryResponse {
+  // The newly created time entry.
+  TimeEntryPayload entry = 1;
+}

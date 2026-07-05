@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package finance.recurring_invoice.v1;
+
+import "finance/recurring_invoice/v1/create_recurring_invoice.proto";
+import "finance/recurring_invoice/v1/get_recurring_invoice.proto";
+import "finance/recurring_invoice/v1/list_recurring_invoices.proto";
+import "finance/recurring_invoice/v1/pause_recurring_invoice.proto";
+import "finance/recurring_invoice/v1/resume_recurring_invoice.proto";
+import "finance/recurring_invoice/v1/update_recurring_invoice.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
+
+// RecurringInvoiceService defines recurring invoice endpoints.
+service RecurringInvoiceService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/recurring-invoice/v1"};
+
+  rpc ListRecurringInvoices(ListRecurringInvoicesRequest) returns (ListRecurringInvoicesResponse) {
+    option (onekit.http.config) = {
+      path: "/recurring-invoices"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateRecurringInvoice(CreateRecurringInvoiceRequest) returns (CreateRecurringInvoiceResponse) {
+    option (onekit.http.config) = {
+      path: "/recurring-invoices"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc GetRecurringInvoice(GetRecurringInvoiceRequest) returns (GetRecurringInvoiceResponse) {
+    option (onekit.http.config) = {
+      path: "/recurring-invoices/{id}"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc UpdateRecurringInvoice(UpdateRecurringInvoiceRequest) returns (UpdateRecurringInvoiceResponse) {
+    option (onekit.http.config) = {
+      path: "/recurring-invoices/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc PauseRecurringInvoice(PauseRecurringInvoiceRequest) returns (PauseRecurringInvoiceResponse) {
+    option (onekit.http.config) = {
+      path: "/recurring-invoices/{id}/pause"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+
+  rpc ResumeRecurringInvoice(ResumeRecurringInvoiceRequest) returns (ResumeRecurringInvoiceResponse) {
+    option (onekit.http.config) = {
+      path: "/recurring-invoices/{id}/resume"
+      method: HTTP_METHOD_PATCH
+    };
+  }
+}

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package hr.onboarding.v1;
+
+import "buf/validate/validate.proto";
+import "hr/onboarding/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
+
+// ── List Employee Checklists ─────────────────────────────────────
+
+message ListEmployeeChecklistsRequest {
+  // employee_id is the employee whose checklists should be listed.
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.query).name = "employee_id",
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // limit is the maximum number of checklists to return.
+  optional int32 limit = 2 [
+    (onekit.http.query).name = "limit",
+    (onekit.http.nullable) = true
+  ];
+  // offset is the number of checklists to skip before returning results.
+  optional int32 offset = 3 [
+    (onekit.http.query).name = "offset",
+    (onekit.http.nullable) = true
+  ];
+}
+
+message ListEmployeeChecklistsResponse {
+  // Page of employee checklists matching the filters.
+  repeated EmployeeChecklistPayload checklists = 1;
+  // Total number of matching checklists across all pages.
+  int64 total = 2 [
+    (onekit.http.int64_encoding) = INT64_ENCODING_NUMBER
+  ];
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

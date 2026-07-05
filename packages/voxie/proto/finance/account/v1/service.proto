@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package finance.account.v1;
+
+import "finance/account/v1/create_account.proto";
+import "finance/account/v1/delete_account.proto";
+import "finance/account/v1/get_chart_of_accounts.proto";
+import "finance/account/v1/list_accounts.proto";
+import "finance/account/v1/update_account.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/account/v1";
+
+// AccountService defines chart-of-accounts endpoints.
+service AccountService {
+  option (onekit.http.service_config) = {base_path: "/api/finance/account/v1"};
+
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse) {
+    option (onekit.http.config) = {
+      path: "/accounts"
+      method: HTTP_METHOD_GET
+    };
+  }
+
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {
+    option (onekit.http.config) = {
+      path: "/accounts"
+      method: HTTP_METHOD_POST
+    };
+  }
+
+  rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountResponse) {
+    option (onekit.http.config) = {
+      path: "/accounts/{id}"
+      method: HTTP_METHOD_PUT
+      body: "body"
+    };
+  }
+
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse) {
+    option (onekit.http.config) = {
+      path: "/accounts/{id}"
+      method: HTTP_METHOD_DELETE
+    };
+  }
+
+  rpc GetChartOfAccounts(GetChartOfAccountsRequest) returns (GetChartOfAccountsResponse) {
+    option (onekit.http.config) = {
+      path: "/chart-of-accounts"
+      method: HTTP_METHOD_GET
+    };
+  }
+}

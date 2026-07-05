@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package insights.dashboard.v1;
+
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/dashboard/v1";
+
+message InsightsMetricCard {
+  // value is the headline metric value.
+  int64 value = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // delta_pct is the period-over-period change percentage.
+  double delta_pct = 2;
+}
+
+message InsightsPctCard {
+  // value is the percentage metric value.
+  double value = 1;
+  // delta_pct is the period-over-period change percentage.
+  double delta_pct = 2;
+}
+
+message GetDashboardSummaryRequest {}
+
+message GetDashboardSummaryResponse {
+  // revenue is MTD revenue in minor units with delta.
+  InsightsMetricCard revenue = 1;
+  // customers is MTD customer count with delta.
+  InsightsMetricCard customers = 2;
+  // orders is MTD order count with delta.
+  InsightsMetricCard orders = 3;
+  // margin is MTD margin percentage with delta.
+  InsightsPctCard margin = 4;
+}
