@@ -12,6 +12,8 @@ import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
+import { createMemoryClient } from '../lib/memoryClient';
+import { ApiError } from '@voxire/voxie/hub/memory/v1/service_client';
 import { buildCaretFollowUps } from '../lib/followUps';
 import { inferCaretModeForPrompt } from '../lib/modeIntent';
 import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';
@@ -171,14 +173,16 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         old ? old.filter((chat) => chat.id !== id) : []
       );
 
-      const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
-      const response = await fetch(`${baseUrl}memory/chats/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: authHeaders(),
-      }).catch(() => null);
+      const deleted = await createMemoryClient(apiBaseUrl)
+        .deleteChat({ sessionId: id })
+        .then(() => true)
+        .catch((err) => {
+          // A 404 means the chat is already gone server-side - treat it as
+          // a successful delete rather than reverting the optimistic update.
+          return err instanceof ApiError && err.statusCode === 404;
+        });
 
-      if (!response || (!response.ok && response.status !== 404)) {
+      if (!deleted) {
         if (previous) {
           queryClient.setQueryData<CaretChatSummary[]>(queryKey, previous);
           setRecent(previous);
