@@ -5,6 +5,7 @@ export {
   createOneKitClientOptions,
   createOneKitFetch,
   getOneKitApiBaseUrl,
+  getOneKitErrorMessage,
 } from './client';
 export type { OneKitClientConstructor, OneKitClientOptions } from './client';
 export { safeFetch, unwrap, ok, err, ResultAsync } from './result';

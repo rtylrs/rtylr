@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createApiClient, createOneKitClient, createOneKitFetch } from './client';
+import {
+  createApiClient,
+  createOneKitClient,
+  createOneKitFetch,
+  getOneKitErrorMessage,
+} from './client';
 
 // We need to mock import.meta.env
 vi.stubGlobal('import', {
@@ -205,5 +210,24 @@ describe('createOneKitClient', () => {
     expect(client.baseUrl).toBeDefined();
     expect(client.options?.fetch).toBeDefined();
     expect(client.options?.defaultHeaders).toEqual({ 'X-Demo': '1' });
+  });
+});
+
+describe('getOneKitErrorMessage', () => {
+  it('parses the message out of a oneKit ApiError JSON body', () => {
+    const error = {
+      message: 'Request failed with status 401',
+      body: '{"message":"Invalid email or password","status_code":401}',
+    };
+    expect(getOneKitErrorMessage(error, 'fallback')).toBe('Invalid email or password');
+  });
+
+  it('falls back to error.message when the body is not JSON', () => {
+    const error = new Error('network down');
+    expect(getOneKitErrorMessage(error, 'fallback')).toBe('network down');
+  });
+
+  it('falls back to the provided default for unrecognized errors', () => {
+    expect(getOneKitErrorMessage('nope', 'fallback')).toBe('fallback');
   });
 });

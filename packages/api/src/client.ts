@@ -191,4 +191,28 @@ export function createOneKitClient<TClient, TOptions extends OneKitClientOptions
   return new Client(getOneKitApiBaseUrl(), createOneKitClientOptions(appId, options));
 }
 
+/**
+ * Extracts the backend-provided message from an error thrown by a generated
+ * oneKit service client. onekit's `Error` type serializes as a flat
+ * `{ message, status_code }` JSON body (see `onekit/http.NewError` in onion) -
+ * generated clients wrap that body as a plain string on `ApiError.body`, so it
+ * has to be parsed out rather than read off `.message` (which is always the
+ * generic "Request failed with status N").
+ */
+export function getOneKitErrorMessage(error: unknown, fallback: string): string {
+  if (error && typeof error === 'object' && 'body' in error && typeof error.body === 'string') {
+    try {
+      const parsed: unknown = JSON.parse(error.body);
+      if (parsed && typeof parsed === 'object' && 'message' in parsed) {
+        const message = (parsed as { message?: unknown }).message;
+        if (typeof message === 'string' && message.trim()) return message;
+      }
+    } catch {
+      // body wasn't JSON - fall through to the generic message below.
+    }
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
+
 export const api: AxiosInstance = createApiClient('dash');
