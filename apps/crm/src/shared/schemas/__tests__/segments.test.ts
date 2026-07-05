@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { segmentSchema, SEGMENT_COLORS, isValidSegmentColor, isTrendingUp } from '../segments';
 
 const baseSegment = {
-  id: 1,
+  id: '1',
   name: 'VIP Customers',
   description: 'Top spenders',
   customerCount: 120,
@@ -15,14 +15,14 @@ const baseSegment = {
 describe('segmentSchema', () => {
   it('parses a valid segment', () => {
     const result = segmentSchema.parse(baseSegment);
-    expect(result.id).toBe(1);
+    expect(result.id).toBe('1');
     expect(result.name).toBe('VIP Customers');
     expect(result.trendUp).toBe(true);
   });
 
-  it('coerces string id to number', () => {
+  it('keeps id as a string', () => {
     const result = segmentSchema.parse({ ...baseSegment, id: '5' });
-    expect(result.id).toBe(5);
+    expect(result.id).toBe('5');
   });
 
   it('defaults rules to empty array when missing', () => {
@@ -38,17 +38,17 @@ describe('segmentSchema', () => {
 
   it('parses a backend wire payload and defaults presentation fields', () => {
     const result = segmentSchema.parse({
-      id: 7,
-      ownerId: 1,
+      id: '7',
+      ownerId: '1',
       name: 'New Segment',
       description: 'From the API',
-      filters: { tier: 'gold' },
-      customerCount: 42,
+      filters: '{"tier":"gold"}',
+      customerCount: '42',
       createdAt: '2024-06-01T00:00:00Z',
       updatedAt: '2024-06-02T00:00:00Z',
     });
-    expect(result.id).toBe(7);
-    expect(result.filters).toEqual({ tier: 'gold' });
+    expect(result.id).toBe('7');
+    expect(result.filters).toEqual('{"tier":"gold"}');
     expect(result.customerCount).toBe(42);
     expect(result.color).toBe('#3b82f6');
     expect(result.rules).toEqual([]);

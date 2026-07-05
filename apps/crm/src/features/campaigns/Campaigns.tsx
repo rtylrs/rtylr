@@ -378,7 +378,10 @@ const Campaigns: React.FC = () => {
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
   const audienceBySegment = useMemo(
-    () => new Map((fetchedSegments ?? []).map((segment) => [segment.id, segment.customerCount])),
+    () =>
+      new Map(
+        (fetchedSegments ?? []).map((segment) => [Number(segment.id), segment.customerCount])
+      ),
     [fetchedSegments]
   );
   const campaigns: Campaign[] = useMemo(

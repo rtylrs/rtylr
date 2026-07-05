@@ -1,11 +1,10 @@
 import { z } from 'zod';
 
 /**
- * Segment wire shape mirrors the backend segments module
- * (onion segments/internal/routes/handlers/segment_handlers.go → SegmentPayload).
- * The backend returns: id, ownerId, name, description, filters (raw JSON),
- * customerCount, createdAt, updatedAt. The @voxire/api response interceptor
- * converts snake_case → camelCase.
+ * Segment wire shape mirrors crm.segment.v1.Segment. id/ownerId/customerCount
+ * are transported as strings (onekit int64-as-string encoding) - kept as
+ * strings for id/ownerId (opaque identifiers), transformed to a number for
+ * customerCount since the UI does arithmetic/formatting on it.
  *
  * The backend does NOT send `color`, `icon`, `rules`, `trend`, or `trendUp` —
  * those are presentation concerns generated/derived client-side. They are kept
@@ -14,12 +13,12 @@ import { z } from 'zod';
  * display projection of `filters`.
  */
 export const segmentSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  ownerId: z.number().optional(),
+  id: z.string(),
+  ownerId: z.string().optional(),
   name: z.string(),
   description: z.string().default(''),
-  filters: z.unknown().optional(),
-  customerCount: z.number().default(0),
+  filters: z.string().default('{}'),
+  customerCount: z.union([z.string(), z.number()]).transform(Number).default(0),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   // Client-only presentation fields — not part of the API contract.

@@ -31,14 +31,16 @@ const SMSCampaign: React.FC = () => {
   const customers = fetchedCustomers ?? [];
 
   const [name, setName] = useState('');
-  const [segmentId, setSegmentId] = useState<number>(0);
+  const [segmentId, setSegmentId] = useState<string>('');
   const [body, setBody] = useState(DEFAULT_SMS_BODY);
   const pending = create.isPending || update.isPending;
 
   useEffect(() => {
     if (existingCampaign) {
       setName(existingCampaign.name);
-      setSegmentId(existingCampaign.audienceSegmentId ?? 0);
+      setSegmentId(
+        existingCampaign.audienceSegmentId != null ? String(existingCampaign.audienceSegmentId) : ''
+      );
       setBody(existingCampaign.body ?? '');
       return;
     }
@@ -53,7 +55,7 @@ const SMSCampaign: React.FC = () => {
       type: 'sms',
       status: send ? 'active' : 'draft',
       body,
-      audienceSegmentId: segmentId,
+      audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
     const callbacks = {
       onSuccess: () => {
@@ -188,10 +190,7 @@ const SMSCampaign: React.FC = () => {
               >
                 Audience
               </h4>
-              <Select
-                value={segmentId}
-                onChange={(event) => setSegmentId(Number(event.target.value))}
-              >
+              <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
                 {segments.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name} ({item.customerCount})

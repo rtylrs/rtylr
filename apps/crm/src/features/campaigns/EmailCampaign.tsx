@@ -29,7 +29,7 @@ const EmailCampaign: React.FC = () => {
   const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
   const [name, setName] = useState(searchParams.get('name') || '');
-  const [segmentId, setSegmentId] = useState<number>(0);
+  const [segmentId, setSegmentId] = useState<string>('');
   const [subject, setSubject] = useState(searchParams.get('subject') || '');
   const [body, setBody] = useState(searchParams.get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -38,7 +38,9 @@ const EmailCampaign: React.FC = () => {
   useEffect(() => {
     if (existingCampaign) {
       setName(existingCampaign.name);
-      setSegmentId(existingCampaign.audienceSegmentId ?? 0);
+      setSegmentId(
+        existingCampaign.audienceSegmentId != null ? String(existingCampaign.audienceSegmentId) : ''
+      );
       setSubject(existingCampaign.subject ?? '');
       setBody(existingCampaign.body ?? '');
       return;
@@ -63,7 +65,7 @@ const EmailCampaign: React.FC = () => {
       status: send ? 'active' : 'draft',
       subject,
       body,
-      audienceSegmentId: segmentId,
+      audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
     const callbacks = {
       onSuccess: () => {
@@ -179,10 +181,7 @@ const EmailCampaign: React.FC = () => {
               >
                 Audience
               </h4>
-              <Select
-                value={segmentId}
-                onChange={(event) => setSegmentId(Number(event.target.value))}
-              >
+              <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
                 {segments.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name} ({item.customerCount})

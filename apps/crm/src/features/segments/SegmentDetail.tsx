@@ -10,13 +10,8 @@ import { getTier } from '../../shared/lib/tiers';
 const SegmentDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
-  const segmentId = Number(id);
-  const {
-    data: fetched,
-    isLoading: segmentLoading,
-    error: segmentError,
-  } = useGetSegment(segmentId);
-  const { data: fetchedCustomers, isLoading } = useSegmentCustomers(segmentId);
+  const { data: fetched, isLoading: segmentLoading, error: segmentError } = useGetSegment(id);
+  const { data: fetchedCustomers, isLoading } = useSegmentCustomers(id);
   const segment = fetched;
   const customers = fetchedCustomers ?? [];
 

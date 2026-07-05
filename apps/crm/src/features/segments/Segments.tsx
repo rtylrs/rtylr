@@ -25,7 +25,7 @@ import { ConfirmModal } from '../../shared/components/ui';
 const ACCENT = '#3b82f6';
 
 interface Segment {
-  id: number;
+  id: string;
   name: string;
   description: string;
   customerCount: number;
@@ -513,7 +513,7 @@ const Segments: React.FC = () => {
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();
   const [builderOpen, setBuilderOpen] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const segments: Segment[] = useMemo(() => {
     if (!fetchedSegments) return [];
     return fetchedSegments.map((s) => ({
@@ -522,7 +522,7 @@ const Segments: React.FC = () => {
     }));
   }, [fetchedSegments]);
 
-  const handleDelete = (id: number): void => {
+  const handleDelete = (id: string): void => {
     removeSegment.mutate(id, {
       onSuccess: () => {
         toast.success('Segment deleted');
