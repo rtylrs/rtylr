@@ -19,6 +19,7 @@ const (
 
 type repository interface {
 	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Quote, error)
+	Get(ctx context.Context, businessID, id int64) (domain.Quote, error)
 	Create(ctx context.Context, businessID int64, input domain.QuoteInput) (int64, error)
 	Update(ctx context.Context, businessID, id int64, input domain.QuoteInput) error
 	UpdateStatus(ctx context.Context, businessID, id int64, status string) error
@@ -70,6 +71,10 @@ func paginate(page, pageSize int64) (int, int) {
 		pageSize = 500
 	}
 	return int(pageSize), int((page - 1) * pageSize)
+}
+
+func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.Quote, error) {
+	return s.repo.Get(ctx, businessID, id)
 }
 
 func (s *Service) Create(ctx context.Context, businessID int64, input domain.QuoteInput) (int64, error) {

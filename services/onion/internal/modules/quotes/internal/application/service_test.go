@@ -10,6 +10,8 @@ import (
 
 type mockRepo struct {
 	list      []domain.Quote
+	getResult domain.Quote
+	getErr    error
 	createID  int64
 	convertID int64
 	createErr error
@@ -21,6 +23,10 @@ type mockRepo struct {
 
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.Quote, error) {
 	return m.list, nil
+}
+
+func (m *mockRepo) Get(_ context.Context, _, _ int64) (domain.Quote, error) {
+	return m.getResult, m.getErr
 }
 
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.QuoteInput) (int64, error) {
