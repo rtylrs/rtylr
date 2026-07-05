@@ -20,7 +20,22 @@ const NON_QUEUEABLE_MUTATION_PATTERNS = [
   /\/users\//,
 ];
 
+const TABLES_URL = '/api/pos/table/v1/tables';
+const ORDERS_URL = '/api/pos/orders/v1/orders';
+const HELD_ORDERS_URL = '/api/pos/orders/holds/v1/orders/held';
+
 const COLLECTION_KEYS: Record<string, string[]> = {
+  [TABLES_URL]: ['tables', 'data'],
+  [ORDERS_URL]: ['orders', 'data'],
+  [HELD_ORDERS_URL]: ['orders', 'heldOrders', 'data'],
+  '/api/pos/menu-item/v1/menu-items': ['items', 'products', 'data'],
+  '/api/pos/customer/v1/customers': ['customers', 'data'],
+  '/api/pos/gift-card/v1/gift-cards': ['giftCards', 'cards', 'data'],
+  '/api/pos/modifier/v1/modifiers': ['modifiers', 'groups', 'data'],
+  '/api/pos/combo/v1/combos': ['combos', 'data'],
+  '/api/pos/stock/v1/inventory': ['items', 'inventory', 'data'],
+
+  // Keep old snapshots readable until clients naturally refresh them.
   '/pos/tables': ['tables', 'data'],
   '/pos/orders': ['orders', 'data'],
   '/pos/orders/held': ['orders', 'heldOrders', 'data'],
@@ -305,18 +320,18 @@ async function applySyncedMutationResult(mutation: ApiMutation, response: unknow
   const optimisticId = idOf(mutation.optimisticResponse);
   const remoteId = idOf(response);
 
-  if (mutation.url === '/pos/orders' && optimisticId && remoteId && optimisticId !== remoteId) {
+  if (isOrdersCollectionUrl(mutation.url) && optimisticId && remoteId && optimisticId !== remoteId) {
     const merged = mergeEntity(asRecord(mutation.optimisticResponse) ?? {}, response, false);
-    await updateCollectionSnapshots('/pos/orders', ['orders', 'data'], (existing) =>
+    await updateCollectionSnapshots(ORDERS_URL, ['orders', 'data'], (existing) =>
       upsertById(removeById(existing, optimisticId), merged)
     );
-    await cacheResponse('get', `/pos/orders/${remoteId}`, undefined, undefined, merged);
+    await cacheResponse('get', `${ORDERS_URL}/${remoteId}`, undefined, undefined, merged);
     return;
   }
 
-  if (mutation.url === '/pos/tables' && optimisticId && remoteId && optimisticId !== remoteId) {
+  if (isTablesCollectionUrl(mutation.url) && optimisticId && remoteId && optimisticId !== remoteId) {
     const merged = mergeEntity(asRecord(mutation.optimisticResponse) ?? {}, response, false);
-    await updateCollectionSnapshots('/pos/tables', ['tables', 'data'], (existing) =>
+    await updateCollectionSnapshots(TABLES_URL, ['tables', 'data'], (existing) =>
       upsertById(removeById(existing, optimisticId), merged)
     );
     return;
@@ -331,39 +346,39 @@ async function applyMutationToSnapshots(
   requestBody: unknown,
   responseBody: unknown
 ): Promise<void> {
-  if (url === '/pos/orders' && method === 'post') {
+  if (isOrdersCollectionUrl(url) && method === 'post') {
     const order = mergeEntity(
       buildOptimisticOrder(requestBody),
       responseBody,
       Boolean(asRecord(responseBody)?.pendingSync)
     );
-    await updateCollectionSnapshots('/pos/orders', ['orders', 'data'], (existing) =>
+    await updateCollectionSnapshots(ORDERS_URL, ['orders', 'data'], (existing) =>
       upsertById(existing, order)
     );
     const orderId = idOf(order);
     if (orderId) {
-      await cacheResponse('get', `/pos/orders/${orderId}`, undefined, undefined, order);
+      await cacheResponse('get', `${ORDERS_URL}/${orderId}`, undefined, undefined, order);
     }
     return;
   }
 
-  if (url === '/pos/tables' && method === 'post') {
+  if (isTablesCollectionUrl(url) && method === 'post') {
     const table = mergeEntity(
       buildOptimisticTable(requestBody),
       responseBody,
       Boolean(asRecord(responseBody)?.pendingSync)
     );
-    await updateCollectionSnapshots('/pos/tables', ['tables', 'data'], (existing) =>
+    await updateCollectionSnapshots(TABLES_URL, ['tables', 'data'], (existing) =>
       upsertById(existing, table)
     );
     return;
   }
 
-  const tableStatusMatch = url.match(/^\/pos\/tables\/([^/]+)\/status$/);
+  const tableStatusMatch = tableStatusUrlMatch(url);
   if (tableStatusMatch && (method === 'put' || method === 'patch')) {
     const id = tableStatusMatch[1];
     const status = asRecord(requestBody)?.status;
-    await updateCollectionSnapshots('/pos/tables', ['tables', 'data'], (existing) =>
+    await updateCollectionSnapshots(TABLES_URL, ['tables', 'data'], (existing) =>
       existing.map((entry) =>
         sameId(entry, id) ? { ...(asRecord(entry) ?? {}), id: idValue(entry, id), status } : entry
       )
@@ -371,17 +386,17 @@ async function applyMutationToSnapshots(
     return;
   }
 
-  const tableMatch = url.match(/^\/pos\/tables\/([^/]+)$/);
+  const tableMatch = tableUrlMatch(url);
   if (tableMatch) {
     const id = tableMatch[1];
     if (method === 'delete') {
-      await updateCollectionSnapshots('/pos/tables', ['tables', 'data'], (existing) =>
+      await updateCollectionSnapshots(TABLES_URL, ['tables', 'data'], (existing) =>
         removeById(existing, id)
       );
       return;
     }
     const patch = asRecord(responseBody) ?? asRecord(requestBody) ?? {};
-    await updateCollectionSnapshots('/pos/tables', ['tables', 'data'], (existing) =>
+    await updateCollectionSnapshots(TABLES_URL, ['tables', 'data'], (existing) =>
       existing.map((entry) =>
         sameId(entry, id)
           ? { ...(asRecord(entry) ?? {}), ...patch, id: idValue(entry, id) }
@@ -395,14 +410,14 @@ async function applyMutationToSnapshots(
   if (orderStatus) {
     const orderId = orderIdFromMutationUrl(url);
     if (!orderId) return;
-    await updateCollectionSnapshots('/pos/orders', ['orders', 'data'], (existing) =>
+    await updateCollectionSnapshots(ORDERS_URL, ['orders', 'data'], (existing) =>
       existing.map((entry) =>
         sameId(entry, orderId)
           ? { ...(asRecord(entry) ?? {}), id: idValue(entry, orderId), status: orderStatus }
           : entry
       )
     );
-    await patchCachedDetail(`/pos/orders/${orderId}`, { status: orderStatus });
+    await patchCachedDetail(`${ORDERS_URL}/${orderId}`, { status: orderStatus });
     return;
   }
 
@@ -525,10 +540,10 @@ function buildOptimisticResponse(
   url: string,
   requestBody: unknown
 ): unknown {
-  if (url === '/pos/orders' && method === 'post') {
+  if (isOrdersCollectionUrl(url) && method === 'post') {
     return buildOptimisticOrder(requestBody);
   }
-  if (url === '/pos/tables' && method === 'post') {
+  if (isTablesCollectionUrl(url) && method === 'post') {
     return buildOptimisticTable(requestBody);
   }
 
@@ -627,24 +642,51 @@ function mergeEntity(base: RecordLike, responseBody: unknown, pendingSync: boole
 }
 
 function orderStatusForMutation(url: string, requestBody: unknown): string | null {
-  if (/^\/pos\/orders\/[^/]+\/status$/.test(url)) {
+  if (/^\/pos\/orders\/[^/]+\/status$/.test(url) || /^\/api\/pos\/orders\/v1\/orders\/[^/]+\/status$/.test(url)) {
     return text(asRecord(requestBody)?.status, 'pending');
   }
   if (/^\/pos\/orders\/[^/]+\/payment$/.test(url)) return 'paid';
+  if (/^\/api\/pos\/orders\/payments\/v1\/orders\/[^/]+\/payment$/.test(url)) return 'paid';
   if (/^\/pos\/orders\/[^/]+\/void$/.test(url)) return 'voided';
+  if (/^\/api\/pos\/orders\/v1\/orders\/[^/]+\/void$/.test(url)) return 'voided';
   if (/^\/pos\/orders\/[^/]+\/refund$/.test(url)) return 'refunded';
+  if (/^\/api\/pos\/orders\/refunds\/v1\/orders\/[^/]+\/refund$/.test(url)) return 'refunded';
   if (/^\/pos\/orders\/[^/]+\/hold$/.test(url)) return 'held';
+  if (/^\/api\/pos\/orders\/holds\/v1\/orders\/[^/]+\/hold$/.test(url)) return 'held';
   if (/^\/pos\/orders\/[^/]+\/send-to-kitchen$/.test(url)) return 'sent';
   return null;
 }
 
 function orderIdFromMutationUrl(url: string): string | null {
-  return url.match(/^\/pos\/orders\/([^/]+)/)?.[1] ?? null;
+  return (
+    url.match(/^\/pos\/orders\/([^/]+)/)?.[1] ??
+    url.match(/^\/api\/pos\/orders\/(?:v1|payments\/v1|refunds\/v1|holds\/v1|discounts\/v1|splits\/v1)\/orders\/([^/]+)/)?.[1] ??
+    null
+  );
+}
+
+function isOrdersCollectionUrl(url: string): boolean {
+  return url === ORDERS_URL || url === '/pos/orders';
+}
+
+function isTablesCollectionUrl(url: string): boolean {
+  return url === TABLES_URL || url === '/pos/tables';
+}
+
+function tableStatusUrlMatch(url: string): RegExpMatchArray | null {
+  return (
+    url.match(/^\/pos\/tables\/([^/]+)\/status$/) ??
+    url.match(/^\/api\/pos\/table\/v1\/tables\/([^/]+)$/)
+  );
+}
+
+function tableUrlMatch(url: string): RegExpMatchArray | null {
+  return url.match(/^\/pos\/tables\/([^/]+)$/) ?? url.match(/^\/api\/pos\/table\/v1\/tables\/([^/]+)$/);
 }
 
 function collectionUrlForMutation(url: string): string | null {
   for (const collectionUrl of Object.keys(COLLECTION_KEYS)) {
-    if (collectionUrl === '/pos/orders/held') continue;
+    if (collectionUrl === HELD_ORDERS_URL || collectionUrl === '/pos/orders/held') continue;
     if (url === collectionUrl || url.startsWith(`${collectionUrl}/`)) {
       return collectionUrl;
     }
@@ -696,7 +738,7 @@ function idValue(entry: unknown, fallback: unknown): unknown {
 }
 
 function isQueueableMutation(url: string): boolean {
-  if (!url.startsWith('/pos/')) return false;
+  if (!url.startsWith('/pos/') && !url.startsWith('/api/pos/')) return false;
   return !NON_QUEUEABLE_MUTATION_PATTERNS.some((pattern) => pattern.test(url));
 }
 
