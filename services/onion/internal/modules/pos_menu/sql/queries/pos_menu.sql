@@ -61,7 +61,7 @@ VALUES (?, ?, ?, ?, ?, TRUE);
 
 -- name: UpdateMenuItem :exec
 UPDATE erp_products
-SET name = COALESCE(NULLIF(?, ''), name),
+SET name = COALESCE(NULLIF(sqlc.arg(name), ''), name),
     sale_price = ?,
     stock_quantity = ?,
     is_active = ?,
