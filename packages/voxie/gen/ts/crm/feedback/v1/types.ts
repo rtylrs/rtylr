@@ -10,9 +10,13 @@ export interface Feedback {
   id: number;
   ownerId: number;
   customerId: number;
+  /** "nps" or "review" — score's scale and meaning depend on this. */
   type: string;
+  /** NPS score (0-10) when type is "nps"; star rating (1-5) when type is "review". */
   score: number;
   comment: string;
   source: string;
   createdAt: string;
+  /** Display name of the customer this feedback belongs to. */
+  customerName: string;
 }
