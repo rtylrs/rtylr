@@ -26,6 +26,7 @@ export interface Feedback {
   comment: string;
   source: string;
   createdAt: string;
+  customerName: string;
 }
 
 export interface CreateFeedbackRequest {

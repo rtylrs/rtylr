@@ -10,9 +10,13 @@ message Feedback {
   int64 id = 1 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   int64 owner_id = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
   int64 customer_id = 3 [(onekit.http.int64_encoding) = INT64_ENCODING_STRING];
+  // "nps" or "review" — score's scale and meaning depend on this.
   string type = 4;
+  // NPS score (0-10) when type is "nps"; star rating (1-5) when type is "review".
   int32 score = 5;
   string comment = 6;
   string source = 7;
   string created_at = 8;
+  // Display name of the customer this feedback belongs to.
+  string customer_name = 9;
 }

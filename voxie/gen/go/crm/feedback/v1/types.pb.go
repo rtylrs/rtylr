@@ -23,15 +23,19 @@ const (
 )
 
 type Feedback struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	CustomerId    int64                  `protobuf:"varint,3,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	Type          string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
-	Score         int32                  `protobuf:"varint,5,opt,name=score,proto3" json:"score,omitempty"`
-	Comment       string                 `protobuf:"bytes,6,opt,name=comment,proto3" json:"comment,omitempty"`
-	Source        string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Id         int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	OwnerId    int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	CustomerId int64                  `protobuf:"varint,3,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	// "nps" or "review" — score's scale and meaning depend on this.
+	Type string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	// NPS score (0-10) when type is "nps"; star rating (1-5) when type is "review".
+	Score     int32  `protobuf:"varint,5,opt,name=score,proto3" json:"score,omitempty"`
+	Comment   string `protobuf:"bytes,6,opt,name=comment,proto3" json:"comment,omitempty"`
+	Source    string `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`
+	CreatedAt string `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// Display name of the customer this feedback belongs to.
+	CustomerName  string `protobuf:"bytes,9,opt,name=customer_name,json=customerName,proto3" json:"customer_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,11 +126,18 @@ func (x *Feedback) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Feedback) GetCustomerName() string {
+	if x != nil {
+		return x.CustomerName
+	}
+	return ""
+}
+
 var File_crm_feedback_v1_types_proto protoreflect.FileDescriptor
 
 const file_crm_feedback_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1bcrm/feedback/v1/types.proto\x12\x0fcrm.feedback.v1\x1a\x1donekit/http/annotations.proto\"\xe3\x01\n" +
+	"\x1bcrm/feedback/v1/types.proto\x12\x0fcrm.feedback.v1\x1a\x1donekit/http/annotations.proto\"\x88\x02\n" +
 	"\bFeedback\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\x03B\x04е\x18\x01R\x02id\x12\x1f\n" +
 	"\bowner_id\x18\x02 \x01(\x03B\x04е\x18\x01R\aownerId\x12%\n" +
@@ -137,7 +148,8 @@ const file_crm_feedback_v1_types_proto_rawDesc = "" +
 	"\acomment\x18\x06 \x01(\tR\acomment\x12\x16\n" +
 	"\x06source\x18\a \x01(\tR\x06source\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAtB0Z.github.com/voxire/voxie/gen/go/crm/feedback/v1b\x06proto3"
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12#\n" +
+	"\rcustomer_name\x18\t \x01(\tR\fcustomerNameB0Z.github.com/voxire/voxie/gen/go/crm/feedback/v1b\x06proto3"
 
 var (
 	file_crm_feedback_v1_types_proto_rawDescOnce sync.Once
