@@ -4,21 +4,15 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock('../../shared/lib/api', () => ({
-  safe: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
+const mockClient = vi.hoisted(() => ({
+  getBalanceSheet: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((val: unknown) => Promise.resolve(val)),
+  createOneKitClient: () => mockClient,
 }));
 
 import { useBalanceSheet } from './useBalanceSheet';
-import { safe } from '../../shared/lib/api';
 
 const createWrapper = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -32,33 +26,23 @@ describe('useBalanceSheet', () => {
   });
 
   it('fetches balance sheet on mount', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      assets: [{ label: 'Cash', amount: 10000, type: 'current' }],
-      liabilities: [],
-      equity: [],
+    mockClient.getBalanceSheet.mockResolvedValue({
       totalAssets: 10000,
       totalLiabilities: 0,
       totalEquity: 10000,
+      cashBalance: 8000,
+      accountsReceivable: 2000,
+      accountsPayable: 0,
     });
     const { result } = renderHook(() => useBalanceSheet(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith(
-      '/finance/balance-sheet',
-      expect.objectContaining({ params: expect.objectContaining({ as_of: expect.any(String) }) })
-    );
-  });
-
-  it('defaults assets, liabilities, equity to empty arrays', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-    const { result } = renderHook(() => useBalanceSheet(), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.assets).toEqual([]);
-    expect(result.current.data?.liabilities).toEqual([]);
-    expect(result.current.data?.equity).toEqual([]);
+    expect(mockClient.getBalanceSheet).toHaveBeenCalledWith({});
+    expect(result.current.data?.totalAssets).toBe(10000);
+    expect(result.current.data?.assets).toHaveLength(2);
   });
 
   it('starts in loading state', () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    mockClient.getBalanceSheet.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useBalanceSheet(), { wrapper: createWrapper() });
     expect(result.current.isLoading).toBe(true);
   });

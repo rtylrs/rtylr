@@ -128,7 +128,7 @@ export interface PLReport {
 }
 
 export interface TaxConfig {
-  id?: number;
+  id?: string;
   name: string;
   rate: number;
 }

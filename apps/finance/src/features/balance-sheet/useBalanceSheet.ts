@@ -1,17 +1,30 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { safe } from '../../shared/lib/api';
+import { StatementServiceClient } from '@voxire/voxie/finance/statement/v1/service_client';
 import { balanceSheetSchema } from '../../shared/schemas/balanceSheet';
 
+const statementClient = createOneKitClient(StatementServiceClient, 'finance');
+
+// finance.statement.v1.GetBalanceSheet has no as-of-date param - it's always
+// the current point-in-time balance sheet.
 export function useBalanceSheet() {
-  const asOf = new Date().toISOString().slice(0, 10);
   return useQuery({
-    queryKey: ['balance-sheet', asOf],
+    queryKey: ['balance-sheet'],
     queryFn: async () => {
-      const res = await unwrap(
-        safe.get<unknown>('/finance/balance-sheet', { params: { as_of: asOf } })
-      );
-      return balanceSheetSchema.parse(res ?? {});
+      const res = await statementClient.getBalanceSheet({});
+      return balanceSheetSchema.parse({
+        assets: [
+          { label: 'Cash', amount: res.cashBalance, type: 'asset' },
+          { label: 'Accounts Receivable', amount: res.accountsReceivable, type: 'asset' },
+        ],
+        liabilities: [
+          { label: 'Accounts Payable', amount: res.accountsPayable, type: 'liability' },
+        ],
+        equity: [{ label: 'Equity', amount: res.totalEquity, type: 'equity' }],
+        totalAssets: res.totalAssets,
+        totalLiabilities: res.totalLiabilities,
+        totalEquity: res.totalEquity,
+      });
     },
   });
 }

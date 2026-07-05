@@ -3,7 +3,7 @@ import { taxConfigSchema, taxReportSchema, plReportSchema } from '../tax';
 
 describe('taxConfigSchema', () => {
   it('parses a valid config', () => {
-    const result = taxConfigSchema.parse({ id: 1, name: 'VAT', rate: 20 });
+    const result = taxConfigSchema.parse({ id: '1', name: 'VAT', rate: 20 });
     expect(result.name).toBe('VAT');
     expect(result.rate).toBe(20);
   });

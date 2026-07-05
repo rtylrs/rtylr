@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const taxConfigSchema = z.object({
-  id: z.number().optional().nullable(),
+  id: z.string().optional().nullable(),
   name: z.string().default(''),
   rate: z.number().default(0),
 });
