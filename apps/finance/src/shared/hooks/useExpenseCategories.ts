@@ -1,19 +1,16 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { safe } from '../lib/api';
+import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/service_client';
 import type { ExpenseCategory } from '../services/financeApi';
-import { expenseCategorySchema } from '../schemas/expenses';
-import { unwrapList } from '../lib/unwrapList';
+
+const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
 
 export function useExpenseCategories() {
-  return useQuery({
+  return useQuery<ExpenseCategory[]>({
     queryKey: ['expense-categories'],
     queryFn: async (): Promise<ExpenseCategory[]> => {
-      const res = await unwrap(safe.get<unknown>('/finance/expenses/categories'));
-      return z
-        .array(expenseCategorySchema)
-        .parse(unwrapList(res, 'categories')) as ExpenseCategory[];
+      const res = await expensesClient.listExpenseCategories({});
+      return res.categories.map((c) => ({ id: Number(c.id), name: c.name, color: c.color }));
     },
   });
 }

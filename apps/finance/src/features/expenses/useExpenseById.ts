@@ -1,14 +1,29 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { safe } from '../../shared/lib/api';
-import { expenseSchema } from '../../shared/schemas/expenses';
+import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/service_client';
+import type { Expense } from '../../shared/services/financeApi';
+
+const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
 
 export function useExpenseById(id: string | undefined) {
-  return useQuery({
+  return useQuery<Expense | undefined>({
     queryKey: ['expense', id],
-    queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>(`/finance/expenses/${id}`));
-      return expenseSchema.parse(res);
+    queryFn: async (): Promise<Expense | undefined> => {
+      const res = await expensesClient.getExpense({ id: id ?? '' });
+      if (!res.expense) return undefined;
+      return {
+        id: res.expense.id,
+        categoryId: res.expense.categoryId != null ? Number(res.expense.categoryId) : null,
+        description: res.expense.description,
+        amount: res.expense.amount,
+        currency: res.expense.currency,
+        vendor: res.expense.vendor,
+        receiptUrl: res.expense.receiptUrl,
+        expenseDate: res.expense.expenseDate,
+        status: res.expense.status,
+        createdAt: res.expense.createdAt,
+        updatedAt: res.expense.updatedAt,
+      };
     },
     enabled: !!id,
   });
