@@ -190,7 +190,7 @@ export function safeFetch(client: AxiosInstance): SafeApi {
  * ```ts
  * useQuery({
  *   queryKey: ['products'],
- *   queryFn: () => unwrap(safe.get<Product[]>('/erp/products')),
+ *   queryFn: () => unwrap(safe.get<Product[]>('/api/erp/product/v1/products')),
  * });
  * ```
  */
