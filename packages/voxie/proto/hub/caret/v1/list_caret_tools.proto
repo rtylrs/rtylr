@@ -10,6 +10,10 @@ message CaretTool {
   string description = 3;
   string category = 4;
   bool requires_approval = 5;
+  // Access scope of this tool: "read" or "write". Mirrors the server-side
+  // gating already applied in ask/analyst modes; exposed so the UI can
+  // surface it too (e.g. counting write-scoped tools).
+  string scope = 6;
 }
 
 message ListCaretToolsRequest {
