@@ -17,7 +17,7 @@
     "@voxire/auth": "workspace:*",
     "@voxire/caret": "workspace:*",
     "@voxire/config": "workspace:*",
-    "@voxire/contracts": "workspace:*",
+    "@voxire/voxie": "workspace:*",
     "@voxire/i18n": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
