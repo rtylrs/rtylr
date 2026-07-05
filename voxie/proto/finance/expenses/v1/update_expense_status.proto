@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package finance.expenses.v1;
+
+import "buf/validate/validate.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/expenses/v1";
+
+message UpdateExpenseStatusBody {
+  // status is the current lifecycle state - "pending", "approved", or "rejected".
+  string status = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+}
+
+message UpdateExpenseStatusRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
+  // body carries status update fields bound from the HTTP payload.
+  UpdateExpenseStatusBody body = 2;
+}
+
+message UpdateExpenseStatusResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

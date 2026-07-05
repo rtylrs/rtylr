@@ -17,6 +17,7 @@ type InvoicesServiceServer interface {
 	UpdateInvoice(context.Context, *UpdateInvoiceRequest) (*UpdateInvoiceResponse, error)
 	UpdateInvoiceStatus(context.Context, *UpdateInvoiceStatusRequest) (*UpdateInvoiceStatusResponse, error)
 	DeleteInvoice(context.Context, *DeleteInvoiceRequest) (*DeleteInvoiceResponse, error)
+	SendInvoice(context.Context, *SendInvoiceRequest) (*SendInvoiceResponse, error)
 }
 
 // RegisterInvoicesServiceServer registers the HTTP handlers for service InvoicesService to the given mux.
@@ -79,6 +80,15 @@ func RegisterInvoicesServiceServer(server InvoicesServiceServer, opts ...ServerO
 
 	config.mux.Handle("DELETE /api/finance/invoices/v1/invoices/{id}", deleteInvoiceHandler)
 
+	methodHeaders = getSendInvoiceHeaders()
+	sendInvoiceHandler := BindingMiddleware[SendInvoiceRequest](
+		genericHandler(server.SendInvoice, config.errorHandler, config.marshalOpts), serviceHeaders, methodHeaders,
+		sendInvoicePathParams, sendInvoiceQueryParams,
+		"POST", "", config.maxRequestBytes, config.errorHandler, config.marshalOpts,
+	)
+
+	config.mux.Handle("POST /api/finance/invoices/v1/invoices/{id}/send", sendInvoiceHandler)
+
 	return nil
 }
 
@@ -114,6 +124,11 @@ func getUpdateInvoiceStatusHeaders() []*onekithttp.Header {
 
 // getDeleteInvoiceHeaders returns the method-level required headers for DeleteInvoice
 func getDeleteInvoiceHeaders() []*onekithttp.Header {
+	return nil
+}
+
+// getSendInvoiceHeaders returns the method-level required headers for SendInvoice
+func getSendInvoiceHeaders() []*onekithttp.Header {
 	return nil
 }
 
@@ -165,3 +180,11 @@ var deleteInvoicePathParams = []PathParamConfig{
 
 // deleteInvoiceQueryParams contains query parameter configuration for DeleteInvoice
 var deleteInvoiceQueryParams = []QueryParamConfig{}
+
+// sendInvoicePathParams contains path parameter configuration for SendInvoice
+var sendInvoicePathParams = []PathParamConfig{
+	{URLParam: "id", FieldName: "id"},
+}
+
+// sendInvoiceQueryParams contains query parameter configuration for SendInvoice
+var sendInvoiceQueryParams = []QueryParamConfig{}

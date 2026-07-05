@@ -3857,6 +3857,18 @@ export const contractValidationMetadata = {
       "type": "int64"
     }
   },
+  "finance.expenses.v1.GetExpenseRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.expenses.v1.ListExpenseCategoriesRequest": {},
   "finance.expenses.v1.ListExpensesRequest": {},
   "finance.expenses.v1.UpdateExpenseRequest": {
@@ -3868,6 +3880,27 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": false,
       "type": "UpdateExpenseBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "finance.expenses.v1.UpdateExpenseStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateExpenseStatusBody"
     },
     "id": {
       "gt": 0,
@@ -4142,6 +4175,18 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "finance.invoices.v1.SendInvoiceRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.invoices.v1.UpdateInvoiceRequest": {
     "body": {
       "name": "body",
@@ -4284,6 +4329,18 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "finance.quote.v1.ConvertQuoteRequest": {
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
   "finance.quote.v1.CreateQuoteRequest": {
     "customerId": {
       "gt": 0,
@@ -4401,6 +4458,27 @@ export const contractValidationMetadata = {
       "required": false,
       "scalar": true,
       "type": "string"
+    }
+  },
+  "finance.quote.v1.UpdateQuoteStatusRequest": {
+    "body": {
+      "name": "body",
+      "optional": false,
+      "protoName": "body",
+      "repeated": false,
+      "required": false,
+      "scalar": false,
+      "type": "UpdateQuoteStatusBody"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
     }
   },
   "finance.reconciliation.v1.GetOverviewRequest": {},

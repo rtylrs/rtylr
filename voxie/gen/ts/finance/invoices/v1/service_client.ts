@@ -152,6 +152,14 @@ export interface DeleteInvoiceResponse {
   message: string;
 }
 
+export interface SendInvoiceRequest {
+  id: string;
+}
+
+export interface SendInvoiceResponse {
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -363,6 +371,31 @@ export class InvoicesServiceClient {
     }
 
     return await resp.json() as DeleteInvoiceResponse;
+  }
+
+  async sendInvoice(req: SendInvoiceRequest, options?: InvoicesServiceCallOptions): Promise<SendInvoiceResponse> {
+    let path = "/api/finance/invoices/v1/invoices/{id}/send";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as SendInvoiceResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

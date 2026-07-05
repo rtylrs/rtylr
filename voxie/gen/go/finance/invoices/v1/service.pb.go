@@ -25,7 +25,7 @@ var File_finance_invoices_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!finance/invoices/v1/service.proto\x12\x13finance.invoices.v1\x1a(finance/invoices/v1/create_invoice.proto\x1a(finance/invoices/v1/delete_invoice.proto\x1a%finance/invoices/v1/get_invoice.proto\x1a'finance/invoices/v1/list_invoices.proto\x1a(finance/invoices/v1/update_invoice.proto\x1a/finance/invoices/v1/update_invoice_status.proto\x1a\x1donekit/http/annotations.proto2\xc2\x06\n" +
+	"!finance/invoices/v1/service.proto\x12\x13finance.invoices.v1\x1a(finance/invoices/v1/create_invoice.proto\x1a(finance/invoices/v1/delete_invoice.proto\x1a%finance/invoices/v1/get_invoice.proto\x1a'finance/invoices/v1/list_invoices.proto\x1a&finance/invoices/v1/send_invoice.proto\x1a(finance/invoices/v1/update_invoice.proto\x1a/finance/invoices/v1/update_invoice_status.proto\x1a\x1donekit/http/annotations.proto2\xc1\a\n" +
 	"\x0fInvoicesService\x12v\n" +
 	"\fListInvoices\x12(.finance.invoices.v1.ListInvoicesRequest\x1a).finance.invoices.v1.ListInvoicesResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/invoices\x10\x01\x12y\n" +
@@ -39,7 +39,9 @@ const file_finance_invoices_v1_service_proto_rawDesc = "" +
 	"\x13UpdateInvoiceStatus\x12/.finance.invoices.v1.UpdateInvoiceStatusRequest\x1a0.finance.invoices.v1.UpdateInvoiceStatusResponse\"#\x9a\xb5\x18\x1f\n" +
 	"\x15/invoices/{id}/status\x10\x05\"\x04body\x12~\n" +
 	"\rDeleteInvoice\x12).finance.invoices.v1.DeleteInvoiceRequest\x1a*.finance.invoices.v1.DeleteInvoiceResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/invoices/{id}\x10\x04\x1a\x1e\xa2\xb5\x18\x1a\n" +
+	"\x0e/invoices/{id}\x10\x04\x12}\n" +
+	"\vSendInvoice\x12'.finance.invoices.v1.SendInvoiceRequest\x1a(.finance.invoices.v1.SendInvoiceResponse\"\x1b\x9a\xb5\x18\x17\n" +
+	"\x13/invoices/{id}/send\x10\x02\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/finance/invoices/v1B4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"
 
 var file_finance_invoices_v1_service_proto_goTypes = []any{
@@ -49,12 +51,14 @@ var file_finance_invoices_v1_service_proto_goTypes = []any{
 	(*UpdateInvoiceRequest)(nil),        // 3: finance.invoices.v1.UpdateInvoiceRequest
 	(*UpdateInvoiceStatusRequest)(nil),  // 4: finance.invoices.v1.UpdateInvoiceStatusRequest
 	(*DeleteInvoiceRequest)(nil),        // 5: finance.invoices.v1.DeleteInvoiceRequest
-	(*ListInvoicesResponse)(nil),        // 6: finance.invoices.v1.ListInvoicesResponse
-	(*CreateInvoiceResponse)(nil),       // 7: finance.invoices.v1.CreateInvoiceResponse
-	(*GetInvoiceResponse)(nil),          // 8: finance.invoices.v1.GetInvoiceResponse
-	(*UpdateInvoiceResponse)(nil),       // 9: finance.invoices.v1.UpdateInvoiceResponse
-	(*UpdateInvoiceStatusResponse)(nil), // 10: finance.invoices.v1.UpdateInvoiceStatusResponse
-	(*DeleteInvoiceResponse)(nil),       // 11: finance.invoices.v1.DeleteInvoiceResponse
+	(*SendInvoiceRequest)(nil),          // 6: finance.invoices.v1.SendInvoiceRequest
+	(*ListInvoicesResponse)(nil),        // 7: finance.invoices.v1.ListInvoicesResponse
+	(*CreateInvoiceResponse)(nil),       // 8: finance.invoices.v1.CreateInvoiceResponse
+	(*GetInvoiceResponse)(nil),          // 9: finance.invoices.v1.GetInvoiceResponse
+	(*UpdateInvoiceResponse)(nil),       // 10: finance.invoices.v1.UpdateInvoiceResponse
+	(*UpdateInvoiceStatusResponse)(nil), // 11: finance.invoices.v1.UpdateInvoiceStatusResponse
+	(*DeleteInvoiceResponse)(nil),       // 12: finance.invoices.v1.DeleteInvoiceResponse
+	(*SendInvoiceResponse)(nil),         // 13: finance.invoices.v1.SendInvoiceResponse
 }
 var file_finance_invoices_v1_service_proto_depIdxs = []int32{
 	0,  // 0: finance.invoices.v1.InvoicesService.ListInvoices:input_type -> finance.invoices.v1.ListInvoicesRequest
@@ -63,14 +67,16 @@ var file_finance_invoices_v1_service_proto_depIdxs = []int32{
 	3,  // 3: finance.invoices.v1.InvoicesService.UpdateInvoice:input_type -> finance.invoices.v1.UpdateInvoiceRequest
 	4,  // 4: finance.invoices.v1.InvoicesService.UpdateInvoiceStatus:input_type -> finance.invoices.v1.UpdateInvoiceStatusRequest
 	5,  // 5: finance.invoices.v1.InvoicesService.DeleteInvoice:input_type -> finance.invoices.v1.DeleteInvoiceRequest
-	6,  // 6: finance.invoices.v1.InvoicesService.ListInvoices:output_type -> finance.invoices.v1.ListInvoicesResponse
-	7,  // 7: finance.invoices.v1.InvoicesService.CreateInvoice:output_type -> finance.invoices.v1.CreateInvoiceResponse
-	8,  // 8: finance.invoices.v1.InvoicesService.GetInvoice:output_type -> finance.invoices.v1.GetInvoiceResponse
-	9,  // 9: finance.invoices.v1.InvoicesService.UpdateInvoice:output_type -> finance.invoices.v1.UpdateInvoiceResponse
-	10, // 10: finance.invoices.v1.InvoicesService.UpdateInvoiceStatus:output_type -> finance.invoices.v1.UpdateInvoiceStatusResponse
-	11, // 11: finance.invoices.v1.InvoicesService.DeleteInvoice:output_type -> finance.invoices.v1.DeleteInvoiceResponse
-	6,  // [6:12] is the sub-list for method output_type
-	0,  // [0:6] is the sub-list for method input_type
+	6,  // 6: finance.invoices.v1.InvoicesService.SendInvoice:input_type -> finance.invoices.v1.SendInvoiceRequest
+	7,  // 7: finance.invoices.v1.InvoicesService.ListInvoices:output_type -> finance.invoices.v1.ListInvoicesResponse
+	8,  // 8: finance.invoices.v1.InvoicesService.CreateInvoice:output_type -> finance.invoices.v1.CreateInvoiceResponse
+	9,  // 9: finance.invoices.v1.InvoicesService.GetInvoice:output_type -> finance.invoices.v1.GetInvoiceResponse
+	10, // 10: finance.invoices.v1.InvoicesService.UpdateInvoice:output_type -> finance.invoices.v1.UpdateInvoiceResponse
+	11, // 11: finance.invoices.v1.InvoicesService.UpdateInvoiceStatus:output_type -> finance.invoices.v1.UpdateInvoiceStatusResponse
+	12, // 12: finance.invoices.v1.InvoicesService.DeleteInvoice:output_type -> finance.invoices.v1.DeleteInvoiceResponse
+	13, // 13: finance.invoices.v1.InvoicesService.SendInvoice:output_type -> finance.invoices.v1.SendInvoiceResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -85,6 +91,7 @@ func file_finance_invoices_v1_service_proto_init() {
 	file_finance_invoices_v1_delete_invoice_proto_init()
 	file_finance_invoices_v1_get_invoice_proto_init()
 	file_finance_invoices_v1_list_invoices_proto_init()
+	file_finance_invoices_v1_send_invoice_proto_init()
 	file_finance_invoices_v1_update_invoice_proto_init()
 	file_finance_invoices_v1_update_invoice_status_proto_init()
 	type x struct{}

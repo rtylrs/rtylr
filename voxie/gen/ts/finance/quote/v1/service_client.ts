@@ -69,6 +69,28 @@ export interface GetQuoteResponse {
   quote?: Quote;
 }
 
+export interface UpdateQuoteStatusRequest {
+  id: string;
+  body?: UpdateQuoteStatusBody;
+}
+
+export interface UpdateQuoteStatusBody {
+  status: string;
+}
+
+export interface UpdateQuoteStatusResponse {
+  message: string;
+}
+
+export interface ConvertQuoteRequest {
+  id: string;
+}
+
+export interface ConvertQuoteResponse {
+  invoiceId: string;
+  message: string;
+}
+
 export interface FieldViolation {
   field: string;
   description: string;
@@ -208,6 +230,56 @@ export class QuoteServiceClient {
     }
 
     return await resp.json() as GetQuoteResponse;
+  }
+
+  async updateQuoteStatus(req: UpdateQuoteStatusRequest, options?: QuoteServiceCallOptions): Promise<UpdateQuoteStatusResponse> {
+    let path = "/api/finance/quote/v1/quotes/{id}/status";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(req.body ?? {}),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as UpdateQuoteStatusResponse;
+  }
+
+  async convertQuote(req: ConvertQuoteRequest, options?: QuoteServiceCallOptions): Promise<ConvertQuoteResponse> {
+    let path = "/api/finance/quote/v1/quotes/{id}/convert";
+    path = path.replace("{id}", encodeURIComponent(String(req.id)));
+    const url = this.baseURL + path;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...this.defaultHeaders,
+      ...options?.headers,
+    };
+
+    const resp = await this.doFetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+      signal: options?.signal,
+    }, options?.retry ?? this.retry);
+
+    if (!resp.ok) {
+      return this.handleError(resp);
+    }
+
+    return await resp.json() as ConvertQuoteResponse;
   }
 
   private async doFetch(url: string, init: RequestInit, retry?: RetryOptions): Promise<Response> {

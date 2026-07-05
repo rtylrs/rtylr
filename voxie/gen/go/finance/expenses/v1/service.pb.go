@@ -25,7 +25,7 @@ var File_finance_expenses_v1_service_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"!finance/expenses/v1/service.proto\x12\x13finance.expenses.v1\x1a(finance/expenses/v1/create_expense.proto\x1a(finance/expenses/v1/delete_expense.proto\x1a1finance/expenses/v1/list_expense_categories.proto\x1a'finance/expenses/v1/list_expenses.proto\x1a(finance/expenses/v1/update_expense.proto\x1a\x1donekit/http/annotations.proto2\xc1\x05\n" +
+	"!finance/expenses/v1/service.proto\x12\x13finance.expenses.v1\x1a(finance/expenses/v1/create_expense.proto\x1a(finance/expenses/v1/delete_expense.proto\x1a%finance/expenses/v1/get_expense.proto\x1a1finance/expenses/v1/list_expense_categories.proto\x1a'finance/expenses/v1/list_expenses.proto\x1a(finance/expenses/v1/update_expense.proto\x1a/finance/expenses/v1/update_expense_status.proto\x1a\x1donekit/http/annotations.proto2\xd8\a\n" +
 	"\x0fExpensesService\x12v\n" +
 	"\fListExpenses\x12(.finance.expenses.v1.ListExpensesRequest\x1a).finance.expenses.v1.ListExpensesResponse\"\x11\x9a\xb5\x18\r\n" +
 	"\t/expenses\x10\x01\x12y\n" +
@@ -34,7 +34,12 @@ const file_finance_expenses_v1_service_proto_rawDesc = "" +
 	"\rUpdateExpense\x12).finance.expenses.v1.UpdateExpenseRequest\x1a*.finance.expenses.v1.UpdateExpenseResponse\"\x1c\x9a\xb5\x18\x18\n" +
 	"\x0e/expenses/{id}\x10\x03\"\x04body\x12~\n" +
 	"\rDeleteExpense\x12).finance.expenses.v1.DeleteExpenseRequest\x1a*.finance.expenses.v1.DeleteExpenseResponse\"\x16\x9a\xb5\x18\x12\n" +
-	"\x0e/expenses/{id}\x10\x04\x12\x93\x01\n" +
+	"\x0e/expenses/{id}\x10\x04\x12u\n" +
+	"\n" +
+	"GetExpense\x12&.finance.expenses.v1.GetExpenseRequest\x1a'.finance.expenses.v1.GetExpenseResponse\"\x16\x9a\xb5\x18\x12\n" +
+	"\x0e/expenses/{id}\x10\x01\x12\x9d\x01\n" +
+	"\x13UpdateExpenseStatus\x12/.finance.expenses.v1.UpdateExpenseStatusRequest\x1a0.finance.expenses.v1.UpdateExpenseStatusResponse\"#\x9a\xb5\x18\x1f\n" +
+	"\x15/expenses/{id}/status\x10\x05\"\x04body\x12\x93\x01\n" +
 	"\x15ListExpenseCategories\x121.finance.expenses.v1.ListExpenseCategoriesRequest\x1a2.finance.expenses.v1.ListExpenseCategoriesResponse\"\x13\x9a\xb5\x18\x0f\n" +
 	"\v/categories\x10\x01\x1a\x1e\xa2\xb5\x18\x1a\n" +
 	"\x18/api/finance/expenses/v1B4Z2github.com/voxire/voxie/gen/go/finance/expenses/v1b\x06proto3"
@@ -44,29 +49,37 @@ var file_finance_expenses_v1_service_proto_goTypes = []any{
 	(*CreateExpenseRequest)(nil),          // 1: finance.expenses.v1.CreateExpenseRequest
 	(*UpdateExpenseRequest)(nil),          // 2: finance.expenses.v1.UpdateExpenseRequest
 	(*DeleteExpenseRequest)(nil),          // 3: finance.expenses.v1.DeleteExpenseRequest
-	(*ListExpenseCategoriesRequest)(nil),  // 4: finance.expenses.v1.ListExpenseCategoriesRequest
-	(*ListExpensesResponse)(nil),          // 5: finance.expenses.v1.ListExpensesResponse
-	(*CreateExpenseResponse)(nil),         // 6: finance.expenses.v1.CreateExpenseResponse
-	(*UpdateExpenseResponse)(nil),         // 7: finance.expenses.v1.UpdateExpenseResponse
-	(*DeleteExpenseResponse)(nil),         // 8: finance.expenses.v1.DeleteExpenseResponse
-	(*ListExpenseCategoriesResponse)(nil), // 9: finance.expenses.v1.ListExpenseCategoriesResponse
+	(*GetExpenseRequest)(nil),             // 4: finance.expenses.v1.GetExpenseRequest
+	(*UpdateExpenseStatusRequest)(nil),    // 5: finance.expenses.v1.UpdateExpenseStatusRequest
+	(*ListExpenseCategoriesRequest)(nil),  // 6: finance.expenses.v1.ListExpenseCategoriesRequest
+	(*ListExpensesResponse)(nil),          // 7: finance.expenses.v1.ListExpensesResponse
+	(*CreateExpenseResponse)(nil),         // 8: finance.expenses.v1.CreateExpenseResponse
+	(*UpdateExpenseResponse)(nil),         // 9: finance.expenses.v1.UpdateExpenseResponse
+	(*DeleteExpenseResponse)(nil),         // 10: finance.expenses.v1.DeleteExpenseResponse
+	(*GetExpenseResponse)(nil),            // 11: finance.expenses.v1.GetExpenseResponse
+	(*UpdateExpenseStatusResponse)(nil),   // 12: finance.expenses.v1.UpdateExpenseStatusResponse
+	(*ListExpenseCategoriesResponse)(nil), // 13: finance.expenses.v1.ListExpenseCategoriesResponse
 }
 var file_finance_expenses_v1_service_proto_depIdxs = []int32{
-	0, // 0: finance.expenses.v1.ExpensesService.ListExpenses:input_type -> finance.expenses.v1.ListExpensesRequest
-	1, // 1: finance.expenses.v1.ExpensesService.CreateExpense:input_type -> finance.expenses.v1.CreateExpenseRequest
-	2, // 2: finance.expenses.v1.ExpensesService.UpdateExpense:input_type -> finance.expenses.v1.UpdateExpenseRequest
-	3, // 3: finance.expenses.v1.ExpensesService.DeleteExpense:input_type -> finance.expenses.v1.DeleteExpenseRequest
-	4, // 4: finance.expenses.v1.ExpensesService.ListExpenseCategories:input_type -> finance.expenses.v1.ListExpenseCategoriesRequest
-	5, // 5: finance.expenses.v1.ExpensesService.ListExpenses:output_type -> finance.expenses.v1.ListExpensesResponse
-	6, // 6: finance.expenses.v1.ExpensesService.CreateExpense:output_type -> finance.expenses.v1.CreateExpenseResponse
-	7, // 7: finance.expenses.v1.ExpensesService.UpdateExpense:output_type -> finance.expenses.v1.UpdateExpenseResponse
-	8, // 8: finance.expenses.v1.ExpensesService.DeleteExpense:output_type -> finance.expenses.v1.DeleteExpenseResponse
-	9, // 9: finance.expenses.v1.ExpensesService.ListExpenseCategories:output_type -> finance.expenses.v1.ListExpenseCategoriesResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: finance.expenses.v1.ExpensesService.ListExpenses:input_type -> finance.expenses.v1.ListExpensesRequest
+	1,  // 1: finance.expenses.v1.ExpensesService.CreateExpense:input_type -> finance.expenses.v1.CreateExpenseRequest
+	2,  // 2: finance.expenses.v1.ExpensesService.UpdateExpense:input_type -> finance.expenses.v1.UpdateExpenseRequest
+	3,  // 3: finance.expenses.v1.ExpensesService.DeleteExpense:input_type -> finance.expenses.v1.DeleteExpenseRequest
+	4,  // 4: finance.expenses.v1.ExpensesService.GetExpense:input_type -> finance.expenses.v1.GetExpenseRequest
+	5,  // 5: finance.expenses.v1.ExpensesService.UpdateExpenseStatus:input_type -> finance.expenses.v1.UpdateExpenseStatusRequest
+	6,  // 6: finance.expenses.v1.ExpensesService.ListExpenseCategories:input_type -> finance.expenses.v1.ListExpenseCategoriesRequest
+	7,  // 7: finance.expenses.v1.ExpensesService.ListExpenses:output_type -> finance.expenses.v1.ListExpensesResponse
+	8,  // 8: finance.expenses.v1.ExpensesService.CreateExpense:output_type -> finance.expenses.v1.CreateExpenseResponse
+	9,  // 9: finance.expenses.v1.ExpensesService.UpdateExpense:output_type -> finance.expenses.v1.UpdateExpenseResponse
+	10, // 10: finance.expenses.v1.ExpensesService.DeleteExpense:output_type -> finance.expenses.v1.DeleteExpenseResponse
+	11, // 11: finance.expenses.v1.ExpensesService.GetExpense:output_type -> finance.expenses.v1.GetExpenseResponse
+	12, // 12: finance.expenses.v1.ExpensesService.UpdateExpenseStatus:output_type -> finance.expenses.v1.UpdateExpenseStatusResponse
+	13, // 13: finance.expenses.v1.ExpensesService.ListExpenseCategories:output_type -> finance.expenses.v1.ListExpenseCategoriesResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_finance_expenses_v1_service_proto_init() }
@@ -76,9 +89,11 @@ func file_finance_expenses_v1_service_proto_init() {
 	}
 	file_finance_expenses_v1_create_expense_proto_init()
 	file_finance_expenses_v1_delete_expense_proto_init()
+	file_finance_expenses_v1_get_expense_proto_init()
 	file_finance_expenses_v1_list_expense_categories_proto_init()
 	file_finance_expenses_v1_list_expenses_proto_init()
 	file_finance_expenses_v1_update_expense_proto_init()
+	file_finance_expenses_v1_update_expense_status_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
