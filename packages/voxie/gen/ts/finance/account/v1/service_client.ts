@@ -17,6 +17,7 @@ export interface Account {
   balance: number;
   isActive: boolean;
   createdAt: string;
+  code: string;
 }
 
 export interface CreateAccountRequest {
@@ -25,6 +26,7 @@ export interface CreateAccountRequest {
   currency: string;
   balance: number;
   isActive: boolean;
+  code: string;
 }
 
 export interface CreateAccountResponse {
@@ -43,6 +45,7 @@ export interface UpdateAccountBody {
   currency: string;
   balance: number;
   isActive: boolean;
+  code: string;
 }
 
 export interface UpdateAccountResponse {

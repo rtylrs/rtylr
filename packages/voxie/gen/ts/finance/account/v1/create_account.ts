@@ -17,6 +17,8 @@ export interface CreateAccountRequest {
   balance: number;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
+  /** code is the optional account code/number. */
+  code: string;
 }
 
 export interface CreateAccountResponse {

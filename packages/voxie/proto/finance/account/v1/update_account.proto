@@ -19,6 +19,8 @@ message UpdateAccountBody {
   string currency = 3;
   double balance = 4 [(buf.validate.field).double.gte = 0];
   bool is_active = 5;
+  // code is the optional account code/number.
+  string code = 6;
 }
 
 message UpdateAccountRequest {

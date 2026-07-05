@@ -23,4 +23,6 @@ export interface Account {
   isActive: boolean;
   /** created_at is when the record was created. */
   createdAt: string;
+  /** code is the optional account code/number. */
+  code: string;
 }

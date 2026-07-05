@@ -12,6 +12,8 @@ export interface UpdateAccountBody {
   currency: string;
   balance: number;
   isActive: boolean;
+  /** code is the optional account code/number. */
+  code: string;
 }
 
 export interface UpdateAccountRequest {

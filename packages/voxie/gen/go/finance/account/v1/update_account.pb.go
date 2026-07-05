@@ -24,12 +24,14 @@ const (
 )
 
 type UpdateAccountBody struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	Currency      string                 `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
-	Balance       float64                `protobuf:"fixed64,4,opt,name=balance,proto3" json:"balance,omitempty"`
-	IsActive      bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Name     string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Type     string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Currency string                 `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	Balance  float64                `protobuf:"fixed64,4,opt,name=balance,proto3" json:"balance,omitempty"`
+	IsActive bool                   `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	// code is the optional account code/number.
+	Code          string `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -97,6 +99,13 @@ func (x *UpdateAccountBody) GetIsActive() bool {
 		return x.IsActive
 	}
 	return false
+}
+
+func (x *UpdateAccountBody) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
 }
 
 type UpdateAccountRequest struct {
@@ -199,7 +208,7 @@ var File_finance_account_v1_update_account_proto protoreflect.FileDescriptor
 
 const file_finance_account_v1_update_account_proto_rawDesc = "" +
 	"\n" +
-	"'finance/account/v1/update_account.proto\x12\x12finance.account.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xb6\x01\n" +
+	"'finance/account/v1/update_account.proto\x12\x12finance.account.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\xca\x01\n" +
 	"\x11UpdateAccountBody\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1e\n" +
@@ -207,7 +216,8 @@ const file_finance_account_v1_update_account_proto_rawDesc = "" +
 	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04type\x12\x1a\n" +
 	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12(\n" +
 	"\abalance\x18\x04 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\abalance\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\"q\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x12\n" +
+	"\x04code\x18\x06 \x01(\tR\x04code\"q\n" +
 	"\x14UpdateAccountRequest\x12\x1e\n" +
 	"\x02id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\x02id\x129\n" +
 	"\x04body\x18\x02 \x01(\v2%.finance.account.v1.UpdateAccountBodyR\x04body\"1\n" +

@@ -3469,6 +3469,15 @@ export const contractValidationMetadata = {
       "scalar": true,
       "type": "double"
     },
+    "code": {
+      "name": "code",
+      "optional": false,
+      "protoName": "code",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
     "currency": {
       "minLen": 1,
       "name": "currency",

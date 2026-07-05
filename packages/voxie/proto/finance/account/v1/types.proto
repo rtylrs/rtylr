@@ -25,4 +25,6 @@ message Account {
   bool is_active = 7;
   // created_at is when the record was created.
   string created_at = 8;
+  // code is the optional account code/number.
+  string code = 9;
 }
