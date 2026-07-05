@@ -53,6 +53,9 @@ importers:
       '@voxire/utils':
         specifier: workspace:*
         version: link:packages/utils
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:packages/voxie
       axios:
         specifier: ^1.15.2
         version: 1.16.0

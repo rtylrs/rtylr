@@ -31,6 +31,7 @@
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/utils": "workspace:*",
+    "@voxire/voxie": "workspace:*",
     "axios": "^1.15.2",
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",
