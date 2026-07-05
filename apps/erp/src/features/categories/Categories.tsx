@@ -21,9 +21,9 @@ const Categories: React.FC = () => {
   const createMut = useCreateCategory();
   const deleteMut = useDeleteCategory();
   const updateMut = useUpdateCategory();
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
 
   const handleCreate = async (): Promise<void> => {
@@ -32,7 +32,7 @@ const Categories: React.FC = () => {
       return;
     }
     try {
-      await createMut.mutateAsync({ name: newName.trim() });
+      await createMut.mutateAsync({ name: newName.trim(), description: '' });
       toast.success(`Category "${newName}" created`);
       setNewName('');
     } catch {
@@ -115,7 +115,7 @@ const Categories: React.FC = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         updateMut.mutate(
-                          { id: cat.id, name: editName.trim() },
+                          { id: cat.id, body: { name: editName.trim(), description: cat.description } },
                           {
                             onSuccess: () => {
                               toast.success('Category updated');
@@ -153,7 +153,7 @@ const Categories: React.FC = () => {
                     aria-label="Save category"
                     onClick={() =>
                       updateMut.mutate(
-                        { id: cat.id, name: editName.trim() },
+                        { id: cat.id, body: { name: editName.trim(), description: cat.description } },
                         {
                           onSuccess: () => {
                             toast.success('Category updated');

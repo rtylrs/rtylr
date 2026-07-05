@@ -1,12 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, PackagePlus, Plus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
-import { unwrap, uploadAsset } from '@voxire/api';
+import { uploadAsset } from '@voxire/api';
 import { cdnImageUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
-import { useCreateProduct, useUpdateProduct } from '../../features/products/useProducts';
-import { erpApi, type CreateProductInput, type Product } from '../services/erpApi';
+import {
+  useCreateProduct,
+  useProductAttributes,
+  useProductFull,
+  useUpdateProduct,
+  type CreateProductInput,
+  type Product,
+} from '../../features/products/useProducts';
 import UnitSelector from './UnitSelector';
 import { useCategories } from '../../features/categories/useCategories';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
@@ -78,32 +83,24 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Prefill custom attributes when editing an existing product.
-  const { data: attrData } = useQuery({
-    queryKey: ['product-attributes', editing?.id],
-    enabled: !!editing?.id,
-    queryFn: () => unwrap(erpApi.getProductAttributes(editing!.id)),
-  });
+  const { data: attributesData } = useProductAttributes(editing?.id);
   useEffect(() => {
-    if (attrData?.attributes) {
-      setAttributes(attrData.attributes.map((a) => ({ name: a.name, value: a.value })));
+    if (attributesData) {
+      setAttributes(attributesData.map((attribute) => ({ name: attribute.name, value: attribute.value })));
     }
-  }, [attrData]);
+  }, [attributesData]);
 
   // Authoritative full-product fetch on edit: the list payload lacks the PIM
   // fields, so without this an edit-save would zero compare-at/tax/weight/etc.
-  const { data: fullData } = useQuery({
-    queryKey: ['product-full', editing?.id],
-    enabled: !!editing?.id,
-    queryFn: () => unwrap(erpApi.getProductFull(editing!.id)),
-  });
+  const { data: fullProduct } = useProductFull(editing?.id);
   useEffect(() => {
-    const p = fullData?.product;
+    const p = fullProduct;
     if (!p) return;
     setName(p.name);
     setSku(p.sku);
-    setCategoryId(p.categoryId ? String(p.categoryId) : '');
-    setSupplierId(p.supplierId ? String(p.supplierId) : '');
-    setBrandId(p.brandId ? String(p.brandId) : '');
+    setCategoryId(p.categoryId !== '0' ? p.categoryId : '');
+    setSupplierId(p.supplierId !== '0' ? p.supplierId : '');
+    setBrandId(p.brandId !== '0' ? p.brandId : '');
     setBarcode(p.barcode ?? '');
     setImageUrl(p.imageUrl ?? editing?.imageUrl ?? '');
     setDescription(p.description ?? '');
@@ -126,7 +123,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setHsCode(p.hsCode ?? '');
     setLeadTimeDays(p.leadTimeDays ? String(p.leadTimeDays) : '');
     setAllowBackorder(p.allowBackorder);
-  }, [fullData]);
+  }, [fullProduct]);
 
   const { data: categories = [] } = useCategories();
   const { data: supplierData } = useSuppliers();
@@ -142,23 +139,23 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setSku(editing.sku);
       setCategoryId(
         editing.categoryId !== undefined && editing.categoryId !== null
-          ? String(editing.categoryId)
+          ? editing.categoryId
           : ''
       );
       setSupplierId(
         editing.supplierId !== undefined && editing.supplierId !== null
-          ? String(editing.supplierId)
+          ? editing.supplierId
           : ''
       );
       setBarcode(editing.barcode ?? '');
-      setImageUrl(editing.imageUrl ?? '');
+      setImageUrl((editing as Product & { imageUrl?: string }).imageUrl ?? '');
       setDescription(editing.description ?? '');
       setUnit(editing.unit ?? 'pcs');
       setCostPrice(String(editing.costPrice ?? ''));
       setSalePrice(String(editing.salePrice ?? ''));
-      setStock(editing.stock != null ? String(editing.stock) : '');
-      setLowStock(editing.lowStock != null ? String(editing.lowStock) : '');
-      setReorderPoint(editing.reorderPoint != null ? String(editing.reorderPoint) : '');
+      setStock(editing.stockQuantity != null ? String(editing.stockQuantity) : '');
+      setLowStock(editing.lowStockThreshold != null ? String(editing.lowStockThreshold) : '');
+      setReorderPoint(editing.reorderQuantity != null ? String(editing.reorderQuantity) : '');
     }
   }, [editing]);
 
@@ -241,32 +238,33 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     const payload: CreateProductInput = {
       name,
       sku,
-      categoryId: Number(categoryId),
-      supplierId: supplierId ? Number(supplierId) : undefined,
+      categoryId,
+      supplierId: supplierId || '0',
       barcode,
-      imageUrl: imageUrl || undefined,
       description,
       unit,
       costPrice: isNaN(cost) ? 0 : cost,
       salePrice: isNaN(sale) ? 0 : sale,
-      stockQuantity: stock ? Number(stock) : undefined,
-      lowStockThreshold: lowStock ? Number(lowStock) : undefined,
-      reorderQuantity: reorderPoint ? Number(reorderPoint) : undefined,
+      stockQuantity: stock ? Number(stock) : 0,
+      lowStockThreshold: lowStock ? Number(lowStock) : 0,
+      reorderQuantity: reorderPoint ? Number(reorderPoint) : 0,
       isActive: active,
       trackInventory,
-      brandId: brandId ? Number(brandId) : undefined,
-      compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
-      taxRate: taxRate ? Number(taxRate) : undefined,
-      currency: currency || undefined,
-      weight: weight ? Number(weight) : undefined,
-      length: length ? Number(length) : undefined,
-      width: width ? Number(width) : undefined,
-      height: height ? Number(height) : undefined,
-      countryOfOrigin: countryOfOrigin || undefined,
-      hsCode: hsCode || undefined,
-      leadTimeDays: leadTimeDays ? Number(leadTimeDays) : undefined,
+      brandId: brandId || '0',
+      compareAtPrice: compareAtPrice ? Number(compareAtPrice) : 0,
+      taxRate: taxRate ? Number(taxRate) : 0,
+      currency,
+      weight: weight ? Number(weight) : 0,
+      weightUnit: 'kg',
+      length: length ? Number(length) : 0,
+      width: width ? Number(width) : 0,
+      height: height ? Number(height) : 0,
+      dimensionUnit: 'cm',
+      countryOfOrigin,
+      hsCode,
       allowBackorder,
-      attributes: attributes.filter((a) => a.name.trim() !== ''),
+      leadTimeDays: leadTimeDays ? Number(leadTimeDays) : 0,
+      imageUrl,
     };
 
     const onSuccess = (): void => {
@@ -278,7 +276,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     };
 
     if (isEdit && editing) {
-      updateProduct.mutate({ id: editing.id, ...payload }, { onSuccess, onError });
+      updateProduct.mutate({ id: editing.id, body: payload }, { onSuccess, onError });
       return;
     }
     createProduct.mutate(payload, { onSuccess, onError });

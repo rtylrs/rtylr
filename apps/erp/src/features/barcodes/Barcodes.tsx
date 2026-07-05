@@ -13,10 +13,10 @@ const AMBER = '#f59e0b';
 const Barcodes: React.FC = () => {
   const { data: productResult, isLoading } = useProducts();
   const products = productResult?.products ?? [];
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [copies, setCopies] = useState(1);
 
-  const toggle = (id: number) => {
+  const toggle = (id: string) => {
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
     else next.add(id);

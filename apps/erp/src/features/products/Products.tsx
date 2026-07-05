@@ -5,10 +5,14 @@ import { cdnImageUrl } from '@voxire/config';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
-import { useProducts, useDeleteProduct, ProductFilters } from './useProducts';
-import { type Product } from '../../shared/services/erpApi';
+import {
+  getProductStockStatus,
+  useProducts,
+  useDeleteProduct,
+  type Product,
+  type ProductFilters,
+} from './useProducts';
 import { useCategories } from '../categories/useCategories';
-import { useBrands } from '../brands/useBrands';
 import ProductCard from '../../shared/components/ProductCard';
 import StockBadge from '../../shared/components/StockBadge';
 import FilterDrawer from '../../shared/components/FilterDrawer';
@@ -33,29 +37,47 @@ const Products: React.FC = () => {
   const [filters, setFilters] = useState<ProductFilters>({});
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showAdd, setShowAdd] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 50;
 
   const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch, page, pageSize };
   const { data: productResult, isLoading } = useProducts(mergedFilters);
-  const products = productResult?.products ?? [];
+  const rawProducts = productResult?.products ?? [];
+  const products = useMemo(() => {
+    let out = rawProducts;
+
+    if (filters.status) {
+      out = out.filter((product) => getProductStockStatus(product) === filters.status);
+    }
+
+    if (filters.sort) {
+      const direction = filters.sortDir === 'desc' ? -1 : 1;
+      out = [...out].sort((a, b) => {
+        if (filters.sort === 'name') return a.name.localeCompare(b.name) * direction;
+        if (filters.sort === 'stock') return (a.stockQuantity - b.stockQuantity) * direction;
+        if (filters.sort === 'price') return (a.salePrice - b.salePrice) * direction;
+        if (filters.sort === 'category') return a.categoryId.localeCompare(b.categoryId) * direction;
+        return 0;
+      });
+    }
+
+    return out;
+  }, [rawProducts, filters.status, filters.sort, filters.sortDir]);
   const totalProducts = productResult?.total ?? products.length;
   const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
-  const { data: brands = [] } = useBrands();
   const deleteMut = useDeleteProduct();
   const categoryNameById = useMemo(() => {
-    const map = new Map<number, string>();
-    categories.forEach((category) => map.set(category.id, category.name));
+    const map = new Map<string, string>();
+    categories.forEach((category) => map.set(String(category.id), category.name));
     return map;
   }, [categories]);
 
   const categoryNameFor = useCallback(
     (product: Product): string => {
-      const categoryId = (product as Product & { categoryId?: number }).categoryId;
-      return product.category || (categoryId ? categoryNameById.get(categoryId) : '') || '-';
+      return categoryNameById.get(product.categoryId) || '-';
     },
     [categoryNameById]
   );
@@ -71,7 +93,7 @@ const Products: React.FC = () => {
     setFilters(next);
   };
 
-  const toggle = (id: number) => {
+  const toggle = (id: string) => {
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
     else next.add(id);
@@ -96,11 +118,11 @@ const Products: React.FC = () => {
         name: p.name,
         sku: p.sku,
         category: categoryNameFor(p),
-        brand: p.brand || '',
-        stock: p.stock,
+        brand: '',
+        stock: p.stockQuantity,
         costPrice: p.costPrice,
         salePrice: p.salePrice,
-        status: p.status,
+        status: getProductStockStatus(p),
       })),
     [products, categoryNameFor]
   );
@@ -172,7 +194,7 @@ const Products: React.FC = () => {
         >
           <SlidersHorizontal size={12} />
           Filters
-          {(filters.categoryId !== undefined || filters.brand || filters.status) && (
+          {(filters.categoryId !== undefined || filters.status) && (
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: AMBER }} />
           )}
         </button>
@@ -248,7 +270,7 @@ const Products: React.FC = () => {
           {products.map((p) => (
             <ProductCard
               key={p.id}
-              product={{ ...p, category: categoryNameFor(p) }}
+              product={p}
               selected={selected.has(p.id)}
               onToggle={toggle}
             />
@@ -278,7 +300,8 @@ const Products: React.FC = () => {
           </div>
           <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
             {products.map((p) => {
-              const imageUrl = cdnImageUrl(p.imageUrl);
+              const imageUrl = cdnImageUrl((p as Product & { imageUrl?: string }).imageUrl);
+              const stockStatus = getProductStockStatus(p);
               return (
                 <div
                   key={p.id}
@@ -331,25 +354,25 @@ const Products: React.FC = () => {
                     {categoryNameFor(p)}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {p.brand || '-'}
+                    -
                   </span>
                   <span
                     className="text-sm font-semibold"
                     style={{
                       color:
-                        p.stock === 0
+                        p.stockQuantity === 0
                           ? '#f87171'
-                          : p.stock < p.lowStock
+                          : p.stockQuantity < p.lowStockThreshold
                             ? AMBER
                             : 'var(--hub-text)',
                     }}
                   >
-                    {p.stock}
+                    {p.stockQuantity}
                   </span>
                   <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
                     {formatCurrency(p.salePrice)}
                   </span>
-                  <StockBadge stock={p.stock} lowStock={p.lowStock} />
+                  <StockBadge stock={p.stockQuantity} lowStock={p.lowStockThreshold} />
                 </div>
               );
             })}
@@ -379,11 +402,11 @@ const Products: React.FC = () => {
             Category
           </label>
           <select
-            value={filters.categoryId !== undefined ? String(filters.categoryId) : ''}
+            value={filters.categoryId ?? ''}
             onChange={(e) =>
               updateFilters({
                 ...filters,
-                categoryId: e.target.value ? Number(e.target.value) : undefined,
+                categoryId: e.target.value || undefined,
               })
             }
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
@@ -406,31 +429,6 @@ const Products: React.FC = () => {
             className="text-xs font-semibold mb-1 block"
             style={{ color: 'var(--hub-text-muted)' }}
           >
-            Brand
-          </label>
-          <select
-            value={filters.brand || ''}
-            onChange={(e) => updateFilters({ ...filters, brand: e.target.value || undefined })}
-            className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
-            style={{
-              background: 'var(--hub-input-bg)',
-              border: '1px solid var(--hub-border)',
-              color: 'var(--hub-text)',
-            }}
-          >
-            <option value="">All brands</option>
-            {brands.map((b) => (
-              <option key={b.id} value={b.name}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label
-            className="text-xs font-semibold mb-1 block"
-            style={{ color: 'var(--hub-text-muted)' }}
-          >
             Status
           </label>
           <select
@@ -438,7 +436,7 @@ const Products: React.FC = () => {
             onChange={(e) =>
               updateFilters({
                 ...filters,
-                status: (e.target.value as Product['status']) || undefined,
+                status: (e.target.value as ProductFilters['status']) || undefined,
               })
             }
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
@@ -483,12 +481,12 @@ const Products: React.FC = () => {
               p.id,
               p.name,
               p.sku,
-              p.category,
-              p.brand || '',
-              p.stock,
+              categoryNameFor(p),
+              '',
+              p.stockQuantity,
               p.costPrice,
               p.salePrice,
-              p.status,
+              getProductStockStatus(p),
             ]),
           ]
             .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))

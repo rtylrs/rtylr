@@ -2,8 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { Tag, Plus, X, Trash2, Check, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useVariants, useCreateVariant, useUpdateVariant, useDeleteVariant } from '../useVariants';
-import type { ProductVariant } from '../../../shared/services/erpApi';
+import {
+  parseVariantAttributes,
+  useVariants,
+  useCreateVariant,
+  useUpdateVariant,
+  useDeleteVariant,
+  type Variant,
+} from '../useVariants';
 
 const AMBER = '#f59e0b';
 
@@ -55,7 +61,7 @@ function skuSuffix(attrs: Record<string, string>): string {
 }
 
 interface VariantRowProps {
-  variant: ProductVariant;
+  variant: Variant;
 }
 
 const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
@@ -63,23 +69,31 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
   const updateMut = useUpdateVariant();
   const deleteMut = useDeleteVariant();
   const [sku, setSku] = useState(variant.sku);
-  const [price, setPrice] = useState(String(variant.price));
-  const [stock, setStock] = useState(String(variant.stock));
+  const [price, setPrice] = useState(String(variant.salePrice));
+  const [stock, setStock] = useState(String(variant.stockQuantity));
   const [confirming, setConfirming] = useState(false);
+  const attributes = useMemo(() => parseVariantAttributes(variant.attributes), [variant.attributes]);
 
   const dirty =
-    sku !== variant.sku || price !== String(variant.price) || stock !== String(variant.stock);
+    sku !== variant.sku ||
+    price !== String(variant.salePrice) ||
+    stock !== String(variant.stockQuantity);
 
   const handleSave = (): void => {
     updateMut.mutate(
       {
         id: variant.id,
-        productId: variant.productId,
-        name: variant.name,
-        sku: sku.trim(),
-        price: parseFloat(price) || 0,
-        stock: parseFloat(stock) || 0,
-        attributes: variant.attributes,
+        body: {
+          productId: variant.productId,
+          name: variant.name,
+          sku: sku.trim(),
+          barcode: variant.barcode,
+          costPrice: variant.costPrice,
+          salePrice: parseFloat(price) || 0,
+          stockQuantity: parseFloat(stock) || 0,
+          attributes: variant.attributes,
+          isActive: variant.isActive,
+        },
       },
       { onSuccess: () => toast.success(t('erp.products.variants.saved')) }
     );
@@ -104,7 +118,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
           {variant.name}
         </p>
         <div className="flex gap-1 flex-wrap mt-0.5">
-          {Object.entries(variant.attributes).map(([k, val]) => (
+          {Object.entries(attributes).map(([k, val]) => (
             <span
               key={k}
               className="text-[10px] px-1.5 py-0.5 rounded"
@@ -187,7 +201,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
 };
 
 interface VariantMatrixProps {
-  productId: number;
+  productId: string;
   productSku: string;
   baseSalePrice: number;
 }
@@ -202,7 +216,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
   const [drafts, setDrafts] = useState<DraftVariant[]>([]);
 
   const existingSignatures = useMemo(
-    () => new Set(variants.map((v) => attrSignature(v.attributes))),
+    () => new Set(variants.map((v) => attrSignature(parseVariantAttributes(v.attributes)))),
     [variants]
   );
 
@@ -271,9 +285,12 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
           productId,
           name: d.name.trim() || Object.values(d.attributes).join(' / '),
           sku: d.sku.trim(),
-          price: parseFloat(d.price) || 0,
-          stock: parseFloat(d.stock) || 0,
-          attributes: d.attributes,
+          barcode: '',
+          costPrice: 0,
+          salePrice: parseFloat(d.price) || 0,
+          stockQuantity: parseFloat(d.stock) || 0,
+          attributes: JSON.stringify(d.attributes),
+          isActive: true,
         });
       }
       toast.success(t('erp.products.variants.created', { count: drafts.length }));

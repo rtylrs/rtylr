@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Layers } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { useVariants, useCreateVariant } from '../products/useVariants';
+import { parseVariantAttributes, useVariants, useCreateVariant } from '../products/useVariants';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
@@ -28,11 +28,16 @@ const Variants: React.FC = () => {
   const { data: variants = [], isLoading } = useVariants();
   const createMut = useCreateVariant();
   const [showCreate, setShowCreate] = useState(false);
+  const [newProductId, setNewProductId] = useState('');
   const [newName, setNewName] = useState('');
   const [newSku, setNewSku] = useState('');
   const [newPrice, setNewPrice] = useState('');
 
   const handleCreate = async (): Promise<void> => {
+    if (!newProductId.trim()) {
+      toast.error('Product ID is required');
+      return;
+    }
     if (!newName.trim()) {
       toast.error('Variant name is required');
       return;
@@ -44,14 +49,19 @@ const Variants: React.FC = () => {
     }
     try {
       await createMut.mutateAsync({
+        productId: newProductId.trim(),
         name: newName.trim(),
         sku: newSku.trim(),
-        price,
-        stock: 0,
-        attributes: {},
+        barcode: '',
+        costPrice: 0,
+        salePrice: price,
+        stockQuantity: 0,
+        attributes: '{}',
+        isActive: true,
       });
       toast.success('Variant created');
       setShowCreate(false);
+      setNewProductId('');
       setNewName('');
       setNewSku('');
       setNewPrice('');
@@ -109,7 +119,9 @@ const Variants: React.FC = () => {
             description="Add variants to differentiate your products"
           />
         ) : (
-          variants.map((v, i) => (
+          variants.map((v, i) => {
+            const attributes = parseVariantAttributes(v.attributes);
+            return (
             <div
               key={v.id}
               className="grid px-4 py-3 items-center"
@@ -125,7 +137,7 @@ const Variants: React.FC = () => {
                 {v.sku}
               </span>
               <div className="flex gap-1 flex-wrap">
-                {Object.entries(v.attributes).map(([k, val]) => (
+                {Object.entries(attributes).map(([k, val]) => (
                   <span
                     key={k}
                     className="text-[10px] px-1.5 py-0.5 rounded"
@@ -136,14 +148,14 @@ const Variants: React.FC = () => {
                 ))}
               </div>
               <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                {v.stock}
+                {v.stockQuantity}
               </span>
               <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                {formatCurrency(v.price)}
+                {formatCurrency(v.salePrice)}
               </span>
-              <StockBadge stock={v.stock} lowStock={10} />
+              <StockBadge stock={v.stockQuantity} lowStock={10} />
             </div>
-          ))
+          )})
         )}
       </div>
 
@@ -162,6 +174,12 @@ const Variants: React.FC = () => {
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
               New Variant
             </h3>
+            <input
+              value={newProductId}
+              onChange={(e) => setNewProductId(e.target.value)}
+              placeholder="Product ID"
+              style={inputStyle}
+            />
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -193,7 +211,7 @@ const Variants: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !newName.trim()}
+                disabled={createMut.isPending || !newProductId.trim() || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: '#000' }}
               >

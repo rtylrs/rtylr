@@ -1,18 +1,20 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { erpApi, ReorderSuggestion } from '../../shared/services/erpApi';
-import { reorderSuggestionSchema } from '../../shared/schemas/reorder';
-import { unwrapList } from '../../shared/lib/unwrapList';
+import {
+  ProductServiceClient,
+  type ReorderSuggestion,
+} from '@voxire/voxie/erp/product/v1/service_client';
+
+const productClient = createOneKitClient(ProductServiceClient, 'erp');
+
+export type { ReorderSuggestion };
 
 export function useReorderSuggestions() {
   return useQuery<ReorderSuggestion[]>({
     queryKey: ['reorder-suggestions'],
     queryFn: async () => {
-      const res = await unwrap(erpApi.getReorderSuggestions());
-      return z
-        .array(reorderSuggestionSchema)
-        .parse(unwrapList(res, 'suggestions', 'items')) as ReorderSuggestion[];
+      const response = await productClient.listReorderSuggestions({});
+      return response.suggestions;
     },
   });
 }

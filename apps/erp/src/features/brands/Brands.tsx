@@ -28,7 +28,7 @@ const Brands: React.FC = () => {
   const createMut = useCreateBrand();
   const deleteMut = useDeleteBrand();
   const [showCreate, setShowCreate] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
 
@@ -38,7 +38,11 @@ const Brands: React.FC = () => {
       return;
     }
     try {
-      await createMut.mutateAsync({ name: newName.trim(), description: newDescription.trim() });
+      await createMut.mutateAsync({
+        name: newName.trim(),
+        logoUrl: '',
+        description: newDescription.trim(),
+      });
       toast.success('Brand created');
       setShowCreate(false);
       setNewName('');

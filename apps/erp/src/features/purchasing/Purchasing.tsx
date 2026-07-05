@@ -10,11 +10,11 @@ import {
   Trash2,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { PurchaseOrder } from '../../shared/services/erpApi';
 import {
+  type PurchaseOrder,
   usePurchaseOrders,
   useApprovePurchaseOrder,
-  useSendPurchaseOrder,
+  useUpdatePurchaseOrderStatus,
   useCreatePurchaseOrder,
 } from './usePurchaseOrders';
 import { useSuppliers } from '../suppliers/useSuppliers';
@@ -26,8 +26,28 @@ import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
+type DisplayStatus = 'Draft' | 'Sent' | 'Approved' | 'Received' | 'Partial' | 'Cancelled';
+
+function displayStatus(status: string): DisplayStatus {
+  switch (status) {
+    case 'sent':
+      return 'Sent';
+    case 'approved':
+      return 'Approved';
+    case 'received':
+      return 'Received';
+    case 'partial':
+      return 'Partial';
+    case 'cancelled':
+      return 'Cancelled';
+    case 'draft':
+    default:
+      return 'Draft';
+  }
+}
+
 const statusConfig: Record<
-  PurchaseOrder['status'],
+  DisplayStatus,
   {
     color: string;
     bg: string;
@@ -35,10 +55,11 @@ const statusConfig: Record<
   }
 > = {
   Draft: { color: 'var(--hub-text-muted)', bg: 'var(--hub-hover)', icon: FileText },
-  'Pending Approval': { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: ClockIcon },
+  Partial: { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: ClockIcon },
   Approved: { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', icon: ThumbsUp },
   Sent: { color: AMBER, bg: 'rgba(245,158,11,0.1)', icon: Send },
   Received: { color: '#10b981', bg: 'rgba(16,185,129,0.1)', icon: CheckCircle },
+  Cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', icon: Trash2 },
 };
 
 const containerVariants: Variants = {
@@ -71,16 +92,16 @@ const SkeletonTableRow: React.FC = () => (
 const Purchasing: React.FC = () => {
   const [page, setPage] = useState(1);
   const { data: ordersResult, isLoading } = usePurchaseOrders({ page });
-  const orders = ordersResult?.orders ?? [];
+  const orders = ordersResult?.purchaseOrders ?? [];
   const hasMore = ordersResult?.hasMore ?? false;
   const approveMut = useApprovePurchaseOrder();
-  const sendMut = useSendPurchaseOrder();
+  const updateStatusMut = useUpdatePurchaseOrderStatus();
   const createMut = useCreatePurchaseOrder();
   const { data: supplierResult } = useSuppliers();
   const suppliers = supplierResult?.suppliers ?? [];
   const { data: productResult } = useProducts();
   const products = productResult?.products ?? [];
-  const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
+  const [filter, setFilter] = useState<DisplayStatus | 'All'>('All');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');
   const [newPoNumber, setNewPoNumber] = useState('');
@@ -92,24 +113,27 @@ const Purchasing: React.FC = () => {
     Array<{ productId: string; quantityOrdered: string; unitCost: string }>
   >([{ productId: '', quantityOrdered: '', unitCost: '' }]);
 
-  const filteredOrders = filter === 'All' ? orders : orders.filter((o) => o.status === filter);
+  const supplierNameById = new Map(suppliers.map((supplier) => [supplier.id, supplier.name]));
+
+  const filteredOrders =
+    filter === 'All' ? orders : orders.filter((order) => displayStatus(order.status) === filter);
 
   const statusCounts: Record<string, number> = {
-    Draft: orders.filter((o) => o.status === 'Draft').length,
-    'Pending Approval': orders.filter((o) => o.status === 'Pending Approval').length,
-    Sent: orders.filter((o) => o.status === 'Sent').length,
-    Received: orders.filter((o) => o.status === 'Received').length,
+    Draft: orders.filter((o) => displayStatus(o.status) === 'Draft').length,
+    Sent: orders.filter((o) => displayStatus(o.status) === 'Sent').length,
+    Approved: orders.filter((o) => displayStatus(o.status) === 'Approved').length,
+    Received: orders.filter((o) => displayStatus(o.status) === 'Received').length,
   };
 
-  const handleApprove = (id: number): void => {
+  const handleApprove = (id: string): void => {
     approveMut.mutate(id, {
       onSuccess: () => toast.success(`PO-${id} approved`),
       onError: () => toast.error(`Failed to approve PO-${id}`),
     });
   };
 
-  const handleSend = (id: number): void => {
-    sendMut.mutate(id, {
+  const handleSend = (id: string): void => {
+    updateStatusMut.mutate({ id, body: { status: 'sent' } }, {
       onSuccess: () => toast.success(`PO-${id} sent to supplier`),
       onError: () => toast.error(`Failed to send PO-${id}`),
     });
@@ -127,13 +151,13 @@ const Purchasing: React.FC = () => {
     }
     try {
       await createMut.mutateAsync({
-        supplierId: Number(newSupplierId),
+        supplierId: newSupplierId,
         poNumber: newPoNumber.trim(),
         taxAmount: 0,
         expectedDelivery: newExpectedDelivery,
         notes: newNotes.trim(),
         items: validItems.map((it) => ({
-          productId: Number(it.productId),
+          productId: it.productId,
           quantityOrdered: Number(it.quantityOrdered),
           unitCost: it.unitCost ? Number(it.unitCost) : 0,
         })),
@@ -166,12 +190,12 @@ const Purchasing: React.FC = () => {
           <ExportButton
             data={orders.map((o) => ({
               id: o.id,
-              supplier: o.supplier,
-              date: o.date,
-              expectedDate: o.expectedDate,
-              items: o.items,
+              supplier: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
+              createdAt: o.createdAt,
+              expectedDelivery: o.expectedDelivery ?? '',
+              items: o.items.length,
               total: o.total,
-              status: o.status,
+              status: displayStatus(o.status),
             }))}
             filename="purchase-orders.csv"
           />
@@ -187,7 +211,7 @@ const Purchasing: React.FC = () => {
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {(Object.entries(statusCounts) as [PurchaseOrder['status'], number][]).map(
+        {(Object.entries(statusCounts) as [DisplayStatus, number][]).map(
           ([status, count]) => {
             const sc = statusConfig[status];
             if (!sc) return null;
@@ -250,7 +274,8 @@ const Purchasing: React.FC = () => {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
             : filteredOrders.map((order) => {
-                const sc = statusConfig[order.status] || statusConfig['Draft'];
+                const status = displayStatus(order.status);
+                const sc = statusConfig[status] || statusConfig['Draft'];
                 return (
                   <div
                     key={order.id}
@@ -273,27 +298,27 @@ const Purchasing: React.FC = () => {
                       className="text-sm truncate pr-2"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
-                      {order.supplier}
+                      {supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`}
                     </span>
                     <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                      {order.expectedDate}
+                      {order.expectedDelivery ?? ''}
                     </span>
                     <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {order.items}
+                      {order.items.length}
                     </span>
                     <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                      {order.total}
+                      ${order.total.toFixed(2)}
                     </span>
                     <span>
                       <span
                         className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                         style={{ background: sc.bg, color: sc.color }}
                       >
-                        {order.status}
+                        {status}
                       </span>
                     </span>
                     <div className="flex items-center gap-1">
-                      {order.status === 'Pending Approval' && (
+                      {status === 'Sent' && (
                         <button
                           onClick={() => handleApprove(order.id)}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
@@ -302,7 +327,7 @@ const Purchasing: React.FC = () => {
                           Approve
                         </button>
                       )}
-                      {order.status === 'Draft' && (
+                      {status === 'Draft' && (
                         <button
                           onClick={() => handleSend(order.id)}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
@@ -311,7 +336,10 @@ const Purchasing: React.FC = () => {
                           Send
                         </button>
                       )}
-                      <PrintPOButton order={order} />
+                      <PrintPOButton
+                        order={order}
+                        supplierName={supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`}
+                      />
                     </div>
                   </div>
                 );

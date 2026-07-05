@@ -1,22 +1,23 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createOneKitClient } from '@voxire/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../shared/lib/api';
-import { unwrapList } from '../../shared/lib/unwrapList';
 import {
-  stockTakeSchema,
-  StockTake,
-  CreateStockTakeInput,
-  UpdateStockTakeInput,
-} from './stockTakeSchema';
+  StockTakeServiceClient,
+  type CreateStockTakeRequest,
+  type CreateStockTakeResponse,
+  type ListStockTakesResponse,
+  type StockTake,
+  type UpdateStockTakeRequest,
+  type UpdateStockTakeResponse,
+} from '@voxire/voxie/erp/stock_take/v1/service_client';
 
-export interface StockTakeListResult {
-  stockTakes: StockTake[];
-  hasMore: boolean;
-  page: number;
-  pageSize: number;
-}
+const stockTakeClient = createOneKitClient(StockTakeServiceClient, 'erp');
+
+export type {
+  CreateStockTakeRequest as CreateStockTakeInput,
+  StockTake,
+  UpdateStockTakeRequest as UpdateStockTakeInput,
+};
 
 export interface UseStockTakesParams {
   page?: number;
@@ -26,26 +27,16 @@ export interface UseStockTakesParams {
 export function useStockTakes(params: UseStockTakesParams = {}) {
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 50;
-  return useQuery<StockTakeListResult>({
+  return useQuery<ListStockTakesResponse>({
     queryKey: ['stock-takes', { page, pageSize }],
-    queryFn: async () => {
-      const res = await unwrap(
-        safe.get<unknown>('/erp/stock-takes', { params: { page, page_size: pageSize } })
-      );
-      const stockTakes = z
-        .array(stockTakeSchema)
-        .parse(unwrapList(res, 'stockTakes', 'stock_takes'));
-      const hasMore = (res as Record<string, unknown>)?.hasMore === true;
-      return { stockTakes, hasMore, page, pageSize };
-    },
+    queryFn: () => stockTakeClient.listStockTakes({ page, pageSize }),
   });
 }
 
 export function useCreateStockTake() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: CreateStockTakeInput) =>
-      unwrap(safe.post<unknown>('/erp/stock-takes', data)),
+  return useMutation<CreateStockTakeResponse, Error, CreateStockTakeRequest>({
+    mutationFn: (data) => stockTakeClient.createStockTake(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
     onError: () => toast.error('Failed to create stock take'),
   });
@@ -53,8 +44,8 @@ export function useCreateStockTake() {
 
 export function useUpdateStockTake() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: UpdateStockTakeInput) => unwrap(safe.put<unknown>('/erp/stock-takes', data)),
+  return useMutation<UpdateStockTakeResponse, Error, UpdateStockTakeRequest>({
+    mutationFn: (data) => stockTakeClient.updateStockTake(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
     onError: () => toast.error('Failed to update stock take'),
   });

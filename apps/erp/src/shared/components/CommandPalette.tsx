@@ -48,7 +48,11 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const products = productResult?.products ?? [];
   const suppliers = supplierResult?.suppliers ?? [];
   const { data: ordersResult } = usePurchaseOrders();
-  const orders = ordersResult?.orders ?? [];
+  const orders = ordersResult?.purchaseOrders ?? [];
+  const supplierNameById = useMemo(
+    () => new Map(suppliers.map((supplier) => [supplier.id, supplier.name])),
+    [suppliers]
+  );
 
   useEffect(() => {
     if (!open) setQ('');
@@ -81,12 +85,15 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
       }));
 
     const orderResults: Result[] = (orders || [])
-      .filter((o) => String(o.id).includes(qq) || o.supplier.toLowerCase().includes(qq))
+      .filter((o) => {
+        const supplierName = supplierNameById.get(o.supplierId) ?? '';
+        return String(o.id).includes(qq) || supplierName.toLowerCase().includes(qq);
+      })
       .slice(0, 3)
       .map((o) => ({
         type: 'order',
         label: `PO-${o.id}`,
-        sub: o.supplier,
+        sub: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
         to: `/purchasing`,
         icon: ShoppingCart,
       }));
@@ -97,7 +104,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
     );
 
     return [...productResults, ...supplierResults, ...orderResults, ...navResults];
-  }, [q, products, suppliers, orders]);
+  }, [q, products, suppliers, orders, supplierNameById]);
 
   useEffect(() => {
     setActiveIdx(0);

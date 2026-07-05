@@ -4,7 +4,7 @@ import { useAdjustInventory } from '../../features/inventory/useInventory';
 import { toast } from 'sonner';
 
 interface QuickStockAdjustProps {
-  productId: number;
+  productId: string;
   currentStock: number;
   onChange?: (newStock: number) => void;
 }
@@ -22,7 +22,7 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
     const next = Math.max(0, stock + delta);
     setStock(next);
     adjust.mutate(
-      { productId, change: delta, type: 'adjustment' },
+      { productId, change: delta, type: 'adjustment', notes: 'Quick stock adjustment' },
       {
         onSuccess: () => {
           toast.success(`Stock adjusted by ${delta > 0 ? '+' : ''}${delta}`);

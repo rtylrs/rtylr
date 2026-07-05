@@ -58,6 +58,6 @@ const STATUS_LABELS: Record<StockTransferStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-export function stockTransferStatusLabel(status: StockTransferStatus): string {
-  return STATUS_LABELS[status];
+export function stockTransferStatusLabel(status: string): string {
+  return STATUS_LABELS[status as StockTransferStatus] ?? status;
 }

@@ -3,7 +3,8 @@ import { motion } from 'motion/react';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { usePurchaseOrders, useUpdatePurchaseOrderStatus } from './usePurchaseOrders';
-import type { PurchaseOrder } from '../../shared/services/erpApi';
+import type { PurchaseOrder } from './usePurchaseOrders';
+import { useSuppliers } from '../suppliers/useSuppliers';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -21,22 +22,24 @@ interface ReceiveLine {
 
 const Receiving: React.FC = () => {
   const { data: ordersResult, isLoading } = usePurchaseOrders();
-  const orders = ordersResult?.orders ?? [];
+  const { data: supplierResult } = useSuppliers();
+  const orders = ordersResult?.purchaseOrders ?? [];
+  const supplierNameById = new Map((supplierResult?.suppliers ?? []).map((s) => [s.id, s.name]));
   const updateStatus = useUpdatePurchaseOrderStatus();
-  const open = orders.filter((o) => o.status === 'Sent' || o.status === 'Approved');
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const open = orders.filter((o) => o.status === 'sent' || o.status === 'approved');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lines, setLines] = useState<ReceiveLine[]>([]);
 
   const handleSelectOrder = (order: PurchaseOrder): void => {
     setSelectedId(order.id);
-    setLines([
-      {
-        sku: order.id.toString(),
-        name: `PO-${order.id} - All items (${order.supplier})`,
-        expected: order.items,
-        received: order.items,
-      },
-    ]);
+    setLines(
+      order.items.map((item) => ({
+        sku: item.productId,
+        name: `Product #${item.productId}`,
+        expected: item.quantityOrdered,
+        received: item.quantityReceived || item.quantityOrdered,
+      }))
+    );
   };
 
   const adjust = (sku: string, delta: number) => {
@@ -64,7 +67,7 @@ const Receiving: React.FC = () => {
     if (selectedId !== null) {
       // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
       updateStatus.mutate(
-        { id: selectedId, status: 'received' },
+        { id: selectedId, body: { status: 'received' } },
         { onError: () => toast.error('Failed to update receipt status') }
       );
     }
@@ -190,10 +193,10 @@ const Receiving: React.FC = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                  PO-{o.id} / {o.supplier}
+                  PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                  {o.items} items / Expected {formatDate(o.expectedDate)}
+                  {o.items.length} items / Expected {formatDate(o.expectedDelivery ?? '')}
                 </p>
               </div>
               <span

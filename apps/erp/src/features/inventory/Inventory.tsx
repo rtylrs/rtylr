@@ -5,8 +5,7 @@ import { cdnImageUrl } from '@voxire/config';
 import { Package, Search, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
-import { Product } from '../../shared/services/erpApi';
-import { useProducts } from '../products/useProducts';
+import { getProductStockStatus, type ProductStockStatus, useProducts } from '../products/useProducts';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PaginationControls from '../../shared/components/PaginationControls';
 
@@ -14,7 +13,7 @@ const AMBER = '#f59e0b';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const statusConfig: Record<Product['status'], { color: string; bg: string }> = {
+const statusConfig: Record<ProductStockStatus, { color: string; bg: string }> = {
   'In Stock': { color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
   'Low Stock': { color: AMBER, bg: 'rgba(245,158,11,0.1)' },
   'Out of Stock': { color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
@@ -175,8 +174,9 @@ const Inventory: React.FC = () => {
                 </div>
               ) : (
                 products.map((product) => {
-                  const sc = statusConfig[product.status];
-                  const imageUrl = cdnImageUrl(product.imageUrl);
+                  const status = getProductStockStatus(product);
+                  const sc = statusConfig[status];
+                  const imageUrl = cdnImageUrl((product as typeof product & { imageUrl?: string }).imageUrl);
                   return (
                     <div
                       key={product.id}
@@ -229,17 +229,17 @@ const Inventory: React.FC = () => {
                         className="text-sm font-semibold"
                         style={{
                           color:
-                            product.stock === 0
+                            product.stockQuantity === 0
                               ? '#f87171'
-                              : product.stock < product.lowStock
+                              : product.stockQuantity < product.lowStockThreshold
                                 ? AMBER
                                 : 'var(--hub-text)',
                         }}
                       >
-                        {product.stock}
+                        {product.stockQuantity}
                       </span>
                       <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                        {product.lowStock}
+                        {product.lowStockThreshold}
                       </span>
                       <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                         ${product.costPrice.toFixed(2)}
@@ -252,7 +252,7 @@ const Inventory: React.FC = () => {
                           className="rounded-full px-2 py-0.5 text-[10px] font-medium"
                           style={{ background: sc.bg, color: sc.color }}
                         >
-                          {product.status}
+                          {status}
                         </span>
                       </span>
                     </div>

@@ -1,22 +1,23 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createOneKitClient } from '@voxire/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../shared/lib/api';
-import { unwrapList } from '../../shared/lib/unwrapList';
 import {
-  stockTransferSchema,
-  StockTransfer,
-  CreateStockTransferInput,
-  UpdateStockTransferStatusInput,
-} from './stockTransferSchema';
+  StockTransferServiceClient,
+  type CreateStockTransferRequest,
+  type CreateStockTransferResponse,
+  type ListStockTransfersResponse,
+  type StockTransfer,
+  type UpdateStockTransferStatusRequest,
+  type UpdateStockTransferStatusResponse,
+} from '@voxire/voxie/erp/stock_transfer/v1/service_client';
 
-export interface StockTransferListResult {
-  transfers: StockTransfer[];
-  hasMore: boolean;
-  page: number;
-  pageSize: number;
-}
+const stockTransferClient = createOneKitClient(StockTransferServiceClient, 'erp');
+
+export type {
+  CreateStockTransferRequest as CreateStockTransferInput,
+  StockTransfer,
+  UpdateStockTransferStatusRequest as UpdateStockTransferStatusInput,
+};
 
 export interface UseStockTransfersParams {
   page?: number;
@@ -26,26 +27,16 @@ export interface UseStockTransfersParams {
 export function useStockTransfers(params: UseStockTransfersParams = {}) {
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 50;
-  return useQuery<StockTransferListResult>({
+  return useQuery<ListStockTransfersResponse>({
     queryKey: ['stock-transfers', { page, pageSize }],
-    queryFn: async () => {
-      const res = await unwrap(
-        safe.get<unknown>('/erp/stock-transfers', { params: { page, page_size: pageSize } })
-      );
-      const transfers = z
-        .array(stockTransferSchema)
-        .parse(unwrapList(res, 'stockTransfers', 'stock_transfers'));
-      const hasMore = (res as Record<string, unknown>)?.hasMore === true;
-      return { transfers, hasMore, page, pageSize };
-    },
+    queryFn: () => stockTransferClient.listStockTransfers({ page, pageSize }),
   });
 }
 
 export function useCreateStockTransfer() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: CreateStockTransferInput) =>
-      unwrap(safe.post<unknown>('/erp/stock-transfers', data)),
+  return useMutation<CreateStockTransferResponse, Error, CreateStockTransferRequest>({
+    mutationFn: (data) => stockTransferClient.createStockTransfer(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-transfers'] }),
     onError: () => toast.error('Failed to create stock transfer'),
   });
@@ -53,9 +44,8 @@ export function useCreateStockTransfer() {
 
 export function useUpdateStockTransferStatus() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: UpdateStockTransferStatusInput) =>
-      unwrap(safe.put<unknown>('/erp/stock-transfers', data)),
+  return useMutation<UpdateStockTransferStatusResponse, Error, UpdateStockTransferStatusRequest>({
+    mutationFn: (data) => stockTransferClient.updateStockTransferStatus(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-transfers'] }),
     onError: () => toast.error('Failed to update stock transfer'),
   });

@@ -1,49 +1,34 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createOneKitClient } from '@voxire/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { erpApi, Brand } from '../../shared/services/erpApi';
-import { unwrapList } from '../../shared/lib/unwrapList';
+import {
+  BrandServiceClient,
+  type Brand,
+  type CreateBrandRequest,
+  type CreateBrandResponse,
+  type DeleteBrandResponse,
+  type UpdateBrandRequest,
+  type UpdateBrandResponse,
+} from '@voxire/voxie/erp/brand/v1/service_client';
 
-/**
- * Backend brand contract (snake_case -> camelCase via @voxire/api):
- * { id, ownerId, name, logoUrl, description, productCount, createdAt, updatedAt }.
- * createdAt / updatedAt are returned but not displayed yet; productCount is
- * genuinely returned by the backend, so it stays.
- */
-const brandRowSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  logoUrl: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
-  productCount: z.number().default(0),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
+const brandClient = createOneKitClient(BrandServiceClient, 'erp');
+
+export type { Brand };
 
 export function useBrands() {
   return useQuery<Brand[]>({
     queryKey: ['brands'],
     queryFn: async () => {
-      const res = await unwrap(erpApi.listBrands());
-      const rows = z.array(brandRowSchema).parse(unwrapList(res, 'brands'));
-      return rows.map(
-        (row): Brand => ({
-          id: row.id,
-          name: row.name,
-          logoUrl: row.logoUrl ?? undefined,
-          description: row.description ?? undefined,
-          productCount: row.productCount,
-        })
-      );
+      const response = await brandClient.listBrands({});
+      return response.brands;
     },
   });
 }
 
 export function useCreateBrand() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: Partial<Brand>) => unwrap(erpApi.createBrand(data)),
+  return useMutation<CreateBrandResponse, Error, CreateBrandRequest>({
+    mutationFn: (data) => brandClient.createBrand(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
     onError: () => toast.error('Failed to create brand'),
   });
@@ -51,9 +36,18 @@ export function useCreateBrand() {
 
 export function useDeleteBrand() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => unwrap(erpApi.deleteBrand(id)),
+  return useMutation<DeleteBrandResponse, Error, string>({
+    mutationFn: (id) => brandClient.deleteBrand({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
     onError: () => toast.error('Failed to delete brand'),
+  });
+}
+
+export function useUpdateBrand() {
+  const qc = useQueryClient();
+  return useMutation<UpdateBrandResponse, Error, UpdateBrandRequest>({
+    mutationFn: (data) => brandClient.updateBrand(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
+    onError: () => toast.error('Failed to update brand'),
   });
 }

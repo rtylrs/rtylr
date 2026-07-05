@@ -7,8 +7,8 @@ import {
   stockTakeStatusLabel,
   stockTakeProgress,
   stockTakeVariance,
-  type CreateStockTakeItemInput,
 } from './stockTakeSchema';
+import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/service_client';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -41,10 +41,10 @@ const StockTakes: React.FC = () => {
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
   const [showCreate, setShowCreate] = useState(false);
-  const [newWarehouseId, setNewWarehouseId] = useState<number>(0);
+  const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');
 
-  const warehouseName = (id: number): string =>
+  const warehouseName = (id: string): string =>
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
 
   const handleCreate = async (): Promise<void> => {
@@ -60,18 +60,18 @@ const StockTakes: React.FC = () => {
       });
       toast.success('Stock take created');
       setShowCreate(false);
-      setNewWarehouseId(0);
+      setNewWarehouseId('');
       setNewNotes('');
     } catch {
       toast.error('Failed to create stock take');
     }
   };
 
-  const handleComplete = async (id: number, items: CreateStockTakeItemInput[]): Promise<void> => {
+  const handleComplete = async (id: string, items: UpdateStockTakeItemBody[]): Promise<void> => {
     const uncounted = items.filter((item) => item.expectedQty > 0 && !item.countedQty).length;
     const doComplete = async (): Promise<void> => {
       try {
-        await updateMut.mutateAsync({ id, status: 'completed', items });
+        await updateMut.mutateAsync({ id, body: { status: 'completed', notes: '', items } });
         toast.success('Stock take completed');
       } catch {
         toast.error('Failed to complete stock take');
@@ -235,10 +235,10 @@ const StockTakes: React.FC = () => {
             </h3>
             <select
               value={newWarehouseId}
-              onChange={(e) => setNewWarehouseId(Number(e.target.value))}
+              onChange={(e) => setNewWarehouseId(e.target.value)}
               style={inputStyle}
             >
-              <option value={0}>Select warehouse…</option>
+              <option value="">Select warehouse…</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}

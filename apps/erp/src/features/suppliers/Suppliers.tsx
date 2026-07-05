@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
-import { Plus, Mail, Phone, Package, BarChart3 } from 'lucide-react';
+import { Plus, Mail, Phone, MapPin, BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Supplier } from '../../shared/services/erpApi';
+import type { Supplier } from './useSuppliers';
 import { useSuppliers, useCreateSupplier } from './useSuppliers';
 import SupplierScorecard from '../../shared/components/SupplierScorecard';
 import ExportButton from '../../shared/components/ExportButton';
@@ -90,31 +90,40 @@ const Suppliers: React.FC = () => {
   const [showScorecards, setShowScorecards] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newContact, setNewContact] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [newCity, setNewCity] = useState('');
+  const [newCountry, setNewCountry] = useState('');
+  const [newAddress, setNewAddress] = useState('');
 
-  const activeCount = suppliers.filter((s) => s.status === 'Active').length;
+  const activeCount = suppliers.filter((s) => s.isActive).length;
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) {
-      toast.error('Supplier name is required');
+    if (!newName.trim() || !newEmail.trim() || !newCity.trim() || !newCountry.trim()) {
+      toast.error('Supplier name, email, city, and country are required');
       return;
     }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
-        contactName: newContact.trim(),
         email: newEmail.trim(),
         phone: newPhone.trim(),
-        categories: [],
+        address: newAddress.trim(),
+        city: newCity.trim(),
+        country: newCountry.trim(),
+        taxId: '',
+        paymentTerms: '',
+        notes: '',
+        isActive: true,
       });
       toast.success('Supplier created');
       setShowCreate(false);
       setNewName('');
-      setNewContact('');
       setNewEmail('');
       setNewPhone('');
+      setNewCity('');
+      setNewCountry('');
+      setNewAddress('');
     } catch {
       toast.error('Failed to create supplier');
     }
@@ -154,11 +163,11 @@ const Suppliers: React.FC = () => {
             data={suppliers.map((s) => ({
               id: s.id,
               name: s.name,
-              contact: s.contactName,
               email: s.email,
               phone: s.phone,
-              products: s.productCount,
-              status: s.status,
+              city: s.city,
+              country: s.country,
+              status: s.isActive ? 'Active' : 'Inactive',
             }))}
             filename="suppliers.csv"
           />
@@ -222,20 +231,20 @@ const Suppliers: React.FC = () => {
                         {supplier.name}
                       </p>
                       <p className="text-xs truncate" style={{ color: 'var(--hub-text-muted)' }}>
-                        {supplier.contactName}
+                        {[supplier.city, supplier.country].filter(Boolean).join(', ')}
                       </p>
                     </div>
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"
                       style={{
                         background:
-                          supplier.status === 'Active'
+                          supplier.isActive
                             ? 'rgba(16,185,129,0.1)'
                             : 'var(--hub-hover)',
-                        color: supplier.status === 'Active' ? '#10b981' : 'var(--hub-text-muted)',
+                        color: supplier.isActive ? '#10b981' : 'var(--hub-text-muted)',
                       }}
                     >
-                      {supplier.status}
+                      {supplier.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
 
@@ -270,22 +279,14 @@ const Suppliers: React.FC = () => {
                   {/* Product count + categories */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <Package size={12} style={{ color }} />
+                      <MapPin size={12} style={{ color }} />
                       <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        {supplier.productCount} products
+                        {supplier.address || [supplier.city, supplier.country].filter(Boolean).join(', ') || 'No address'}
                       </span>
                     </div>
-                    <div className="flex gap-1 flex-wrap justify-end">
-                      {(supplier.categories ?? []).map((cat) => (
-                        <span
-                          key={cat}
-                          className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
-                          style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}>
+                      {supplier.paymentTerms || 'No terms'}
+                    </span>
                   </div>
                 </motion.div>
               );
@@ -316,9 +317,11 @@ const Suppliers: React.FC = () => {
             </h3>
             {[
               { value: newName, setter: setNewName, placeholder: 'Company name' },
-              { value: newContact, setter: setNewContact, placeholder: 'Contact name' },
               { value: newEmail, setter: setNewEmail, placeholder: 'Email' },
               { value: newPhone, setter: setNewPhone, placeholder: 'Phone' },
+              { value: newCity, setter: setNewCity, placeholder: 'City' },
+              { value: newCountry, setter: setNewCountry, placeholder: 'Country' },
+              { value: newAddress, setter: setNewAddress, placeholder: 'Address' },
             ].map(({ value, setter, placeholder }) => (
               <input
                 key={placeholder}
@@ -343,7 +346,7 @@ const Suppliers: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !newName.trim()}
+                disabled={createMut.isPending || !newName.trim() || !newEmail.trim() || !newCity.trim() || !newCountry.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: '#000' }}
               >

@@ -37,18 +37,29 @@ const today = new Date().toLocaleDateString('en-US', {
 });
 
 function getStatusColor(status: string): string {
-  if (status === 'Received') return 'var(--erp-success, #10b981)';
-  if (status === 'Sent' || status === 'Approved' || status === 'Partial') return AMBER;
-  if (status === 'Pending Approval') return 'var(--erp-purple, #a78bfa)';
+  const normalized = status.toLowerCase();
+  if (normalized === 'received') return 'var(--erp-success, #10b981)';
+  if (normalized === 'sent' || normalized === 'approved' || normalized === 'partial') return AMBER;
+  if (normalized === 'pending_approval') return 'var(--erp-purple, #a78bfa)';
   return 'var(--hub-text-dim)';
 }
 
 function getStatusBg(status: string): string {
-  if (status === 'Received') return 'rgba(16,185,129,0.09)';
-  if (status === 'Sent' || status === 'Approved' || status === 'Partial')
+  const normalized = status.toLowerCase();
+  if (normalized === 'received') return 'rgba(16,185,129,0.09)';
+  if (normalized === 'sent' || normalized === 'approved' || normalized === 'partial')
     return 'rgba(245,158,11,0.09)';
-  if (status === 'Pending Approval') return 'rgba(167,139,250,0.09)';
+  if (normalized === 'pending_approval') return 'rgba(167,139,250,0.09)';
   return 'rgba(0,0,0,0.06)';
+}
+
+function formatStatus(status: string): string {
+  return status
+    .replace(/_/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 const activityIconFor = (type: string) => {
@@ -80,7 +91,7 @@ const Dashboard: React.FC = () => {
   const lowStockItems = dashboardStats?.lowStockItems ?? [];
   const recentOrders = (dashboardStats?.recentOrders ?? []).slice(0, 3);
   const topCategories = dashboardStats?.topCategories ?? [];
-  const criticalLowStockCount = lowStockItems.filter((i) => i.stock <= 5).length;
+  const criticalLowStockCount = lowStockItems.filter((i) => i.currentStock <= 5).length;
 
   const stats = [
     {
@@ -119,7 +130,7 @@ const Dashboard: React.FC = () => {
 
   const inventoryValue =
     dashboardStats?.inventoryValue ??
-    (productsData || []).slice(0, 5).reduce((s, p) => s + p.salePrice * (p.stock || 0), 0);
+    (productsData || []).slice(0, 5).reduce((s, p) => s + p.salePrice * (p.stockQuantity || 0), 0);
 
   return (
     <motion.div
@@ -292,7 +303,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-2`}>
             {activityData.slice(0, 5).map((a) => {
-              const Icon = activityIconFor(a.type);
+              const Icon = activityIconFor(a.entityType);
               return (
                 <div key={a.id} className="flex items-start gap-2">
                   <Icon
@@ -305,10 +316,10 @@ const Dashboard: React.FC = () => {
                       className="text-[11px] font-medium truncate"
                       style={{ color: 'var(--hub-text)' }}
                     >
-                      {a.title}
+                      {a.description}
                     </p>
                     <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                      {timeAgo(a.timestamp)}
+                      {timeAgo(a.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -354,12 +365,15 @@ const Dashboard: React.FC = () => {
                     </div>
                     <p
                       className="text-sm font-bold text-center"
-                      style={{ color: item.stock <= 5 ? 'var(--erp-danger, #f87171)' : AMBER }}
+                      style={{
+                        color:
+                          item.currentStock <= 5 ? 'var(--erp-danger, #f87171)' : AMBER,
+                      }}
                     >
-                      {item.stock} {item.unit}
+                      {item.currentStock}
                     </p>
                     <p className="text-xs text-right" style={{ color: 'var(--hub-text-muted)' }}>
-                      {item.minStock} {item.unit}
+                      {item.reorderPoint}
                     </p>
                   </div>
                 ))}
@@ -395,14 +409,14 @@ const Dashboard: React.FC = () => {
                           {order.poNumber}
                         </p>
                         <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                          {order.date}
+                          {new Date(order.createdAt).toLocaleDateString('en-US')}
                         </p>
                       </div>
                       <p
                         className="text-xs truncate pr-2"
                         style={{ color: 'var(--hub-text-muted)' }}
                       >
-                        {order.supplier}
+                        {order.supplierName}
                       </p>
                       <p
                         className="text-xs font-semibold text-right"
@@ -415,7 +429,7 @@ const Dashboard: React.FC = () => {
                           className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                           style={{ background: statusBg, color: statusColor }}
                         >
-                          {order.status}
+                          {formatStatus(order.status)}
                         </span>
                       </div>
                     </div>

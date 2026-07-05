@@ -1,18 +1,20 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { erpApi, ActivityItem } from '../services/erpApi';
-import { activityItemSchema } from '../schemas/activity';
-import { unwrapList } from '../lib/unwrapList';
+import {
+  ActivityServiceClient,
+  type ActivityEntry,
+} from '@voxire/voxie/hub/activity/v1/service_client';
+
+const activityClient = createOneKitClient(ActivityServiceClient, 'hub');
+
+export type { ActivityEntry };
 
 export function useActivity(limit = 20) {
-  return useQuery<ActivityItem[]>({
+  return useQuery<ActivityEntry[]>({
     queryKey: ['activity', limit],
     queryFn: async () => {
-      const res = await unwrap(erpApi.listActivity(limit));
-      return z
-        .array(activityItemSchema)
-        .parse(unwrapList(res, 'activity', 'items')) as ActivityItem[];
+      const response = await activityClient.listActivity({ limit });
+      return response.activities;
     },
   });
 }

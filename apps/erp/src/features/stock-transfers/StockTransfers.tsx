@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Plus, ArrowRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
-import { stockTransferStatusLabel, type StockTransferStatus } from './stockTransferSchema';
+import { stockTransferStatusLabel } from './stockTransferSchema';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
@@ -26,7 +26,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
-function statusConfig(status: StockTransferStatus): { color: string; bg: string } {
+function statusConfig(status: string): { color: string; bg: string } {
   if (status === 'received') return { color: '#10b981', bg: 'rgba(16,185,129,0.12)' };
   if (status === 'in_transit') return { color: AMBER, bg: 'rgba(245,158,11,0.12)' };
   if (status === 'cancelled') return { color: '#f87171', bg: 'rgba(248,113,113,0.12)' };
@@ -37,16 +37,16 @@ const StockTransfers: React.FC = () => {
   const [page, setPage] = useState(1);
   const pageSize = 50;
   const { data: transferResult, isLoading } = useStockTransfers({ page, pageSize });
-  const transfers = transferResult?.transfers ?? [];
+  const transfers = transferResult?.stockTransfers ?? [];
   const hasMore = transferResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
   const createMut = useCreateStockTransfer();
   const [showCreate, setShowCreate] = useState(false);
-  const [fromWarehouseId, setFromWarehouseId] = useState<number>(0);
-  const [toWarehouseId, setToWarehouseId] = useState<number>(0);
+  const [fromWarehouseId, setFromWarehouseId] = useState('');
+  const [toWarehouseId, setToWarehouseId] = useState('');
   const [notes, setNotes] = useState('');
 
-  const warehouseName = (id: number): string =>
+  const warehouseName = (id: string): string =>
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
 
   const handleCreate = async (): Promise<void> => {
@@ -67,8 +67,8 @@ const StockTransfers: React.FC = () => {
       });
       toast.success('Transfer draft created');
       setShowCreate(false);
-      setFromWarehouseId(0);
-      setToWarehouseId(0);
+      setFromWarehouseId('');
+      setToWarehouseId('');
       setNotes('');
     } catch {
       toast.error('Failed to create transfer');
@@ -189,10 +189,10 @@ const StockTransfers: React.FC = () => {
             </h3>
             <select
               value={fromWarehouseId}
-              onChange={(e) => setFromWarehouseId(Number(e.target.value))}
+              onChange={(e) => setFromWarehouseId(e.target.value)}
               style={inputStyle}
             >
-              <option value={0}>From warehouse…</option>
+              <option value="">From warehouse…</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -201,10 +201,10 @@ const StockTransfers: React.FC = () => {
             </select>
             <select
               value={toWarehouseId}
-              onChange={(e) => setToWarehouseId(Number(e.target.value))}
+              onChange={(e) => setToWarehouseId(e.target.value)}
               style={inputStyle}
             >
-              <option value={0}>To warehouse…</option>
+              <option value="">To warehouse…</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}

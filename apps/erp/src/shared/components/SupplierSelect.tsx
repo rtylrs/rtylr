@@ -3,8 +3,8 @@ import { Search, Check } from 'lucide-react';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
 
 interface SupplierSelectProps {
-  value?: number | null;
-  onChange: (id: number) => void;
+  value?: string | null;
+  onChange: (id: string) => void;
   placeholder?: string;
 }
 

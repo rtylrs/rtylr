@@ -2,19 +2,19 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Package } from 'lucide-react';
 import { cdnImageUrl } from '@voxire/config';
-import { Product } from '../services/erpApi';
+import type { Product } from '../../features/products/useProducts';
 import { formatCurrency } from '../lib/format';
 import StockBadge from './StockBadge';
 
 interface ProductCardProps {
   product: Product;
   selected?: boolean;
-  onToggle?: (id: number) => void;
+  onToggle?: (id: string) => void;
   compact?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, compact }) => {
-  const imageUrl = cdnImageUrl(product.imageUrl);
+  const imageUrl = cdnImageUrl((product as Product & { imageUrl?: string }).imageUrl);
   return (
     <div
       className="rounded-xl p-3 transition-colors"
@@ -60,14 +60,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
           </p>
           {!compact && (
             <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-              {product.category}
-              {product.brand ? ` / ${product.brand}` : ''}
+              Category #{product.categoryId}
             </p>
           )}
         </div>
       </div>
       <div className="flex items-center justify-between mt-3">
-        <StockBadge stock={product.stock} lowStock={product.lowStock} />
+        <StockBadge stock={product.stockQuantity} lowStock={product.lowStockThreshold} />
         <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
           {formatCurrency(product.salePrice)}
         </span>

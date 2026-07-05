@@ -61,12 +61,12 @@ const STATUS_LABELS: Record<StockTakeStatus, string> = {
   completed: 'Completed',
 };
 
-export function stockTakeStatusLabel(status: StockTakeStatus): string {
-  return STATUS_LABELS[status];
+export function stockTakeStatusLabel(status: string): string {
+  return STATUS_LABELS[status as StockTakeStatus] ?? status;
 }
 
 /** Counting progress derived from items (backend does not send totals). */
-export function stockTakeProgress(items: StockTakeItem[]): {
+export function stockTakeProgress(items: Array<Pick<StockTakeItem, 'countedQty'>>): {
   counted: number;
   total: number;
   pct: number;
@@ -78,6 +78,6 @@ export function stockTakeProgress(items: StockTakeItem[]): {
 }
 
 /** Net variance across all counted items. */
-export function stockTakeVariance(items: StockTakeItem[]): number {
+export function stockTakeVariance(items: Array<Pick<StockTakeItem, 'variance'>>): number {
   return items.reduce((sum, item) => sum + item.variance, 0);
 }

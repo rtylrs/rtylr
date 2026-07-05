@@ -104,6 +104,14 @@ vi.mock('../products/useProducts', () => ({
     isPending: false,
     mutate: vi.fn(),
   }),
+  useProductAttributes: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
+  useProductFull: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
 }));
 
 vi.mock('../suppliers/useSuppliers', () => ({

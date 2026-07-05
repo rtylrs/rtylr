@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { useDeleteProduct, useProduct } from './useProducts';
+import { useDeleteProduct, useProductFull } from './useProducts';
 import VariantMatrix from './components/VariantMatrix';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import StockBadge from '../../shared/components/StockBadge';
@@ -16,6 +16,8 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatCurrency } from '../../shared/lib/format';
+import { useCategories } from '../categories/useCategories';
+import { useBrands } from '../brands/useBrands';
 
 const AMBER = '#f59e0b';
 
@@ -63,11 +65,23 @@ const ProductDetail: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams({ strict: false });
-  const productId = id ? parseInt(id) : undefined;
-  const { data: product, isLoading } = useProduct(productId);
+  const productId = id || undefined;
+  const { data: product, isLoading } = useProductFull(productId);
+  const { data: categories = [] } = useCategories();
+  const { data: brands = [] } = useBrands();
   const deleteProduct = useDeleteProduct();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const categoryNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    categories.forEach((category) => map.set(String(category.id), category.name));
+    return map;
+  }, [categories]);
+  const brandNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    brands.forEach((brand) => map.set(String(brand.id), brand.name));
+    return map;
+  }, [brands]);
 
   const handleDelete = (): void => {
     if (!product) return;
@@ -188,19 +202,19 @@ const ProductDetail: React.FC = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <StockBadge stock={product.stock} lowStock={product.lowStock} />
+                  <StockBadge stock={product.stockQuantity} lowStock={product.lowStockThreshold} />
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                     style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
                   >
-                    {product.category}
+                    {categoryNameById.get(product.categoryId) || `Category #${product.categoryId}`}
                   </span>
-                  {product.brand && (
+                  {product.brandId !== '0' && (
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: 'rgba(245,158,11,0.1)', color: AMBER }}
                     >
-                      {product.brand}
+                      {brandNameById.get(product.brandId) || `Brand #${product.brandId}`}
                     </span>
                   )}
                 </div>
@@ -258,7 +272,7 @@ const ProductDetail: React.FC = () => {
                   Stock
                 </p>
                 <div className="mt-0.5">
-                  <QuickStockAdjust productId={product.id} currentStock={product.stock} />
+                  <QuickStockAdjust productId={product.id} currentStock={product.stockQuantity} />
                 </div>
               </div>
             </div>
@@ -347,7 +361,7 @@ const ProductDetail: React.FC = () => {
               <div className="flex justify-between">
                 <span style={{ color: 'var(--hub-text-dim)' }}>Reorder Point</span>
                 <span style={{ color: 'var(--hub-text)' }}>
-                  {product.reorderPoint || product.lowStock} units
+                  {product.reorderQuantity || product.lowStockThreshold} units
                 </span>
               </div>
               <div className="flex justify-between">

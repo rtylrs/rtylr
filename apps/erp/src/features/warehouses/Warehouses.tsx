@@ -29,7 +29,7 @@ const Warehouses: React.FC = () => {
   const createMut = useCreateWarehouse();
   const deleteMut = useDeleteWarehouse();
   const [showCreate, setShowCreate] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
   const [newManagerName, setNewManagerName] = useState('');
@@ -44,8 +44,12 @@ const Warehouses: React.FC = () => {
       await createMut.mutateAsync({
         name: newName.trim(),
         address: newAddress.trim(),
+        city: '',
+        country: '',
         managerName: newManagerName.trim(),
-        capacity: newCapacity.trim() ? Number(newCapacity) : 0,
+        capacity: newCapacity.trim() || '0',
+        isDefault: false,
+        isActive: true,
       });
       toast.success('Warehouse created');
       setShowCreate(false);
@@ -162,13 +166,15 @@ const Warehouses: React.FC = () => {
                       <User size={11} /> Managed by {w.managerName}
                     </div>
                   )}
-                  {w.capacity > 0 && (
+                  {Number(w.capacity) > 0 && (
                     <div
                       className="flex items-center justify-between text-xs"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
                       <span>Capacity</span>
-                      <span style={{ color: 'var(--hub-text)' }}>{formatNumber(w.capacity)}</span>
+                      <span style={{ color: 'var(--hub-text)' }}>
+                        {formatNumber(Number(w.capacity))}
+                      </span>
                     </div>
                   )}
                 </div>

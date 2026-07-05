@@ -1,30 +1,38 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { createOneKitClient } from '@voxire/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../shared/lib/api';
-import { unwrapList } from '../../shared/lib/unwrapList';
 import {
-  warehouseSchema,
+  WarehouseServiceClient,
+  type CreateWarehouseRequest,
+  type CreateWarehouseResponse,
+  type DeleteWarehouseResponse,
+  type UpdateWarehouseRequest,
+  type UpdateWarehouseResponse,
+  type Warehouse,
+} from '@voxire/voxie/erp/warehouse/v1/service_client';
+
+const warehouseClient = createOneKitClient(WarehouseServiceClient, 'erp');
+
+export type {
+  CreateWarehouseRequest as CreateWarehouseInput,
+  UpdateWarehouseRequest as UpdateWarehouseInput,
   Warehouse,
-  CreateWarehouseInput,
-  UpdateWarehouseInput,
-} from './warehouseSchema';
+};
 
 export function useWarehouses() {
   return useQuery<Warehouse[]>({
     queryKey: ['warehouses'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/erp/warehouses'));
-      return z.array(warehouseSchema).parse(unwrapList(res, 'warehouses'));
+      const response = await warehouseClient.listWarehouses({});
+      return response.warehouses;
     },
   });
 }
 
 export function useCreateWarehouse() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: CreateWarehouseInput) => unwrap(safe.post<unknown>('/erp/warehouses', data)),
+  return useMutation<CreateWarehouseResponse, Error, CreateWarehouseRequest>({
+    mutationFn: (data) => warehouseClient.createWarehouse(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
     onError: () => toast.error('Failed to create warehouse'),
   });
@@ -32,8 +40,8 @@ export function useCreateWarehouse() {
 
 export function useUpdateWarehouse() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: UpdateWarehouseInput) => unwrap(safe.put<unknown>('/erp/warehouses', data)),
+  return useMutation<UpdateWarehouseResponse, Error, UpdateWarehouseRequest>({
+    mutationFn: (data) => warehouseClient.updateWarehouse(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
     onError: () => toast.error('Failed to update warehouse'),
   });
@@ -41,8 +49,8 @@ export function useUpdateWarehouse() {
 
 export function useDeleteWarehouse() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => unwrap(safe.delete<unknown>('/erp/warehouses', { data: { id } })),
+  return useMutation<DeleteWarehouseResponse, Error, string>({
+    mutationFn: (id) => warehouseClient.deleteWarehouse({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
     onError: () => toast.error('Failed to delete warehouse'),
   });

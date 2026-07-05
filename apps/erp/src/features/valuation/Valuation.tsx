@@ -12,6 +12,11 @@ const AMBER = '#f59e0b';
 const Valuation: React.FC = () => {
   const { data, isLoading } = useValuation();
   const items = data?.items ?? [];
+  const totalCost = useMemo(() => items.reduce((sum, item) => sum + item.totalCost, 0), [items]);
+  const totalItems = useMemo(
+    () => items.reduce((sum, item) => sum + Number(item.totalItems || 0), 0),
+    [items]
+  );
 
   const categories = useMemo(
     () =>
@@ -60,7 +65,7 @@ const Valuation: React.FC = () => {
               </span>
             </div>
             <p className="text-3xl font-bold" style={{ color: '#10b981' }}>
-              {formatCurrency(data?.totalCost ?? 0)}
+              {formatCurrency(totalCost)}
             </p>
           </div>
           <div
@@ -74,7 +79,7 @@ const Valuation: React.FC = () => {
               </span>
             </div>
             <p className="text-3xl font-bold" style={{ color: 'var(--hub-text)' }}>
-              {formatNumber(data?.totalItems ?? 0)}
+              {formatNumber(totalItems)}
             </p>
           </div>
         </div>
