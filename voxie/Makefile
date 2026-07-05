@@ -1,6 +1,6 @@
 .PHONY: clean lint format breaking generate install-plugins install-js typecheck
 
-ONEKIT_VERSION := v0.3.2
+ONEKIT_VERSION := v0.3.5
 
 # Clean generated code
 clean:
@@ -20,8 +20,8 @@ breaking:
 
 # Install the onekit protoc plugins used for generation
 install-plugins:
-	go install github.com/stackxio/onekit/cmd/protoc-gen-onekit-go-http@$(ONEKIT_VERSION)
-	go install github.com/stackxio/onekit/cmd/protoc-gen-onekit-ts-client@$(ONEKIT_VERSION)
+	go install github.com/corezio/onekit/cmd/protoc-gen-onekit-go-http@$(ONEKIT_VERSION)
+	go install github.com/corezio/onekit/cmd/protoc-gen-onekit-ts-client@$(ONEKIT_VERSION)
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 # Install JS codegen tooling (ts-proto)

@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/stackxio/onekit/http"
+	_ "github.com/corezio/onekit/http"
 	v1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
