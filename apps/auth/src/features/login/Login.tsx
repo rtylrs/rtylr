@@ -10,12 +10,15 @@ import { useLogin } from '../../shared/hooks/useAuth';
 import { useFeatureGate } from '../../shared/hooks/useFeatureGate';
 import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { UserServiceClient } from '@voxire/voxie/hub/user/v1/service_client';
 import { safe } from '../../shared/lib/api';
 import { Button, HelmetContainer, LicenseBanner } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
 import { getEmailError } from '../../shared/lib/validation';
+
+const userClient = createOneKitClient(UserServiceClient, 'auth');
 
 type KnownAppId = keyof typeof APP_URLS;
 
@@ -46,9 +49,9 @@ const Login: React.FC = (): React.JSX.Element => {
     }
     // No explicit redirect, decide based on the user's subscription apps
     try {
-      const res = await unwrap(safe.get<{ role?: string; apps?: string[] }>('/user/me'));
-      const role: string = res.role ?? '';
-      const apps: string[] = res.apps ?? [];
+      const res = await userClient.getMe({});
+      const role = res.role;
+      const apps = res.apps;
       // Owners and admins always land on Dash (the account center)
       if (role === 'owner' || role === 'admin' || apps.length === 0) {
         window.location.href = APP_URLS.dash as string;

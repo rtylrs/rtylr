@@ -1,17 +1,20 @@
 import { useMutation } from '@tanstack/react-query';
-import { unwrap, type ApiError } from '@voxire/api';
-import type { GoogleAuthRequest } from '@voxire/contracts/common/auth/v1/google_auth';
-import type { LoginRequest } from '@voxire/contracts/common/auth/v1/login';
-import type { RegisterRequest } from '@voxire/contracts/common/auth/v1/register';
-import { validateContractPayload } from '@voxire/contracts/validation/metadata';
-import { safe } from '../lib/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import {
+  AuthServiceClient,
+  type GoogleAuthRequest,
+  type GoogleAuthResponse,
+  type LoginRequest,
+  type LoginResponse,
+  type RegisterRequest,
+  type RegisterResponse,
+  type CheckEmailExistsResponse,
+} from '@voxire/voxie/common/auth/v1/service_client';
+import { validateContractPayload } from '@voxire/voxie/validation/metadata';
 import { useUserStore } from '../stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../lib/cookies';
 
-interface AuthResponse {
-  token: string;
-  role?: string;
-}
+const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 function assertContractPayload(messageName: string, payload: Record<string, unknown>): void {
   const issues = validateContractPayload(messageName, payload);
@@ -20,30 +23,32 @@ function assertContractPayload(messageName: string, payload: Record<string, unkn
   }
 }
 
+function persistSession(login: (role: string) => void, token: string): void {
+  setCookie('token', token, {
+    days: 30,
+    sameSite: 'lax',
+    domain: getDefaultCookieDomain(),
+  });
+  login('');
+}
+
 export const useLogin = () => {
   const { login, setLoading, setError } = useUserStore();
 
-  return useMutation({
-    mutationFn: (payload: LoginRequest): Promise<AuthResponse> => {
+  return useMutation<LoginResponse, Error, LoginRequest>({
+    mutationFn: (payload) => {
       assertContractPayload('common.auth.v1.LoginRequest', {
         ...(payload as unknown as Record<string, unknown>),
       });
-      return unwrap(safe.post<AuthResponse>('/auth/login', payload));
+      return authClient.login(payload);
     },
     onMutate: () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data) => {
-      setCookie('token', data.token, {
-        days: 30,
-        sameSite: 'lax',
-        domain: getDefaultCookieDomain(),
-      });
-      login(data.role ?? '');
-    },
-    onError: (error: ApiError) => {
-      setError(error.message || 'Login failed');
+    onSuccess: (data) => persistSession(login, data.token),
+    onError: (error) => {
+      setError(getOneKitErrorMessage(error, 'Login failed'));
       setLoading(false);
     },
     onSettled: () => {
@@ -55,27 +60,20 @@ export const useLogin = () => {
 export const useRegisterRestaurant = () => {
   const { login, setLoading, setError } = useUserStore();
 
-  return useMutation({
-    mutationFn: (payload: RegisterRequest): Promise<AuthResponse> => {
+  return useMutation<RegisterResponse, Error, RegisterRequest>({
+    mutationFn: (payload) => {
       assertContractPayload('common.auth.v1.RegisterRequest', {
         ...(payload as unknown as Record<string, unknown>),
       });
-      return unwrap(safe.post<AuthResponse>('/auth/register', payload));
+      return authClient.register(payload);
     },
     onMutate: () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data) => {
-      setCookie('token', data.token, {
-        days: 30,
-        sameSite: 'lax',
-        domain: getDefaultCookieDomain(),
-      });
-      login(data.role ?? '');
-    },
-    onError: (error: ApiError) => {
-      setError(error.message || 'Registration failed');
+    onSuccess: (data) => persistSession(login, data.token),
+    onError: (error) => {
+      setError(getOneKitErrorMessage(error, 'Registration failed'));
       setLoading(false);
     },
     onSettled: () => {
@@ -84,29 +82,21 @@ export const useRegisterRestaurant = () => {
   });
 };
 
-export const checkEmailExists = (email: string): Promise<{ exists: boolean }> =>
-  unwrap(safe.get<{ exists: boolean }>('/get-email-exists', { params: { email } }));
+export const checkEmailExists = (email: string): Promise<CheckEmailExistsResponse> =>
+  authClient.checkEmailExists({ email });
 
 export const useGoogleAuth = () => {
   const { login, setLoading, setError } = useUserStore();
 
-  return useMutation({
-    mutationFn: (payload: GoogleAuthRequest): Promise<AuthResponse> =>
-      unwrap(safe.post<AuthResponse>('/auth/register/google', payload)),
+  return useMutation<GoogleAuthResponse, Error, GoogleAuthRequest>({
+    mutationFn: (payload) => authClient.googleAuth(payload),
     onMutate: () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data) => {
-      setCookie('token', data.token, {
-        days: 30,
-        sameSite: 'lax',
-        domain: getDefaultCookieDomain(),
-      });
-      login(data.role ?? '');
-    },
-    onError: (error: ApiError) => {
-      setError(error.message || 'Google login failed');
+    onSuccess: (data) => persistSession(login, data.token),
+    onError: (error) => {
+      setError(getOneKitErrorMessage(error, 'Google login failed'));
       setLoading(false);
     },
     onSettled: () => {

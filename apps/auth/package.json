@@ -13,7 +13,7 @@
     "@tanstack/react-router": "^1.170.8",
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
-    "@voxire/contracts": "workspace:*",
+    "@voxire/voxie": "workspace:*",
     "@voxire/i18n": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",

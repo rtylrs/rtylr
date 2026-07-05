@@ -5,9 +5,13 @@ import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 import Logo from '../../shared/components/Logo';
 import { Button, HelmetContainer } from '@voxire/components';
-import { unwrap } from '@voxire/api';
-import type { ResetPasswordRequest } from '@voxire/contracts/common/auth/v1/reset_password';
-import { safe } from '../../shared/lib/api';
+import { createOneKitClient } from '@voxire/api';
+import {
+  AuthServiceClient,
+  type ResetPasswordRequest,
+} from '@voxire/voxie/common/auth/v1/service_client';
+
+const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +25,7 @@ const ResetPassword: React.FC = () => {
     setLoading(true);
     try {
       const request: ResetPasswordRequest = { email };
-      await unwrap(safe.post('/auth/password-reset/request', request));
+      await authClient.resetPassword(request);
       setRequestSent(true);
       setMessage(t('auth.reset.successMessage'));
     } catch {

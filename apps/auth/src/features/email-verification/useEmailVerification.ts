@@ -1,22 +1,26 @@
 import { useMutation } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import type { ResendVerificationRequest } from '@voxire/contracts/common/auth/v1/resend_verification';
-import type { VerifyEmailRequest } from '@voxire/contracts/common/auth/v1/verify_email';
+import { createOneKitClient } from '@voxire/api';
+import {
+  AuthServiceClient,
+  type ResendVerificationRequest,
+  type ResendVerificationResponse,
+  type VerifyEmailRequest,
+  type VerifyEmailResponse,
+} from '@voxire/voxie/common/auth/v1/service_client';
 import { toast } from 'sonner';
-import { safe } from '../../shared/lib/api';
+
+const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 export const useEmailVerification = () => {
-  return useMutation({
-    mutationFn: (payload: VerifyEmailRequest) =>
-      unwrap(safe.post<{ verified: boolean }>('/auth/verify-email', payload)),
+  return useMutation<VerifyEmailResponse, Error, VerifyEmailRequest>({
+    mutationFn: (payload) => authClient.verifyEmail(payload),
     onError: () => toast.error('Email verification failed. Please try again.'),
   });
 };
 
 export const useResendVerificationEmail = () => {
-  return useMutation({
-    mutationFn: (payload: ResendVerificationRequest) =>
-      unwrap(safe.post<{ ok: boolean }>('/auth/resend-verification', payload)),
+  return useMutation<ResendVerificationResponse, Error, ResendVerificationRequest>({
+    mutationFn: (payload) => authClient.resendVerification(payload),
     onError: () => toast.error('Failed to resend verification email'),
   });
 };

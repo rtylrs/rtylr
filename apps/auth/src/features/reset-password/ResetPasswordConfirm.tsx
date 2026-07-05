@@ -3,9 +3,13 @@ import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Logo from '../../shared/components/Logo';
 import { Button, HelmetContainer } from '@voxire/components';
-import { unwrap } from '@voxire/api';
-import type { ResetPasswordConfirmRequest } from '@voxire/contracts/common/auth/v1/reset_password_confirm';
-import { safe } from '../../shared/lib/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import {
+  AuthServiceClient,
+  type ResetPasswordConfirmRequest,
+} from '@voxire/voxie/common/auth/v1/service_client';
+
+const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const ResetPasswordConfirm: React.FC = () => {
   const navigate = useNavigate();
@@ -34,11 +38,10 @@ const ResetPasswordConfirm: React.FC = () => {
     setError('');
     try {
       const request: ResetPasswordConfirmRequest = { token, password };
-      await unwrap(safe.post('/auth/password-reset/confirm', request));
+      await authClient.resetPasswordConfirm(request);
       setDone(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to reset password.';
-      setError(msg);
+      setError(getOneKitErrorMessage(err, 'Failed to reset password.'));
     } finally {
       setLoading(false);
     }

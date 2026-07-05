@@ -4,10 +4,16 @@ import { AlertCircle } from 'lucide-react';
 import { Button, HelmetContainer } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
-import { unwrap } from '@voxire/api';
-import type { AcceptInviteRequest } from '@voxire/contracts/hub/team/invitations/v1/accept_invite';
-import { safe } from '../../shared/lib/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
+import {
+  AuthServiceClient,
+  type InviteAcceptRequest,
+} from '@voxire/voxie/common/auth/v1/service_client';
 import type { AppId } from '@voxire/types';
+
+const invitationsClient = createOneKitClient(InvitationsServiceClient, 'auth');
+const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const InviteAccept: React.FC = () => {
   const { token } = useParams({ strict: false });
@@ -27,12 +33,8 @@ const InviteAccept: React.FC = () => {
   // Verify the token on mount
   useEffect(() => {
     if (!token) return;
-    unwrap(
-      safe.get<{ valid?: boolean; email?: string; fullName?: string; apps?: string[] }>(
-        '/auth/invite/verify',
-        { params: { token } }
-      )
-    )
+    invitationsClient
+      .verifyInvite({ token })
       .then((res) => {
         if (res.valid) {
           setValid(true);
@@ -60,18 +62,11 @@ const InviteAccept: React.FC = () => {
     setError(null);
 
     try {
-      const request: AcceptInviteRequest = { token: token ?? '', password };
-      await unwrap(safe.post('/auth/invite/accept', request));
+      const request: InviteAcceptRequest = { token: token ?? '', password };
+      await authClient.inviteAccept(request);
       setSuccess(true);
     } catch (err) {
-      // unwrap throws an ApiError; the axios error (with the { error: { message } }
-      // envelope) is on .cause, and ApiError.message carries the parsed string.
-      const e = err as {
-        message?: string;
-        cause?: { response?: { data?: { error?: { message?: string } } } };
-      };
-      const fromBody = e?.cause?.response?.data?.error?.message;
-      setError(fromBody || e?.message || 'Failed to set password');
+      setError(getOneKitErrorMessage(err, 'Failed to set password'));
     } finally {
       setLoading(false);
     }

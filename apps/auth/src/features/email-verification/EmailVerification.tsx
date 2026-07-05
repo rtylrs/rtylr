@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
-import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
 import Logo from '../../shared/components/Logo';
 import { Button, HelmetContainer } from '@voxire/components';
+import { useEmailVerification } from './useEmailVerification';
 
 const EmailVerification = () => {
   const navigate = useNavigate();
@@ -13,9 +12,22 @@ const EmailVerification = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
+  const verifyMutation = useEmailVerification();
+  const done = useRef(false);
 
   useEffect(() => {
-    unwrap(safe.get<{ message?: string }>(`/auth/verify/${token}`))
+    if (done.current) return;
+    done.current = true;
+
+    if (!token) {
+      setMessage('Email verification failed. Please try again.');
+      setSuccess(false);
+      setLoading(false);
+      return;
+    }
+
+    verifyMutation
+      .mutateAsync({ token })
       .then((r) => {
         setMessage(r.message || 'Your email has been verified.');
         setSuccess(true);
@@ -25,6 +37,7 @@ const EmailVerification = () => {
         setSuccess(false);
       })
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   return (

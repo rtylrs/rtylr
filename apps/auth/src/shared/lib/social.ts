@@ -1,6 +1,8 @@
-import { unwrap } from '@voxire/api';
-import { safe } from './api';
+import { createOneKitClient } from '@voxire/api';
+import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/service_client';
 import { storageSet } from './storage';
+
+const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 export type SocialProvider = 'google' | 'github' | 'microsoft' | 'apple';
 
@@ -16,9 +18,7 @@ export async function startSocialLogin(
   redirectParam: string | null,
   businessName?: string
 ): Promise<void> {
-  const { url } = await unwrap(
-    safe.get<{ url: string }>('/auth/social/authorize', { params: { provider } })
-  );
+  const { url } = await authClient.socialAuthorize({ provider });
   if (redirectParam) storageSet(SOCIAL_AUTH_REDIRECT_KEY, redirectParam);
   if (businessName?.trim()) storageSet(SOCIAL_AUTH_BUSINESS_NAME_KEY, businessName.trim());
   window.location.href = url;

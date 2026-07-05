@@ -1,19 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { APP_URLS, APP_CONFIG } from '@voxire/config';
-import { unwrap } from '@voxire/api';
-import type { GoogleAuthRequest } from '@voxire/contracts/common/auth/v1/google_auth';
-import { safe } from '../../shared/lib/api';
-import { useUserStore } from '../../shared/stores/userStore';
-import { setCookie, getDefaultCookieDomain } from '../../shared/lib/cookies';
+import { APP_URLS } from '@voxire/config';
+import type { GoogleAuthRequest } from '@voxire/voxie/common/auth/v1/service_client';
+import { useGoogleAuth } from '../../shared/hooks/useAuth';
 import { storageGet, storageRemove } from '../../shared/lib/storage';
 import { SOCIAL_AUTH_BUSINESS_NAME_KEY, SOCIAL_AUTH_REDIRECT_KEY } from '../../shared/lib/social';
 
 type KnownAppId = keyof typeof APP_URLS;
-
-interface GoogleAuthResponse {
-  token: string;
-  role?: string;
-}
 
 function getRedirectUrl(redirectParam: string | null): string {
   if (redirectParam && redirectParam in APP_URLS) {
@@ -23,7 +15,7 @@ function getRedirectUrl(redirectParam: string | null): string {
 }
 
 const Callback: React.FC = (): React.JSX.Element => {
-  const { login } = useUserStore();
+  const googleAuthMutation = useGoogleAuth();
   const done = useRef(false);
 
   useEffect(() => {
@@ -45,23 +37,15 @@ const Callback: React.FC = (): React.JSX.Element => {
 
     const request: GoogleAuthRequest = {
       code,
-      ...(businessName ? { businessName } : {}),
+      businessName: businessName || null,
     };
 
-    unwrap(safe.post<GoogleAuthResponse>('/auth/register/google', request))
-      .then((data) => {
-        setCookie('token', data.token, {
-          days: 30,
-          sameSite: 'lax',
-          domain: getDefaultCookieDomain(),
-        });
-        login(data.role ?? '');
-        window.location.replace(getRedirectUrl(redirectParam));
-      })
-      .catch(() => {
-        window.location.replace('/?error=oauth_failed');
-      });
-  }, [login]);
+    googleAuthMutation.mutate(request, {
+      onSuccess: () => window.location.replace(getRedirectUrl(redirectParam)),
+      onError: () => window.location.replace('/?error=oauth_failed'),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
