@@ -28,8 +28,7 @@ A proto change is only complete when ALL of the following are true:
 - `buf breaking` passes against the last tagged version (no breaking changes unless intentional and documented)
 - All new fields have a comment describing their purpose
 - `make generate` was run and `gen/go` + `gen/ts` are committed alongside the proto change (CI will also catch drift, but don't rely on it)
-- Submodule refs updated in `onion`, `rtylr`, and `pos`
-- `@voxire/contracts/package.json` exports updated in `packages` (shared by `rtylr` and `pos`) if a new `.proto` file was added
+- Submodule refs updated in `onion` and `packages` (shared by `rtylr` and `pos`)
 - If a new domain or structural pattern was introduced, it is documented in `rtylr/docs/`
 
 ### PR Pre-Merge Checklist
@@ -41,8 +40,7 @@ Run through this before merging any proto change:
 - [ ] All new fields have inline comments
 - [ ] `make generate` run and `gen/go` + `gen/ts` committed (CI enforces this on push to `main`, but PRs must already be clean)
 - [ ] Submodule ref updated in `onion` — no local regeneration needed there anymore, `gen/go` ships pre-built
-- [ ] Submodule ref updated in `packages` (the `voxie` submodule at `packages/contracts/voxie`) — no local generation needed there either, `rtylr` and `pos` both pick it up via the shared `packages` submodule
-- [ ] New export paths added to `packages/contracts/package.json` (if new `.proto` file added)
+- [ ] Submodule ref updated in `packages` (the `voxie` submodule lives directly at `packages/voxie`) — no local generation needed there either, `rtylr` and `pos` both pick it up via the shared `packages` submodule
 - [ ] `rtylr/docs/` updated if the change affects the API contract
 
 ### When You Introduce a New Pattern
@@ -62,15 +60,15 @@ If you create a new proto convention (a new naming pattern, a new use of `oneof`
 | Schema language | Protocol Buffers 3 | proto3 | All `.proto` files use `syntax = "proto3"` |
 | Build tool | buf | v2 | Linting, formatting, breaking-change detection |
 | Validation | bufbuild/protovalidate | via `buf.yaml` deps | Field validation rules on request messages; enforced at runtime via `buf.build/go/protovalidate` |
-| HTTP contracts | stackxio/onekit | pinned tag (see `Makefile` `ONEKIT_VERSION`) | Real Go + proto dependency, not vendored. `onekit/http` annotations define HTTP routes on services; `protoc-gen-onekit-go-http` generates the server bindings into `gen/go` |
+| HTTP contracts | corezio/onekit | pinned tag (see `Makefile` `ONEKIT_VERSION`) | Real Go + proto dependency, not vendored. `onekit/http` annotations define HTTP routes on services; `protoc-gen-onekit-go-http` generates the server bindings into `gen/go`. Renamed from `stackxio/onekit` — same maintainer, same commit history, both GitHub and the BSR module moved. |
 | Go codegen | protoc-gen-go + protoc-gen-onekit-go-http | pinned | Owned by `voxie` — `make generate` runs it and the output is committed to `gen/go` |
 | TypeScript codegen | ts-proto + protoc-gen-onekit-ts-client | pinned | Owned by `voxie` — `make generate` runs both and the output is committed to `gen/ts`. ts-proto generates message types, onekit generates the typed fetch client per service. |
 | Go module | `github.com/voxire/voxie` | — | Imported in `onion` via `replace`; `gen/go` ships pre-built, no local generation needed in `onion` |
-| TS package | `@voxire/contracts` (in the `packages` repo) | — | `packages/contracts` carries `voxie` as its own submodule and re-exports `gen/ts` directly; `rtylr` and `pos` both consume it through the shared `packages` submodule, no local generation needed |
+| TS package | `@voxire/voxie` (in the `packages` repo) | — | `packages/voxie` carries `voxie` as its own submodule and re-exports `gen/ts` directly via a wildcard `exports` map (`./*` → `./gen/ts/*.ts`) — no per-file export entry needed. `rtylr` and `pos` both consume it through the shared `packages` submodule, no local generation needed |
 
 ### Adding Dependencies
 
-Runtime dependencies are allowed here now, but only for what the generated output itself needs at runtime: Go side currently `github.com/stackxio/onekit`, `buf.build/go/protovalidate`, and transitive deps; JS side is `ts-proto` and `typescript` as devDependencies only (generated `gen/ts` has zero runtime npm dependencies — onekit's ts-client is self-contained, using only `fetch`). Don't add anything voxie's own proto/codegen tooling doesn't require — application logic still belongs in `onion` and the frontend apps.
+Runtime dependencies are allowed here now, but only for what the generated output itself needs at runtime: Go side currently `github.com/corezio/onekit`, `buf.build/go/protovalidate`, and transitive deps; JS side is `ts-proto` and `typescript` as devDependencies only (generated `gen/ts` has zero runtime npm dependencies — onekit's ts-client is self-contained, using only `fetch`). Don't add anything voxie's own proto/codegen tooling doesn't require — application logic still belongs in `onion` and the frontend apps.
 
 ---
 
@@ -95,10 +93,10 @@ voxie/
 │   └── pos/{capability}/{subdomain}/v1/
 ├── gen/go/                     Generated Go output — committed, regenerated by `make generate` / CI
 ├── gen/ts/                     Generated TypeScript output — committed, regenerated by `make generate` / CI
-├── buf.yaml                    buf v2 config — module path proto/, deps: stackxio/onekit + bufbuild/protovalidate
+├── buf.yaml                    buf v2 config — module path proto/, deps: corezio/onekit + bufbuild/protovalidate
 ├── buf.gen.yaml                codegen plugin config (Go + TS plugins)
 ├── buf.lock                    locked buf dependencies
-├── go.mod                      requires github.com/stackxio/onekit + protovalidate runtime deps
+├── go.mod                      requires github.com/corezio/onekit + protovalidate runtime deps
 ├── package.json                 devDependencies: ts-proto, typescript (codegen tooling only, no runtime deps)
 ├── scripts/generate_validation_metadata.py   parses proto/ directly, outputs gen/ts/validation
 ├── .github/workflows/contracts.yml   lint / breaking / generate+typecheck+commit CI
@@ -123,7 +121,7 @@ voxie/
 Both Go and TypeScript are owned and committed by `voxie` itself — neither consumer regenerates anything locally anymore:
 
 - **Go (`gen/go`):** `make generate` (or CI on push to `main`) runs `protoc-gen-go` + `protoc-gen-onekit-go-http`. `onion` consumes the submodule at whatever commit is checked out.
-- **TypeScript (`gen/ts`):** the same `make generate` run also runs `protoc-gen-ts_proto` (message types) + `protoc-gen-onekit-ts-client` (a typed fetch client per service, self-contained — no runtime npm dependencies) + `scripts/generate_validation_metadata.py` (frontend-side `buf.validate` rule enforcement, parsed directly from `proto/`, output to `gen/ts/validation`). `packages/contracts` (in the `packages` repo, shared by `rtylr` and `pos`) carries `voxie` as its own submodule and re-exports `gen/ts` directly.
+- **TypeScript (`gen/ts`):** the same `make generate` run also runs `protoc-gen-ts_proto` (message types) + `protoc-gen-onekit-ts-client` (a typed fetch client per service, self-contained — no runtime npm dependencies) + `scripts/generate_validation_metadata.py` (frontend-side `buf.validate` rule enforcement, parsed directly from `proto/`, output to `gen/ts/validation`). `packages/voxie` (in the `packages` repo, shared by `rtylr` and `pos`) carries `voxie` as its own submodule and re-exports `gen/ts` directly via a wildcard `exports` map — no per-file export entry needed when a new `.proto` file is added.
 
 ### How Consumers Import These Types
 
@@ -139,12 +137,12 @@ return handlers.ListUsersResponse{
 }, nil
 ```
 
-**TypeScript frontends (`rtylr`, `pos`) via `@voxire/contracts`:**
+**TypeScript frontends (`rtylr`, `pos`) via `@voxire/voxie`:**
 
 ```ts
-import type { StaffUserPayload } from '@voxire/contracts/hub/team/members/v1/types';
-import type { LoginRequest } from '@voxire/contracts/common/auth/v1/login';
-import { FloorServiceClient } from '@voxire/contracts/pos/floor/v1/service_client';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
+import type { LoginRequest } from '@voxire/voxie/common/auth/v1/login';
+import { FloorServiceClient } from '@voxire/voxie/pos/floor/v1/service_client';
 ```
 
 ### Deprecating and Removing Fields
@@ -212,16 +210,16 @@ Create `proto/{domain}/v2/` only for genuinely breaking changes that cannot be h
 | Add a new enum value | No | Add to v1 |
 | Rename/remove an enum value | **Yes** | Create v2 |
 
-### Exports Must Have a Corresponding Proto File
+### TypeScript Exports Are Automatic
 
-**Do not add export paths to `packages/contracts/package.json` unless the corresponding `.proto` file exists in `voxie/proto/`.** Stub exports cause TypeScript build failures downstream.
+`packages/voxie/package.json` re-exports `gen/ts` via a wildcard `exports` map (`"./*": "./gen/ts/*.ts"`) — there is no per-file export allowlist to maintain. Any path under `gen/ts/` is importable from `@voxire/voxie/{path}` the moment it's generated and committed. `make generate` always runs `rm -rf gen/go gen/ts` first, so deleting a `.proto` file and regenerating removes its output cleanly — there's no stale-export risk to guard against manually.
 
 Order of operations when adding a new `.proto` file:
 1. Create the `.proto` file in `proto/common/{domain}/v1/` for shared contracts or `proto/{app}/{capability}/{subdomain}/v1/` for app-owned contracts.
 2. Run `make lint`.
 3. Run `make generate` and commit the `.proto` source together with the regenerated `gen/go` and `gen/ts`.
 4. In `onion`: bump the `voxie` submodule pointer — no generation step needed there.
-5. In `packages` (shared by `rtylr` and `pos`): bump the `voxie` submodule pointer at `packages/contracts/voxie`; add the export path to `packages/contracts/package.json` if a new `.proto` file was added. No local generation step needed there either.
+5. In `packages` (shared by `rtylr` and `pos`): bump the `voxie` submodule pointer at `packages/voxie`. No local generation step or export-path edit needed there either.
 
 ---
 
@@ -251,7 +249,7 @@ Order of operations when adding a new `.proto` file:
 6. **Run `make generate` and commit `gen/go` + `gen/ts`** after proto changes.
 7. **Run `buf lint` before committing.** `buf breaking` must pass against main.
 8. **New proto files follow** `proto/common/{domain}/v1/{endpoint}.proto` or `proto/{app}/{capability}/{subdomain}/v1/{endpoint}.proto`. One endpoint per file.
-9. **Never add `packages/contracts/package.json` export paths without a corresponding `.proto` source file.**
+9. **Never hand-add entries to `packages/voxie/package.json`'s `exports` map.** It's a wildcard (`./*` → `./gen/ts/*.ts`) — new proto files are importable automatically once `gen/ts` is regenerated and committed.
 
 ---
 
@@ -268,7 +266,6 @@ Order of operations when adding a new `.proto` file:
 
 | Issue | Location | Priority |
 |---|---|---|
-| `@voxire/contracts/package.json` exports include `book/v1/*`, `store/v1/*`, and legacy `auth/v1/auth` paths with no corresponding proto files | `packages/contracts/package.json` (in rtylr) | Medium |
 | Go module is declared as `v0.0.0` — no semantic versioning enforced | `go.mod` | Low |
 
 ---
@@ -276,7 +273,7 @@ Order of operations when adding a new `.proto` file:
 ## 9. SESSION STARTUP CHECKLIST
 
 1. `git pull origin main` on the `voxie` repo
-2. Check if `onion` and `packages` (the `voxie` submodule at `packages/contracts/voxie`) have pending submodule ref updates
+2. Check if `onion` and `packages` (the `voxie` submodule at `packages/voxie`) have pending submodule ref updates
 3. Re-read this CLAUDE.md
 4. Confirm `buf` is installed: `buf --version`
 
@@ -309,7 +306,7 @@ There is nothing to run in `onion`, `packages`, `rtylr`, or `pos` — they all c
 2. Run `make lint`.
 3. Run `make generate` and commit the `.proto` file together with the regenerated `gen/go` and `gen/ts`.
 4. In `onion`: `cd voxie && git pull && cd ..` → `git add voxie` → import from the generated capability path under `gen/go/`. No local generation step needed.
-5. In `packages`: `cd contracts/voxie && git pull && cd ../..` → `git add contracts/voxie` → add export to `packages/contracts/package.json` if needed → import from `@voxire/contracts/{capability path}`. No local generation step needed.
+5. In `packages`: `cd voxie && git pull && cd ..` → `git add voxie` → import from `@voxire/voxie/{capability path}`. No local generation step or export-path edit needed.
 
 ### Submodule update workflow
 
@@ -320,7 +317,7 @@ git add voxie
 git commit -m "update voxie contracts"
 
 # In packages/ (consumed by both rtylr and pos)
-cd contracts/voxie && git pull origin main && cd ../..
-git add contracts/voxie
+cd voxie && git pull origin main && cd ..
+git add voxie
 git commit -m "update voxie contracts"
 ```
