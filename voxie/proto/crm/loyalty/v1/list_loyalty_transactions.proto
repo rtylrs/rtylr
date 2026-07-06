@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package crm.loyalty.v1;
 
+import "crm/loyalty/v1/types.proto";
 import "onekit/http/annotations.proto";
-import "pos/loyalty/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
 
@@ -24,7 +24,7 @@ message ListLoyaltyTransactionsRequest {
 
 message ListLoyaltyTransactionsResponse {
   // transactions is the transactions value for this contract.
-  repeated .pos.loyalty.v1.LoyaltyTransaction transactions = 1;
+  repeated LoyaltyTransaction transactions = 1;
   // total is the total number of matching records.
   int64 total = 2 [(onekit.http.int64_encoding) = INT64_ENCODING_NUMBER];
   // page is the current result page.

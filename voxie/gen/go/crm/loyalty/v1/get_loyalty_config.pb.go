@@ -7,7 +7,6 @@
 package v1
 
 import (
-	v1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -61,7 +60,7 @@ func (*GetLoyaltyConfigRequest) Descriptor() ([]byte, []int) {
 type GetLoyaltyConfigResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// config is the config value for this contract.
-	Config        *v1.LoyaltyConfig `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Config        *LoyaltyConfig `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -96,7 +95,7 @@ func (*GetLoyaltyConfigResponse) Descriptor() ([]byte, []int) {
 	return file_crm_loyalty_v1_get_loyalty_config_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetLoyaltyConfigResponse) GetConfig() *v1.LoyaltyConfig {
+func (x *GetLoyaltyConfigResponse) GetConfig() *LoyaltyConfig {
 	if x != nil {
 		return x.Config
 	}
@@ -107,10 +106,10 @@ var File_crm_loyalty_v1_get_loyalty_config_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_get_loyalty_config_proto_rawDesc = "" +
 	"\n" +
-	"'crm/loyalty/v1/get_loyalty_config.proto\x12\x0ecrm.loyalty.v1\x1a\x1apos/loyalty/v1/types.proto\"\x19\n" +
+	"'crm/loyalty/v1/get_loyalty_config.proto\x12\x0ecrm.loyalty.v1\x1a\x1acrm/loyalty/v1/types.proto\"\x19\n" +
 	"\x17GetLoyaltyConfigRequest\"Q\n" +
 	"\x18GetLoyaltyConfigResponse\x125\n" +
-	"\x06config\x18\x01 \x01(\v2\x1d.pos.loyalty.v1.LoyaltyConfigR\x06configB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"
+	"\x06config\x18\x01 \x01(\v2\x1d.crm.loyalty.v1.LoyaltyConfigR\x06configB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"
 
 var (
 	file_crm_loyalty_v1_get_loyalty_config_proto_rawDescOnce sync.Once
@@ -128,10 +127,10 @@ var file_crm_loyalty_v1_get_loyalty_config_proto_msgTypes = make([]protoimpl.Mes
 var file_crm_loyalty_v1_get_loyalty_config_proto_goTypes = []any{
 	(*GetLoyaltyConfigRequest)(nil),  // 0: crm.loyalty.v1.GetLoyaltyConfigRequest
 	(*GetLoyaltyConfigResponse)(nil), // 1: crm.loyalty.v1.GetLoyaltyConfigResponse
-	(*v1.LoyaltyConfig)(nil),         // 2: pos.loyalty.v1.LoyaltyConfig
+	(*LoyaltyConfig)(nil),            // 2: crm.loyalty.v1.LoyaltyConfig
 }
 var file_crm_loyalty_v1_get_loyalty_config_proto_depIdxs = []int32{
-	2, // 0: crm.loyalty.v1.GetLoyaltyConfigResponse.config:type_name -> pos.loyalty.v1.LoyaltyConfig
+	2, // 0: crm.loyalty.v1.GetLoyaltyConfigResponse.config:type_name -> crm.loyalty.v1.LoyaltyConfig
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -144,6 +143,7 @@ func file_crm_loyalty_v1_get_loyalty_config_proto_init() {
 	if File_crm_loyalty_v1_get_loyalty_config_proto != nil {
 		return
 	}
+	file_crm_loyalty_v1_types_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

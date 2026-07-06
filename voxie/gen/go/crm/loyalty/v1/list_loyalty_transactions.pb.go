@@ -8,7 +8,6 @@ package v1
 
 import (
 	_ "github.com/corezio/onekit/http"
-	v1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -89,7 +88,7 @@ func (x *ListLoyaltyTransactionsRequest) GetPageSize() int64 {
 type ListLoyaltyTransactionsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// transactions is the transactions value for this contract.
-	Transactions []*v1.LoyaltyTransaction `protobuf:"bytes,1,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	Transactions []*LoyaltyTransaction `protobuf:"bytes,1,rep,name=transactions,proto3" json:"transactions,omitempty"`
 	// total is the total number of matching records.
 	Total int64 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	// page is the current result page.
@@ -130,7 +129,7 @@ func (*ListLoyaltyTransactionsResponse) Descriptor() ([]byte, []int) {
 	return file_crm_loyalty_v1_list_loyalty_transactions_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*v1.LoyaltyTransaction {
+func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*LoyaltyTransaction {
 	if x != nil {
 		return x.Transactions
 	}
@@ -162,7 +161,7 @@ var File_crm_loyalty_v1_list_loyalty_transactions_proto protoreflect.FileDescrip
 
 const file_crm_loyalty_v1_list_loyalty_transactions_proto_rawDesc = "" +
 	"\n" +
-	".crm/loyalty/v1/list_loyalty_transactions.proto\x12\x0ecrm.loyalty.v1\x1a\x1donekit/http/annotations.proto\x1a\x1apos/loyalty/v1/types.proto\"\xae\x01\n" +
+	".crm/loyalty/v1/list_loyalty_transactions.proto\x12\x0ecrm.loyalty.v1\x1a\x1acrm/loyalty/v1/types.proto\x1a\x1donekit/http/annotations.proto\"\xae\x01\n" +
 	"\x1eListLoyaltyTransactionsRequest\x126\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03B\x15µ\x18\r\n" +
 	"\vcustomer_idе\x18\x01R\n" +
@@ -172,7 +171,7 @@ const file_crm_loyalty_v1_list_loyalty_transactions_proto_rawDesc = "" +
 	"\tpage_size\x18\x03 \x01(\x03B\x13µ\x18\v\n" +
 	"\tpage_sizeе\x18\x02R\bpageSize\"\xc2\x01\n" +
 	"\x1fListLoyaltyTransactionsResponse\x12F\n" +
-	"\ftransactions\x18\x01 \x03(\v2\".pos.loyalty.v1.LoyaltyTransactionR\ftransactions\x12\x1a\n" +
+	"\ftransactions\x18\x01 \x03(\v2\".crm.loyalty.v1.LoyaltyTransactionR\ftransactions\x12\x1a\n" +
 	"\x05total\x18\x02 \x01(\x03B\x04е\x18\x02R\x05total\x12\x18\n" +
 	"\x04page\x18\x03 \x01(\x03B\x04е\x18\x02R\x04page\x12!\n" +
 	"\tpage_size\x18\x04 \x01(\x03B\x04е\x18\x02R\bpageSizeB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"
@@ -193,10 +192,10 @@ var file_crm_loyalty_v1_list_loyalty_transactions_proto_msgTypes = make([]protoi
 var file_crm_loyalty_v1_list_loyalty_transactions_proto_goTypes = []any{
 	(*ListLoyaltyTransactionsRequest)(nil),  // 0: crm.loyalty.v1.ListLoyaltyTransactionsRequest
 	(*ListLoyaltyTransactionsResponse)(nil), // 1: crm.loyalty.v1.ListLoyaltyTransactionsResponse
-	(*v1.LoyaltyTransaction)(nil),           // 2: pos.loyalty.v1.LoyaltyTransaction
+	(*LoyaltyTransaction)(nil),              // 2: crm.loyalty.v1.LoyaltyTransaction
 }
 var file_crm_loyalty_v1_list_loyalty_transactions_proto_depIdxs = []int32{
-	2, // 0: crm.loyalty.v1.ListLoyaltyTransactionsResponse.transactions:type_name -> pos.loyalty.v1.LoyaltyTransaction
+	2, // 0: crm.loyalty.v1.ListLoyaltyTransactionsResponse.transactions:type_name -> crm.loyalty.v1.LoyaltyTransaction
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -209,6 +208,7 @@ func file_crm_loyalty_v1_list_loyalty_transactions_proto_init() {
 	if File_crm_loyalty_v1_list_loyalty_transactions_proto != nil {
 		return
 	}
+	file_crm_loyalty_v1_types_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
