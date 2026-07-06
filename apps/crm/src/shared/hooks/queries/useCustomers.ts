@@ -149,23 +149,6 @@ export const useDeleteCustomer = (): UseMutationResult<unknown, unknown, number>
   });
 };
 
-export const useRecordVisit = (): UseMutationResult<unknown, unknown, number> => {
-  const qc = useQueryClient();
-  const { t } = useTranslation();
-  return useMutation<unknown, unknown, number>({
-    mutationFn: (customerId: number): Promise<unknown> =>
-      unwrap(safe.post('/crm/customers/record-visit', { customerId })),
-    onSuccess: (_data: unknown, customerId: number): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-customers'] });
-      void qc.invalidateQueries({ queryKey: ['crm-customer', customerId] });
-      toast.success(t('crm.customers.visitRecorded'));
-    },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
 export const useMergeCustomers = (): UseMutationResult<unknown, unknown, MergeCustomersPayload> => {
   const qc = useQueryClient();
   const { t } = useTranslation();
@@ -175,29 +158,6 @@ export const useMergeCustomers = (): UseMutationResult<unknown, unknown, MergeCu
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       toast.success(t('crm.customers.merged'));
-    },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
-    },
-  });
-};
-
-export const useImportCustomers = (): UseMutationResult<unknown, unknown, File> => {
-  const qc = useQueryClient();
-  const { t } = useTranslation();
-  return useMutation<unknown, unknown, File>({
-    mutationFn: async (file: File): Promise<unknown> => {
-      const form = new FormData();
-      form.append('file', file);
-      return unwrap(
-        safe.post('/crm/customers/import', form, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-      );
-    },
-    onSuccess: (): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-customers'] });
-      toast.success(t('crm.customers.imported'));
     },
     onError: (): void => {
       toast.error(t('errors.generic'));
