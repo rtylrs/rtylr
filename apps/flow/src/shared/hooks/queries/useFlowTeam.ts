@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import {
   useMutation,
   useQuery,
@@ -6,7 +6,12 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../lib/api';
+import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/service_client';
+import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/service_client';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/service_client';
+
+const membersClient = createOneKitClient(MembersServiceClient, 'flow');
+const permissionsClient = createOneKitClient(PermissionsServiceClient, 'flow');
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -21,17 +26,6 @@ export interface FlowTeamMember {
   avatarUrl?: string;
 }
 
-interface ListMembersResponse {
-  users?: FlowTeamMember[];
-  members?: FlowTeamMember[];
-}
-
-type RawFlowTeamMember = Omit<FlowTeamMember, 'id' | 'name'> & {
-  id: string | number;
-  name?: string | null;
-  fullName?: string | null;
-};
-
 interface GrantPayload {
   userId: string;
   // Member's existing apps and role come from useFlowTeam so the
@@ -43,31 +37,31 @@ interface GrantPayload {
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
+export function normalizeFlowTeamMember(member: StaffUserPayload): FlowTeamMember {
+  const fullName = member.fullName?.trim() ?? '';
+  const email = member.email?.trim() ?? '';
+
+  return {
+    id: member.id,
+    name: fullName || email,
+    fullName: fullName || undefined,
+    email,
+    role: member.role,
+    apps: member.apps ?? [],
+    isActive: member.isActive,
+  };
+}
+
 // useFlowTeam returns every member of the business. Flow-specific
 // filters (current members vs. grant candidates) are applied in the UI
 // against each member's `.apps` array - there is no separate Flow-only
 // endpoint, so the same query backs both lists.
-export function normalizeFlowTeamMember(member: RawFlowTeamMember): FlowTeamMember {
-  const fullName = member.fullName?.trim() ?? '';
-  const name = member.name?.trim() ?? '';
-  const email = member.email?.trim() ?? '';
-
-  return {
-    ...member,
-    id: String(member.id),
-    name: fullName || name || email,
-    fullName: fullName || undefined,
-    email,
-  };
-}
-
 export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
   useQuery<FlowTeamMember[]>({
     queryKey: ['flow-team'],
     queryFn: async (): Promise<FlowTeamMember[]> => {
-      const res = await unwrap(safe.get<ListMembersResponse>('/team/members'));
-      const raw: RawFlowTeamMember[] = res?.users ?? res?.members ?? [];
-      return raw.map(normalizeFlowTeamMember);
+      const res = await membersClient.listTeam({});
+      return res.users.map(normalizeFlowTeamMember);
     },
     staleTime: 30_000,
   });
@@ -80,20 +74,14 @@ export const useFlowGrantAccess = (): UseMutationResult<unknown, unknown, GrantP
   return useMutation<unknown, unknown, GrantPayload>({
     mutationFn: ({ userId, apps, role }: GrantPayload): Promise<unknown> => {
       const nextApps = apps.includes('flow') ? apps : [...apps, 'flow'];
-      return unwrap(
-        safe.put('/team/users/permissions', {
-          user_id: Number(userId),
-          apps: nextApps,
-          role,
-        })
-      );
+      return permissionsClient.updatePermissions({ userId, apps: nextApps, role });
     },
     onSuccess: (): void => {
       toast.success('Flow access granted');
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
     },
-    onError: (): void => {
-      toast.error('Failed to grant Flow access');
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to grant Flow access'));
     },
   });
 };
@@ -101,14 +89,13 @@ export const useFlowGrantAccess = (): UseMutationResult<unknown, unknown, GrantP
 export const useFlowDeactivateMember = (): UseMutationResult<unknown, unknown, string> => {
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
-    mutationFn: (id: string): Promise<unknown> =>
-      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
+    mutationFn: (id: string): Promise<unknown> => membersClient.removeMember({ userId: id }),
     onSuccess: (): void => {
       toast.success('Member removed from Flow');
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
     },
-    onError: (): void => {
-      toast.error('Failed to remove member');
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to remove member'));
     },
   });
 };

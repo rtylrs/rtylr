@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
-import { safe } from '../lib/api';
 import { APP_URLS } from '@voxire/config';
-
-interface SubResponse {
-  subscription: { status: string; trialEndsAt: string | null } | null;
-}
+import { useFlowSubscription } from '../hooks/queries/useFlowSubscription';
 
 function daysLeft(trialEndsAt: string | null): number {
   if (!trialEndsAt) return 0;
@@ -19,12 +13,7 @@ const DISMISSED_KEY = 'trial_banner_dismissed';
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === '1');
 
-  const { data } = useQuery({
-    queryKey: ['subscription-banner'],
-    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
-    select: (d) => d.subscription,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data } = useFlowSubscription();
 
   if (!data || data.status !== 'trial' || dismissed) return null;
 

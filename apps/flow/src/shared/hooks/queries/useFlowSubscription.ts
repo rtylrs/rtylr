@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../lib/api';
+import { createOneKitClient } from '@voxire/api';
+import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/service_client';
+
+const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'flow');
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface FlowSubscription {
-  id: number;
+  id: string;
   planName: string;
   planSlug: string;
   status: 'active' | 'trial' | 'cancelled' | 'expired';
@@ -50,16 +52,30 @@ export function computeSeatProration(pricePerSeatCents: number): SeatProration {
   };
 }
 
-// ── Hooks ─────────────────────────────────────────────────────────────────────
+const VALID_STATUSES: FlowSubscription['status'][] = ['active', 'trial', 'cancelled', 'expired'];
 
-interface SubResponse {
-  subscription: FlowSubscription | null;
-}
+// ── Hooks ─────────────────────────────────────────────────────────────────────
 
 export const useFlowSubscription = (): ReturnType<typeof useQuery<FlowSubscription | null>> =>
   useQuery({
     queryKey: ['flow-subscription'],
-    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
-    select: (d) => d.subscription,
+    queryFn: async (): Promise<FlowSubscription | null> => {
+      const res = await subscriptionClient.getMySubscription({});
+      const sub = res.subscription;
+      if (!sub) return null;
+      return {
+        id: sub.id,
+        planName: sub.planName,
+        planSlug: sub.planSlug,
+        status: (VALID_STATUSES as string[]).includes(sub.status)
+          ? (sub.status as FlowSubscription['status'])
+          : 'active',
+        seatCount: sub.seatCount,
+        pricePerSeatCents: sub.pricePerSeatCents,
+        trialEndsAt: sub.trialEndsAt,
+        nextBillingDate: sub.nextBillingDate,
+        paddleSubscriptionId: sub.paddleSubscriptionId || null,
+      };
+    },
     staleTime: 5 * 60 * 1000,
   });
