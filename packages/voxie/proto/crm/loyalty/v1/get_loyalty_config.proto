@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package crm.loyalty.v1;
 
-import "pos/loyalty/v1/types.proto";
+import "crm/loyalty/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
 
@@ -10,5 +10,5 @@ message GetLoyaltyConfigRequest {}
 
 message GetLoyaltyConfigResponse {
   // config is the config value for this contract.
-  .pos.loyalty.v1.LoyaltyConfig config = 1;
+  LoyaltyConfig config = 1;
 }

@@ -5,7 +5,7 @@
 // source: crm/loyalty/v1/get_loyalty_config.proto
 
 /* eslint-disable */
-import type { LoyaltyConfig } from "../../../pos/loyalty/v1/types";
+import type { LoyaltyConfig } from "./types";
 
 export interface GetLoyaltyConfigRequest {
 }

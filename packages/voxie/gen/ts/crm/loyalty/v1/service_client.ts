@@ -10,12 +10,19 @@ export interface GetLoyaltyConfigResponse {
 
 export interface LoyaltyConfig {
   id: string;
-  businessId: string;
+  ownerId: string;
   isEnabled: boolean;
-  pointsPerDollar: number;
-  redemptionRate: number;
-  minRedeemPoints: number;
-  createdAt: string;
+  pointsPerCurrencyUnit: number;
+  currencyPerPoint: number;
+  bronzeMin: string;
+  silverMin: string;
+  goldMin: string;
+  platinumMin: string;
+  bronzeDiscountPct: number;
+  silverDiscountPct: number;
+  goldDiscountPct: number;
+  platinumDiscountPct: number;
+  pointsExpiryDays: string;
   updatedAt: string;
 }
 
@@ -102,13 +109,15 @@ export interface ListLoyaltyTransactionsResponse {
 
 export interface LoyaltyTransaction {
   id: string;
-  businessId: string;
+  ownerId: string;
   customerId: string;
-  orderId: string;
   type: string;
-  points: number;
-  balanceAfter: number;
-  note: string;
+  points: string;
+  balanceBefore: string;
+  balanceAfter: string;
+  description: string;
+  referenceId: string | null;
+  referenceType: string;
   createdAt: string;
 }
 
