@@ -685,7 +685,6 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 | Legacy `routes/AppRoutes.tsx` files still exist in some apps alongside the live `router.tsx`; `MenuWithId.jsx` is a mixed-extension import in dash             | `apps/dash/src/routes/`, `apps/dash/src/features/menu/`                  | Low      |
 | HR app still uses flat locale files (`locales/en.json`) instead of the namespaced `locales/en/*.json` layout                                                   | `apps/hr/src/locales/`                                                   | Low      |
 | Empty untracked `apps/hub/`, `apps/vbitez/`, `apps/landing/` leftover folders may exist on local checkouts                                                     | `apps/`                                                                  | Low      |
-| `@voxire/voxie/package.json` exports `book/v1/*`, `store/v1/*`, and `auth/v1/auth` paths with no proto sources in voxie                                    | `packages/voxie/package.json`                                        | Medium   |
 | No `.env.example` visible in repo root - environment setup requires reading docs                                                                               | Root                                                                     | Medium   |
 
 ---
