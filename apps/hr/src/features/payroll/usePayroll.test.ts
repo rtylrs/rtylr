@@ -13,6 +13,8 @@ vi.mock('../../shared/lib/api', () => ({
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val: unknown) => val),
+  createOneKitClient: () => ({ listPayroll: vi.fn(), listStaff: vi.fn() }),
+  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
 vi.mock('react-i18next', () => ({

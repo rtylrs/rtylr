@@ -1,29 +1,45 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
-import { hrApi, type PayrollRow } from '../../shared/services/hrApi';
+import { PayrollServiceClient } from '@voxire/voxie/hr/payroll/v1/service_client';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/service_client';
+import { type PayrollRow } from '../../shared/services/hrApi';
 
-const payrollRowSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  name: z.string(),
-  role: z.string(),
-  hoursWorked: z.number(),
-  basePay: z.number(),
-  overtime: z.number(),
-  deductions: z.number(),
-  status: z.enum(['Pending', 'Paid']).optional(),
-});
+const payrollClient = createOneKitClient(PayrollServiceClient, 'hr');
+const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 
-/** Legacy hook used by Operations screen, reads from old payroll endpoint */
+function normalizeStatus(status: string): 'Pending' | 'Paid' | undefined {
+  const lower = status.toLowerCase();
+  if (lower === 'paid') return 'Paid';
+  if (lower === 'pending') return 'Pending';
+  return undefined;
+}
+
+/** Legacy hook used by Operations screen, reads from hr.payroll.v1.ListPayroll */
 export function usePayroll(params?: {
   period?: string;
 }): ReturnType<typeof useQuery<PayrollRow[]>> {
   return useQuery<PayrollRow[]>({
     queryKey: ['payroll-legacy', params],
     queryFn: async (): Promise<PayrollRow[]> => {
-      const res = await unwrap(hrApi.listPayroll(params));
-      const raw = res ?? [];
-      return z.array(payrollRowSchema).parse(Array.isArray(raw) ? raw : []) as PayrollRow[];
+      const [payrollRes, staffRes] = await Promise.all([
+        payrollClient.listPayroll({ periodLabel: params?.period ?? '' }),
+        staffClient.listStaff({ search: '', departmentId: '', status: '' }),
+      ]);
+      const staffById = new Map(staffRes.staff.map((s) => [Number(s.id), s]));
+
+      return payrollRes.records.map((r) => {
+        const staff = staffById.get(r.staffId);
+        return {
+          id: r.id,
+          name: staff ? `${staff.firstName} ${staff.lastName}`.trim() : `Staff #${r.staffId}`,
+          role: staff?.role ?? '',
+          hoursWorked: r.regularHours + r.overtimeHours,
+          basePay: r.basePay,
+          overtime: r.overtimePay,
+          deductions: r.deductions,
+          status: normalizeStatus(r.status),
+        };
+      });
     },
   });
 }

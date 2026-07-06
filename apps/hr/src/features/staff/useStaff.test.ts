@@ -3,9 +3,15 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
+const mockStaffClient = vi.hoisted(() => ({
+  listStaff: vi.fn(),
+}));
+const mockDepartmentClient = vi.hoisted(() => ({
+  listDepartments: vi.fn(),
+}));
+
 vi.mock('../../shared/services/hrApi', () => ({
   hrApi: {
-    listStaff: vi.fn(),
     createStaff: vi.fn(),
     updateStaff: vi.fn(),
     deleteStaff: vi.fn(),
@@ -16,6 +22,17 @@ vi.mock('../../shared/services/hrApi', () => ({
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val) => val),
+  createOneKitClient: (Client: { name: string }) => {
+    switch (Client.name) {
+      case 'StaffServiceClient':
+        return mockStaffClient;
+      case 'DepartmentServiceClient':
+        return mockDepartmentClient;
+      default:
+        throw new Error(`unexpected client ${Client.name}`);
+    }
+  },
+  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
 import {
@@ -41,28 +58,45 @@ describe('useStaff', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches staff list on mount', async () => {
-    const data = [
+  it('fetches staff list and resolves department names', async () => {
+    mockStaffClient.listStaff.mockResolvedValue({
+      staff: [
+        {
+          id: '1',
+          firstName: 'Jane',
+          lastName: 'Doe',
+          email: 'jane@example.com',
+          role: 'Manager',
+          departmentId: 'd1',
+          employmentType: 'Full-time',
+          status: 'Active',
+        },
+      ],
+    });
+    mockDepartmentClient.listDepartments.mockResolvedValue({
+      departments: [{ id: 'd1', name: 'Sales' }],
+    });
+
+    const { result } = renderHook(() => useStaff(), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([
       {
         id: 1,
-        name: 'Jane',
+        name: 'Jane Doe',
         role: 'Manager',
         department: 'Sales',
         email: 'jane@example.com',
         employmentType: 'Full-time',
         status: 'Active',
       },
-    ];
-    (hrApi.listStaff as any).mockResolvedValue(data);
-    const { result } = renderHook(() => useStaff(), {
-      wrapper: createWrapper(),
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    ]);
   });
 
   it('starts in loading state', () => {
-    (hrApi.listStaff as any).mockReturnValue(new Promise(() => {}));
+    mockStaffClient.listStaff.mockReturnValue(new Promise(() => {}));
+    mockDepartmentClient.listDepartments.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useStaff(), {
       wrapper: createWrapper(),
     });
