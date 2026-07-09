@@ -164,7 +164,9 @@ var getPublicOrderStatusPathParams = []PathParamConfig{
 }
 
 // getPublicOrderStatusQueryParams contains query parameter configuration for GetPublicOrderStatus
-var getPublicOrderStatusQueryParams = []QueryParamConfig{}
+var getPublicOrderStatusQueryParams = []QueryParamConfig{
+	{QueryName: "business_id", FieldName: "business_id", Required: false},
+}
 
 // getOrderDetailPathParams contains path parameter configuration for GetOrderDetail
 var getOrderDetailPathParams = []PathParamConfig{

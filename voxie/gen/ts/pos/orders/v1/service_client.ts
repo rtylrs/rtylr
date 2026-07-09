@@ -119,6 +119,7 @@ export interface CreatePublicOrderResponse {
 
 export interface GetPublicOrderStatusRequest {
   orderId: string;
+  businessId: string;
 }
 
 export interface GetPublicOrderStatusResponse {
@@ -302,7 +303,9 @@ export class OrderServiceClient {
   async getPublicOrderStatus(req: GetPublicOrderStatusRequest, options?: OrderServiceCallOptions): Promise<GetPublicOrderStatusResponse> {
     let path = "/api/pos/orders/v1/orders/{order_id}/public-status";
     path = path.replace("{order_id}", encodeURIComponent(String(req.orderId)));
-    const url = this.baseURL + path;
+    const params = new URLSearchParams();
+    if (req.businessId != null && req.businessId !== "0") params.set("business_id", String(req.businessId));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

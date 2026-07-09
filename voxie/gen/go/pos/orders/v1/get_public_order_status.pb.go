@@ -24,8 +24,11 @@ const (
 )
 
 type GetPublicOrderStatusRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderId       int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	OrderId int64                  `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	// business_id scopes the lookup to the business the order belongs to,
+	// preventing cross-tenant order enumeration on this anonymous endpoint.
+	BusinessId    int64 `protobuf:"varint,2,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,6 +66,13 @@ func (*GetPublicOrderStatusRequest) Descriptor() ([]byte, []int) {
 func (x *GetPublicOrderStatusRequest) GetOrderId() int64 {
 	if x != nil {
 		return x.OrderId
+	}
+	return 0
+}
+
+func (x *GetPublicOrderStatusRequest) GetBusinessId() int64 {
+	if x != nil {
+		return x.BusinessId
 	}
 	return 0
 }
@@ -131,9 +141,12 @@ var File_pos_orders_v1_get_public_order_status_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_get_public_order_status_proto_rawDesc = "" +
 	"\n" +
-	"+pos/orders/v1/get_public_order_status.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"H\n" +
+	"+pos/orders/v1/get_public_order_status.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1donekit/http/annotations.proto\"\x8a\x01\n" +
 	"\x1bGetPublicOrderStatusRequest\x12)\n" +
-	"\border_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\"z\n" +
+	"\border_id\x18\x01 \x01(\x03B\x0e\xbaH\a\xc8\x01\x01\"\x02 \x00е\x18\x01R\aorderId\x12@\n" +
+	"\vbusiness_id\x18\x02 \x01(\x03B\x1f\xbaH\a\xc8\x01\x01\"\x02 \x00µ\x18\r\n" +
+	"\vbusiness_idе\x18\x01R\n" +
+	"businessId\"z\n" +
 	"\x1cGetPublicOrderStatusResponse\x12\x1f\n" +
 	"\border_id\x18\x01 \x01(\x03B\x04е\x18\x01R\aorderId\x12!\n" +
 	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x16\n" +

@@ -12893,6 +12893,16 @@ export const contractValidationMetadata = {
     }
   },
   "pos.orders.v1.GetPublicOrderStatusRequest": {
+    "businessId": {
+      "gt": 0,
+      "name": "businessId",
+      "optional": false,
+      "protoName": "business_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
     "orderId": {
       "gt": 0,
       "name": "orderId",

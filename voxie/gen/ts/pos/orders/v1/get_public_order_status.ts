@@ -8,6 +8,11 @@
 
 export interface GetPublicOrderStatusRequest {
   orderId: number;
+  /**
+   * business_id scopes the lookup to the business the order belongs to,
+   * preventing cross-tenant order enumeration on this anonymous endpoint.
+   */
+  businessId: number;
 }
 
 export interface GetPublicOrderStatusResponse {

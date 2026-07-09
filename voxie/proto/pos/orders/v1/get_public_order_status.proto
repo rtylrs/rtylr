@@ -13,6 +13,14 @@ message GetPublicOrderStatusRequest {
     (buf.validate.field).int64.gt = 0,
     (onekit.http.int64_encoding) = INT64_ENCODING_STRING
   ];
+  // business_id scopes the lookup to the business the order belongs to,
+  // preventing cross-tenant order enumeration on this anonymous endpoint.
+  int64 business_id = 2 [
+    (onekit.http.query).name = "business_id",
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0,
+    (onekit.http.int64_encoding) = INT64_ENCODING_STRING
+  ];
 }
 
 message GetPublicOrderStatusResponse {
