@@ -118,6 +118,19 @@ func parseTime(s string) time.Time {
 	return ref
 }
 
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse shift decimal value from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
+}
+
 func shiftFromSqlcRow(row sqlc.ListShiftsRow) domain.Shift {
 	s := domain.Shift{
 		ID:         row.ID,
@@ -148,10 +161,10 @@ func shiftFromSqlcRow(row sqlc.ListShiftsRow) domain.Shift {
 		s.ClockOutAt = row.ClockOutAt.Time
 	}
 	if row.HoursWorked.Valid {
-		s.HoursWorked, _ = strconv.ParseFloat(row.HoursWorked.String, 64)
+		s.HoursWorked = parseDecimal(row.HoursWorked.String)
 	}
 	if row.OvertimeHours.Valid {
-		s.OvertimeHours, _ = strconv.ParseFloat(row.OvertimeHours.String, 64)
+		s.OvertimeHours = parseDecimal(row.OvertimeHours.String)
 	}
 	if row.Notes.Valid {
 		s.Notes = row.Notes.String

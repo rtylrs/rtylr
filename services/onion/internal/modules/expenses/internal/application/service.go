@@ -15,10 +15,14 @@ import (
 const (
 	expensesScope = "expenses"
 	expensesTTL   = 5 * time.Minute
+
+	defaultListLimit int32 = 20
+	maxListLimit     int32 = 100
 )
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.Expense, error)
+	ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Expense, error)
 	GetByID(ctx context.Context, businessID, id int64) (domain.Expense, error)
 	Create(ctx context.Context, input domain.ExpenseInput) (int64, error)
 	Update(ctx context.Context, input domain.ExpenseUpdateInput) error
@@ -49,6 +53,22 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Expense,
 		},
 		cacher.WithExpiry(ctx, expensesTTL),
 	)
+}
+
+// ListPaginated returns a single page of expenses. A non-positive limit
+// defaults to 20 and limit is capped at 100; a negative offset is clamped to
+// zero.
+func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Expense, error) {
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+	if limit > maxListLimit {
+		limit = maxListLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return s.repo.ListPaginated(ctx, businessID, limit, offset)
 }
 
 func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.Expense, error) {

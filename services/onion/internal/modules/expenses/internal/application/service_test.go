@@ -23,6 +23,10 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Expense, error) {
 	return m.listResult, m.listErr
 }
 
+func (m *mockRepo) ListPaginated(_ context.Context, _ int64, _, _ int32) ([]domain.Expense, error) {
+	return m.listResult, m.listErr
+}
+
 func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.Expense, error) {
 	if len(m.listResult) > 0 {
 		return m.listResult[0], m.listErr

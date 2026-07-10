@@ -14,6 +14,12 @@ import (
 	financeexpensesv1 "github.com/voxire/voxie/gen/go/finance/expenses/v1"
 )
 
+// listExpensesPageSize bounds ListExpenses server-side. The voxie
+// finance.expenses.v1.ListExpensesRequest contract has no pagination fields
+// yet, so the endpoint returns at most one maximum-size page instead of every
+// row.
+const listExpensesPageSize int32 = 100
+
 type ExpensesAPI struct {
 	Service *application.Service
 }
@@ -27,7 +33,7 @@ func (a *ExpensesAPI) ListExpenses(ctx context.Context, _ *financeexpensesv1.Lis
 	if err != nil {
 		return nil, err
 	}
-	expenses, listErr := a.Service.List(ctx, businessID)
+	expenses, listErr := a.Service.ListPaginated(ctx, businessID, listExpensesPageSize, 0)
 	if listErr != nil {
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to list expenses")
 	}

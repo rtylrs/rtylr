@@ -14,10 +14,14 @@ import (
 const (
 	documentsScope = "documents"
 	documentsTTL   = 5 * time.Minute
+
+	defaultListLimit int32 = 20
+	maxListLimit     int32 = 100
 )
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.Document, error)
+	ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Document, error)
 	Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error)
 	Delete(ctx context.Context, businessID, id int64) error
 }
@@ -44,6 +48,22 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Document
 		},
 		cacher.WithExpiry(ctx, documentsTTL),
 	)
+}
+
+// ListPaginated returns a single page of documents. A non-positive limit
+// defaults to 20 and limit is capped at 100; a negative offset is clamped to
+// zero.
+func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Document, error) {
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+	if limit > maxListLimit {
+		limit = maxListLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return s.repo.ListPaginated(ctx, businessID, limit, offset)
 }
 
 func (s *Service) Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error) {

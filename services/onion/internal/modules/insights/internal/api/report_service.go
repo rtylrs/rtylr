@@ -21,7 +21,12 @@ func NewReportAPI(service *application.Service) *ReportAPI {
 }
 
 func scheduledReportToProto(row application.ScheduledReportPayload) *insightsreportv1.ScheduledReport {
-	templateID, _ := strconv.ParseInt(row.TemplateID, 10, 64)
+	// TemplateID is stored as a slug (e.g. "revenue"); non-numeric slugs map to
+	// a zero numeric id and the slug itself is carried in TemplateName below.
+	var templateID int64
+	if id, err := strconv.ParseInt(row.TemplateID, 10, 64); err == nil {
+		templateID = id
+	}
 	return &insightsreportv1.ScheduledReport{
 		Id:             row.ID,
 		TemplateId:     templateID,

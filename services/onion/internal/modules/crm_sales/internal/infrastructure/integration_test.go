@@ -14,7 +14,7 @@ func TestListLeads_ReturnsNoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	leads, err := repo.ListLeads(ctx, testutil.OwnerID)
+	leads, err := repo.ListLeads(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListLeads: unexpected error: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestListContacts_NoLeadFilter_ReturnsNoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	contacts, err := repo.ListContacts(ctx, testutil.OwnerID, nil)
+	contacts, err := repo.ListContacts(ctx, testutil.OwnerID, nil, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContacts: unexpected error: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestListContracts_ReturnsNoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	contracts, err := repo.ListContracts(ctx, testutil.OwnerID)
+	contracts, err := repo.ListContracts(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContracts: unexpected error: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestListLeads_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	leads, err := repo.ListLeads(ctx, 0)
+	leads, err := repo.ListLeads(ctx, 0, 100, 0)
 	if err != nil {
 		t.Fatalf("ListLeads(ownerID=0): %v", err)
 	}
@@ -276,7 +276,7 @@ func TestListContacts_ZeroLeadID_ReturnsAll(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	contacts, err := repo.ListContacts(ctx, testutil.OwnerID, nil)
+	contacts, err := repo.ListContacts(ctx, testutil.OwnerID, nil, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContacts(leadID=nil): %v", err)
 	}

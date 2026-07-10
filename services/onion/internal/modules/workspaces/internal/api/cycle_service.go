@@ -92,8 +92,22 @@ func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycle
 		}
 	}
 
-	start, _ := time.Parse("2006-01-02", req.GetStartDate())
-	end, _ := time.Parse("2006-01-02", req.GetEndDate())
+	var start time.Time
+	if req.GetStartDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetStartDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid start_date")
+		}
+		start = parsed
+	}
+	var end time.Time
+	if req.GetEndDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetEndDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid end_date")
+		}
+		end = parsed
+	}
 	if end.IsZero() {
 		end = start.AddDate(0, 0, 14)
 	}
@@ -124,7 +138,14 @@ func (a *CycleAPI) UpdateCycle(ctx context.Context, req *flowcyclev1.UpdateCycle
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	end, _ := time.Parse("2006-01-02", req.GetEndDate())
+	var end time.Time
+	if req.GetEndDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetEndDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid end_date")
+		}
+		end = parsed
+	}
 
 	if err := a.Service.UpdateCycle(ctx, domain.UpdateCycleInput{
 		ID:      req.GetId(),

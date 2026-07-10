@@ -15,3 +15,13 @@ WHERE business_id = ? AND id = ?;
 
 -- name: DeleteCategory :exec
 DELETE FROM erp_categories WHERE business_id = ? AND id = ?;
+
+-- name: ListCategoriesPaginated :many
+SELECT id, owner_id, business_id, name, description, created_at, updated_at
+FROM erp_categories
+WHERE business_id = ?
+ORDER BY name ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountCategories :one
+SELECT COUNT(*) FROM erp_categories WHERE business_id = ?;

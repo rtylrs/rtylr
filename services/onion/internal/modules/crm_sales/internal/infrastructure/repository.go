@@ -29,8 +29,12 @@ func NewRepository(db *sql.DB) *Repository {
 // Leads
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error) {
-	rows, err := r.queries.ListLeads(ctx, businessID)
+func (r *Repository) ListLeads(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Lead, error) {
+	rows, err := r.queries.ListLeads(ctx, sqlc.ListLeadsParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +44,10 @@ func (r *Repository) ListLeads(ctx context.Context, businessID int64) ([]domain.
 		leads = append(leads, leadFromRow(row))
 	}
 	return leads, nil
+}
+
+func (r *Repository) CountLeads(ctx context.Context, businessID int64) (int64, error) {
+	return r.queries.CountLeads(ctx, businessID)
 }
 
 func (r *Repository) GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error) {
@@ -140,11 +148,13 @@ func (r *Repository) GetPipeline(ctx context.Context, businessID int64) ([]domai
 // Contacts
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error) {
+func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) ([]domain.Contact, error) {
 	if leadID != nil {
 		rows, err := r.queries.ListContactsByLead(ctx, sqlc.ListContactsByLeadParams{
 			BusinessID: businessID,
 			LeadID:     *leadID,
+			Limit:      limit,
+			Offset:     offset,
 		})
 		if err != nil {
 			return nil, err
@@ -156,7 +166,11 @@ func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID 
 		return contacts, nil
 	}
 
-	rows, err := r.queries.ListContacts(ctx, businessID)
+	rows, err := r.queries.ListContacts(ctx, sqlc.ListContactsParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -165,6 +179,16 @@ func (r *Repository) ListContacts(ctx context.Context, businessID int64, leadID 
 		contacts = append(contacts, contactFromRow(row))
 	}
 	return contacts, nil
+}
+
+func (r *Repository) CountContacts(ctx context.Context, businessID int64, leadID *int64) (int64, error) {
+	if leadID != nil {
+		return r.queries.CountContactsByLead(ctx, sqlc.CountContactsByLeadParams{
+			BusinessID: businessID,
+			LeadID:     *leadID,
+		})
+	}
+	return r.queries.CountContacts(ctx, businessID)
 }
 
 func (r *Repository) GetContact(ctx context.Context, id, businessID int64) (domain.Contact, error) {
@@ -375,8 +399,12 @@ func (r *Repository) DeleteTouchpoint(ctx context.Context, id, businessID int64)
 // Contracts
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error) {
-	rows, err := r.queries.ListContracts(ctx, businessID)
+func (r *Repository) ListContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error) {
+	rows, err := r.queries.ListContracts(ctx, sqlc.ListContractsParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -386,6 +414,10 @@ func (r *Repository) ListContracts(ctx context.Context, businessID int64) ([]dom
 		contracts = append(contracts, contractFromRow(row))
 	}
 	return contracts, nil
+}
+
+func (r *Repository) CountContracts(ctx context.Context, businessID int64) (int64, error) {
+	return r.queries.CountContracts(ctx, businessID)
 }
 
 func (r *Repository) GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error) {

@@ -257,7 +257,14 @@ func ExactKey(parts ExactKeyParts) string {
 		Prompt:        normalizeText(parts.Prompt),
 	}
 
-	bytes, _ := json.Marshal(payload)
+	bytes, err := json.Marshal(payload)
+	if err != nil {
+		// Marshalling a struct of plain strings and ints cannot realistically
+		// fail; fall back to a deterministic textual encoding so callers still
+		// get a stable cache key.
+		logger.Global().Warn("failed to marshal exact cache key payload", logger.Error(err))
+		bytes = []byte(fmt.Sprintf("%#v", payload))
+	}
 	sum := sha256.Sum256(bytes)
 	return hex.EncodeToString(sum[:])
 }

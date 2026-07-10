@@ -27,10 +27,15 @@ type ListContactsHandler struct{ Service *application.Service }
 
 type ListContactsRequest struct {
 	LeadID *int64 `json:"lead_id"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 type ListContactsResponse struct {
 	Contacts []domain.Contact `json:"contacts"`
+	Total    int64            `json:"total"`
+	Limit    int32            `json:"limit"`
+	Offset   int32            `json:"offset"`
 }
 
 func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsRequest) (ListContactsResponse, error) {
@@ -44,13 +49,13 @@ func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsReques
 		return ListContactsResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	contacts, err := h.Service.ListContacts(ctx, businessID, req.LeadID)
+	page, err := h.Service.ListContacts(ctx, businessID, req.LeadID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contacts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListContactsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list contacts")
 	}
 
-	return ListContactsResponse{Contacts: contacts}, nil
+	return ListContactsResponse{Contacts: page.Contacts, Total: page.Total, Limit: page.Limit, Offset: page.Offset}, nil
 }
 
 // ---------------------------------------------------------------------------

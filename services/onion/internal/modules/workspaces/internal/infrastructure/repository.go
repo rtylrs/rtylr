@@ -820,10 +820,12 @@ func (r *Repository) DeleteTimeLog(ctx context.Context, id, userID int64) error 
 	return err
 }
 
-func (r *Repository) RecalcActualHours(ctx context.Context, taskID int64) error {
+func (r *Repository) RecalcActualHours(ctx context.Context, taskID, actorID int64) error {
 	err := r.queries.RecalcActualHours(ctx, sqlc.RecalcActualHoursParams{
-		TaskID: taskID,
-		ID:     taskID,
+		TaskID:  taskID,
+		ID:      taskID,
+		OwnerID: actorID,
+		UserID:  actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("RecalcActualHours failed", logger.Error(err))
@@ -1504,8 +1506,13 @@ func (r *Repository) GetMyTasksProject(ctx context.Context, userID, workspaceID 
 	return row.ID, row.Name
 }
 
-func (r *Repository) RenameProject(ctx context.Context, projectID int64, name string) error {
-	return r.queries.RenameProject(ctx, sqlc.RenameProjectParams{Name: name, ID: projectID})
+func (r *Repository) RenameProject(ctx context.Context, projectID, ownerID, workspaceID int64, name string) error {
+	return r.queries.RenameProject(ctx, sqlc.RenameProjectParams{
+		Name:        name,
+		ID:          projectID,
+		OwnerID:     ownerID,
+		WorkspaceID: workspaceID,
+	})
 }
 
 func (r *Repository) GetProjectWorkspace(ctx context.Context, projectID int64) int64 {

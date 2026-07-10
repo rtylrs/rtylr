@@ -33,29 +33,55 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Docum
 
 	items := make([]domain.Document, 0, len(rows))
 	for _, row := range rows {
-		var item domain.Document
-		item.ID = row.ID
-		item.OwnerID = row.OwnerID
-		item.BusinessID = row.BusinessID
-		if row.StaffID.Valid {
-			item.StaffID = row.StaffID.Int64
-		}
-		item.Name = row.Name
-		if row.Type.Valid {
-			item.Type = row.Type.String
-		}
-		if row.FileUrl.Valid {
-			item.FileURL = row.FileUrl.String
-		}
-		if row.ExpiryDate.Valid {
-			item.ExpiryDate = row.ExpiryDate.Time
-		}
-		if row.CreatedAt.Valid {
-			item.CreatedAt = row.CreatedAt.Time
-		}
-		items = append(items, item)
+		items = append(items, documentFromRow(row))
 	}
 	return items, nil
+}
+
+// ListPaginated returns a single page of documents for the business, ordered
+// by creation date. Limit and offset are applied as-is; callers clamp them.
+func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Document, error) {
+	rows, err := r.queries.ListDocumentsPaginated(ctx, sqlc.ListDocumentsPaginatedParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list documents page", logger.Error(err))
+		return nil, err
+	}
+
+	items := make([]domain.Document, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, documentFromRow(row))
+	}
+	return items, nil
+}
+
+// documentFromRow maps a sqlc hr_documents row to the domain model,
+// collapsing nullable columns to their zero value when NULL.
+func documentFromRow(row sqlc.HrDocument) domain.Document {
+	var item domain.Document
+	item.ID = row.ID
+	item.OwnerID = row.OwnerID
+	item.BusinessID = row.BusinessID
+	if row.StaffID.Valid {
+		item.StaffID = row.StaffID.Int64
+	}
+	item.Name = row.Name
+	if row.Type.Valid {
+		item.Type = row.Type.String
+	}
+	if row.FileUrl.Valid {
+		item.FileURL = row.FileUrl.String
+	}
+	if row.ExpiryDate.Valid {
+		item.ExpiryDate = row.ExpiryDate.Time
+	}
+	if row.CreatedAt.Valid {
+		item.CreatedAt = row.CreatedAt.Time
+	}
+	return item
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.DocumentInput) (int64, error) {

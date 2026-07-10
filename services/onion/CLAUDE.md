@@ -158,11 +158,14 @@ onion/
 ├── media-engine/             Native image/video transform engine used by the CDN runmode
 ├── local-env/                Local development environment (docker compose etc. — see make local-env-up)
 ├── scripts/                  migrate.sh, reset-db.sh, generate_sqlc.sh, goose.sh, check_schema_drift.py, ...
-├── docs/                     backend.md, database.md — authoritative architecture references
+├── docs/                     backend.md, database.md, platform-patterns.md — authoritative architecture references
 ├── voxie/                    Git submodule — proto contracts + generated Go types
+├── self-host/                Self-hosting bundle (docker-compose.yml + .env.example; uses Dockerfile.license)
 ├── app.yaml                  App Engine / deployment config (see note below)
 ├── cloudbuild.yaml           Cloud Build pipeline
-├── Dockerfile                API image; Dockerfile.worker and Dockerfile.upload build the other binaries
+├── Dockerfile                API image; Dockerfile.worker and Dockerfile.upload build the other binaries;
+│                             Dockerfile.license builds cmd/license (self-host), Dockerfile.migrate builds
+│                             the rtylr/migrate image — both referenced by the GitHub Actions workflows
 ├── Makefile
 ├── go.mod
 └── go.sum

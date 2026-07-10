@@ -64,14 +64,20 @@ func newCampaignPayload(c domain.Campaign) CampaignPayload {
 func CampaignListRoutes() []string { return []string{"/crm/campaigns"} }
 
 type (
-	ListCampaignsHandler  struct{ Service *application.Service }
-	ListCampaignsRequest  struct{}
+	ListCampaignsHandler struct{ Service *application.Service }
+	ListCampaignsRequest struct {
+		Limit  int32 `json:"limit"`
+		Offset int32 `json:"offset"`
+	}
 	ListCampaignsResponse struct {
 		Campaigns []CampaignPayload `json:"campaigns"`
+		Total     int64             `json:"total"`
+		Limit     int32             `json:"limit"`
+		Offset    int32             `json:"offset"`
 	}
 )
 
-func (h *ListCampaignsHandler) Serve(ctx context.Context, _ *ListCampaignsRequest) (ListCampaignsResponse, error) {
+func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequest) (ListCampaignsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
@@ -80,15 +86,20 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, _ *ListCampaignsReques
 	if bizErr != nil {
 		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
 	}
-	campaigns, err := h.Service.List(ctx, businessID)
+	page, err := h.Service.ListPaginated(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		return ListCampaignsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list campaigns")
 	}
-	payloads := make([]CampaignPayload, len(campaigns))
-	for i, c := range campaigns {
+	payloads := make([]CampaignPayload, len(page.Campaigns))
+	for i, c := range page.Campaigns {
 		payloads[i] = newCampaignPayload(c)
 	}
-	return ListCampaignsResponse{Campaigns: payloads}, nil
+	return ListCampaignsResponse{
+		Campaigns: payloads,
+		Total:     page.Total,
+		Limit:     page.Limit,
+		Offset:    page.Offset,
+	}, nil
 }
 
 // ─── Get By ID ────────────────────────────────────────────────────────────────

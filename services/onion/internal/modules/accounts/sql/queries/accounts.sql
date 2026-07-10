@@ -1,14 +1,26 @@
+-- ListAccounts feeds the proto ListAccountsResponse (voxie), which has no
+-- pagination fields, so the result is bounded with a generous hard LIMIT
+-- instead (same pattern as pos_tables). A chart of accounts is inherently
+-- small; 1000 rows is far beyond any realistic business.
 -- name: ListAccounts :many
 SELECT id, owner_id, business_id, name, code, type, currency, balance, is_active, created_at
 FROM finance_accounts
 WHERE business_id = ?
-ORDER BY type ASC, name ASC;
+ORDER BY type ASC, name ASC
+LIMIT 1000;
 
+-- ListAccountsForTree must return the full account set to build the chart of
+-- accounts tree, so it stays unpaginated by design — bounded by the same
+-- generous hard LIMIT as above.
 -- name: ListAccountsForTree :many
 SELECT id, owner_id, business_id, name, code, parent_id, type, currency, balance, is_active, created_at
 FROM finance_accounts
 WHERE business_id = ?
-ORDER BY type ASC, code ASC, name ASC;
+ORDER BY type ASC, code ASC, name ASC
+LIMIT 1000;
+
+-- name: CountAccounts :one
+SELECT COUNT(*) FROM finance_accounts WHERE business_id = ?;
 
 -- name: CreateAccount :execresult
 INSERT INTO finance_accounts (owner_id, business_id, name, code, type, currency, balance, is_active)

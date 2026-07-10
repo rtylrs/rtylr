@@ -14,6 +14,12 @@ import (
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
+// listCategoriesPageSize bounds ListCategories server-side. The voxie
+// erp.category.v1.ListCategoriesRequest contract has no pagination fields
+// yet, so the endpoint returns at most one maximum-size page instead of every
+// row.
+const listCategoriesPageSize int32 = 100
+
 type CategoryAPI struct {
 	Service *application.Service
 }
@@ -27,7 +33,7 @@ func (a *CategoryAPI) ListCategories(ctx context.Context, _ *erpcategoryv1.ListC
 	if err != nil {
 		return nil, err
 	}
-	categories, listErr := a.Service.ListCategories(ctx, ownerID)
+	categories, listErr := a.Service.ListCategoriesPaginated(ctx, ownerID, listCategoriesPageSize, 0)
 	if listErr != nil {
 		return nil, categoryStatusError(http.StatusInternalServerError, "Failed to list categories")
 	}

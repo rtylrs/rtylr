@@ -57,15 +57,21 @@ func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (
 
 func ListLeadsRoutes() []string { return []string{"/crm/sales/leads"} }
 
-type (
-	ListLeadsHandler  struct{ Service *application.Service }
-	ListLeadsRequest  struct{}
-	ListLeadsResponse struct {
-		Leads []domain.Lead `json:"leads"`
-	}
-)
+type ListLeadsHandler struct{ Service *application.Service }
 
-func (h *ListLeadsHandler) Serve(ctx context.Context, _ *ListLeadsRequest) (ListLeadsResponse, error) {
+type ListLeadsRequest struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListLeadsResponse struct {
+	Leads  []domain.Lead `json:"leads"`
+	Total  int64         `json:"total"`
+	Limit  int32         `json:"limit"`
+	Offset int32         `json:"offset"`
+}
+
+func (h *ListLeadsHandler) Serve(ctx context.Context, req *ListLeadsRequest) (ListLeadsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListLeadsResponse{}, onekiterrors.PermissionDenied()
@@ -76,13 +82,13 @@ func (h *ListLeadsHandler) Serve(ctx context.Context, _ *ListLeadsRequest) (List
 		return ListLeadsResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	leads, err := h.Service.ListLeads(ctx, businessID)
+	page, err := h.Service.ListLeads(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list leads", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListLeadsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list leads")
 	}
 
-	return ListLeadsResponse{Leads: leads}, nil
+	return ListLeadsResponse{Leads: page.Leads, Total: page.Total, Limit: page.Limit, Offset: page.Offset}, nil
 }
 
 // ---------------------------------------------------------------------------

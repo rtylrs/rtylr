@@ -4,7 +4,11 @@ SELECT id, owner_id, business_id, company_name, COALESCE(industry,'') AS industr
        created_at, updated_at
 FROM crm_leads
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountLeads :one
+SELECT COUNT(*) FROM crm_leads WHERE business_id = ?;
 
 -- name: GetLead :one
 SELECT id, owner_id, business_id, company_name, COALESCE(industry,'') AS industry, COALESCE(size,'') AS size,
@@ -35,7 +39,11 @@ SELECT id, owner_id, business_id, lead_id, customer_id, name, COALESCE(role,'') 
        created_at, updated_at
 FROM crm_contacts
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountContacts :one
+SELECT COUNT(*) FROM crm_contacts WHERE business_id = ?;
 
 -- name: ListContactsByLead :many
 SELECT id, owner_id, business_id, lead_id, customer_id, name, COALESCE(role,'') AS role, COALESCE(email,'') AS email,
@@ -43,7 +51,11 @@ SELECT id, owner_id, business_id, lead_id, customer_id, name, COALESCE(role,'') 
        created_at, updated_at
 FROM crm_contacts
 WHERE business_id = ? AND lead_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountContactsByLead :one
+SELECT COUNT(*) FROM crm_contacts WHERE business_id = ? AND lead_id = ?;
 
 -- name: GetContact :one
 SELECT id, owner_id, business_id, lead_id, customer_id, name, COALESCE(role,'') AS role, COALESCE(email,'') AS email,
@@ -92,7 +104,11 @@ SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
        created_at, updated_at
 FROM crm_contracts
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountContracts :one
+SELECT COUNT(*) FROM crm_contracts WHERE business_id = ?;
 
 -- name: GetContract :one
 SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,

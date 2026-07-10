@@ -189,7 +189,7 @@ func TestListContracts_AfterCreate_ContainsNew(t *testing.T) {
 		t.Fatalf("CreateContract: %v", err)
 	}
 
-	contracts, err := repo.ListContracts(ctx, testutil.OwnerID)
+	contracts, err := repo.ListContracts(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContracts: %v", err)
 	}
@@ -211,7 +211,7 @@ func TestListContracts_WrongOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	contracts, err := repo.ListContracts(ctx, 999999)
+	contracts, err := repo.ListContracts(ctx, 999999, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContracts wrong owner: %v", err)
 	}

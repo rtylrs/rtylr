@@ -188,10 +188,19 @@ func interfaceToFloat64(value interface{}) float64 {
 	case int32:
 		return float64(v)
 	case []byte:
-		f, _ := strconv.ParseFloat(string(v), 64)
+		f, err := strconv.ParseFloat(string(v), 64)
+		if err != nil {
+			// The domain layer stays dependency-free (no logger), so an
+			// unparseable database aggregate safely coerces to zero.
+			return 0
+		}
 		return f
 	case string:
-		f, _ := strconv.ParseFloat(v, 64)
+		f, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			// See []byte case: default safely to zero to keep the domain pure.
+			return 0
+		}
 		return f
 	default:
 		return 0
@@ -209,10 +218,19 @@ func interfaceToInt64(value interface{}) int64 {
 	case float64:
 		return int64(v)
 	case []byte:
-		i, _ := strconv.ParseInt(string(v), 10, 64)
+		i, err := strconv.ParseInt(string(v), 10, 64)
+		if err != nil {
+			// The domain layer stays dependency-free (no logger), so an
+			// unparseable database aggregate safely coerces to zero.
+			return 0
+		}
 		return i
 	case string:
-		i, _ := strconv.ParseInt(v, 10, 64)
+		i, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			// See []byte case: default safely to zero to keep the domain pure.
+			return 0
+		}
 		return i
 	default:
 		return 0

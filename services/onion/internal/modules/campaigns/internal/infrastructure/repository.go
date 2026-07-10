@@ -38,6 +38,41 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Campa
 	return campaigns, nil
 }
 
+// ListPaginated returns a single page of campaigns for the business, ordered
+// by creation date. Limit and offset are applied as-is; callers clamp them.
+func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Campaign, error) {
+	rows, err := r.queries.ListCampaignsPaginated(ctx, sqlc.ListCampaignsPaginatedParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list campaigns page", logger.Error(err))
+
+		return nil, err
+	}
+
+	campaigns := make([]domain.Campaign, 0, len(rows))
+
+	for _, row := range rows {
+		campaigns = append(campaigns, campaignFromRow(row))
+	}
+
+	return campaigns, nil
+}
+
+// Count returns the total number of campaigns for the business.
+func (r *Repository) Count(ctx context.Context, businessID int64) (int64, error) {
+	count, err := r.queries.CountCampaigns(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count campaigns", logger.Error(err))
+
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Campaign, error) {
 	row, err := r.queries.GetCampaignByID(ctx, sqlc.GetCampaignByIDParams{
 		ID:         id,

@@ -99,7 +99,14 @@ func (a *MilestoneAPI) CreateMilestone(ctx context.Context, req *flowmilestonev1
 		wsID = req.GetWorkspaceId()
 	}
 
-	dueDate, _ := time.Parse("2006-01-02", req.GetTargetDate())
+	var dueDate time.Time
+	if req.GetTargetDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetTargetDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid target_date")
+		}
+		dueDate = parsed
+	}
 	if dueDate.IsZero() {
 		dueDate = time.Now().AddDate(0, 1, 0)
 	}
@@ -126,7 +133,14 @@ func (a *MilestoneAPI) UpdateMilestone(ctx context.Context, req *flowmilestonev1
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	dueDate, _ := time.Parse("2006-01-02", req.GetTargetDate())
+	var dueDate time.Time
+	if req.GetTargetDate() != "" {
+		parsed, parseErr := time.Parse("2006-01-02", req.GetTargetDate())
+		if parseErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid target_date")
+		}
+		dueDate = parsed
+	}
 
 	if err := a.Service.UpdateMilestone(ctx, domain.UpdateMilestoneInput{
 		ID:          req.GetId(),

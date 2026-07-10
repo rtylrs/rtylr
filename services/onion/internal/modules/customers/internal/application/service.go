@@ -91,7 +91,9 @@ func (s *Service) UpdateCustomer(ctx context.Context, input domain.CustomerUpdat
 		// Preserve existing points — only update tier label
 		existing, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.ID)
 		if err == nil {
-			_ = s.repo.UpdateCustomerLoyalty(ctx, input.ID, existing.LoyaltyPoints, input.LoyaltyTier)
+			if loyaltyErr := s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.ID, existing.LoyaltyPoints, input.LoyaltyTier); loyaltyErr != nil {
+				logger.Ctx(ctx).Error("Failed to update customer loyalty tier", logger.Error(loyaltyErr))
+			}
 		}
 	}
 	invalidateCustomerScope(ctx, input.BusinessID)
@@ -175,7 +177,7 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput
 
 	newTier := RecalculateTier(balanceAfter, cfg)
 
-	return s.repo.UpdateCustomerLoyalty(ctx, input.CustomerID, balanceAfter, newTier)
+	return s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.CustomerID, balanceAfter, newTier)
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) error {
@@ -215,7 +217,7 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 
 	newTier := RecalculateTier(balanceAfter, cfg)
 
-	return s.repo.UpdateCustomerLoyalty(ctx, input.CustomerID, balanceAfter, newTier)
+	return s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.CustomerID, balanceAfter, newTier)
 }
 
 func (s *Service) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {

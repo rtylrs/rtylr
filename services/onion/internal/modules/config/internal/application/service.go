@@ -39,7 +39,10 @@ func (s *Service) GetGlobalConfig(ctx context.Context) (domain.Config, error) {
 }
 
 func (s *Service) GetConfig(ctx context.Context, ownerID string) (domain.Config, error) {
-	idN, _ := strconv.ParseInt(ownerID, 10, 64)
+	idN, err := strconv.ParseInt(ownerID, 10, 64)
+	if err != nil {
+		return domain.Config{}, domain.ErrInvalidOwnerID
+	}
 	cacheKey := cacheKeys.BusinessConfig(idN)
 
 	return cacher.Of[domain.Config]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.Config, error) {
@@ -62,12 +65,15 @@ func (s *Service) CreateConfig(ctx context.Context, input domain.ConfigInput) er
 }
 
 func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain.ConfigInput) error {
+	idN, parseErr := strconv.ParseInt(ownerID, 10, 64)
+	if parseErr != nil {
+		return domain.ErrInvalidOwnerID
+	}
 	input.OwnerId = ownerID
 	err := s.repo.UpdateConfig(ctx, input)
 	if err != nil {
 		return err
 	}
-	idN, _ := strconv.ParseInt(ownerID, 10, 64)
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(idN))
 	}
@@ -75,7 +81,10 @@ func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain
 }
 
 func (s *Service) GetThemeByOwnerID(ctx context.Context, id string) (domain.Theme, error) {
-	idN, _ := strconv.ParseInt(id, 10, 64)
+	idN, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return domain.Theme{}, domain.ErrInvalidOwnerID
+	}
 	return cacher.Of[domain.Theme]().GetOrComputeSingle(ctx, cacheKeys.BusinessTheme(idN), func(ctx context.Context) (domain.Theme, error) {
 		return s.repo.GetThemeByOwnerID(ctx, id)
 	}, cacher.WithExpiry(ctx, ConfigCacheTTL))

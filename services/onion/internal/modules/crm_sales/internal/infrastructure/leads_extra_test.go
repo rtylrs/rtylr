@@ -14,7 +14,7 @@ func TestListLeads_WrongOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	leads, err := repo.ListLeads(ctx, 999999)
+	leads, err := repo.ListLeads(ctx, 999999, 100, 0)
 	if err != nil {
 		t.Fatalf("ListLeads wrong owner: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestListLeads_AfterCreate_CountIncreases(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	before, err := repo.ListLeads(ctx, testutil.OwnerID)
+	before, err := repo.ListLeads(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListLeads before: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestListLeads_AfterCreate_CountIncreases(t *testing.T) {
 		t.Fatalf("CreateLead: %v", err)
 	}
 
-	after, err := repo.ListLeads(ctx, testutil.OwnerID)
+	after, err := repo.ListLeads(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListLeads after: %v", err)
 	}

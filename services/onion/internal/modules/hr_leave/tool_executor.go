@@ -162,7 +162,10 @@ func (m *Module) executeGetLeaveCalendarTool(ctx context.Context, input map[stri
 		dateFrom = time.Now().Format("2006-01-02")
 	}
 	if dateTo == "" {
-		start, _ := time.Parse("2006-01-02", dateFrom)
+		start, parseErr := time.Parse("2006-01-02", dateFrom)
+		if parseErr != nil {
+			return nil, errors.New("date_from must be in YYYY-MM-DD format")
+		}
 		dateTo = start.AddDate(0, 0, 30).Format("2006-01-02")
 	}
 

@@ -9,6 +9,8 @@ import (
 
 var ErrConfigNotFound = errors.New("config not found")
 
+var ErrInvalidOwnerID = errors.New("invalid owner id")
+
 type Config struct {
 	OwnerId                string
 	BusinessID             int64 `json:"business_id"`

@@ -204,7 +204,10 @@ func hrTimeToolPeriod(input map[string]any) (string, string, error) {
 			return "", "", err
 		}
 		if date != "" {
-			start, _ := time.Parse("2006-01-02", date)
+			start, err := time.Parse("2006-01-02", date)
+			if err != nil {
+				return "", "", errors.New("date must be in YYYY-MM-DD format")
+			}
 			return date, start.AddDate(0, 0, 6).Format("2006-01-02"), nil
 		}
 	}

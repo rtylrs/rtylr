@@ -11,10 +11,16 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
-const brandsCacheTTL = 5 * time.Minute
+const (
+	brandsCacheTTL = 5 * time.Minute
+
+	defaultListLimit int32 = 20
+	maxListLimit     int32 = 100
+)
 
 type repository interface {
 	ListBrands(ctx context.Context, businessID int64) ([]domain.Brand, error)
+	ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error)
 	CreateBrand(ctx context.Context, businessID int64, input domain.BrandInput) (int64, error)
 	UpdateBrand(ctx context.Context, businessID, id int64, input domain.BrandInput) error
 	DeleteBrand(ctx context.Context, businessID, id int64) error
@@ -38,6 +44,23 @@ func (s *Service) ListBrands(ctx context.Context, businessID int64) ([]domain.Br
 	return cacher.Of[[]domain.Brand]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Brand, error) {
 		return s.repo.ListBrands(ctx, businessID)
 	}, cacher.WithExpiry(ctx, brandsCacheTTL))
+}
+
+// ListBrandsPaginated returns a single page of brands. A non-positive limit
+// defaults to 20 and limit is capped at 100; a negative offset is clamped to
+// zero.
+func (s *Service) ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error) {
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+	if limit > maxListLimit {
+		limit = maxListLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	return s.repo.ListBrandsPaginated(ctx, businessID, limit, offset)
 }
 
 func (s *Service) CreateBrand(ctx context.Context, businessID int64, input domain.BrandInput) (int64, error) {

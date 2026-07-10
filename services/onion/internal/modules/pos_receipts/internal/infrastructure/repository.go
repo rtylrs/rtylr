@@ -130,7 +130,15 @@ func decimalToFloat(s string) float64 {
 	return f
 }
 
-func parseTime(s string) (t time.Time) {
-	t, _ = time.Parse("2006-01-02", s)
+func parseTime(s string) time.Time {
+	if s == "" {
+		return time.Time{}
+	}
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		logger.Global().Warn("failed to parse receipt date filter",
+			logger.String("value", s), logger.Error(err))
+		return time.Time{}
+	}
 	return t
 }

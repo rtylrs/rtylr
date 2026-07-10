@@ -23,6 +23,10 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Bill, error) {
 	return m.listResult, m.listErr
 }
 
+func (m *mockRepo) ListPaginated(_ context.Context, _ int64, _, _ int32) ([]domain.Bill, error) {
+	return m.listResult, m.listErr
+}
+
 func (m *mockRepo) Get(_ context.Context, _, _ int64) (domain.Bill, error) {
 	return m.getResult, m.getErr
 }

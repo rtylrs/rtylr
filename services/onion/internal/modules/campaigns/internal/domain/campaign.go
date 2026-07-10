@@ -25,6 +25,15 @@ type Campaign struct {
 	UpdatedAt         time.Time  `json:"updated_at"`
 }
 
+// CampaignPage is a single page of campaigns plus the pagination metadata
+// that was applied to produce it.
+type CampaignPage struct {
+	Campaigns []Campaign
+	Total     int64
+	Limit     int32
+	Offset    int32
+}
+
 type CampaignInput struct {
 	OwnerID           int64
 	BusinessID        int64

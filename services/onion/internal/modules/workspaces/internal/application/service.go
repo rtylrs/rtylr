@@ -488,7 +488,7 @@ func (s *Service) CreateTimeLog(ctx context.Context, input domain.TimeLogInput) 
 	if err != nil {
 		return 0, err
 	}
-	if recalcErr := s.repo.RecalcActualHours(ctx, input.TaskID); recalcErr != nil {
+	if recalcErr := s.repo.RecalcActualHours(ctx, input.TaskID, input.UserID); recalcErr != nil {
 		logger.Ctx(ctx).Error("CreateTimeLog: failed to recalc actual_hours", logger.Error(recalcErr))
 	}
 	return id, nil
@@ -498,7 +498,7 @@ func (s *Service) DeleteTimeLog(ctx context.Context, id, userID, taskID int64) e
 	if err := s.repo.DeleteTimeLog(ctx, id, userID); err != nil {
 		return err
 	}
-	if recalcErr := s.repo.RecalcActualHours(ctx, taskID); recalcErr != nil {
+	if recalcErr := s.repo.RecalcActualHours(ctx, taskID, userID); recalcErr != nil {
 		logger.Ctx(ctx).Error("DeleteTimeLog: failed to recalc actual_hours", logger.Error(recalcErr))
 	}
 	return nil
@@ -797,7 +797,7 @@ func (s *Service) EnsureMyTasksProject(
 
 	if existingID, existingName := s.repo.GetMyTasksProject(ctx, userID, workspaceID); existingID != 0 {
 		if existingName == "Inbox" {
-			if renameErr := s.repo.RenameProject(ctx, existingID, "My Tasks"); renameErr != nil {
+			if renameErr := s.repo.RenameProject(ctx, existingID, userID, workspaceID, "My Tasks"); renameErr != nil {
 				logger.Ctx(ctx).Warn("migrate Inbox->My Tasks failed", logger.Error(renameErr))
 			} else {
 				invalidateWorkspacesScope(ctx, userID)

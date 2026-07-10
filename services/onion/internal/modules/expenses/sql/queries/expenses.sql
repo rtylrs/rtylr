@@ -39,3 +39,13 @@ SELECT COALESCE(CAST(category_id AS CHAR), 'uncategorised') AS category_key, COU
 FROM finance_expenses
 WHERE business_id = ?
 GROUP BY category_id;
+
+-- name: ListExpensesPaginated :many
+SELECT id, owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
+FROM finance_expenses
+WHERE business_id = ?
+ORDER BY expense_date DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountExpenses :one
+SELECT COUNT(*) FROM finance_expenses WHERE business_id = ?;

@@ -291,14 +291,15 @@ func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID 
 	return nil
 }
 
-func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, customerID int64, newPoints int, newTier string) error {
+func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, businessID, customerID int64, newPoints int, newTier string) error {
 	err := r.queries.UpdateCustomerLoyalty(ctx, sqlc.UpdateCustomerLoyaltyParams{
 		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true},
 		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{
 			CrmCustomersLoyaltyTier: sqlc.CrmCustomersLoyaltyTier(newTier),
 			Valid:                   newTier != "",
 		},
-		ID: customerID,
+		ID:         customerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update customer loyalty", logger.Error(err))
@@ -1235,7 +1236,10 @@ func customerFromRow(row sqlc.CrmCustomer) domain.Customer {
 	}
 
 	if row.Tags != nil {
-		_ = json.Unmarshal(row.Tags, &c.Tags)
+		if err := json.Unmarshal(row.Tags, &c.Tags); err != nil {
+			logger.Global().Warn("failed to parse customer tags JSON from database",
+				logger.Any("customer_id", row.ID), logger.Error(err))
+		}
 	}
 
 	if c.Tags == nil {
@@ -1353,7 +1357,10 @@ func scanCustomerRaw(rows *sql.Rows) (domain.Customer, error) {
 	c.Notes = notes.String
 
 	if tagsJSON.Valid && tagsJSON.String != "" {
-		_ = json.Unmarshal([]byte(tagsJSON.String), &c.Tags)
+		if err := json.Unmarshal([]byte(tagsJSON.String), &c.Tags); err != nil {
+			logger.Global().Warn("failed to parse customer tags JSON from database",
+				logger.Any("customer_id", c.ID), logger.Error(err))
+		}
 	}
 
 	if c.Tags == nil {

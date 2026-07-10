@@ -666,6 +666,7 @@ func (r *Repository) CreateBusinessOwner(ctx context.Context, params CreateBusin
 		}
 	}()
 
+	// cross-schema write to users (user module) — create the owner account during provisioning
 	userRes, err := tx.ExecContext(ctx, `
 INSERT INTO users (email, password_hash, full_name, onboarded, auth_provider)
 VALUES (?, ?, ?, TRUE, 'password')`,
@@ -683,6 +684,7 @@ VALUES (?, ?, ?, TRUE, 'password')`,
 		return nil, err
 	}
 
+	// cross-schema write to businesses (config/business module) — create the business during provisioning
 	businessRes, err := tx.ExecContext(ctx, `
 INSERT INTO businesses (name, owner_id, industry, country, timezone, currency, is_active)
 VALUES (?, ?, ?, ?, ?, ?, TRUE)`,
@@ -703,6 +705,7 @@ VALUES (?, ?, ?, ?, ?, ?, TRUE)`,
 		return nil, err
 	}
 
+	// cross-schema write to users (user module) — link the owner account to its new business
 	if _, err = tx.ExecContext(ctx, `
 UPDATE users
 SET business_id = ?, onboarded = TRUE, updated_at = NOW()
@@ -716,6 +719,7 @@ WHERE id = ?`,
 
 	appsJSON := `["dash","pos","erp","hr","crm","finance","flow","insights"]`
 	if params.PlanID > 0 {
+		// cross-schema read from plans (subscriptions module) — plan app entitlements for provisioning
 		if err = tx.QueryRowContext(ctx, `
 SELECT apps
 FROM plans
@@ -732,6 +736,7 @@ LIMIT 1`,
 		}
 	}
 
+	// cross-schema write to user_app_permissions (team/hub module) — grant owner role on the new business
 	if _, err = tx.ExecContext(ctx, `
 INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
 VALUES (?, ?, ?, ?, 'owner', TRUE)
@@ -763,6 +768,7 @@ ON DUPLICATE KEY UPDATE
 			periodEndsAt = endsAt
 		}
 
+		// cross-schema write to subscriptions (subscriptions module) — grant the plan during provisioning
 		subRes, subErr := tx.ExecContext(ctx, `
 INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, current_period_ends_at)
 VALUES (?, ?, ?, 1, ?, ?)
@@ -787,6 +793,7 @@ ON DUPLICATE KEY UPDATE
 			result.SubscriptionID = sql.NullInt64{Int64: subID, Valid: true}
 		} else {
 			var existingID int64
+			// cross-schema read from subscriptions (subscriptions module) — resolve existing subscription ID after upsert
 			if scanErr := tx.QueryRowContext(ctx, "SELECT id FROM subscriptions WHERE owner_id = ? LIMIT 1", ownerID).Scan(&existingID); scanErr != nil {
 				_ = tx.Rollback()
 				return nil, scanErr
@@ -795,7 +802,8 @@ ON DUPLICATE KEY UPDATE
 		}
 	}
 
-	_, _ = tx.ExecContext(ctx, `
+	// cross-schema write to hr_employees (hr_core module), reading from users (user module) — seed the owner's employee record
+	if _, err = tx.ExecContext(ctx, `
 INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status)
 SELECT ?, COALESCE(u.business_id, 0), u.id,
        COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
@@ -806,7 +814,10 @@ WHERE u.id = ?
   AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id)`,
 		ownerID,
 		ownerID,
-	)
+	); err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
 
 	if err = tx.Commit(); err != nil {
 		return nil, err

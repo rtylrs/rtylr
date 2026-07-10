@@ -15,6 +15,11 @@ import (
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
+// listBillsPageSize bounds ListBills server-side. The voxie
+// finance.bill.v1.ListBillsRequest contract has no pagination fields yet, so
+// the endpoint returns at most one maximum-size page instead of every row.
+const listBillsPageSize int32 = 100
+
 type BillAPI struct {
 	Service *application.Service
 }
@@ -28,7 +33,7 @@ func (a *BillAPI) ListBills(ctx context.Context, _ *financebillv1.ListBillsReque
 	if err != nil {
 		return nil, err
 	}
-	bills, listErr := a.Service.List(ctx, businessID)
+	bills, listErr := a.Service.ListPaginated(ctx, businessID, listBillsPageSize, 0)
 	if listErr != nil {
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to list bills")
 	}

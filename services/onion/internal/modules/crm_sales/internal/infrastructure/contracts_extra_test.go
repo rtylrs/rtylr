@@ -103,7 +103,7 @@ func TestListContracts_AllBelongToOwner(t *testing.T) {
 		Plan:   "starter",
 	})
 
-	contracts, err := repo.ListContracts(ctx, testutil.OwnerID)
+	contracts, err := repo.ListContracts(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContracts: %v", err)
 	}

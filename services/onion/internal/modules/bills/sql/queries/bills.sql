@@ -32,3 +32,13 @@ SELECT status, COUNT(*) AS cnt
 FROM finance_bills
 WHERE business_id = ?
 GROUP BY status;
+
+-- name: ListBillsPaginated :many
+SELECT id, owner_id, business_id, supplier_id, amount, currency, due_date, status, description, created_at, updated_at
+FROM finance_bills
+WHERE business_id = ?
+ORDER BY due_date ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountBills :one
+SELECT COUNT(*) FROM finance_bills WHERE business_id = ?;

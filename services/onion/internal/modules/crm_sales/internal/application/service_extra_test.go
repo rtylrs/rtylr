@@ -80,7 +80,7 @@ func TestGetPipeline_PropagatesError(t *testing.T) {
 func TestListContracts_PropagatesError(t *testing.T) {
 	want := errors.New("list contracts error")
 	s := &Service{repo: &mockRepo{err: want}}
-	_, err := s.ListContracts(context.Background(), 1)
+	_, err := s.ListContracts(context.Background(), 1, 0, 0)
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}

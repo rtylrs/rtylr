@@ -237,8 +237,5 @@ INSERT INTO pos_orders
 (owner_id, business_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, kitchen_notes)
 VALUES (?, ?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
 
--- name: GetPublicOrderStatus :one
-SELECT id, order_number, status FROM pos_orders WHERE id = ? LIMIT 1;
-
 -- name: GetPublicOrderNumberStatus :one
-SELECT order_number, status FROM pos_orders WHERE id = ? LIMIT 1;
+SELECT order_number, status FROM pos_orders WHERE business_id = ? AND id = ? LIMIT 1;

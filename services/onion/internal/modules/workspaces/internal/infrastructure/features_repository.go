@@ -560,7 +560,10 @@ func mapWorkloadMemberTasks(rows []sqlc.GetTeamWorkloadMemberTasksRow) []domain.
 			}
 		}
 		if len(row.Labels) > 0 {
-			_ = json.Unmarshal(row.Labels, &t.Labels)
+			if err := json.Unmarshal(row.Labels, &t.Labels); err != nil {
+				logger.Global().Warn("failed to parse task labels JSON from database",
+					logger.Any("task_id", row.ID), logger.Error(err))
+			}
 		}
 		tasks = append(tasks, t)
 	}

@@ -539,3 +539,33 @@ func GetAIPrimaryProvider() string {
 func IsAnyAIConfigured() bool {
 	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured()
 }
+
+// GetLicenseSigningPrivateKey returns the private key used to sign self-host
+// license keys (license authority runmode).
+func GetLicenseSigningPrivateKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.LicenseSigningPrivateKey
+	}
+	return os.Getenv("LICENSE_SIGNING_PRIVATE_KEY")
+}
+
+// GetLicensePublicKey returns the public key used to verify license keys on
+// self-host deployments.
+func GetLicensePublicKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.LicensePublicKey
+	}
+	return os.Getenv("LICENSE_PUBLIC_KEY")
+}
+
+// GetLicenseIssuer returns the issuer name embedded in generated license keys,
+// defaulting to "voxire" when unset.
+func GetLicenseIssuer() string {
+	if GlobalConfig != nil && GlobalConfig.LicenseIssuer != "" {
+		return GlobalConfig.LicenseIssuer
+	}
+	if v := strings.TrimSpace(os.Getenv("LICENSE_ISSUER")); v != "" {
+		return v
+	}
+	return "voxire"
+}

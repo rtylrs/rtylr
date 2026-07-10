@@ -22,6 +22,14 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Campaign, error) {
 	return m.list, nil
 }
 
+func (m *mockRepo) ListPaginated(_ context.Context, _ int64, _, _ int32) ([]domain.Campaign, error) {
+	return m.list, nil
+}
+
+func (m *mockRepo) Count(_ context.Context, _ int64) (int64, error) {
+	return int64(len(m.list)), nil
+}
+
 func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.Campaign, error) {
 	return m.get, nil
 }

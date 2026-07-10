@@ -311,7 +311,7 @@ func TestUpdateCustomerLoyalty_IncreasesPoints(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	if err := repo.UpdateCustomerLoyalty(ctx, 5301, 999, "bronze"); err != nil {
+	if err := repo.UpdateCustomerLoyalty(ctx, testutil.OwnerID, 5301, 999, "bronze"); err != nil {
 		t.Fatalf("UpdateCustomerLoyalty: %v", err)
 	}
 
@@ -324,7 +324,9 @@ func TestUpdateCustomerLoyalty_IncreasesPoints(t *testing.T) {
 	}
 
 	// Restore
-	_ = repo.UpdateCustomerLoyalty(ctx, 5301, 50, "bronze")
+	if err := repo.UpdateCustomerLoyalty(ctx, testutil.OwnerID, 5301, 50, "bronze"); err != nil {
+		t.Errorf("restore UpdateCustomerLoyalty: %v", err)
+	}
 }
 
 func TestUpdateCustomerLoyalty_ChangesToGold(t *testing.T) {
@@ -332,7 +334,7 @@ func TestUpdateCustomerLoyalty_ChangesToGold(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	if err := repo.UpdateCustomerLoyalty(ctx, 5301, 2000, "gold"); err != nil {
+	if err := repo.UpdateCustomerLoyalty(ctx, testutil.OwnerID, 5301, 2000, "gold"); err != nil {
 		t.Fatalf("UpdateCustomerLoyalty: %v", err)
 	}
 
@@ -345,7 +347,9 @@ func TestUpdateCustomerLoyalty_ChangesToGold(t *testing.T) {
 	}
 
 	// Restore
-	_ = repo.UpdateCustomerLoyalty(ctx, 5301, 50, "bronze")
+	if err := repo.UpdateCustomerLoyalty(ctx, testutil.OwnerID, 5301, 50, "bronze"); err != nil {
+		t.Errorf("restore UpdateCustomerLoyalty: %v", err)
+	}
 }
 
 func TestRecordVisit_IncreasesVisitCount(t *testing.T) {

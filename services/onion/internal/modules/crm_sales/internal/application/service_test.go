@@ -22,8 +22,12 @@ type mockRepo struct {
 	err         error
 }
 
-func (m *mockRepo) ListLeads(_ context.Context, _ int64) ([]domain.Lead, error) {
+func (m *mockRepo) ListLeads(_ context.Context, _ int64, _, _ int32) ([]domain.Lead, error) {
 	return m.leads, m.err
+}
+
+func (m *mockRepo) CountLeads(_ context.Context, _ int64) (int64, error) {
+	return int64(len(m.leads)), m.err
 }
 
 func (m *mockRepo) GetLead(_ context.Context, _, _ int64) (domain.Lead, error) {
@@ -46,8 +50,12 @@ func (m *mockRepo) GetPipeline(_ context.Context, _ int64) ([]domain.PipelineSum
 	return m.pipeline, m.err
 }
 
-func (m *mockRepo) ListContacts(_ context.Context, _ int64, _ *int64) ([]domain.Contact, error) {
+func (m *mockRepo) ListContacts(_ context.Context, _ int64, _ *int64, _, _ int32) ([]domain.Contact, error) {
 	return m.contacts, m.err
+}
+
+func (m *mockRepo) CountContacts(_ context.Context, _ int64, _ *int64) (int64, error) {
+	return int64(len(m.contacts)), m.err
 }
 
 func (m *mockRepo) CreateContact(_ context.Context, _ int64, _ domain.CreateContactRequest) (domain.Contact, error) {
@@ -74,8 +82,12 @@ func (m *mockRepo) DeleteTouchpoint(_ context.Context, _, _ int64) error {
 	return m.err
 }
 
-func (m *mockRepo) ListContracts(_ context.Context, _ int64) ([]domain.Contract, error) {
+func (m *mockRepo) ListContracts(_ context.Context, _ int64, _, _ int32) ([]domain.Contract, error) {
 	return m.contracts, m.err
+}
+
+func (m *mockRepo) CountContracts(_ context.Context, _ int64) (int64, error) {
+	return int64(len(m.contracts)), m.err
 }
 
 func (m *mockRepo) GetContract(_ context.Context, _, _ int64) (domain.Contract, error) {
@@ -94,19 +106,22 @@ func (m *mockRepo) UpdateContract(_ context.Context, _, _ int64, _ domain.Update
 
 func TestListLeads_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{leads: []domain.Lead{{ID: 1, CompanyName: "Acme"}}}}
-	got, err := s.ListLeads(context.Background(), 10)
+	got, err := s.ListLeads(context.Background(), 10, 0, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(got) != 1 || got[0].ID != 1 {
-		t.Errorf("expected 1 lead, got %v", got)
+	if len(got.Leads) != 1 || got.Leads[0].ID != 1 {
+		t.Errorf("expected 1 lead, got %v", got.Leads)
+	}
+	if got.Total != 1 || got.Limit != 20 || got.Offset != 0 {
+		t.Errorf("unexpected pagination metadata: %+v", got)
 	}
 }
 
 func TestListLeads_PropagatesError(t *testing.T) {
 	want := errors.New("db down")
 	s := &Service{repo: &mockRepo{err: want}}
-	_, err := s.ListLeads(context.Background(), 10)
+	_, err := s.ListLeads(context.Background(), 10, 0, 0)
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel error, got %v", err)
 	}
@@ -186,8 +201,8 @@ func TestGetPipeline_HappyPath(t *testing.T) {
 
 func TestListContacts_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{contacts: []domain.Contact{{ID: 7}}}}
-	got, err := s.ListContacts(context.Background(), 1, nil)
-	if err != nil || len(got) != 1 {
+	got, err := s.ListContacts(context.Background(), 1, nil, 0, 0)
+	if err != nil || len(got.Contacts) != 1 {
 		t.Errorf("got %v, err %v", got, err)
 	}
 }
@@ -195,8 +210,8 @@ func TestListContacts_HappyPath(t *testing.T) {
 func TestListContacts_WithLeadID(t *testing.T) {
 	leadID := int64(42)
 	s := &Service{repo: &mockRepo{contacts: []domain.Contact{{ID: 7, LeadID: 42}}}}
-	got, err := s.ListContacts(context.Background(), 1, &leadID)
-	if err != nil || len(got) != 1 {
+	got, err := s.ListContacts(context.Background(), 1, &leadID, 0, 0)
+	if err != nil || len(got.Contacts) != 1 {
 		t.Errorf("got %v, err %v", got, err)
 	}
 }
@@ -250,8 +265,8 @@ func TestDeleteTouchpoint_HappyPath(t *testing.T) {
 
 func TestListContracts_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{contracts: []domain.Contract{{ID: 1, Plan: "pro"}}}}
-	got, err := s.ListContracts(context.Background(), 1)
-	if err != nil || len(got) != 1 {
+	got, err := s.ListContracts(context.Background(), 1, 0, 0)
+	if err != nil || len(got.Contracts) != 1 {
 		t.Errorf("got %v, err %v", got, err)
 	}
 }

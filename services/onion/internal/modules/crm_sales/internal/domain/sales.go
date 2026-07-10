@@ -165,3 +165,27 @@ type PipelineSummary struct {
 	Count    int     `json:"count"`
 	TotalMRR float64 `json:"total_mrr"`
 }
+
+// LeadPage is a single page of leads plus pagination metadata.
+type LeadPage struct {
+	Leads  []Lead `json:"leads"`
+	Total  int64  `json:"total"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+}
+
+// ContactPage is a single page of contacts plus pagination metadata.
+type ContactPage struct {
+	Contacts []Contact `json:"contacts"`
+	Total    int64     `json:"total"`
+	Limit    int32     `json:"limit"`
+	Offset   int32     `json:"offset"`
+}
+
+// ContractPage is a single page of contracts plus pagination metadata.
+type ContractPage struct {
+	Contracts []Contract `json:"contracts"`
+	Total     int64      `json:"total"`
+	Limit     int32      `json:"limit"`
+	Offset    int32      `json:"offset"`
+}

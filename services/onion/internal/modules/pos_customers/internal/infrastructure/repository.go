@@ -33,6 +33,7 @@ func (r *Repository) Search(ctx context.Context, businessID int64, query string)
 	searchTerm := searchutil.BooleanPrefixQuery(query)
 
 	// dynamic-query: squirrel (MATCH ... AGAINST via parameterized raw SQL)
+	// cross-schema read from crm_customers (customers module)
 	rows, err := r.pool.QueryContext(ctx, `
 SELECT id, business_id, first_name, last_name, email, phone
 FROM crm_customers

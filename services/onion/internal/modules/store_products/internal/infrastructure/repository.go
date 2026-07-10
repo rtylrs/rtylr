@@ -73,7 +73,11 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		logger.Ctx(ctx).Error("Failed to create store product", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read store product insert id", logger.Error(err))
+		return 0, err
+	}
 	if err := tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit store product transaction", logger.Error(err))
 		return 0, err

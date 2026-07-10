@@ -663,7 +663,15 @@ type adminShortlistRequest struct {
 
 func ListShortlistsHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jobID, _ := strconv.ParseInt(r.URL.Query().Get("job_id"), 10, 64)
+		var jobID int64
+		if raw := r.URL.Query().Get("job_id"); raw != "" {
+			parsed, err := strconv.ParseInt(raw, 10, 64)
+			if err != nil || parsed <= 0 {
+				writeApplyError(w, http.StatusBadRequest, "Invalid job id")
+				return
+			}
+			jobID = parsed
+		}
 		shortlists, err := svc.ListShortlists(r.Context(), jobID)
 		if err != nil {
 			logger.Ctx(r.Context()).Error("voxhire list shortlists failed", logger.Error(err))

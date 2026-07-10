@@ -11,10 +11,16 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
-const categoriesCacheTTL = 5 * time.Minute
+const (
+	categoriesCacheTTL = 5 * time.Minute
+
+	defaultListLimit int32 = 20
+	maxListLimit     int32 = 100
+)
 
 type repository interface {
 	ListCategories(ctx context.Context, businessID int64) ([]domain.Category, error)
+	ListCategoriesPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Category, error)
 	CreateCategory(ctx context.Context, businessID int64, input domain.CategoryInput) (int64, error)
 	UpdateCategory(ctx context.Context, businessID, id int64, input domain.CategoryInput) error
 	DeleteCategory(ctx context.Context, businessID, id int64) error
@@ -38,6 +44,23 @@ func (s *Service) ListCategories(ctx context.Context, businessID int64) ([]domai
 	return cacher.Of[[]domain.Category]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Category, error) {
 		return s.repo.ListCategories(ctx, businessID)
 	}, cacher.WithExpiry(ctx, categoriesCacheTTL))
+}
+
+// ListCategoriesPaginated returns a single page of categories. A non-positive
+// limit defaults to 20 and limit is capped at 100; a negative offset is
+// clamped to zero.
+func (s *Service) ListCategoriesPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Category, error) {
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+	if limit > maxListLimit {
+		limit = maxListLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	return s.repo.ListCategoriesPaginated(ctx, businessID, limit, offset)
 }
 
 func (s *Service) CreateCategory(ctx context.Context, businessID int64, input domain.CategoryInput) (int64, error) {

@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"net/mail"
-	"os"
 	"strings"
 	"time"
 
@@ -290,27 +289,15 @@ func currentLicensePublicKey() (string, error) {
 }
 
 func licenseSigningPrivateKey() string {
-	if platformconfig.GlobalConfig != nil {
-		return platformconfig.GlobalConfig.LicenseSigningPrivateKey
-	}
-	return os.Getenv("LICENSE_SIGNING_PRIVATE_KEY")
+	return platformconfig.GetLicenseSigningPrivateKey()
 }
 
 func licensePublicKey() string {
-	if platformconfig.GlobalConfig != nil {
-		return platformconfig.GlobalConfig.LicensePublicKey
-	}
-	return os.Getenv("LICENSE_PUBLIC_KEY")
+	return platformconfig.GetLicensePublicKey()
 }
 
 func licenseIssuer() string {
-	if platformconfig.GlobalConfig != nil && platformconfig.GlobalConfig.LicenseIssuer != "" {
-		return platformconfig.GlobalConfig.LicenseIssuer
-	}
-	if v := strings.TrimSpace(os.Getenv("LICENSE_ISSUER")); v != "" {
-		return v
-	}
-	return "voxire"
+	return platformconfig.GetLicenseIssuer()
 }
 
 func normalizeOwnerEmail(raw string) (string, error) {

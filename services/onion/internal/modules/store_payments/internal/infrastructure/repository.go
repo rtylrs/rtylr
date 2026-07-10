@@ -41,8 +41,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		logger.Ctx(ctx).Error("Failed to create payment method", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
-	return id, nil
+	return result.LastInsertId()
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.PaymentMethodInput) error {

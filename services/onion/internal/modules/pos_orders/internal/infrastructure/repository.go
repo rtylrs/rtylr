@@ -1589,8 +1589,11 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 	return orderID, nil
 }
 
-func (r *Repository) GetPublicOrderStatus(ctx context.Context, orderID int64) (orderNumber, status string, err error) {
-	row, err := r.queries.GetPublicOrderNumberStatus(ctx, orderID)
+func (r *Repository) GetPublicOrderStatus(ctx context.Context, businessID, orderID int64) (orderNumber, status string, err error) {
+	row, err := r.queries.GetPublicOrderNumberStatus(ctx, sqlc.GetPublicOrderNumberStatusParams{
+		BusinessID: businessID,
+		ID:         orderID,
+	})
 	if err != nil {
 		return "", "", err
 	}

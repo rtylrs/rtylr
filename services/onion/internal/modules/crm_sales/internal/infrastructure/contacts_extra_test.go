@@ -208,7 +208,7 @@ func TestListContacts_FilterByLeadID_ReturnsOnlyThatLead(t *testing.T) {
 		t.Fatalf("CreateContact: %v", err)
 	}
 
-	contacts, err := repo.ListContacts(ctx, testutil.OwnerID, &lead.ID)
+	contacts, err := repo.ListContacts(ctx, testutil.OwnerID, &lead.ID, 100, 0)
 	if err != nil {
 		t.Fatalf("ListContacts filtered: %v", err)
 	}

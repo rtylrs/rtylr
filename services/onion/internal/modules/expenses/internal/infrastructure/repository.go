@@ -41,6 +41,26 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Expen
 	return expenses, nil
 }
 
+// ListPaginated returns a single page of expenses for the business, ordered by
+// expense date. Limit and offset are applied as-is; callers clamp them.
+func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Expense, error) {
+	rows, err := r.queries.ListExpensesPaginated(ctx, sqlc.ListExpensesPaginatedParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list expenses page", logger.Error(err))
+		return nil, err
+	}
+
+	expenses := make([]domain.Expense, 0, len(rows))
+	for _, row := range rows {
+		expenses = append(expenses, expenseFromRow(sqlc.ListExpensesRow(row)))
+	}
+	return expenses, nil
+}
+
 func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.Expense, error) {
 	row, err := r.queries.GetExpenseByID(ctx, sqlc.GetExpenseByIDParams{
 		ID:         id,

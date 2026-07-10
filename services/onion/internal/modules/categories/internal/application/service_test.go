@@ -19,6 +19,10 @@ func (m *mockRepo) ListCategories(_ context.Context, _ int64) ([]domain.Category
 	return nil, nil
 }
 
+func (m *mockRepo) ListCategoriesPaginated(_ context.Context, _ int64, _, _ int32) ([]domain.Category, error) {
+	return nil, nil
+}
+
 func (m *mockRepo) CreateCategory(_ context.Context, _ int64, _ domain.CategoryInput) (int64, error) {
 	return m.createID, m.createErr
 }

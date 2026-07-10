@@ -14,6 +14,11 @@ import (
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
+// listBrandsPageSize bounds ListBrands server-side. The voxie
+// erp.brand.v1.ListBrandsRequest contract has no pagination fields yet, so
+// the endpoint returns at most one maximum-size page instead of every row.
+const listBrandsPageSize int32 = 100
+
 type BrandAPI struct {
 	Service *application.Service
 }
@@ -27,7 +32,7 @@ func (a *BrandAPI) ListBrands(ctx context.Context, _ *erpbrandv1.ListBrandsReque
 	if err != nil {
 		return nil, err
 	}
-	brands, listErr := a.Service.ListBrands(ctx, ownerID)
+	brands, listErr := a.Service.ListBrandsPaginated(ctx, ownerID, listBrandsPageSize, 0)
 	if listErr != nil {
 		return nil, brandStatusError(http.StatusInternalServerError, "Failed to list brands")
 	}

@@ -26,6 +26,15 @@ type StoreOrder struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
+// StoreOrderPage is a single page of store orders plus the pagination
+// metadata that was applied to produce it.
+type StoreOrderPage struct {
+	Orders []StoreOrder
+	Total  int64
+	Limit  int32
+	Offset int32
+}
+
 type StoreOrderItem struct {
 	ID        int64     `json:"id"`
 	OrderID   int64     `json:"order_id"`

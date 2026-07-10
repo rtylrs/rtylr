@@ -20,6 +20,11 @@ var expiryDateLayouts = []string{
 	"2006-01-02 15:04:05",
 }
 
+// listDocumentsPageSize bounds ListDocuments server-side. The voxie
+// hr.document.v1.ListDocumentsRequest contract has no pagination fields yet,
+// so the endpoint returns at most one maximum-size page instead of every row.
+const listDocumentsPageSize int32 = 100
+
 type DocumentAPI struct {
 	service *application.Service
 }
@@ -34,7 +39,7 @@ func (a *DocumentAPI) ListDocuments(ctx context.Context, _ *hrdocumentv1.ListDoc
 		return nil, errModel
 	}
 
-	items, err := a.service.List(ctx, businessID)
+	items, err := a.service.ListPaginated(ctx, businessID, listDocumentsPageSize, 0)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list documents")
 	}

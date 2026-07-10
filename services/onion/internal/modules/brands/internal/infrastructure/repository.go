@@ -34,33 +34,63 @@ func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain
 	brands := make([]domain.Brand, 0, len(rows))
 
 	for _, row := range rows {
-		var b domain.Brand
-		b.ID = row.ID
-		b.OwnerID = row.OwnerID
-		b.BusinessID = row.BusinessID
-		b.Name = row.Name
-		b.ProductCount = row.ProductCount
-
-		if row.LogoUrl.Valid {
-			b.LogoURL = row.LogoUrl.String
-		}
-
-		if row.Description.Valid {
-			b.Description = row.Description.String
-		}
-
-		if row.CreatedAt.Valid {
-			b.CreatedAt = row.CreatedAt.Time
-		}
-
-		if row.UpdatedAt.Valid {
-			b.UpdatedAt = row.UpdatedAt.Time
-		}
-
-		brands = append(brands, b)
+		brands = append(brands, brandFromRow(row))
 	}
 
 	return brands, nil
+}
+
+// ListBrandsPaginated returns a single page of brands for the business,
+// ordered by name. Limit and offset are applied as-is; callers clamp them.
+func (r *Repository) ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error) {
+	rows, err := r.queries.ListBrandsPaginated(ctx, sqlc.ListBrandsPaginatedParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list brands page", logger.Error(err))
+
+		return nil, err
+	}
+
+	brands := make([]domain.Brand, 0, len(rows))
+
+	for _, row := range rows {
+		brands = append(brands, brandFromRow(sqlc.ListBrandsRow(row)))
+	}
+
+	return brands, nil
+}
+
+// brandFromRow maps a sqlc erp_brands row (with its computed product count)
+// to the domain model, collapsing nullable columns to their zero value when
+// NULL.
+func brandFromRow(row sqlc.ListBrandsRow) domain.Brand {
+	var b domain.Brand
+	b.ID = row.ID
+	b.OwnerID = row.OwnerID
+	b.BusinessID = row.BusinessID
+	b.Name = row.Name
+	b.ProductCount = row.ProductCount
+
+	if row.LogoUrl.Valid {
+		b.LogoURL = row.LogoUrl.String
+	}
+
+	if row.Description.Valid {
+		b.Description = row.Description.String
+	}
+
+	if row.CreatedAt.Valid {
+		b.CreatedAt = row.CreatedAt.Time
+	}
+
+	if row.UpdatedAt.Valid {
+		b.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return b
 }
 
 func (r *Repository) CreateBrand(ctx context.Context, businessID int64, input domain.BrandInput) (int64, error) {

@@ -631,6 +631,9 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 	return orderID, orderNumber, nil
 }
 
-func (s *Service) GetPublicOrderStatus(ctx context.Context, orderID int64) (string, string, error) {
-	return s.repo.GetPublicOrderStatus(ctx, orderID)
+func (s *Service) GetPublicOrderStatus(ctx context.Context, businessID, orderID int64) (string, string, error) {
+	if businessID <= 0 {
+		return "", "", errors.New("business_id is required")
+	}
+	return s.repo.GetPublicOrderStatus(ctx, businessID, orderID)
 }

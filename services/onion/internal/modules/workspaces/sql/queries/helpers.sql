@@ -21,7 +21,11 @@ SET actual_hours = (
     FROM flow_time_logs
     WHERE task_id = ?
 )
-WHERE flow_tasks.id = ?;
+WHERE flow_tasks.id = ?
+  AND (
+    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_tasks.workspace_id AND w.owner_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_tasks.workspace_id AND wm.user_id = ?)
+  );
 
 -- cross-schema read from users — email lookup for project invites
 -- name: LookupUserByEmail :one
@@ -49,7 +53,7 @@ LIMIT 1;
 -- name: RenameProject :exec
 UPDATE flow_projects
 SET name = ?
-WHERE id = ?;
+WHERE id = ? AND owner_id = ? AND workspace_id = ?;
 
 -- name: GetProjectWorkspace :one
 SELECT workspace_id

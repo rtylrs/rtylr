@@ -818,24 +818,20 @@ func (r *Repository) CountInvoicesByStatus(ctx context.Context, businessID int64
 	return counts, nil
 }
 
-// GetOverdueInvoices returns all unpaid invoices whose due_date is before
-// the given cutoff (expressed as YYYY-MM-DD). Pass an empty string to use
-// today's date.
-func (r *Repository) GetOverdueInvoices(ctx context.Context, businessID int64, beforeDate string) ([]domain.Invoice, error) {
-	if beforeDate == "" {
-		beforeDate = time.Now().Format("2006-01-02")
-	}
-
-	before, err := time.Parse("2006-01-02", beforeDate)
+// GetOverdueInvoices returns one page of unpaid invoices whose due_date is
+// before the given cutoff (expressed as YYYY-MM-DD). Pass an empty string to
+// use today's date.
+func (r *Repository) GetOverdueInvoices(ctx context.Context, businessID int64, beforeDate string, limit, offset int32) ([]domain.Invoice, error) {
+	before, err := parseOverdueCutoff(ctx, beforeDate)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to parse beforeDate for overdue invoices", logger.Error(err))
-
 		return nil, err
 	}
 
 	rows, err := r.queries.ListOverdueInvoices(ctx, sqlc.ListOverdueInvoicesParams{
 		BusinessID: businessID,
 		DueDate:    before,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list overdue invoices", logger.Error(err))
@@ -849,6 +845,43 @@ func (r *Repository) GetOverdueInvoices(ctx context.Context, businessID int64, b
 	}
 
 	return invoices, nil
+}
+
+// CountOverdueInvoices returns the total number of unpaid invoices whose
+// due_date is before the given cutoff (expressed as YYYY-MM-DD). Pass an
+// empty string to use today's date.
+func (r *Repository) CountOverdueInvoices(ctx context.Context, businessID int64, beforeDate string) (int64, error) {
+	before, err := parseOverdueCutoff(ctx, beforeDate)
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := r.queries.CountOverdueInvoices(ctx, sqlc.CountOverdueInvoicesParams{
+		BusinessID: businessID,
+		DueDate:    before,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count overdue invoices", logger.Error(err))
+
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func parseOverdueCutoff(ctx context.Context, beforeDate string) (time.Time, error) {
+	if beforeDate == "" {
+		beforeDate = time.Now().Format("2006-01-02")
+	}
+
+	before, err := time.Parse("2006-01-02", beforeDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse beforeDate for overdue invoices", logger.Error(err))
+
+		return time.Time{}, err
+	}
+
+	return before, nil
 }
 
 // ---------------------------------------------------------------------------

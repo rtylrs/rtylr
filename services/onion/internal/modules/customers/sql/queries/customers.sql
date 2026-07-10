@@ -20,7 +20,7 @@ WHERE id = ? AND business_id = ?;
 DELETE FROM crm_customers WHERE id = ? AND business_id = ?;
 
 -- name: UpdateCustomerLoyalty :exec
-UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ?;
+UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ? AND business_id = ?;
 
 -- name: RecordVisit :exec
 UPDATE crm_customers

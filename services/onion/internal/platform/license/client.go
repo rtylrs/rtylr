@@ -42,7 +42,10 @@ func NewClient(authorityURL string) *Client {
 // authority's StatusReport. A non-nil error means the authority was unreachable
 // or returned an unusable response — callers apply grace logic on error.
 func (c *Client) Verify(ctx context.Context, key string) (StatusReport, error) {
-	body, _ := json.Marshal(map[string]string{"license_key": strings.TrimSpace(key)})
+	body, err := json.Marshal(map[string]string{"license_key": strings.TrimSpace(key)})
+	if err != nil {
+		return StatusReport{}, fmt.Errorf("encode license verify request: %w", err)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.authorityURL+"/license/verify", bytes.NewReader(body))
 	if err != nil {
 		return StatusReport{}, err

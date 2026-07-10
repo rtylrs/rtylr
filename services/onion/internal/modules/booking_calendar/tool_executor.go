@@ -77,12 +77,17 @@ func bookingCalendarToolRange(input map[string]any) (string, string, error) {
 	if from == "" {
 		from = time.Now().Format("2006-01-02")
 	}
+	start, err := time.Parse("2006-01-02", from)
+	if err != nil {
+		return "", "", errors.New("from must be in YYYY-MM-DD format")
+	}
 	if to == "" {
-		start, _ := time.Parse("2006-01-02", from)
 		to = start.AddDate(0, 0, 7).Format("2006-01-02")
 	}
-	start, _ := time.Parse("2006-01-02", from)
-	end, _ := time.Parse("2006-01-02", to)
+	end, err := time.Parse("2006-01-02", to)
+	if err != nil {
+		return "", "", errors.New("to must be in YYYY-MM-DD format")
+	}
 	if end.Before(start) {
 		return "", "", errors.New("to must be on or after from")
 	}

@@ -24,14 +24,16 @@ func invalidateCRMSalesScope(ctx context.Context, businessID int64) {
 }
 
 type repository interface {
-	ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error)
+	ListLeads(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Lead, error)
+	CountLeads(ctx context.Context, businessID int64) (int64, error)
 	GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error)
 	CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error)
 	UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
 	DeleteLead(ctx context.Context, id, businessID int64) error
 	GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error)
 
-	ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error)
+	ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) ([]domain.Contact, error)
+	CountContacts(ctx context.Context, businessID int64, leadID *int64) (int64, error)
 	CreateContact(ctx context.Context, businessID int64, req domain.CreateContactRequest) (domain.Contact, error)
 	UpdateContact(ctx context.Context, id, businessID int64, req domain.UpdateContactRequest) (domain.Contact, error)
 	DeleteContact(ctx context.Context, id, businessID int64) error
@@ -40,7 +42,8 @@ type repository interface {
 	CreateTouchpoint(ctx context.Context, businessID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error)
 	DeleteTouchpoint(ctx context.Context, id, businessID int64) error
 
-	ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error)
+	ListContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
+	CountContracts(ctx context.Context, businessID int64) (int64, error)
 	GetContract(ctx context.Context, id, businessID int64) (domain.Contract, error)
 	CreateContract(ctx context.Context, businessID int64, req domain.CreateContractRequest) (domain.Contract, error)
 	UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error)
@@ -54,11 +57,35 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) ListLeads(ctx context.Context, businessID int64) ([]domain.Lead, error) {
-	return cacher.Of[[]domain.Lead]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSalesScope, businessID, "leads"),
-		func(ctx context.Context) ([]domain.Lead, error) {
-			return s.repo.ListLeads(ctx, businessID)
+// normalizePagination applies the standard list defaults: limit falls back to
+// 20 when unset, is capped at 100, and offset is clamped to zero or above.
+func normalizePagination(limit, offset int32) (int32, int32) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return limit, offset
+}
+
+func (s *Service) ListLeads(ctx context.Context, businessID int64, limit, offset int32) (domain.LeadPage, error) {
+	limit, offset = normalizePagination(limit, offset)
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("leads|n=%d|o=%d", limit, offset))
+	return cacher.Of[domain.LeadPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.LeadPage, error) {
+			leads, err := s.repo.ListLeads(ctx, businessID, limit, offset)
+			if err != nil {
+				return domain.LeadPage{}, err
+			}
+			total, err := s.repo.CountLeads(ctx, businessID)
+			if err != nil {
+				return domain.LeadPage{}, err
+			}
+			return domain.LeadPage{Leads: leads, Total: total, Limit: limit, Offset: offset}, nil
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
@@ -126,15 +153,24 @@ func (s *Service) GetPipeline(ctx context.Context, businessID int64) ([]domain.P
 	)
 }
 
-func (s *Service) ListContacts(ctx context.Context, businessID int64, leadID *int64) ([]domain.Contact, error) {
+func (s *Service) ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) (domain.ContactPage, error) {
+	limit, offset = normalizePagination(limit, offset)
 	lead := int64(0)
 	if leadID != nil {
 		lead = *leadID
 	}
-	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contacts|l=%d", lead))
-	return cacher.Of[[]domain.Contact]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.Contact, error) {
-			return s.repo.ListContacts(ctx, businessID, leadID)
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contacts|l=%d|n=%d|o=%d", lead, limit, offset))
+	return cacher.Of[domain.ContactPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.ContactPage, error) {
+			contacts, err := s.repo.ListContacts(ctx, businessID, leadID, limit, offset)
+			if err != nil {
+				return domain.ContactPage{}, err
+			}
+			total, err := s.repo.CountContacts(ctx, businessID, leadID)
+			if err != nil {
+				return domain.ContactPage{}, err
+			}
+			return domain.ContactPage{Contacts: contacts, Total: total, Limit: limit, Offset: offset}, nil
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)
@@ -196,11 +232,20 @@ func (s *Service) DeleteTouchpoint(ctx context.Context, id, businessID int64) er
 	return nil
 }
 
-func (s *Service) ListContracts(ctx context.Context, businessID int64) ([]domain.Contract, error) {
-	return cacher.Of[[]domain.Contract]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(crmSalesScope, businessID, "contracts"),
-		func(ctx context.Context) ([]domain.Contract, error) {
-			return s.repo.ListContracts(ctx, businessID)
+func (s *Service) ListContracts(ctx context.Context, businessID int64, limit, offset int32) (domain.ContractPage, error) {
+	limit, offset = normalizePagination(limit, offset)
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contracts|n=%d|o=%d", limit, offset))
+	return cacher.Of[domain.ContractPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.ContractPage, error) {
+			contracts, err := s.repo.ListContracts(ctx, businessID, limit, offset)
+			if err != nil {
+				return domain.ContractPage{}, err
+			}
+			total, err := s.repo.CountContracts(ctx, businessID)
+			if err != nil {
+				return domain.ContractPage{}, err
+			}
+			return domain.ContractPage{Contracts: contracts, Total: total, Limit: limit, Offset: offset}, nil
 		},
 		cacher.WithExpiry(ctx, crmSalesTTL),
 	)

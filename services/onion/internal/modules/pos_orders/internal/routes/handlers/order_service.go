@@ -172,8 +172,12 @@ func (a *OrderAPI) GetPublicOrderStatus(ctx context.Context, req *posordersv1.Ge
 	if orderID <= 0 {
 		return nil, orderAPIStatusError(http.StatusBadRequest, "Invalid order id")
 	}
+	businessID := req.GetBusinessId()
+	if businessID <= 0 {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "Invalid business id")
+	}
 
-	orderNumber, status, err := a.Service.GetPublicOrderStatus(ctx, orderID)
+	orderNumber, status, err := a.Service.GetPublicOrderStatus(ctx, businessID, orderID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")

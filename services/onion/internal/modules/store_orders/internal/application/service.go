@@ -11,7 +11,12 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
-const cacheTTL = 5 * time.Minute
+const (
+	cacheTTL = 5 * time.Minute
+
+	defaultListLimit int32 = 20
+	maxListLimit     int32 = 100
+)
 
 type Service struct{ repo *infrastructure.Repository }
 
@@ -24,6 +29,38 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.StoreOrd
 	return cacher.Of[[]domain.StoreOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.StoreOrder, error) {
 		return s.repo.List(ctx, businessID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
+}
+
+// ListPaginated returns a single page of store orders plus the tenant's total
+// count. A non-positive limit defaults to 20 and limit is capped at 100; a
+// negative offset is clamped to zero.
+func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) (domain.StoreOrderPage, error) {
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+	if limit > maxListLimit {
+		limit = maxListLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	orders, err := s.repo.ListPaginated(ctx, businessID, limit, offset)
+	if err != nil {
+		return domain.StoreOrderPage{}, err
+	}
+
+	total, err := s.repo.Count(ctx, businessID)
+	if err != nil {
+		return domain.StoreOrderPage{}, err
+	}
+
+	return domain.StoreOrderPage{
+		Orders: orders,
+		Total:  total,
+		Limit:  limit,
+		Offset: offset,
+	}, nil
 }
 
 func (s *Service) GetDetail(ctx context.Context, businessID, orderID int64) (domain.StoreOrderDetail, error) {

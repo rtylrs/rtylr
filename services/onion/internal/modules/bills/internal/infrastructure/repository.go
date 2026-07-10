@@ -69,6 +69,27 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Bill,
 	return items, nil
 }
 
+// ListPaginated returns a single page of bills for the business, ordered by
+// due date. Limit and offset are applied as-is; callers clamp them.
+func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Bill, error) {
+	rows, err := r.queries.ListBillsPaginated(ctx, sqlc.ListBillsPaginatedParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list bills page", logger.Error(err))
+		return nil, err
+	}
+
+	items := make([]domain.Bill, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, billFromSqlc(row))
+	}
+
+	return items, nil
+}
+
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.BillInput) (int64, error) {
 	status := input.Status
 	if status == "" {

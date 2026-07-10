@@ -18,14 +18,20 @@ func CreateRoutes() []string { return []string{"/store/orders"} }
 func UpdateRoutes() []string { return []string{"/store/orders"} }
 
 type (
-	ListHandler  struct{ Service *application.Service }
-	ListRequest  struct{}
+	ListHandler struct{ Service *application.Service }
+	ListRequest struct {
+		Limit  int32 `json:"limit"`
+		Offset int32 `json:"offset"`
+	}
 	ListResponse struct {
 		Orders []domain.StoreOrder `json:"orders"`
+		Total  int64               `json:"total"`
+		Limit  int32               `json:"limit"`
+		Offset int32               `json:"offset"`
 	}
 )
 
-func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, error) {
+func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return ListResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
@@ -34,11 +40,16 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if bizErr != nil {
 		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
-	items, err := h.Service.List(ctx, businessID)
+	page, err := h.Service.ListPaginated(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		return ListResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list orders")
 	}
-	return ListResponse{Orders: items}, nil
+	return ListResponse{
+		Orders: page.Orders,
+		Total:  page.Total,
+		Limit:  page.Limit,
+		Offset: page.Offset,
+	}, nil
 }
 
 type (

@@ -37,6 +37,36 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Store
 	return items, nil
 }
 
+// ListPaginated returns a single page of store orders for the business,
+// ordered by creation date. Limit and offset are applied as-is; callers clamp
+// them.
+func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.StoreOrder, error) {
+	rows, err := r.queries.ListStoreOrdersPaginated(ctx, sqlc.ListStoreOrdersPaginatedParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list store orders page", logger.Error(err))
+		return nil, err
+	}
+	items := make([]domain.StoreOrder, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, orderFromRow(ctx, row))
+	}
+	return items, nil
+}
+
+// Count returns the total number of store orders for the business.
+func (r *Repository) Count(ctx context.Context, businessID int64) (int64, error) {
+	count, err := r.queries.CountStoreOrders(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count store orders", logger.Error(err))
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *Repository) GetDetail(ctx context.Context, businessID, orderID int64) (domain.StoreOrderDetail, error) {
 	order, err := r.queries.GetStoreOrder(ctx, sqlc.GetStoreOrderParams{BusinessID: businessID, ID: orderID})
 	if err != nil {
@@ -81,7 +111,11 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		logger.Ctx(ctx).Error("Failed to create store order", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read store order insert id", logger.Error(err))
+		return 0, err
+	}
 	if err := r.upsertOrderCustomerTx(ctx, qtx, ownerID, businessID, input); err != nil {
 		return 0, err
 	}

@@ -479,7 +479,7 @@ func TestGetOverdueInvoices_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	overdue, err := repo.GetOverdueInvoices(ctx, testutil.OwnerID, "")
+	overdue, err := repo.GetOverdueInvoices(ctx, testutil.OwnerID, "", 100, 0)
 	if err != nil {
 		t.Fatalf("GetOverdueInvoices: %v", err)
 	}
@@ -491,7 +491,7 @@ func TestGetOverdueInvoices_ZeroOwnerReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	overdue, err := repo.GetOverdueInvoices(ctx, 0, "")
+	overdue, err := repo.GetOverdueInvoices(ctx, 0, "", 100, 0)
 	if err != nil {
 		t.Fatalf("GetOverdueInvoices(ownerID=0): %v", err)
 	}
@@ -506,7 +506,7 @@ func TestGetOverdueInvoices_FutureCutoffReturnsNone(t *testing.T) {
 	ctx := context.Background()
 
 	// A past cutoff means nothing is "overdue before year 2000".
-	overdue, err := repo.GetOverdueInvoices(ctx, testutil.OwnerID, "2000-01-01")
+	overdue, err := repo.GetOverdueInvoices(ctx, testutil.OwnerID, "2000-01-01", 100, 0)
 	if err != nil {
 		t.Fatalf("GetOverdueInvoices past cutoff: %v", err)
 	}

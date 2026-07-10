@@ -23,15 +23,21 @@ import (
 
 func ListContractsRoutes() []string { return []string{"/crm/sales/contracts"} }
 
-type (
-	ListContractsHandler  struct{ Service *application.Service }
-	ListContractsRequest  struct{}
-	ListContractsResponse struct {
-		Contracts []domain.Contract `json:"contracts"`
-	}
-)
+type ListContractsHandler struct{ Service *application.Service }
 
-func (h *ListContractsHandler) Serve(ctx context.Context, _ *ListContractsRequest) (ListContractsResponse, error) {
+type ListContractsRequest struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListContractsResponse struct {
+	Contracts []domain.Contract `json:"contracts"`
+	Total     int64             `json:"total"`
+	Limit     int32             `json:"limit"`
+	Offset    int32             `json:"offset"`
+}
+
+func (h *ListContractsHandler) Serve(ctx context.Context, req *ListContractsRequest) (ListContractsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListContractsResponse{}, onekiterrors.PermissionDenied()
@@ -42,13 +48,13 @@ func (h *ListContractsHandler) Serve(ctx context.Context, _ *ListContractsReques
 		return ListContractsResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	contracts, err := h.Service.ListContracts(ctx, businessID)
+	page, err := h.Service.ListContracts(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contracts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListContractsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list contracts")
 	}
 
-	return ListContractsResponse{Contracts: contracts}, nil
+	return ListContractsResponse{Contracts: page.Contracts, Total: page.Total, Limit: page.Limit, Offset: page.Offset}, nil
 }
 
 // ---------------------------------------------------------------------------

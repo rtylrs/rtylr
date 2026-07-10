@@ -45,8 +45,7 @@ func (r *Repository) Create(ctx context.Context, creatorID, businessID int64, in
 		logger.Ctx(ctx).Error("Failed to create theme", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
-	return id, nil
+	return result.LastInsertId()
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ThemeInput) error {

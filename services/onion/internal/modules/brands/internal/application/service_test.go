@@ -25,6 +25,10 @@ func (m *mockRepo) ListBrands(_ context.Context, _ int64) ([]domain.Brand, error
 	return nil, nil
 }
 
+func (m *mockRepo) ListBrandsPaginated(_ context.Context, _ int64, _, _ int32) ([]domain.Brand, error) {
+	return nil, nil
+}
+
 func (m *mockRepo) CreateBrand(_ context.Context, _ int64, input domain.BrandInput) (int64, error) {
 	m.createGot = input
 	return m.createID, m.createErr

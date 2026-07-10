@@ -13,7 +13,11 @@ SELECT id, owner_id, business_id, invoice_number, client_name, client_email, cli
        notes, terms, created_at, updated_at
 FROM finance_invoices
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountInvoicesByOwner :one
+SELECT COUNT(*) FROM finance_invoices WHERE business_id = ?;
 
 -- name: ListInvoicesByOwnerAndStatus :many
 SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
@@ -69,7 +73,15 @@ FROM finance_invoices
 WHERE business_id = ?
   AND status NOT IN ('paid', 'void', 'draft')
   AND due_date < ?
-ORDER BY due_date ASC;
+ORDER BY due_date ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountOverdueInvoices :one
+SELECT COUNT(*)
+FROM finance_invoices
+WHERE business_id = ?
+  AND status NOT IN ('paid', 'void', 'draft')
+  AND due_date < ?;
 
 -- name: GetInvoiceItems :many
 SELECT id, invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order
@@ -101,7 +113,11 @@ SELECT id, owner_id, business_id, category_id, description, amount, currency, ex
        payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE business_id = ?
-ORDER BY expense_date DESC;
+ORDER BY expense_date DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountExpensesByOwner :one
+SELECT COUNT(*) FROM finance_expenses WHERE business_id = ?;
 
 -- name: GetExpenseByID :one
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,
