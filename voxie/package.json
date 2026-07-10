@@ -1,7 +1,25 @@
 {
-  "name": "voxie-contracts",
+  "name": "@voxire/voxie",
+  "version": "0.0.1",
   "private": true,
-  "description": "TypeScript codegen tooling for voxie protobuf contracts",
+  "description": "Generated TypeScript contracts and clients from Voxie protobuf definitions",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./validation/metadata": "./gen/ts/validation/metadata.ts",
+    "./validation/metadata.json": "./gen/ts/validation/metadata.json",
+    "./*": "./gen/ts/*.ts",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./gen/ts/*"
+      ]
+    }
+  },
   "devDependencies": {
     "ts-proto": "^2.11.6",
     "typescript": "^5.9.3"
