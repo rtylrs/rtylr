@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const finiteNumber = z.preprocess((value) => {
+  if (value === null || value === undefined || value === '') return value;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : value;
+}, z.number());
+
 export const payrollConfigSchema = z.object({
   grossModel: z.enum(['hourly', 'salary', 'both']),
   period: z.enum(['weekly', 'biweekly', 'monthly']),
@@ -11,29 +17,29 @@ export const payrollConfigSchema = z.object({
 export type PayrollConfigForm = z.infer<typeof payrollConfigSchema>;
 
 export const payrollRunEntrySchema = z.object({
-  id: z.number(),
-  employeeId: z.number(),
+  id: finiteNumber,
+  employeeId: finiteNumber,
   employeeName: z.string(),
-  hoursWorked: z.number(),
-  basePay: z.number(),
-  overtimePay: z.number(),
-  deductions: z.number(),
-  bonuses: z.number(),
-  netPay: z.number(),
+  hoursWorked: finiteNumber,
+  basePay: finiteNumber,
+  overtimePay: finiteNumber,
+  deductions: finiteNumber,
+  bonuses: finiteNumber,
+  netPay: finiteNumber,
 });
 
 export type PayrollRunEntry = z.infer<typeof payrollRunEntrySchema>;
 
 export const payrollRunSchema = z.object({
-  id: z.number(),
+  id: finiteNumber,
   periodStart: z.string(),
   periodEnd: z.string(),
   status: z.enum(['Draft', 'Pending', 'Approved', 'Paid']),
-  totalNetPay: z.number(),
-  totalBasePay: z.number(),
-  totalOvertimePay: z.number(),
-  totalDeductions: z.number(),
-  employeeCount: z.number(),
+  totalNetPay: finiteNumber,
+  totalBasePay: finiteNumber,
+  totalOvertimePay: finiteNumber,
+  totalDeductions: finiteNumber,
+  employeeCount: finiteNumber,
   createdAt: z.string(),
   entries: z.array(payrollRunEntrySchema).optional(),
 });

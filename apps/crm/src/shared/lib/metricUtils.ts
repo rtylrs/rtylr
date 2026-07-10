@@ -1,7 +1,10 @@
+import { toFiniteNumber } from '@voxire/api';
+
 export function formatMetric(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return String(value);
+  const safeValue = toFiniteNumber(value);
+  if (safeValue >= 1_000_000) return `${(safeValue / 1_000_000).toFixed(1)}M`;
+  if (safeValue >= 1_000) return `${(safeValue / 1_000).toFixed(1)}K`;
+  return String(safeValue);
 }
 
 export function absoluteDiff(a: number, b: number): number {

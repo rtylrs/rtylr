@@ -73,4 +73,23 @@ describe('dashboardStatsSchema', () => {
     expect(result.totalCustomersChange).toBe('+3%');
     expect(result.campaignReachChange).toBe('-2%');
   });
+
+  it('normalizes snake_case numeric strings from the wire', () => {
+    const result = dashboardStatsSchema.parse({
+      total_customers: '1200',
+      new_this_month: '45',
+      active_loyalty_members: '380',
+      campaign_reach: '950',
+      total_customers_change: '+3%',
+      top_customers: [{ firstName: 'Alice', lastName: 'Smith', visits: '8' }],
+      recent_campaigns: [
+        { name: 'Launch', channel: 'email', sent: '250', openRate: '40%', revenue: '$500' },
+      ],
+    });
+
+    expect(result.totalCustomers).toBe(1200);
+    expect(result.activeLoyaltyMembers).toBe(380);
+    expect(result.topCustomers[0]?.visits).toBe(8);
+    expect(result.recentCampaigns[0]?.sent).toBe(250);
+  });
 });

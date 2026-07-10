@@ -1,6 +1,7 @@
 // Headcount analytics helpers for the insights operations feature.
 
 import type { HeadcountResponse } from '../hooks/queries/types';
+import { toFiniteNumber } from '@voxire/api';
 
 /**
  * headcountTrend returns 'up', 'down', or 'flat' based on momDeltaPct.
@@ -23,8 +24,9 @@ export function headcountDeltaLabel(data: HeadcountResponse): string {
  * headcountGrowthRate returns the month-over-month growth rate formatted as a percentage string.
  */
 export function headcountGrowthRate(data: HeadcountResponse): string {
-  const sign = data.momDeltaPct >= 0 ? '+' : '';
-  return `${sign}${data.momDeltaPct.toFixed(1)}%`;
+  const delta = toFiniteNumber(data.momDeltaPct);
+  const sign = delta >= 0 ? '+' : '';
+  return `${sign}${delta.toFixed(1)}%`;
 }
 
 /**

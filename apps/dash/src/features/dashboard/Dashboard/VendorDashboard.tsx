@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Settings2, X, Plus, GripVertical } from 'lucide-react';
 import { ErrorBoundary } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
+import { toFiniteNumber } from '@voxire/api';
 import { useUserStore } from '../../../shared/stores/userStore';
 import {
   getWidgetComponent,
@@ -50,14 +51,14 @@ function layoutSignature(layout: ReadonlyArray<LayoutSignatureItem> | undefined)
   return JSON.stringify(
     (layout ?? []).map((item) => ({
       i: String(item.i ?? ''),
-      x: Number(item.x ?? 0),
-      y: Number(item.y ?? 0),
-      w: Number(item.w ?? 0),
-      h: Number(item.h ?? 0),
-      minW: Number(item.minW ?? 0),
-      minH: Number(item.minH ?? 0),
-      maxW: Number(item.maxW ?? 0),
-      maxH: Number(item.maxH ?? 0),
+      x: toFiniteNumber(item.x),
+      y: toFiniteNumber(item.y),
+      w: toFiniteNumber(item.w),
+      h: toFiniteNumber(item.h),
+      minW: toFiniteNumber(item.minW),
+      minH: toFiniteNumber(item.minH),
+      maxW: toFiniteNumber(item.maxW),
+      maxH: toFiniteNumber(item.maxH),
     }))
   );
 }

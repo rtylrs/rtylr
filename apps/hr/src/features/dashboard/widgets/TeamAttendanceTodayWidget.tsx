@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import WidgetShell from './WidgetShell';
+import { safeRatio, toFiniteNumber } from '@voxire/api';
 
 interface AttendanceData {
   present: number;
@@ -20,6 +21,7 @@ const TeamAttendanceTodayWidget = ({
   isLoading,
 }: TeamAttendanceTodayWidgetProps): React.JSX.Element => {
   const { t } = useTranslation();
+  const total = toFiniteNumber(data?.total);
 
   return (
     <WidgetShell
@@ -35,17 +37,17 @@ const TeamAttendanceTodayWidget = ({
             {[
               {
                 label: t('dashboard.widgets.present'),
-                value: data.present,
+                value: toFiniteNumber(data.present),
                 color: 'var(--hr-status-approved)',
               },
               {
                 label: t('dashboard.widgets.absent'),
-                value: data.absent,
+                value: toFiniteNumber(data.absent),
                 color: 'var(--hr-error)',
               },
               {
                 label: t('dashboard.widgets.late'),
-                value: data.late,
+                value: toFiniteNumber(data.late),
                 color: 'var(--hr-status-pending)',
               },
             ].map((s) => (
@@ -57,7 +59,7 @@ const TeamAttendanceTodayWidget = ({
               </div>
             ))}
           </div>
-          {data.total > 0 && (
+          {total > 0 && (
             <div
               style={{
                 display: 'flex',
@@ -69,19 +71,19 @@ const TeamAttendanceTodayWidget = ({
             >
               <div
                 style={{
-                  width: `${(data.present / data.total) * 100}%`,
+                  width: `${safeRatio(data.present, total) * 100}%`,
                   background: 'var(--hr-status-approved)',
                 }}
               />
               <div
                 style={{
-                  width: `${(data.late / data.total) * 100}%`,
+                  width: `${safeRatio(data.late, total) * 100}%`,
                   background: 'var(--hr-status-pending)',
                 }}
               />
               <div
                 style={{
-                  width: `${(data.absent / data.total) * 100}%`,
+                  width: `${safeRatio(data.absent, total) * 100}%`,
                   background: 'var(--hr-error)',
                 }}
               />

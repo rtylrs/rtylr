@@ -1,4 +1,4 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/service_client';
 import type { Expense } from '../../shared/services/financeApi';
@@ -13,9 +13,9 @@ export function useExpenseById(id: string | undefined) {
       if (!res.expense) return undefined;
       return {
         id: res.expense.id,
-        categoryId: res.expense.categoryId != null ? Number(res.expense.categoryId) : null,
+        categoryId: res.expense.categoryId != null ? toFiniteNumber(res.expense.categoryId) : null,
         description: res.expense.description,
-        amount: res.expense.amount,
+        amount: toFiniteNumber(res.expense.amount),
         currency: res.expense.currency,
         vendor: res.expense.vendor,
         receiptUrl: res.expense.receiptUrl,

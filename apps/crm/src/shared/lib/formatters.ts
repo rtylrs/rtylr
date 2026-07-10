@@ -1,20 +1,22 @@
 // Formatting utilities for the CRM app.
 
+import { toFiniteNumber } from '@voxire/api';
+
 export function formatCurrency(amount: number, currency = 'USD', locale = 'en-US'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(toFiniteNumber(amount));
 }
 
 export function formatPercent(value: number, decimals = 1): string {
-  return value.toFixed(decimals) + '%';
+  return toFiniteNumber(value).toFixed(decimals) + '%';
 }
 
 export function formatNumber(value: number, locale = 'en-US'): string {
-  return new Intl.NumberFormat(locale).format(value);
+  return new Intl.NumberFormat(locale).format(toFiniteNumber(value));
 }
 
 export function formatDate(value: string | Date | null | undefined, locale = 'en-US'): string {

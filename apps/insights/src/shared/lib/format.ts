@@ -1,18 +1,21 @@
+import { toFiniteNumber } from '@voxire/api';
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(toFiniteNumber(value));
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-US').format(value);
+  return new Intl.NumberFormat('en-US').format(toFiniteNumber(value));
 }
 
 export function formatPercent(value: number): string {
-  return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+  const safeValue = toFiniteNumber(value);
+  return `${safeValue >= 0 ? '+' : ''}${safeValue.toFixed(1)}%`;
 }
 
 export function timeAgo(dateStr: string): string {

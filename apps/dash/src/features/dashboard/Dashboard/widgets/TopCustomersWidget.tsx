@@ -1,7 +1,7 @@
 import React from 'react';
 import { Crown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 interface TopCustomer {
@@ -12,7 +12,16 @@ interface TopCustomer {
 }
 
 interface ApiResponse {
-  customers?: TopCustomer[];
+  customers?: RawTopCustomer[];
+}
+
+interface RawTopCustomer {
+  id?: number | string;
+  name?: string;
+  lifetimeSpendMinorUnits?: number | string;
+  lifetime_spend_minor_units?: number | string;
+  orderCount?: number | string;
+  order_count?: number | string;
 }
 
 function formatMoney(minor: number): string {
@@ -30,7 +39,14 @@ const TopCustomersWidget: React.FC = (): React.JSX.Element => {
         const res = await unwrap(
           safe.get<ApiResponse>('/insights/customers/top', { params: { limit: 5 } })
         );
-        return res.customers ?? [];
+        return (res.customers ?? []).map((customer) => ({
+          id: toFiniteNumber(customer.id),
+          name: customer.name ?? 'Customer',
+          lifetimeSpendMinorUnits: toFiniteNumber(
+            customer.lifetimeSpendMinorUnits ?? customer.lifetime_spend_minor_units
+          ),
+          orderCount: toFiniteNumber(customer.orderCount ?? customer.order_count),
+        }));
       } catch {
         return [];
       }

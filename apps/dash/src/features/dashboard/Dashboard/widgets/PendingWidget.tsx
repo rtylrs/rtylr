@@ -6,6 +6,7 @@ import { safe } from '../../../../shared/lib/api';
 
 interface PendingRequest {
   staffName?: string;
+  staff_name?: string;
   type?: string;
 }
 
@@ -58,7 +59,7 @@ const PendingWidget: React.FC = () => {
               <div className="h-2 w-2 rounded-full shrink-0" style={{ background: '#f59e0b' }} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
-                  {r.staffName || 'Team member'}
+                  {r.staffName ?? r.staff_name ?? 'Team member'}
                 </p>
                 <p className="text-[10px]" style={{ color: 'var(--dash-text-dim)' }}>
                   {r.type || 'Time off request'}

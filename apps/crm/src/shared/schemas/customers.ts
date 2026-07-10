@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const finiteNumber = z.preprocess((value) => {
+  if (value === null || value === undefined || value === '') return value;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : value;
+}, z.number());
+
 /**
  * Customer wire shape mirrors the backend `crmv1.Customer` proto
  * (onion customers module, customer_list_handler.go → crmv1.Customer).
@@ -15,8 +21,8 @@ import { z } from 'zod';
  * compatibility. Derived fields are not sent back to the API.
  */
 const customerWireSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  ownerId: z.number().optional(),
+  id: finiteNumber,
+  ownerId: finiteNumber.optional(),
   firstName: z.string().default(''),
   lastName: z.string().default(''),
   email: z.string().default(''),
@@ -26,9 +32,9 @@ const customerWireSchema = z.object({
   address: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
-  loyaltyPoints: z.number().default(0),
-  totalSpent: z.number().default(0),
-  visitCount: z.number().default(0),
+  loyaltyPoints: finiteNumber.catch(0),
+  totalSpent: finiteNumber.catch(0),
+  visitCount: finiteNumber.catch(0),
   lastVisitAt: z.string().nullable().optional(),
   loyaltyTier: z.string().optional(),
   tags: z.array(z.string()).optional(),
@@ -44,7 +50,7 @@ const customerWireSchema = z.object({
       marketing: z.boolean(),
     })
     .optional(),
-  referredBy: z.number().nullable().optional(),
+  referredBy: finiteNumber.nullable().optional(),
 });
 
 function deriveInitials(firstName: string, lastName: string): string {
@@ -67,7 +73,7 @@ export const customerSchema = customerWireSchema.transform((c) => {
 });
 
 export const timelineEntrySchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
+  id: finiteNumber,
   type: z.enum(['visit', 'purchase', 'email', 'sms', 'note', 'points', 'reward']).catch('visit'),
   title: z.string(),
   description: z.string().optional(),

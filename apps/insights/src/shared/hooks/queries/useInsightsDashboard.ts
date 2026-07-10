@@ -1,4 +1,4 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { DashboardServiceClient } from '@voxire/voxie/insights/dashboard/v1/service_client';
 import type { InsightsDashboardResponse } from './types';
@@ -12,20 +12,20 @@ export const useInsightsDashboard = (): UseQueryResult<InsightsDashboardResponse
       const res = await dashboardClient.getDashboardSummary({});
       return {
         revenue: {
-          value: Number(res.revenue?.value ?? 0),
-          deltaPct: res.revenue?.deltaPct ?? 0,
+          value: toFiniteNumber(res.revenue?.value),
+          deltaPct: toFiniteNumber(res.revenue?.deltaPct),
         },
         customers: {
-          value: Number(res.customers?.value ?? 0),
-          deltaPct: res.customers?.deltaPct ?? 0,
+          value: toFiniteNumber(res.customers?.value),
+          deltaPct: toFiniteNumber(res.customers?.deltaPct),
         },
         orders: {
-          value: Number(res.orders?.value ?? 0),
-          deltaPct: res.orders?.deltaPct ?? 0,
+          value: toFiniteNumber(res.orders?.value),
+          deltaPct: toFiniteNumber(res.orders?.deltaPct),
         },
         margin: {
-          value: res.margin?.value ?? 0,
-          deltaPct: res.margin?.deltaPct ?? 0,
+          value: toFiniteNumber(res.margin?.value),
+          deltaPct: toFiniteNumber(res.margin?.deltaPct),
         },
       };
     },

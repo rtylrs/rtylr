@@ -6,6 +6,7 @@ import { useValuation } from './useValuation';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatCurrency, formatNumber } from '../../shared/lib/format';
+import { safeRatio, toFiniteNumber } from '@voxire/api';
 
 const AMBER = '#f59e0b';
 
@@ -14,7 +15,7 @@ const Valuation: React.FC = () => {
   const items = data?.items ?? [];
   const totalCost = useMemo(() => items.reduce((sum, item) => sum + item.totalCost, 0), [items]);
   const totalItems = useMemo(
-    () => items.reduce((sum, item) => sum + Number(item.totalItems || 0), 0),
+    () => items.reduce((sum, item) => sum + toFiniteNumber(item.totalItems), 0),
     [items]
   );
 
@@ -111,7 +112,7 @@ const Valuation: React.FC = () => {
                   <div
                     className="h-full rounded-full"
                     style={{
-                      width: `${(cat.value / maxCat) * 100}%`,
+                      width: `${safeRatio(cat.value, maxCat) * 100}%`,
                       background: AMBER,
                     }}
                   />

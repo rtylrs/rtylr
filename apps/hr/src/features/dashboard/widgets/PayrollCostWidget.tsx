@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { DollarSign } from 'lucide-react';
 import { useHRConfigStore } from '../../../shared/stores/hrConfigStore';
 import WidgetShell from './WidgetShell';
+import { safeRatio, toFiniteNumber } from '@voxire/api';
 
 interface PayrollCostData {
   currentMonth: number;
@@ -33,9 +34,11 @@ const PayrollCostWidget = ({ data, isLoading }: PayrollCostWidgetProps): React.J
     );
   }
 
+  const currentMonth = toFiniteNumber(data?.currentMonth);
+  const previousMonth = toFiniteNumber(data?.previousMonth);
   const changePercent =
-    data && data.previousMonth > 0
-      ? (((data.currentMonth - data.previousMonth) / data.previousMonth) * 100).toFixed(1)
+    data && previousMonth > 0
+      ? (safeRatio(currentMonth - previousMonth, previousMonth) * 100).toFixed(1)
       : null;
 
   return (
@@ -51,7 +54,7 @@ const PayrollCostWidget = ({ data, isLoading }: PayrollCostWidgetProps): React.J
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
             <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--hr-text)' }}>
               {data.currency}
-              {data.currentMonth.toLocaleString()}
+              {currentMonth.toLocaleString()}
             </span>
           </div>
           {changePercent !== null && (

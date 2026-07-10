@@ -1,4 +1,4 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { CustomerServiceClient } from '@voxire/voxie/insights/customer/v1/service_client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
@@ -11,7 +11,7 @@ import type {
 
 const customerClient = createOneKitClient(CustomerServiceClient, 'insights');
 
-const majorToMinor = (value: number): number => Math.round(value * 100);
+const majorToMinor = (value: unknown): number => Math.round(toFiniteNumber(value) * 100);
 
 export const useCustomerKPIs = (params?: DateRangeParams): UseQueryResult<CustomerKPIResponse> => {
   const { from, to } = resolveDateRange(params);
@@ -20,12 +20,12 @@ export const useCustomerKPIs = (params?: DateRangeParams): UseQueryResult<Custom
     queryFn: async (): Promise<CustomerKPIResponse> => {
       const res = await customerClient.getCustomerAnalytics({ period: `${from},${to}` });
       const analytics = res.analytics;
-      const total = analytics?.total ?? 0;
-      const retentionRate = analytics?.retentionRate ?? 0;
-      const churnRate = analytics?.churnRate ?? 0;
+      const total = toFiniteNumber(analytics?.total);
+      const retentionRate = toFiniteNumber(analytics?.retentionRate);
+      const churnRate = toFiniteNumber(analytics?.churnRate);
       return {
         total,
-        newThisMonth: analytics?.newThisPeriod ?? 0,
+        newThisMonth: toFiniteNumber(analytics?.newThisPeriod),
         active: Math.round((total * retentionRate) / 100),
         churned: Math.round((total * churnRate) / 100),
       };
@@ -54,11 +54,11 @@ export const useTopCustomers = (
       });
       return {
         customers: res.customers.map((entry) => ({
-          customerId: Number(entry.id),
+          customerId: toFiniteNumber(entry.id),
           name: entry.name,
           email: '',
           lifetimeSpendMinorUnits: majorToMinor(entry.totalSpent),
-          orderCount: entry.orderCount,
+          orderCount: toFiniteNumber(entry.orderCount),
         })),
       };
     },
@@ -78,7 +78,7 @@ export const useCustomerLTV = (): UseQueryResult<CustomerLTVResponse> => {
             label: entry.segment,
             lowerMinorUnits: avg,
             upperMinorUnits: avg,
-            customerCount: entry.customerCount,
+            customerCount: toFiniteNumber(entry.customerCount),
           };
         }),
       };
@@ -99,9 +99,9 @@ export const useCustomerChurn = (
         windows: [
           {
             windowDays: 30,
-            churnedCount: analysis?.churnedCount ?? 0,
+            churnedCount: toFiniteNumber(analysis?.churnedCount),
             activeCount: 0,
-            churnPct: analysis?.churnRate ?? 0,
+            churnPct: toFiniteNumber(analysis?.churnRate),
           },
         ],
       };

@@ -1,5 +1,7 @@
 // Shared money formatting helpers.
 
+import { toFiniteNumber } from '@voxire/api';
+
 export type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CAD' | 'AUD' | 'CHF' | 'CNY';
 
 const CURRENCY_SYMBOL: Record<Currency, string> = {
@@ -48,12 +50,14 @@ export function formatMoney(
 }
 
 export function formatCompact(n: number, currency: Currency = 'USD'): string {
-  const abs = Math.abs(n);
+  const safeNumber = toFiniteNumber(n);
+  const abs = Math.abs(safeNumber);
   if (abs >= 1_000_000_000)
-    return `${getCurrencySymbol(currency)}${(n / 1_000_000_000).toFixed(1)}B`;
-  if (abs >= 1_000_000) return `${getCurrencySymbol(currency)}${(n / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `${getCurrencySymbol(currency)}${(n / 1_000).toFixed(1)}K`;
-  return `${getCurrencySymbol(currency)}${n.toFixed(0)}`;
+    return `${getCurrencySymbol(currency)}${(safeNumber / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000)
+    return `${getCurrencySymbol(currency)}${(safeNumber / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${getCurrencySymbol(currency)}${(safeNumber / 1_000).toFixed(1)}K`;
+  return `${getCurrencySymbol(currency)}${safeNumber.toFixed(0)}`;
 }
 
 // Static FX rate table used for display-only currency conversion.

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 interface WidgetProduct {
@@ -13,8 +13,20 @@ interface WidgetProduct {
   revenue?: number;
 }
 
+interface RawWidgetProduct {
+  productId?: number | string;
+  product_id?: number | string;
+  name?: string;
+  category?: string;
+  unitsSold?: number | string;
+  units_sold?: number | string;
+  revenueMinorUnits?: number | string;
+  revenue_minor_units?: number | string;
+  revenue?: number | string;
+}
+
 interface BestSellersResponse {
-  products?: WidgetProduct[];
+  products?: RawWidgetProduct[];
 }
 
 function productRevenue(product: WidgetProduct): number {
@@ -30,11 +42,21 @@ const TopProductsWidget: React.FC = () => {
     queryFn: async (): Promise<WidgetProduct[]> => {
       try {
         const res = await unwrap(
-          safe.get<BestSellersResponse | WidgetProduct[]>('/insights/products/best-sellers', {
+          safe.get<BestSellersResponse | RawWidgetProduct[]>('/insights/products/best-sellers', {
             params: { limit: 5 },
           })
         );
-        return (Array.isArray(res) ? res : res.products) ?? [];
+        return ((Array.isArray(res) ? res : res.products) ?? []).map((product) => ({
+          productId: toFiniteNumber(product.productId ?? product.product_id),
+          name: product.name ?? '',
+          category: product.category ?? '',
+          unitsSold: toFiniteNumber(product.unitsSold ?? product.units_sold),
+          revenueMinorUnits:
+            product.revenueMinorUnits !== undefined || product.revenue_minor_units !== undefined
+              ? toFiniteNumber(product.revenueMinorUnits ?? product.revenue_minor_units)
+              : undefined,
+          revenue: product.revenue !== undefined ? toFiniteNumber(product.revenue) : undefined,
+        }));
       } catch {
         return [];
       }

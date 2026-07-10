@@ -1,4 +1,4 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { ProductServiceClient } from '@voxire/voxie/insights/product/v1/service_client';
 import type {
@@ -17,10 +17,10 @@ export const useProductKPIs = (): UseQueryResult<ProductKPIResponse> => {
     queryFn: async (): Promise<ProductKPIResponse> => {
       const res = await productClient.getProductPerformance({});
       return {
-        totalSkus: Number(res.totalSkus),
-        activeSkus: Number(res.activeSkus),
-        outOfStock: Number(res.outOfStock),
-        avgMarginPct: res.avgMarginPct,
+        totalSkus: toFiniteNumber(res.totalSkus),
+        activeSkus: toFiniteNumber(res.activeSkus),
+        outOfStock: toFiniteNumber(res.outOfStock),
+        avgMarginPct: toFiniteNumber(res.avgMarginPct),
       };
     },
   });
@@ -38,10 +38,10 @@ export const useBestSellers = (params?: BestSellersParams): UseQueryResult<BestS
       const res = await productClient.getBestSellers({ limit });
       return {
         products: res.products.map((p) => ({
-          productId: Number(p.productId),
+          productId: toFiniteNumber(p.productId),
           name: p.name,
-          unitsSold: p.unitsSold,
-          revenueMinorUnits: Number(p.revenueMinorUnits),
+          unitsSold: toFiniteNumber(p.unitsSold),
+          revenueMinorUnits: toFiniteNumber(p.revenueMinorUnits),
         })),
       };
     },
@@ -56,9 +56,9 @@ export const useProductMargins = (): UseQueryResult<ProductMarginsResponse> => {
       return {
         buckets: res.buckets.map((b) => ({
           label: b.label,
-          lowerPct: b.lowerPct,
-          upperPct: b.upperPct,
-          productCount: Number(b.productCount),
+          lowerPct: toFiniteNumber(b.lowerPct),
+          upperPct: toFiniteNumber(b.upperPct),
+          productCount: toFiniteNumber(b.productCount),
         })),
       };
     },
@@ -77,9 +77,9 @@ export const useSlowMovers = (params?: SlowMoversParams): UseQueryResult<SlowMov
       const res = await productClient.getSlowMovers({ days });
       return {
         products: res.products.map((p) => ({
-          productId: Number(p.productId),
+          productId: toFiniteNumber(p.productId),
           name: p.name,
-          stockQuantity: p.stockQuantity,
+          stockQuantity: toFiniteNumber(p.stockQuantity),
         })),
       };
     },
@@ -93,10 +93,10 @@ export const useProductCategoryMix = (): UseQueryResult<ProductCategoryMixRespon
       const res = await productClient.getCategoryPerformance({});
       return {
         categories: res.categories.map((c) => ({
-          categoryId: Number(c.categoryId),
+          categoryId: toFiniteNumber(c.categoryId),
           categoryName: c.categoryName,
-          unitsSold: c.unitsSold,
-          revenueMinorUnits: Number(c.revenueMinorUnits),
+          unitsSold: toFiniteNumber(c.unitsSold),
+          revenueMinorUnits: toFiniteNumber(c.revenueMinorUnits),
         })),
       };
     },

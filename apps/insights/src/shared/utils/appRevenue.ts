@@ -1,12 +1,13 @@
 // App revenue share helpers for the insights revenue feature.
 
 import type { AppRevenueShare } from '../hooks/queries/types';
+import { toFiniteNumber } from '@voxire/api';
 
 /**
  * totalAppRevenue sums amountMinorUnits across all app revenue shares.
  */
 export function totalAppRevenue(shares: AppRevenueShare[]): number {
-  return shares.reduce((sum, s) => sum + s.amountMinorUnits, 0);
+  return shares.reduce((sum, s) => sum + toFiniteNumber(s.amountMinorUnits), 0);
 }
 
 /**
@@ -45,5 +46,5 @@ export function findAppShare(
  * appPctLabels returns the pct field formatted as a percentage string for each entry.
  */
 export function appPctLabels(shares: AppRevenueShare[]): string[] {
-  return shares.map((s) => `${s.pct.toFixed(1)}%`);
+  return shares.map((s) => `${toFiniteNumber(s.pct).toFixed(1)}%`);
 }

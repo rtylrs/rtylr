@@ -40,14 +40,15 @@ export function maxOf(values: number[]): number | null {
 
 /** Formats a number with thousands separators, e.g. 1000 -> "1,000". */
 export function formatNumber(value: number): string {
-  return value.toLocaleString('en-US');
+  return toFiniteNumber(value).toLocaleString('en-US');
 }
 
 /** Formats a number as a compact string: 1000 -> "1K", 1000000 -> "1M". */
 export function formatCompact(value: number): string {
-  if (value >= 1_000_000) return `${roundTo(value / 1_000_000, 1)}M`;
-  if (value >= 1_000) return `${roundTo(value / 1_000, 1)}K`;
-  return String(value);
+  const safeValue = toFiniteNumber(value);
+  if (safeValue >= 1_000_000) return `${roundTo(safeValue / 1_000_000, 1)}M`;
+  if (safeValue >= 1_000) return `${roundTo(safeValue / 1_000, 1)}K`;
+  return String(safeValue);
 }
 
 /** Returns true if value is a finite number (not NaN or Infinity). */
@@ -60,3 +61,4 @@ export function percentChange(oldValue: number, newValue: number): number {
   if (oldValue === 0) return newValue === 0 ? 0 : 100;
   return roundTo(((newValue - oldValue) / Math.abs(oldValue)) * 100, 1);
 }
+import { toFiniteNumber } from '@voxire/api';

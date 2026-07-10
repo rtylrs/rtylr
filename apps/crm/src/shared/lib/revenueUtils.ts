@@ -2,6 +2,8 @@
  * Revenue calculation and formatting utilities for CRM analytics.
  */
 
+import { toFiniteNumber } from '@voxire/api';
+
 /** Parses a revenue string like "$1,234.56" to a number. */
 export function parseRevenue(value: string): number {
   const cleaned = value.replace(/[$,\s]/g, '');
@@ -11,9 +13,10 @@ export function parseRevenue(value: string): number {
 
 /** Formats a number as a compact revenue string. */
 export function formatRevenue(value: number): string {
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
-  return `$${value.toFixed(2)}`;
+  const safeValue = toFiniteNumber(value);
+  if (safeValue >= 1_000_000) return `$${(safeValue / 1_000_000).toFixed(1)}M`;
+  if (safeValue >= 1_000) return `$${(safeValue / 1_000).toFixed(1)}K`;
+  return `$${safeValue.toFixed(2)}`;
 }
 
 /** Returns the percentage change from previous to current. */
@@ -35,6 +38,7 @@ export function arpc(totalRevenue: number, customerCount: number): number {
 
 /** Returns a formatted change string like "+12%" or "-5%". */
 export function formatChange(pct: number): string {
-  const sign = pct >= 0 ? '+' : '';
-  return `${sign}${pct.toFixed(1)}%`;
+  const safePct = toFiniteNumber(pct);
+  const sign = safePct >= 0 ? '+' : '';
+  return `${sign}${safePct.toFixed(1)}%`;
 }

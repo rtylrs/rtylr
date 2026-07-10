@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const finiteNumber = z.preprocess((value) => {
+  if (value === null || value === undefined || value === '') return value;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : value;
+}, z.number());
+
 /**
  * Campaign wire shape mirrors the backend campaigns module
  * (onion campaigns/internal/routes/handlers/campaign_handlers.go → CampaignPayload).
@@ -11,17 +17,17 @@ import { z } from 'zod';
  * client-side from sentCount / openCount when a display needs them.
  */
 export const campaignSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  ownerId: z.number().optional(),
+  id: finiteNumber,
+  ownerId: finiteNumber.optional(),
   name: z.string(),
   type: z.string().default(''),
   status: z.string(),
-  audienceSegmentId: z.number().nullable().optional(),
+  audienceSegmentId: finiteNumber.nullable().optional(),
   subject: z.string().nullable().optional(),
   body: z.string().nullable().optional(),
-  audienceCount: z.number().optional(),
-  sentCount: z.number().default(0),
-  openCount: z.number().default(0),
+  audienceCount: finiteNumber.optional(),
+  sentCount: finiteNumber.catch(0),
+  openCount: finiteNumber.catch(0),
   scheduledAt: z.string().nullable().optional(),
   sentAt: z.string().nullable().optional(),
   createdAt: z.string().optional(),
@@ -29,20 +35,20 @@ export const campaignSchema = z.object({
 });
 
 export const campaignStatsSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  sent: z.number(),
-  delivered: z.number(),
-  opened: z.number(),
-  clicked: z.number(),
-  unsubscribed: z.number(),
-  bounced: z.number(),
-  revenue: z.number(),
+  id: finiteNumber,
+  sent: finiteNumber,
+  delivered: finiteNumber,
+  opened: finiteNumber,
+  clicked: finiteNumber,
+  unsubscribed: finiteNumber,
+  bounced: finiteNumber,
+  revenue: finiteNumber,
   timeline: z
     .array(
       z.object({
         day: z.string(),
-        opens: z.number(),
-        clicks: z.number(),
+        opens: finiteNumber,
+        clicks: finiteNumber,
       })
     )
     .default([]),

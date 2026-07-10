@@ -1,4 +1,4 @@
-import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, toFiniteNumber } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -25,9 +25,9 @@ export interface ExpenseListResult {
 function fromApiExpense(e: ApiExpense): Expense {
   return {
     id: e.id,
-    categoryId: e.categoryId != null ? Number(e.categoryId) : null,
+    categoryId: e.categoryId != null ? toFiniteNumber(e.categoryId) : null,
     description: e.description,
-    amount: e.amount,
+    amount: toFiniteNumber(e.amount),
     currency: e.currency,
     vendor: e.vendor,
     receiptUrl: e.receiptUrl,
@@ -39,7 +39,7 @@ function fromApiExpense(e: ApiExpense): Expense {
 }
 
 function fromApiCategory(c: ApiExpenseCategory): ExpenseCategory {
-  return { id: Number(c.id), name: c.name, color: c.color };
+  return { id: toFiniteNumber(c.id), name: c.name, color: c.color };
 }
 
 // finance.expenses.v1.ExpensesService.ListExpenses has no pagination

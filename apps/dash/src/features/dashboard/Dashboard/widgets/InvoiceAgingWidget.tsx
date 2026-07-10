@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 /**
@@ -22,8 +22,9 @@ interface Bucket {
 interface ApiResponse {
   buckets?: {
     label: string;
-    amount_minor_units: number;
-    count: number;
+    amountMinorUnits?: number | string;
+    amount_minor_units?: number | string;
+    count: number | string;
   }[];
 }
 
@@ -49,8 +50,8 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
         const res = await unwrap(safe.get<ApiResponse>('/insights/financial/invoice-aging'));
         return (res.buckets ?? []).map((b) => ({
           label: b.label,
-          amountMinorUnits: b.amount_minor_units,
-          count: b.count,
+          amountMinorUnits: toFiniteNumber(b.amountMinorUnits ?? b.amount_minor_units),
+          count: toFiniteNumber(b.count),
         }));
       } catch {
         return [];

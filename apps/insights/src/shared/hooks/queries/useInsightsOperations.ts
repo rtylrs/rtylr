@@ -1,4 +1,4 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { OperationServiceClient } from '@voxire/voxie/insights/operation/v1/service_client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
@@ -18,10 +18,10 @@ export const useOperationsKPIs = (): UseQueryResult<OperationsKPIResponse> => {
     queryFn: async (): Promise<OperationsKPIResponse> => {
       const res = await operationClient.getOperationsSummary({});
       return {
-        activeStaff: Number(res.activeStaff),
-        shiftsThisWeek: Number(res.shiftsThisWeek),
-        pendingTimeOff: Number(res.pendingTimeOff),
-        openLeaveRequests: Number(res.openLeaveRequests),
+        activeStaff: toFiniteNumber(res.activeStaff),
+        shiftsThisWeek: toFiniteNumber(res.shiftsThisWeek),
+        pendingTimeOff: toFiniteNumber(res.pendingTimeOff),
+        openLeaveRequests: toFiniteNumber(res.openLeaveRequests),
       };
     },
   });
@@ -34,12 +34,12 @@ export const useHeadcount = (params?: DateRangeParams): UseQueryResult<Headcount
     queryFn: async (): Promise<HeadcountResponse> => {
       const res = await operationClient.getHeadcountMetrics({ period: `${from},${to}` });
       const metrics = res.metrics;
-      const hired = metrics?.hiredThisPeriod ?? 0;
-      const departed = metrics?.departedThisPeriod ?? 0;
+      const hired = toFiniteNumber(metrics?.hiredThisPeriod);
+      const departed = toFiniteNumber(metrics?.departedThisPeriod);
       return {
-        activeStaff: metrics?.current ?? 0,
+        activeStaff: toFiniteNumber(metrics?.current),
         momDelta: hired - departed,
-        momDeltaPct: metrics?.turnoverRate ?? 0,
+        momDeltaPct: toFiniteNumber(metrics?.turnoverRate),
       };
     },
   });
@@ -53,10 +53,10 @@ export const useShiftMetrics = (params?: DateRangeParams): UseQueryResult<ShiftM
       const res = await operationClient.getShiftMetrics({ period: `${from},${to}` });
       const metrics = res.metrics;
       return {
-        scheduled: metrics?.totalShifts ?? 0,
-        completed: metrics?.covered ?? 0,
-        noShows: metrics?.missed ?? 0,
-        completionRatePct: metrics?.coverageRate ?? 0,
+        scheduled: toFiniteNumber(metrics?.totalShifts),
+        completed: toFiniteNumber(metrics?.covered),
+        noShows: toFiniteNumber(metrics?.missed),
+        completionRatePct: toFiniteNumber(metrics?.coverageRate),
       };
     },
   });
@@ -69,8 +69,8 @@ export const useTimeOff = (params?: DateRangeParams): UseQueryResult<TimeOffResp
     queryFn: async (): Promise<TimeOffResponse> => {
       const res = await operationClient.getTimeOffMetrics({ period: `${from},${to}` });
       return {
-        pending: res.metrics?.pending ?? 0,
-        approved: res.metrics?.approved ?? 0,
+        pending: toFiniteNumber(res.metrics?.pending),
+        approved: toFiniteNumber(res.metrics?.approved),
       };
     },
   });
@@ -84,9 +84,9 @@ export const useUtilization = (params?: DateRangeParams): UseQueryResult<Utiliza
       const res = await operationClient.getUtilization({ period: `${from},${to}` });
       const metrics = res.metrics;
       return {
-        scheduledHours: metrics?.totalHours ?? 0,
-        availableHours: metrics?.availableHours ?? 0,
-        utilizationPct: metrics?.avgUtilization ?? 0,
+        scheduledHours: toFiniteNumber(metrics?.totalHours),
+        availableHours: toFiniteNumber(metrics?.availableHours),
+        utilizationPct: toFiniteNumber(metrics?.avgUtilization),
       };
     },
   });

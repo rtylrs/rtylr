@@ -1,5 +1,5 @@
 import { safe } from '../lib/api';
-import { unwrap } from '@voxire/api';
+import { toOptionalFiniteNumber, unwrap } from '@voxire/api';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -538,7 +538,7 @@ function toCreateContractPayload(data: CreateContractRequest): CreateContractMut
     seats: data.seats,
     signedAt: data.signedAt,
     signedByName: data.signedBy,
-    closedBy: data.closedBy ? Number(data.closedBy) : undefined,
+    closedBy: toOptionalFiniteNumber(data.closedBy),
     notes: data.notes,
   };
 }
@@ -550,7 +550,7 @@ function toContractUpdatePayload(data: UpdateContractRequest): ContractMutationP
     seats: data.seats,
     signedAt: data.signedAt,
     signedByName: data.signedBy,
-    closedBy: data.closedBy ? Number(data.closedBy) : undefined,
+    closedBy: toOptionalFiniteNumber(data.closedBy),
     notes: data.notes,
   };
 }

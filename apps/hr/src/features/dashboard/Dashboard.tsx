@@ -39,6 +39,7 @@ import HeadcountWidget from './widgets/HeadcountWidget';
 import PayrollCostWidget from './widgets/PayrollCostWidget';
 import SetupCompletionWidget from './widgets/SetupCompletionWidget';
 import type { DashboardWidget } from '../../shared/schemas/dashboard';
+import { safeRatio, toFiniteNumber } from '@voxire/api';
 
 const ACCENT = 'var(--hr-accent)';
 
@@ -263,10 +264,10 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const dashData = {
-    totalStaff: legacyDashboard?.totalStaff ?? 0,
-    onShiftToday: legacyDashboard?.onShiftToday ?? 0,
-    openPositions: legacyDashboard?.openPositions ?? 0,
-    monthlyPayroll: legacyDashboard?.monthlyPayroll ?? 0,
+    totalStaff: toFiniteNumber(legacyDashboard?.totalStaff),
+    onShiftToday: toFiniteNumber(legacyDashboard?.onShiftToday),
+    openPositions: toFiniteNumber(legacyDashboard?.openPositions),
+    monthlyPayroll: toFiniteNumber(legacyDashboard?.monthlyPayroll),
   };
   const recentActivity = legacyDashboard?.recentActivity || [];
   const todayAtGlance = legacyDashboard?.todayAtGlance || {
@@ -290,7 +291,7 @@ const Dashboard: React.FC = () => {
       value: loading ? '…' : String(dashData.onShiftToday),
       change:
         dashData.totalStaff > 0
-          ? `${((dashData.onShiftToday / dashData.totalStaff) * 100).toFixed(1)}%`
+          ? `${(safeRatio(dashData.onShiftToday, dashData.totalStaff) * 100).toFixed(1)}%`
           : '-',
       trend: 'neutral' as const,
       icon: Clock,

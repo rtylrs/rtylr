@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { PieChart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 interface AppSlice {
@@ -11,7 +11,15 @@ interface AppSlice {
 }
 
 interface ApiResponse {
-  byApp?: AppSlice[];
+  byApp?: RawAppSlice[];
+  by_app?: RawAppSlice[];
+}
+
+interface RawAppSlice {
+  app?: string;
+  amountMinorUnits?: number | string;
+  amount_minor_units?: number | string;
+  pct?: number | string;
 }
 
 const APP_COLOUR: Record<string, string> = {
@@ -35,7 +43,11 @@ const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
     queryFn: async (): Promise<AppSlice[]> => {
       try {
         const res = await unwrap(safe.get<ApiResponse>('/insights/revenue/by-app'));
-        return res.byApp ?? [];
+        return (res.byApp ?? res.by_app ?? []).map((slice) => ({
+          app: slice.app ?? 'other',
+          amountMinorUnits: toFiniteNumber(slice.amountMinorUnits ?? slice.amount_minor_units),
+          pct: toFiniteNumber(slice.pct),
+        }));
       } catch {
         return [];
       }

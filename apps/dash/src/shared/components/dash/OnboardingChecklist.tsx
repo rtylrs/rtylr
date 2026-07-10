@@ -3,6 +3,7 @@ import { Check, Circle, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from '@tanstack/react-router';
 import { APP_URLS } from '@voxire/config';
+import { safeRatio } from '@voxire/api';
 
 export interface OnboardingStep {
   id: string;
@@ -62,7 +63,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   const navigate = useNavigate();
   const doneCount = steps.filter((s) => s.done).length;
   const total = steps.length;
-  const progress = Math.round((doneCount / total) * 100);
+  const progress = Math.round(safeRatio(doneCount, total) * 100);
 
   return (
     <motion.div

@@ -2,6 +2,8 @@
  * Currency formatting and conversion utilities for the finance app.
  */
 
+import { toFiniteNumber } from '@voxire/api';
+
 export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'AED' | 'SAR' | 'CAD' | 'AUD';
 
 const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
@@ -26,25 +28,27 @@ export function getCurrencySymbol(code: string): string {
  * Uses Intl.NumberFormat for locale-aware formatting.
  */
 export function formatCurrency(amount: number, currency = 'USD', locale = 'en-US'): string {
+  const safeAmount = toFiniteNumber(amount);
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(safeAmount);
 }
 
 /**
  * Formats a number as a compact currency string (e.g. $1.2K, $3.5M).
  */
 export function formatCurrencyCompact(amount: number, currency = 'USD', locale = 'en-US'): string {
-  if (Math.abs(amount) >= 1_000_000) {
-    return `${getCurrencySymbol(currency)}${(amount / 1_000_000).toFixed(1)}M`;
+  const safeAmount = toFiniteNumber(amount);
+  if (Math.abs(safeAmount) >= 1_000_000) {
+    return `${getCurrencySymbol(currency)}${(safeAmount / 1_000_000).toFixed(1)}M`;
   }
-  if (Math.abs(amount) >= 1_000) {
-    return `${getCurrencySymbol(currency)}${(amount / 1_000).toFixed(1)}K`;
+  if (Math.abs(safeAmount) >= 1_000) {
+    return `${getCurrencySymbol(currency)}${(safeAmount / 1_000).toFixed(1)}K`;
   }
-  return formatCurrency(amount, currency, locale);
+  return formatCurrency(safeAmount, currency, locale);
 }
 
 /**

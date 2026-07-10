@@ -54,4 +54,19 @@ describe('dashboardStatsSchema', () => {
     expect(result.totalReceivable).toBe(5000);
     expect(result.overdueAmount).toBe(1200);
   });
+
+  it('normalizes snake_case numeric strings from the wire', () => {
+    const result = dashboardStatsSchema.parse({
+      total_receivable: '5000.25',
+      overdue_amount: '1200',
+      total_expenses_mtd: '20000',
+      net_profit_mtd: '30000',
+      outstanding_invoices_count: '7',
+      bar_data: [{ month: 'Jul', revenue: '9000', expenses: '4000' }],
+    });
+
+    expect(result.totalReceivable).toBe(5000.25);
+    expect(result.outstandingInvoicesCount).toBe(7);
+    expect(result.barData[0]).toMatchObject({ revenue: 9000, expenses: 4000 });
+  });
 });

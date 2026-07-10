@@ -35,13 +35,14 @@ export function formatCurrency(amount: number, currency = 'USD', locale = 'en-US
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-  }).format(amount);
+  }).format(toFiniteNumber(amount));
 }
 
 export function formatPercent(ratio: number, decimals = 1): string {
-  return `${(ratio * 100).toFixed(decimals)}%`;
+  return `${(toFiniteNumber(ratio) * 100).toFixed(decimals)}%`;
 }
 
 export function isInRange(value: number, min: number, max: number): boolean {
   return value >= min && value <= max;
 }
+import { toFiniteNumber } from '@voxire/api';

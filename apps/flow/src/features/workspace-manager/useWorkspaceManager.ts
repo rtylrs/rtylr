@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { toFiniteNumber, unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { flowApi, ApiWorkspaceMember } from '../../shared/services/flowApi';
@@ -19,13 +19,13 @@ export function useAddWorkspaceMember(workspaceId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { workspace_id: number; user_id: number; role?: string }) => {
-      const wsId = Number(data.workspace_id);
-      const uid = Number(data.user_id);
-      if (isNaN(wsId) || wsId === 0) {
+      const wsId = toFiniteNumber(data.workspace_id);
+      const uid = toFiniteNumber(data.user_id);
+      if (wsId === 0) {
         toast.error('Invalid workspace ID');
         return Promise.reject(new Error('Invalid workspace ID'));
       }
-      if (isNaN(uid) || uid === 0) {
+      if (uid === 0) {
         toast.error('Invalid user ID');
         return Promise.reject(new Error('Invalid user ID'));
       }
@@ -42,13 +42,13 @@ export function useRemoveWorkspaceMember(workspaceId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { workspace_id: number; user_id: number }) => {
-      const wsId = Number(data.workspace_id);
-      const uid = Number(data.user_id);
-      if (isNaN(wsId) || wsId === 0) {
+      const wsId = toFiniteNumber(data.workspace_id);
+      const uid = toFiniteNumber(data.user_id);
+      if (wsId === 0) {
         toast.error('Invalid workspace ID');
         return Promise.reject(new Error('Invalid workspace ID'));
       }
-      if (isNaN(uid) || uid === 0) {
+      if (uid === 0) {
         toast.error('Invalid user ID');
         return Promise.reject(new Error('Invalid user ID'));
       }
@@ -65,13 +65,13 @@ export function useUpdateWorkspaceMemberRole(workspaceId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { workspace_id: number; user_id: number; role: string }) => {
-      const wsId = Number(data.workspace_id);
-      const uid = Number(data.user_id);
-      if (isNaN(wsId) || wsId === 0) {
+      const wsId = toFiniteNumber(data.workspace_id);
+      const uid = toFiniteNumber(data.user_id);
+      if (wsId === 0) {
         toast.error('Invalid workspace ID');
         return Promise.reject(new Error('Invalid workspace ID'));
       }
-      if (isNaN(uid) || uid === 0) {
+      if (uid === 0) {
         toast.error('Invalid user ID');
         return Promise.reject(new Error('Invalid user ID'));
       }

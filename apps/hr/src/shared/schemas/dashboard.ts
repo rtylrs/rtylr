@@ -1,10 +1,15 @@
 import { z } from 'zod';
 
+const finiteNumber = z.preprocess((value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}, z.number());
+
 export const hrDashboardStatsSchema = z.object({
-  totalStaff: z.number(),
-  onShiftToday: z.number(),
-  openPositions: z.number(),
-  monthlyPayroll: z.number(),
+  totalStaff: finiteNumber,
+  onShiftToday: finiteNumber,
+  openPositions: finiteNumber,
+  monthlyPayroll: finiteNumber,
   recentActivity: z
     .array(
       z.object({
@@ -17,26 +22,26 @@ export const hrDashboardStatsSchema = z.object({
     )
     .default([]),
   todayAtGlance: z.object({
-    shiftsScheduled: z.number(),
-    newApplications: z.number(),
-    pendingApprovals: z.number(),
+    shiftsScheduled: finiteNumber,
+    newApplications: finiteNumber,
+    pendingApprovals: finiteNumber,
   }),
 });
 
 export type HRDashboardStats = z.infer<typeof hrDashboardStatsSchema>;
 
 export const dashboardWidgetSchema = z.object({
-  id: z.number(),
-  ownerId: z.number(),
-  roleId: z.number(),
+  id: finiteNumber,
+  ownerId: finiteNumber,
+  roleId: finiteNumber,
   widgetType: z.string(),
-  positionX: z.number(),
-  positionY: z.number(),
-  width: z.number(),
-  height: z.number(),
+  positionX: finiteNumber,
+  positionY: finiteNumber,
+  width: finiteNumber,
+  height: finiteNumber,
   config: z.unknown().default({}),
-  createdAt: z.number(),
-  updatedAt: z.number(),
+  createdAt: finiteNumber,
+  updatedAt: finiteNumber,
 });
 
 export const dashboardDataSchema = z.object({

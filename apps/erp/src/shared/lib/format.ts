@@ -1,13 +1,15 @@
+import { toFiniteNumber } from '@voxire/api';
+
 export function formatCurrency(value: number, currency = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
-  }).format(value);
+  }).format(toFiniteNumber(value));
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-US').format(value);
+  return new Intl.NumberFormat('en-US').format(toFiniteNumber(value));
 }
 
 export function formatDate(dateString: string): string {

@@ -1,4 +1,4 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/service_client';
 import type { ExpenseCategory } from '../services/financeApi';
@@ -10,7 +10,11 @@ export function useExpenseCategories() {
     queryKey: ['expense-categories'],
     queryFn: async (): Promise<ExpenseCategory[]> => {
       const res = await expensesClient.listExpenseCategories({});
-      return res.categories.map((c) => ({ id: Number(c.id), name: c.name, color: c.color }));
+      return res.categories.map((c) => ({
+        id: toFiniteNumber(c.id),
+        name: c.name,
+        color: c.color,
+      }));
     },
   });
 }

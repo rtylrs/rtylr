@@ -1,14 +1,16 @@
 import React from 'react';
 import { Package, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 interface StockItem {
   productName?: string;
+  product_name?: string;
   name?: string;
-  stockQuantity?: number;
-  stock?: number;
+  stockQuantity?: number | string;
+  stock_quantity?: number | string;
+  stock?: number | string;
 }
 
 interface LowStockResponse {
@@ -57,14 +59,14 @@ const LowStockWidget: React.FC = () => {
               <AlertTriangle size={12} style={{ color: 'var(--aging-critical)' }} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
-                  {p.productName ?? p.name}
+                  {p.productName ?? p.product_name ?? p.name}
                 </p>
               </div>
               <span
                 className="text-[10px] font-semibold"
                 style={{ color: 'var(--aging-critical)' }}
               >
-                {p.stockQuantity ?? p.stock ?? 0} left
+                {toFiniteNumber(p.stockQuantity ?? p.stock_quantity ?? p.stock)} left
               </span>
             </div>
           ))

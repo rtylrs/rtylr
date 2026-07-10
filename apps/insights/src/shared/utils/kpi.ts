@@ -2,14 +2,17 @@
 // These functions derive the display values shown on summary cards
 // from the raw API response shapes in shared/hooks/queries/types.ts.
 
+import { toFiniteNumber } from '@voxire/api';
+
 /**
  * deltaLabel formats a deltaPct value as a signed percentage string.
  * e.g. 12.3 -> "+12.3%", -5.0 -> "-5.0%", 0 -> "0.0%"
  */
 export function deltaLabel(deltaPct: number, decimals = 1): string {
-  const formatted = Math.abs(deltaPct).toFixed(decimals);
-  if (deltaPct > 0) return `+${formatted}%`;
-  if (deltaPct < 0) return `-${formatted}%`;
+  const safeDelta = toFiniteNumber(deltaPct);
+  const formatted = Math.abs(safeDelta).toFixed(decimals);
+  if (safeDelta > 0) return `+${formatted}%`;
+  if (safeDelta < 0) return `-${formatted}%`;
   return `0.${'0'.repeat(decimals)}%`;
 }
 
@@ -18,8 +21,9 @@ export function deltaLabel(deltaPct: number, decimals = 1): string {
  * percentage, using the threshold to avoid noise on tiny moves.
  */
 export function deltaDirection(deltaPct: number, flatThreshold = 0.5): 'up' | 'down' | 'flat' {
-  if (deltaPct > flatThreshold) return 'up';
-  if (deltaPct < -flatThreshold) return 'down';
+  const safeDelta = toFiniteNumber(deltaPct);
+  if (safeDelta > flatThreshold) return 'up';
+  if (safeDelta < -flatThreshold) return 'down';
   return 'flat';
 }
 
@@ -45,7 +49,7 @@ export function formatKpiValue(
 ): string {
   const { minorUnits = false, currency = 'USD', locale = 'en-US' } = options;
   if (minorUnits) {
-    const major = value / 100;
+    const major = toFiniteNumber(value) / 100;
     return major.toLocaleString(locale, {
       style: 'currency',
       currency,
@@ -53,5 +57,5 @@ export function formatKpiValue(
       maximumFractionDigits: 0,
     });
   }
-  return value.toLocaleString(locale);
+  return toFiniteNumber(value).toLocaleString(locale);
 }

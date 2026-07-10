@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
+import { safeRatio, toFiniteNumber } from '@voxire/api';
 import { Expense } from '../../shared/services/financeApi';
 import { useExpenses, useExpenseCategories } from './useExpenses';
 
@@ -24,7 +25,11 @@ function getCategoryColor(cat: string): string {
 type CategoryNameLookup = (categoryId?: number | null) => string;
 
 const fmt = (n: number) =>
-  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
+  toFiniteNumber(n).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+  });
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--hub-card)',
@@ -66,7 +71,7 @@ const CategoryBar: React.FC<{ expenses: Expense[]; categoryName: CategoryNameLoo
           <div
             key={cat}
             style={{
-              width: `${(val / grandTotal) * 100}%`,
+              width: `${safeRatio(val, grandTotal) * 100}%`,
               background: getCategoryColor(cat),
               transition: 'width 0.4s ease',
             }}
@@ -102,7 +107,7 @@ const CategoryBar: React.FC<{ expenses: Expense[]; categoryName: CategoryNameLoo
                 {cat}
               </div>
               <div style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
-                {fmt(val)} &middot; {((val / grandTotal) * 100).toFixed(1)}%
+                {fmt(val)} &middot; {(safeRatio(val, grandTotal) * 100).toFixed(1)}%
               </div>
             </div>
           </div>

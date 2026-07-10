@@ -5,6 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useGetMenu } from '../../shared/hooks/queries/useMenu';
+import { toFiniteNumber } from '@voxire/api';
 
 interface StoreItemDetails {
   name?: string;
@@ -71,7 +72,7 @@ const Menu: React.FC<{}> = () => {
           </div>
           {item?.details?.price !== undefined && (
             <span className="text-sm font-semibold text-primary">
-              ${(item.details.price / 100).toFixed(2)}
+              ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
             </span>
           )}
         </div>
@@ -90,7 +91,7 @@ const Menu: React.FC<{}> = () => {
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm font-semibold text-primary">
-          ${Number(item.details?.price ?? 0).toFixed(2)}
+          ${(toFiniteNumber(item.details?.price) / 100).toFixed(2)}
         </span>
         <span
           className="px-2 py-1 rounded-full text-[11px] font-semibold"
