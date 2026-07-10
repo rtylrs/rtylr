@@ -30,6 +30,31 @@ interface BestSeller {
   revenue?: number;
 }
 
+type RawBestSeller = Partial<BestSeller> & {
+  product_id?: string | number;
+  units_sold?: string | number;
+  revenue_minor_units?: string | number;
+  revenue?: string | number;
+};
+
+function finiteNumber(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeBestSeller(item: RawBestSeller): BestSeller {
+  return {
+    productId: finiteNumber(item.productId ?? item.product_id),
+    name: item.name ?? '',
+    unitsSold: finiteNumber(item.unitsSold ?? item.units_sold),
+    revenueMinorUnits:
+      item.revenueMinorUnits !== undefined || item.revenue_minor_units !== undefined
+        ? finiteNumber(item.revenueMinorUnits ?? item.revenue_minor_units)
+        : undefined,
+    revenue: item.revenue !== undefined ? finiteNumber(item.revenue) : undefined,
+  };
+}
+
 function revenueDollars(item: BestSeller): number {
   if (typeof item.revenueMinorUnits === 'number') return item.revenueMinorUnits / 100;
   return item.revenue ?? 0;
@@ -40,11 +65,14 @@ const useBestSellers = () =>
     queryKey: ['dash-best-sellers'],
     queryFn: async (): Promise<BestSeller[]> => {
       const res = await unwrap(
-        safe.get<{ products?: BestSeller[] } | BestSeller[]>('/insights/products/best-sellers', {
-          params: { limit: 5 },
-        })
+        safe.get<{ products?: RawBestSeller[] } | RawBestSeller[]>(
+          '/insights/products/best-sellers',
+          {
+            params: { limit: 5 },
+          }
+        )
       );
-      return (Array.isArray(res) ? res : res.products) ?? [];
+      return ((Array.isArray(res) ? res : res.products) ?? []).map(normalizeBestSeller);
     },
     staleTime: 60_000,
   });

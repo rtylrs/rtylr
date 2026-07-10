@@ -7,10 +7,11 @@ import { useCheckout } from '../../shared/hooks/queries/useSubscription';
 import { toast } from 'sonner';
 
 function formatMoney(amount: number, currency: string) {
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
   try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(safeAmount);
   } catch {
-    return `$${amount.toFixed(2)}`;
+    return `$${safeAmount.toFixed(2)}`;
   }
 }
 
@@ -28,15 +29,17 @@ const UsageBar: React.FC<{ label: string; used: number; limit: number; unit?: st
   limit,
   unit,
 }) => {
-  const pct = Math.min(100, Math.round((used / limit) * 100));
+  const safeUsed = Number.isFinite(used) ? used : 0;
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 0;
+  const pct = safeLimit > 0 ? Math.min(100, Math.round((safeUsed / safeLimit) * 100)) : 0;
   const color = pct > 90 ? '#ef4444' : pct > 75 ? '#f59e0b' : '#10b981';
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
         <span style={{ color: 'var(--dash-text-muted)' }}>{label}</span>
         <span style={{ color: 'var(--dash-text)' }}>
-          {used.toLocaleString()}
-          {unit ?? ''} / {limit.toLocaleString()}
+          {safeUsed.toLocaleString()}
+          {unit ?? ''} / {safeLimit.toLocaleString()}
           {unit ?? ''}
         </span>
       </div>

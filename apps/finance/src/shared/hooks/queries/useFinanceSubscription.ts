@@ -1,44 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../lib/api';
+import { createOneKitClient } from '@voxire/api';
+import {
+  SubscriptionServiceClient,
+  type Subscription,
+  type BillingDetail,
+} from '@voxire/voxie/hub/subscription/v1/service_client';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export interface FinanceSubscription {
-  id: number;
-  planName: string;
-  planSlug: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  seatCount: number;
-  pricePerSeatCents: number;
-  trialEndsAt: string | null;
-  nextBillingDate: string | null;
-  paddleSubscriptionId: string | null;
-}
+export type FinanceSubscription = Subscription;
+export type FinanceBillingDetail = BillingDetail;
+export type FinanceBillingLineItem = BillingDetail['lineItems'][number];
 
-export interface FinanceBillingLineItem {
-  periodStart: string;
-  periodEnd: string | null;
-  seatCount: number;
-  pricePerSeatCents: number;
-  amountCents: number;
-}
-
-export interface FinanceBillingDetail {
-  billingMonth: string;
-  nextBillingDate: string | null;
-  lineItems: FinanceBillingLineItem[];
-  totalCents: number;
-  planName: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  trialEndsAt: string | null;
-  paddleSubscriptionId: string | null;
-}
+const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'finance');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function centsToDisplay(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  const safeCents = Number.isFinite(cents) ? cents : 0;
+  return `$${(safeCents / 100).toFixed(2)}`;
 }
 
 export function trialDaysLeft(trialEndsAt: string | null): number {
@@ -108,28 +88,22 @@ export function formatPeriodRange(start: string, end: string | null): string {
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
-interface SubResponse {
-  subscription: FinanceSubscription | null;
-}
-
-interface BillingResponse {
-  billing: FinanceBillingDetail | null;
-}
-
-export const useFinanceSubscription = (): ReturnType<typeof useQuery<FinanceSubscription | null>> =>
+export const useFinanceSubscription = (): ReturnType<
+  typeof useQuery<FinanceSubscription | undefined>
+> =>
   useQuery({
     queryKey: ['finance-subscription'],
-    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
+    queryFn: () => subscriptionClient.getMySubscription({}),
     select: (d) => d.subscription,
     staleTime: 5 * 60 * 1000,
   });
 
 export const useFinanceSubscriptionBilling = (): ReturnType<
-  typeof useQuery<FinanceBillingDetail | null>
+  typeof useQuery<FinanceBillingDetail | undefined>
 > =>
   useQuery({
     queryKey: ['finance-subscription', 'billing'],
-    queryFn: () => unwrap(safe.get<BillingResponse>('/subscriptions/billing')),
+    queryFn: () => subscriptionClient.getBillingDetail({}),
     select: (d) => d.billing,
     staleTime: 2 * 60 * 1000,
   });

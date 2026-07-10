@@ -17,12 +17,41 @@ export interface AiUsage {
   periodEnd: string;
 }
 
+type RawAiUsage = Partial<AiUsage> & {
+  plan_slug?: string;
+  allowance_tokens?: string | number;
+  used_tokens?: string | number;
+  remaining_tokens?: string | number;
+  overage_tokens?: string | number;
+  allow_overage?: boolean;
+  period_end?: string;
+};
+
+function finiteNumber(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeAiUsage(raw: RawAiUsage | null | undefined): AiUsage {
+  return {
+    planSlug: raw?.planSlug ?? raw?.plan_slug ?? 'free',
+    mode: raw?.mode === 'per_person' ? 'per_person' : 'pool',
+    allowanceTokens: finiteNumber(raw?.allowanceTokens ?? raw?.allowance_tokens),
+    usedTokens: finiteNumber(raw?.usedTokens ?? raw?.used_tokens),
+    remainingTokens: finiteNumber(raw?.remainingTokens ?? raw?.remaining_tokens),
+    overageTokens: finiteNumber(raw?.overageTokens ?? raw?.overage_tokens),
+    allowOverage: Boolean(raw?.allowOverage ?? raw?.allow_overage),
+    blocked: Boolean(raw?.blocked),
+    periodEnd: raw?.periodEnd ?? raw?.period_end ?? '',
+  };
+}
+
 export const useAiUsage = () =>
   useQuery({
     queryKey: ['ai-usage'],
     queryFn: async (): Promise<AiUsage> => {
-      const res = await unwrap(safe.get<{ usage: AiUsage }>('/api/hub/ai/v1/usage'));
-      return (res as { usage: AiUsage }).usage;
+      const res = await unwrap(safe.get<{ usage?: RawAiUsage }>('/api/hub/ai/v1/usage'));
+      return normalizeAiUsage(res?.usage);
     },
     staleTime: 30_000,
   });
@@ -31,7 +60,9 @@ export const useAiQuotaMode = () =>
   useQuery({
     queryKey: ['ai-quota-settings'],
     queryFn: async (): Promise<AiQuotaMode> => {
-      const res = await unwrap(safe.get<{ settings: { mode: AiQuotaMode } }>('/api/hub/ai/v1/quota-settings'));
+      const res = await unwrap(
+        safe.get<{ settings: { mode: AiQuotaMode } }>('/api/hub/ai/v1/quota-settings')
+      );
       return res?.settings?.mode ?? 'pool';
     },
     staleTime: 30_000,

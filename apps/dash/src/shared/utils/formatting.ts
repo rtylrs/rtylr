@@ -64,10 +64,11 @@ export const formatRelativeTime = (date: string | Date): string => {
  * @returns Formatted currency string
  */
 export const formatCurrency = (amount: number, currency: string = 'USD'): string => {
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
-  }).format(amount);
+  }).format(safeAmount);
 };
 
 /**
@@ -76,7 +77,7 @@ export const formatCurrency = (amount: number, currency: string = 'USD'): string
  * @returns Formatted number string
  */
 export const formatNumber = (num: number): string => {
-  return new Intl.NumberFormat('en-US').format(num);
+  return new Intl.NumberFormat('en-US').format(Number.isFinite(num) ? num : 0);
 };
 
 export const formatting = {

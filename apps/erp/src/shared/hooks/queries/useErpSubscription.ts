@@ -1,44 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../lib/api';
+import { createOneKitClient } from '@voxire/api';
+import {
+  SubscriptionServiceClient,
+  type Subscription,
+  type BillingDetail,
+} from '@voxire/voxie/hub/subscription/v1/service_client';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export interface ErpSubscription {
-  id: number;
-  planName: string;
-  planSlug: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  seatCount: number;
-  pricePerSeatCents: number;
-  trialEndsAt: string | null;
-  nextBillingDate: string | null;
-  paddleSubscriptionId: string | null;
-}
+export type ErpSubscription = Subscription;
+export type ErpBillingDetail = BillingDetail;
+export type ErpBillingLineItem = BillingDetail['lineItems'][number];
 
-export interface ErpBillingLineItem {
-  periodStart: string;
-  periodEnd: string | null;
-  seatCount: number;
-  pricePerSeatCents: number;
-  amountCents: number;
-}
-
-export interface ErpBillingDetail {
-  billingMonth: string;
-  nextBillingDate: string | null;
-  lineItems: ErpBillingLineItem[];
-  totalCents: number;
-  planName: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  trialEndsAt: string | null;
-  paddleSubscriptionId: string | null;
-}
+const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'erp');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function centsToDisplay(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  const safeCents = Number.isFinite(cents) ? cents : 0;
+  return `$${(safeCents / 100).toFixed(2)}`;
 }
 
 export function trialDaysLeft(trialEndsAt: string | null): number {
@@ -108,26 +88,20 @@ export function formatPeriodRange(start: string, end: string | null): string {
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
-interface SubResponse {
-  subscription: ErpSubscription | null;
-}
-
-interface BillingResponse {
-  billing: ErpBillingDetail | null;
-}
-
-export const useErpSubscription = (): ReturnType<typeof useQuery<ErpSubscription | null>> =>
+export const useErpSubscription = (): ReturnType<typeof useQuery<ErpSubscription | undefined>> =>
   useQuery({
     queryKey: ['erp-subscription'],
-    queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
+    queryFn: () => subscriptionClient.getMySubscription({}),
     select: (d) => d.subscription,
     staleTime: 5 * 60 * 1000,
   });
 
-export const useErpSubscriptionBilling = (): ReturnType<typeof useQuery<ErpBillingDetail | null>> =>
+export const useErpSubscriptionBilling = (): ReturnType<
+  typeof useQuery<ErpBillingDetail | undefined>
+> =>
   useQuery({
     queryKey: ['erp-subscription', 'billing'],
-    queryFn: () => unwrap(safe.get<BillingResponse>('/subscriptions/billing')),
+    queryFn: () => subscriptionClient.getBillingDetail({}),
     select: (d) => d.billing,
     staleTime: 2 * 60 * 1000,
   });

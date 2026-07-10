@@ -17,11 +17,16 @@ interface RawAddon {
   name?: string;
   description?: string;
   icon?: string;
-  price?: number;
+  price?: number | string;
   isFree?: boolean;
   is_free?: boolean;
   isEnabled?: boolean;
   is_enabled?: boolean;
+}
+
+function finiteNumber(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export const ADDONS_QUERY_KEY = ['addons'] as const;
@@ -38,7 +43,7 @@ export const useAddons = () =>
           name: String(addon.name ?? ''),
           description: String(addon.description ?? ''),
           icon: String(addon.icon ?? ''),
-          price: Number(addon.price ?? 0),
+          price: finiteNumber(addon.price),
           isFree: Boolean(addon.is_free ?? addon.isFree),
           isEnabled: Boolean(addon.is_enabled ?? addon.isEnabled),
         }));

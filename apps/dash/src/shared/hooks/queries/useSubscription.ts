@@ -87,11 +87,207 @@ export interface BillingHistoryMonth {
   status: 'paid' | 'draft';
 }
 
+type ApiScalar = string | number | boolean | null | undefined;
+
+type RawSubscriptionPayload = Partial<SubscriptionPayload> & {
+  plan_name?: string;
+  plan_slug?: string;
+  price_per_seat_cents?: ApiScalar;
+  is_granted?: ApiScalar;
+  seat_count?: ApiScalar;
+  included_seat_limit?: ApiScalar;
+  included_seat_count?: ApiScalar;
+  billable_seat_count?: ApiScalar;
+  grant_expires_at?: string | null;
+  trial_ends_at?: string | null;
+  next_billing_date?: string | null;
+  paddle_subscription_id?: string | null;
+};
+
+type RawPlanPayload = Partial<PlanPayload> & {
+  price_per_seat_cents?: ApiScalar;
+  annual_price_per_seat_cents?: ApiScalar;
+  trial_days?: ApiScalar;
+  max_seats?: ApiScalar;
+  max_locations?: ApiScalar;
+  ai_credits_per_month?: ApiScalar;
+  tier_order?: ApiScalar;
+  is_solo?: ApiScalar;
+  is_featured?: ApiScalar;
+  is_active?: ApiScalar;
+};
+
+type RawBillingLineItem = Partial<BillingLineItem> & {
+  period_start?: string;
+  period_end?: string | null;
+  seat_count?: ApiScalar;
+  included_seat_limit?: ApiScalar;
+  included_seat_count?: ApiScalar;
+  billable_seat_count?: ApiScalar;
+  included_cents?: ApiScalar;
+  price_per_seat_cents?: ApiScalar;
+  amount_cents?: ApiScalar;
+  is_granted?: ApiScalar;
+  grant_expires_at?: string | null;
+  addon_id?: string;
+  unit_price_cents?: ApiScalar;
+};
+
+type RawBillingDetailPayload = Partial<BillingDetailPayload> & {
+  billing_month?: string;
+  next_billing_date?: string | null;
+  line_items?: RawBillingLineItem[];
+  total_cents?: ApiScalar;
+  plan_name?: string;
+  price_per_seat_cents?: ApiScalar;
+  current_seat_count?: ApiScalar;
+  included_seat_limit?: ApiScalar;
+  included_seat_count?: ApiScalar;
+  billable_seat_count?: ApiScalar;
+  seat_discount_cents?: ApiScalar;
+  is_granted?: ApiScalar;
+  grant_expires_at?: string | null;
+  trial_ends_at?: string | null;
+  paddle_subscription_id?: string | null;
+};
+
+type RawBillingHistoryMonth = Partial<BillingHistoryMonth> & {
+  total_cents?: ApiScalar;
+  line_items?: RawBillingLineItem[];
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** Convert cents to a display string: 400 → "$4.00" */
 export function centsToDisplay(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  const safeCents = Number.isFinite(cents) ? cents : 0;
+  return `$${(safeCents / 100).toFixed(2)}`;
+}
+
+function num(value: ApiScalar, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function nullableNum(value: ApiScalar): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function bool(value: ApiScalar, fallback = false): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes'].includes(normalized)) return true;
+    if (['false', '0', 'no', ''].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((item) => String(item)) : [];
+}
+
+function normalizeSubscription(
+  raw: RawSubscriptionPayload | null | undefined
+): SubscriptionPayload | null {
+  if (!raw) return null;
+  return {
+    id: num(raw.id),
+    planName: raw.planName ?? raw.plan_name ?? '',
+    planSlug: raw.planSlug ?? raw.plan_slug ?? '',
+    apps: stringList(raw.apps),
+    pricePerSeatCents: num(raw.pricePerSeatCents ?? raw.price_per_seat_cents),
+    status: raw.status ?? 'active',
+    isGranted: bool(raw.isGranted ?? raw.is_granted),
+    seatCount: num(raw.seatCount ?? raw.seat_count),
+    includedSeatLimit: num(raw.includedSeatLimit ?? raw.included_seat_limit),
+    includedSeatCount: num(raw.includedSeatCount ?? raw.included_seat_count),
+    billableSeatCount: num(raw.billableSeatCount ?? raw.billable_seat_count),
+    grantExpiresAt: raw.grantExpiresAt ?? raw.grant_expires_at ?? null,
+    trialEndsAt: raw.trialEndsAt ?? raw.trial_ends_at ?? null,
+    nextBillingDate: raw.nextBillingDate ?? raw.next_billing_date ?? null,
+    paddleSubscriptionId: raw.paddleSubscriptionId ?? raw.paddle_subscription_id ?? null,
+  };
+}
+
+function normalizePlan(raw: RawPlanPayload): PlanPayload {
+  return {
+    id: num(raw.id),
+    name: raw.name ?? '',
+    slug: raw.slug ?? '',
+    apps: stringList(raw.apps),
+    pricePerSeatCents: num(raw.pricePerSeatCents ?? raw.price_per_seat_cents),
+    annualPricePerSeatCents: num(raw.annualPricePerSeatCents ?? raw.annual_price_per_seat_cents),
+    trialDays: num(raw.trialDays ?? raw.trial_days),
+    tagline: raw.tagline ?? '',
+    maxSeats: nullableNum(raw.maxSeats ?? raw.max_seats),
+    maxLocations: nullableNum(raw.maxLocations ?? raw.max_locations),
+    aiCreditsPerMonth: num(raw.aiCreditsPerMonth ?? raw.ai_credits_per_month),
+    features: stringList(raw.features),
+    tierOrder: num(raw.tierOrder ?? raw.tier_order),
+    isSolo: bool(raw.isSolo ?? raw.is_solo),
+    isFeatured: bool(raw.isFeatured ?? raw.is_featured),
+    isActive: bool(raw.isActive ?? raw.is_active, true),
+  };
+}
+
+function normalizeLineItem(raw: RawBillingLineItem): BillingLineItem {
+  return {
+    periodStart: raw.periodStart ?? raw.period_start ?? '',
+    periodEnd: raw.periodEnd ?? raw.period_end ?? null,
+    seatCount: num(raw.seatCount ?? raw.seat_count),
+    includedSeatLimit: num(raw.includedSeatLimit ?? raw.included_seat_limit),
+    includedSeatCount: num(raw.includedSeatCount ?? raw.included_seat_count),
+    billableSeatCount: num(raw.billableSeatCount ?? raw.billable_seat_count),
+    includedCents: num(raw.includedCents ?? raw.included_cents),
+    pricePerSeatCents: num(raw.pricePerSeatCents ?? raw.price_per_seat_cents),
+    amountCents: num(raw.amountCents ?? raw.amount_cents),
+    type: raw.type,
+    description: raw.description,
+    isGranted: bool(raw.isGranted ?? raw.is_granted),
+    grantExpiresAt: raw.grantExpiresAt ?? raw.grant_expires_at ?? null,
+    addonId: raw.addonId ?? raw.addon_id,
+    quantity: num(raw.quantity),
+    unitPriceCents: num(raw.unitPriceCents ?? raw.unit_price_cents),
+  };
+}
+
+function normalizeBilling(
+  raw: RawBillingDetailPayload | null | undefined
+): BillingDetailPayload | null {
+  if (!raw) return null;
+  const lineItems = raw.lineItems ?? raw.line_items ?? [];
+  return {
+    billingMonth: raw.billingMonth ?? raw.billing_month ?? '',
+    nextBillingDate: raw.nextBillingDate ?? raw.next_billing_date ?? null,
+    lineItems: lineItems.map(normalizeLineItem),
+    totalCents: num(raw.totalCents ?? raw.total_cents),
+    planName: raw.planName ?? raw.plan_name ?? '',
+    pricePerSeatCents: num(raw.pricePerSeatCents ?? raw.price_per_seat_cents),
+    currentSeatCount: num(raw.currentSeatCount ?? raw.current_seat_count),
+    includedSeatLimit: num(raw.includedSeatLimit ?? raw.included_seat_limit),
+    includedSeatCount: num(raw.includedSeatCount ?? raw.included_seat_count),
+    billableSeatCount: num(raw.billableSeatCount ?? raw.billable_seat_count),
+    seatDiscountCents: num(raw.seatDiscountCents ?? raw.seat_discount_cents),
+    status: raw.status ?? 'active',
+    isGranted: bool(raw.isGranted ?? raw.is_granted),
+    grantExpiresAt: raw.grantExpiresAt ?? raw.grant_expires_at ?? null,
+    trialEndsAt: raw.trialEndsAt ?? raw.trial_ends_at ?? null,
+    paddleSubscriptionId: raw.paddleSubscriptionId ?? raw.paddle_subscription_id ?? null,
+  };
+}
+
+function normalizeBillingHistory(raw: RawBillingHistoryMonth): BillingHistoryMonth {
+  const lineItems = raw.lineItems ?? raw.line_items ?? [];
+  return {
+    month: raw.month ?? '',
+    totalCents: num(raw.totalCents ?? raw.total_cents),
+    lineItems: lineItems.map(normalizeLineItem),
+    status: raw.status ?? 'draft',
+  };
 }
 
 /** Format a date range for line items, e.g. "Apr 1 – 18, 2026" */
@@ -170,19 +366,19 @@ export function computeSeatProration(pricePerSeatCents: number): SeatProration {
 // ── Query hooks ───────────────────────────────────────────────────────────────
 
 interface MySubscriptionResponse {
-  subscription: SubscriptionPayload | null;
+  subscription: RawSubscriptionPayload | null;
 }
 
 interface ListPlansResponse {
-  plans: PlanPayload[];
+  plans: RawPlanPayload[];
 }
 
 interface BillingDetailResponse {
-  billing: BillingDetailPayload | null;
+  billing: RawBillingDetailPayload | null;
 }
 
 interface BillingHistoryResponse {
-  history: BillingHistoryMonth[];
+  history: RawBillingHistoryMonth[];
 }
 
 interface SetSubscriptionRequest {
@@ -202,21 +398,21 @@ export const useMySubscription = () =>
   useQuery({
     queryKey: ['subscription'],
     queryFn: () => unwrap(safe.get<MySubscriptionResponse>('/api/hub/subscription/v1/my')),
-    select: (data) => data.subscription,
+    select: (data) => normalizeSubscription(data.subscription),
   });
 
 export const useListPlans = () =>
   useQuery({
     queryKey: ['subscription', 'plans'],
     queryFn: () => unwrap(safe.get<ListPlansResponse>('/api/hub/subscription/v1/plans')),
-    select: (data) => data.plans,
+    select: (data) => (data.plans ?? []).map(normalizePlan),
   });
 
 export const useBillingDetail = () =>
   useQuery({
     queryKey: ['subscription', 'billing'],
     queryFn: () => unwrap(safe.get<BillingDetailResponse>('/api/hub/subscription/v1/billing')),
-    select: (data) => data.billing,
+    select: (data) => normalizeBilling(data.billing),
   });
 
 export const useBillingHistory = () =>
@@ -224,7 +420,7 @@ export const useBillingHistory = () =>
     queryKey: ['subscription', 'billing', 'history'],
     queryFn: () =>
       unwrap(safe.get<BillingHistoryResponse>('/api/hub/subscription/v1/billing/history')),
-    select: (data) => data.history,
+    select: (data) => (data.history ?? []).map(normalizeBillingHistory),
   });
 
 export const useSetSubscription = () => {
@@ -244,8 +440,10 @@ export const useSetSubscription = () => {
 export const useCheckout = () =>
   useMutation<CheckoutResponse, Error, CheckoutRequest>({
     mutationFn: (data: CheckoutRequest) =>
-      unwrap(safe.post<CheckoutResponse>('/api/hub/subscription/v1/checkout', {
-        plan_slug: data.planSlug,
-        email: data.email,
-      })),
+      unwrap(
+        safe.post<CheckoutResponse>('/api/hub/subscription/v1/checkout', {
+          plan_slug: data.planSlug,
+          email: data.email,
+        })
+      ),
   });

@@ -5,12 +5,13 @@
 
 /** Format a number as a currency string using Intl.NumberFormat. */
 export function formatCurrency(amount: number, currency = 'USD', locale = 'en-US'): string {
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(safeAmount);
 }
 
 /** Round a monetary value to 2 decimal places (avoids floating point drift). */

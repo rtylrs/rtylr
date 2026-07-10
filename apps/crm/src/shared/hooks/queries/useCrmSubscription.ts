@@ -15,7 +15,8 @@ const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function centsToDisplay(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  const safeCents = Number.isFinite(cents) ? cents : 0;
+  return `$${(safeCents / 100).toFixed(2)}`;
 }
 
 export function trialDaysLeft(trialEndsAt: string | null): number {
