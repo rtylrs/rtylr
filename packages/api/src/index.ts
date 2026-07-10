@@ -14,3 +14,4 @@ export { RealtimeClient, getRealtimeClient } from './realtime';
 export type { RealtimeEvent } from './realtime';
 export { uploadAsset } from './upload';
 export type { UploadedAsset, UploadAssetOptions } from './upload';
+export { safeRatio, toFiniteNumber, toOptionalFiniteNumber } from './wire';
