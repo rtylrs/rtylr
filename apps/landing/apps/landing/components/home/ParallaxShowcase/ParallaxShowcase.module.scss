@@ -1,7 +1,7 @@
 // Pinned scroll scene: tall section, sticky 100vh stage inside.
 .section {
   position: relative;
-  height: 220vh;
+  height: 340vh;
 }
 
 .sticky {
@@ -148,7 +148,7 @@
 // Responsive
 @media (max-width: 768px) {
   .section {
-    height: 180vh;
+    height: 280vh;
   }
 
   .title {

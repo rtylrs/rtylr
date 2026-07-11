@@ -4,7 +4,8 @@ import styles from './ParallaxShowcase.module.scss';
 
 // Pinned scroll scene: the image starts as a rounded inset card, expands
 // to full bleed as you scroll, then the message scrubs in over it. The
-// section is 220vh tall; the inner viewport stays pinned the whole way.
+// section is deliberately tall; the inner viewport stays pinned while each
+// phase gets enough physical scroll distance for trackpads and mouse wheels.
 const ParallaxShowcase: React.FC = (): React.JSX.Element => {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -13,8 +14,8 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
     offset: ['start start', 'end end'],
   });
 
-  // Direct scrub (no spring) so the scene tracks the wheel 1:1 - springs
-  // on pinned scrubs read as lag. Border radius stays CONSTANT (paint
+  // Direct scrub (no spring) keeps the scene responsive; the section height
+  // controls pacing without introducing input lag. Border radius stays constant (paint
   // happens once); the final 1.045 scale pushes the rounded corners just
   // past the viewport edge, so only cheap composited transforms animate.
   const frameScale = useTransform(scrollYProgress, [0, 0.55], [0.62, 1.045]);
