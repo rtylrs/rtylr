@@ -32,67 +32,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	router.Put("/console/resources/{table}/rows/{id}", rawUpdateResourceRow(ctx, service))
 	router.Delete("/console/resources/{table}/rows/{id}", rawDeleteResourceRow(ctx, service))
 
-	// Stats
-	serverHttp.RegisterGET[handlers.StatsRequest, handlers.StatsResponse](
-		ctx, router, []string{"/console/stats"},
-		&handlers.StatsHandler{Service: service},
-	)
+	// AI cache analytics has not moved to the generated console contract yet.
 	serverHttp.RegisterGET[handlers.AICacheAnalyticsRequest, handlers.AICacheAnalyticsResponse](
 		ctx, router, []string{"/console/ai-cache/analytics"},
 		&handlers.AICacheAnalyticsHandler{},
 	)
-
-	// Users
-	serverHttp.RegisterGET[handlers.ListUsersRequest, handlers.ListUsersResponse](
-		ctx, router, []string{"/console/users"},
-		&handlers.ListUsersHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateUserRequest, handlers.CreateUserResponse](
-		ctx, router, []string{"/console/users"},
-		&handlers.CreateUserHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateBusinessOwnerRequest, handlers.CreateBusinessOwnerResponse](
-		ctx, router, []string{"/console/internal-onboarding/business-owner"},
-		&handlers.CreateBusinessOwnerHandler{Service: service},
-	)
-
-	// Users by ID (raw handlers for path params)
-	router.Get("/console/users/{id}", rawGetUser(ctx, service))
-	router.Put("/console/users/{id}", rawUpdateUser(ctx, service))
-	router.Delete("/console/users/{id}", rawDeleteUser(ctx, service))
-	router.Post("/console/users/{id}/ban", rawBanUser(ctx, service))
-	router.Post("/console/users/{id}/unban", rawUnbanUser(ctx, service))
-	router.Post("/console/users/{id}/set-console-admin", rawSetConsoleAdmin(ctx, service))
-	router.Get("/console/users/{id}/subscription", rawGetUserSubscription(ctx, service))
-
-	// Businesses
-	serverHttp.RegisterGET[handlers.ListBusinessesRequest, handlers.ListBusinessesResponse](
-		ctx, router, []string{"/console/businesses"},
-		&handlers.ListBusinessesHandler{Service: service},
-	)
-	router.Get("/console/businesses/{id}", rawGetBusiness(ctx, service))
-	router.Put("/console/businesses/{id}", rawUpdateBusiness(ctx, service))
-	router.Delete("/console/businesses/{id}", rawDeleteBusiness(ctx, service))
-
-	// Subscriptions
-	serverHttp.RegisterGET[handlers.ListSubscriptionsRequest, handlers.ListSubscriptionsResponse](
-		ctx, router, []string{"/console/subscriptions"},
-		&handlers.ListSubscriptionsHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[handlers.UpsertSubscriptionRequest, handlers.UpsertSubscriptionResponse](
-		ctx, router, []string{"/console/subscriptions/upsert"},
-		&handlers.UpsertSubscriptionHandler{Service: service},
-	)
-	router.Get("/console/subscriptions/{id}", rawGetSubscription(ctx, service))
-	router.Put("/console/subscriptions/{id}", rawUpdateSubscription(ctx, service))
-	router.Delete("/console/subscriptions/{id}", rawDeleteSubscription(ctx, service))
-
-	// Plans
-	serverHttp.RegisterGET[handlers.ListPlansRequest, handlers.ListPlansResponse](
-		ctx, router, []string{"/console/plans"},
-		&handlers.ListPlansHandler{Service: service},
-	)
-	router.Put("/console/plans/{id}", rawUpdatePlan(ctx, service))
 
 	// Grants
 	serverHttp.RegisterGET[handlers.ListGrantsRequest, handlers.ListGrantsResponse](

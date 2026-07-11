@@ -3,15 +3,28 @@ package console
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	consoleadminv1 "github.com/voxire/voxie/gen/go/console/admin/v1"
 
+	"github.com/voxire/onion/internal/modules/console/internal/api"
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	"github.com/voxire/onion/internal/modules/console/internal/routes"
 )
 
 type Module struct {
 	service *application.Service
+}
+
+func (m *Module) RegisterAPI(mux *http.ServeMux) {
+	if err := consoleadminv1.RegisterConsoleAdminServiceServer(
+		api.NewConsoleAdminAPI(m.service),
+		consoleadminv1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register console admin service: %w", err))
+	}
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {

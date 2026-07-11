@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/api"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubfeaturev1.RegisterFeatureServiceServer(
 		api.NewFeatureAPI(m.service),
 		hubfeaturev1.WithMux(mux),
-		hubfeaturev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub feature service: %w", err))
 	}
