@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package console.admin.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/console/admin/v1";
+
+message User {
+  int64 id = 1;
+  string email = 2;
+  string full_name = 3;
+  optional int64 business_id = 4;
+  bool is_console_admin = 5;
+  bool is_banned = 6;
+  optional string ban_reason = 7;
+  optional string banned_at = 8;
+  string created_at = 9;
+}
+
+message Business {
+  int64 id = 1;
+  int64 owner_id = 2;
+  string name = 3;
+  string slug = 4;
+  string created_at = 5;
+}
+
+message Subscription {
+  int64 id = 1;
+  int64 owner_id = 2;
+  string owner_name = 3;
+  string owner_email = 4;
+  optional int64 business_id = 5;
+  string business_name = 6;
+  int64 plan_id = 7;
+  string plan_name = 8;
+  string status = 9;
+  int32 seat_count = 10;
+  int32 active_seat_count = 11;
+  int32 included_seat_limit = 12;
+  int32 included_seat_count = 13;
+  int32 billable_seat_count = 14;
+  optional string trial_ends_at = 15;
+  optional string next_billing_date = 16;
+  optional string current_period_ends_at = 17;
+  optional string paddle_subscription_id = 18;
+  optional string paddle_customer_id = 19;
+  optional int32 days_remaining = 20;
+  string created_at = 21;
+  optional string updated_at = 22;
+}
+
+message Plan {
+  int64 id = 1;
+  string name = 2;
+  int32 price_per_seat_cents = 3;
+  int32 annual_price_per_seat_cents = 4;
+  bool is_active = 5;
+  string created_at = 6;
+}
+
+message Stats {
+  int64 total_users = 1;
+  int64 banned_users = 2;
+  int64 active_subscriptions = 3;
+  int64 total_businesses = 4;
+  int64 total_grants = 5;
+  int64 manual_addon_grants = 6;
+  int64 console_admins = 7;
+}

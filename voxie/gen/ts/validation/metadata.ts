@@ -1062,6 +1062,439 @@ export const contractValidationMetadata = {
       "type": "string"
     }
   },
+  "console.admin.v1.GetStatsRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersRequest": {
+    "email": {
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "id": {
+      "name": "id",
+      "optional": true,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "limit": {
+      "name": "limit",
+      "optional": false,
+      "protoName": "limit",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "offset": {
+      "name": "offset",
+      "optional": false,
+      "protoName": "offset",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserRequest": {
+    "email": {
+      "email": true,
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "fullName": {
+      "minLen": 1,
+      "name": "fullName",
+      "optional": false,
+      "protoName": "full_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "isConsoleAdmin": {
+      "name": "isConsoleAdmin",
+      "optional": false,
+      "protoName": "is_console_admin",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "password": {
+      "minLen": 8,
+      "name": "password",
+      "optional": false,
+      "protoName": "password",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesRequest": {
+    "id": {
+      "name": "id",
+      "optional": true,
+      "protoName": "id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "limit": {
+      "name": "limit",
+      "optional": false,
+      "protoName": "limit",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "name": {
+      "name": "name",
+      "optional": false,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "offset": {
+      "name": "offset",
+      "optional": false,
+      "protoName": "offset",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "ownerId": {
+      "name": "ownerId",
+      "optional": true,
+      "protoName": "owner_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    }
+  },
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest.DeleteBusinessResponse.CreateBusinessOwnerRequest": {
+    "businessName": {
+      "minLen": 1,
+      "name": "businessName",
+      "optional": false,
+      "protoName": "business_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "country": {
+      "name": "country",
+      "optional": false,
+      "protoName": "country",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "currency": {
+      "name": "currency",
+      "optional": false,
+      "protoName": "currency",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "email": {
+      "email": true,
+      "name": "email",
+      "optional": false,
+      "protoName": "email",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "fullName": {
+      "minLen": 1,
+      "name": "fullName",
+      "optional": false,
+      "protoName": "full_name",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "grantDays": {
+      "name": "grantDays",
+      "optional": true,
+      "protoName": "grant_days",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "grantPlan": {
+      "name": "grantPlan",
+      "optional": false,
+      "protoName": "grant_plan",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "industry": {
+      "name": "industry",
+      "optional": false,
+      "protoName": "industry",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "password": {
+      "minLen": 8,
+      "name": "password",
+      "optional": false,
+      "protoName": "password",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "planId": {
+      "name": "planId",
+      "optional": true,
+      "protoName": "plan_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int64"
+    },
+    "subscriptionStatus": {
+      "name": "subscriptionStatus",
+      "optional": false,
+      "protoName": "subscription_status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "timezone": {
+      "name": "timezone",
+      "optional": false,
+      "protoName": "timezone",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest.DeleteBusinessResponse.CreateBusinessOwnerResponse.ListSubscriptionsRequest": {
+    "limit": {
+      "name": "limit",
+      "optional": false,
+      "protoName": "limit",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "offset": {
+      "name": "offset",
+      "optional": false,
+      "protoName": "offset",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "status": {
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest.DeleteBusinessResponse.CreateBusinessOwnerResponse.ListSubscriptionsResponse.UpsertSubscriptionRequest": {
+    "currentPeriodEndsAt": {
+      "name": "currentPeriodEndsAt",
+      "optional": true,
+      "protoName": "current_period_ends_at",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "nextBillingDate": {
+      "name": "nextBillingDate",
+      "optional": true,
+      "protoName": "next_billing_date",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "ownerId": {
+      "gt": 0,
+      "name": "ownerId",
+      "optional": false,
+      "protoName": "owner_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "paddleCustomerId": {
+      "name": "paddleCustomerId",
+      "optional": true,
+      "protoName": "paddle_customer_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "paddleSubscriptionId": {
+      "name": "paddleSubscriptionId",
+      "optional": true,
+      "protoName": "paddle_subscription_id",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "planId": {
+      "gt": 0,
+      "name": "planId",
+      "optional": false,
+      "protoName": "plan_id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "seatCount": {
+      "name": "seatCount",
+      "optional": true,
+      "protoName": "seat_count",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "status": {
+      "minLen": 1,
+      "name": "status",
+      "optional": false,
+      "protoName": "status",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "totalDays": {
+      "name": "totalDays",
+      "optional": true,
+      "protoName": "total_days",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "trialEndsAt": {
+      "name": "trialEndsAt",
+      "optional": true,
+      "protoName": "trial_ends_at",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    }
+  },
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest.DeleteBusinessResponse.CreateBusinessOwnerResponse.ListSubscriptionsResponse.UpsertSubscriptionResponse.DeleteSubscriptionRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest.DeleteBusinessResponse.CreateBusinessOwnerResponse.ListSubscriptionsResponse.UpsertSubscriptionResponse.DeleteSubscriptionRequest.DeleteSubscriptionResponse.ListPlansRequest": {},
+  "console.admin.v1.GetStatsRequest.GetStatsResponse.ListUsersResponse.GetUserRequest.GetUserResponse.CreateUserResponse.UpdateUserRequest.UpdateUserResponse.DeleteUserRequest.DeleteUserResponse.BanUserRequest.BanUserResponse.UnbanUserRequest.UnbanUserResponse.SetConsoleAdminRequest.SetConsoleAdminResponse.GetUserSubscriptionRequest.GetUserSubscriptionResponse.ListBusinessesResponse.UpdateBusinessRequest.UpdateBusinessResponse.DeleteBusinessRequest.DeleteBusinessResponse.CreateBusinessOwnerResponse.ListSubscriptionsResponse.UpsertSubscriptionResponse.DeleteSubscriptionRequest.DeleteSubscriptionResponse.ListPlansRequest.ListPlansResponse.UpdatePlanRequest": {
+    "annualPricePerSeatCents": {
+      "name": "annualPricePerSeatCents",
+      "optional": true,
+      "protoName": "annual_price_per_seat_cents",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    },
+    "id": {
+      "gt": 0,
+      "name": "id",
+      "optional": false,
+      "protoName": "id",
+      "repeated": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "isActive": {
+      "name": "isActive",
+      "optional": true,
+      "protoName": "is_active",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "bool"
+    },
+    "name": {
+      "name": "name",
+      "optional": true,
+      "protoName": "name",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "pricePerSeatCents": {
+      "name": "pricePerSeatCents",
+      "optional": true,
+      "protoName": "price_per_seat_cents",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "int32"
+    }
+  },
   "crm.campaign.v1.CreateCampaignRequest": {
     "channel": {
       "minLen": 1,

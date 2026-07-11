@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package console.admin.v1;
+
+import "buf/validate/validate.proto";
+import "console/admin/v1/types.proto";
+import "onekit/http/annotations.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/console/admin/v1";
+
+service ConsoleAdminService {
+  option (onekit.http.service_config) = {base_path: "/api/console/admin/v1"};
+
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {
+    option (onekit.http.config) = {path: "/console/stats" method: HTTP_METHOD_GET};
+  }
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (onekit.http.config) = {path: "/console/users" method: HTTP_METHOD_GET};
+  }
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (onekit.http.config) = {path: "/console/users/{id}" method: HTTP_METHOD_GET};
+  }
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (onekit.http.config) = {path: "/console/users" method: HTTP_METHOD_POST body: "*"};
+  }
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+    option (onekit.http.config) = {path: "/console/users/{id}" method: HTTP_METHOD_PUT body: "*"};
+  }
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (onekit.http.config) = {path: "/console/users/{id}" method: HTTP_METHOD_DELETE};
+  }
+  rpc BanUser(BanUserRequest) returns (BanUserResponse) {
+    option (onekit.http.config) = {path: "/console/users/{id}/ban" method: HTTP_METHOD_POST body: "*"};
+  }
+  rpc UnbanUser(UnbanUserRequest) returns (UnbanUserResponse) {
+    option (onekit.http.config) = {path: "/console/users/{id}/unban" method: HTTP_METHOD_POST body: "*"};
+  }
+  rpc SetConsoleAdmin(SetConsoleAdminRequest) returns (SetConsoleAdminResponse) {
+    option (onekit.http.config) = {path: "/console/users/{id}/set-console-admin" method: HTTP_METHOD_POST body: "*"};
+  }
+  rpc GetUserSubscription(GetUserSubscriptionRequest) returns (GetUserSubscriptionResponse) {
+    option (onekit.http.config) = {path: "/console/users/{user_id}/subscription" method: HTTP_METHOD_GET};
+  }
+  rpc ListBusinesses(ListBusinessesRequest) returns (ListBusinessesResponse) {
+    option (onekit.http.config) = {path: "/console/businesses" method: HTTP_METHOD_GET};
+  }
+  rpc UpdateBusiness(UpdateBusinessRequest) returns (UpdateBusinessResponse) {
+    option (onekit.http.config) = {path: "/console/businesses/{id}" method: HTTP_METHOD_PUT body: "*"};
+  }
+  rpc DeleteBusiness(DeleteBusinessRequest) returns (DeleteBusinessResponse) {
+    option (onekit.http.config) = {path: "/console/businesses/{id}" method: HTTP_METHOD_DELETE};
+  }
+  rpc CreateBusinessOwner(CreateBusinessOwnerRequest) returns (CreateBusinessOwnerResponse) {
+    option (onekit.http.config) = {path: "/console/internal-onboarding/business-owner" method: HTTP_METHOD_POST body: "*"};
+  }
+  rpc ListSubscriptions(ListSubscriptionsRequest) returns (ListSubscriptionsResponse) {
+    option (onekit.http.config) = {path: "/console/subscriptions" method: HTTP_METHOD_GET};
+  }
+  rpc UpsertSubscription(UpsertSubscriptionRequest) returns (UpsertSubscriptionResponse) {
+    option (onekit.http.config) = {path: "/console/subscriptions/upsert" method: HTTP_METHOD_POST body: "*"};
+  }
+  rpc DeleteSubscription(DeleteSubscriptionRequest) returns (DeleteSubscriptionResponse) {
+    option (onekit.http.config) = {path: "/console/subscriptions/{id}" method: HTTP_METHOD_DELETE};
+  }
+  rpc ListPlans(ListPlansRequest) returns (ListPlansResponse) {
+    option (onekit.http.config) = {path: "/console/plans" method: HTTP_METHOD_GET};
+  }
+  rpc UpdatePlan(UpdatePlanRequest) returns (UpdatePlanResponse) {
+    option (onekit.http.config) = {path: "/console/plans/{id}" method: HTTP_METHOD_PUT body: "*"};
+  }
+}
+
+message GetStatsRequest {}
+message GetStatsResponse { Stats stats = 1; }
+
+message ListUsersRequest {
+  int32 limit = 1 [(onekit.http.query).name = "limit"];
+  int32 offset = 2 [(onekit.http.query).name = "offset"];
+  optional int64 id = 3 [(onekit.http.query).name = "id"];
+  string email = 4 [(onekit.http.query).name = "email"];
+  string name = 5 [(onekit.http.query).name = "name"];
+}
+message ListUsersResponse { repeated User users = 1; int64 total = 2; }
+message GetUserRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; }
+message GetUserResponse { User user = 1; }
+message CreateUserRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+  string password = 2 [(buf.validate.field).string.min_len = 8];
+  string full_name = 3 [(buf.validate.field).string.min_len = 1];
+  bool is_console_admin = 4;
+}
+message CreateUserResponse { User user = 1; string message = 2; }
+message UpdateUserRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; optional string full_name = 2; optional string email = 3; }
+message UpdateUserResponse { string message = 1; }
+message DeleteUserRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; }
+message DeleteUserResponse { string message = 1; }
+message BanUserRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; string reason = 2; }
+message BanUserResponse { string message = 1; }
+message UnbanUserRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; }
+message UnbanUserResponse { string message = 1; }
+message SetConsoleAdminRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; bool is_console_admin = 2; }
+message SetConsoleAdminResponse { string message = 1; }
+message GetUserSubscriptionRequest { int64 user_id = 1 [(buf.validate.field).int64.gt = 0]; }
+message GetUserSubscriptionResponse { optional Subscription subscription = 1; }
+
+message ListBusinessesRequest {
+  int32 limit = 1 [(onekit.http.query).name = "limit"];
+  int32 offset = 2 [(onekit.http.query).name = "offset"];
+  optional int64 id = 3 [(onekit.http.query).name = "id"];
+  string name = 4 [(onekit.http.query).name = "name"];
+  optional int64 owner_id = 5 [(onekit.http.query).name = "owner_id"];
+}
+message ListBusinessesResponse { repeated Business businesses = 1; int64 total = 2; }
+message UpdateBusinessRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; string name = 2 [(buf.validate.field).string.min_len = 1]; }
+message UpdateBusinessResponse { string message = 1; }
+message DeleteBusinessRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; }
+message DeleteBusinessResponse { string message = 1; }
+
+message CreateBusinessOwnerRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+  string password = 2 [(buf.validate.field).string.min_len = 8];
+  string full_name = 3 [(buf.validate.field).string.min_len = 1];
+  string business_name = 4 [(buf.validate.field).string.min_len = 1];
+  string industry = 5;
+  string country = 6;
+  string timezone = 7;
+  string currency = 8;
+  bool grant_plan = 9;
+  optional int64 plan_id = 10;
+  string subscription_status = 11;
+  optional int32 grant_days = 12;
+}
+message CreateBusinessOwnerResponse { User owner = 1; Business business = 2; optional Subscription subscription = 3; string message = 4; }
+
+message ListSubscriptionsRequest {
+  int32 limit = 1 [(onekit.http.query).name = "limit"];
+  int32 offset = 2 [(onekit.http.query).name = "offset"];
+  string status = 3 [(onekit.http.query).name = "status"];
+}
+message ListSubscriptionsResponse { repeated Subscription subscriptions = 1; int64 total = 2; }
+message UpsertSubscriptionRequest {
+  int64 owner_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 plan_id = 2 [(buf.validate.field).int64.gt = 0];
+  string status = 3 [(buf.validate.field).string.min_len = 1];
+  optional int32 seat_count = 4;
+  optional string trial_ends_at = 5;
+  optional string next_billing_date = 6;
+  optional string current_period_ends_at = 7;
+  optional int32 total_days = 8;
+  optional string paddle_subscription_id = 9;
+  optional string paddle_customer_id = 10;
+}
+message UpsertSubscriptionResponse { string message = 1; }
+message DeleteSubscriptionRequest { int64 id = 1 [(buf.validate.field).int64.gt = 0]; }
+message DeleteSubscriptionResponse { string message = 1; }
+
+message ListPlansRequest {}
+message ListPlansResponse { repeated Plan plans = 1; }
+message UpdatePlanRequest {
+  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  optional string name = 2;
+  optional int32 price_per_seat_cents = 3;
+  optional int32 annual_price_per_seat_cents = 4;
+  optional bool is_active = 5;
+}
+message UpdatePlanResponse { string message = 1; }
