@@ -20,6 +20,7 @@ voxie/
     pos/             # POS contracts
   api/               # .onk contracts (onekit) - the migration target
     hub/business/v1/ # first migrated service
+    hub/config/v1/    # second migrated service (references business/v1.Business - a cross-package reference)
 ```
 
 Go output (`gen/go`) is generated here and committed — `onion` consumes it directly from the submodule checkout, no local generation needed. `rtylr` still generates its own TypeScript: `pnpm contracts:sync` into `packages/contracts/src`.
@@ -62,8 +63,9 @@ For anything still touching an existing `.proto` service:
    - A cross-field/message-level constraint (e.g. `buf.validate.message.oneof`) has no onk decorator equivalent yet - needs a hand-written check in the handler for now.
 3. Run `onek check .` to validate, then `onek build .` (or `make generate`) to generate.
 4. Diff the generated routes against the old ones (`grep 'mux.Handle' gen/go/.../server_http.pb.go` vs the new `server.gen.go`) - they must match exactly.
-5. Delete the old `.proto` files and their `gen/go`/`gen/ts` output for that service.
-6. Commit, and prove it end-to-end: compile the generated Go, spin up the server with a test implementation, and exercise it over real HTTP - don't just confirm it generates without errors.
+5. Before deleting anything, check whether other `.proto` files import this service's types (`grep -rl "{app}/{domain}/v1" proto/`) - a proto file can't import a type that only exists in `.onk` anymore. Either migrate the dependent service in the same PR (onk resolves cross-directory references automatically - just reference the type by name, no import statement needed), or leave this service's proto types.proto in place as a shim until the dependent is migrated too.
+6. Delete the old `.proto` files and their `gen/go`/`gen/ts` output for that service, and add its `proto/{path}` to `BREAKING_EXCLUDE` in the `Makefile` (deleting the file is intentional, not a regression `buf breaking` should flag).
+7. Commit, and prove it end-to-end: compile the generated Go, spin up the server with a test implementation, and exercise it over real HTTP - don't just confirm it generates without errors.
 
 ## Tools
 

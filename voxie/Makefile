@@ -1,7 +1,13 @@
 .PHONY: clean lint format breaking generate install-plugins install-onek install-js typecheck
 
 ONEKIT_VERSION := v0.3.5
-ONK_VERSION := v0.4.2
+ONK_VERSION := v0.4.3
+
+# Proto paths already migrated to .onk (see api/) - their proto files are
+# intentionally deleted, not accidentally regressed, so they're excluded from
+# breaking-change detection. Add the migrated service's proto path here as
+# part of each migration PR (see README.md "Migrating a service to .onk").
+BREAKING_EXCLUDE := --exclude-path proto/hub/business/v1 --exclude-path proto/hub/config/v1
 
 # Clean generated code
 clean:
@@ -17,7 +23,7 @@ format:
 
 # Check for breaking changes
 breaking:
-	buf breaking --against '.git#branch=main'
+	buf breaking --against '.git#branch=main' $(BREAKING_EXCLUDE)
 
 # Install the onekit protoc plugins used for services still on .proto (see proto/).
 # Being migrated off in favor of onek/.onk - see api/ and README.md.
