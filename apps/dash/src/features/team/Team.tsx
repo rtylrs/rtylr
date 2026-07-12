@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import {
   Search,
   UserPlus,
@@ -22,8 +21,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button, Input } from '../../shared/components/ui';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
 import { EmptyState, SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
 import {
   useTeam,
@@ -39,6 +36,7 @@ import {
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
 import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
+import { isAddonEnabled, useAddons } from '../../shared/hooks/queries/useAddons';
 
 const APP_ICONS: Record<
   string,
@@ -63,21 +61,8 @@ const Team: React.FC = (): React.JSX.Element => {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [confirm, setConfirm] = useState<TeamMember | null>(null);
   const { data: sub } = useMySubscription();
-  const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
-    queryKey: ['addons'],
-    queryFn: async () => {
-      try {
-        const res = await unwrap(
-          safe.get<{ addons?: Array<{ id: string; isEnabled: boolean }> }>('/addons')
-        );
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 60_000,
-  });
-  const menuAddonEnabled = (addonsData ?? []).some((a) => a.id === 'menu' && a.isEnabled);
+  const { data: addonsData = [] } = useAddons();
+  const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
 
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [page, setPage] = useState(0);

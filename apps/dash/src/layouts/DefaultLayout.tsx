@@ -2,8 +2,6 @@ import React, { useRef } from 'react';
 import { useNavigate, Link, useRouterState } from '@tanstack/react-router';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import { safe } from '../shared/lib/api';
 import { APP_URLS, getAvatarUrl, resolveAppUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
@@ -48,6 +46,7 @@ import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
+import { isAddonEnabled, useAddons } from '../shared/hooks/queries/useAddons';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/caret';
 
@@ -275,21 +274,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { theme, setTheme } = useThemeStore();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { data: notifications = [] } = useNotifications();
-  const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
-    queryKey: ['addons'],
-    queryFn: async () => {
-      try {
-        const res = await unwrap(
-          safe.get<{ addons?: Array<{ id: string; isEnabled: boolean }> }>('/addons')
-        );
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 60_000,
-  });
-  const menuAddonEnabled = (addonsData ?? []).some((a) => a.id === 'menu' && a.isEnabled);
+  const { data: addonsData = [] } = useAddons();
+  const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
   const sidebarRef = useRef<HTMLElement | null>(null);
 
   useForesightLinks(sidebarRef, {

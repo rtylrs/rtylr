@@ -26,9 +26,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Input } from '../../shared/components/ui';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
-import { ADDONS_QUERY_KEY, type AddonData, useAddons } from '../../shared/hooks/queries/useAddons';
+import {
+  ADDONS_QUERY_KEY,
+  disableAddon,
+  enableAddon,
+  type AddonData,
+  useAddons,
+} from '../../shared/hooks/queries/useAddons';
 import {
   centsToDisplay,
   useBillingDetail,
@@ -132,7 +136,7 @@ const Addons: React.FC = () => {
         throw new Error('addons unavailable during trial');
       }
       setEnablingId(addonId);
-      await unwrap(safe.patch(`/api/hub/app/v1/addons/${encodeURIComponent(addonId)}/enable`));
+      await enableAddon(addonId);
     },
     onSuccess: (_, addonId) => {
       setShowEnableSuccess(addonId);
@@ -153,7 +157,7 @@ const Addons: React.FC = () => {
       if (isTrialMode) {
         throw new Error('addons unavailable during trial');
       }
-      await unwrap(safe.patch(`/api/hub/app/v1/addons/${encodeURIComponent(addonId)}/disable`));
+      await disableAddon(addonId);
     },
     onSuccess: () => {
       setDisableTarget(null);
@@ -168,7 +172,7 @@ const Addons: React.FC = () => {
       if (isTrialMode) {
         throw new Error('addons unavailable during trial');
       }
-      await unwrap(safe.patch(`/api/hub/app/v1/addons/${encodeURIComponent(addonId)}/enable`));
+      await enableAddon(addonId);
     },
     onSuccess: (_, addonId) => {
       const purchased = addons.find((addon) => addon.id === addonId);

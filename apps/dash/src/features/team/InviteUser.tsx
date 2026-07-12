@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import {
   Send,
   MonitorSpeaker,
@@ -16,8 +15,6 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Input, Label } from '../../shared/components/ui';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
 import {
@@ -30,6 +27,7 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
+import { isAddonEnabled, useAddons } from '../../shared/hooks/queries/useAddons';
 
 const ALL_APPS = [
   { key: 'pos', label: 'POS', desc: 'Point of sale', icon: MonitorSpeaker, color: '#4583C4' },
@@ -107,21 +105,8 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const posSelectedBulk = bulkApps.includes('pos');
   const { data: locations = [] } = usePOSLocations(posSelectedSingle || posSelectedBulk);
 
-  const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
-    queryKey: ['addons'],
-    queryFn: async () => {
-      try {
-        const res = await unwrap(
-          safe.get<{ addons?: Array<{ id: string; isEnabled: boolean }> }>('/addons')
-        );
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 60_000,
-  });
-  const menuAddonEnabled = (addonsData ?? []).some((a) => a.id === 'menu' && a.isEnabled);
+  const { data: addonsData = [] } = useAddons();
+  const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
 
   const allRoles = [
     ...ROLES,
