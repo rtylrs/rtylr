@@ -1,5 +1,4 @@
 import { usePermissionsStore } from '../stores/permissionsStore';
-import { useUserStore } from '../stores/userStore';
 
 export type PermissionKey =
   | 'canEditProducts'
@@ -18,7 +17,6 @@ export const hasPermission = (permission: PermissionKey): boolean => {
 
 export const canAccessRoute = (route: string): boolean => {
   const permissionsStore = usePermissionsStore.getState();
-  const userStore = useUserStore.getState();
 
   // Define route-permission mappings
   const routePermissions: Record<string, PermissionKey[]> = {
@@ -45,25 +43,3 @@ export const PERMISSIONS = {
   MANAGE_ORDERS: 'canManageOrders' as PermissionKey,
   MANAGE_BILLING: 'canManageBilling' as PermissionKey,
 };
-
-// Hook to use permissions in components
-export const usePermissions = () => {
-  const permissionsStore = usePermissionsStore();
-  const userStore = useUserStore();
-
-  // Sync permissions with user role
-  React.useEffect(() => {
-    if (userStore.role) {
-      permissionsStore.setRole(userStore.role as any);
-    }
-  }, [userStore.role]);
-
-  return {
-    hasPermission: permissionsStore.hasPermission,
-    permissions: permissionsStore.getPermissions(),
-    role: permissionsStore.role,
-  };
-};
-
-// Need to import React for the hook
-import React from 'react';
