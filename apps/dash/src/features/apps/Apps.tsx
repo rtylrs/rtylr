@@ -49,7 +49,7 @@ const Apps: React.FC = () => {
   return (
     <>
       <HelmetContainer title="Apps · rtylr" />
-      <div className="space-y-5 max-w-6xl">
+      <div className="dash-apps-page space-y-5 w-full min-w-0">
         <div className="flex items-center gap-3">
           <div
             className="h-9 w-9 rounded-xl flex items-center justify-center"
@@ -67,8 +67,8 @@ const Apps: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 max-w-sm">
+        <div className="dash-apps-controls flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[12rem] max-w-sm">
             <Search
               size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -111,7 +111,7 @@ const Apps: React.FC = () => {
             description="Try a different search or category."
           />
         ) : (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="dash-app-grid grid gap-4">
             {filtered.map((app) => (
               <AppCard key={app.key} app={app} />
             ))}

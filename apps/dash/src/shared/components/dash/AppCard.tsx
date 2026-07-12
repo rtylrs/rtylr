@@ -55,28 +55,26 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
   })();
 
   const content = (
-    <>
-      <div className="flex items-start justify-between">
-        <div
-          className="h-11 w-11 rounded-xl flex items-center justify-center"
-          style={{ background: app.bg, opacity: isLocked ? 0.5 : 1 }}
-        >
-          <Icon size={22} style={{ color: app.color }} />
-        </div>
-        <div className="flex items-center gap-1.5">{badge}</div>
+    <div className="flex min-w-0 items-start gap-3">
+      <div
+        className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center"
+        style={{ background: app.bg, opacity: isLocked ? 0.5 : 1 }}
+      >
+        <Icon size={22} style={{ color: app.color }} />
       </div>
-      <div>
+      <div className="min-w-0 flex-1">
         <p
-          className="text-sm font-semibold"
+          className="text-sm font-semibold leading-snug"
           style={{ color: isLocked ? 'var(--dash-text-muted)' : 'var(--dash-text)' }}
         >
           {app.label}
         </p>
-        <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--dash-text-muted)' }}>
+        <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--dash-text-muted)' }}>
           {app.description}
         </p>
       </div>
-    </>
+      <div className="flex shrink-0 items-center gap-1.5">{badge}</div>
+    </div>
   );
 
   const cardStyle: React.CSSProperties = {
@@ -88,7 +86,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
   if (isComingSoon || (isLocked && false)) {
     return (
       <motion.div
-        className="rounded-xl p-5 flex flex-col gap-4 cursor-not-allowed"
+        className="dash-app-card rounded-xl p-4 cursor-not-allowed"
         style={cardStyle}
         whileHover={{ scale: 1 }}
       >
@@ -102,7 +100,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
     return (
       <motion.a
         href="/settings/billing"
-        className="group rounded-xl p-5 flex flex-col gap-4 no-underline transition-all"
+        className="dash-app-card group rounded-xl p-4 no-underline transition-all"
         style={cardStyle}
         whileHover={{ scale: 1.01 }}
       >
@@ -116,7 +114,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
       href={app.href}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      className="group rounded-xl p-5 flex flex-col gap-4 no-underline transition-all"
+      className="dash-app-card group rounded-xl p-4 no-underline transition-all"
       style={cardStyle}
       whileHover={{ scale: 1.01 }}
       onClick={() => onLaunch?.(app)}

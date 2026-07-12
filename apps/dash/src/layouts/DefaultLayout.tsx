@@ -135,6 +135,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
     <Link
       to={path}
       data-tour={label.toLowerCase()}
+      title={label}
       className={cn(
         'group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
         isActive ? '' : 'hover:bg-[var(--dash-hover)]'
@@ -156,7 +157,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       >
         <Icon size={16} />
       </motion.span>
-      <span className="relative">{label}</span>
+      <span className="dash-sidebar-label relative">{label}</span>
       {isActive && (
         <motion.span
           className="relative ml-auto h-1 w-1 rounded-full shrink-0"
@@ -190,10 +191,10 @@ const SidebarSection: React.FC<{
         style={{ color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)' }}
       >
         <Icon size={16} className="shrink-0" />
-        <span className="flex-1 text-left">{label}</span>
+        <span className="dash-sidebar-label flex-1 text-left">{label}</span>
         <ChevronRight
           size={12}
-          className={cn('shrink-0 transition-transform', open && 'rotate-90')}
+          className={cn('dash-sidebar-chevron shrink-0 transition-transform', open && 'rotate-90')}
           style={{ color: 'var(--dash-text-dim)' }}
         />
       </button>
@@ -229,7 +230,7 @@ const AppsSection: React.FC = () => {
   return (
     <div className="pt-3">
       <div
-        className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide"
+        className="dash-sidebar-section-label px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide"
         style={{ color: 'var(--dash-text-dim)' }}
       >
         Apps
@@ -243,6 +244,7 @@ const AppsSection: React.FC = () => {
               href={resolveAppUrl(a.key as Parameters<typeof resolveAppUrl>[0])}
               target="_blank"
               rel="noopener noreferrer"
+              title={a.label}
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
               style={{ color: 'var(--dash-text-muted)' }}
             >
@@ -252,8 +254,12 @@ const AppsSection: React.FC = () => {
               >
                 <Icon size={13} style={{ color: a.color }} />
               </span>
-              <span className="flex-1 truncate">{a.label}</span>
-              <ExternalLink size={11} style={{ color: 'var(--dash-text-dim)' }} />
+              <span className="dash-sidebar-label flex-1 truncate">{a.label}</span>
+              <ExternalLink
+                size={11}
+                className="dash-sidebar-external"
+                style={{ color: 'var(--dash-text-dim)' }}
+              />
             </a>
           );
         })}
@@ -335,10 +341,13 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--dash-bg)' }}>
+      <div
+        className="dash-shell flex h-screen overflow-hidden"
+        style={{ background: 'var(--dash-bg)' }}
+      >
         {/* Sidebar */}
         <aside
-          className="w-64 flex flex-col shrink-0 overflow-hidden"
+          className="dash-sidebar w-64 flex flex-col shrink-0 overflow-hidden"
           style={{
             background: 'var(--dash-surface)',
             borderRight: '1px solid var(--dash-border)',
@@ -346,7 +355,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           {/* Logo */}
           <div
-            className="flex h-14 items-center gap-2.5 px-4"
+            className="dash-sidebar-logo flex h-14 items-center gap-2.5 px-4"
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             <img
@@ -397,7 +406,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               }}
             >
               <Settings size={16} />
-              <span>Manage account</span>
+              <span className="dash-sidebar-label">Manage account</span>
             </Link>
 
             <DropdownMenu>
@@ -411,7 +420,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     className="shrink-0"
                     style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
                   />
-                  <div className="flex flex-col items-start min-w-0 flex-1">
+                  <div className="dash-sidebar-user flex flex-col items-start min-w-0 flex-1">
                     <span
                       className="text-xs font-medium truncate w-full text-left"
                       style={{ color: 'var(--dash-text)' }}
@@ -495,12 +504,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </aside>
 
         {/* Main content + Caret AI inline column */}
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-1 min-w-0 overflow-hidden">
+          <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
             <LicenseBanner safe={safe} />
             {/* Topbar */}
             <header
-              className="h-11 flex items-center justify-between px-6 shrink-0"
+              className="dash-topbar h-11 flex items-center justify-between px-6 shrink-0"
               style={{
                 background: 'var(--dash-surface)',
                 borderBottom: '1px solid var(--dash-border)',
@@ -548,7 +557,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     ⌘K
                   </kbd>
                 </button>
-                <CaretButton data-tour="caret" />
+                <CaretButton className="dash-caret-button" data-tour="caret" />
                 <button
                   onClick={() => navigate({ to: '/notifications' })}
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
@@ -575,7 +584,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, y: -8, filter: 'blur(2px)' }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="flex-1 overflow-y-auto p-6"
+                className="dash-page flex-1 min-w-0 overflow-y-auto p-6"
               >
                 {children}
               </motion.main>

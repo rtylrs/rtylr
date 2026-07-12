@@ -100,7 +100,10 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
 
   return (
     <>
-      <div className="px-2 py-1.5" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+      <div
+        className="dash-business-switcher px-2 py-1.5"
+        style={{ borderBottom: '1px solid var(--dash-border)' }}
+      >
         <DropdownMenu>
           <DropdownMenuTrigger>
             <button
@@ -114,12 +117,16 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
                 <Building2 size={11} style={{ color: '#4583C4' }} />
               </span>
               <span
-                className="flex-1 truncate text-left text-xs"
+                className="dash-sidebar-label flex-1 truncate text-left text-xs"
                 style={{ color: 'var(--dash-text)' }}
               >
                 {currentBusiness?.name ?? user?.businessName ?? t('businesses.myBusinesses')}
               </span>
-              <ChevronRight size={11} style={{ color: 'var(--dash-text-dim)' }} />
+              <ChevronRight
+                size={11}
+                className="dash-sidebar-chevron"
+                style={{ color: 'var(--dash-text-dim)' }}
+              />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" side="bottom" className="w-52">
