@@ -66,9 +66,7 @@ function toMenuList(items: PosMenuItem[]): MenuListEntry[] {
 }
 
 export const useGetAllMenus = (restaurantId: string | null) => {
-  const { setAllMenus } = useMenuStore();
-
-  const query = useQuery({
+  return useQuery({
     queryKey: ['menus', restaurantId],
     queryFn: async () => {
       const res = await menuItemClient.listMenuItems({});
@@ -76,14 +74,6 @@ export const useGetAllMenus = (restaurantId: string | null) => {
     },
     enabled: !!restaurantId,
   });
-
-  useEffect(() => {
-    if (query.data) {
-      setAllMenus(query.data);
-    }
-  }, [query.data, setAllMenus]);
-
-  return query;
 };
 
 export const useGetMenu = (userId: string | null, disabled?: boolean) => {

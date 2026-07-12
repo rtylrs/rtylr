@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useFullscreenStore } from '../stores/fullscreenStore';
 
 /**
@@ -6,7 +6,7 @@ import { useFullscreenStore } from '../stores/fullscreenStore';
  * Note: Actual fullscreen functionality removed (was Tauri-specific)
  */
 export const useFullscreen = () => {
-  const { isFullscreen, setFullscreen, toggleFullscreen } = useFullscreenStore();
+  const { isFullscreen, setFullscreen } = useFullscreenStore();
 
   // Apply fullscreen state to the window
   const applyFullscreen = useCallback(
@@ -19,15 +19,8 @@ export const useFullscreen = () => {
 
   // Toggle fullscreen state
   const toggle = useCallback(async () => {
-    const newState = !isFullscreen;
-    await applyFullscreen(newState);
-    toggleFullscreen();
-  }, [isFullscreen, applyFullscreen, toggleFullscreen]);
-
-  // Apply stored fullscreen state on mount
-  useEffect(() => {
-    // No-op in web-only version
-  }, []); // Only run on mount
+    await applyFullscreen(!isFullscreen);
+  }, [isFullscreen, applyFullscreen]);
 
   return {
     isFullscreen,

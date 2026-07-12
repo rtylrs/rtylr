@@ -13,6 +13,8 @@ const DropdownMenu: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!open) return;
+
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
@@ -20,7 +22,7 @@ const DropdownMenu: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [open]);
 
   return (
     <DropdownContext.Provider value={{ open, setOpen }}>
