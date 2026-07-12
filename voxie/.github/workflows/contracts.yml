@@ -22,6 +22,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      # actions/checkout on a pull_request event leaves "main" only as
+      # origin/main, not a resolvable local branch - buf's `.git#branch=main`
+      # input needs the latter, so `buf breaking` fails to even find it
+      # without this. Never surfaced before since every prior CI run here was
+      # a direct push to main, not a pull_request.
+      - name: Fetch main for buf breaking
+        if: github.event_name == 'pull_request'
+        run: git fetch origin main:main
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
