@@ -562,22 +562,11 @@ const Design: React.FC = () => {
   const [newPresetName, setNewPresetName] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const [colorPrimary, setColorPrimary] = useState(draftConfig.colors?.primary ?? '#4583C4');
-  const [colorAccent, setColorAccent] = useState(draftConfig.colors?.accent ?? '#f59e0b');
-  const [colorBg, setColorBg] = useState(draftConfig.colors?.bg ?? '#ffffff');
   const [fontFamily, setFontFamily] = useState('system');
   const [fontSize, setFontSize] = useState('md');
-
-  useEffect(() => {
-    setColorPrimary(draftConfig.colors?.primary ?? '#4583C4');
-    setColorAccent(draftConfig.colors?.accent ?? '#f59e0b');
-    setColorBg(draftConfig.colors?.bg ?? '#ffffff');
-  }, [
-    activePresetId,
-    draftConfig.colors?.primary,
-    draftConfig.colors?.accent,
-    draftConfig.colors?.bg,
-  ]);
+  const colorPrimary = draftConfig.colors?.primary ?? '#4583C4';
+  const colorAccent = draftConfig.colors?.accent ?? '#f59e0b';
+  const colorBg = draftConfig.colors?.bg ?? '#ffffff';
 
   const activePreset = presets.find((p) => p.id === activePresetId);
 
@@ -993,7 +982,6 @@ const Design: React.FC = () => {
                 label="Primary"
                 value={colorPrimary}
                 onChange={(v) => {
-                  setColorPrimary(v);
                   patchDraftConfig({
                     colors: { ...draftConfig.colors, primary: v, accent: colorAccent, bg: colorBg },
                   });
@@ -1003,7 +991,6 @@ const Design: React.FC = () => {
                 label="Accent"
                 value={colorAccent}
                 onChange={(v) => {
-                  setColorAccent(v);
                   patchDraftConfig({
                     colors: {
                       primary: colorPrimary,
@@ -1018,7 +1005,6 @@ const Design: React.FC = () => {
                 label="Background"
                 value={colorBg}
                 onChange={(v) => {
-                  setColorBg(v);
                   patchDraftConfig({
                     colors: {
                       primary: colorPrimary,

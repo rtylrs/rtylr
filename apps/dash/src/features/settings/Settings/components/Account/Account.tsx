@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { signOut } from '@voxire/auth';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { safe } from '../../../../../shared/lib/api';
@@ -46,32 +46,30 @@ interface LoginHistoryItem {
   timeAgo: string;
 }
 
+interface LoginHistoryResponse {
+  history?: Array<{ email: string; method: string; ip?: string; createdAt: string }>;
+}
+
 const Account: React.FC = () => {
   const { user } = useUserStore();
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
-  const [loginHistory, setLoginHistory] = useState<LoginHistoryItem[]>([]);
   const [confirmInvalidateOpen, setConfirmInvalidateOpen] = useState(false);
 
-  useEffect(() => {
-    void unwrap(
-      safe.get<{
-        history?: Array<{ email: string; method: string; ip?: string; createdAt: string }>;
-      }>('/api/hub/security/v1/login-history')
-    )
-      .then((res) => {
-        const history = res.history ?? [];
-        setLoginHistory(
-          history.map((h) => ({
-            email: h.email,
-            method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
-            ip: h.ip ? `from ${h.ip}` : '',
-            timeAgo: formatTimeAgo(h.createdAt),
-          }))
-        );
-      })
-      .catch(() => {});
-  }, []);
+  const { data: loginHistory = [] } = useQuery<LoginHistoryItem[]>({
+    queryKey: ['security', 'login-history'],
+    queryFn: async () => {
+      const response = await unwrap(
+        safe.get<LoginHistoryResponse>('/api/hub/security/v1/login-history')
+      );
+      return (response.history ?? []).map((entry) => ({
+        email: entry.email,
+        method: entry.method === 'email' ? 'Logged in via email' : `Logged in via ${entry.method}`,
+        ip: entry.ip ? `from ${entry.ip}` : '',
+        timeAgo: formatTimeAgo(entry.createdAt),
+      }));
+    },
+  });
 
   useEffect(() => {
     if (user) {
