@@ -13,7 +13,7 @@ import {
   type ContentBlock,
 } from '@voxire/caret';
 import { useUserStore } from '../../shared/stores/userStore';
-import { buildDashPageContext, buildDashSystemContext } from '../../shared/lib/caret';
+import { buildDashPageContext, buildDashSystemContext } from '../../shared/lib/dashCaretContext';
 
 const SUGGESTIONS = [
   'How much revenue did we make today?',

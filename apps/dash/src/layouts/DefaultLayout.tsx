@@ -48,7 +48,7 @@ import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
 import { isAddonEnabled, useAddons } from '../shared/hooks/queries/useAddons';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
-import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/caret';
+import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/dashCaretContext';
 
 interface NavItem {
   label: string;
