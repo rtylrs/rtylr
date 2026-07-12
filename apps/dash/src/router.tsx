@@ -13,7 +13,6 @@ import AppLayout from './layouts/AppLayout';
 import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
 import NoMatch from './features/extras/NoMatch';
 
-const MenuWithId = React.lazy(() => import('./features/menu/MenuWithId.jsx'));
 const Orders = React.lazy(() => import('./features/orders/Orders'));
 const VendorDashboard = React.lazy(() => import('./features/dashboard/Dashboard/VendorDashboard'));
 const Menu = React.lazy(() => import('./features/menu/Menu.tsx'));
@@ -95,12 +94,6 @@ const menuRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/menu',
   component: () => wrap(<Menu />),
-});
-
-const menuWithIdRoute = createRoute({
-  getParentRoute: () => businessRoute,
-  path: '/menu/$id',
-  component: () => wrap(<MenuWithId />),
 });
 
 const createItemRoute = createRoute({
@@ -389,7 +382,6 @@ const routeTree = rootRoute.addChildren([
     dashboardRoute,
     menusRoute,
     menuRoute,
-    menuWithIdRoute,
     createItemRoute,
     createBannerRoute,
     ordersRoute,
