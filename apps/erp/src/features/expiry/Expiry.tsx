@@ -14,7 +14,9 @@ const AMBER = '#f59e0b';
 const Expiry: React.FC = () => {
   const { data: items = [], isLoading } = useExpiry();
 
-  const sorted = [...items].sort((a, b) => daysUntil(a.expiryDate) - daysUntil(b.expiryDate));
+  const sorted = [...items].sort(
+    (a, b) => daysUntil(a.expiryDate ?? '') - daysUntil(b.expiryDate ?? '')
+  );
 
   return (
     <motion.div
@@ -66,7 +68,7 @@ const Expiry: React.FC = () => {
           />
         ) : (
           sorted.map((item, i) => {
-            const days = daysUntil(item.expiryDate);
+            const days = daysUntil(item.expiryDate ?? '');
             const isExpired = days < 0;
             const isUrgent = days <= 7 && days >= 0;
             const color = isExpired ? '#f87171' : isUrgent ? AMBER : '#10b981';
@@ -97,7 +99,7 @@ const Expiry: React.FC = () => {
                   {item.warehouseName}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--hub-text)' }}>
-                  {formatDate(item.expiryDate)}
+                  {formatDate(item.expiryDate ?? '')}
                 </span>
                 <span
                   className="text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit"

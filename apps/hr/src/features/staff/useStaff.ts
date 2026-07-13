@@ -1,9 +1,9 @@
 import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/service_client';
-import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/service_client';
-import type { Staff as ApiStaff } from '@voxire/voxie/hr/staff/v1/service_client';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
+import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
+import type { Staff as ApiStaff } from '@voxire/voxie/hr/staff/v1/types';
 import { staffMemberSchema, type StaffMember } from '../../shared/schemas/staff';
 import { hrApi, CreateStaffInput, UpdateStaffInput } from '../../shared/services/hrApi';
 
@@ -30,8 +30,10 @@ export function useStaff() {
         staffClient.listStaff({ search: '', departmentId: '', status: '' }),
         departmentClient.listDepartments({}),
       ]);
-      const namesById = new Map(departmentsRes.departments.map((d) => [d.id, d.name]));
-      return staffRes.staff.map((s) => toStaffMember(s, namesById.get(s.departmentId) ?? ''));
+      const namesById = new Map((departmentsRes.departments ?? []).map((d) => [d.id, d.name]));
+      return (staffRes.staff ?? []).map((s) =>
+        toStaffMember(s, namesById.get(s.departmentId) ?? '')
+      );
     },
   });
 }

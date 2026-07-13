@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   ListTimeEntriesRequest,
   ListTimeEntriesResponse,
-} from '@voxire/voxie/hr/time_entry/v1/list_time_entries';
+} from '@voxire/voxie/hr/time_entry/v1/types';
 import type {
   CreateTimeEntryRequest,
   CreateTimeEntryResponse,
-} from '@voxire/voxie/hr/time_entry/v1/create_time_entry';
+} from '@voxire/voxie/hr/time_entry/v1/types';
 import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

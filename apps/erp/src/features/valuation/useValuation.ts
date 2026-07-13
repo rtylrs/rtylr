@@ -1,10 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import {
-  InventoryServiceClient,
-  type GetValuationResponse,
-  type ValuationItem,
-} from '@voxire/voxie/erp/inventory/v1/service_client';
+import { InventoryServiceClient } from '@voxire/voxie/erp/inventory/v1/client';
+import type { GetValuationResponse, ValuationItem } from '@voxire/voxie/erp/inventory/v1/types';
 
 const inventoryClient = createOneKitClient(InventoryServiceClient, 'erp');
 

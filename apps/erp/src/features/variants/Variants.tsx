@@ -120,42 +120,43 @@ const Variants: React.FC = () => {
           />
         ) : (
           variants.map((v, i) => {
-            const attributes = parseVariantAttributes(v.attributes);
+            const attributes = parseVariantAttributes(v.attributes ?? '');
             return (
-            <div
-              key={v.id}
-              className="grid px-4 py-3 items-center"
-              style={{
-                gridTemplateColumns: '2fr 1fr 1.5fr 0.8fr 0.8fr 0.8fr',
-                borderTop: i > 0 ? '1px solid var(--hub-border)' : 'none',
-              }}
-            >
-              <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                {v.name}
-              </span>
-              <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
-                {v.sku}
-              </span>
-              <div className="flex gap-1 flex-wrap">
-                {Object.entries(attributes).map(([k, val]) => (
-                  <span
-                    key={k}
-                    className="text-[10px] px-1.5 py-0.5 rounded"
-                    style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
-                  >
-                    {k}: {val}
-                  </span>
-                ))}
+              <div
+                key={v.id}
+                className="grid px-4 py-3 items-center"
+                style={{
+                  gridTemplateColumns: '2fr 1fr 1.5fr 0.8fr 0.8fr 0.8fr',
+                  borderTop: i > 0 ? '1px solid var(--hub-border)' : 'none',
+                }}
+              >
+                <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {v.name}
+                </span>
+                <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
+                  {v.sku}
+                </span>
+                <div className="flex gap-1 flex-wrap">
+                  {Object.entries(attributes).map(([k, val]) => (
+                    <span
+                      key={k}
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                    >
+                      {k}: {val}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  {v.stockQuantity}
+                </span>
+                <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {formatCurrency(v.salePrice ?? 0)}
+                </span>
+                <StockBadge stock={v.stockQuantity ?? 0} lowStock={10} />
               </div>
-              <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                {v.stockQuantity}
-              </span>
-              <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                {formatCurrency(v.salePrice)}
-              </span>
-              <StockBadge stock={v.stockQuantity} lowStock={10} />
-            </div>
-          )})
+            );
+          })
         )}
       </div>
 

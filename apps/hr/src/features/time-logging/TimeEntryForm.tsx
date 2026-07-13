@@ -80,11 +80,14 @@ const TimeEntryForm = ({
     }
 
     setErrors({});
-    createEntry.mutate(formData, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+    createEntry.mutate(
+      { ...formData, employeeId: String(formData.employeeId) },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
   };
 
   if (!open) return null;

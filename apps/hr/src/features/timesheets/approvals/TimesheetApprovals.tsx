@@ -53,7 +53,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
     if (!rejectTarget) return;
     rejectMutation.mutate(
       {
-        timesheetId: rejectTarget.id,
+        timesheetId: Number(rejectTarget.id ?? 0),
         rejectionReason: rejectionReason || undefined,
       },
       {
@@ -149,7 +149,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
                         <span>{period}</span>
                         <span>·</span>
                         <span style={{ fontWeight: 600, color: ACCENT }}>
-                          {formatDuration(ts.totalMinutes)}
+                          {formatDuration(ts.totalMinutes ?? 0)}
                         </span>
                         <span>·</span>
                         <span>
@@ -164,7 +164,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
                       <Button
                         variant="primary"
                         style={{ padding: '6px 12px', fontSize: 11 }}
-                        onClick={() => handleApprove(ts.id)}
+                        onClick={() => handleApprove(Number(ts.id ?? 0))}
                         disabled={approveMutation.isPending}
                         icon={<CheckCircle size={13} />}
                       >

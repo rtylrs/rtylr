@@ -23,7 +23,9 @@ export const useMarkNotificationRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.patch(`/api/hub/notification/v1/notifications/${encodeURIComponent(id)}/read`));
+      await unwrap(
+        safe.patch(`/api/hub/notification/v1/notifications/${encodeURIComponent(id)}/read`)
+      );
       return id;
     },
     onMutate: async (id) => {

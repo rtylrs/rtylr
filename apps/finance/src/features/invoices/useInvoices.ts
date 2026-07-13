@@ -2,13 +2,13 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  InvoicesServiceClient,
-  type CreateInvoiceRequest,
-  type InvoiceSummary,
-  type InvoiceDetail,
-} from '@voxire/voxie/finance/invoices/v1/service_client';
-import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/service_client';
+import { InvoicesServiceClient } from '@voxire/voxie/finance/invoices/v1/client';
+import type {
+  CreateInvoiceRequest,
+  InvoiceSummary,
+  InvoiceDetail,
+} from '@voxire/voxie/finance/invoices/v1/types';
+import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/client';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
 
@@ -36,7 +36,7 @@ function fromApiSummary(inv: InvoiceSummary): Invoice {
     amount: inv.total,
     currency: inv.currency,
     paid: inv.amountPaid,
-    status: STATUS_FROM_API[inv.status] ?? 'Draft',
+    status: STATUS_FROM_API[inv.status ?? ''] ?? 'Draft',
     dueDate: inv.dueDate,
     issuedDate: inv.issueDate,
     number: inv.invoiceNumber,
@@ -51,10 +51,10 @@ function fromApiDetail(inv: InvoiceDetail): Invoice {
     amount: inv.total,
     currency: inv.currency,
     paid: inv.amountPaid,
-    status: STATUS_FROM_API[inv.status] ?? 'Draft',
+    status: STATUS_FROM_API[inv.status ?? ''] ?? 'Draft',
     dueDate: inv.dueDate,
     issuedDate: inv.issueDate,
-    items: inv.items.map((item) => ({
+    items: (inv.items ?? []).map((item) => ({
       description: item.description,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
@@ -94,10 +94,12 @@ export function useInvoices(params: UseInvoicesParams = {}) {
         pageSize,
       });
       return {
-        invoices: z.array(invoiceSchema).parse(res.invoices.map(fromApiSummary)) as Invoice[],
-        hasMore: res.hasMore,
-        page: res.page,
-        pageSize: res.pageSize,
+        invoices: z
+          .array(invoiceSchema)
+          .parse((res.invoices ?? []).map(fromApiSummary)) as Invoice[],
+        hasMore: res.hasMore ?? false,
+        page: res.page ?? page,
+        pageSize: res.pageSize ?? pageSize,
       };
     },
   });

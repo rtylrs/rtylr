@@ -46,7 +46,9 @@ function GoalContext({ goals }: { goals: ReviewGoalPayload[] }): React.JSX.Eleme
               <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--hr-text)' }}>
                 {g.title}
               </span>
-              <Pill color={STATUS_COLORS[g.status] ?? 'var(--hr-status-draft)'}>{g.status}</Pill>
+              <Pill color={STATUS_COLORS[g.status ?? ''] ?? 'var(--hr-status-draft)'}>
+                {g.status}
+              </Pill>
             </div>
           </Card>
         ))}

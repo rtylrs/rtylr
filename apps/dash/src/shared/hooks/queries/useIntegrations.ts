@@ -22,9 +22,7 @@ export const useConnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(
-        safe.post('/api/hub/integration/v1/integrations/connect', { provider: id })
-      );
+      await unwrap(safe.post('/api/hub/integration/v1/integrations/connect', { provider: id }));
       return id;
     },
     onSuccess: () => {

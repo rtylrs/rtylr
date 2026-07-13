@@ -11,7 +11,7 @@ import { useFeatureGate } from '../../shared/hooks/useFeatureGate';
 import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
 import { createOneKitClient } from '@voxire/api';
-import { UserServiceClient } from '@voxire/voxie/hub/user/v1/service_client';
+import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { safe } from '../../shared/lib/api';
 import { Button, HelmetContainer, LicenseBanner } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';

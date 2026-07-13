@@ -1,13 +1,13 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
-import type { ListEmployeesResponse } from '@voxire/voxie/hr/employee/v1/list_employees';
-import type { CreateEmployeeResponse } from '@voxire/voxie/hr/employee/v1/create_employee';
-import type { UpdateEmployeeResponse } from '@voxire/voxie/hr/employee/v1/update_employee';
+import type { ListEmployeesResponse } from '@voxire/voxie/hr/employee/v1/types';
+import type { CreateEmployeeResponse } from '@voxire/voxie/hr/employee/v1/types';
+import type { UpdateEmployeeResponse } from '@voxire/voxie/hr/employee/v1/types';
 import type {
   InviteEmployeeRequest,
   InviteEmployeeResponse,
-} from '@voxire/voxie/hr/employee/v1/invite_employee';
+} from '@voxire/voxie/hr/employee/v1/types';
 import type { EmployeeFormData } from '../../schemas/employeeSchema';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

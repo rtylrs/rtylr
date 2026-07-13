@@ -22,15 +22,16 @@ const OnboardingManagement = (): React.JSX.Element => {
   const checklists = data?.checklists ?? [];
 
   const getProgress = (checklist: EmployeeChecklistPayload): number => {
-    const total = checklist.items.length;
+    const items = checklist.items ?? [];
+    const total = items.length;
     if (total === 0) return 0;
-    const done = checklist.items.filter((i) => i.status === 'complete').length;
+    const done = items.filter((i) => i.status === 'complete').length;
     return Math.round((done / total) * 100);
   };
 
   const getOverdueCount = (checklist: EmployeeChecklistPayload): number => {
-    return checklist.items.filter(
-      (i) => i.status !== 'complete' && new Date(i.dueDate).getTime() < Date.now()
+    return (checklist.items ?? []).filter(
+      (i) => i.status !== 'complete' && new Date(i.dueDate ?? 0).getTime() < Date.now()
     ).length;
   };
 
@@ -146,7 +147,7 @@ const OnboardingManagement = (): React.JSX.Element => {
                           )}
                         </td>
                         <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
-                          {new Date(cl.triggeredAt * 1000).toLocaleDateString()}
+                          {new Date(Number(cl.triggeredAt ?? 0) * 1000).toLocaleDateString()}
                         </td>
                       </tr>
                     );

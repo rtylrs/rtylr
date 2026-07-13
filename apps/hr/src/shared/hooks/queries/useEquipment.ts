@@ -1,13 +1,13 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  EquipmentServiceClient,
-  type ListEquipmentRequestsRequest,
-  type ListEquipmentRequestsResponse,
-  type CreateEquipmentRequestRequest,
-  type ApproveEquipmentRequest,
-  type ListAssetsResponse,
-} from '@voxire/voxie/hr/equipment/v1/service_client';
+import { EquipmentServiceClient } from '@voxire/voxie/hr/equipment/v1/client';
+import type {
+  ListEquipmentRequestsRequest,
+  ListEquipmentRequestsResponse,
+  CreateEquipmentRequestRequest,
+  ApproveEquipmentRequest,
+  ListAssetsResponse,
+} from '@voxire/voxie/hr/equipment/v1/types';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ export const useListEquipmentRequests = (params?: ListEquipmentRequestsRequest) 
   return useQuery<ListEquipmentRequestsResponse>({
     queryKey: ['equipment-requests', params],
     queryFn: () =>
-      equipmentClient.listEquipmentRequests(params ?? { employeeId: null, status: null }),
+      equipmentClient.listEquipmentRequests(params ?? { employeeId: undefined, status: undefined }),
   });
 };
 
@@ -57,6 +57,7 @@ export const useApproveEquipment = () => {
 export const useListAssets = (employeeId?: string) => {
   return useQuery<ListAssetsResponse>({
     queryKey: ['assets', employeeId],
-    queryFn: () => equipmentClient.listAssets({ employeeId: employeeId ?? null, condition: null }),
+    queryFn: () =>
+      equipmentClient.listAssets({ employeeId: employeeId ?? undefined, condition: undefined }),
   });
 };

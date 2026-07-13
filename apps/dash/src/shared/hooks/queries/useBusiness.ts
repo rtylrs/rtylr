@@ -9,9 +9,7 @@ export const useSetBusinessSlug = () => {
   const setWebsiteData = useConfigStore((s) => s.setWebsiteData);
   return useMutation({
     mutationFn: async (slug: string) => {
-      return unwrap<{ slug: string }>(
-        safe.patch('/api/hub/business/v1/businesses/slug', { slug })
-      );
+      return unwrap<{ slug: string }>(safe.patch('/api/hub/business/v1/businesses/slug', { slug }));
     },
     onSuccess: ({ slug }) => {
       const currentWebsiteData = useConfigStore.getState().websiteData ?? {};

@@ -42,7 +42,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const userId = useUserStore((s) => s.userId);
   const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
   const { data: balances } = useListLeaveBalances();
-  const { data: existingRequests } = useListLeaveRequests({ employeeId: userId, status: null });
+  const { data: existingRequests } = useListLeaveRequests({
+    employeeId: userId ?? undefined,
+    status: undefined,
+  });
   const createRequest = useCreateLeaveRequest();
 
   const [form, setForm] = useState({
@@ -81,7 +84,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
     const approvedRequests = (existingRequests ?? []).filter((r) => r.status === 'approved');
     const hasOverlap = approvedRequests.some(
-      (r) => startDate <= r.endDate && endDate >= r.startDate
+      (r) => startDate <= (r.endDate ?? '') && endDate >= (r.startDate ?? '')
     );
     if (hasOverlap) {
       toast.error(t('leave.form.errorOverlap'));
@@ -95,7 +98,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
         startDate,
         endDate,
         totalDays: daysBetween(startDate, endDate),
-        notes: notes || null,
+        notes: notes || undefined,
       },
       { onSuccess: () => navigate({ to: '/leave' }) }
     );

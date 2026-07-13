@@ -115,7 +115,10 @@ const Categories: React.FC = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         updateMut.mutate(
-                          { id: cat.id, body: { name: editName.trim(), description: cat.description } },
+                          {
+                            id: cat.id,
+                            body: { name: editName.trim(), description: cat.description },
+                          },
                           {
                             onSuccess: () => {
                               toast.success('Category updated');
@@ -153,7 +156,10 @@ const Categories: React.FC = () => {
                     aria-label="Save category"
                     onClick={() =>
                       updateMut.mutate(
-                        { id: cat.id, body: { name: editName.trim(), description: cat.description } },
+                        {
+                          id: cat.id,
+                          body: { name: editName.trim(), description: cat.description },
+                        },
                         {
                           onSuccess: () => {
                             toast.success('Category updated');
@@ -193,8 +199,8 @@ const Categories: React.FC = () => {
                   <button
                     aria-label="Edit category"
                     onClick={() => {
-                      setEditingId(cat.id);
-                      setEditName(cat.name);
+                      setEditingId(cat.id ?? null);
+                      setEditName(cat.name ?? '');
                     }}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: 'var(--hub-text-muted)' }}
@@ -208,7 +214,7 @@ const Categories: React.FC = () => {
                     <Edit3 size={12} />
                   </button>
                   <button
-                    onClick={() => setConfirmDelete(cat.id)}
+                    onClick={() => setConfirmDelete(cat.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: '#f87171' }}
                     onMouseEnter={(e) => {

@@ -1,10 +1,8 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  QuoteServiceClient,
-  type Quote as ApiQuote,
-} from '@voxire/voxie/finance/quote/v1/service_client';
+import { QuoteServiceClient } from '@voxire/voxie/finance/quote/v1/client';
+import type { Quote as ApiQuote } from '@voxire/voxie/finance/quote/v1/types';
 import { quoteSchema } from '../../shared/schemas/quotes';
 
 const quoteClient = createOneKitClient(QuoteServiceClient, 'finance');
@@ -26,7 +24,7 @@ function fromApiQuote(q: ApiQuote): ReturnType<typeof quoteSchema.parse> {
     id: q.id,
     client: q.customerName,
     amount: q.total,
-    status: STATUS_FROM_API[q.status] ?? 'Draft',
+    status: STATUS_FROM_API[q.status ?? ''] ?? 'Draft',
     issuedDate: q.createdAt,
     expiresAt: q.validUntil,
   });
@@ -51,10 +49,10 @@ export function useQuotes(params: UseQuotesParams = {}) {
     queryFn: async (): Promise<QuoteListResult> => {
       const res = await quoteClient.listQuotes({ page, pageSize });
       return {
-        quotes: res.quotes.map(fromApiQuote),
-        hasMore: res.hasMore,
-        page: res.page,
-        pageSize: res.pageSize,
+        quotes: (res.quotes ?? []).map(fromApiQuote),
+        hasMore: res.hasMore ?? false,
+        page: res.page ?? page,
+        pageSize: res.pageSize ?? pageSize,
       };
     },
   });

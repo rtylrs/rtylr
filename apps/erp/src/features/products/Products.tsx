@@ -55,10 +55,12 @@ const Products: React.FC = () => {
     if (filters.sort) {
       const direction = filters.sortDir === 'desc' ? -1 : 1;
       out = [...out].sort((a, b) => {
-        if (filters.sort === 'name') return a.name.localeCompare(b.name) * direction;
-        if (filters.sort === 'stock') return (a.stockQuantity - b.stockQuantity) * direction;
-        if (filters.sort === 'price') return (a.salePrice - b.salePrice) * direction;
-        if (filters.sort === 'category') return a.categoryId.localeCompare(b.categoryId) * direction;
+        if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
+        if (filters.sort === 'stock')
+          return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
+        if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
+        if (filters.sort === 'category')
+          return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
         return 0;
       });
     }
@@ -71,13 +73,13 @@ const Products: React.FC = () => {
   const deleteMut = useDeleteProduct();
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
-    categories.forEach((category) => map.set(String(category.id), category.name));
+    categories.forEach((category) => map.set(String(category.id), category.name ?? ''));
     return map;
   }, [categories]);
 
   const categoryNameFor = useCallback(
     (product: Product): string => {
-      return categoryNameById.get(product.categoryId) || '-';
+      return categoryNameById.get(product.categoryId ?? '') || '-';
     },
     [categoryNameById]
   );
@@ -271,7 +273,7 @@ const Products: React.FC = () => {
             <ProductCard
               key={p.id}
               product={p}
-              selected={selected.has(p.id)}
+              selected={selected.has(p.id ?? '')}
               onToggle={toggle}
             />
           ))}
@@ -318,8 +320,8 @@ const Products: React.FC = () => {
                 >
                   <input
                     type="checkbox"
-                    checked={selected.has(p.id)}
-                    onChange={() => toggle(p.id)}
+                    checked={selected.has(p.id ?? '')}
+                    onChange={() => toggle(p.id ?? '')}
                     className="cursor-pointer"
                   />
                   <div className="flex min-w-0 items-center gap-3">
@@ -362,7 +364,7 @@ const Products: React.FC = () => {
                       color:
                         p.stockQuantity === 0
                           ? '#f87171'
-                          : p.stockQuantity < p.lowStockThreshold
+                          : (p.stockQuantity ?? 0) < (p.lowStockThreshold ?? 0)
                             ? AMBER
                             : 'var(--hub-text)',
                     }}
@@ -370,9 +372,9 @@ const Products: React.FC = () => {
                     {p.stockQuantity}
                   </span>
                   <span className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {formatCurrency(p.salePrice)}
+                    {formatCurrency(p.salePrice ?? 0)}
                   </span>
-                  <StockBadge stock={p.stockQuantity} lowStock={p.lowStockThreshold} />
+                  <StockBadge stock={p.stockQuantity ?? 0} lowStock={p.lowStockThreshold ?? 0} />
                 </div>
               );
             })}
@@ -462,7 +464,7 @@ const Products: React.FC = () => {
           toast.info('Archive coming soon');
         }}
         onExport={() => {
-          const rows = products.filter((p) => selected.has(p.id));
+          const rows = products.filter((p) => selected.has(p.id ?? ''));
           if (rows.length === 0) return;
           const header = [
             'id',

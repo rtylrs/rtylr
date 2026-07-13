@@ -1,12 +1,12 @@
 import { createOneKitClient, unwrap } from '@voxire/api';
-import type { AwardPointsRequest } from '@voxire/voxie/crm/loyalty/v1/award_points';
-import type { RedeemPointsRequest } from '@voxire/voxie/crm/loyalty/v1/redeem_points';
-import type { UpdateLoyaltyConfigRequest } from '@voxire/voxie/crm/loyalty/v1/update_loyalty_config';
-import {
-  LoyaltyServiceClient,
-  type CreateLoyaltyTierRequest,
-  type UpdateLoyaltyTierRequest,
-} from '@voxire/voxie/crm/loyalty/v1/service_client';
+import type { AwardPointsRequest } from '@voxire/voxie/crm/loyalty/v1/types';
+import type { RedeemPointsRequest } from '@voxire/voxie/crm/loyalty/v1/types';
+import type { UpdateLoyaltyConfigRequest } from '@voxire/voxie/crm/loyalty/v1/types';
+import { LoyaltyServiceClient } from '@voxire/voxie/crm/loyalty/v1/client';
+import type {
+  CreateLoyaltyTierRequest,
+  UpdateLoyaltyTierRequest,
+} from '@voxire/voxie/crm/loyalty/v1/types';
 import {
   useMutation,
   useQuery,
@@ -59,15 +59,15 @@ function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): UpdateLoy
     isEnabled: config.programEnabled ?? false,
     pointsPerCurrencyUnit: config.pointsPerDollar ?? 0,
     currencyPerPoint: config.redemptionRate ?? 0,
-    bronzeMin: 0,
-    silverMin: 0,
-    goldMin: 0,
-    platinumMin: 0,
+    bronzeMin: String(0),
+    silverMin: String(0),
+    goldMin: String(0),
+    platinumMin: String(0),
     bronzeDiscountPct: 0,
     silverDiscountPct: 0,
     goldDiscountPct: 0,
     platinumDiscountPct: 0,
-    pointsExpiryDays: config.pointsExpiry ?? 0,
+    pointsExpiryDays: String(config.pointsExpiry ?? 0),
   };
 }
 
@@ -212,8 +212,8 @@ export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedee
   return useMutation<unknown, unknown, AwardRedeemPayload>({
     mutationFn: (payload: AwardRedeemPayload): Promise<unknown> => {
       const request: AwardPointsRequest = {
-        customerId: payload.customerId,
-        points: payload.points,
+        customerId: String(payload.customerId),
+        points: String(payload.points),
         description: payload.reason ?? '',
         referenceType: '',
       };
@@ -237,8 +237,8 @@ export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRede
   return useMutation<unknown, unknown, AwardRedeemPayload>({
     mutationFn: (payload: AwardRedeemPayload): Promise<unknown> => {
       const request: RedeemPointsRequest = {
-        customerId: payload.customerId,
-        points: payload.points,
+        customerId: String(payload.customerId),
+        points: String(payload.points),
         description: payload.reason ?? '',
         referenceType: '',
       };

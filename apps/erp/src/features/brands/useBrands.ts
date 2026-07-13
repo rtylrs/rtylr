@@ -1,15 +1,15 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  BrandServiceClient,
-  type Brand,
-  type CreateBrandRequest,
-  type CreateBrandResponse,
-  type DeleteBrandResponse,
-  type UpdateBrandRequest,
-  type UpdateBrandResponse,
-} from '@voxire/voxie/erp/brand/v1/service_client';
+import { BrandServiceClient } from '@voxire/voxie/erp/brand/v1/client';
+import type {
+  Brand,
+  CreateBrandRequest,
+  CreateBrandResponse,
+  DeleteBrandResponse,
+  UpdateBrandRequest,
+  UpdateBrandResponse,
+} from '@voxire/voxie/erp/brand/v1/types';
 
 const brandClient = createOneKitClient(BrandServiceClient, 'erp');
 
@@ -20,7 +20,7 @@ export function useBrands() {
     queryKey: ['brands'],
     queryFn: async () => {
       const response = await brandClient.listBrands({});
-      return response.brands;
+      return response.brands ?? [];
     },
   });
 }

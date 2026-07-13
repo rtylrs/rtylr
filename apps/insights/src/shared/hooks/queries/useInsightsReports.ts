@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { ReportServiceClient } from '@voxire/voxie/insights/report/v1/service_client';
+import { ReportServiceClient } from '@voxire/voxie/insights/report/v1/client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type { ReportTemplatesResponse, GenerateReportResult } from './types';
 
@@ -25,10 +25,10 @@ export const useReportTemplates = (): UseQueryResult<ReportTemplatesResponse> =>
         type: '',
       });
       return {
-        templates: res.templates.map((tpl) => ({
-          id: tpl.id,
-          name: tpl.name,
-          description: tpl.description,
+        templates: (res.templates ?? []).map((tpl) => ({
+          id: tpl.id ?? '',
+          name: tpl.name ?? '',
+          description: tpl.description ?? '',
         })),
       };
     },
@@ -57,7 +57,11 @@ export const useGenerateRevenueReport = (): UseMutationResult<
         to,
         format: variables.format ?? 'pdf',
       });
-      return res;
+      return {
+        reportId: res.reportId ?? '',
+        url: res.url ?? null,
+        status: res.status ?? '',
+      };
     },
     onSuccess: (): void => {
       toast.success(t('insights.reports.generateQueued'));
@@ -77,7 +81,7 @@ export const useExportRevenueReport = (): UseMutationResult<void, unknown, DateR
     mutationFn: async (params: DateRangeParams): Promise<void> => {
       const { from, to } = resolveDateRange(params);
       const res = await reportClient.exportRevenueReport({ from, to });
-      const blob = new Blob([res.csv], { type: res.contentType || 'text/csv' });
+      const blob = new Blob([res.csv ?? ''], { type: res.contentType || 'text/csv' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;

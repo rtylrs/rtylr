@@ -8,20 +8,17 @@ import type {
 import type {
   CreateReviewCycleRequest,
   CreateReviewCycleResponse,
-} from '@voxire/voxie/hr/performance/v1/create_review_cycle';
+} from '@voxire/voxie/hr/performance/v1/types';
 import type {
   OpenReviewCycleRequest,
   OpenReviewCycleResponse,
-} from '@voxire/voxie/hr/performance/v1/open_review_cycle';
+} from '@voxire/voxie/hr/performance/v1/types';
 import type {
   SubmitReviewRequest,
   SubmitReviewResponse,
-} from '@voxire/voxie/hr/performance/v1/submit_review';
-import type { ListReviewCyclesResponse } from '@voxire/voxie/hr/performance/v1/list_review_cycles';
-import type {
-  ListGoalsRequest,
-  ListGoalsResponse,
-} from '@voxire/voxie/hr/performance/v1/list_goals';
+} from '@voxire/voxie/hr/performance/v1/types';
+import type { ListReviewCyclesResponse } from '@voxire/voxie/hr/performance/v1/types';
+import type { ListGoalsRequest, ListGoalsResponse } from '@voxire/voxie/hr/performance/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

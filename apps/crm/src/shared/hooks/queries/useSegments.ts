@@ -9,11 +9,9 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import {
-  SegmentServiceClient,
-  type Segment as ApiSegment,
-  type Customer as ApiSegmentCustomer,
-} from '@voxire/voxie/crm/segment/v1/service_client';
+import { SegmentServiceClient } from '@voxire/voxie/crm/segment/v1/client';
+import type { Segment as ApiSegment } from '@voxire/voxie/crm/segment/v1/types';
+import type { Customer as ApiSegmentCustomer } from '@voxire/voxie/crm/customer/v1/types';
 import { segmentSchema } from '../../schemas/segments';
 import type { Segment } from '../../schemas/segments';
 import { customerSchema } from '../../schemas/customers';
@@ -75,7 +73,7 @@ export const useListSegments = (): UseQueryResult<Segment[]> =>
     queryFn: async (): Promise<Segment[]> => {
       const res = await segmentClient.listSegments({});
       return z.array(segmentSchema).parse(
-        res.segments.map((s) => {
+        (res.segments ?? []).map((s) => {
           const segment = fromApiSegment(s);
           return { ...segment, rules: filtersToRules(segment.filters) };
         })
@@ -101,10 +99,10 @@ export const useSegmentCustomers = (id: string | undefined): UseQueryResult<Cust
     queryFn: async (): Promise<Customer[]> => {
       const res = await segmentClient.getSegmentCustomers({
         segmentId: id ?? '',
-        page: 1,
-        pageSize: 50,
+        page: String(1),
+        pageSize: String(50),
       });
-      return z.array(customerSchema).parse(res.customers.map(fromApiSegmentCustomer));
+      return z.array(customerSchema).parse((res.customers ?? []).map(fromApiSegmentCustomer));
     },
     enabled: !!id,
   });

@@ -4,8 +4,8 @@ import type {
   PayrollRunPayload,
   PayrollEntryPayload,
 } from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
-import type { TriggerPayrollRunRequest } from '@voxire/voxie/hr/employees/payroll/runs/v1/trigger_payroll_run';
-import type { ListPayrollRunsResponse } from '@voxire/voxie/hr/employees/payroll/runs/v1/list_payroll_runs';
+import type { TriggerPayrollRunRequest } from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
+import type { ListPayrollRunsResponse } from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

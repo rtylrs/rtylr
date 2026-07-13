@@ -1,12 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
-import {
-  AuthServiceClient,
-  type ResendVerificationRequest,
-  type ResendVerificationResponse,
-  type VerifyEmailRequest,
-  type VerifyEmailResponse,
-} from '@voxire/voxie/common/auth/v1/service_client';
+import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
+import type {
+  ResendVerificationRequest,
+  ResendVerificationResponse,
+  VerifyEmailRequest,
+  VerifyEmailResponse,
+} from '@voxire/voxie/common/auth/v1/types';
 import { toast } from 'sonner';
 
 const authClient = createOneKitClient(AuthServiceClient, 'auth');

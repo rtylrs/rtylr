@@ -88,7 +88,7 @@ const AssetRegister = (): React.JSX.Element => {
                       <td style={{ padding: '10px 12px' }}>
                         <Pill
                           style={pillStyle(
-                            CONDITION_COLORS[asset.condition] ?? 'var(--hr-status-draft)'
+                            CONDITION_COLORS[asset.condition ?? ''] ?? 'var(--hr-status-draft)'
                           )}
                         >
                           {t(`equipment.assets.conditions.${asset.condition}` as const)}

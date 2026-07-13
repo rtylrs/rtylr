@@ -1,5 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
-import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/service_client';
+import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
 import { storageSet } from './storage';
 
 const authClient = createOneKitClient(AuthServiceClient, 'auth');

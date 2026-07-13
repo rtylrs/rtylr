@@ -2,7 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/service_client';
+import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
 import type { TaxConfig, TaxReport, PLReport } from '../services/financeApi';
 import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax';
 

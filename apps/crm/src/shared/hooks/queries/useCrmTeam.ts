@@ -3,11 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import {
-  MembersServiceClient,
-  type StaffUserPayload,
-} from '@voxire/voxie/hub/team/members/v1/service_client';
-import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
+import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/client';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 
 export type CrmTeamMember = StaffUserPayload;
 
@@ -27,7 +25,7 @@ export const useCrmTeam = (): UseQueryResult<CrmTeamMember[]> =>
     queryKey: ['crm-team'],
     queryFn: async (): Promise<CrmTeamMember[]> => {
       const res = await membersClient.listTeam({});
-      return res.users;
+      return res.users ?? [];
     },
     staleTime: 30_000,
   });

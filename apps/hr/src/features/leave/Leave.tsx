@@ -113,8 +113,8 @@ const Leave = (): React.JSX.Element => {
                         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                           {t('leave.employee')} #{req.employeeId}
                         </span>
-                        <Pill color={STATUS_COLORS[req.status]}>
-                          {t(`leave.statuses.${req.status.toLowerCase()}`)}
+                        <Pill color={STATUS_COLORS[req.status ?? '']}>
+                          {t(`leave.statuses.${(req.status ?? '').toLowerCase()}`)}
                         </Pill>
                         <span style={{ fontSize: 10, color: 'var(--hr-text-dim)' }}>
                           #{req.leaveTypeId}
@@ -134,13 +134,13 @@ const Leave = (): React.JSX.Element => {
                         onApprove={() =>
                           approveLeave.mutate({
                             requestId: req.id,
-                            body: { approved: true, rejectionReason: null },
+                            body: { approved: true, rejectionReason: undefined },
                           })
                         }
                         onReject={() =>
                           approveLeave.mutate({
                             requestId: req.id,
-                            body: { approved: false, rejectionReason: null },
+                            body: { approved: false, rejectionReason: undefined },
                           })
                         }
                       />

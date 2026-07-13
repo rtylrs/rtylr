@@ -236,7 +236,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
 
   const handleClockOut = useCallback((): void => {
     if (!activeRecord) return;
-    clockOut.mutate({ employeeId: activeRecord.employeeId });
+    clockOut.mutate({ employeeId: Number(activeRecord.employeeId ?? 0) });
   }, [activeRecord, clockOut]);
 
   /* ── PIN flow ─────────────────────────────────────────────── */
@@ -351,7 +351,9 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         {isClockedIn && activeRecord ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ fontSize: 12, color: 'var(--hr-text-muted)' }}>
-              {t('attendance.clockWidget.since', { time: formatTime(activeRecord.clockInAt) })}
+              {t('attendance.clockWidget.since', {
+                time: formatTime(Number(activeRecord.clockInAt ?? 0)),
+              })}
               {activeRecord.isLate && (
                 <Pill color="var(--hr-error)" style={{ marginLeft: 8, fontSize: 9 }}>
                   {t('attendance.late', { minutes: activeRecord.lateMinutes })}

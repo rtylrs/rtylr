@@ -1,6 +1,6 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { CustomerServiceClient } from '@voxire/voxie/insights/customer/v1/service_client';
+import { CustomerServiceClient } from '@voxire/voxie/insights/customer/v1/client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type {
   CustomerKPIResponse,
@@ -53,9 +53,9 @@ export const useTopCustomers = (
         period: `${from},${to}`,
       });
       return {
-        customers: res.customers.map((entry) => ({
+        customers: (res.customers ?? []).map((entry) => ({
           customerId: toFiniteNumber(entry.id),
-          name: entry.name,
+          name: entry.name ?? '',
           email: '',
           lifetimeSpendMinorUnits: majorToMinor(entry.totalSpent),
           orderCount: toFiniteNumber(entry.orderCount),
@@ -75,7 +75,7 @@ export const useCustomerLTV = (): UseQueryResult<CustomerLTVResponse> => {
         buckets: segments.map((entry) => {
           const avg = majorToMinor(entry.avgLtv);
           return {
-            label: entry.segment,
+            label: entry.segment ?? '',
             lowerMinorUnits: avg,
             upperMinorUnits: avg,
             customerCount: toFiniteNumber(entry.customerCount),

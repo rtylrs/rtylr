@@ -5,7 +5,11 @@ import { cdnImageUrl } from '@voxire/config';
 import { Package, Search, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
-import { getProductStockStatus, type ProductStockStatus, useProducts } from '../products/useProducts';
+import {
+  getProductStockStatus,
+  type ProductStockStatus,
+  useProducts,
+} from '../products/useProducts';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PaginationControls from '../../shared/components/PaginationControls';
 
@@ -176,7 +180,9 @@ const Inventory: React.FC = () => {
                 products.map((product) => {
                   const status = getProductStockStatus(product);
                   const sc = statusConfig[status];
-                  const imageUrl = cdnImageUrl((product as typeof product & { imageUrl?: string }).imageUrl);
+                  const imageUrl = cdnImageUrl(
+                    (product as typeof product & { imageUrl?: string }).imageUrl
+                  );
                   return (
                     <div
                       key={product.id}
@@ -231,7 +237,7 @@ const Inventory: React.FC = () => {
                           color:
                             product.stockQuantity === 0
                               ? '#f87171'
-                              : product.stockQuantity < product.lowStockThreshold
+                              : (product.stockQuantity ?? 0) < (product.lowStockThreshold ?? 0)
                                 ? AMBER
                                 : 'var(--hub-text)',
                         }}
@@ -242,10 +248,10 @@ const Inventory: React.FC = () => {
                         {product.lowStockThreshold}
                       </span>
                       <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                        ${product.costPrice.toFixed(2)}
+                        ${(product.costPrice ?? 0).toFixed(2)}
                       </span>
                       <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        ${product.salePrice.toFixed(2)}
+                        ${(product.salePrice ?? 0).toFixed(2)}
                       </span>
                       <span>
                         <span

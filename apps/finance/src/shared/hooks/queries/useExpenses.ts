@@ -2,7 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/service_client';
+import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/client';
 
 const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
 

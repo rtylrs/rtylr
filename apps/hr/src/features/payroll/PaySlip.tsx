@@ -101,7 +101,12 @@ const PaySlip = (): React.JSX.Element => {
     );
   }
 
-  const gross = entry.basePay + entry.overtimePay + entry.bonuses;
+  const basePay = entry.basePay ?? 0;
+  const overtimePay = entry.overtimePay ?? 0;
+  const bonuses = entry.bonuses ?? 0;
+  const deductions = entry.deductions ?? 0;
+  const netPay = entry.netPay ?? 0;
+  const gross = basePay + overtimePay + bonuses;
 
   return (
     <>
@@ -146,16 +151,16 @@ const PaySlip = (): React.JSX.Element => {
             >
               {t('payroll.paySlip.earnings')}
             </div>
-            <BreakdownRow label={t('payroll.table.basePay')} value={fmt(entry.basePay)} />
+            <BreakdownRow label={t('payroll.table.basePay')} value={fmt(basePay)} />
             <BreakdownRow
               label={t('payroll.table.overtimePay')}
-              value={fmt(entry.overtimePay)}
-              color={entry.overtimePay > 0 ? 'var(--hr-status-submitted)' : undefined}
+              value={fmt(overtimePay)}
+              color={overtimePay > 0 ? 'var(--hr-status-submitted)' : undefined}
             />
             <BreakdownRow
               label={t('payroll.table.bonuses')}
-              value={fmt(entry.bonuses)}
-              color={entry.bonuses > 0 ? 'var(--hr-status-approved)' : undefined}
+              value={fmt(bonuses)}
+              color={bonuses > 0 ? 'var(--hr-status-approved)' : undefined}
             />
             <BreakdownRow label={t('payroll.paySlip.grossPay')} value={fmt(gross)} bold />
           </div>
@@ -176,7 +181,7 @@ const PaySlip = (): React.JSX.Element => {
             </div>
             <BreakdownRow
               label={t('payroll.table.deductions')}
-              value={`-${fmt(entry.deductions)}`}
+              value={`-${fmt(deductions)}`}
               color="var(--hr-error)"
             />
           </div>
@@ -202,7 +207,7 @@ const PaySlip = (): React.JSX.Element => {
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              {fmt(entry.netPay)}
+              {fmt(netPay)}
             </span>
           </div>
         </Card>

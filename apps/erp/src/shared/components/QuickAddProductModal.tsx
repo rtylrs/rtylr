@@ -86,7 +86,12 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const { data: attributesData } = useProductAttributes(editing?.id);
   useEffect(() => {
     if (attributesData) {
-      setAttributes(attributesData.map((attribute) => ({ name: attribute.name, value: attribute.value })));
+      setAttributes(
+        attributesData.map((attribute) => ({
+          name: attribute.name ?? '',
+          value: attribute.value ?? '',
+        }))
+      );
     }
   }, [attributesData]);
 
@@ -96,11 +101,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   useEffect(() => {
     const p = fullProduct;
     if (!p) return;
-    setName(p.name);
-    setSku(p.sku);
-    setCategoryId(p.categoryId !== '0' ? p.categoryId : '');
-    setSupplierId(p.supplierId !== '0' ? p.supplierId : '');
-    setBrandId(p.brandId !== '0' ? p.brandId : '');
+    setName(p.name ?? '');
+    setSku(p.sku ?? '');
+    setCategoryId(p.categoryId !== '0' ? (p.categoryId ?? '') : '');
+    setSupplierId(p.supplierId !== '0' ? (p.supplierId ?? '') : '');
+    setBrandId(p.brandId !== '0' ? (p.brandId ?? '') : '');
     setBarcode(p.barcode ?? '');
     setImageUrl(p.imageUrl ?? editing?.imageUrl ?? '');
     setDescription(p.description ?? '');
@@ -110,8 +115,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setStock(p.stockQuantity ? String(p.stockQuantity) : '');
     setLowStock(p.lowStockThreshold ? String(p.lowStockThreshold) : '');
     setReorderPoint(p.reorderQuantity ? String(p.reorderQuantity) : '');
-    setTrackInventory(p.trackInventory);
-    setActive(p.isActive);
+    setTrackInventory(p.trackInventory ?? false);
+    setActive(p.isActive ?? false);
     setCompareAtPrice(p.compareAtPrice ? String(p.compareAtPrice) : '');
     setTaxRate(p.taxRate ? String(p.taxRate) : '');
     setCurrency(p.currency || 'USD');
@@ -122,7 +127,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setCountryOfOrigin(p.countryOfOrigin ?? '');
     setHsCode(p.hsCode ?? '');
     setLeadTimeDays(p.leadTimeDays ? String(p.leadTimeDays) : '');
-    setAllowBackorder(p.allowBackorder);
+    setAllowBackorder(p.allowBackorder ?? false);
   }, [fullProduct]);
 
   const { data: categories = [] } = useCategories();
@@ -135,17 +140,13 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   // Re-seed local state when a different product is loaded for editing.
   useEffect(() => {
     if (editing) {
-      setName(editing.name);
-      setSku(editing.sku);
+      setName(editing.name ?? '');
+      setSku(editing.sku ?? '');
       setCategoryId(
-        editing.categoryId !== undefined && editing.categoryId !== null
-          ? editing.categoryId
-          : ''
+        editing.categoryId !== undefined && editing.categoryId !== null ? editing.categoryId : ''
       );
       setSupplierId(
-        editing.supplierId !== undefined && editing.supplierId !== null
-          ? editing.supplierId
-          : ''
+        editing.supplierId !== undefined && editing.supplierId !== null ? editing.supplierId : ''
       );
       setBarcode(editing.barcode ?? '');
       setImageUrl((editing as Product & { imageUrl?: string }).imageUrl ?? '');

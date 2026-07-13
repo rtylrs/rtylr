@@ -73,8 +73,8 @@ const Payroll = (): React.JSX.Element => {
     statusFilter === 'all' ? true : r.status === statusFilter
   );
 
-  const totalNet = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalNet, 0);
-  const totalGross = runs.reduce((s: number, r: PayrollRunPayload) => s + r.totalGross, 0);
+  const totalNet = runs.reduce((s: number, r: PayrollRunPayload) => s + (r.totalNet ?? 0), 0);
+  const totalGross = runs.reduce((s: number, r: PayrollRunPayload) => s + (r.totalGross ?? 0), 0);
   const pendingCount = runs.filter((r: PayrollRunPayload) => r.status === 'in_review').length;
 
   const handleTriggerRun = (): void => {
@@ -211,14 +211,14 @@ const Payroll = (): React.JSX.Element => {
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                         {run.periodStart}, {run.periodEnd}
                       </span>
-                      <Pill color={STATUS_COLORS[run.status]}>
+                      <Pill color={STATUS_COLORS[run.status ?? '']}>
                         {t(`payroll.statuses.${run.status}`)}
                       </Pill>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
                       <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                       {t('payroll.employeeCount', { count: run.entries?.length ?? 0 })} ·{' '}
-                      {t('payroll.netTotal')}: {fmt(run.totalNet)}
+                      {t('payroll.netTotal')}: {fmt(run.totalNet ?? 0)}
                     </div>
                   </div>
                 </Card>

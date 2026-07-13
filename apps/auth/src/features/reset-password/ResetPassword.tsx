@@ -6,10 +6,8 @@ import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import Logo from '../../shared/components/Logo';
 import { Button, HelmetContainer } from '@voxire/components';
 import { createOneKitClient } from '@voxire/api';
-import {
-  AuthServiceClient,
-  type ResetPasswordRequest,
-} from '@voxire/voxie/common/auth/v1/service_client';
+import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
+import type { ResetPasswordRequest } from '@voxire/voxie/common/auth/v1/types';
 
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
 

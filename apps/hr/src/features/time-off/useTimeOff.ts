@@ -1,8 +1,8 @@
 import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { TimeOffServiceClient } from '@voxire/voxie/hr/time_off/v1/service_client';
-import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/service_client';
+import { TimeOffServiceClient } from '@voxire/voxie/hr/time_off/v1/client';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { timeOffRequestSchema, type TimeOffRequest } from '../../shared/schemas/timeOff';
 import { hrApi } from '../../shared/services/hrApi';
 
@@ -24,9 +24,9 @@ export function useTimeOff() {
         timeOffClient.listTimeOff({}),
         staffClient.listStaff({ search: '', departmentId: '', status: '' }),
       ]);
-      const staffById = new Map(staffRes.staff.map((s) => [s.id, s]));
+      const staffById = new Map((staffRes.staff ?? []).map((s) => [s.id, s]));
 
-      return timeOffRes.requests.map((r) => {
+      return (timeOffRes.requests ?? []).map((r) => {
         const staff = staffById.get(r.staffId);
         return timeOffRequestSchema.parse({
           id: r.id,
@@ -35,7 +35,7 @@ export function useTimeOff() {
           startDate: r.startDate,
           endDate: r.endDate,
           reason: r.reason,
-          status: normalizeStatus(r.status),
+          status: normalizeStatus(r.status ?? ''),
         });
       });
     },

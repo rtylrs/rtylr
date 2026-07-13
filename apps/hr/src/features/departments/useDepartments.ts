@@ -1,8 +1,8 @@
 import { createOneKitClient, unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/service_client';
-import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/service_client';
+import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { departmentSchema, type Department } from '../../shared/schemas/departments';
 import { hrApi, CreateDepartmentInput, UpdateDepartmentInput } from '../../shared/services/hrApi';
 
@@ -17,12 +17,13 @@ export function useDepartments() {
         departmentClient.listDepartments({}),
         staffClient.listStaff({ search: '', departmentId: '', status: '' }),
       ]);
-      const staffById = new Map(staffRes.staff.map((s) => [s.id, s]));
+      const staffList = staffRes.staff ?? [];
+      const staffById = new Map(staffList.map((s) => [s.id, s]));
 
-      return departmentsRes.departments.map((d) => {
-        const members = staffRes.staff.filter((s) => s.departmentId === d.id);
+      return (departmentsRes.departments ?? []).map((d) => {
+        const members = staffList.filter((s) => s.departmentId === d.id);
         const manager = staffById.get(d.managerStaffId);
-        const salaries = members.map((s) => s.salary).filter((s) => s > 0);
+        const salaries = members.map((s) => s.salary ?? 0).filter((s) => s > 0);
         const avgSalary = salaries.length
           ? salaries.reduce((sum, s) => sum + s, 0) / salaries.length
           : 0;

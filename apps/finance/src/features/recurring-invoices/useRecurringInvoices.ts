@@ -2,7 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { RecurringInvoiceServiceClient } from '@voxire/voxie/finance/recurring_invoice/v1/service_client';
+import { RecurringInvoiceServiceClient } from '@voxire/voxie/finance/recurring_invoice/v1/client';
 import { recurringInvoiceSchema } from '../../shared/schemas/recurringInvoices';
 
 const recurringClient = createOneKitClient(RecurringInvoiceServiceClient, 'finance');
@@ -33,7 +33,7 @@ export function useCreateRecurringInvoice() {
         templateInvoiceId: data.templateInvoiceId,
         frequency: data.frequency,
         nextInvoiceDate: data.nextInvoiceDate,
-        endDate: data.endDate ?? null,
+        endDate: data.endDate ?? undefined,
         isActive: data.isActive ?? true,
       }),
     onSuccess: () => {

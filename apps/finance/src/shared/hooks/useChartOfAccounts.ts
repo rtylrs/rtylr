@@ -1,11 +1,9 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AccountServiceClient } from '@voxire/voxie/finance/account/v1/service_client';
-import {
-  JournalServiceClient,
-  type CreateJournalEntryResponse,
-} from '@voxire/voxie/finance/journal/v1/service_client';
+import { AccountServiceClient } from '@voxire/voxie/finance/account/v1/client';
+import { JournalServiceClient } from '@voxire/voxie/finance/journal/v1/client';
+import type { CreateJournalEntryResponse } from '@voxire/voxie/finance/journal/v1/types';
 import { chartOfAccountSchema } from '../schemas/accounts';
 import { journalEntrySchema } from '../schemas/journal';
 import { z } from 'zod';
@@ -78,11 +76,11 @@ export function useJournal(params: UseJournalParams = {}) {
         toDate: '',
       });
       const entries = z.array(journalEntrySchema).parse(
-        res.entries.map((e) => ({
+        (res.entries ?? []).map((e) => ({
           id: e.id,
           date: e.date,
           description: e.description,
-          lines: e.lines.map((l) => ({
+          lines: (e.lines ?? []).map((l) => ({
             account: l.accountName,
             debit: l.debit,
             credit: l.credit,

@@ -1,12 +1,12 @@
 import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  OvertimeServiceClient,
-  type ListOvertimeRequestsRequest,
-  type CreateOvertimeRequestRequest,
-  type ApproveOvertimeRequest,
-  type OvertimeRequestPayload,
-} from '@voxire/voxie/hr/overtime/v1/service_client';
+import { OvertimeServiceClient } from '@voxire/voxie/hr/overtime/v1/client';
+import type {
+  ListOvertimeRequestsRequest,
+  CreateOvertimeRequestRequest,
+  ApproveOvertimeRequest,
+  OvertimeRequestPayload,
+} from '@voxire/voxie/hr/overtime/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -30,9 +30,9 @@ export const useListOvertimeRequests = (params?: ListOvertimeRequestsRequest) =>
     queryKey: ['overtime-requests', params],
     queryFn: async (): Promise<OvertimeRequestPayload[]> => {
       const res = await overtimeClient.listOvertimeRequests(
-        params ?? { employeeId: null, status: null }
+        params ?? { employeeId: undefined, status: undefined }
       );
-      return res.requests;
+      return res.requests ?? [];
     },
   });
 };

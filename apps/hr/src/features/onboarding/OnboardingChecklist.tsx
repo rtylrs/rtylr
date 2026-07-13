@@ -49,23 +49,23 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   const isOverdue = (item: EmployeeChecklistItemPayload): boolean => {
-    return item.status !== 'complete' && new Date(item.dueDate).getTime() < Date.now();
+    return item.status !== 'complete' && new Date(item.dueDate ?? 0).getTime() < Date.now();
   };
 
   const handleComplete = (item: EmployeeChecklistItemPayload): void => {
-    complete.mutate({ itemId: item.id });
+    complete.mutate({ itemId: Number(item.id ?? 0) });
   };
 
   const handleAttachmentUpload = (file: { name: string; url: string }): void => {
     if (!attachmentItem) return;
     complete.mutate(
-      { itemId: attachmentItem.id, attachmentUrl: file.url },
+      { itemId: Number(attachmentItem.id ?? 0), attachmentUrl: file.url },
       { onSuccess: () => setAttachmentItem(null) }
     );
   };
 
   const grouped = items.reduce<Record<string, EmployeeChecklistItemPayload[]>>((acc, item) => {
-    const key = item.status;
+    const key = item.status ?? '';
     if (!acc[key]) acc[key] = [];
     acc[key].push(item);
     return acc;
@@ -175,7 +175,11 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
                         {t('onboardingMgmt.checklist.dueDate', { date: item.dueDate })}
                       </div>
                     </div>
-                    <Pill style={pillStyle(STATUS_COLORS[item.status] ?? 'var(--hr-status-draft)')}>
+                    <Pill
+                      style={pillStyle(
+                        STATUS_COLORS[item.status ?? ''] ?? 'var(--hr-status-draft)'
+                      )}
+                    >
                       {t(`onboardingMgmt.checklist.statuses.${item.status}` as const)}
                     </Pill>
                     {isOverdue(item) && (

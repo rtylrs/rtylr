@@ -177,10 +177,12 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
                 >
                   <span>#{review.employeeId}</span>
                   <span>#{review.reviewerEmployeeId}</span>
-                  <Pill color={REVIEW_TYPE_COLORS[review.reviewType] ?? 'var(--hr-status-draft)'}>
+                  <Pill
+                    color={REVIEW_TYPE_COLORS[review.reviewType ?? ''] ?? 'var(--hr-status-draft)'}
+                  >
                     {t(`performance.reviewTypes.${review.reviewType}`)}
                   </Pill>
-                  <Pill color={STATUS_COLORS[review.status] ?? 'var(--hr-status-draft)'}>
+                  <Pill color={STATUS_COLORS[review.status ?? ''] ?? 'var(--hr-status-draft)'}>
                     {t(`performance.statuses.${review.status}`)}
                   </Pill>
                   <span style={{ color: 'var(--hr-text-muted)' }}>
@@ -190,7 +192,7 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
                     {canShare(review) && (
                       <Button
                         variant="ghost"
-                        onClick={() => handleShare(review.id)}
+                        onClick={() => handleShare(Number(review.id ?? 0))}
                         aria-label={t('performance.reviews.share')}
                         style={{ padding: '4px 8px' }}
                       >
@@ -212,7 +214,7 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
 
 function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
   const { t } = useTranslation();
-  const { data, isLoading } = useListGoals({ reviewCycleId: cycleId });
+  const { data, isLoading } = useListGoals({ reviewCycleId: String(cycleId) });
   const goals = data?.goals ?? [];
 
   if (isLoading) {
@@ -242,7 +244,7 @@ function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
             <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
               {goal.title}
             </h4>
-            <Pill color={STATUS_COLORS[goal.status] ?? 'var(--hr-status-draft)'}>
+            <Pill color={STATUS_COLORS[goal.status ?? ''] ?? 'var(--hr-status-draft)'}>
               {goal.status}
             </Pill>
           </div>
@@ -289,10 +291,10 @@ const ReviewCycleDetail = (): React.JSX.Element => {
       <HelmetContainer title="Review cycle · rtylr" />
       <div>
         <SectionHeader
-          title={cycle.name}
+          title={cycle.name ?? ''}
           subtitle={`${cycle.periodStart}, ${cycle.periodEnd}`}
           right={
-            <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
+            <Pill color={STATUS_COLORS[cycle.status ?? ''] ?? 'var(--hr-status-draft)'}>
               {cycle.status}
             </Pill>
           }

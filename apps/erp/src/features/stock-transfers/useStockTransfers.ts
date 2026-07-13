@@ -1,15 +1,15 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  StockTransferServiceClient,
-  type CreateStockTransferRequest,
-  type CreateStockTransferResponse,
-  type ListStockTransfersResponse,
-  type StockTransfer,
-  type UpdateStockTransferStatusRequest,
-  type UpdateStockTransferStatusResponse,
-} from '@voxire/voxie/erp/stock_transfer/v1/service_client';
+import { StockTransferServiceClient } from '@voxire/voxie/erp/stock_transfer/v1/client';
+import type {
+  CreateStockTransferRequest,
+  CreateStockTransferResponse,
+  ListStockTransfersResponse,
+  StockTransfer,
+  UpdateStockTransferStatusRequest,
+  UpdateStockTransferStatusResponse,
+} from '@voxire/voxie/erp/stock_transfer/v1/types';
 
 const stockTransferClient = createOneKitClient(StockTransferServiceClient, 'erp');
 

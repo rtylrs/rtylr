@@ -748,7 +748,9 @@ test.describe.skip('ERP purchase orders flow', () => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
 
-  test('PO number and supplier name render from GET /api/erp/purchase-order/v1/purchase-orders', async ({ page }) => {
+  test('PO number and supplier name render from GET /api/erp/purchase-order/v1/purchase-orders', async ({
+    page,
+  }) => {
     const fakePOs: StubPurchaseOrder[] = [
       {
         id: 101,

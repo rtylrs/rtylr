@@ -2,7 +2,7 @@ import { unwrap, createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
-import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
 
@@ -211,13 +211,13 @@ export const useBulkInvite = (): ReturnType<
         groupId: payload.groupId ? String(payload.groupId) : '',
       });
       return {
-        results: res.results.map((r) => ({
-          email: r.email,
+        results: (res.results ?? []).map((r) => ({
+          email: r.email ?? '',
           userId: Number(r.userId),
           status: r.status as BulkResult['status'],
-          message: r.message,
+          message: r.message ?? '',
         })),
-        message: res.message,
+        message: res.message ?? '',
       };
     },
     onSuccess: () => {

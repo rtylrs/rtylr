@@ -1,15 +1,15 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  SupplierServiceClient,
-  type CreateSupplierRequest,
-  type CreateSupplierResponse,
-  type ListSuppliersResponse,
-  type Supplier,
-  type UpdateSupplierRequest,
-  type UpdateSupplierResponse,
-} from '@voxire/voxie/erp/supplier/v1/service_client';
+import { SupplierServiceClient } from '@voxire/voxie/erp/supplier/v1/client';
+import type {
+  CreateSupplierRequest,
+  CreateSupplierResponse,
+  ListSuppliersResponse,
+  Supplier,
+  UpdateSupplierRequest,
+  UpdateSupplierResponse,
+} from '@voxire/voxie/erp/supplier/v1/types';
 
 const supplierClient = createOneKitClient(SupplierServiceClient, 'erp');
 

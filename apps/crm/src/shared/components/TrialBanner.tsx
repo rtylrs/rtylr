@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
-import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/service_client';
+import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
 import { APP_URLS } from '@voxire/config';
 
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
@@ -27,7 +27,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
 
   if (!data || data.status !== 'trial' || dismissed) return null;
 
-  const days = daysLeft(data.trialEndsAt);
+  const days = daysLeft(data.trialEndsAt ?? null);
   if (days > 7) return null;
 
   const dismiss = (): void => {

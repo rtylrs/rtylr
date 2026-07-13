@@ -19,7 +19,7 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
   const suppliers = supplierResult?.suppliers ?? [];
 
   const filtered = useMemo(
-    () => suppliers.filter((s) => s.name.toLowerCase().includes(q.toLowerCase())),
+    () => suppliers.filter((s) => (s.name ?? '').toLowerCase().includes(q.toLowerCase())),
     [suppliers, q]
   );
 
@@ -70,7 +70,7 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
             <button
               key={s.id}
               onClick={() => {
-                onChange(s.id);
+                onChange(s.id ?? '');
                 setOpen(false);
                 setQ('');
               }}

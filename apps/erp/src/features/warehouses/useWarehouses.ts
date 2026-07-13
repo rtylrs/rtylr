@@ -1,15 +1,15 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  WarehouseServiceClient,
-  type CreateWarehouseRequest,
-  type CreateWarehouseResponse,
-  type DeleteWarehouseResponse,
-  type UpdateWarehouseRequest,
-  type UpdateWarehouseResponse,
-  type Warehouse,
-} from '@voxire/voxie/erp/warehouse/v1/service_client';
+import { WarehouseServiceClient } from '@voxire/voxie/erp/warehouse/v1/client';
+import type {
+  CreateWarehouseRequest,
+  CreateWarehouseResponse,
+  DeleteWarehouseResponse,
+  UpdateWarehouseRequest,
+  UpdateWarehouseResponse,
+  Warehouse,
+} from '@voxire/voxie/erp/warehouse/v1/types';
 
 const warehouseClient = createOneKitClient(WarehouseServiceClient, 'erp');
 
@@ -24,7 +24,7 @@ export function useWarehouses() {
     queryKey: ['warehouses'],
     queryFn: async () => {
       const response = await warehouseClient.listWarehouses({});
-      return response.warehouses;
+      return response.warehouses ?? [];
     },
   });
 }

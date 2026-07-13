@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { FinancialServiceClient } from '@voxire/voxie/insights/financial/v1/service_client';
+import { FinancialServiceClient } from '@voxire/voxie/insights/financial/v1/client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type { CashFlowResponse, ExpensesByCategoryResponse, InvoiceAgingResponse } from './types';
 
@@ -17,9 +17,9 @@ export const useCashFlow = (params?: DateRangeParams): UseQueryResult<CashFlowRe
       const trend = res.analytics?.trend ?? [];
       return {
         series: trend.map((point) => ({
-          date: point.date,
-          inflowMinorUnits: majorToMinor(point.inflow),
-          outflowMinorUnits: majorToMinor(point.outflow),
+          date: point.date ?? '',
+          inflowMinorUnits: majorToMinor(point.inflow ?? 0),
+          outflowMinorUnits: majorToMinor(point.outflow ?? 0),
         })),
       };
     },
@@ -38,8 +38,8 @@ export const useExpensesByCategory = (
       return {
         categories: byCategory.map((entry, index) => ({
           categoryId: index + 1,
-          categoryName: entry.category,
-          amountMinorUnits: majorToMinor(entry.amount),
+          categoryName: entry.category ?? '',
+          amountMinorUnits: majorToMinor(entry.amount ?? 0),
         })),
       };
     },
@@ -54,9 +54,9 @@ export const useInvoiceAging = (): UseQueryResult<InvoiceAgingResponse> => {
       const buckets = res.aging?.buckets ?? [];
       return {
         buckets: buckets.map((b) => ({
-          bucket: b.bucket,
-          invoiceCount: b.count,
-          amountMinorUnits: majorToMinor(b.amount),
+          bucket: b.bucket ?? '',
+          invoiceCount: b.count ?? 0,
+          amountMinorUnits: majorToMinor(b.amount ?? 0),
         })),
       };
     },

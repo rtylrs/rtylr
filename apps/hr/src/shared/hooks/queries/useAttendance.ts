@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   ListAttendanceRequest,
   ListAttendanceResponse,
-} from '@voxire/voxie/hr/attendance/v1/list_attendance';
-import type { AttendanceClockInResponse } from '@voxire/voxie/hr/attendance/v1/attendance_clock_in';
-import type { AttendanceClockOutResponse } from '@voxire/voxie/hr/attendance/v1/attendance_clock_out';
+} from '@voxire/voxie/hr/attendance/v1/types';
+import type { AttendanceClockInResponse } from '@voxire/voxie/hr/attendance/v1/types';
+import type { AttendanceClockOutResponse } from '@voxire/voxie/hr/attendance/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

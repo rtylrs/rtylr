@@ -82,7 +82,7 @@ const MyPaySlips = (): React.JSX.Element => {
                       </Pill>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                      {t('payroll.netTotal')}: {fmt(run.totalNet)}
+                      {t('payroll.netTotal')}: {fmt(run.totalNet ?? 0)}
                     </div>
                   </div>
                 </Card>

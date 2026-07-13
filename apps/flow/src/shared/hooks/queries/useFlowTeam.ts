@@ -6,9 +6,9 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/service_client';
-import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/service_client';
-import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/service_client';
+import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/client';
+import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/client';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
 
 const membersClient = createOneKitClient(MembersServiceClient, 'flow');
 const permissionsClient = createOneKitClient(PermissionsServiceClient, 'flow');
@@ -42,13 +42,13 @@ export function normalizeFlowTeamMember(member: StaffUserPayload): FlowTeamMembe
   const email = member.email?.trim() ?? '';
 
   return {
-    id: member.id,
+    id: member.id ?? '',
     name: fullName || email,
     fullName: fullName || undefined,
     email,
-    role: member.role,
+    role: member.role ?? '',
     apps: member.apps ?? [],
-    isActive: member.isActive,
+    isActive: member.isActive ?? false,
   };
 }
 
@@ -61,7 +61,7 @@ export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
     queryKey: ['flow-team'],
     queryFn: async (): Promise<FlowTeamMember[]> => {
       const res = await membersClient.listTeam({});
-      return res.users.map(normalizeFlowTeamMember);
+      return (res.users ?? []).map(normalizeFlowTeamMember);
     },
     staleTime: 30_000,
   });

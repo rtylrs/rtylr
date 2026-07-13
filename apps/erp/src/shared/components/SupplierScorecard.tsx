@@ -47,10 +47,10 @@ const SupplierScorecard: React.FC<SupplierScorecardProps> = ({ supplier }) => {
         </span>
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Detail label="Email" value={supplier.email} icon={Mail} />
-        <Detail label="Phone" value={supplier.phone} icon={Phone} />
+        <Detail label="Email" value={supplier.email ?? ''} icon={Mail} />
+        <Detail label="Phone" value={supplier.phone ?? ''} icon={Phone} />
         <Detail label="Location" value={location} icon={MapPin} />
-        <Detail label="Terms" value={supplier.paymentTerms} icon={ReceiptText} />
+        <Detail label="Terms" value={supplier.paymentTerms ?? ''} icon={ReceiptText} />
       </div>
     </div>
   );

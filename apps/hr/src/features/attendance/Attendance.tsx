@@ -125,7 +125,7 @@ const Attendance = (): React.JSX.Element => {
                       })}
                     </td>
                     <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
-                      {formatTime(record.clockInAt)}
+                      {formatTime(Number(record.clockInAt ?? 0))}
                       {record.isLate && (
                         <Pill color="var(--hr-error)" style={{ marginLeft: 6, fontSize: 9 }}>
                           {t('attendance.late', { minutes: record.lateMinutes })}
@@ -133,7 +133,7 @@ const Attendance = (): React.JSX.Element => {
                       )}
                     </td>
                     <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
-                      {record.clockOutAt ? formatTime(record.clockOutAt) : '-'}
+                      {record.clockOutAt ? formatTime(Number(record.clockOutAt)) : '-'}
                     </td>
                     <td
                       style={{
@@ -148,7 +148,7 @@ const Attendance = (): React.JSX.Element => {
                       {t(`attendance.methods.${record.clockInMethod}`)}
                     </td>
                     <td style={{ padding: '12px' }}>
-                      <Pill color={STATUS_COLORS[record.status] ?? 'var(--hr-status-draft)'}>
+                      <Pill color={STATUS_COLORS[record.status ?? ''] ?? 'var(--hr-status-draft)'}>
                         {t(`attendance.statuses.${record.status}`)}
                       </Pill>
                     </td>

@@ -49,7 +49,7 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
       {
         employeeId: userId ?? '',
         ...result.data,
-        neededByDate: result.data.neededByDate ?? null,
+        neededByDate: result.data.neededByDate ?? undefined,
       },
       {
         onSuccess: () => onClose(),

@@ -37,8 +37,8 @@ function groupByDay(entries: TimeEntryPayload[]): Record<string, number> {
     result[day] = 0;
   }
   for (const entry of entries) {
-    const day = getDayOfWeek(entry.date);
-    result[day] = (result[day] ?? 0) + entry.durationMinutes;
+    const day = getDayOfWeek(entry.date ?? '');
+    result[day] = (result[day] ?? 0) + (entry.durationMinutes ?? 0);
   }
   return result;
 }
@@ -59,7 +59,10 @@ const TimesheetDetail = (): React.JSX.Element => {
   const { data: timesheet, isLoading } = useGetTimesheet(timesheetId);
   const submitTimesheet = useSubmitTimesheet();
 
-  const dayTotals = useMemo(() => (timesheet ? groupByDay(timesheet.entries) : null), [timesheet]);
+  const dayTotals = useMemo(
+    () => (timesheet ? groupByDay(timesheet.entries ?? []) : null),
+    [timesheet]
+  );
 
   if (isLoading) {
     return (
@@ -81,6 +84,8 @@ const TimesheetDetail = (): React.JSX.Element => {
       </div>
     );
   }
+
+  const entriesList = timesheet.entries ?? [];
 
   const periodLabel = `${new Date(timesheet.periodStart + 'T00:00:00').toLocaleDateString(
     undefined,
@@ -106,13 +111,13 @@ const TimesheetDetail = (): React.JSX.Element => {
           title={periodLabel}
           right={
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Pill color={STATUS_COLORS[timesheet.status] ?? 'var(--hr-status-draft)'}>
+              <Pill color={STATUS_COLORS[timesheet.status ?? ''] ?? 'var(--hr-status-draft)'}>
                 {t(`timesheets.statuses.${timesheet.status}`)}
               </Pill>
               {timesheet.status === 'draft' && (
                 <Button
                   variant="primary"
-                  onClick={() => submitTimesheet.mutate({ timesheetId: timesheet.id })}
+                  onClick={() => submitTimesheet.mutate({ timesheetId: Number(timesheet.id ?? 0) })}
                   disabled={submitTimesheet.isPending}
                   icon={<Send size={13} />}
                 >
@@ -202,7 +207,7 @@ const TimesheetDetail = (): React.JSX.Element => {
               color: ACCENT,
             }}
           >
-            {t('timesheets.total')}: {formatDuration(timesheet.totalMinutes)}
+            {t('timesheets.total')}: {formatDuration(timesheet.totalMinutes ?? 0)}
           </div>
         </Card>
 
@@ -215,15 +220,15 @@ const TimesheetDetail = (): React.JSX.Element => {
             margin: '8px 0 0',
           }}
         >
-          {t('timesheets.entriesTitle')} ({timesheet.entries.length})
+          {t('timesheets.entriesTitle')} ({entriesList.length})
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {timesheet.entries.length === 0 ? (
+          {entriesList.length === 0 ? (
             <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', padding: '8px 0' }}>
               {t('timesheets.noEntries')}
             </p>
           ) : (
-            timesheet.entries.map((entry, idx) => (
+            entriesList.map((entry, idx) => (
               <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, y: 4 }}
@@ -261,7 +266,7 @@ const TimesheetDetail = (): React.JSX.Element => {
                       flexShrink: 0,
                     }}
                   >
-                    {formatDuration(entry.durationMinutes)}
+                    {formatDuration(entry.durationMinutes ?? 0)}
                   </span>
                 </Card>
               </motion.div>

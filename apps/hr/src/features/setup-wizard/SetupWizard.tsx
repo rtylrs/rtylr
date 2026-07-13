@@ -100,7 +100,7 @@ const SetupWizard = (): React.JSX.Element => {
   const advanceAfterComplete = (): void => {
     if (isLast) {
       upsertConfig.mutate(
-        { setupCompletedAt: Math.floor(Date.now() / 1000) },
+        { setupCompletedAt: String(Math.floor(Date.now() / 1000)) },
         {
           onSuccess: () => {
             navigate({ to: '/', replace: true });

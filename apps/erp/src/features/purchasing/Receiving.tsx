@@ -31,13 +31,13 @@ const Receiving: React.FC = () => {
   const [lines, setLines] = useState<ReceiveLine[]>([]);
 
   const handleSelectOrder = (order: PurchaseOrder): void => {
-    setSelectedId(order.id);
+    setSelectedId(order.id ?? null);
     setLines(
-      order.items.map((item) => ({
-        sku: item.productId,
-        name: `Product #${item.productId}`,
-        expected: item.quantityOrdered,
-        received: item.quantityReceived || item.quantityOrdered,
+      (order.items ?? []).map((item) => ({
+        sku: item.productId ?? '',
+        name: `Product #${item.productId ?? ''}`,
+        expected: item.quantityOrdered ?? 0,
+        received: (item.quantityReceived || item.quantityOrdered) ?? 0,
       }))
     );
   };
@@ -196,7 +196,7 @@ const Receiving: React.FC = () => {
                   PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                  {o.items.length} items / Expected {formatDate(o.expectedDelivery ?? '')}
+                  {(o.items ?? []).length} items / Expected {formatDate(o.expectedDelivery ?? '')}
                 </p>
               </div>
               <span

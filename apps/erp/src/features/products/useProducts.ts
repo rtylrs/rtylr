@@ -1,18 +1,18 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  ProductServiceClient,
-  type CreateProductRequest,
-  type CreateProductResponse,
-  type DeleteProductResponse,
-  type FullProduct,
-  type ListProductsResponse,
-  type Product,
-  type ProductAttribute,
-  type UpdateProductRequest,
-  type UpdateProductResponse,
-} from '@voxire/voxie/erp/product/v1/service_client';
+import { ProductServiceClient } from '@voxire/voxie/erp/product/v1/client';
+import type {
+  CreateProductRequest,
+  CreateProductResponse,
+  DeleteProductResponse,
+  FullProduct,
+  ListProductsResponse,
+  Product,
+  ProductAttribute,
+  UpdateProductRequest,
+  UpdateProductResponse,
+} from '@voxire/voxie/erp/product/v1/types';
 
 const productClient = createOneKitClient(ProductServiceClient, 'erp');
 
@@ -32,9 +32,11 @@ export interface ProductFilters {
   pageSize?: number;
 }
 
-export function getProductStockStatus(product: Pick<Product, 'stockQuantity' | 'lowStockThreshold'>): ProductStockStatus {
-  if (product.stockQuantity <= 0) return 'Out of Stock';
-  if (product.stockQuantity <= product.lowStockThreshold) return 'Low Stock';
+export function getProductStockStatus(
+  product: Pick<Product, 'stockQuantity' | 'lowStockThreshold'>
+): ProductStockStatus {
+  if ((product.stockQuantity ?? 0) <= 0) return 'Out of Stock';
+  if ((product.stockQuantity ?? 0) <= (product.lowStockThreshold ?? 0)) return 'Low Stock';
   return 'In Stock';
 }
 
@@ -91,7 +93,7 @@ export function useProductAttributes(id: string | undefined) {
     queryFn: async () => {
       if (!id) return [];
       const response = await productClient.listProductAttributes({ id });
-      return response.attributes;
+      return response.attributes ?? [];
     },
   });
 }

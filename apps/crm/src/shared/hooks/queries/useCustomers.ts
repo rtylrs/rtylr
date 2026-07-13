@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
-import type { CreateCustomerRequest } from '@voxire/voxie/crm/customer/v1/create_customer';
-import type { UpdateCustomerRequest } from '@voxire/voxie/crm/customer/v1/update_customer';
+import type { CreateCustomerRequest } from '@voxire/voxie/crm/customer/v1/types';
+import type { UpdateCustomerRequest } from '@voxire/voxie/crm/customer/v1/types';
 import {
   useMutation,
   useQuery,
@@ -116,7 +116,7 @@ export const useUpdateCustomer = (): UseMutationResult<
   return useMutation<Customer, unknown, UpdateCustomerPayload>({
     mutationFn: async (payload: UpdateCustomerPayload): Promise<Customer> => {
       const request: UpdateCustomerRequest = {
-        id: payload.id,
+        id: String(payload.id),
         ...payload.data,
       } as UpdateCustomerRequest;
       const res = await unwrap(safe.put<Customer>('/crm/customers', request));

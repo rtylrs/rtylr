@@ -105,12 +105,13 @@ const Overtime = (): React.JSX.Element => {
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                       {t('overtime.employee')} #{req.employeeId}
                     </span>
-                    <Pill color={STATUS_COLORS[req.status]}>
-                      {t(`overtime.statuses.${req.status.toLowerCase()}`)}
+                    <Pill color={STATUS_COLORS[req.status ?? '']}>
+                      {t(`overtime.statuses.${(req.status ?? '').toLowerCase()}`)}
                     </Pill>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                    {req.date} · {formatMinutes(req.plannedExtraMinutes)} {t('overtime.planned')}
+                    {req.date} · {formatMinutes(req.plannedExtraMinutes ?? 0)}{' '}
+                    {t('overtime.planned')}
                   </div>
                   {req.reason && (
                     <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
@@ -123,13 +124,21 @@ const Overtime = (): React.JSX.Element => {
                     onApprove={() =>
                       approveOvertime.mutate({
                         overtimeRequestId: req.id,
-                        body: { approved: true, multiplierApplied: null, rejectionReason: null },
+                        body: {
+                          approved: true,
+                          multiplierApplied: undefined,
+                          rejectionReason: undefined,
+                        },
                       })
                     }
                     onReject={() =>
                       approveOvertime.mutate({
                         overtimeRequestId: req.id,
-                        body: { approved: false, multiplierApplied: null, rejectionReason: null },
+                        body: {
+                          approved: false,
+                          multiplierApplied: undefined,
+                          rejectionReason: undefined,
+                        },
                       })
                     }
                   />

@@ -141,9 +141,12 @@ export function usePublicBusinessBySlug(slug: string | null): {
     queryKey: ['public-business-by-slug', slug],
     queryFn: async (): Promise<PublicBusinessBySlugBundle> => {
       if (!slug) throw new Error('slug required');
-      const res = await api.get<PublicBusinessBySlugApi>('/api/hub/business/v1/businesses/by-slug', {
-        params: { slug },
-      });
+      const res = await api.get<PublicBusinessBySlugApi>(
+        '/api/hub/business/v1/businesses/by-slug',
+        {
+          params: { slug },
+        }
+      );
       return {
         business: {
           id: res.data.business.id,

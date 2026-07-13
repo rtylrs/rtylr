@@ -1,7 +1,8 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { z } from 'zod';
-import { FeedbackServiceClient, type Feedback } from '@voxire/voxie/crm/feedback/v1/service_client';
+import { FeedbackServiceClient } from '@voxire/voxie/crm/feedback/v1/client';
+import type { Feedback } from '@voxire/voxie/crm/feedback/v1/types';
 import { feedbackItemSchema, type FeedbackType } from '../../schemas/feedback';
 import type { FeedbackItem } from '../../schemas/feedback';
 
@@ -38,7 +39,7 @@ export const useListFeedback = (params?: ListFeedbackParams): UseQueryResult<Fee
         page: 1,
         pageSize: 100,
       });
-      return z.array(feedbackItemSchema).parse(res.feedback.map(fromApiFeedback));
+      return z.array(feedbackItemSchema).parse((res.feedback ?? []).map(fromApiFeedback));
     },
   });
 

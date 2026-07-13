@@ -1,15 +1,15 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  CategoryServiceClient,
-  type Category,
-  type CreateCategoryRequest,
-  type CreateCategoryResponse,
-  type DeleteCategoryResponse,
-  type UpdateCategoryRequest,
-  type UpdateCategoryResponse,
-} from '@voxire/voxie/erp/category/v1/service_client';
+import { CategoryServiceClient } from '@voxire/voxie/erp/category/v1/client';
+import type {
+  Category,
+  CreateCategoryRequest,
+  CreateCategoryResponse,
+  DeleteCategoryResponse,
+  UpdateCategoryRequest,
+  UpdateCategoryResponse,
+} from '@voxire/voxie/erp/category/v1/types';
 
 const categoryClient = createOneKitClient(CategoryServiceClient, 'erp');
 
@@ -20,7 +20,7 @@ export function useCategories() {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await categoryClient.listCategories({});
-      return response.categories;
+      return response.categories ?? [];
     },
   });
 }

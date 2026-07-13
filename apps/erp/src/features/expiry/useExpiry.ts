@@ -1,9 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import {
-  ProductServiceClient,
-  type ExpiringItem,
-} from '@voxire/voxie/erp/product/v1/service_client';
+import { ProductServiceClient } from '@voxire/voxie/erp/product/v1/client';
+import type { ExpiringItem } from '@voxire/voxie/erp/product/v1/types';
 
 const productClient = createOneKitClient(ProductServiceClient, 'erp');
 
@@ -14,7 +12,7 @@ export function useExpiry(daysAhead = 30) {
     queryKey: ['expiry', daysAhead],
     queryFn: async () => {
       const response = await productClient.listExpiringItems({ daysAhead });
-      return response.items;
+      return response.items ?? [];
     },
   });
 }

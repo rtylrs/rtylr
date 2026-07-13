@@ -1,14 +1,14 @@
 import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  LeaveServiceClient,
-  type ListLeaveRequestsRequest,
-  type CreateLeaveRequestRequest,
-  type ApproveLeaveRequest,
-  type LeaveRequestPayload,
-  type LeaveTypePayload,
-  type LeaveBalancePayload,
-} from '@voxire/voxie/hr/leave/v1/service_client';
+import { LeaveServiceClient } from '@voxire/voxie/hr/leave/v1/client';
+import type {
+  ListLeaveRequestsRequest,
+  CreateLeaveRequestRequest,
+  ApproveLeaveRequest,
+  LeaveRequestPayload,
+  LeaveTypePayload,
+  LeaveBalancePayload,
+} from '@voxire/voxie/hr/leave/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,7 @@ export const useListLeaveTypes = () => {
     queryKey: ['leave-types'],
     queryFn: async (): Promise<LeaveTypePayload[]> => {
       const res = await leaveClient.listLeaveTypes({});
-      return res.leaveTypes;
+      return res.leaveTypes ?? [];
     },
   });
 };
@@ -40,8 +40,10 @@ export const useListLeaveRequests = (params?: ListLeaveRequestsRequest) => {
   return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-requests', params],
     queryFn: async (): Promise<LeaveRequestPayload[]> => {
-      const res = await leaveClient.listLeaveRequests(params ?? { employeeId: null, status: null });
-      return res.requests;
+      const res = await leaveClient.listLeaveRequests(
+        params ?? { employeeId: undefined, status: undefined }
+      );
+      return res.requests ?? [];
     },
   });
 };
@@ -85,8 +87,8 @@ export const useListLeaveBalances = () => {
   return useQuery<LeaveBalancePayload[]>({
     queryKey: ['leave-balances'],
     queryFn: async (): Promise<LeaveBalancePayload[]> => {
-      const res = await leaveClient.listLeaveBalances({ employeeId: null, year: null });
-      return res.balances;
+      const res = await leaveClient.listLeaveBalances({ employeeId: undefined, year: undefined });
+      return res.balances ?? [];
     },
   });
 };

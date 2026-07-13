@@ -1,15 +1,15 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  VariantServiceClient,
-  type CreateVariantRequest,
-  type CreateVariantResponse,
-  type DeleteVariantResponse,
-  type UpdateVariantRequest,
-  type UpdateVariantResponse,
-  type Variant,
-} from '@voxire/voxie/erp/variant/v1/service_client';
+import { VariantServiceClient } from '@voxire/voxie/erp/variant/v1/client';
+import type {
+  CreateVariantRequest,
+  CreateVariantResponse,
+  DeleteVariantResponse,
+  UpdateVariantRequest,
+  UpdateVariantResponse,
+  Variant,
+} from '@voxire/voxie/erp/variant/v1/types';
 
 const variantClient = createOneKitClient(VariantServiceClient, 'erp');
 
@@ -33,7 +33,7 @@ export function useVariants(productId?: string) {
     queryKey: ['variants', productId],
     queryFn: async () => {
       const response = await variantClient.listVariants({ productId: productId ?? '0' });
-      return response.variants;
+      return response.variants ?? [];
     },
   });
 }

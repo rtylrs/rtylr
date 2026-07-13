@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
-import { RevenueServiceClient } from '@voxire/voxie/insights/revenue/v1/service_client';
+import { RevenueServiceClient } from '@voxire/voxie/insights/revenue/v1/client';
 
 /**
  * Revenue time-series for the dashboard widget. Hits
@@ -38,8 +38,8 @@ export function useRevenueSeries(days = 7): {
         });
         const trend = res.overview?.trend ?? [];
         return trend.map((point) => ({
-          date: point.date,
-          amountMinorUnits: Math.round(point.amount * 100),
+          date: point.date ?? '',
+          amountMinorUnits: Math.round((point.amount ?? 0) * 100),
         }));
       } catch {
         return [];

@@ -32,7 +32,7 @@ const Barcodes: React.FC = () => {
     setTimeout(() => window.print(), 100);
   };
 
-  const selectedProducts = products.filter((p) => selected.has(p.id));
+  const selectedProducts = products.filter((p) => selected.has(p.id ?? ''));
 
   return (
     <motion.div
@@ -86,18 +86,20 @@ const Barcodes: React.FC = () => {
             : products.map((p) => (
                 <button
                   key={p.id}
-                  onClick={() => toggle(p.id)}
+                  onClick={() => toggle(p.id ?? '')}
                   className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left"
-                  style={{ background: selected.has(p.id) ? 'var(--hub-active)' : 'transparent' }}
+                  style={{
+                    background: selected.has(p.id ?? '') ? 'var(--hub-active)' : 'transparent',
+                  }}
                 >
                   <div
                     className="h-4 w-4 rounded flex items-center justify-center"
                     style={{
-                      background: selected.has(p.id) ? AMBER : 'var(--hub-hover)',
+                      background: selected.has(p.id ?? '') ? AMBER : 'var(--hub-hover)',
                       border: '1px solid var(--hub-border)',
                     }}
                   >
-                    {selected.has(p.id) && <Check size={10} style={{ color: '#000' }} />}
+                    {selected.has(p.id ?? '') && <Check size={10} style={{ color: '#000' }} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p
@@ -134,8 +136,10 @@ const Barcodes: React.FC = () => {
                     style={{ border: '1px solid var(--hub-border)' }}
                   >
                     <p className="text-[11px] font-bold text-black mb-1 truncate">{p.name}</p>
-                    <BarcodeSvg value={p.barcode || p.sku} width={200} height={50} />
-                    <p className="text-[10px] text-black/60 mt-1">${p.salePrice.toFixed(2)}</p>
+                    <BarcodeSvg value={p.barcode || p.sku || ''} width={200} height={50} />
+                    <p className="text-[10px] text-black/60 mt-1">
+                      ${(p.salePrice ?? 0).toFixed(2)}
+                    </p>
                   </div>
                 ))
               )}

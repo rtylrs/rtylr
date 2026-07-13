@@ -110,7 +110,7 @@ const ChecklistTemplates = (): React.JSX.Element => {
                     {tmpl.name}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                    {t('onboardingMgmt.templates.itemCount', { count: tmpl.items.length })}
+                    {t('onboardingMgmt.templates.itemCount', { count: (tmpl.items ?? []).length })}
                   </div>
                 </div>
                 <Pill

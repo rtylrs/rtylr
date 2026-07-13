@@ -123,14 +123,14 @@ const TimesheetsList = (): React.JSX.Element => {
                         color: 'var(--hr-text-muted)',
                       }}
                     >
-                      <span>{formatDuration(ts.totalMinutes)}</span>
+                      <span>{formatDuration(ts.totalMinutes ?? 0)}</span>
                       <span>·</span>
                       <span>
                         {ts.entries?.length ?? 0} {t('timesheets.entries')}
                       </span>
                     </div>
                   </div>
-                  <Pill color={STATUS_COLORS[ts.status] ?? 'var(--hr-status-draft)'}>
+                  <Pill color={STATUS_COLORS[ts.status ?? ''] ?? 'var(--hr-status-draft)'}>
                     {t(`timesheets.statuses.${ts.status}`)}
                   </Pill>
                   <ChevronRight size={14} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />

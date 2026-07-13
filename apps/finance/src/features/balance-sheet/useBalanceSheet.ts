@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { StatementServiceClient } from '@voxire/voxie/finance/statement/v1/service_client';
+import { StatementServiceClient } from '@voxire/voxie/finance/statement/v1/client';
 import { balanceSheetSchema } from '../../shared/schemas/balanceSheet';
 
 const statementClient = createOneKitClient(StatementServiceClient, 'finance');

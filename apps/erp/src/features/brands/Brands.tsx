@@ -100,7 +100,7 @@ const Brands: React.FC = () => {
                   className="h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm"
                   style={{ background: 'rgba(245,158,11,0.12)', color: AMBER }}
                 >
-                  {b.name
+                  {(b.name ?? '')
                     .split(' ')
                     .map((w) => w[0])
                     .join('')
@@ -120,7 +120,7 @@ const Brands: React.FC = () => {
                 <Tag size={14} style={{ color: 'var(--hub-text-dim)' }} />
                 <button
                   aria-label="Delete brand"
-                  onClick={() => setConfirmDeleteId(b.id)}
+                  onClick={() => setConfirmDeleteId(b.id ?? null)}
                   className="h-7 w-7 rounded-lg flex items-center justify-center"
                   style={{ color: '#f87171' }}
                   onMouseEnter={(e) => {

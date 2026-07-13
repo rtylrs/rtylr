@@ -43,9 +43,9 @@ function formatDuration(minutes: number): string {
 function groupByDate(entries: TimeEntryPayload[]): Map<string, TimeEntryPayload[]> {
   const groups = new Map<string, TimeEntryPayload[]>();
   for (const entry of entries) {
-    const existing = groups.get(entry.date) ?? [];
+    const existing = groups.get(entry.date ?? '') ?? [];
     existing.push(entry);
-    groups.set(entry.date, existing);
+    groups.set(entry.date ?? '', existing);
   }
   return groups;
 }
@@ -82,7 +82,7 @@ const TimeLogging = (): React.JSX.Element => {
 
   const entries = data?.entries ?? [];
   const grouped = useMemo(() => groupByDate(entries), [entries]);
-  const totalMinutes = entries.reduce((sum, e) => sum + e.durationMinutes, 0);
+  const totalMinutes = entries.reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0);
 
   const sortedDates = useMemo(() => {
     return Array.from(grouped.keys()).sort((a, b) => b.localeCompare(a));
@@ -125,7 +125,7 @@ const TimeLogging = (): React.JSX.Element => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {sortedDates.map((date, dateIdx) => {
               const dayEntries = grouped.get(date) ?? [];
-              const dayTotal = dayEntries.reduce((sum, e) => sum + e.durationMinutes, 0);
+              const dayTotal = dayEntries.reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0);
               const dateLabel = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
                 weekday: 'short',
                 month: 'short',
@@ -209,7 +209,7 @@ const TimeLogging = (): React.JSX.Element => {
                               </Pill>
                             )}
                             <Pill
-                              color={STATUS_COLORS[entry.status] ?? 'var(--hr-status-draft)'}
+                              color={STATUS_COLORS[entry.status ?? ''] ?? 'var(--hr-status-draft)'}
                               style={{ fontSize: 9 }}
                             >
                               {t(`timeLogging.statuses.${entry.status}`)}
@@ -224,11 +224,11 @@ const TimeLogging = (): React.JSX.Element => {
                             flexShrink: 0,
                           }}
                         >
-                          {formatDuration(entry.durationMinutes)}
+                          {formatDuration(entry.durationMinutes ?? 0)}
                         </span>
                         {entry.status === 'draft' && (
                           <button
-                            onClick={() => deleteEntry.mutate(entry.id)}
+                            onClick={() => deleteEntry.mutate(Number(entry.id ?? 0))}
                             style={{
                               display: 'flex',
                               alignItems: 'center',

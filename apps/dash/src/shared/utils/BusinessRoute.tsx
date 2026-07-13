@@ -408,9 +408,9 @@ function BusinessRoute(): React.JSX.Element | null {
             setMaintanance((configRes?.maintenance as boolean) ?? false);
             setAboutContent({ aboutContent: config.aboutContent ?? null });
           })
-            .catch(() => {
-              // config is non-critical - missing config won't block the app
-            });
+          .catch(() => {
+            // config is non-critical - missing config won't block the app
+          });
       })
       .catch(() => {
         // auth interceptor handles 401 redirect

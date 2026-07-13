@@ -1,16 +1,14 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/service_client';
-import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/service_client';
-import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
-import {
-  AccessServiceClient,
-  type AccessRequest as ApiAccessRequest,
-} from '@voxire/voxie/hub/team/access/v1/service_client';
+import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/client';
+import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/client';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
+import { AccessServiceClient } from '@voxire/voxie/hub/team/access/v1/client';
+import type { AccessRequest as ApiAccessRequest } from '@voxire/voxie/hub/team/access/v1/types';
 import type {
   StaffUserPayload,
   StaffUserWithGroups,
-} from '@voxire/voxie/hub/team/members/v1/service_client';
+} from '@voxire/voxie/hub/team/members/v1/types';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { teamMemberSchema } from '../../schemas/team';
@@ -36,17 +34,26 @@ export interface TeamListResult {
 }
 
 function fromApiMember(u: StaffUserPayload | StaffUserWithGroups): TeamMember {
+  const email = u.email ?? '';
   return {
-    id: u.id,
+    id: u.id ?? '',
     fullName: u.fullName,
-    name: u.fullName || u.email,
-    email: u.email,
-    role: u.role,
+    name: u.fullName || email,
+    email,
+    role: u.role ?? '',
     apps: u.apps ?? [],
-    isActive: u.isActive,
+    isActive: u.isActive ?? false,
     status: u.isActive ? 'active' : 'inactive',
-    createdAt: u.createdAt,
-    groups: 'groups' in u ? (u.groups ?? []).map((g) => ({ ...g, id: Number(g.id) })) : [],
+    createdAt: u.createdAt ?? '',
+    groups:
+      'groups' in u
+        ? (u.groups ?? []).map((g) => ({
+            ...g,
+            id: Number(g.id),
+            name: g.name ?? '',
+            color: g.color ?? '',
+          }))
+        : [],
   };
 }
 
@@ -86,7 +93,7 @@ export const useTeam = (params: UseTeamParams = {}) => {
     queryFn: async (): Promise<TeamListResult> => {
       const res = await membersClient.listTeam({});
       return {
-        members: res.users.map(fromApiMember),
+        members: (res.users ?? []).map(fromApiMember),
         hasMore: false,
         page,
         pageSize,
@@ -196,10 +203,10 @@ function fromApiAccessRequest(r: ApiAccessRequest): AccessRequest {
   return {
     id: Number(r.id),
     userId: Number(r.userId),
-    app: r.app,
-    requesterName: r.requesterName,
-    requesterEmail: r.requesterEmail,
-    createdAt: r.createdAt,
+    app: r.app ?? '',
+    requesterName: r.requesterName ?? '',
+    requesterEmail: r.requesterEmail ?? '',
+    createdAt: r.createdAt ?? '',
   };
 }
 
@@ -208,7 +215,7 @@ export const useAccessRequests = () =>
     queryKey: ['team', 'access-requests'],
     queryFn: async () => {
       const res = await accessClient.listAccessRequests({});
-      return res.requests.map(fromApiAccessRequest);
+      return (res.requests ?? []).map(fromApiAccessRequest);
     },
     staleTime: 30_000,
   });

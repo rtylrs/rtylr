@@ -1,11 +1,11 @@
 import { safe } from '../lib/api';
 import type { InvoiceItem as InvoiceLine } from '@voxire/voxie/finance/invoices/v1/types';
-import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/create_invoice';
-import type { CreateRecurringInvoiceRequest } from '@voxire/voxie/finance/recurring_invoice/v1/create_recurring_invoice';
-import type { CreateBillRequest } from '@voxire/voxie/finance/bill/v1/create_bill';
-import type { CreateBankAccountRequest } from '@voxire/voxie/finance/bank_account/v1/create_bank_account';
-import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/create_account';
-import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/create_journal_entry';
+import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/types';
+import type { CreateRecurringInvoiceRequest } from '@voxire/voxie/finance/recurring_invoice/v1/types';
+import type { CreateBillRequest } from '@voxire/voxie/finance/bill/v1/types';
+import type { CreateBankAccountRequest } from '@voxire/voxie/finance/bank_account/v1/types';
+import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/types';
+import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/types';
 
 export const plReportQueryParams = (params?: {
   period?: string;

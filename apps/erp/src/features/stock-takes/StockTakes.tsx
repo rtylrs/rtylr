@@ -3,12 +3,8 @@ import { motion } from 'motion/react';
 import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStockTakes';
-import {
-  stockTakeStatusLabel,
-  stockTakeProgress,
-  stockTakeVariance,
-} from './stockTakeSchema';
-import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/service_client';
+import { stockTakeStatusLabel, stockTakeProgress, stockTakeVariance } from './stockTakeSchema';
+import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/types';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -68,7 +64,9 @@ const StockTakes: React.FC = () => {
   };
 
   const handleComplete = async (id: string, items: UpdateStockTakeItemBody[]): Promise<void> => {
-    const uncounted = items.filter((item) => item.expectedQty > 0 && !item.countedQty).length;
+    const uncounted = items.filter(
+      (item) => (item.expectedQty ?? 0) > 0 && !item.countedQty
+    ).length;
     const doComplete = async (): Promise<void> => {
       try {
         await updateMut.mutateAsync({ id, body: { status: 'completed', notes: '', items } });
@@ -118,8 +116,12 @@ const StockTakes: React.FC = () => {
           />
         ) : (
           stockTakes.map((st) => {
-            const progress = stockTakeProgress(st.items);
-            const variance = stockTakeVariance(st.items);
+            const progress = stockTakeProgress(
+              (st.items ?? []).map((item) => ({ countedQty: item.countedQty ?? 0 }))
+            );
+            const variance = stockTakeVariance(
+              (st.items ?? []).map((item) => ({ variance: item.variance ?? 0 }))
+            );
             const statusColor =
               st.status === 'completed'
                 ? '#10b981'
@@ -142,10 +144,10 @@ const StockTakes: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                        {warehouseName(st.warehouseId)}
+                        {warehouseName(st.warehouseId ?? '')}
                       </p>
                       <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                        #{st.id} / Created {formatDate(st.createdAt)}
+                        #{st.id} / Created {formatDate(st.createdAt ?? '')}
                       </p>
                     </div>
                   </div>
@@ -155,8 +157,8 @@ const StockTakes: React.FC = () => {
                         aria-label="Complete stock take"
                         onClick={() =>
                           handleComplete(
-                            st.id,
-                            st.items.map((item) => ({
+                            st.id ?? '',
+                            (st.items ?? []).map((item) => ({
                               productId: item.productId,
                               expectedQty: item.expectedQty,
                               countedQty: item.countedQty,
@@ -174,7 +176,7 @@ const StockTakes: React.FC = () => {
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: `${statusColor}20`, color: statusColor }}
                     >
-                      {stockTakeStatusLabel(st.status)}
+                      {stockTakeStatusLabel(st.status ?? '')}
                     </span>
                   </div>
                 </div>

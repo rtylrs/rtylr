@@ -44,7 +44,7 @@ function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element 
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
             {cycle.name}
           </h3>
-          <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
+          <Pill color={STATUS_COLORS[cycle.status ?? ''] ?? 'var(--hr-status-draft)'}>
             {cycle.status}
           </Pill>
         </div>

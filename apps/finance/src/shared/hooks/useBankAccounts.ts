@@ -2,7 +2,7 @@ import { createOneKitClient, unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { safe } from '../lib/api';
-import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/service_client';
+import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/client';
 import { bankAccountSchema } from '../schemas/accounts';
 import { unwrapList } from '../lib/unwrapList';
 
@@ -19,7 +19,7 @@ export function useBankAccounts() {
         sortDir: '',
       });
       return z.array(bankAccountSchema).parse(
-        res.accounts.map((a) => ({
+        (res.accounts ?? []).map((a) => ({
           id: a.id,
           name: a.name,
           type: a.accountType,

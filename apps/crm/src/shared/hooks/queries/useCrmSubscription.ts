@@ -1,14 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
-import {
-  SubscriptionServiceClient,
-  type Subscription,
-  type BillingDetail,
-} from '@voxire/voxie/hub/subscription/v1/service_client';
+import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
+import type { Subscription, BillingDetail } from '@voxire/voxie/hub/subscription/v1/types';
 
 export type CrmSubscription = Subscription;
 export type CrmBillingDetail = BillingDetail;
-export type CrmBillingLineItem = BillingDetail['lineItems'][number];
+export type CrmBillingLineItem = NonNullable<BillingDetail['lineItems']>[number];
 
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 

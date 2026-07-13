@@ -68,11 +68,14 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
   const { t } = useTranslation();
   const updateMut = useUpdateVariant();
   const deleteMut = useDeleteVariant();
-  const [sku, setSku] = useState(variant.sku);
-  const [price, setPrice] = useState(String(variant.salePrice));
-  const [stock, setStock] = useState(String(variant.stockQuantity));
+  const [sku, setSku] = useState(variant.sku ?? '');
+  const [price, setPrice] = useState(String(variant.salePrice ?? 0));
+  const [stock, setStock] = useState(String(variant.stockQuantity ?? 0));
   const [confirming, setConfirming] = useState(false);
-  const attributes = useMemo(() => parseVariantAttributes(variant.attributes), [variant.attributes]);
+  const attributes = useMemo(
+    () => parseVariantAttributes(variant.attributes ?? ''),
+    [variant.attributes]
+  );
 
   const dirty =
     sku !== variant.sku ||
@@ -100,7 +103,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
   };
 
   const handleDelete = (): void => {
-    deleteMut.mutate(variant.id, {
+    deleteMut.mutate(variant.id ?? '', {
       onSuccess: () => toast.success(t('erp.products.variants.deleted')),
     });
   };
@@ -216,7 +219,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
   const [drafts, setDrafts] = useState<DraftVariant[]>([]);
 
   const existingSignatures = useMemo(
-    () => new Set(variants.map((v) => attrSignature(parseVariantAttributes(v.attributes)))),
+    () => new Set(variants.map((v) => attrSignature(parseVariantAttributes(v.attributes ?? '')))),
     [variants]
   );
 

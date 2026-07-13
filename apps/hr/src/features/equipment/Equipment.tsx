@@ -97,8 +97,8 @@ const Equipment = (): React.JSX.Element => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {displayRequests.map((req) => {
-              const urgencyColor = URGENCY_COLORS[req.urgency] ?? 'var(--hr-status-draft)';
-              const statusColor = STATUS_COLORS[req.status] ?? 'var(--hr-status-draft)';
+              const urgencyColor = URGENCY_COLORS[req.urgency ?? ''] ?? 'var(--hr-status-draft)';
+              const statusColor = STATUS_COLORS[req.status ?? ''] ?? 'var(--hr-status-draft)';
               return (
                 <Card
                   key={req.id}
@@ -156,7 +156,7 @@ const Equipment = (): React.JSX.Element => {
                       <Button
                         variant="primary"
                         icon={<CheckCircle size={13} />}
-                        onClick={() => handleApproval(req.id, true)}
+                        onClick={() => handleApproval(req.id ?? '', true)}
                         style={{ minHeight: 30, padding: '4px 10px', fontSize: 11 }}
                       >
                         {t('equipment.approve')}
@@ -164,7 +164,7 @@ const Equipment = (): React.JSX.Element => {
                       <Button
                         variant="danger"
                         icon={<XCircle size={13} />}
-                        onClick={() => handleApproval(req.id, false)}
+                        onClick={() => handleApproval(req.id ?? '', false)}
                         style={{ minHeight: 30, padding: '4px 10px', fontSize: 11 }}
                       >
                         {t('equipment.reject')}

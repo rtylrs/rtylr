@@ -72,17 +72,17 @@ const LeaveBalances = (): React.JSX.Element => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <BalanceRow
               label={t('leave.balances.entitled')}
-              value={balance.entitledDays}
+              value={balance.entitledDays ?? 0}
               color="var(--hr-accent)"
             />
             <BalanceRow
               label={t('leave.balances.used')}
-              value={balance.usedDays}
+              value={balance.usedDays ?? 0}
               color="var(--hr-status-rejected)"
             />
             <BalanceRow
               label={t('leave.balances.pending')}
-              value={balance.pendingDays}
+              value={balance.pendingDays ?? 0}
               color="var(--hr-status-submitted)"
             />
           </div>

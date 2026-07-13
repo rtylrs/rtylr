@@ -70,7 +70,7 @@ const LeaveCalendarInner = (): React.JSX.Element => {
     (date: Date) => {
       if (!entries) return [];
       const dateStr = date.toISOString().split('T')[0];
-      return entries.filter((e) => dateStr >= e.startDate && dateStr <= e.endDate);
+      return entries.filter((e) => dateStr >= (e.startDate ?? '') && dateStr <= (e.endDate ?? ''));
     },
     [entries]
   );

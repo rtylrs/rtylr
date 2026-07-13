@@ -116,13 +116,15 @@ const Purchasing: React.FC = () => {
   const supplierNameById = new Map(suppliers.map((supplier) => [supplier.id, supplier.name]));
 
   const filteredOrders =
-    filter === 'All' ? orders : orders.filter((order) => displayStatus(order.status) === filter);
+    filter === 'All'
+      ? orders
+      : orders.filter((order) => displayStatus(order.status ?? '') === filter);
 
   const statusCounts: Record<string, number> = {
-    Draft: orders.filter((o) => displayStatus(o.status) === 'Draft').length,
-    Sent: orders.filter((o) => displayStatus(o.status) === 'Sent').length,
-    Approved: orders.filter((o) => displayStatus(o.status) === 'Approved').length,
-    Received: orders.filter((o) => displayStatus(o.status) === 'Received').length,
+    Draft: orders.filter((o) => displayStatus(o.status ?? '') === 'Draft').length,
+    Sent: orders.filter((o) => displayStatus(o.status ?? '') === 'Sent').length,
+    Approved: orders.filter((o) => displayStatus(o.status ?? '') === 'Approved').length,
+    Received: orders.filter((o) => displayStatus(o.status ?? '') === 'Received').length,
   };
 
   const handleApprove = (id: string): void => {
@@ -133,10 +135,13 @@ const Purchasing: React.FC = () => {
   };
 
   const handleSend = (id: string): void => {
-    updateStatusMut.mutate({ id, body: { status: 'sent' } }, {
-      onSuccess: () => toast.success(`PO-${id} sent to supplier`),
-      onError: () => toast.error(`Failed to send PO-${id}`),
-    });
+    updateStatusMut.mutate(
+      { id, body: { status: 'sent' } },
+      {
+        onSuccess: () => toast.success(`PO-${id} sent to supplier`),
+        onError: () => toast.error(`Failed to send PO-${id}`),
+      }
+    );
   };
 
   const handleCreatePO = async (): Promise<void> => {
@@ -193,9 +198,9 @@ const Purchasing: React.FC = () => {
               supplier: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
               createdAt: o.createdAt,
               expectedDelivery: o.expectedDelivery ?? '',
-              items: o.items.length,
+              items: (o.items ?? []).length,
               total: o.total,
-              status: displayStatus(o.status),
+              status: displayStatus(o.status ?? ''),
             }))}
             filename="purchase-orders.csv"
           />
@@ -211,40 +216,38 @@ const Purchasing: React.FC = () => {
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {(Object.entries(statusCounts) as [DisplayStatus, number][]).map(
-          ([status, count]) => {
-            const sc = statusConfig[status];
-            if (!sc) return null;
-            const Icon = sc.icon;
-            const active = filter === status;
-            return (
-              <button
-                key={status}
-                onClick={() => setFilter(active ? 'All' : status)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
-                style={{
-                  background: 'var(--hub-card)',
-                  border: active ? '1px solid rgba(245,158,11,0.5)' : '1px solid var(--hub-border)',
-                }}
+        {(Object.entries(statusCounts) as [DisplayStatus, number][]).map(([status, count]) => {
+          const sc = statusConfig[status];
+          if (!sc) return null;
+          const Icon = sc.icon;
+          const active = filter === status;
+          return (
+            <button
+              key={status}
+              onClick={() => setFilter(active ? 'All' : status)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
+              style={{
+                background: 'var(--hub-card)',
+                border: active ? '1px solid rgba(245,158,11,0.5)' : '1px solid var(--hub-border)',
+              }}
+            >
+              <span
+                className="flex items-center justify-center h-8 w-8 rounded-lg shrink-0"
+                style={{ background: sc.bg }}
               >
-                <span
-                  className="flex items-center justify-center h-8 w-8 rounded-lg shrink-0"
-                  style={{ background: sc.bg }}
-                >
-                  <Icon size={15} style={{ color: sc.color }} />
-                </span>
-                <div>
-                  <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>
-                    {isLoading ? '…' : count}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {status}
-                  </p>
-                </div>
-              </button>
-            );
-          }
-        )}
+                <Icon size={15} style={{ color: sc.color }} />
+              </span>
+              <div>
+                <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>
+                  {isLoading ? '…' : count}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                  {status}
+                </p>
+              </div>
+            </button>
+          );
+        })}
       </motion.div>
 
       <motion.div
@@ -274,7 +277,7 @@ const Purchasing: React.FC = () => {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
             : filteredOrders.map((order) => {
-                const status = displayStatus(order.status);
+                const status = displayStatus(order.status ?? '');
                 const sc = statusConfig[status] || statusConfig['Draft'];
                 return (
                   <div
@@ -304,10 +307,10 @@ const Purchasing: React.FC = () => {
                       {order.expectedDelivery ?? ''}
                     </span>
                     <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {order.items.length}
+                      {(order.items ?? []).length}
                     </span>
                     <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                      ${order.total.toFixed(2)}
+                      ${(order.total ?? 0).toFixed(2)}
                     </span>
                     <span>
                       <span
@@ -320,7 +323,7 @@ const Purchasing: React.FC = () => {
                     <div className="flex items-center gap-1">
                       {status === 'Sent' && (
                         <button
-                          onClick={() => handleApprove(order.id)}
+                          onClick={() => handleApprove(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{ background: 'rgba(96,165,250,0.15)', color: '#60a5fa' }}
                         >
@@ -329,7 +332,7 @@ const Purchasing: React.FC = () => {
                       )}
                       {status === 'Draft' && (
                         <button
-                          onClick={() => handleSend(order.id)}
+                          onClick={() => handleSend(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
                         >
@@ -338,7 +341,9 @@ const Purchasing: React.FC = () => {
                       )}
                       <PrintPOButton
                         order={order}
-                        supplierName={supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`}
+                        supplierName={
+                          supplierNameById.get(order.supplierId) ?? `Supplier #${order.supplierId}`
+                        }
                       />
                     </div>
                   </div>

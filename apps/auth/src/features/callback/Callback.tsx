@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { APP_URLS } from '@voxire/config';
-import type { GoogleAuthRequest } from '@voxire/voxie/common/auth/v1/service_client';
+import type { GoogleAuthRequest } from '@voxire/voxie/common/auth/v1/types';
 import { useGoogleAuth } from '../../shared/hooks/useAuth';
 import { storageGet, storageRemove } from '../../shared/lib/storage';
 import { SOCIAL_AUTH_BUSINESS_NAME_KEY, SOCIAL_AUTH_REDIRECT_KEY } from '../../shared/lib/social';

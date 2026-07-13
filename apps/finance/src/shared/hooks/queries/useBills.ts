@@ -2,11 +2,8 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import {
-  BillServiceClient,
-  type CreateBillRequest,
-  type CreateBillResponse,
-} from '@voxire/voxie/finance/bill/v1/service_client';
+import { BillServiceClient } from '@voxire/voxie/finance/bill/v1/client';
+import type { CreateBillRequest, CreateBillResponse } from '@voxire/voxie/finance/bill/v1/types';
 
 const billClient = createOneKitClient(BillServiceClient, 'finance');
 

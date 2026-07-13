@@ -206,7 +206,7 @@ const Suppliers: React.FC = () => {
           ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
           : suppliers.map((supplier, index) => {
               const color = getSupplierColor(supplier, index);
-              const initials = getInitials(supplier.name);
+              const initials = getInitials(supplier.name ?? '');
               return (
                 <motion.div
                   key={supplier.id}
@@ -237,10 +237,7 @@ const Suppliers: React.FC = () => {
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"
                       style={{
-                        background:
-                          supplier.isActive
-                            ? 'rgba(16,185,129,0.1)'
-                            : 'var(--hub-hover)',
+                        background: supplier.isActive ? 'rgba(16,185,129,0.1)' : 'var(--hub-hover)',
                         color: supplier.isActive ? '#10b981' : 'var(--hub-text-muted)',
                       }}
                     >
@@ -281,10 +278,15 @@ const Suppliers: React.FC = () => {
                     <div className="flex items-center gap-1.5">
                       <MapPin size={12} style={{ color }} />
                       <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        {supplier.address || [supplier.city, supplier.country].filter(Boolean).join(', ') || 'No address'}
+                        {supplier.address ||
+                          [supplier.city, supplier.country].filter(Boolean).join(', ') ||
+                          'No address'}
                       </span>
                     </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}>
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                      style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-dim)' }}
+                    >
                       {supplier.paymentTerms || 'No terms'}
                     </span>
                   </div>
@@ -346,7 +348,13 @@ const Suppliers: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !newName.trim() || !newEmail.trim() || !newCity.trim() || !newCountry.trim()}
+                disabled={
+                  createMut.isPending ||
+                  !newName.trim() ||
+                  !newEmail.trim() ||
+                  !newCity.trim() ||
+                  !newCountry.trim()
+                }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: '#000' }}
               >

@@ -145,7 +145,7 @@ const GoalsList = (): React.JSX.Element => {
   const goals = data?.goals ?? [];
 
   /* Pick the most recent cycle id for creating new goals */
-  const latestCycleId = goals.length > 0 ? goals[0].reviewCycleId : 0;
+  const latestCycleId = goals.length > 0 ? Number(goals[0].reviewCycleId ?? 0) : 0;
 
   return (
     <>
@@ -196,7 +196,7 @@ const GoalsList = (): React.JSX.Element => {
                   <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
                     {goal.title}
                   </h4>
-                  <Pill color={STATUS_COLORS[goal.status] ?? 'var(--hr-status-draft)'}>
+                  <Pill color={STATUS_COLORS[goal.status ?? ''] ?? 'var(--hr-status-draft)'}>
                     {goal.status}
                   </Pill>
                 </div>

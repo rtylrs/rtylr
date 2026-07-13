@@ -1,10 +1,8 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
-import {
-  ProductServiceClient,
-  type GetDashboardResponse,
-} from '@voxire/voxie/erp/product/v1/service_client';
+import { ProductServiceClient } from '@voxire/voxie/erp/product/v1/client';
+import type { GetDashboardResponse } from '@voxire/voxie/erp/product/v1/types';
 
 const productClient = createOneKitClient(ProductServiceClient, 'erp');
 

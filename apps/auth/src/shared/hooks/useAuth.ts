@@ -1,15 +1,15 @@
 import { useMutation } from '@tanstack/react-query';
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
-import {
-  AuthServiceClient,
-  type GoogleAuthRequest,
-  type GoogleAuthResponse,
-  type LoginRequest,
-  type LoginResponse,
-  type RegisterRequest,
-  type RegisterResponse,
-  type CheckEmailExistsResponse,
-} from '@voxire/voxie/common/auth/v1/service_client';
+import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
+import type {
+  GoogleAuthRequest,
+  GoogleAuthResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  CheckEmailExistsResponse,
+} from '@voxire/voxie/common/auth/v1/types';
 import { validateContractPayload } from '@voxire/voxie/validation/metadata';
 import { useUserStore } from '../stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../lib/cookies';

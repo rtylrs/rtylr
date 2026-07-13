@@ -1,6 +1,6 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/service_client';
+import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
 import { toast } from 'sonner';
 
 const accessClient = createOneKitClient(AccessServiceClient, 'dash');
@@ -17,11 +17,11 @@ export const usePOSLocations = (enabled: boolean) =>
     queryKey: ['pos-locations'],
     queryFn: async (): Promise<POSLocation[]> => {
       const res = await accessClient.getMyLocations({});
-      return res.locations
+      return (res.locations ?? [])
         .map((l) => ({
           id: Number(l.locationId),
-          name: l.name,
-          address: l.address,
+          name: l.name ?? '',
+          address: l.address ?? '',
         }))
         .filter((l) => l.id > 0);
     },
@@ -84,13 +84,13 @@ export const useMemberLocations = (userId: string | number | undefined, enabled:
     queryKey: ['pos-member-locations', String(userId ?? '')],
     queryFn: async (): Promise<MemberLocation[]> => {
       const res = await accessClient.getMemberLocations({ userId: String(userId) });
-      return res.locations
+      return (res.locations ?? [])
         .map((l) => ({
           id: Number(l.id),
           locationId: Number(l.locationId),
-          canManagePosUsers: l.canManagePosUsers,
-          canManageTerminals: l.canManageTerminals,
-          canViewReports: l.canViewReports,
+          canManagePosUsers: l.canManagePosUsers ?? false,
+          canManageTerminals: l.canManageTerminals ?? false,
+          canViewReports: l.canViewReports ?? false,
         }))
         .filter((l) => l.locationId > 0);
     },

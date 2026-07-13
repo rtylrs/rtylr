@@ -30,7 +30,8 @@ interface SwitchBusinessResponse {
 export const useListMyBusinesses = () =>
   useQuery({
     queryKey: ['businesses', 'mine'],
-    queryFn: () => unwrap(safe.get<ListMyBusinessesResponse>('/api/hub/business/v1/businesses/mine')),
+    queryFn: () =>
+      unwrap(safe.get<ListMyBusinessesResponse>('/api/hub/business/v1/businesses/mine')),
     staleTime: 30_000,
   });
 

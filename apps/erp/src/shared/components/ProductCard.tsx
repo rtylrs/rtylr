@@ -28,7 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
           <input
             type="checkbox"
             checked={!!selected}
-            onChange={() => onToggle(product.id)}
+            onChange={() => onToggle(product.id ?? '')}
             className="mt-1 cursor-pointer"
           />
         )}
@@ -66,9 +66,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
         </div>
       </div>
       <div className="flex items-center justify-between mt-3">
-        <StockBadge stock={product.stockQuantity} lowStock={product.lowStockThreshold} />
+        <StockBadge stock={product.stockQuantity ?? 0} lowStock={product.lowStockThreshold} />
         <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-          {formatCurrency(product.salePrice)}
+          {formatCurrency(product.salePrice ?? 0)}
         </span>
       </div>
     </div>

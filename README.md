@@ -39,7 +39,7 @@ touching the others.
 | `@voxire/permissions`     | Typed RBAC with platform roles, POS roles, and 100+ granular capabilities        |
 | `@voxire/config`          | `APP_URLS`, `APP_CONFIG`, theme injection, brand colors                          |
 | `@voxire/types`           | `UserRole`, `AppId`, `User` interface                                            |
-| `@voxire/voxie`       | Generated TypeScript types and clients from voxie protobuf contracts             |
+| `@voxire/voxie`           | Generated TypeScript types and clients from voxie protobuf contracts             |
 | `@voxire/ui`              | Radix-based primitives (Dialog, Select, Switch, etc.)                            |
 | `@voxire/components`      | HelmetContainer, Button, Modal, Spinner, FullScreenLoader                        |
 | `@voxire/auth`            | Cookie helpers, `AppGuard` with per-app `apps[]` gating, user store              |

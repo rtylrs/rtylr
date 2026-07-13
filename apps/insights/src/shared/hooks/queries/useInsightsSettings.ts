@@ -8,14 +8,10 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import {
-  SettingServiceClient,
-  type InsightsSettings as ApiInsightsSettings,
-} from '@voxire/voxie/insights/setting/v1/service_client';
-import {
-  ReportServiceClient,
-  type ScheduledReport as ApiScheduledReport,
-} from '@voxire/voxie/insights/report/v1/service_client';
+import { SettingServiceClient } from '@voxire/voxie/insights/setting/v1/client';
+import type { InsightsSettings as ApiInsightsSettings } from '@voxire/voxie/insights/setting/v1/types';
+import { ReportServiceClient } from '@voxire/voxie/insights/report/v1/client';
+import type { ScheduledReport as ApiScheduledReport } from '@voxire/voxie/insights/report/v1/types';
 import type { InsightsSettingsResponse, ScheduledReportsResponse, ScheduledReport } from './types';
 
 const settingClient = createOneKitClient(SettingServiceClient, 'insights');
@@ -31,11 +27,11 @@ const DEFAULT_API_SETTINGS: ApiInsightsSettings = {
 
 function fromApiSettings(settings: ApiInsightsSettings): InsightsSettingsResponse {
   return {
-    defaultCurrency: settings.currency,
-    defaultPeriod: settings.defaultPeriod,
-    comparePrevious: settings.comparePrevious,
-    dashboardWidgets: settings.dashboardWidgets,
-    favoriteReports: settings.favoriteReports,
+    defaultCurrency: settings.currency ?? 'USD',
+    defaultPeriod: settings.defaultPeriod ?? '',
+    comparePrevious: settings.comparePrevious ?? false,
+    dashboardWidgets: settings.dashboardWidgets ?? [],
+    favoriteReports: settings.favoriteReports ?? [],
     // insights.setting.v1.InsightsSettings has no fiscal-year-start or
     // timezone field - these are UI-only and never persisted server-side.
     fiscalYearStart: '01-01',
@@ -45,13 +41,13 @@ function fromApiSettings(settings: ApiInsightsSettings): InsightsSettingsRespons
 
 function fromApiScheduledReport(report: ApiScheduledReport): ScheduledReport {
   return {
-    id: report.id,
-    templateId: report.templateName || report.templateId,
-    cadence: report.frequency,
-    channel: report.channel,
-    recipient: report.recipientEmail,
-    isActive: report.isActive,
-    createdAt: report.createdAt,
+    id: report.id ?? '',
+    templateId: report.templateName || report.templateId || '',
+    cadence: report.frequency ?? '',
+    channel: report.channel ?? '',
+    recipient: report.recipientEmail ?? '',
+    isActive: report.isActive ?? false,
+    createdAt: report.createdAt ?? '',
   };
 }
 
@@ -126,7 +122,7 @@ export const useScheduledReports = (): UseQueryResult<ScheduledReportsResponse> 
         sortBy: 'createdAt',
         sortDir: 'desc',
       });
-      return { scheduledReports: res.reports.map(fromApiScheduledReport) };
+      return { scheduledReports: (res.reports ?? []).map(fromApiScheduledReport) };
     },
   });
 };
@@ -141,7 +137,7 @@ export const useDeleteScheduledReport = (): UseMutationResult<
   return useMutation<{ deleted: boolean }, unknown, string>({
     mutationFn: async (id: string): Promise<{ deleted: boolean }> => {
       const res = await reportClient.deleteScheduledReport({ id });
-      return { deleted: res.deleted };
+      return { deleted: res.deleted ?? false };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });

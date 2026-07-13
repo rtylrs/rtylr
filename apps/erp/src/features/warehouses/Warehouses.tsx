@@ -136,7 +136,7 @@ const Warehouses: React.FC = () => {
                   </div>
                   <button
                     aria-label="Delete warehouse"
-                    onClick={() => setConfirmDeleteId(w.id)}
+                    onClick={() => setConfirmDeleteId(w.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: '#f87171' }}
                     onMouseEnter={(e) => {

@@ -1,7 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { ActivityServiceClient } from '@voxire/voxie/hub/activity/v1/service_client';
-import type { ActivityEntry as ApiActivityEntry } from '@voxire/voxie/hub/activity/v1/service_client';
+import { ActivityServiceClient } from '@voxire/voxie/hub/activity/v1/client';
+import type { ActivityEntry as ApiActivityEntry } from '@voxire/voxie/hub/activity/v1/types';
 import { activityEntrySchema, type ActivityEntry } from '../../schemas/activity';
 
 export type { ActivityEntry } from '../../schemas/activity';
@@ -37,9 +37,11 @@ function deriveSeverity(action: string): 'info' | 'warning' | 'critical' {
 }
 
 function mapEntry(raw: ApiActivityEntry): ActivityEntry {
+  const entityType = raw.entityType ?? '';
+  const action = raw.action ?? '';
   const target =
     (raw.description && raw.description.trim()) ||
-    `${humanize(raw.entityType)}${raw.entityId && raw.entityId !== '0' ? ` #${raw.entityId}` : ''}`.trim() ||
+    `${humanize(entityType)}${raw.entityId && raw.entityId !== '0' ? ` #${raw.entityId}` : ''}`.trim() ||
     '—';
 
   return activityEntrySchema.parse({
@@ -48,11 +50,11 @@ function mapEntry(raw: ApiActivityEntry): ActivityEntry {
       (raw.userName && raw.userName.trim()) ||
       (raw.userId && raw.userId !== '0' ? `User #${raw.userId}` : 'System'),
     actorId: raw.userId && raw.userId !== '0' ? raw.userId : undefined,
-    action: humanize(raw.action) || raw.action || 'activity',
+    action: humanize(action) || action || 'activity',
     target,
     app: raw.app || 'hub',
     createdAt: raw.createdAt || new Date().toISOString(),
-    severity: deriveSeverity(raw.action),
+    severity: deriveSeverity(action),
   });
 }
 
@@ -63,7 +65,7 @@ export const useActivity = (limit = 100) => {
     queryKey: ['activity', limit],
     queryFn: async (): Promise<ActivityEntry[]> => {
       const res = await activityClient.listActivity({ limit });
-      return res.activities.map(mapEntry);
+      return (res.activities ?? []).map(mapEntry);
     },
     staleTime: 20_000,
   });
@@ -84,7 +86,7 @@ export const useAuditLog = (params: { page: number; pageSize: number }) => {
     queryKey: ['audit', page, pageSize],
     queryFn: async (): Promise<AuditPage> => {
       const res = await activityClient.listActivity({ limit: AUDIT_FETCH_LIMIT });
-      const entries = res.activities.map(mapEntry);
+      const entries = (res.activities ?? []).map(mapEntry);
       const start = Math.max(0, (page - 1) * pageSize);
       return {
         entries: entries.slice(start, start + pageSize),

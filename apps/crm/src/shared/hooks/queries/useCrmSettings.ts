@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { SettingsServiceClient } from '@voxire/voxie/crm/settings/v1/service_client';
+import { SettingsServiceClient } from '@voxire/voxie/crm/settings/v1/client';
 import { settingsSchema } from '../../schemas/settings';
 import type { Settings } from '../../schemas/settings';
 

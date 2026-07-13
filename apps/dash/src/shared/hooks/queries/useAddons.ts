@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
-import { AppServiceClient } from '@voxire/voxie/hub/app/v1/service_client';
+import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 
 export interface AddonData {
   id: string;
@@ -19,9 +19,17 @@ export const ADDONS_QUERY_KEY = ['addons'] as const;
 export const useAddons = () =>
   useQuery<AddonData[]>({
     queryKey: ADDONS_QUERY_KEY,
-    queryFn: async () => {
+    queryFn: async (): Promise<AddonData[]> => {
       const response = await appClient.listAddons({});
-      return response.addons;
+      return (response.addons ?? []).map((addon) => ({
+        id: addon.id ?? '',
+        name: addon.name ?? '',
+        description: addon.description ?? '',
+        icon: addon.icon ?? '',
+        price: addon.price ?? 0,
+        isFree: addon.isFree ?? false,
+        isEnabled: addon.isEnabled ?? false,
+      }));
     },
   });
 

@@ -61,7 +61,7 @@ const LowStockAlerts: React.FC = () => {
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           {items.map((item, i) => {
-            const critical = item.stockQuantity <= 5;
+            const critical = (item.stockQuantity ?? 0) <= 5;
             return (
               <div
                 key={item.productId}
@@ -95,7 +95,7 @@ const LowStockAlerts: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => handleReorder(item.productName)}
+                  onClick={() => handleReorder(item.productName ?? '')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
                   style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
                 >

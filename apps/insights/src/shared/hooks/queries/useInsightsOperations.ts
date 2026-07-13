@@ -1,6 +1,6 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { OperationServiceClient } from '@voxire/voxie/insights/operation/v1/service_client';
+import { OperationServiceClient } from '@voxire/voxie/insights/operation/v1/client';
 import { resolveDateRange, type DateRangeParams } from '../../utils/dateRange';
 import type {
   OperationsKPIResponse,

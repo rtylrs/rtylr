@@ -61,7 +61,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
       'Bonuses',
       'Net Pay',
     ];
-    const rows = run.entries.map((e: PayrollEntryPayload) => [
+    const rows = (run.entries ?? []).map((e: PayrollEntryPayload) => [
       e.employeeId,
       e.hoursWorked,
       e.basePay,
@@ -90,7 +90,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   }
 
   const totalDeductions = entries.reduce(
-    (s: number, e: PayrollEntryPayload) => s + e.deductions,
+    (s: number, e: PayrollEntryPayload) => s + (e.deductions ?? 0),
     0
   );
 
@@ -108,7 +108,9 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         subtitle={t('payroll.runDetail.subtitle', { count: entries.length })}
         right={
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Pill color={STATUS_COLORS[run.status]}>{t(`payroll.statuses.${run.status}`)}</Pill>
+            <Pill color={STATUS_COLORS[run.status ?? '']}>
+              {t(`payroll.statuses.${run.status}`)}
+            </Pill>
             {run.status === 'in_review' && (
               <Button
                 variant="primary"
@@ -137,7 +139,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         {[
           {
             label: t('payroll.stats.totalGross'),
-            value: fmt(run.totalGross),
+            value: fmt(run.totalGross ?? 0),
             color: 'var(--accent)',
           },
           {
@@ -147,7 +149,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
           },
           {
             label: t('payroll.stats.totalNet'),
-            value: fmt(run.totalNet),
+            value: fmt(run.totalNet ?? 0),
             color: 'var(--hr-status-approved)',
           },
         ].map((stat) => (
@@ -239,8 +241,13 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
           >
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const entry: PayrollEntryPayload = entries[virtualRow.index];
-              const grossPay = entry.basePay + entry.overtimePay + entry.bonuses;
-              const deductionsExceedGross = entry.deductions > grossPay;
+              const basePay = entry.basePay ?? 0;
+              const overtimePay = entry.overtimePay ?? 0;
+              const bonuses = entry.bonuses ?? 0;
+              const deductions = entry.deductions ?? 0;
+              const netPay = entry.netPay ?? 0;
+              const grossPay = basePay + overtimePay + bonuses;
+              const deductionsExceedGross = deductions > grossPay;
               return (
                 <div
                   key={entry.id}
@@ -297,36 +304,31 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                   <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
                     {entry.hoursWorked}h
                   </span>
-                  <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
-                    {fmt(entry.basePay)}
-                  </span>
+                  <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>{fmt(basePay)}</span>
                   <span
                     style={{
                       fontSize: 13,
                       color:
-                        entry.overtimePay > 0
-                          ? 'var(--hr-status-submitted)'
-                          : 'var(--hr-text-muted)',
+                        overtimePay > 0 ? 'var(--hr-status-submitted)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {entry.overtimePay > 0 ? fmt(entry.overtimePay) : '-'}
+                    {overtimePay > 0 ? fmt(overtimePay) : '-'}
                   </span>
                   <span
                     style={{
                       fontSize: 13,
-                      color: entry.deductions > 0 ? 'var(--hr-error)' : 'var(--hr-text-muted)',
+                      color: deductions > 0 ? 'var(--hr-error)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {entry.deductions > 0 ? fmt(entry.deductions) : '-'}
+                    {deductions > 0 ? fmt(deductions) : '-'}
                   </span>
                   <span
                     style={{
                       fontSize: 13,
-                      color:
-                        entry.bonuses > 0 ? 'var(--hr-status-approved)' : 'var(--hr-text-muted)',
+                      color: bonuses > 0 ? 'var(--hr-status-approved)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {entry.bonuses > 0 ? fmt(entry.bonuses) : '-'}
+                    {bonuses > 0 ? fmt(bonuses) : '-'}
                   </span>
                   <span
                     style={{
@@ -335,7 +337,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: 'var(--hr-status-approved)',
                     }}
                   >
-                    {fmt(entry.netPay)}
+                    {fmt(netPay)}
                   </span>
                 </div>
               );

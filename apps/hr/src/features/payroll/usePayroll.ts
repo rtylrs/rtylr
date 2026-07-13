@@ -1,7 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { PayrollServiceClient } from '@voxire/voxie/hr/payroll/v1/service_client';
-import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/service_client';
+import { PayrollServiceClient } from '@voxire/voxie/hr/payroll/v1/client';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { type PayrollRow } from '../../shared/services/hrApi';
 
 const payrollClient = createOneKitClient(PayrollServiceClient, 'hr');
@@ -25,19 +25,19 @@ export function usePayroll(params?: {
         payrollClient.listPayroll({ periodLabel: params?.period ?? '' }),
         staffClient.listStaff({ search: '', departmentId: '', status: '' }),
       ]);
-      const staffById = new Map(staffRes.staff.map((s) => [Number(s.id), s]));
+      const staffById = new Map((staffRes.staff ?? []).map((s) => [Number(s.id), s]));
 
-      return payrollRes.records.map((r) => {
-        const staff = staffById.get(r.staffId);
+      return (payrollRes.records ?? []).map((r) => {
+        const staff = staffById.get(r.staffId ?? 0);
         return {
-          id: r.id,
+          id: r.id ?? 0,
           name: staff ? `${staff.firstName} ${staff.lastName}`.trim() : `Staff #${r.staffId}`,
           role: staff?.role ?? '',
-          hoursWorked: r.regularHours + r.overtimeHours,
-          basePay: r.basePay,
-          overtime: r.overtimePay,
-          deductions: r.deductions,
-          status: normalizeStatus(r.status),
+          hoursWorked: (r.regularHours ?? 0) + (r.overtimeHours ?? 0),
+          basePay: r.basePay ?? 0,
+          overtime: r.overtimePay ?? 0,
+          deductions: r.deductions ?? 0,
+          status: normalizeStatus(r.status ?? ''),
         };
       });
     },

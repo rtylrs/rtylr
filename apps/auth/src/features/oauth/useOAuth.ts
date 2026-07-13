@@ -1,10 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
-import {
-  OauthServiceClient,
-  type IssueRequest,
-  type IssueResponse,
-} from '@voxire/voxie/common/oauth/v1/service_client';
+import { OauthServiceClient } from '@voxire/voxie/common/oauth/v1/client';
+import type { IssueRequest, IssueResponse } from '@voxire/voxie/common/oauth/v1/types';
 import { toast } from 'sonner';
 
 const oauthClient = createOneKitClient(OauthServiceClient, 'auth');

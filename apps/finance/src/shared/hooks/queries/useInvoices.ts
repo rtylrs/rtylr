@@ -2,10 +2,8 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import {
-  InvoicesServiceClient,
-  type ListInvoicesResponse,
-} from '@voxire/voxie/finance/invoices/v1/service_client';
+import { InvoicesServiceClient } from '@voxire/voxie/finance/invoices/v1/client';
+import type { ListInvoicesResponse } from '@voxire/voxie/finance/invoices/v1/types';
 
 const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
 
@@ -53,8 +51,10 @@ export const useSendInvoice = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: (data: SendInvoiceRequest): Promise<SendInvoiceResponse> =>
-      invoicesClient.sendInvoice({ id: data.invoiceId }),
+    mutationFn: async (data: SendInvoiceRequest): Promise<SendInvoiceResponse> => {
+      const res = await invoicesClient.sendInvoice({ id: data.invoiceId });
+      return { message: res.message ?? '' };
+    },
     onSuccess: (_data: SendInvoiceResponse, variables: SendInvoiceRequest) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       toast.success(t('invoices.sent', { to: variables.to }));

@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
   const lowStockItems = dashboardStats?.lowStockItems ?? [];
   const recentOrders = (dashboardStats?.recentOrders ?? []).slice(0, 3);
   const topCategories = dashboardStats?.topCategories ?? [];
-  const criticalLowStockCount = lowStockItems.filter((i) => i.currentStock <= 5).length;
+  const criticalLowStockCount = lowStockItems.filter((i) => (i.currentStock ?? 0) <= 5).length;
 
   const stats = [
     {
@@ -130,7 +130,9 @@ const Dashboard: React.FC = () => {
 
   const inventoryValue =
     dashboardStats?.inventoryValue ??
-    (productsData || []).slice(0, 5).reduce((s, p) => s + p.salePrice * (p.stockQuantity || 0), 0);
+    (productsData || [])
+      .slice(0, 5)
+      .reduce((s, p) => s + (p.salePrice ?? 0) * (p.stockQuantity || 0), 0);
 
   return (
     <motion.div
@@ -303,7 +305,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className={`${SCROLL_AREA_CLASS} space-y-2`}>
             {activityData.slice(0, 5).map((a) => {
-              const Icon = activityIconFor(a.entityType);
+              const Icon = activityIconFor(a.entityType ?? '');
               return (
                 <div key={a.id} className="flex items-start gap-2">
                   <Icon
@@ -319,7 +321,7 @@ const Dashboard: React.FC = () => {
                       {a.description}
                     </p>
                     <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                      {timeAgo(a.createdAt)}
+                      {timeAgo(a.createdAt ?? '')}
                     </p>
                   </div>
                 </div>
@@ -366,8 +368,7 @@ const Dashboard: React.FC = () => {
                     <p
                       className="text-sm font-bold text-center"
                       style={{
-                        color:
-                          item.currentStock <= 5 ? 'var(--erp-danger, #f87171)' : AMBER,
+                        color: (item.currentStock ?? 0) <= 5 ? 'var(--erp-danger, #f87171)' : AMBER,
                       }}
                     >
                       {item.currentStock}
@@ -396,8 +397,8 @@ const Dashboard: React.FC = () => {
             {isLoading
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
               : recentOrders.map((order) => {
-                  const statusColor = getStatusColor(order.status);
-                  const statusBg = getStatusBg(order.status);
+                  const statusColor = getStatusColor(order.status ?? '');
+                  const statusBg = getStatusBg(order.status ?? '');
                   return (
                     <div
                       key={order.id}
@@ -409,7 +410,7 @@ const Dashboard: React.FC = () => {
                           {order.poNumber}
                         </p>
                         <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                          {new Date(order.createdAt).toLocaleDateString('en-US')}
+                          {new Date(order.createdAt ?? '').toLocaleDateString('en-US')}
                         </p>
                       </div>
                       <p
@@ -422,14 +423,14 @@ const Dashboard: React.FC = () => {
                         className="text-xs font-semibold text-right"
                         style={{ color: 'var(--hub-text)' }}
                       >
-                        {formatCurrency(order.total)}
+                        {formatCurrency(order.total ?? 0)}
                       </p>
                       <div className="flex justify-end">
                         <span
                           className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                           style={{ background: statusBg, color: statusColor }}
                         >
-                          {formatStatus(order.status)}
+                          {formatStatus(order.status ?? '')}
                         </span>
                       </div>
                     </div>

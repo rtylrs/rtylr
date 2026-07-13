@@ -63,22 +63,24 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
     if (!qq) return NAV_ITEMS.slice(0, 8);
 
     const productResults: Result[] = products
-      .filter((p) => p.name.toLowerCase().includes(qq) || p.sku.toLowerCase().includes(qq))
+      .filter(
+        (p) => (p.name ?? '').toLowerCase().includes(qq) || (p.sku ?? '').toLowerCase().includes(qq)
+      )
       .slice(0, 5)
       .map((p) => ({
         type: 'product',
-        label: p.name,
+        label: p.name ?? '',
         sub: p.sku,
         to: `/products/${p.id}`,
         icon: Package,
       }));
 
     const supplierResults: Result[] = (suppliers || [])
-      .filter((s) => s.name.toLowerCase().includes(qq))
+      .filter((s) => (s.name ?? '').toLowerCase().includes(qq))
       .slice(0, 3)
       .map((s) => ({
         type: 'supplier',
-        label: s.name,
+        label: s.name ?? '',
         sub: s.email,
         to: `/suppliers`,
         icon: Users,

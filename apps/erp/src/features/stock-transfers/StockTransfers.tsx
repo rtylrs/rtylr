@@ -123,7 +123,7 @@ const StockTransfers: React.FC = () => {
             <EmptyState title="No transfers" description="Create your first stock transfer" />
           ) : (
             transfers.map((t) => {
-              const sc = statusConfig(t.status);
+              const sc = statusConfig(t.status ?? '');
               return (
                 <div
                   key={t.id}
@@ -137,27 +137,27 @@ const StockTransfers: React.FC = () => {
                     className="text-xs font-medium truncate pr-2"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {warehouseName(t.fromWarehouseId)}
+                    {warehouseName(t.fromWarehouseId ?? '')}
                   </span>
                   <ArrowRight size={12} style={{ color: 'var(--hub-text-dim)' }} />
                   <span
                     className="text-xs font-medium truncate pr-2"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {warehouseName(t.toWarehouseId)}
+                    {warehouseName(t.toWarehouseId ?? '')}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text)' }}>
-                    {t.items.length}
+                    {(t.items ?? []).length}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {formatDate(t.createdAt)}
+                    {formatDate(t.createdAt ?? '')}
                   </span>
                   <span>
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: sc.bg, color: sc.color }}
                     >
-                      {stockTransferStatusLabel(t.status)}
+                      {stockTransferStatusLabel(t.status ?? '')}
                     </span>
                   </span>
                 </div>

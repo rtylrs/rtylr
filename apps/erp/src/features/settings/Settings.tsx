@@ -316,10 +316,10 @@ const TeamTab: React.FC = () => {
             </div>
           </div>
           {sub &&
-            sub.pricePerSeatCents > 0 &&
+            (sub.pricePerSeatCents ?? 0) > 0 &&
             (() => {
               const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                computeSeatProration(sub.pricePerSeatCents);
+                computeSeatProration(sub.pricePerSeatCents ?? 0);
               return (
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
                   Adding this member costs{' '}
@@ -328,7 +328,7 @@ const TeamTab: React.FC = () => {
                   </span>{' '}
                   this month ({daysRemaining}/{daysInMonth} days), then{' '}
                   <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {centsToDisplay(sub.pricePerSeatCents)}/mo
+                    {centsToDisplay(sub.pricePerSeatCents ?? 0)}/mo
                   </span>{' '}
                   from {nextMonthName} 1st.
                 </p>

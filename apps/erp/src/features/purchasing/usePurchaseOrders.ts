@@ -1,16 +1,16 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  PurchaseOrderServiceClient,
-  type ApprovePurchaseOrderResponse,
-  type CreatePurchaseOrderRequest,
-  type CreatePurchaseOrderResponse,
-  type ListPurchaseOrdersResponse,
-  type PurchaseOrder,
-  type UpdatePurchaseOrderStatusRequest,
-  type UpdatePurchaseOrderStatusResponse,
-} from '@voxire/voxie/erp/purchase_order/v1/service_client';
+import { PurchaseOrderServiceClient } from '@voxire/voxie/erp/purchase_order/v1/client';
+import type {
+  ApprovePurchaseOrderResponse,
+  CreatePurchaseOrderRequest,
+  CreatePurchaseOrderResponse,
+  ListPurchaseOrdersResponse,
+  PurchaseOrder,
+  UpdatePurchaseOrderStatusRequest,
+  UpdatePurchaseOrderStatusResponse,
+} from '@voxire/voxie/erp/purchase_order/v1/types';
 
 const purchaseOrderClient = createOneKitClient(PurchaseOrderServiceClient, 'erp');
 

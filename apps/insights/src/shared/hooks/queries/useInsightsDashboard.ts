@@ -1,6 +1,6 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { DashboardServiceClient } from '@voxire/voxie/insights/dashboard/v1/service_client';
+import { DashboardServiceClient } from '@voxire/voxie/insights/dashboard/v1/client';
 import type { InsightsDashboardResponse } from './types';
 
 const dashboardClient = createOneKitClient(DashboardServiceClient, 'insights');

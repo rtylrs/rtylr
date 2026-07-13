@@ -1,9 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import {
-  ProductServiceClient,
-  type ReorderSuggestion,
-} from '@voxire/voxie/erp/product/v1/service_client';
+import { ProductServiceClient } from '@voxire/voxie/erp/product/v1/client';
+import type { ReorderSuggestion } from '@voxire/voxie/erp/product/v1/types';
 
 const productClient = createOneKitClient(ProductServiceClient, 'erp');
 
@@ -14,7 +12,7 @@ export function useReorderSuggestions() {
     queryKey: ['reorder-suggestions'],
     queryFn: async () => {
       const response = await productClient.listReorderSuggestions({});
-      return response.suggestions;
+      return response.suggestions ?? [];
     },
   });
 }

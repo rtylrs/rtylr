@@ -33,8 +33,9 @@ import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
 import { createOneKitClient } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
-import { AppServiceClient, type Addon } from '@voxire/voxie/hub/app/v1/service_client';
-import { UserServiceClient } from '@voxire/voxie/hub/user/v1/service_client';
+import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
+import type { Addon } from '@voxire/voxie/hub/app/v1/types';
+import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 
 const ACCENT = '#3b82f6';
 
@@ -47,7 +48,7 @@ function useAddonEnabled(addonId: string): boolean {
     queryFn: async (): Promise<Addon[]> => {
       try {
         const res = await appClient.listAddons({});
-        return res.addons;
+        return res.addons ?? [];
       } catch {
         return [];
       }

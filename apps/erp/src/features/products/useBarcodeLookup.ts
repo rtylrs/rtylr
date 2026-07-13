@@ -1,10 +1,8 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  ProductServiceClient,
-  type Product,
-} from '@voxire/voxie/erp/product/v1/service_client';
+import { ProductServiceClient } from '@voxire/voxie/erp/product/v1/client';
+import type { Product } from '@voxire/voxie/erp/product/v1/types';
 
 const productClient = createOneKitClient(ProductServiceClient, 'erp');
 

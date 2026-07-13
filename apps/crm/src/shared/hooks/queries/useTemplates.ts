@@ -9,10 +9,8 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import {
-  TemplateServiceClient,
-  type Template as ApiTemplate,
-} from '@voxire/voxie/crm/template/v1/service_client';
+import { TemplateServiceClient } from '@voxire/voxie/crm/template/v1/client';
+import type { Template as ApiTemplate } from '@voxire/voxie/crm/template/v1/types';
 import { templateSchema } from '../../schemas/templates';
 import type { Template } from '../../schemas/templates';
 
@@ -36,7 +34,7 @@ export const useTemplates = (): UseQueryResult<Template[]> =>
     queryKey: ['crm-templates'],
     queryFn: async (): Promise<Template[]> => {
       const res = await templateClient.listTemplates({});
-      return z.array(templateSchema).parse(res.templates.map(fromApiTemplate));
+      return z.array(templateSchema).parse((res.templates ?? []).map(fromApiTemplate));
     },
   });
 

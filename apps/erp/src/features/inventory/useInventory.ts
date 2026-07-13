@@ -1,12 +1,12 @@
 import { createOneKitClient } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  InventoryServiceClient,
-  type AdjustInventoryRequest,
-  type AdjustInventoryResponse,
-  type InventoryReportItem,
-} from '@voxire/voxie/erp/inventory/v1/service_client';
+import { InventoryServiceClient } from '@voxire/voxie/erp/inventory/v1/client';
+import type {
+  AdjustInventoryRequest,
+  AdjustInventoryResponse,
+  InventoryReportItem,
+} from '@voxire/voxie/erp/inventory/v1/types';
 
 const inventoryClient = createOneKitClient(InventoryServiceClient, 'erp');
 
@@ -19,7 +19,7 @@ export function useInventoryReport() {
     queryKey: ['inventory-report'],
     queryFn: async () => {
       const response = await inventoryClient.getInventoryReport({});
-      return response.items;
+      return response.items ?? [];
     },
   });
 }
@@ -29,7 +29,7 @@ export function useLowStock() {
     queryKey: ['low-stock'],
     queryFn: async () => {
       const response = await inventoryClient.getLowStock({});
-      return response.items;
+      return response.items ?? [];
     },
   });
 }

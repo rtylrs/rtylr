@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   ListTimesheetsRequest,
   ListTimesheetsResponse,
-} from '@voxire/voxie/hr/time_entry/v1/list_timesheets';
+} from '@voxire/voxie/hr/time_entry/v1/types';
 import type { TimesheetPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

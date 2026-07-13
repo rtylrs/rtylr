@@ -277,9 +277,7 @@ function parseBackendRoutes() {
 }
 
 function parseContractInterfaces() {
-  const files = walk(path.join(root, 'packages/voxie/gen/ts'), (file) =>
-    file.endsWith('.ts')
-  );
+  const files = walk(path.join(root, 'packages/voxie/gen/ts'), (file) => file.endsWith('.ts'));
   const byDeclFileAndName = new Map();
   const byName = new Map();
 

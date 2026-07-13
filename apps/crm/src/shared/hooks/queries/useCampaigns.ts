@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
-import type { CreateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/create_campaign';
-import type { UpdateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/update_campaign';
-import type { UpdateCampaignStatusRequest } from '@voxire/voxie/crm/campaign/v1/update_campaign_status';
+import type { CreateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/types';
+import type { UpdateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/types';
+import type { UpdateCampaignStatusRequest } from '@voxire/voxie/crm/campaign/v1/types';
 import {
   useMutation,
   useQuery,
@@ -95,7 +95,7 @@ export const useUpdateCampaign = (): UseMutationResult<
     mutationFn: async (payload: UpdateCampaignPayload): Promise<Campaign> => {
       const res = await unwrap(
         safe.put<Campaign>(`/crm/campaigns/${payload.id}`, {
-          id: payload.id,
+          id: String(payload.id),
           ...payload.data,
         } as UpdateCampaignRequest)
       );
@@ -138,7 +138,7 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
     mutationFn: (payload: CampaignStatusPayload): Promise<unknown> => {
       return unwrap(
         safe.put(`/crm/campaigns/${payload.id}/status`, {
-          id: payload.id,
+          id: String(payload.id),
           status: payload.status,
         } as UpdateCampaignStatusRequest)
       );

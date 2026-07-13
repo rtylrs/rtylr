@@ -23,7 +23,7 @@ const Reconcile: React.FC = () => {
   const candidates: Candidate[] = (invoicesResp?.invoices ?? []).map((inv) => ({
     id: String(inv.id),
     label: `${inv.invoiceNumber} - ${inv.clientName}`,
-    amount: inv.total,
+    amount: inv.total ?? 0,
   }));
   const [matches, setMatches] = useState<Record<string, string>>({});
 

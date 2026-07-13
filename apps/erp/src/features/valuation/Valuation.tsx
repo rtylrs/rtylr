@@ -13,7 +13,10 @@ const AMBER = '#f59e0b';
 const Valuation: React.FC = () => {
   const { data, isLoading } = useValuation();
   const items = data?.items ?? [];
-  const totalCost = useMemo(() => items.reduce((sum, item) => sum + item.totalCost, 0), [items]);
+  const totalCost = useMemo(
+    () => items.reduce((sum, item) => sum + (item.totalCost ?? 0), 0),
+    [items]
+  );
   const totalItems = useMemo(
     () => items.reduce((sum, item) => sum + toFiniteNumber(item.totalItems), 0),
     [items]
@@ -22,7 +25,7 @@ const Valuation: React.FC = () => {
   const categories = useMemo(
     () =>
       items
-        .map((i) => ({ name: i.categoryName || 'Uncategorized', value: i.totalValue }))
+        .map((i) => ({ name: i.categoryName || 'Uncategorized', value: i.totalValue ?? 0 }))
         .sort((a, b) => b.value - a.value),
     [items]
   );

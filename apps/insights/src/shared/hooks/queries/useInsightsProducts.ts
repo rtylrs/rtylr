@@ -1,6 +1,6 @@
 import { createOneKitClient, toFiniteNumber } from '@voxire/api';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { ProductServiceClient } from '@voxire/voxie/insights/product/v1/service_client';
+import { ProductServiceClient } from '@voxire/voxie/insights/product/v1/client';
 import type {
   ProductKPIResponse,
   BestSellersResponse,
@@ -37,9 +37,9 @@ export const useBestSellers = (params?: BestSellersParams): UseQueryResult<BestS
     queryFn: async (): Promise<BestSellersResponse> => {
       const res = await productClient.getBestSellers({ limit });
       return {
-        products: res.products.map((p) => ({
+        products: (res.products ?? []).map((p) => ({
           productId: toFiniteNumber(p.productId),
-          name: p.name,
+          name: p.name ?? '',
           unitsSold: toFiniteNumber(p.unitsSold),
           revenueMinorUnits: toFiniteNumber(p.revenueMinorUnits),
         })),
@@ -54,8 +54,8 @@ export const useProductMargins = (): UseQueryResult<ProductMarginsResponse> => {
     queryFn: async (): Promise<ProductMarginsResponse> => {
       const res = await productClient.getProductMargins({});
       return {
-        buckets: res.buckets.map((b) => ({
-          label: b.label,
+        buckets: (res.buckets ?? []).map((b) => ({
+          label: b.label ?? '',
           lowerPct: toFiniteNumber(b.lowerPct),
           upperPct: toFiniteNumber(b.upperPct),
           productCount: toFiniteNumber(b.productCount),
@@ -76,9 +76,9 @@ export const useSlowMovers = (params?: SlowMoversParams): UseQueryResult<SlowMov
     queryFn: async (): Promise<SlowMoversResponse> => {
       const res = await productClient.getSlowMovers({ days });
       return {
-        products: res.products.map((p) => ({
+        products: (res.products ?? []).map((p) => ({
           productId: toFiniteNumber(p.productId),
-          name: p.name,
+          name: p.name ?? '',
           stockQuantity: toFiniteNumber(p.stockQuantity),
         })),
       };
@@ -92,9 +92,9 @@ export const useProductCategoryMix = (): UseQueryResult<ProductCategoryMixRespon
     queryFn: async (): Promise<ProductCategoryMixResponse> => {
       const res = await productClient.getCategoryPerformance({});
       return {
-        categories: res.categories.map((c) => ({
+        categories: (res.categories ?? []).map((c) => ({
           categoryId: toFiniteNumber(c.categoryId),
-          categoryName: c.categoryName,
+          categoryName: c.categoryName ?? '',
           unitsSold: toFiniteNumber(c.unitsSold),
           revenueMinorUnits: toFiniteNumber(c.revenueMinorUnits),
         })),

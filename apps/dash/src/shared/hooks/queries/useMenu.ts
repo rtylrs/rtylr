@@ -1,8 +1,8 @@
 import { createOneKitClient } from '@voxire/api';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/service_client';
-import type { MenuItem as ApiMenuItem } from '@voxire/voxie/pos/menu_item/v1/service_client';
+import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
+import type { MenuItem as ApiMenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 import { useMenuStore } from '../../stores/menuStore';
 
 const menuItemClient = createOneKitClient(MenuItemServiceClient, 'dash');
@@ -38,14 +38,14 @@ function toStoreItems(items: PosMenuItem[]): StoreMenuItem[] {
     return {
       _id: id,
       itemId: id,
-      name: item.name,
+      name: item.name ?? '',
       type: 'item',
       details: {
-        name: item.name,
+        name: item.name ?? '',
         description: item.sku ? `SKU ${item.sku}` : '',
-        price: item.salePrice,
-        sku: item.sku,
-        isActive: item.isActive,
+        price: item.salePrice ?? 0,
+        sku: item.sku ?? '',
+        isActive: item.isActive ?? false,
       },
     };
   });
@@ -70,7 +70,7 @@ export const useGetAllMenus = (restaurantId: string | null) => {
     queryKey: ['menus', restaurantId],
     queryFn: async () => {
       const res = await menuItemClient.listMenuItems({});
-      return toMenuList(res.items);
+      return toMenuList(res.items ?? []);
     },
     enabled: !!restaurantId,
   });
@@ -85,7 +85,7 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
       const res = await menuItemClient.listMenuItems({});
       return {
         _id: 'pos-menu',
-        items: toStoreItems(res.items),
+        items: toStoreItems(res.items ?? []),
       };
     },
     enabled: !!userId,

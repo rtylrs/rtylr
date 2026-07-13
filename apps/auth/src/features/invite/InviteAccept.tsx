@@ -5,11 +5,9 @@ import { Button, HelmetContainer } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
-import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/service_client';
-import {
-  AuthServiceClient,
-  type InviteAcceptRequest,
-} from '@voxire/voxie/common/auth/v1/service_client';
+import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
+import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
+import type { InviteAcceptRequest } from '@voxire/voxie/common/auth/v1/types';
 import type { AppId } from '@voxire/types';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'auth');

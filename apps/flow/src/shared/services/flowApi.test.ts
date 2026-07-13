@@ -29,7 +29,9 @@ describe('flowApi', () => {
 
   it('getDashboard without workspaceId passes undefined params', () => {
     flowApi.getDashboard();
-    expect(safe.get).toHaveBeenCalledWith('/api/flow/dashboard/v1/dashboard', { params: undefined });
+    expect(safe.get).toHaveBeenCalledWith('/api/flow/dashboard/v1/dashboard', {
+      params: undefined,
+    });
   });
 
   // Workspaces
@@ -199,7 +201,9 @@ describe('flowApi', () => {
 
   it('updateMilestone calls PUT /api/flow/milestone/v1/milestones/:id', () => {
     flowApi.updateMilestone('m-1', { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/api/flow/milestone/v1/milestones/m-1', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/api/flow/milestone/v1/milestones/m-1', {
+      name: 'Updated',
+    });
   });
 
   // Cycles
@@ -232,7 +236,9 @@ describe('flowApi', () => {
 
   it('getTeamWorkload calls GET /api/flow/insights/v1/team/workload', () => {
     flowApi.getTeamWorkload();
-    expect(safe.get).toHaveBeenCalledWith('/api/flow/insights/v1/team/workload', { params: undefined });
+    expect(safe.get).toHaveBeenCalledWith('/api/flow/insights/v1/team/workload', {
+      params: undefined,
+    });
   });
 
   it('getRoadmap calls GET /api/flow/insights/v1/roadmap', () => {

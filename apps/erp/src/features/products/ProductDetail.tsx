@@ -74,18 +74,18 @@ const ProductDetail: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
-    categories.forEach((category) => map.set(String(category.id), category.name));
+    categories.forEach((category) => map.set(String(category.id), category.name ?? ''));
     return map;
   }, [categories]);
   const brandNameById = useMemo(() => {
     const map = new Map<string, string>();
-    brands.forEach((brand) => map.set(String(brand.id), brand.name));
+    brands.forEach((brand) => map.set(String(brand.id), brand.name ?? ''));
     return map;
   }, [brands]);
 
   const handleDelete = (): void => {
     if (!product) return;
-    deleteProduct.mutate(product.id, {
+    deleteProduct.mutate(product.id ?? '', {
       onSuccess: () => {
         toast.success(t('erp.products.toast.deleted'));
         setConfirmDelete(false);
@@ -131,7 +131,9 @@ const ProductDetail: React.FC = () => {
       className="w-full min-w-0 space-y-5"
     >
       <HelmetContainer title="Product detail · rtylr" />
-      <Breadcrumbs items={[{ label: 'Inventory', to: '/inventory' }, { label: product.name }]} />
+      <Breadcrumbs
+        items={[{ label: 'Inventory', to: '/inventory' }, { label: product.name ?? '' }]}
+      />
 
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -202,19 +204,23 @@ const ProductDetail: React.FC = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <StockBadge stock={product.stockQuantity} lowStock={product.lowStockThreshold} />
+                  <StockBadge
+                    stock={product.stockQuantity ?? 0}
+                    lowStock={product.lowStockThreshold ?? 0}
+                  />
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                     style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
                   >
-                    {categoryNameById.get(product.categoryId) || `Category #${product.categoryId}`}
+                    {categoryNameById.get(product.categoryId ?? '') ||
+                      `Category #${product.categoryId}`}
                   </span>
                   {product.brandId !== '0' && (
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: 'rgba(245,158,11,0.1)', color: AMBER }}
                     >
-                      {brandNameById.get(product.brandId) || `Brand #${product.brandId}`}
+                      {brandNameById.get(product.brandId ?? '') || `Brand #${product.brandId}`}
                     </span>
                   )}
                 </div>
@@ -237,7 +243,7 @@ const ProductDetail: React.FC = () => {
                   Cost Price
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--hub-text)' }}>
-                  {formatCurrency(product.costPrice)}
+                  {formatCurrency(product.costPrice ?? 0)}
                 </p>
               </div>
               <div>
@@ -248,7 +254,7 @@ const ProductDetail: React.FC = () => {
                   Sale Price
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: AMBER }}>
-                  {formatCurrency(product.salePrice)}
+                  {formatCurrency(product.salePrice ?? 0)}
                 </p>
               </div>
               <div>
@@ -259,9 +265,13 @@ const ProductDetail: React.FC = () => {
                   Margin
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: '#10b981' }}>
-                  {product.salePrice > 0
-                    ? `${Math.round(((product.salePrice - product.costPrice) / product.salePrice) * 100)}%`
-                    : '—'}
+                  {(() => {
+                    const salePrice = product.salePrice ?? 0;
+                    const costPrice = product.costPrice ?? 0;
+                    return salePrice > 0
+                      ? `${Math.round(((salePrice - costPrice) / salePrice) * 100)}%`
+                      : '—';
+                  })()}
                 </p>
               </div>
               <div>
@@ -272,7 +282,10 @@ const ProductDetail: React.FC = () => {
                   Stock
                 </p>
                 <div className="mt-0.5">
-                  <QuickStockAdjust productId={product.id} currentStock={product.stockQuantity} />
+                  <QuickStockAdjust
+                    productId={product.id ?? ''}
+                    currentStock={product.stockQuantity ?? 0}
+                  />
                 </div>
               </div>
             </div>
@@ -323,9 +336,9 @@ const ProductDetail: React.FC = () => {
           </div>
 
           <VariantMatrix
-            productId={product.id}
-            productSku={product.sku}
-            baseSalePrice={product.salePrice}
+            productId={product.id ?? ''}
+            productSku={product.sku ?? ''}
+            baseSalePrice={product.salePrice ?? 0}
           />
         </div>
 
@@ -339,7 +352,7 @@ const ProductDetail: React.FC = () => {
               BARCODE
             </h3>
             <div className="rounded-lg overflow-hidden">
-              <BarcodeSvg value={product.barcode || product.sku} width={240} height={72} />
+              <BarcodeSvg value={(product.barcode || product.sku) ?? ''} width={240} height={72} />
             </div>
           </div>
 
