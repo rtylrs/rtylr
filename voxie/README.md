@@ -30,7 +30,7 @@ make typecheck  # typechecks the generated TypeScript output
 ## Adding or Changing Contracts
 
 1. Create or edit `api/{app-or-common}/{domain}/v1/models.onk` and `service.onk`.
-2. Run `onek check .` to validate, then `make generate` to regenerate `gen/go`/`gen/ts`.
+2. Run `onek check api` to validate, then `make generate` to regenerate `gen/go`/`gen/ts`.
 3. Commit, and prove it end-to-end: compile the generated Go, spin up the server with a test implementation, and exercise it over real HTTP - don't just confirm it generates without errors.
 4. Update the Voxie submodule pointer in `onion` and `rtylr`; run `pnpm contracts:sync` in `rtylr`.
 
