@@ -2,36 +2,119 @@
 
 export interface EquipmentRequestPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-equipment_type?: string;
+ownerId?: string;
+employeeId?: string;
+equipmentType?: string;
 description?: string;
 urgency?: string;
-needed_by_date?: string;
+neededByDate?: string;
 status?: string;
-current_approval_level?: number;
-approved_by?: string;
-delivered_at?: string;
-created_at?: string;
-updated_at?: string;
+currentApprovalLevel?: number;
+approvedBy?: string;
+deliveredAt?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeEquipmentRequestPayload(v: any): EquipmentRequestPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+equipmentType: v.equipment_type,
+description: v.description,
+urgency: v.urgency,
+neededByDate: v.needed_by_date,
+status: v.status,
+currentApprovalLevel: v.current_approval_level,
+approvedBy: v.approved_by,
+deliveredAt: v.delivered_at,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeEquipmentRequestPayload(v: EquipmentRequestPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.equipmentType !== undefined) { out.equipment_type = v.equipmentType; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.urgency !== undefined) { out.urgency = v.urgency; }
+if (v.neededByDate !== undefined) { out.needed_by_date = v.neededByDate; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.currentApprovalLevel !== undefined) { out.current_approval_level = v.currentApprovalLevel; }
+if (v.approvedBy !== undefined) { out.approved_by = v.approvedBy; }
+if (v.deliveredAt !== undefined) { out.delivered_at = v.deliveredAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface AssetPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
+ownerId?: string;
+employeeId?: string;
 name?: string;
-serial_number?: string;
-assigned_date?: string;
-returned_date?: string;
+serialNumber?: string;
+assignedDate?: string;
+returnedDate?: string;
 condition?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeAssetPayload(v: any): AssetPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+name: v.name,
+serialNumber: v.serial_number,
+assignedDate: v.assigned_date,
+returnedDate: v.returned_date,
+condition: v.condition,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeAssetPayload(v: AssetPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.serialNumber !== undefined) { out.serial_number = v.serialNumber; }
+if (v.assignedDate !== undefined) { out.assigned_date = v.assignedDate; }
+if (v.returnedDate !== undefined) { out.returned_date = v.returnedDate; }
+if (v.condition !== undefined) { out.condition = v.condition; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListAssetsRequest {
-employee_id?: string;
+employeeId?: string;
 condition?: string;
+}
+
+export function decodeListAssetsRequest(v: any): ListAssetsRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+condition: v.condition,
+};
+}
+
+export function encodeListAssetsRequest(v: ListAssetsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.condition !== undefined) { out.condition = v.condition; }
+return out;
 }
 
 export interface ListAssetsResponse {
@@ -41,9 +124,43 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListAssetsResponse(v: any): ListAssetsResponse {
+if (v === null || v === undefined) return v;
+return {
+assets: (v.assets !== undefined ? (v.assets as any[]).map(decodeAssetPayload) : v.assets),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListAssetsResponse(v: ListAssetsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.assets !== undefined) { out.assets = (v.assets as any[]).map(encodeAssetPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface ListEquipmentRequestsRequest {
-employee_id?: string;
+employeeId?: string;
 status?: string;
+}
+
+export function decodeListEquipmentRequestsRequest(v: any): ListEquipmentRequestsRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+status: v.status,
+};
+}
+
+export function encodeListEquipmentRequestsRequest(v: ListEquipmentRequestsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface ListEquipmentRequestsResponse {
@@ -53,28 +170,122 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListEquipmentRequestsResponse(v: any): ListEquipmentRequestsResponse {
+if (v === null || v === undefined) return v;
+return {
+requests: (v.requests !== undefined ? (v.requests as any[]).map(decodeEquipmentRequestPayload) : v.requests),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListEquipmentRequestsResponse(v: ListEquipmentRequestsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.requests !== undefined) { out.requests = (v.requests as any[]).map(encodeEquipmentRequestPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateEquipmentRequestRequest {
-employee_id?: string;
-equipment_type?: string;
+employeeId?: string;
+equipmentType?: string;
 description?: string;
 urgency?: string;
-needed_by_date?: string;
+neededByDate?: string;
+}
+
+export function decodeCreateEquipmentRequestRequest(v: any): CreateEquipmentRequestRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+equipmentType: v.equipment_type,
+description: v.description,
+urgency: v.urgency,
+neededByDate: v.needed_by_date,
+};
+}
+
+export function encodeCreateEquipmentRequestRequest(v: CreateEquipmentRequestRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.equipmentType !== undefined) { out.equipment_type = v.equipmentType; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.urgency !== undefined) { out.urgency = v.urgency; }
+if (v.neededByDate !== undefined) { out.needed_by_date = v.neededByDate; }
+return out;
 }
 
 export interface CreateEquipmentRequestResponse {
 request?: EquipmentRequestPayload;
 }
 
+export function decodeCreateEquipmentRequestResponse(v: any): CreateEquipmentRequestResponse {
+if (v === null || v === undefined) return v;
+return {
+request: (v.request !== undefined ? decodeEquipmentRequestPayload(v.request) : v.request),
+};
+}
+
+export function encodeCreateEquipmentRequestResponse(v: CreateEquipmentRequestResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.request !== undefined) { out.request = encodeEquipmentRequestPayload(v.request); }
+return out;
+}
+
 export interface ApproveEquipmentBody {
 approved?: boolean;
 }
 
+export function decodeApproveEquipmentBody(v: any): ApproveEquipmentBody {
+if (v === null || v === undefined) return v;
+return {
+approved: v.approved,
+};
+}
+
+export function encodeApproveEquipmentBody(v: ApproveEquipmentBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.approved !== undefined) { out.approved = v.approved; }
+return out;
+}
+
 export interface ApproveEquipmentRequest {
-equipment_request_id?: string;
+equipmentRequestId?: string;
 body?: ApproveEquipmentBody;
+}
+
+export function decodeApproveEquipmentRequest(v: any): ApproveEquipmentRequest {
+if (v === null || v === undefined) return v;
+return {
+equipmentRequestId: v.equipment_request_id,
+body: (v.body !== undefined ? decodeApproveEquipmentBody(v.body) : v.body),
+};
+}
+
+export function encodeApproveEquipmentRequest(v: ApproveEquipmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.equipmentRequestId !== undefined) { out.equipment_request_id = v.equipmentRequestId; }
+if (v.body !== undefined) { out.body = encodeApproveEquipmentBody(v.body); }
+return out;
 }
 
 export interface ApproveEquipmentResponse {
 success?: boolean;
+}
+
+export function decodeApproveEquipmentResponse(v: any): ApproveEquipmentResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeApproveEquipmentResponse(v: ApproveEquipmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 

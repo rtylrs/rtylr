@@ -2,21 +2,69 @@
 
 export interface RecurringInvoice {
 id?: string;
-owner_id?: string;
-template_invoice_id?: string;
+ownerId?: string;
+templateInvoiceId?: string;
 frequency?: string;
-next_invoice_date?: string;
-end_date?: string;
-is_active?: boolean;
-created_at?: string;
+nextInvoiceDate?: string;
+endDate?: string;
+isActive?: boolean;
+createdAt?: string;
+}
+
+export function decodeRecurringInvoice(v: any): RecurringInvoice {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+templateInvoiceId: v.template_invoice_id,
+frequency: v.frequency,
+nextInvoiceDate: v.next_invoice_date,
+endDate: v.end_date,
+isActive: v.is_active,
+createdAt: v.created_at,
+};
+}
+
+export function encodeRecurringInvoice(v: RecurringInvoice): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.templateInvoiceId !== undefined) { out.template_invoice_id = v.templateInvoiceId; }
+if (v.frequency !== undefined) { out.frequency = v.frequency; }
+if (v.nextInvoiceDate !== undefined) { out.next_invoice_date = v.nextInvoiceDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface CreateRecurringInvoiceRequest {
-template_invoice_id?: string;
+templateInvoiceId?: string;
 frequency?: string;
-next_invoice_date?: string;
-end_date?: string;
-is_active?: boolean;
+nextInvoiceDate?: string;
+endDate?: string;
+isActive?: boolean;
+}
+
+export function decodeCreateRecurringInvoiceRequest(v: any): CreateRecurringInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+templateInvoiceId: v.template_invoice_id,
+frequency: v.frequency,
+nextInvoiceDate: v.next_invoice_date,
+endDate: v.end_date,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateRecurringInvoiceRequest(v: CreateRecurringInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.templateInvoiceId !== undefined) { out.template_invoice_id = v.templateInvoiceId; }
+if (v.frequency !== undefined) { out.frequency = v.frequency; }
+if (v.nextInvoiceDate !== undefined) { out.next_invoice_date = v.nextInvoiceDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateRecurringInvoiceResponse {
@@ -24,43 +72,181 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateRecurringInvoiceResponse(v: any): CreateRecurringInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateRecurringInvoiceResponse(v: CreateRecurringInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetRecurringInvoiceRequest {
 id?: string;
+}
+
+export function decodeGetRecurringInvoiceRequest(v: any): GetRecurringInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetRecurringInvoiceRequest(v: GetRecurringInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface GetRecurringInvoiceResponse {
 invoice?: RecurringInvoice;
 }
 
+export function decodeGetRecurringInvoiceResponse(v: any): GetRecurringInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+invoice: (v.invoice !== undefined ? decodeRecurringInvoice(v.invoice) : v.invoice),
+};
+}
+
+export function encodeGetRecurringInvoiceResponse(v: GetRecurringInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.invoice !== undefined) { out.invoice = encodeRecurringInvoice(v.invoice); }
+return out;
+}
+
 export interface ListRecurringInvoicesRequest {
 }
 
+export function decodeListRecurringInvoicesRequest(v: any): ListRecurringInvoicesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListRecurringInvoicesRequest(v: ListRecurringInvoicesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListRecurringInvoicesResponse {
-recurring_invoices?: (RecurringInvoice)[];
+recurringInvoices?: (RecurringInvoice)[];
+}
+
+export function decodeListRecurringInvoicesResponse(v: any): ListRecurringInvoicesResponse {
+if (v === null || v === undefined) return v;
+return {
+recurringInvoices: (v.recurring_invoices !== undefined ? (v.recurring_invoices as any[]).map(decodeRecurringInvoice) : v.recurring_invoices),
+};
+}
+
+export function encodeListRecurringInvoicesResponse(v: ListRecurringInvoicesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.recurringInvoices !== undefined) { out.recurring_invoices = (v.recurringInvoices as any[]).map(encodeRecurringInvoice); }
+return out;
 }
 
 export interface PauseRecurringInvoiceRequest {
 id?: string;
 }
 
+export function decodePauseRecurringInvoiceRequest(v: any): PauseRecurringInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodePauseRecurringInvoiceRequest(v: PauseRecurringInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface PauseRecurringInvoiceResponse {
 message?: string;
+}
+
+export function decodePauseRecurringInvoiceResponse(v: any): PauseRecurringInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodePauseRecurringInvoiceResponse(v: PauseRecurringInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ResumeRecurringInvoiceRequest {
 id?: string;
 }
 
+export function decodeResumeRecurringInvoiceRequest(v: any): ResumeRecurringInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeResumeRecurringInvoiceRequest(v: ResumeRecurringInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface ResumeRecurringInvoiceResponse {
 message?: string;
 }
 
+export function decodeResumeRecurringInvoiceResponse(v: any): ResumeRecurringInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeResumeRecurringInvoiceResponse(v: ResumeRecurringInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateRecurringInvoiceBody {
-template_invoice_id?: string;
+templateInvoiceId?: string;
 frequency?: string;
-next_invoice_date?: string;
-end_date?: string;
-is_active?: boolean;
+nextInvoiceDate?: string;
+endDate?: string;
+isActive?: boolean;
+}
+
+export function decodeUpdateRecurringInvoiceBody(v: any): UpdateRecurringInvoiceBody {
+if (v === null || v === undefined) return v;
+return {
+templateInvoiceId: v.template_invoice_id,
+frequency: v.frequency,
+nextInvoiceDate: v.next_invoice_date,
+endDate: v.end_date,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateRecurringInvoiceBody(v: UpdateRecurringInvoiceBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.templateInvoiceId !== undefined) { out.template_invoice_id = v.templateInvoiceId; }
+if (v.frequency !== undefined) { out.frequency = v.frequency; }
+if (v.nextInvoiceDate !== undefined) { out.next_invoice_date = v.nextInvoiceDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateRecurringInvoiceRequest {
@@ -68,7 +254,35 @@ id?: string;
 body?: UpdateRecurringInvoiceBody;
 }
 
+export function decodeUpdateRecurringInvoiceRequest(v: any): UpdateRecurringInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateRecurringInvoiceBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateRecurringInvoiceRequest(v: UpdateRecurringInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateRecurringInvoiceBody(v.body); }
+return out;
+}
+
 export interface UpdateRecurringInvoiceResponse {
 message?: string;
+}
+
+export function decodeUpdateRecurringInvoiceResponse(v: any): UpdateRecurringInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateRecurringInvoiceResponse(v: UpdateRecurringInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

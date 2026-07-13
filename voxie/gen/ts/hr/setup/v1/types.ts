@@ -2,38 +2,137 @@
 
 export interface SetupWizardStepPayload {
 id?: string;
-owner_id?: string;
-step_key?: string;
-completed_at?: string;
-created_at?: string;
-updated_at?: string;
+ownerId?: string;
+stepKey?: string;
+completedAt?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeSetupWizardStepPayload(v: any): SetupWizardStepPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+stepKey: v.step_key,
+completedAt: v.completed_at,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeSetupWizardStepPayload(v: SetupWizardStepPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.stepKey !== undefined) { out.step_key = v.stepKey; }
+if (v.completedAt !== undefined) { out.completed_at = v.completedAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface HRCompanyConfigPayload {
 id?: string;
-owner_id?: string;
-time_tracking_model?: string;
-timesheet_period?: string;
-payroll_period?: string;
-payroll_gross_model?: string;
-setup_completed_at?: string;
-created_at?: string;
-updated_at?: string;
-clock_in_methods?: (string)[];
-subscribed_apps?: (string)[];
+ownerId?: string;
+timeTrackingModel?: string;
+timesheetPeriod?: string;
+payrollPeriod?: string;
+payrollGrossModel?: string;
+setupCompletedAt?: string;
+createdAt?: string;
+updatedAt?: string;
+clockInMethods?: (string)[];
+subscribedApps?: (string)[];
+}
+
+export function decodeHRCompanyConfigPayload(v: any): HRCompanyConfigPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+timeTrackingModel: v.time_tracking_model,
+timesheetPeriod: v.timesheet_period,
+payrollPeriod: v.payroll_period,
+payrollGrossModel: v.payroll_gross_model,
+setupCompletedAt: v.setup_completed_at,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+clockInMethods: v.clock_in_methods,
+subscribedApps: v.subscribed_apps,
+};
+}
+
+export function encodeHRCompanyConfigPayload(v: HRCompanyConfigPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.timeTrackingModel !== undefined) { out.time_tracking_model = v.timeTrackingModel; }
+if (v.timesheetPeriod !== undefined) { out.timesheet_period = v.timesheetPeriod; }
+if (v.payrollPeriod !== undefined) { out.payroll_period = v.payrollPeriod; }
+if (v.payrollGrossModel !== undefined) { out.payroll_gross_model = v.payrollGrossModel; }
+if (v.setupCompletedAt !== undefined) { out.setup_completed_at = v.setupCompletedAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.clockInMethods !== undefined) { out.clock_in_methods = v.clockInMethods; }
+if (v.subscribedApps !== undefined) { out.subscribed_apps = v.subscribedApps; }
+return out;
 }
 
 export interface GetSetupStatusResponse {
 steps?: (SetupWizardStepPayload)[];
 config?: HRCompanyConfigPayload;
-is_complete?: boolean;
+isComplete?: boolean;
+}
+
+export function decodeGetSetupStatusResponse(v: any): GetSetupStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+steps: (v.steps !== undefined ? (v.steps as any[]).map(decodeSetupWizardStepPayload) : v.steps),
+config: (v.config !== undefined ? decodeHRCompanyConfigPayload(v.config) : v.config),
+isComplete: v.is_complete,
+};
+}
+
+export function encodeGetSetupStatusResponse(v: GetSetupStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.steps !== undefined) { out.steps = (v.steps as any[]).map(encodeSetupWizardStepPayload); }
+if (v.config !== undefined) { out.config = encodeHRCompanyConfigPayload(v.config); }
+if (v.isComplete !== undefined) { out.is_complete = v.isComplete; }
+return out;
 }
 
 export interface CompleteSetupStepRequest {
-step_key?: string;
+stepKey?: string;
+}
+
+export function decodeCompleteSetupStepRequest(v: any): CompleteSetupStepRequest {
+if (v === null || v === undefined) return v;
+return {
+stepKey: v.step_key,
+};
+}
+
+export function encodeCompleteSetupStepRequest(v: CompleteSetupStepRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.stepKey !== undefined) { out.step_key = v.stepKey; }
+return out;
 }
 
 export interface CompleteSetupStepResponse {
 step?: SetupWizardStepPayload;
+}
+
+export function decodeCompleteSetupStepResponse(v: any): CompleteSetupStepResponse {
+if (v === null || v === undefined) return v;
+return {
+step: (v.step !== undefined ? decodeSetupWizardStepPayload(v.step) : v.step),
+};
+}
+
+export function encodeCompleteSetupStepResponse(v: CompleteSetupStepResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.step !== undefined) { out.step = encodeSetupWizardStepPayload(v.step); }
+return out;
 }
 

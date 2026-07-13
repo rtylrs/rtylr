@@ -3,10 +3,40 @@
 export interface GetDashboardRequest {
 }
 
+export function decodeGetDashboardRequest(v: any): GetDashboardRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetDashboardRequest(v: GetDashboardRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetDashboardResponse {
-today_count?: number;
-upcoming_count?: number;
-cancellation_rate?: number;
+todayCount?: number;
+upcomingCount?: number;
+cancellationRate?: number;
 revenue?: number;
+}
+
+export function decodeGetDashboardResponse(v: any): GetDashboardResponse {
+if (v === null || v === undefined) return v;
+return {
+todayCount: v.today_count,
+upcomingCount: v.upcoming_count,
+cancellationRate: v.cancellation_rate,
+revenue: v.revenue,
+};
+}
+
+export function encodeGetDashboardResponse(v: GetDashboardResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.todayCount !== undefined) { out.today_count = v.todayCount; }
+if (v.upcomingCount !== undefined) { out.upcoming_count = v.upcomingCount; }
+if (v.cancellationRate !== undefined) { out.cancellation_rate = v.cancellationRate; }
+if (v.revenue !== undefined) { out.revenue = v.revenue; }
+return out;
 }
 

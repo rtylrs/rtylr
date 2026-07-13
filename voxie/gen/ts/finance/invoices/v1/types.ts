@@ -4,108 +4,374 @@ export interface InvoiceItem {
 description?: string;
 quantity?: number;
 unit?: string;
-unit_price?: number;
-tax_rate?: number;
-discount_pct?: number;
-sort_order?: string;
+unitPrice?: number;
+taxRate?: number;
+discountPct?: number;
+sortOrder?: string;
 total?: number;
+}
+
+export function decodeInvoiceItem(v: any): InvoiceItem {
+if (v === null || v === undefined) return v;
+return {
+description: v.description,
+quantity: v.quantity,
+unit: v.unit,
+unitPrice: v.unit_price,
+taxRate: v.tax_rate,
+discountPct: v.discount_pct,
+sortOrder: v.sort_order,
+total: v.total,
+};
+}
+
+export function encodeInvoiceItem(v: InvoiceItem): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.description !== undefined) { out.description = v.description; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.unit !== undefined) { out.unit = v.unit; }
+if (v.unitPrice !== undefined) { out.unit_price = v.unitPrice; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.discountPct !== undefined) { out.discount_pct = v.discountPct; }
+if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
+if (v.total !== undefined) { out.total = v.total; }
+return out;
 }
 
 export interface InvoiceSummary {
 id?: string;
-invoice_number?: string;
-client_name?: string;
+invoiceNumber?: string;
+clientName?: string;
 status?: string;
-issue_date?: string;
-due_date?: string;
-paid_date?: string;
+issueDate?: string;
+dueDate?: string;
+paidDate?: string;
 currency?: string;
 total?: number;
-amount_paid?: number;
-amount_due?: number;
-created_at?: string;
+amountPaid?: number;
+amountDue?: number;
+createdAt?: string;
+}
+
+export function decodeInvoiceSummary(v: any): InvoiceSummary {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+invoiceNumber: v.invoice_number,
+clientName: v.client_name,
+status: v.status,
+issueDate: v.issue_date,
+dueDate: v.due_date,
+paidDate: v.paid_date,
+currency: v.currency,
+total: v.total,
+amountPaid: v.amount_paid,
+amountDue: v.amount_due,
+createdAt: v.created_at,
+};
+}
+
+export function encodeInvoiceSummary(v: InvoiceSummary): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.invoiceNumber !== undefined) { out.invoice_number = v.invoiceNumber; }
+if (v.clientName !== undefined) { out.client_name = v.clientName; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.issueDate !== undefined) { out.issue_date = v.issueDate; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.paidDate !== undefined) { out.paid_date = v.paidDate; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.amountPaid !== undefined) { out.amount_paid = v.amountPaid; }
+if (v.amountDue !== undefined) { out.amount_due = v.amountDue; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface InvoiceDetail {
 id?: string;
-owner_id?: string;
-invoice_number?: string;
-client_name?: string;
-client_email?: string;
-client_address?: string;
-client_tax_id?: string;
+ownerId?: string;
+invoiceNumber?: string;
+clientName?: string;
+clientEmail?: string;
+clientAddress?: string;
+clientTaxId?: string;
 status?: string;
-issue_date?: string;
-due_date?: string;
-paid_date?: string;
+issueDate?: string;
+dueDate?: string;
+paidDate?: string;
 currency?: string;
 subtotal?: number;
-discount_type?: string;
-discount_value?: number;
-discount_amount?: number;
-tax_rate?: number;
-tax_amount?: number;
+discountType?: string;
+discountValue?: number;
+discountAmount?: number;
+taxRate?: number;
+taxAmount?: number;
 total?: number;
-amount_paid?: number;
-amount_due?: number;
+amountPaid?: number;
+amountDue?: number;
 notes?: string;
 terms?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
 items?: (InvoiceItem)[];
+}
+
+export function decodeInvoiceDetail(v: any): InvoiceDetail {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+invoiceNumber: v.invoice_number,
+clientName: v.client_name,
+clientEmail: v.client_email,
+clientAddress: v.client_address,
+clientTaxId: v.client_tax_id,
+status: v.status,
+issueDate: v.issue_date,
+dueDate: v.due_date,
+paidDate: v.paid_date,
+currency: v.currency,
+subtotal: v.subtotal,
+discountType: v.discount_type,
+discountValue: v.discount_value,
+discountAmount: v.discount_amount,
+taxRate: v.tax_rate,
+taxAmount: v.tax_amount,
+total: v.total,
+amountPaid: v.amount_paid,
+amountDue: v.amount_due,
+notes: v.notes,
+terms: v.terms,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeInvoiceItem) : v.items),
+};
+}
+
+export function encodeInvoiceDetail(v: InvoiceDetail): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.invoiceNumber !== undefined) { out.invoice_number = v.invoiceNumber; }
+if (v.clientName !== undefined) { out.client_name = v.clientName; }
+if (v.clientEmail !== undefined) { out.client_email = v.clientEmail; }
+if (v.clientAddress !== undefined) { out.client_address = v.clientAddress; }
+if (v.clientTaxId !== undefined) { out.client_tax_id = v.clientTaxId; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.issueDate !== undefined) { out.issue_date = v.issueDate; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.paidDate !== undefined) { out.paid_date = v.paidDate; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.subtotal !== undefined) { out.subtotal = v.subtotal; }
+if (v.discountType !== undefined) { out.discount_type = v.discountType; }
+if (v.discountValue !== undefined) { out.discount_value = v.discountValue; }
+if (v.discountAmount !== undefined) { out.discount_amount = v.discountAmount; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.amountPaid !== undefined) { out.amount_paid = v.amountPaid; }
+if (v.amountDue !== undefined) { out.amount_due = v.amountDue; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.terms !== undefined) { out.terms = v.terms; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeInvoiceItem); }
+return out;
 }
 
 export interface Payment {
 id?: string;
 amount?: number;
 currency?: string;
-payment_date?: string;
+paymentDate?: string;
 method?: string;
 reference?: string;
 notes?: string;
+}
+
+export function decodePayment(v: any): Payment {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+amount: v.amount,
+currency: v.currency,
+paymentDate: v.payment_date,
+method: v.method,
+reference: v.reference,
+notes: v.notes,
+};
+}
+
+export function encodePayment(v: Payment): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.paymentDate !== undefined) { out.payment_date = v.paymentDate; }
+if (v.method !== undefined) { out.method = v.method; }
+if (v.reference !== undefined) { out.reference = v.reference; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
 }
 
 export interface RecordPaymentResponsePayload {
 id?: string;
-invoice_id?: string;
+invoiceId?: string;
 amount?: number;
 currency?: string;
-payment_date?: string;
+paymentDate?: string;
 method?: string;
 reference?: string;
 notes?: string;
 }
 
+export function decodeRecordPaymentResponsePayload(v: any): RecordPaymentResponsePayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+invoiceId: v.invoice_id,
+amount: v.amount,
+currency: v.currency,
+paymentDate: v.payment_date,
+method: v.method,
+reference: v.reference,
+notes: v.notes,
+};
+}
+
+export function encodeRecordPaymentResponsePayload(v: RecordPaymentResponsePayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.invoiceId !== undefined) { out.invoice_id = v.invoiceId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.paymentDate !== undefined) { out.payment_date = v.paymentDate; }
+if (v.method !== undefined) { out.method = v.method; }
+if (v.reference !== undefined) { out.reference = v.reference; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
+}
+
 export interface CreateInvoiceRequest {
-client_name?: string;
-client_email?: string;
-client_address?: string;
-client_tax_id?: string;
-issue_date?: string;
-due_date?: string;
+clientName?: string;
+clientEmail?: string;
+clientAddress?: string;
+clientTaxId?: string;
+issueDate?: string;
+dueDate?: string;
 currency?: string;
-discount_type?: string;
-discount_value?: number;
-tax_rate?: number;
+discountType?: string;
+discountValue?: number;
+taxRate?: number;
 notes?: string;
 terms?: string;
 items?: (InvoiceItem)[];
+}
+
+export function decodeCreateInvoiceRequest(v: any): CreateInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+clientName: v.client_name,
+clientEmail: v.client_email,
+clientAddress: v.client_address,
+clientTaxId: v.client_tax_id,
+issueDate: v.issue_date,
+dueDate: v.due_date,
+currency: v.currency,
+discountType: v.discount_type,
+discountValue: v.discount_value,
+taxRate: v.tax_rate,
+notes: v.notes,
+terms: v.terms,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeInvoiceItem) : v.items),
+};
+}
+
+export function encodeCreateInvoiceRequest(v: CreateInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.clientName !== undefined) { out.client_name = v.clientName; }
+if (v.clientEmail !== undefined) { out.client_email = v.clientEmail; }
+if (v.clientAddress !== undefined) { out.client_address = v.clientAddress; }
+if (v.clientTaxId !== undefined) { out.client_tax_id = v.clientTaxId; }
+if (v.issueDate !== undefined) { out.issue_date = v.issueDate; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.discountType !== undefined) { out.discount_type = v.discountType; }
+if (v.discountValue !== undefined) { out.discount_value = v.discountValue; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.terms !== undefined) { out.terms = v.terms; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeInvoiceItem); }
+return out;
 }
 
 export interface CreateInvoiceResponse {
 invoice?: InvoiceDetail;
 }
 
+export function decodeCreateInvoiceResponse(v: any): CreateInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+invoice: (v.invoice !== undefined ? decodeInvoiceDetail(v.invoice) : v.invoice),
+};
+}
+
+export function encodeCreateInvoiceResponse(v: CreateInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.invoice !== undefined) { out.invoice = encodeInvoiceDetail(v.invoice); }
+return out;
+}
+
 export interface DeleteInvoiceRequest {
 id?: string;
+}
+
+export function decodeDeleteInvoiceRequest(v: any): DeleteInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteInvoiceRequest(v: DeleteInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteInvoiceResponse {
 message?: string;
 }
 
+export function decodeDeleteInvoiceResponse(v: any): DeleteInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteInvoiceResponse(v: DeleteInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetInvoiceRequest {
 id?: string;
+}
+
+export function decodeGetInvoiceRequest(v: any): GetInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetInvoiceRequest(v: GetInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface GetInvoiceResponse {
@@ -113,44 +379,164 @@ invoice?: InvoiceDetail;
 payments?: (Payment)[];
 }
 
+export function decodeGetInvoiceResponse(v: any): GetInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+invoice: (v.invoice !== undefined ? decodeInvoiceDetail(v.invoice) : v.invoice),
+payments: (v.payments !== undefined ? (v.payments as any[]).map(decodePayment) : v.payments),
+};
+}
+
+export function encodeGetInvoiceResponse(v: GetInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.invoice !== undefined) { out.invoice = encodeInvoiceDetail(v.invoice); }
+if (v.payments !== undefined) { out.payments = (v.payments as any[]).map(encodePayment); }
+return out;
+}
+
 export interface ListInvoicesRequest {
 status?: string;
 search?: string;
-date_from?: string;
-date_to?: string;
+dateFrom?: string;
+dateTo?: string;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListInvoicesRequest(v: any): ListInvoicesRequest {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+search: v.search,
+dateFrom: v.date_from,
+dateTo: v.date_to,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListInvoicesRequest(v: ListInvoicesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+if (v.search !== undefined) { out.search = v.search; }
+if (v.dateFrom !== undefined) { out.date_from = v.dateFrom; }
+if (v.dateTo !== undefined) { out.date_to = v.dateTo; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface ListInvoicesResponse {
 invoices?: (InvoiceSummary)[];
 page?: number;
-page_size?: number;
-has_more?: boolean;
+pageSize?: number;
+hasMore?: boolean;
+}
+
+export function decodeListInvoicesResponse(v: any): ListInvoicesResponse {
+if (v === null || v === undefined) return v;
+return {
+invoices: (v.invoices !== undefined ? (v.invoices as any[]).map(decodeInvoiceSummary) : v.invoices),
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
+};
+}
+
+export function encodeListInvoicesResponse(v: ListInvoicesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.invoices !== undefined) { out.invoices = (v.invoices as any[]).map(encodeInvoiceSummary); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
+return out;
 }
 
 export interface SendInvoiceRequest {
 id?: string;
 }
 
+export function decodeSendInvoiceRequest(v: any): SendInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeSendInvoiceRequest(v: SendInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface SendInvoiceResponse {
 message?: string;
 }
 
+export function decodeSendInvoiceResponse(v: any): SendInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeSendInvoiceResponse(v: SendInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateInvoiceBody {
-client_name?: string;
-client_email?: string;
-client_address?: string;
-client_tax_id?: string;
-issue_date?: string;
-due_date?: string;
+clientName?: string;
+clientEmail?: string;
+clientAddress?: string;
+clientTaxId?: string;
+issueDate?: string;
+dueDate?: string;
 currency?: string;
-discount_type?: string;
-discount_value?: number;
-tax_rate?: number;
+discountType?: string;
+discountValue?: number;
+taxRate?: number;
 notes?: string;
 terms?: string;
 items?: (InvoiceItem)[];
+}
+
+export function decodeUpdateInvoiceBody(v: any): UpdateInvoiceBody {
+if (v === null || v === undefined) return v;
+return {
+clientName: v.client_name,
+clientEmail: v.client_email,
+clientAddress: v.client_address,
+clientTaxId: v.client_tax_id,
+issueDate: v.issue_date,
+dueDate: v.due_date,
+currency: v.currency,
+discountType: v.discount_type,
+discountValue: v.discount_value,
+taxRate: v.tax_rate,
+notes: v.notes,
+terms: v.terms,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeInvoiceItem) : v.items),
+};
+}
+
+export function encodeUpdateInvoiceBody(v: UpdateInvoiceBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.clientName !== undefined) { out.client_name = v.clientName; }
+if (v.clientEmail !== undefined) { out.client_email = v.clientEmail; }
+if (v.clientAddress !== undefined) { out.client_address = v.clientAddress; }
+if (v.clientTaxId !== undefined) { out.client_tax_id = v.clientTaxId; }
+if (v.issueDate !== undefined) { out.issue_date = v.issueDate; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.discountType !== undefined) { out.discount_type = v.discountType; }
+if (v.discountValue !== undefined) { out.discount_value = v.discountValue; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.terms !== undefined) { out.terms = v.terms; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeInvoiceItem); }
+return out;
 }
 
 export interface UpdateInvoiceRequest {
@@ -158,12 +544,53 @@ id?: string;
 body?: UpdateInvoiceBody;
 }
 
+export function decodeUpdateInvoiceRequest(v: any): UpdateInvoiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateInvoiceBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateInvoiceRequest(v: UpdateInvoiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateInvoiceBody(v.body); }
+return out;
+}
+
 export interface UpdateInvoiceResponse {
 invoice?: InvoiceDetail;
 }
 
+export function decodeUpdateInvoiceResponse(v: any): UpdateInvoiceResponse {
+if (v === null || v === undefined) return v;
+return {
+invoice: (v.invoice !== undefined ? decodeInvoiceDetail(v.invoice) : v.invoice),
+};
+}
+
+export function encodeUpdateInvoiceResponse(v: UpdateInvoiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.invoice !== undefined) { out.invoice = encodeInvoiceDetail(v.invoice); }
+return out;
+}
+
 export interface UpdateInvoiceStatusBody {
 status?: string;
+}
+
+export function decodeUpdateInvoiceStatusBody(v: any): UpdateInvoiceStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateInvoiceStatusBody(v: UpdateInvoiceStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface UpdateInvoiceStatusRequest {
@@ -171,7 +598,35 @@ id?: string;
 body?: UpdateInvoiceStatusBody;
 }
 
+export function decodeUpdateInvoiceStatusRequest(v: any): UpdateInvoiceStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateInvoiceStatusBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateInvoiceStatusRequest(v: UpdateInvoiceStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateInvoiceStatusBody(v.body); }
+return out;
+}
+
 export interface UpdateInvoiceStatusResponse {
 message?: string;
+}
+
+export function decodeUpdateInvoiceStatusResponse(v: any): UpdateInvoiceStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateInvoiceStatusResponse(v: UpdateInvoiceStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

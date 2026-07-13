@@ -2,32 +2,119 @@
 
 export interface Settings {
 id?: string;
-owner_id?: string;
-default_consent?: boolean;
-from_email?: string;
-from_name?: string;
-sms_sender_id?: string;
+ownerId?: string;
+defaultConsent?: boolean;
+fromEmail?: string;
+fromName?: string;
+smsSenderId?: string;
 timezone?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeSettings(v: any): Settings {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+defaultConsent: v.default_consent,
+fromEmail: v.from_email,
+fromName: v.from_name,
+smsSenderId: v.sms_sender_id,
+timezone: v.timezone,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeSettings(v: Settings): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.defaultConsent !== undefined) { out.default_consent = v.defaultConsent; }
+if (v.fromEmail !== undefined) { out.from_email = v.fromEmail; }
+if (v.fromName !== undefined) { out.from_name = v.fromName; }
+if (v.smsSenderId !== undefined) { out.sms_sender_id = v.smsSenderId; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface GetSettingsRequest {
+}
+
+export function decodeGetSettingsRequest(v: any): GetSettingsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetSettingsRequest(v: GetSettingsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetSettingsResponse {
 settings?: Settings;
 }
 
+export function decodeGetSettingsResponse(v: any): GetSettingsResponse {
+if (v === null || v === undefined) return v;
+return {
+settings: (v.settings !== undefined ? decodeSettings(v.settings) : v.settings),
+};
+}
+
+export function encodeGetSettingsResponse(v: GetSettingsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.settings !== undefined) { out.settings = encodeSettings(v.settings); }
+return out;
+}
+
 export interface UpdateSettingsRequest {
-default_consent?: boolean;
-from_email?: string;
-from_name?: string;
-sms_sender_id?: string;
+defaultConsent?: boolean;
+fromEmail?: string;
+fromName?: string;
+smsSenderId?: string;
 timezone?: string;
+}
+
+export function decodeUpdateSettingsRequest(v: any): UpdateSettingsRequest {
+if (v === null || v === undefined) return v;
+return {
+defaultConsent: v.default_consent,
+fromEmail: v.from_email,
+fromName: v.from_name,
+smsSenderId: v.sms_sender_id,
+timezone: v.timezone,
+};
+}
+
+export function encodeUpdateSettingsRequest(v: UpdateSettingsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.defaultConsent !== undefined) { out.default_consent = v.defaultConsent; }
+if (v.fromEmail !== undefined) { out.from_email = v.fromEmail; }
+if (v.fromName !== undefined) { out.from_name = v.fromName; }
+if (v.smsSenderId !== undefined) { out.sms_sender_id = v.smsSenderId; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+return out;
 }
 
 export interface UpdateSettingsResponse {
 message?: string;
+}
+
+export function decodeUpdateSettingsResponse(v: any): UpdateSettingsResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateSettingsResponse(v: UpdateSettingsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

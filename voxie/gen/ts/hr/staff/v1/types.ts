@@ -2,92 +2,312 @@
 
 export interface Staff {
 id?: string;
-owner_id?: string;
-user_id?: string;
-department_id?: string;
-first_name?: string;
-last_name?: string;
+ownerId?: string;
+userId?: string;
+departmentId?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
 role?: string;
-employment_type?: string;
+employmentType?: string;
 status?: string;
 salary?: number;
-hourly_rate?: number;
-overtime_rate?: number;
-start_date?: string;
-end_date?: string;
+hourlyRate?: number;
+overtimeRate?: number;
+startDate?: string;
+endDate?: string;
 address?: string;
-emergency_contact_name?: string;
-emergency_contact_phone?: string;
+emergencyContactName?: string;
+emergencyContactPhone?: string;
 apps?: string;
 notes?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeStaff(v: any): Staff {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+userId: v.user_id,
+departmentId: v.department_id,
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+role: v.role,
+employmentType: v.employment_type,
+status: v.status,
+salary: v.salary,
+hourlyRate: v.hourly_rate,
+overtimeRate: v.overtime_rate,
+startDate: v.start_date,
+endDate: v.end_date,
+address: v.address,
+emergencyContactName: v.emergency_contact_name,
+emergencyContactPhone: v.emergency_contact_phone,
+apps: v.apps,
+notes: v.notes,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeStaff(v: Staff): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.employmentType !== undefined) { out.employment_type = v.employmentType; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.salary !== undefined) { out.salary = v.salary; }
+if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
+if (v.overtimeRate !== undefined) { out.overtime_rate = v.overtimeRate; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.emergencyContactName !== undefined) { out.emergency_contact_name = v.emergencyContactName; }
+if (v.emergencyContactPhone !== undefined) { out.emergency_contact_phone = v.emergencyContactPhone; }
+if (v.apps !== undefined) { out.apps = v.apps; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListStaffRequest {
 search?: string;
-department_id?: string;
+departmentId?: string;
 status?: string;
+}
+
+export function decodeListStaffRequest(v: any): ListStaffRequest {
+if (v === null || v === undefined) return v;
+return {
+search: v.search,
+departmentId: v.department_id,
+status: v.status,
+};
+}
+
+export function encodeListStaffRequest(v: ListStaffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.search !== undefined) { out.search = v.search; }
+if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface ListStaffResponse {
 staff?: (Staff)[];
 }
 
+export function decodeListStaffResponse(v: any): ListStaffResponse {
+if (v === null || v === undefined) return v;
+return {
+staff: (v.staff !== undefined ? (v.staff as any[]).map(decodeStaff) : v.staff),
+};
+}
+
+export function encodeListStaffResponse(v: ListStaffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staff !== undefined) { out.staff = (v.staff as any[]).map(encodeStaff); }
+return out;
+}
+
 export interface CreateStaffRequest {
-user_id?: string;
-department_id?: string;
-first_name?: string;
-last_name?: string;
+userId?: string;
+departmentId?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
 role?: string;
-employment_type?: string;
+employmentType?: string;
 status?: string;
 salary?: number;
-hourly_rate?: number;
-overtime_rate?: number;
-start_date?: string;
-end_date?: string;
+hourlyRate?: number;
+overtimeRate?: number;
+startDate?: string;
+endDate?: string;
 address?: string;
-emergency_contact_name?: string;
-emergency_contact_phone?: string;
+emergencyContactName?: string;
+emergencyContactPhone?: string;
 apps?: string;
 notes?: string;
+}
+
+export function decodeCreateStaffRequest(v: any): CreateStaffRequest {
+if (v === null || v === undefined) return v;
+return {
+userId: v.user_id,
+departmentId: v.department_id,
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+role: v.role,
+employmentType: v.employment_type,
+status: v.status,
+salary: v.salary,
+hourlyRate: v.hourly_rate,
+overtimeRate: v.overtime_rate,
+startDate: v.start_date,
+endDate: v.end_date,
+address: v.address,
+emergencyContactName: v.emergency_contact_name,
+emergencyContactPhone: v.emergency_contact_phone,
+apps: v.apps,
+notes: v.notes,
+};
+}
+
+export function encodeCreateStaffRequest(v: CreateStaffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.employmentType !== undefined) { out.employment_type = v.employmentType; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.salary !== undefined) { out.salary = v.salary; }
+if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
+if (v.overtimeRate !== undefined) { out.overtime_rate = v.overtimeRate; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.emergencyContactName !== undefined) { out.emergency_contact_name = v.emergencyContactName; }
+if (v.emergencyContactPhone !== undefined) { out.emergency_contact_phone = v.emergencyContactPhone; }
+if (v.apps !== undefined) { out.apps = v.apps; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
 }
 
 export interface CreateStaffResponse {
 id?: string;
 }
 
+export function decodeCreateStaffResponse(v: any): CreateStaffResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeCreateStaffResponse(v: CreateStaffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface GetStaffRequest {
 id?: string;
+}
+
+export function decodeGetStaffRequest(v: any): GetStaffRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetStaffRequest(v: GetStaffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface GetStaffResponse {
 staff?: Staff;
 }
 
+export function decodeGetStaffResponse(v: any): GetStaffResponse {
+if (v === null || v === undefined) return v;
+return {
+staff: (v.staff !== undefined ? decodeStaff(v.staff) : v.staff),
+};
+}
+
+export function encodeGetStaffResponse(v: GetStaffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staff !== undefined) { out.staff = encodeStaff(v.staff); }
+return out;
+}
+
 export interface UpdateStaffBody {
-department_id?: string;
-first_name?: string;
-last_name?: string;
+departmentId?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
 role?: string;
-employment_type?: string;
+employmentType?: string;
 status?: string;
 salary?: number;
-hourly_rate?: number;
-overtime_rate?: number;
-end_date?: string;
+hourlyRate?: number;
+overtimeRate?: number;
+endDate?: string;
 address?: string;
-emergency_contact_name?: string;
-emergency_contact_phone?: string;
+emergencyContactName?: string;
+emergencyContactPhone?: string;
 apps?: string;
 notes?: string;
+}
+
+export function decodeUpdateStaffBody(v: any): UpdateStaffBody {
+if (v === null || v === undefined) return v;
+return {
+departmentId: v.department_id,
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+role: v.role,
+employmentType: v.employment_type,
+status: v.status,
+salary: v.salary,
+hourlyRate: v.hourly_rate,
+overtimeRate: v.overtime_rate,
+endDate: v.end_date,
+address: v.address,
+emergencyContactName: v.emergency_contact_name,
+emergencyContactPhone: v.emergency_contact_phone,
+apps: v.apps,
+notes: v.notes,
+};
+}
+
+export function encodeUpdateStaffBody(v: UpdateStaffBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.employmentType !== undefined) { out.employment_type = v.employmentType; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.salary !== undefined) { out.salary = v.salary; }
+if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
+if (v.overtimeRate !== undefined) { out.overtime_rate = v.overtimeRate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.emergencyContactName !== undefined) { out.emergency_contact_name = v.emergencyContactName; }
+if (v.emergencyContactPhone !== undefined) { out.emergency_contact_phone = v.emergencyContactPhone; }
+if (v.apps !== undefined) { out.apps = v.apps; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
 }
 
 export interface UpdateStaffRequest {
@@ -95,31 +315,137 @@ id?: string;
 body?: UpdateStaffBody;
 }
 
+export function decodeUpdateStaffRequest(v: any): UpdateStaffRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateStaffBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateStaffRequest(v: UpdateStaffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateStaffBody(v.body); }
+return out;
+}
+
 export interface UpdateStaffResponse {
 success?: boolean;
+}
+
+export function decodeUpdateStaffResponse(v: any): UpdateStaffResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeUpdateStaffResponse(v: UpdateStaffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 
 export interface DeleteStaffRequest {
 id?: string;
 }
 
+export function decodeDeleteStaffRequest(v: any): DeleteStaffRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteStaffRequest(v: DeleteStaffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteStaffResponse {
 success?: boolean;
 }
 
+export function decodeDeleteStaffResponse(v: any): DeleteStaffResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeDeleteStaffResponse(v: DeleteStaffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface ClockInRequest {
-staff_id?: string;
+staffId?: string;
+}
+
+export function decodeClockInRequest(v: any): ClockInRequest {
+if (v === null || v === undefined) return v;
+return {
+staffId: v.staff_id,
+};
+}
+
+export function encodeClockInRequest(v: ClockInRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+return out;
 }
 
 export interface ClockInResponse {
 success?: boolean;
 }
 
+export function decodeClockInResponse(v: any): ClockInResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeClockInResponse(v: ClockInResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface ClockOutRequest {
-staff_id?: string;
+staffId?: string;
+}
+
+export function decodeClockOutRequest(v: any): ClockOutRequest {
+if (v === null || v === undefined) return v;
+return {
+staffId: v.staff_id,
+};
+}
+
+export function encodeClockOutRequest(v: ClockOutRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+return out;
 }
 
 export interface ClockOutResponse {
 success?: boolean;
+}
+
+export function decodeClockOutResponse(v: any): ClockOutResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeClockOutResponse(v: ClockOutResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 

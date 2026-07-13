@@ -2,24 +2,78 @@
 
 export interface Bill {
 id?: string;
-owner_id?: string;
-supplier_id?: string;
+ownerId?: string;
+supplierId?: string;
 amount?: number;
 currency?: string;
-due_date?: string;
+dueDate?: string;
 status?: string;
 description?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeBill(v: any): Bill {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+supplierId: v.supplier_id,
+amount: v.amount,
+currency: v.currency,
+dueDate: v.due_date,
+status: v.status,
+description: v.description,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeBill(v: Bill): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateBillRequest {
-supplier_id?: string;
+supplierId?: string;
 amount?: number;
 currency?: string;
-due_date?: string;
+dueDate?: string;
 status?: string;
 description?: string;
+}
+
+export function decodeCreateBillRequest(v: any): CreateBillRequest {
+if (v === null || v === undefined) return v;
+return {
+supplierId: v.supplier_id,
+amount: v.amount,
+currency: v.currency,
+dueDate: v.due_date,
+status: v.status,
+description: v.description,
+};
+}
+
+export function encodeCreateBillRequest(v: CreateBillRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.description !== undefined) { out.description = v.description; }
+return out;
 }
 
 export interface CreateBillResponse {
@@ -27,36 +81,150 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateBillResponse(v: any): CreateBillResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateBillResponse(v: CreateBillResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteBillRequest {
 id?: string;
+}
+
+export function decodeDeleteBillRequest(v: any): DeleteBillRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteBillRequest(v: DeleteBillRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteBillResponse {
 message?: string;
 }
 
+export function decodeDeleteBillResponse(v: any): DeleteBillResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteBillResponse(v: DeleteBillResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetBillRequest {
 id?: string;
+}
+
+export function decodeGetBillRequest(v: any): GetBillRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetBillRequest(v: GetBillRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface GetBillResponse {
 bill?: Bill;
 }
 
+export function decodeGetBillResponse(v: any): GetBillResponse {
+if (v === null || v === undefined) return v;
+return {
+bill: (v.bill !== undefined ? decodeBill(v.bill) : v.bill),
+};
+}
+
+export function encodeGetBillResponse(v: GetBillResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.bill !== undefined) { out.bill = encodeBill(v.bill); }
+return out;
+}
+
 export interface ListBillsRequest {
+}
+
+export function decodeListBillsRequest(v: any): ListBillsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListBillsRequest(v: ListBillsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListBillsResponse {
 bills?: (Bill)[];
 }
 
+export function decodeListBillsResponse(v: any): ListBillsResponse {
+if (v === null || v === undefined) return v;
+return {
+bills: (v.bills !== undefined ? (v.bills as any[]).map(decodeBill) : v.bills),
+};
+}
+
+export function encodeListBillsResponse(v: ListBillsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.bills !== undefined) { out.bills = (v.bills as any[]).map(encodeBill); }
+return out;
+}
+
 export interface UpdateBillBody {
-supplier_id?: string;
+supplierId?: string;
 amount?: number;
 currency?: string;
-due_date?: string;
+dueDate?: string;
 status?: string;
 description?: string;
+}
+
+export function decodeUpdateBillBody(v: any): UpdateBillBody {
+if (v === null || v === undefined) return v;
+return {
+supplierId: v.supplier_id,
+amount: v.amount,
+currency: v.currency,
+dueDate: v.due_date,
+status: v.status,
+description: v.description,
+};
+}
+
+export function encodeUpdateBillBody(v: UpdateBillBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.description !== undefined) { out.description = v.description; }
+return out;
 }
 
 export interface UpdateBillRequest {
@@ -64,7 +232,35 @@ id?: string;
 body?: UpdateBillBody;
 }
 
+export function decodeUpdateBillRequest(v: any): UpdateBillRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateBillBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateBillRequest(v: UpdateBillRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateBillBody(v.body); }
+return out;
+}
+
 export interface UpdateBillResponse {
 message?: string;
+}
+
+export function decodeUpdateBillResponse(v: any): UpdateBillResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateBillResponse(v: UpdateBillResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

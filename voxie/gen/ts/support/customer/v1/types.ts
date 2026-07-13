@@ -2,32 +2,119 @@
 
 export interface Customer {
 id?: string;
-business_id?: string;
+businessId?: string;
 name?: string;
 email?: string;
 phone?: string;
-total_tickets?: number;
-last_ticket_at?: string;
-created_at?: string;
+totalTickets?: number;
+lastTicketAt?: string;
+createdAt?: string;
+}
+
+export function decodeCustomer(v: any): Customer {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+name: v.name,
+email: v.email,
+phone: v.phone,
+totalTickets: v.total_tickets,
+lastTicketAt: v.last_ticket_at,
+createdAt: v.created_at,
+};
+}
+
+export function encodeCustomer(v: Customer): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.totalTickets !== undefined) { out.total_tickets = v.totalTickets; }
+if (v.lastTicketAt !== undefined) { out.last_ticket_at = v.lastTicketAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface ListCustomersRequest {
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListCustomersRequest(v: any): ListCustomersRequest {
+if (v === null || v === undefined) return v;
+return {
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListCustomersRequest(v: ListCustomersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface ListCustomersResponse {
 customers?: (Customer)[];
 total?: number;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListCustomersResponse(v: any): ListCustomersResponse {
+if (v === null || v === undefined) return v;
+return {
+customers: (v.customers !== undefined ? (v.customers as any[]).map(decodeCustomer) : v.customers),
+total: v.total,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListCustomersResponse(v: ListCustomersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customers !== undefined) { out.customers = (v.customers as any[]).map(encodeCustomer); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface GetCustomerRequest {
 id?: string;
 }
 
+export function decodeGetCustomerRequest(v: any): GetCustomerRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetCustomerRequest(v: GetCustomerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface GetCustomerResponse {
 customer?: Customer;
+}
+
+export function decodeGetCustomerResponse(v: any): GetCustomerResponse {
+if (v === null || v === undefined) return v;
+return {
+customer: (v.customer !== undefined ? decodeCustomer(v.customer) : v.customer),
+};
+}
+
+export function encodeGetCustomerResponse(v: GetCustomerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customer !== undefined) { out.customer = encodeCustomer(v.customer); }
+return out;
 }
 

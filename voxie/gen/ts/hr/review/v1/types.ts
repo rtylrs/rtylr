@@ -2,41 +2,146 @@
 
 export interface Review {
 id?: string;
-owner_id?: string;
-staff_id?: string;
-reviewer_id?: string;
+ownerId?: string;
+staffId?: string;
+reviewerId?: string;
 period?: string;
 rating?: number;
-goals_rating?: number;
-values_rating?: number;
-skills_rating?: number;
+goalsRating?: number;
+valuesRating?: number;
+skillsRating?: number;
 notes?: string;
 status?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeReview(v: any): Review {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+staffId: v.staff_id,
+reviewerId: v.reviewer_id,
+period: v.period,
+rating: v.rating,
+goalsRating: v.goals_rating,
+valuesRating: v.values_rating,
+skillsRating: v.skills_rating,
+notes: v.notes,
+status: v.status,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeReview(v: Review): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.reviewerId !== undefined) { out.reviewer_id = v.reviewerId; }
+if (v.period !== undefined) { out.period = v.period; }
+if (v.rating !== undefined) { out.rating = v.rating; }
+if (v.goalsRating !== undefined) { out.goals_rating = v.goalsRating; }
+if (v.valuesRating !== undefined) { out.values_rating = v.valuesRating; }
+if (v.skillsRating !== undefined) { out.skills_rating = v.skillsRating; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListReviewsRequest {
+}
+
+export function decodeListReviewsRequest(v: any): ListReviewsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListReviewsRequest(v: ListReviewsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListReviewsResponse {
 reviews?: (Review)[];
 }
 
+export function decodeListReviewsResponse(v: any): ListReviewsResponse {
+if (v === null || v === undefined) return v;
+return {
+reviews: (v.reviews !== undefined ? (v.reviews as any[]).map(decodeReview) : v.reviews),
+};
+}
+
+export function encodeListReviewsResponse(v: ListReviewsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.reviews !== undefined) { out.reviews = (v.reviews as any[]).map(encodeReview); }
+return out;
+}
+
 export interface CreateReviewRequest {
-staff_id?: string;
-reviewer_id?: string;
+staffId?: string;
+reviewerId?: string;
 period?: string;
 rating?: number;
-goals_rating?: number;
-values_rating?: number;
-skills_rating?: number;
+goalsRating?: number;
+valuesRating?: number;
+skillsRating?: number;
 notes?: string;
 status?: string;
+}
+
+export function decodeCreateReviewRequest(v: any): CreateReviewRequest {
+if (v === null || v === undefined) return v;
+return {
+staffId: v.staff_id,
+reviewerId: v.reviewer_id,
+period: v.period,
+rating: v.rating,
+goalsRating: v.goals_rating,
+valuesRating: v.values_rating,
+skillsRating: v.skills_rating,
+notes: v.notes,
+status: v.status,
+};
+}
+
+export function encodeCreateReviewRequest(v: CreateReviewRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.reviewerId !== undefined) { out.reviewer_id = v.reviewerId; }
+if (v.period !== undefined) { out.period = v.period; }
+if (v.rating !== undefined) { out.rating = v.rating; }
+if (v.goalsRating !== undefined) { out.goals_rating = v.goalsRating; }
+if (v.valuesRating !== undefined) { out.values_rating = v.valuesRating; }
+if (v.skillsRating !== undefined) { out.skills_rating = v.skillsRating; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface CreateReviewResponse {
 id?: string;
 message?: string;
+}
+
+export function decodeCreateReviewResponse(v: any): CreateReviewResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateReviewResponse(v: CreateReviewResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

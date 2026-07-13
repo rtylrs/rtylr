@@ -5,39 +5,149 @@ name?: string;
 color?: string;
 }
 
+export function decodeMilestoneProject(v: any): MilestoneProject {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+color: v.color,
+};
+}
+
+export function encodeMilestoneProject(v: MilestoneProject): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+return out;
+}
+
 export interface Milestone {
 id?: string;
-project_id?: string;
+projectId?: string;
 name?: string;
-target_date?: string;
+targetDate?: string;
 progress?: number;
-computed_progress?: number;
-done_count?: number;
-task_count?: number;
+computedProgress?: number;
+doneCount?: number;
+taskCount?: number;
 status?: string;
 description?: string;
 project?: MilestoneProject;
 }
 
+export function decodeMilestone(v: any): Milestone {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+projectId: v.project_id,
+name: v.name,
+targetDate: v.target_date,
+progress: v.progress,
+computedProgress: v.computed_progress,
+doneCount: v.done_count,
+taskCount: v.task_count,
+status: v.status,
+description: v.description,
+project: (v.project !== undefined ? decodeMilestoneProject(v.project) : v.project),
+};
+}
+
+export function encodeMilestone(v: Milestone): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.targetDate !== undefined) { out.target_date = v.targetDate; }
+if (v.progress !== undefined) { out.progress = v.progress; }
+if (v.computedProgress !== undefined) { out.computed_progress = v.computedProgress; }
+if (v.doneCount !== undefined) { out.done_count = v.doneCount; }
+if (v.taskCount !== undefined) { out.task_count = v.taskCount; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.project !== undefined) { out.project = encodeMilestoneProject(v.project); }
+return out;
+}
+
 export interface ListMilestonesRequest {
-project_id?: string;
-workspace_id?: string;
+projectId?: string;
+workspaceId?: string;
+}
+
+export function decodeListMilestonesRequest(v: any): ListMilestonesRequest {
+if (v === null || v === undefined) return v;
+return {
+projectId: v.project_id,
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeListMilestonesRequest(v: ListMilestonesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface ListMilestonesResponse {
 milestones?: (Milestone)[];
 }
 
+export function decodeListMilestonesResponse(v: any): ListMilestonesResponse {
+if (v === null || v === undefined) return v;
+return {
+milestones: (v.milestones !== undefined ? (v.milestones as any[]).map(decodeMilestone) : v.milestones),
+};
+}
+
+export function encodeListMilestonesResponse(v: ListMilestonesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.milestones !== undefined) { out.milestones = (v.milestones as any[]).map(encodeMilestone); }
+return out;
+}
+
 export interface CreateMilestoneRequest {
-project_id?: string;
-workspace_id?: string;
+projectId?: string;
+workspaceId?: string;
 name?: string;
 description?: string;
-target_date?: string;
+targetDate?: string;
+}
+
+export function decodeCreateMilestoneRequest(v: any): CreateMilestoneRequest {
+if (v === null || v === undefined) return v;
+return {
+projectId: v.project_id,
+workspaceId: v.workspace_id,
+name: v.name,
+description: v.description,
+targetDate: v.target_date,
+};
+}
+
+export function encodeCreateMilestoneRequest(v: CreateMilestoneRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.targetDate !== undefined) { out.target_date = v.targetDate; }
+return out;
 }
 
 export interface CreateMilestoneResponse {
 milestone?: Milestone;
+}
+
+export function decodeCreateMilestoneResponse(v: any): CreateMilestoneResponse {
+if (v === null || v === undefined) return v;
+return {
+milestone: (v.milestone !== undefined ? decodeMilestone(v.milestone) : v.milestone),
+};
+}
+
+export function encodeCreateMilestoneResponse(v: CreateMilestoneResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.milestone !== undefined) { out.milestone = encodeMilestone(v.milestone); }
+return out;
 }
 
 export interface UpdateMilestoneRequest {
@@ -45,9 +155,41 @@ id?: string;
 name?: string;
 description?: string;
 status?: string;
-target_date?: string;
+targetDate?: string;
+}
+
+export function decodeUpdateMilestoneRequest(v: any): UpdateMilestoneRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+description: v.description,
+status: v.status,
+targetDate: v.target_date,
+};
+}
+
+export function encodeUpdateMilestoneRequest(v: UpdateMilestoneRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.targetDate !== undefined) { out.target_date = v.targetDate; }
+return out;
 }
 
 export interface UpdateMilestoneResponse {
+}
+
+export function decodeUpdateMilestoneResponse(v: any): UpdateMilestoneResponse {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeUpdateMilestoneResponse(v: UpdateMilestoneResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 

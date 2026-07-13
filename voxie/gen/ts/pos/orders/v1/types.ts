@@ -2,179 +2,655 @@
 
 export interface OrderItem {
 id?: string;
-order_id?: string;
-menu_item_id?: string;
+orderId?: string;
+menuItemId?: string;
 name?: string;
 sku?: string;
 quantity?: number;
-unit_price?: number;
-discount_pct?: number;
-discount_amount?: number;
-tax_rate?: number;
+unitPrice?: number;
+discountPct?: number;
+discountAmount?: number;
+taxRate?: number;
 total?: number;
 notes?: string;
 status?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeOrderItem(v: any): OrderItem {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+orderId: v.order_id,
+menuItemId: v.menu_item_id,
+name: v.name,
+sku: v.sku,
+quantity: v.quantity,
+unitPrice: v.unit_price,
+discountPct: v.discount_pct,
+discountAmount: v.discount_amount,
+taxRate: v.tax_rate,
+total: v.total,
+notes: v.notes,
+status: v.status,
+createdAt: v.created_at,
+};
+}
+
+export function encodeOrderItem(v: OrderItem): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.menuItemId !== undefined) { out.menu_item_id = v.menuItemId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.unitPrice !== undefined) { out.unit_price = v.unitPrice; }
+if (v.discountPct !== undefined) { out.discount_pct = v.discountPct; }
+if (v.discountAmount !== undefined) { out.discount_amount = v.discountAmount; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface Order {
 id?: string;
-owner_id?: string;
-session_id?: string;
-table_id?: string;
-location_id?: string;
-order_number?: string;
+ownerId?: string;
+sessionId?: string;
+tableId?: string;
+locationId?: string;
+orderNumber?: string;
 type?: string;
 status?: string;
-customer_id?: string;
-customer_name?: string;
-staff_id?: string;
+customerId?: string;
+customerName?: string;
+staffId?: string;
 subtotal?: number;
-discount_amount?: number;
-tax_amount?: number;
+discountAmount?: number;
+taxAmount?: number;
 total?: number;
-payment_method?: string;
-payment_status?: string;
-amount_paid?: number;
-change_due?: number;
+paymentMethod?: string;
+paymentStatus?: string;
+amountPaid?: number;
+changeDue?: number;
 notes?: string;
-kitchen_notes?: string;
-created_at?: string;
-updated_at?: string;
-paid_at?: string;
+kitchenNotes?: string;
+createdAt?: string;
+updatedAt?: string;
+paidAt?: string;
 items?: (OrderItem)[];
 }
 
+export function decodeOrder(v: any): Order {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+sessionId: v.session_id,
+tableId: v.table_id,
+locationId: v.location_id,
+orderNumber: v.order_number,
+type: v.type,
+status: v.status,
+customerId: v.customer_id,
+customerName: v.customer_name,
+staffId: v.staff_id,
+subtotal: v.subtotal,
+discountAmount: v.discount_amount,
+taxAmount: v.tax_amount,
+total: v.total,
+paymentMethod: v.payment_method,
+paymentStatus: v.payment_status,
+amountPaid: v.amount_paid,
+changeDue: v.change_due,
+notes: v.notes,
+kitchenNotes: v.kitchen_notes,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+paidAt: v.paid_at,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeOrderItem) : v.items),
+};
+}
+
+export function encodeOrder(v: Order): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.sessionId !== undefined) { out.session_id = v.sessionId; }
+if (v.tableId !== undefined) { out.table_id = v.tableId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.customerName !== undefined) { out.customer_name = v.customerName; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.subtotal !== undefined) { out.subtotal = v.subtotal; }
+if (v.discountAmount !== undefined) { out.discount_amount = v.discountAmount; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.paymentMethod !== undefined) { out.payment_method = v.paymentMethod; }
+if (v.paymentStatus !== undefined) { out.payment_status = v.paymentStatus; }
+if (v.amountPaid !== undefined) { out.amount_paid = v.amountPaid; }
+if (v.changeDue !== undefined) { out.change_due = v.changeDue; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.kitchenNotes !== undefined) { out.kitchen_notes = v.kitchenNotes; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.paidAt !== undefined) { out.paid_at = v.paidAt; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeOrderItem); }
+return out;
+}
+
 export interface CreateOrderItemInput {
-menu_item_id?: string;
+menuItemId?: string;
 name?: string;
 sku?: string;
 quantity?: number;
-unit_price?: number;
-discount_pct?: number;
-tax_rate?: number;
+unitPrice?: number;
+discountPct?: number;
+taxRate?: number;
 notes?: string;
+}
+
+export function decodeCreateOrderItemInput(v: any): CreateOrderItemInput {
+if (v === null || v === undefined) return v;
+return {
+menuItemId: v.menu_item_id,
+name: v.name,
+sku: v.sku,
+quantity: v.quantity,
+unitPrice: v.unit_price,
+discountPct: v.discount_pct,
+taxRate: v.tax_rate,
+notes: v.notes,
+};
+}
+
+export function encodeCreateOrderItemInput(v: CreateOrderItemInput): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.menuItemId !== undefined) { out.menu_item_id = v.menuItemId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.unitPrice !== undefined) { out.unit_price = v.unitPrice; }
+if (v.discountPct !== undefined) { out.discount_pct = v.discountPct; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
 }
 
 export interface SplitGroup {
-item_ids?: (string)[];
+itemIds?: (string)[];
+}
+
+export function decodeSplitGroup(v: any): SplitGroup {
+if (v === null || v === undefined) return v;
+return {
+itemIds: v.item_ids,
+};
+}
+
+export function encodeSplitGroup(v: SplitGroup): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.itemIds !== undefined) { out.item_ids = v.itemIds; }
+return out;
 }
 
 export interface CreateOrderRequest {
-session_id?: string;
-table_id?: string;
-location_id?: string;
+sessionId?: string;
+tableId?: string;
+locationId?: string;
 type?: string;
-customer_id?: string;
-customer_name?: string;
-payment_method?: string;
+customerId?: string;
+customerName?: string;
+paymentMethod?: string;
 notes?: string;
-kitchen_notes?: string;
+kitchenNotes?: string;
 items?: (CreateOrderItemInput)[];
 }
 
+export function decodeCreateOrderRequest(v: any): CreateOrderRequest {
+if (v === null || v === undefined) return v;
+return {
+sessionId: v.session_id,
+tableId: v.table_id,
+locationId: v.location_id,
+type: v.type,
+customerId: v.customer_id,
+customerName: v.customer_name,
+paymentMethod: v.payment_method,
+notes: v.notes,
+kitchenNotes: v.kitchen_notes,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeCreateOrderItemInput) : v.items),
+};
+}
+
+export function encodeCreateOrderRequest(v: CreateOrderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.sessionId !== undefined) { out.session_id = v.sessionId; }
+if (v.tableId !== undefined) { out.table_id = v.tableId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.customerName !== undefined) { out.customer_name = v.customerName; }
+if (v.paymentMethod !== undefined) { out.payment_method = v.paymentMethod; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.kitchenNotes !== undefined) { out.kitchen_notes = v.kitchenNotes; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeCreateOrderItemInput); }
+return out;
+}
+
 export interface CreateOrderResponse {
-order_id?: string;
-order_number?: string;
+orderId?: string;
+orderNumber?: string;
 message?: string;
 }
 
+export function decodeCreateOrderResponse(v: any): CreateOrderResponse {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+orderNumber: v.order_number,
+message: v.message,
+};
+}
+
+export function encodeCreateOrderResponse(v: CreateOrderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface PublicOrderItemInput {
-menu_item_id?: string;
+menuItemId?: string;
 name?: string;
 quantity?: number;
-unit_price?: number;
+unitPrice?: number;
 notes?: string;
 }
 
+export function decodePublicOrderItemInput(v: any): PublicOrderItemInput {
+if (v === null || v === undefined) return v;
+return {
+menuItemId: v.menu_item_id,
+name: v.name,
+quantity: v.quantity,
+unitPrice: v.unit_price,
+notes: v.notes,
+};
+}
+
+export function encodePublicOrderItemInput(v: PublicOrderItemInput): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.menuItemId !== undefined) { out.menu_item_id = v.menuItemId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.unitPrice !== undefined) { out.unit_price = v.unitPrice; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
+}
+
 export interface CreatePublicOrderRequest {
-owner_id?: string;
-customer_name?: string;
-customer_phone?: string;
-customer_email?: string;
+ownerId?: string;
+customerName?: string;
+customerPhone?: string;
+customerEmail?: string;
 notes?: string;
 items?: (PublicOrderItemInput)[];
 }
 
+export function decodeCreatePublicOrderRequest(v: any): CreatePublicOrderRequest {
+if (v === null || v === undefined) return v;
+return {
+ownerId: v.owner_id,
+customerName: v.customer_name,
+customerPhone: v.customer_phone,
+customerEmail: v.customer_email,
+notes: v.notes,
+items: (v.items !== undefined ? (v.items as any[]).map(decodePublicOrderItemInput) : v.items),
+};
+}
+
+export function encodeCreatePublicOrderRequest(v: CreatePublicOrderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.customerName !== undefined) { out.customer_name = v.customerName; }
+if (v.customerPhone !== undefined) { out.customer_phone = v.customerPhone; }
+if (v.customerEmail !== undefined) { out.customer_email = v.customerEmail; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodePublicOrderItemInput); }
+return out;
+}
+
 export interface CreatePublicOrderResponse {
-order_id?: string;
-order_number?: string;
+orderId?: string;
+orderNumber?: string;
 status?: string;
 }
 
+export function decodeCreatePublicOrderResponse(v: any): CreatePublicOrderResponse {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+orderNumber: v.order_number,
+status: v.status,
+};
+}
+
+export function encodeCreatePublicOrderResponse(v: CreatePublicOrderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
 export interface GetOrderDetailRequest {
-order_id?: string;
+orderId?: string;
+}
+
+export function decodeGetOrderDetailRequest(v: any): GetOrderDetailRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+};
+}
+
+export function encodeGetOrderDetailRequest(v: GetOrderDetailRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+return out;
 }
 
 export interface GetOrderDetailResponse {
 order?: Order;
 }
 
+export function decodeGetOrderDetailResponse(v: any): GetOrderDetailResponse {
+if (v === null || v === undefined) return v;
+return {
+order: (v.order !== undefined ? decodeOrder(v.order) : v.order),
+};
+}
+
+export function encodeGetOrderDetailResponse(v: GetOrderDetailResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.order !== undefined) { out.order = encodeOrder(v.order); }
+return out;
+}
+
 export interface GetPublicOrderStatusRequest {
-order_id?: string;
-business_id?: string;
+orderId?: string;
+businessId?: string;
+}
+
+export function decodeGetPublicOrderStatusRequest(v: any): GetPublicOrderStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+businessId: v.business_id,
+};
+}
+
+export function encodeGetPublicOrderStatusRequest(v: GetPublicOrderStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+return out;
 }
 
 export interface GetPublicOrderStatusResponse {
-order_id?: string;
-order_number?: string;
+orderId?: string;
+orderNumber?: string;
 status?: string;
 }
 
+export function decodeGetPublicOrderStatusResponse(v: any): GetPublicOrderStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+orderNumber: v.order_number,
+status: v.status,
+};
+}
+
+export function encodeGetPublicOrderStatusResponse(v: GetPublicOrderStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
 export interface ListOrdersRequest {
-session_id?: string;
+sessionId?: string;
 status?: string;
-date_from?: string;
-date_to?: string;
+dateFrom?: string;
+dateTo?: string;
 search?: string;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListOrdersRequest(v: any): ListOrdersRequest {
+if (v === null || v === undefined) return v;
+return {
+sessionId: v.session_id,
+status: v.status,
+dateFrom: v.date_from,
+dateTo: v.date_to,
+search: v.search,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListOrdersRequest(v: ListOrdersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.sessionId !== undefined) { out.session_id = v.sessionId; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.dateFrom !== undefined) { out.date_from = v.dateFrom; }
+if (v.dateTo !== undefined) { out.date_to = v.dateTo; }
+if (v.search !== undefined) { out.search = v.search; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface ListOrdersResponse {
 orders?: (Order)[];
 total?: number;
-has_more?: boolean;
+hasMore?: boolean;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListOrdersResponse(v: any): ListOrdersResponse {
+if (v === null || v === undefined) return v;
+return {
+orders: (v.orders !== undefined ? (v.orders as any[]).map(decodeOrder) : v.orders),
+total: v.total,
+hasMore: v.has_more,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListOrdersResponse(v: ListOrdersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orders !== undefined) { out.orders = (v.orders as any[]).map(encodeOrder); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface SendToKitchenRequest {
-order_id?: string;
+orderId?: string;
+}
+
+export function decodeSendToKitchenRequest(v: any): SendToKitchenRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+};
+}
+
+export function encodeSendToKitchenRequest(v: SendToKitchenRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+return out;
 }
 
 export interface SendToKitchenResponse {
 success?: boolean;
 }
 
+export function decodeSendToKitchenResponse(v: any): SendToKitchenResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeSendToKitchenResponse(v: SendToKitchenResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface TransferTableRequest {
-order_id?: string;
-new_table_id?: string;
+orderId?: string;
+newTableId?: string;
+}
+
+export function decodeTransferTableRequest(v: any): TransferTableRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+newTableId: v.new_table_id,
+};
+}
+
+export function encodeTransferTableRequest(v: TransferTableRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.newTableId !== undefined) { out.new_table_id = v.newTableId; }
+return out;
 }
 
 export interface TransferTableResponse {
 success?: boolean;
 }
 
+export function decodeTransferTableResponse(v: any): TransferTableResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeTransferTableResponse(v: TransferTableResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface UpdateOrderStatusBody {
 status?: string;
 }
 
+export function decodeUpdateOrderStatusBody(v: any): UpdateOrderStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateOrderStatusBody(v: UpdateOrderStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
 export interface UpdateOrderStatusRequest {
-order_id?: string;
+orderId?: string;
 body?: UpdateOrderStatusBody;
+}
+
+export function decodeUpdateOrderStatusRequest(v: any): UpdateOrderStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+body: (v.body !== undefined ? decodeUpdateOrderStatusBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateOrderStatusRequest(v: UpdateOrderStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.body !== undefined) { out.body = encodeUpdateOrderStatusBody(v.body); }
+return out;
 }
 
 export interface UpdateOrderStatusResponse {
 message?: string;
 }
 
+export function decodeUpdateOrderStatusResponse(v: any): UpdateOrderStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateOrderStatusResponse(v: UpdateOrderStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface VoidOrderRequest {
-order_id?: string;
+orderId?: string;
 reason?: string;
+}
+
+export function decodeVoidOrderRequest(v: any): VoidOrderRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+reason: v.reason,
+};
+}
+
+export function encodeVoidOrderRequest(v: VoidOrderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+return out;
 }
 
 export interface VoidOrderResponse {
 message?: string;
+}
+
+export function decodeVoidOrderResponse(v: any): VoidOrderResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeVoidOrderResponse(v: VoidOrderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

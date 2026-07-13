@@ -2,35 +2,121 @@
 
 export interface Workspace {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 description?: string;
 icon?: string;
 color?: string;
-is_default?: boolean;
-created_by?: string;
-created_at?: string;
-updated_at?: string;
-member_count?: number;
-is_personal?: boolean;
+isDefault?: boolean;
+createdBy?: string;
+createdAt?: string;
+updatedAt?: string;
+memberCount?: number;
+isPersonal?: boolean;
+}
+
+export function decodeWorkspace(v: any): Workspace {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+description: v.description,
+icon: v.icon,
+color: v.color,
+isDefault: v.is_default,
+createdBy: v.created_by,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+memberCount: v.member_count,
+isPersonal: v.is_personal,
+};
+}
+
+export function encodeWorkspace(v: Workspace): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+if (v.createdBy !== undefined) { out.created_by = v.createdBy; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.memberCount !== undefined) { out.member_count = v.memberCount; }
+if (v.isPersonal !== undefined) { out.is_personal = v.isPersonal; }
+return out;
 }
 
 export interface WorkspaceMember {
 id?: string;
-workspace_id?: string;
-user_id?: string;
+workspaceId?: string;
+userId?: string;
 name?: string;
 email?: string;
 role?: string;
-invited_by?: string;
-joined_at?: string;
+invitedBy?: string;
+joinedAt?: string;
+}
+
+export function decodeWorkspaceMember(v: any): WorkspaceMember {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+workspaceId: v.workspace_id,
+userId: v.user_id,
+name: v.name,
+email: v.email,
+role: v.role,
+invitedBy: v.invited_by,
+joinedAt: v.joined_at,
+};
+}
+
+export function encodeWorkspaceMember(v: WorkspaceMember): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.invitedBy !== undefined) { out.invited_by = v.invitedBy; }
+if (v.joinedAt !== undefined) { out.joined_at = v.joinedAt; }
+return out;
 }
 
 export interface ListWorkspacesRequest {
 }
 
+export function decodeListWorkspacesRequest(v: any): ListWorkspacesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListWorkspacesRequest(v: ListWorkspacesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListWorkspacesResponse {
 workspaces?: (Workspace)[];
+}
+
+export function decodeListWorkspacesResponse(v: any): ListWorkspacesResponse {
+if (v === null || v === undefined) return v;
+return {
+workspaces: (v.workspaces !== undefined ? (v.workspaces as any[]).map(decodeWorkspace) : v.workspaces),
+};
+}
+
+export function encodeListWorkspacesResponse(v: ListWorkspacesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaces !== undefined) { out.workspaces = (v.workspaces as any[]).map(encodeWorkspace); }
+return out;
 }
 
 export interface CreateWorkspaceRequest {
@@ -40,8 +126,40 @@ icon?: string;
 color?: string;
 }
 
+export function decodeCreateWorkspaceRequest(v: any): CreateWorkspaceRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+description: v.description,
+icon: v.icon,
+color: v.color,
+};
+}
+
+export function encodeCreateWorkspaceRequest(v: CreateWorkspaceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.color !== undefined) { out.color = v.color; }
+return out;
+}
+
 export interface CreateWorkspaceResponse {
 workspace?: Workspace;
+}
+
+export function decodeCreateWorkspaceResponse(v: any): CreateWorkspaceResponse {
+if (v === null || v === undefined) return v;
+return {
+workspace: (v.workspace !== undefined ? decodeWorkspace(v.workspace) : v.workspace),
+};
+}
+
+export function encodeCreateWorkspaceResponse(v: CreateWorkspaceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspace !== undefined) { out.workspace = encodeWorkspace(v.workspace); }
+return out;
 }
 
 export interface UpdateWorkspaceBody {
@@ -51,57 +169,244 @@ icon?: string;
 color?: string;
 }
 
+export function decodeUpdateWorkspaceBody(v: any): UpdateWorkspaceBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+description: v.description,
+icon: v.icon,
+color: v.color,
+};
+}
+
+export function encodeUpdateWorkspaceBody(v: UpdateWorkspaceBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.color !== undefined) { out.color = v.color; }
+return out;
+}
+
 export interface UpdateWorkspaceRequest {
 id?: string;
 body?: UpdateWorkspaceBody;
+}
+
+export function decodeUpdateWorkspaceRequest(v: any): UpdateWorkspaceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateWorkspaceBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateWorkspaceRequest(v: UpdateWorkspaceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateWorkspaceBody(v.body); }
+return out;
 }
 
 export interface UpdateWorkspaceResponse {
 message?: string;
 }
 
+export function decodeUpdateWorkspaceResponse(v: any): UpdateWorkspaceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateWorkspaceResponse(v: UpdateWorkspaceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteWorkspaceRequest {
 id?: string;
+}
+
+export function decodeDeleteWorkspaceRequest(v: any): DeleteWorkspaceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteWorkspaceRequest(v: DeleteWorkspaceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteWorkspaceResponse {
 message?: string;
 }
 
+export function decodeDeleteWorkspaceResponse(v: any): DeleteWorkspaceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteWorkspaceResponse(v: DeleteWorkspaceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListWorkspaceMembersRequest {
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeListWorkspaceMembersRequest(v: any): ListWorkspaceMembersRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeListWorkspaceMembersRequest(v: ListWorkspaceMembersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface ListWorkspaceMembersResponse {
 members?: (WorkspaceMember)[];
 }
 
+export function decodeListWorkspaceMembersResponse(v: any): ListWorkspaceMembersResponse {
+if (v === null || v === undefined) return v;
+return {
+members: (v.members !== undefined ? (v.members as any[]).map(decodeWorkspaceMember) : v.members),
+};
+}
+
+export function encodeListWorkspaceMembersResponse(v: ListWorkspaceMembersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.members !== undefined) { out.members = (v.members as any[]).map(encodeWorkspaceMember); }
+return out;
+}
+
 export interface AddWorkspaceMemberRequest {
-workspace_id?: string;
-user_id?: string;
+workspaceId?: string;
+userId?: string;
 role?: string;
+}
+
+export function decodeAddWorkspaceMemberRequest(v: any): AddWorkspaceMemberRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+userId: v.user_id,
+role: v.role,
+};
+}
+
+export function encodeAddWorkspaceMemberRequest(v: AddWorkspaceMemberRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.role !== undefined) { out.role = v.role; }
+return out;
 }
 
 export interface AddWorkspaceMemberResponse {
 message?: string;
 }
 
+export function decodeAddWorkspaceMemberResponse(v: any): AddWorkspaceMemberResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeAddWorkspaceMemberResponse(v: AddWorkspaceMemberResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface RemoveWorkspaceMemberRequest {
-workspace_id?: string;
-user_id?: string;
+workspaceId?: string;
+userId?: string;
+}
+
+export function decodeRemoveWorkspaceMemberRequest(v: any): RemoveWorkspaceMemberRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+userId: v.user_id,
+};
+}
+
+export function encodeRemoveWorkspaceMemberRequest(v: RemoveWorkspaceMemberRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+return out;
 }
 
 export interface RemoveWorkspaceMemberResponse {
 message?: string;
 }
 
+export function decodeRemoveWorkspaceMemberResponse(v: any): RemoveWorkspaceMemberResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeRemoveWorkspaceMemberResponse(v: RemoveWorkspaceMemberResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateWorkspaceMemberRoleRequest {
-workspace_id?: string;
-user_id?: string;
+workspaceId?: string;
+userId?: string;
 role?: string;
+}
+
+export function decodeUpdateWorkspaceMemberRoleRequest(v: any): UpdateWorkspaceMemberRoleRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+userId: v.user_id,
+role: v.role,
+};
+}
+
+export function encodeUpdateWorkspaceMemberRoleRequest(v: UpdateWorkspaceMemberRoleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.role !== undefined) { out.role = v.role; }
+return out;
 }
 
 export interface UpdateWorkspaceMemberRoleResponse {
 message?: string;
+}
+
+export function decodeUpdateWorkspaceMemberRoleResponse(v: any): UpdateWorkspaceMemberRoleResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateWorkspaceMemberRoleResponse(v: UpdateWorkspaceMemberRoleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

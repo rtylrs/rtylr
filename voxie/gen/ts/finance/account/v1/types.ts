@@ -2,14 +2,43 @@
 
 export interface Account {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 type?: string;
 currency?: string;
 balance?: number;
-is_active?: boolean;
-created_at?: string;
+isActive?: boolean;
+createdAt?: string;
 code?: string;
+}
+
+export function decodeAccount(v: any): Account {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+type: v.type,
+currency: v.currency,
+balance: v.balance,
+isActive: v.is_active,
+createdAt: v.created_at,
+code: v.code,
+};
+}
+
+export function encodeAccount(v: Account): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.balance !== undefined) { out.balance = v.balance; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.code !== undefined) { out.code = v.code; }
+return out;
 }
 
 export interface ChartOfAccountsNode {
@@ -20,13 +49,57 @@ type?: string;
 children?: (ChartOfAccountsNode)[];
 }
 
+export function decodeChartOfAccountsNode(v: any): ChartOfAccountsNode {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+code: v.code,
+type: v.type,
+children: (v.children !== undefined ? (v.children as any[]).map(decodeChartOfAccountsNode) : v.children),
+};
+}
+
+export function encodeChartOfAccountsNode(v: ChartOfAccountsNode): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.code !== undefined) { out.code = v.code; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.children !== undefined) { out.children = (v.children as any[]).map(encodeChartOfAccountsNode); }
+return out;
+}
+
 export interface CreateAccountRequest {
 name?: string;
 type?: string;
 currency?: string;
 balance?: number;
-is_active?: boolean;
+isActive?: boolean;
 code?: string;
+}
+
+export function decodeCreateAccountRequest(v: any): CreateAccountRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+type: v.type,
+currency: v.currency,
+balance: v.balance,
+isActive: v.is_active,
+code: v.code,
+};
+}
+
+export function encodeCreateAccountRequest(v: CreateAccountRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.balance !== undefined) { out.balance = v.balance; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.code !== undefined) { out.code = v.code; }
+return out;
 }
 
 export interface CreateAccountResponse {
@@ -34,26 +107,115 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateAccountResponse(v: any): CreateAccountResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateAccountResponse(v: CreateAccountResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteAccountRequest {
 id?: string;
+}
+
+export function decodeDeleteAccountRequest(v: any): DeleteAccountRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteAccountRequest(v: DeleteAccountRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteAccountResponse {
 message?: string;
 }
 
+export function decodeDeleteAccountResponse(v: any): DeleteAccountResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteAccountResponse(v: DeleteAccountResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetChartOfAccountsRequest {
+}
+
+export function decodeGetChartOfAccountsRequest(v: any): GetChartOfAccountsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetChartOfAccountsRequest(v: GetChartOfAccountsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetChartOfAccountsResponse {
 tree?: (ChartOfAccountsNode)[];
 }
 
+export function decodeGetChartOfAccountsResponse(v: any): GetChartOfAccountsResponse {
+if (v === null || v === undefined) return v;
+return {
+tree: (v.tree !== undefined ? (v.tree as any[]).map(decodeChartOfAccountsNode) : v.tree),
+};
+}
+
+export function encodeGetChartOfAccountsResponse(v: GetChartOfAccountsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.tree !== undefined) { out.tree = (v.tree as any[]).map(encodeChartOfAccountsNode); }
+return out;
+}
+
 export interface ListAccountsRequest {
+}
+
+export function decodeListAccountsRequest(v: any): ListAccountsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListAccountsRequest(v: ListAccountsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListAccountsResponse {
 accounts?: (Account)[];
+}
+
+export function decodeListAccountsResponse(v: any): ListAccountsResponse {
+if (v === null || v === undefined) return v;
+return {
+accounts: (v.accounts !== undefined ? (v.accounts as any[]).map(decodeAccount) : v.accounts),
+};
+}
+
+export function encodeListAccountsResponse(v: ListAccountsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.accounts !== undefined) { out.accounts = (v.accounts as any[]).map(encodeAccount); }
+return out;
 }
 
 export interface UpdateAccountBody {
@@ -61,8 +223,31 @@ name?: string;
 type?: string;
 currency?: string;
 balance?: number;
-is_active?: boolean;
+isActive?: boolean;
 code?: string;
+}
+
+export function decodeUpdateAccountBody(v: any): UpdateAccountBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+type: v.type,
+currency: v.currency,
+balance: v.balance,
+isActive: v.is_active,
+code: v.code,
+};
+}
+
+export function encodeUpdateAccountBody(v: UpdateAccountBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.balance !== undefined) { out.balance = v.balance; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.code !== undefined) { out.code = v.code; }
+return out;
 }
 
 export interface UpdateAccountRequest {
@@ -70,7 +255,35 @@ id?: string;
 body?: UpdateAccountBody;
 }
 
+export function decodeUpdateAccountRequest(v: any): UpdateAccountRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateAccountBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateAccountRequest(v: UpdateAccountRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateAccountBody(v.body); }
+return out;
+}
+
 export interface UpdateAccountResponse {
 message?: string;
+}
+
+export function decodeUpdateAccountResponse(v: any): UpdateAccountResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateAccountResponse(v: UpdateAccountResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

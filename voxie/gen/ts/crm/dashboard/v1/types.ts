@@ -2,21 +2,76 @@
 
 export interface TopCustomer {
 id?: string;
-first_name?: string;
-last_name?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
-total_spent?: number;
-loyalty_points?: string;
-loyalty_tier?: string;
+totalSpent?: number;
+loyaltyPoints?: string;
+loyaltyTier?: string;
+}
+
+export function decodeTopCustomer(v: any): TopCustomer {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+totalSpent: v.total_spent,
+loyaltyPoints: v.loyalty_points,
+loyaltyTier: v.loyalty_tier,
+};
+}
+
+export function encodeTopCustomer(v: TopCustomer): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.totalSpent !== undefined) { out.total_spent = v.totalSpent; }
+if (v.loyaltyPoints !== undefined) { out.loyalty_points = v.loyaltyPoints; }
+if (v.loyaltyTier !== undefined) { out.loyalty_tier = v.loyaltyTier; }
+return out;
 }
 
 export interface GetDashboardRequest {
 }
 
+export function decodeGetDashboardRequest(v: any): GetDashboardRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetDashboardRequest(v: GetDashboardRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetDashboardResponse {
-total_customers?: string;
-new_this_month?: string;
-active_loyalty_members?: string;
-top_customers?: (TopCustomer)[];
+totalCustomers?: string;
+newThisMonth?: string;
+activeLoyaltyMembers?: string;
+topCustomers?: (TopCustomer)[];
+}
+
+export function decodeGetDashboardResponse(v: any): GetDashboardResponse {
+if (v === null || v === undefined) return v;
+return {
+totalCustomers: v.total_customers,
+newThisMonth: v.new_this_month,
+activeLoyaltyMembers: v.active_loyalty_members,
+topCustomers: (v.top_customers !== undefined ? (v.top_customers as any[]).map(decodeTopCustomer) : v.top_customers),
+};
+}
+
+export function encodeGetDashboardResponse(v: GetDashboardResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.totalCustomers !== undefined) { out.total_customers = v.totalCustomers; }
+if (v.newThisMonth !== undefined) { out.new_this_month = v.newThisMonth; }
+if (v.activeLoyaltyMembers !== undefined) { out.active_loyalty_members = v.activeLoyaltyMembers; }
+if (v.topCustomers !== undefined) { out.top_customers = (v.topCustomers as any[]).map(encodeTopCustomer); }
+return out;
 }
 

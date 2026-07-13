@@ -2,43 +2,140 @@
 
 export interface TimeEntryPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-project_id?: string;
-task_id?: string;
-category_id?: string;
+ownerId?: string;
+employeeId?: string;
+projectId?: string;
+taskId?: string;
+categoryId?: string;
 date?: string;
-duration_minutes?: number;
-start_time?: string;
-end_time?: string;
+durationMinutes?: number;
+startTime?: string;
+endTime?: string;
 description?: string;
-is_billable?: boolean;
+isBillable?: boolean;
 status?: string;
-rejection_reason?: string;
-approved_by?: string;
+rejectionReason?: string;
+approvedBy?: string;
 source?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeTimeEntryPayload(v: any): TimeEntryPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+projectId: v.project_id,
+taskId: v.task_id,
+categoryId: v.category_id,
+date: v.date,
+durationMinutes: v.duration_minutes,
+startTime: v.start_time,
+endTime: v.end_time,
+description: v.description,
+isBillable: v.is_billable,
+status: v.status,
+rejectionReason: v.rejection_reason,
+approvedBy: v.approved_by,
+source: v.source,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeTimeEntryPayload(v: TimeEntryPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
+if (v.date !== undefined) { out.date = v.date; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.isBillable !== undefined) { out.is_billable = v.isBillable; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason; }
+if (v.approvedBy !== undefined) { out.approved_by = v.approvedBy; }
+if (v.source !== undefined) { out.source = v.source; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface TimesheetPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-period_start?: string;
-period_end?: string;
+ownerId?: string;
+employeeId?: string;
+periodStart?: string;
+periodEnd?: string;
 status?: string;
-current_approval_level?: number;
-submitted_at?: string;
-total_minutes?: number;
+currentApprovalLevel?: number;
+submittedAt?: string;
+totalMinutes?: number;
 entries?: (TimeEntryPayload)[];
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeTimesheetPayload(v: any): TimesheetPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+periodStart: v.period_start,
+periodEnd: v.period_end,
+status: v.status,
+currentApprovalLevel: v.current_approval_level,
+submittedAt: v.submitted_at,
+totalMinutes: v.total_minutes,
+entries: (v.entries !== undefined ? (v.entries as any[]).map(decodeTimeEntryPayload) : v.entries),
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeTimesheetPayload(v: TimesheetPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.periodStart !== undefined) { out.period_start = v.periodStart; }
+if (v.periodEnd !== undefined) { out.period_end = v.periodEnd; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.currentApprovalLevel !== undefined) { out.current_approval_level = v.currentApprovalLevel; }
+if (v.submittedAt !== undefined) { out.submitted_at = v.submittedAt; }
+if (v.totalMinutes !== undefined) { out.total_minutes = v.totalMinutes; }
+if (v.entries !== undefined) { out.entries = (v.entries as any[]).map(encodeTimeEntryPayload); }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListTimeEntriesRequest {
-employee_id?: string;
+employeeId?: string;
 date?: string;
+}
+
+export function decodeListTimeEntriesRequest(v: any): ListTimeEntriesRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+date: v.date,
+};
+}
+
+export function encodeListTimeEntriesRequest(v: ListTimeEntriesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.date !== undefined) { out.date = v.date; }
+return out;
 }
 
 export interface ListTimeEntriesResponse {
@@ -48,27 +145,107 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListTimeEntriesResponse(v: any): ListTimeEntriesResponse {
+if (v === null || v === undefined) return v;
+return {
+entries: (v.entries !== undefined ? (v.entries as any[]).map(decodeTimeEntryPayload) : v.entries),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListTimeEntriesResponse(v: ListTimeEntriesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.entries !== undefined) { out.entries = (v.entries as any[]).map(encodeTimeEntryPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateTimeEntryRequest {
-employee_id?: string;
-project_id?: string;
-task_id?: string;
-category_id?: string;
+employeeId?: string;
+projectId?: string;
+taskId?: string;
+categoryId?: string;
 date?: string;
-duration_minutes?: number;
-start_time?: string;
-end_time?: string;
+durationMinutes?: number;
+startTime?: string;
+endTime?: string;
 description?: string;
-is_billable?: boolean;
+isBillable?: boolean;
 source?: string;
+}
+
+export function decodeCreateTimeEntryRequest(v: any): CreateTimeEntryRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+projectId: v.project_id,
+taskId: v.task_id,
+categoryId: v.category_id,
+date: v.date,
+durationMinutes: v.duration_minutes,
+startTime: v.start_time,
+endTime: v.end_time,
+description: v.description,
+isBillable: v.is_billable,
+source: v.source,
+};
+}
+
+export function encodeCreateTimeEntryRequest(v: CreateTimeEntryRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
+if (v.date !== undefined) { out.date = v.date; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.isBillable !== undefined) { out.is_billable = v.isBillable; }
+if (v.source !== undefined) { out.source = v.source; }
+return out;
 }
 
 export interface CreateTimeEntryResponse {
 entry?: TimeEntryPayload;
 }
 
+export function decodeCreateTimeEntryResponse(v: any): CreateTimeEntryResponse {
+if (v === null || v === undefined) return v;
+return {
+entry: (v.entry !== undefined ? decodeTimeEntryPayload(v.entry) : v.entry),
+};
+}
+
+export function encodeCreateTimeEntryResponse(v: CreateTimeEntryResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.entry !== undefined) { out.entry = encodeTimeEntryPayload(v.entry); }
+return out;
+}
+
 export interface ListTimesheetsRequest {
-employee_id?: string;
+employeeId?: string;
 status?: string;
+}
+
+export function decodeListTimesheetsRequest(v: any): ListTimesheetsRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+status: v.status,
+};
+}
+
+export function encodeListTimesheetsRequest(v: ListTimesheetsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface ListTimesheetsResponse {
@@ -78,17 +255,77 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListTimesheetsResponse(v: any): ListTimesheetsResponse {
+if (v === null || v === undefined) return v;
+return {
+timesheets: (v.timesheets !== undefined ? (v.timesheets as any[]).map(decodeTimesheetPayload) : v.timesheets),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListTimesheetsResponse(v: ListTimesheetsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.timesheets !== undefined) { out.timesheets = (v.timesheets as any[]).map(encodeTimesheetPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface SubmitTimesheetRequest {
-timesheet_id?: string;
+timesheetId?: string;
+}
+
+export function decodeSubmitTimesheetRequest(v: any): SubmitTimesheetRequest {
+if (v === null || v === undefined) return v;
+return {
+timesheetId: v.timesheet_id,
+};
+}
+
+export function encodeSubmitTimesheetRequest(v: SubmitTimesheetRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.timesheetId !== undefined) { out.timesheet_id = v.timesheetId; }
+return out;
 }
 
 export interface SubmitTimesheetResponse {
 success?: boolean;
 }
 
+export function decodeSubmitTimesheetResponse(v: any): SubmitTimesheetResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeSubmitTimesheetResponse(v: SubmitTimesheetResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface ApproveTimesheetBody {
 approved?: boolean;
-rejection_reason?: string;
+rejectionReason?: string;
+}
+
+export function decodeApproveTimesheetBody(v: any): ApproveTimesheetBody {
+if (v === null || v === undefined) return v;
+return {
+approved: v.approved,
+rejectionReason: v.rejection_reason,
+};
+}
+
+export function encodeApproveTimesheetBody(v: ApproveTimesheetBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.approved !== undefined) { out.approved = v.approved; }
+if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason; }
+return out;
 }
 
 export interface ApproveTimesheetRequest {
@@ -96,7 +333,35 @@ id?: string;
 body?: ApproveTimesheetBody;
 }
 
+export function decodeApproveTimesheetRequest(v: any): ApproveTimesheetRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeApproveTimesheetBody(v.body) : v.body),
+};
+}
+
+export function encodeApproveTimesheetRequest(v: ApproveTimesheetRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeApproveTimesheetBody(v.body); }
+return out;
+}
+
 export interface ApproveTimesheetResponse {
 success?: boolean;
+}
+
+export function decodeApproveTimesheetResponse(v: any): ApproveTimesheetResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeApproveTimesheetResponse(v: ApproveTimesheetResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 

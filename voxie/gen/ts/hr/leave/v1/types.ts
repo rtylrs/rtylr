@@ -2,52 +2,172 @@
 
 export interface LeaveTypePayload {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
-is_paid?: boolean;
-requires_approval?: boolean;
-accrual_rule?: string;
-max_carryover_days?: number;
-min_notice_days?: number;
-requires_documentation_after_days?: number;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isPaid?: boolean;
+requiresApproval?: boolean;
+accrualRule?: string;
+maxCarryoverDays?: number;
+minNoticeDays?: number;
+requiresDocumentationAfterDays?: number;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeLeaveTypePayload(v: any): LeaveTypePayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+isPaid: v.is_paid,
+requiresApproval: v.requires_approval,
+accrualRule: v.accrual_rule,
+maxCarryoverDays: v.max_carryover_days,
+minNoticeDays: v.min_notice_days,
+requiresDocumentationAfterDays: v.requires_documentation_after_days,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeLeaveTypePayload(v: LeaveTypePayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.isPaid !== undefined) { out.is_paid = v.isPaid; }
+if (v.requiresApproval !== undefined) { out.requires_approval = v.requiresApproval; }
+if (v.accrualRule !== undefined) { out.accrual_rule = v.accrualRule; }
+if (v.maxCarryoverDays !== undefined) { out.max_carryover_days = v.maxCarryoverDays; }
+if (v.minNoticeDays !== undefined) { out.min_notice_days = v.minNoticeDays; }
+if (v.requiresDocumentationAfterDays !== undefined) { out.requires_documentation_after_days = v.requiresDocumentationAfterDays; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface LeaveRequestPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-leave_type_id?: string;
-start_date?: string;
-end_date?: string;
-total_days?: number;
+ownerId?: string;
+employeeId?: string;
+leaveTypeId?: string;
+startDate?: string;
+endDate?: string;
+totalDays?: number;
 notes?: string;
 status?: string;
-current_approval_level?: number;
-rejection_reason?: string;
-created_at?: string;
-updated_at?: string;
+currentApprovalLevel?: number;
+rejectionReason?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeLeaveRequestPayload(v: any): LeaveRequestPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+leaveTypeId: v.leave_type_id,
+startDate: v.start_date,
+endDate: v.end_date,
+totalDays: v.total_days,
+notes: v.notes,
+status: v.status,
+currentApprovalLevel: v.current_approval_level,
+rejectionReason: v.rejection_reason,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeLeaveRequestPayload(v: LeaveRequestPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.leaveTypeId !== undefined) { out.leave_type_id = v.leaveTypeId; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.totalDays !== undefined) { out.total_days = v.totalDays; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.currentApprovalLevel !== undefined) { out.current_approval_level = v.currentApprovalLevel; }
+if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface LeaveBalancePayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-leave_type_id?: string;
+ownerId?: string;
+employeeId?: string;
+leaveTypeId?: string;
 year?: number;
-entitled_days?: number;
-used_days?: number;
-pending_days?: number;
-remaining_days?: number;
-created_at?: string;
-updated_at?: string;
+entitledDays?: number;
+usedDays?: number;
+pendingDays?: number;
+remainingDays?: number;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeLeaveBalancePayload(v: any): LeaveBalancePayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+leaveTypeId: v.leave_type_id,
+year: v.year,
+entitledDays: v.entitled_days,
+usedDays: v.used_days,
+pendingDays: v.pending_days,
+remainingDays: v.remaining_days,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeLeaveBalancePayload(v: LeaveBalancePayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.leaveTypeId !== undefined) { out.leave_type_id = v.leaveTypeId; }
+if (v.year !== undefined) { out.year = v.year; }
+if (v.entitledDays !== undefined) { out.entitled_days = v.entitledDays; }
+if (v.usedDays !== undefined) { out.used_days = v.usedDays; }
+if (v.pendingDays !== undefined) { out.pending_days = v.pendingDays; }
+if (v.remainingDays !== undefined) { out.remaining_days = v.remainingDays; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListLeaveRequestsRequest {
-employee_id?: string;
+employeeId?: string;
 status?: string;
+}
+
+export function decodeListLeaveRequestsRequest(v: any): ListLeaveRequestsRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+status: v.status,
+};
+}
+
+export function encodeListLeaveRequestsRequest(v: ListLeaveRequestsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface ListLeaveRequestsResponse {
@@ -57,66 +177,259 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListLeaveRequestsResponse(v: any): ListLeaveRequestsResponse {
+if (v === null || v === undefined) return v;
+return {
+requests: (v.requests !== undefined ? (v.requests as any[]).map(decodeLeaveRequestPayload) : v.requests),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListLeaveRequestsResponse(v: ListLeaveRequestsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.requests !== undefined) { out.requests = (v.requests as any[]).map(encodeLeaveRequestPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateLeaveRequestRequest {
-employee_id?: string;
-leave_type_id?: string;
-start_date?: string;
-end_date?: string;
-total_days?: number;
+employeeId?: string;
+leaveTypeId?: string;
+startDate?: string;
+endDate?: string;
+totalDays?: number;
 notes?: string;
+}
+
+export function decodeCreateLeaveRequestRequest(v: any): CreateLeaveRequestRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+leaveTypeId: v.leave_type_id,
+startDate: v.start_date,
+endDate: v.end_date,
+totalDays: v.total_days,
+notes: v.notes,
+};
+}
+
+export function encodeCreateLeaveRequestRequest(v: CreateLeaveRequestRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.leaveTypeId !== undefined) { out.leave_type_id = v.leaveTypeId; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.totalDays !== undefined) { out.total_days = v.totalDays; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
 }
 
 export interface CreateLeaveRequestResponse {
 request?: LeaveRequestPayload;
 }
 
+export function decodeCreateLeaveRequestResponse(v: any): CreateLeaveRequestResponse {
+if (v === null || v === undefined) return v;
+return {
+request: (v.request !== undefined ? decodeLeaveRequestPayload(v.request) : v.request),
+};
+}
+
+export function encodeCreateLeaveRequestResponse(v: CreateLeaveRequestResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.request !== undefined) { out.request = encodeLeaveRequestPayload(v.request); }
+return out;
+}
+
 export interface ApproveLeaveBody {
 approved?: boolean;
-rejection_reason?: string;
+rejectionReason?: string;
+}
+
+export function decodeApproveLeaveBody(v: any): ApproveLeaveBody {
+if (v === null || v === undefined) return v;
+return {
+approved: v.approved,
+rejectionReason: v.rejection_reason,
+};
+}
+
+export function encodeApproveLeaveBody(v: ApproveLeaveBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.approved !== undefined) { out.approved = v.approved; }
+if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason; }
+return out;
 }
 
 export interface ApproveLeaveRequest {
-request_id?: string;
+requestId?: string;
 body?: ApproveLeaveBody;
+}
+
+export function decodeApproveLeaveRequest(v: any): ApproveLeaveRequest {
+if (v === null || v === undefined) return v;
+return {
+requestId: v.request_id,
+body: (v.body !== undefined ? decodeApproveLeaveBody(v.body) : v.body),
+};
+}
+
+export function encodeApproveLeaveRequest(v: ApproveLeaveRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.requestId !== undefined) { out.request_id = v.requestId; }
+if (v.body !== undefined) { out.body = encodeApproveLeaveBody(v.body); }
+return out;
 }
 
 export interface ApproveLeaveResponse {
 success?: boolean;
 }
 
+export function decodeApproveLeaveResponse(v: any): ApproveLeaveResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeApproveLeaveResponse(v: ApproveLeaveResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface ListLeaveTypesRequest {
 }
 
+export function decodeListLeaveTypesRequest(v: any): ListLeaveTypesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListLeaveTypesRequest(v: ListLeaveTypesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListLeaveTypesResponse {
-leave_types?: (LeaveTypePayload)[];
+leaveTypes?: (LeaveTypePayload)[];
 total?: number;
 limit?: number;
 offset?: number;
 }
 
+export function decodeListLeaveTypesResponse(v: any): ListLeaveTypesResponse {
+if (v === null || v === undefined) return v;
+return {
+leaveTypes: (v.leave_types !== undefined ? (v.leave_types as any[]).map(decodeLeaveTypePayload) : v.leave_types),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListLeaveTypesResponse(v: ListLeaveTypesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.leaveTypes !== undefined) { out.leave_types = (v.leaveTypes as any[]).map(encodeLeaveTypePayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateLeaveTypeRequest {
 name?: string;
-is_paid?: boolean;
-requires_approval?: boolean;
-accrual_rule?: string;
-max_carryover_days?: number;
-min_notice_days?: number;
-requires_documentation_after_days?: number;
+isPaid?: boolean;
+requiresApproval?: boolean;
+accrualRule?: string;
+maxCarryoverDays?: number;
+minNoticeDays?: number;
+requiresDocumentationAfterDays?: number;
+}
+
+export function decodeCreateLeaveTypeRequest(v: any): CreateLeaveTypeRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+isPaid: v.is_paid,
+requiresApproval: v.requires_approval,
+accrualRule: v.accrual_rule,
+maxCarryoverDays: v.max_carryover_days,
+minNoticeDays: v.min_notice_days,
+requiresDocumentationAfterDays: v.requires_documentation_after_days,
+};
+}
+
+export function encodeCreateLeaveTypeRequest(v: CreateLeaveTypeRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.isPaid !== undefined) { out.is_paid = v.isPaid; }
+if (v.requiresApproval !== undefined) { out.requires_approval = v.requiresApproval; }
+if (v.accrualRule !== undefined) { out.accrual_rule = v.accrualRule; }
+if (v.maxCarryoverDays !== undefined) { out.max_carryover_days = v.maxCarryoverDays; }
+if (v.minNoticeDays !== undefined) { out.min_notice_days = v.minNoticeDays; }
+if (v.requiresDocumentationAfterDays !== undefined) { out.requires_documentation_after_days = v.requiresDocumentationAfterDays; }
+return out;
 }
 
 export interface CreateLeaveTypeResponse {
-leave_type?: LeaveTypePayload;
+leaveType?: LeaveTypePayload;
+}
+
+export function decodeCreateLeaveTypeResponse(v: any): CreateLeaveTypeResponse {
+if (v === null || v === undefined) return v;
+return {
+leaveType: (v.leave_type !== undefined ? decodeLeaveTypePayload(v.leave_type) : v.leave_type),
+};
+}
+
+export function encodeCreateLeaveTypeResponse(v: CreateLeaveTypeResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.leaveType !== undefined) { out.leave_type = encodeLeaveTypePayload(v.leaveType); }
+return out;
 }
 
 export interface UpdateLeaveTypeBody {
 name?: string;
-is_paid?: boolean;
-requires_approval?: boolean;
-accrual_rule?: string;
-max_carryover_days?: number;
-min_notice_days?: number;
-requires_documentation_after_days?: number;
-is_active?: boolean;
+isPaid?: boolean;
+requiresApproval?: boolean;
+accrualRule?: string;
+maxCarryoverDays?: number;
+minNoticeDays?: number;
+requiresDocumentationAfterDays?: number;
+isActive?: boolean;
+}
+
+export function decodeUpdateLeaveTypeBody(v: any): UpdateLeaveTypeBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+isPaid: v.is_paid,
+requiresApproval: v.requires_approval,
+accrualRule: v.accrual_rule,
+maxCarryoverDays: v.max_carryover_days,
+minNoticeDays: v.min_notice_days,
+requiresDocumentationAfterDays: v.requires_documentation_after_days,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateLeaveTypeBody(v: UpdateLeaveTypeBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.isPaid !== undefined) { out.is_paid = v.isPaid; }
+if (v.requiresApproval !== undefined) { out.requires_approval = v.requiresApproval; }
+if (v.accrualRule !== undefined) { out.accrual_rule = v.accrualRule; }
+if (v.maxCarryoverDays !== undefined) { out.max_carryover_days = v.maxCarryoverDays; }
+if (v.minNoticeDays !== undefined) { out.min_notice_days = v.minNoticeDays; }
+if (v.requiresDocumentationAfterDays !== undefined) { out.requires_documentation_after_days = v.requiresDocumentationAfterDays; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateLeaveTypeRequest {
@@ -124,13 +437,56 @@ id?: string;
 body?: UpdateLeaveTypeBody;
 }
 
+export function decodeUpdateLeaveTypeRequest(v: any): UpdateLeaveTypeRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateLeaveTypeBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateLeaveTypeRequest(v: UpdateLeaveTypeRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateLeaveTypeBody(v.body); }
+return out;
+}
+
 export interface UpdateLeaveTypeResponse {
-leave_type?: LeaveTypePayload;
+leaveType?: LeaveTypePayload;
+}
+
+export function decodeUpdateLeaveTypeResponse(v: any): UpdateLeaveTypeResponse {
+if (v === null || v === undefined) return v;
+return {
+leaveType: (v.leave_type !== undefined ? decodeLeaveTypePayload(v.leave_type) : v.leave_type),
+};
+}
+
+export function encodeUpdateLeaveTypeResponse(v: UpdateLeaveTypeResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.leaveType !== undefined) { out.leave_type = encodeLeaveTypePayload(v.leaveType); }
+return out;
 }
 
 export interface ListLeaveBalancesRequest {
-employee_id?: string;
+employeeId?: string;
 year?: number;
+}
+
+export function decodeListLeaveBalancesRequest(v: any): ListLeaveBalancesRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+year: v.year,
+};
+}
+
+export function encodeListLeaveBalancesRequest(v: ListLeaveBalancesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.year !== undefined) { out.year = v.year; }
+return out;
 }
 
 export interface ListLeaveBalancesResponse {
@@ -138,5 +494,24 @@ balances?: (LeaveBalancePayload)[];
 total?: number;
 limit?: number;
 offset?: number;
+}
+
+export function decodeListLeaveBalancesResponse(v: any): ListLeaveBalancesResponse {
+if (v === null || v === undefined) return v;
+return {
+balances: (v.balances !== undefined ? (v.balances as any[]).map(decodeLeaveBalancePayload) : v.balances),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListLeaveBalancesResponse(v: ListLeaveBalancesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.balances !== undefined) { out.balances = (v.balances as any[]).map(encodeLeaveBalancePayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
 }
 
