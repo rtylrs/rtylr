@@ -54,12 +54,76 @@ func (m *AccessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AccessRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *AccessRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *AccessRequest) GetApp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.App
+}
+
+func (x *AccessRequest) GetRequesterName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RequesterName
+}
+
+func (x *AccessRequest) GetRequesterEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RequesterEmail
+}
+
+func (x *AccessRequest) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type RequestAccessRequest struct {
 	App string `json:"app,omitempty"`
 }
 
+func (x *RequestAccessRequest) GetApp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.App
+}
+
 type RequestAccessResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *RequestAccessResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListAccessRequestsRequest struct {
@@ -67,6 +131,14 @@ type ListAccessRequestsRequest struct {
 
 type ListAccessRequestsResponse struct {
 	Requests []*AccessRequest `json:"requests,omitempty"`
+}
+
+func (x *ListAccessRequestsResponse) GetRequests() []*AccessRequest {
+	if x == nil {
+		var zero []*AccessRequest
+		return zero
+	}
+	return x.Requests
 }
 
 type ApproveAccessRequestRequest struct {
@@ -114,6 +186,38 @@ func (m *ApproveAccessRequestRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApproveAccessRequestRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ApproveAccessRequestRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *ApproveAccessRequestRequest) GetApp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.App
+}
+
 type ApproveAccessRequestResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *ApproveAccessRequestResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

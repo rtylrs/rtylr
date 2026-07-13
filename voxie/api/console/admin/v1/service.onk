@@ -23,7 +23,7 @@ service ConsoleAdminService {
 
   listBusinesses(ListBusinessesRequest) -> ListBusinessesResponse @get("/console/businesses")
 
-  updateBusiness(AdminUpdateBusinessRequest) -> AdminUpdateBusinessResponse @put("/console/businesses/{id}")
+  updateBusiness(UpdateBusinessRequest) -> UpdateBusinessResponse @put("/console/businesses/{id}")
 
   deleteBusiness(DeleteBusinessRequest) -> DeleteBusinessResponse @delete("/console/businesses/{id}")
 

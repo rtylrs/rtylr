@@ -44,9 +44,73 @@ func (m *Integration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Integration) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Integration) GetProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Provider
+}
+
+func (x *Integration) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Integration) GetConfig() []byte {
+	if x == nil {
+		var zero []byte
+		return zero
+	}
+	return x.Config
+}
+
+func (x *Integration) GetConnectedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ConnectedAt
+}
+
+func (x *Integration) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ConnectIntegrationRequest struct {
 	Provider string `json:"provider,omitempty"`
 	Config   []byte `json:"config,omitempty"`
+}
+
+func (x *ConnectIntegrationRequest) GetProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Provider
+}
+
+func (x *ConnectIntegrationRequest) GetConfig() []byte {
+	if x == nil {
+		var zero []byte
+		return zero
+	}
+	return x.Config
 }
 
 type ConnectIntegrationResponse struct {
@@ -83,6 +147,22 @@ func (m *ConnectIntegrationResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ConnectIntegrationResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ConnectIntegrationResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DisconnectIntegrationRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -116,8 +196,24 @@ func (m *DisconnectIntegrationRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DisconnectIntegrationRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DisconnectIntegrationResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DisconnectIntegrationResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListIntegrationsRequest struct {
@@ -125,4 +221,12 @@ type ListIntegrationsRequest struct {
 
 type ListIntegrationsResponse struct {
 	Integrations []*Integration `json:"integrations,omitempty"`
+}
+
+func (x *ListIntegrationsResponse) GetIntegrations() []*Integration {
+	if x == nil {
+		var zero []*Integration
+		return zero
+	}
+	return x.Integrations
 }

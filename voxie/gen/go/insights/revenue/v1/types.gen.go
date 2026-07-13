@@ -7,15 +7,79 @@ type RevenueOverview struct {
 	Trend  []*RevenuePoint `json:"trend,omitempty"`
 }
 
+func (x *RevenueOverview) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *RevenueOverview) GetChange() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Change
+}
+
+func (x *RevenueOverview) GetTrend() []*RevenuePoint {
+	if x == nil {
+		var zero []*RevenuePoint
+		return zero
+	}
+	return x.Trend
+}
+
 type RevenuePoint struct {
 	Date   string  `json:"date,omitempty"`
 	Amount float64 `json:"amount,omitempty"`
+}
+
+func (x *RevenuePoint) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *RevenuePoint) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
 }
 
 type RevenueByApp struct {
 	App        string  `json:"app,omitempty"`
 	Amount     float64 `json:"amount,omitempty"`
 	Percentage float64 `json:"percentage,omitempty"`
+}
+
+func (x *RevenueByApp) GetApp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.App
+}
+
+func (x *RevenueByApp) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *RevenueByApp) GetPercentage() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Percentage
 }
 
 type RevenueComparison struct {
@@ -25,20 +89,84 @@ type RevenueComparison struct {
 	Change   float64 `json:"change,omitempty"`
 }
 
+func (x *RevenueComparison) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
+func (x *RevenueComparison) GetCurrent() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Current
+}
+
+func (x *RevenueComparison) GetPrevious() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Previous
+}
+
+func (x *RevenueComparison) GetChange() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Change
+}
+
 type GetRevenueOverviewRequest struct {
 	Period string `json:"period,omitempty"`
+}
+
+func (x *GetRevenueOverviewRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
 }
 
 type GetRevenueOverviewResponse struct {
 	Overview *RevenueOverview `json:"overview,omitempty"`
 }
 
+func (x *GetRevenueOverviewResponse) GetOverview() *RevenueOverview {
+	if x == nil {
+		var zero *RevenueOverview
+		return zero
+	}
+	return x.Overview
+}
+
 type GetRevenueByAppRequest struct {
 	Period string `json:"period,omitempty"`
 }
 
+func (x *GetRevenueByAppRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
 type GetRevenueByAppResponse struct {
 	Apps []*RevenueByApp `json:"apps,omitempty"`
+}
+
+func (x *GetRevenueByAppResponse) GetApps() []*RevenueByApp {
+	if x == nil {
+		var zero []*RevenueByApp
+		return zero
+	}
+	return x.Apps
 }
 
 type GetRevenueComparisonRequest struct {
@@ -46,6 +174,30 @@ type GetRevenueComparisonRequest struct {
 	CompareTo string `json:"compare_to,omitempty"`
 }
 
+func (x *GetRevenueComparisonRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
+func (x *GetRevenueComparisonRequest) GetCompareTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CompareTo
+}
+
 type GetRevenueComparisonResponse struct {
 	Comparisons []*RevenueComparison `json:"comparisons,omitempty"`
+}
+
+func (x *GetRevenueComparisonResponse) GetComparisons() []*RevenueComparison {
+	if x == nil {
+		var zero []*RevenueComparison
+		return zero
+	}
+	return x.Comparisons
 }

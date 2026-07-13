@@ -82,7 +82,7 @@ func (c *TaxServiceClient) UpdateTaxConfig(ctx context.Context, req *UpdateTaxCo
 	return result, nil
 }
 
-func (c *TaxServiceClient) GetPLReport(ctx context.Context, req *GetTaxPLReportRequest) (*GetTaxPLReportResponse, error) {
+func (c *TaxServiceClient) GetPLReport(ctx context.Context, req *GetPLReportRequest) (*GetPLReportResponse, error) {
 	path := "/finance/tax/v1/pl"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -105,7 +105,7 @@ func (c *TaxServiceClient) GetPLReport(ctx context.Context, req *GetTaxPLReportR
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(GetTaxPLReportResponse)
+	result := new(GetPLReportResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

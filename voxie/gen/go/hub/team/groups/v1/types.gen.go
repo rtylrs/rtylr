@@ -11,6 +11,22 @@ type ResourcePermission struct {
 	PermissionLevel string `json:"permission_level,omitempty"`
 }
 
+func (x *ResourcePermission) GetResourceKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ResourceKey
+}
+
+func (x *ResourcePermission) GetPermissionLevel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PermissionLevel
+}
+
 type GroupSummary struct {
 	Id    int64  `json:"id,omitempty"`
 	Name  string `json:"name,omitempty"`
@@ -44,6 +60,30 @@ func (m *GroupSummary) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *GroupSummary) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *GroupSummary) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *GroupSummary) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
 }
 
 type Group struct {
@@ -97,6 +137,78 @@ func (m *Group) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Group) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Group) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Group) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Group) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Group) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *Group) GetResourcePermissions() []*ResourcePermission {
+	if x == nil {
+		var zero []*ResourcePermission
+		return zero
+	}
+	return x.ResourcePermissions
+}
+
+func (x *Group) GetMemberCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MemberCount
+}
+
+func (x *Group) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Group) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type GroupMember struct {
 	UserId   int64  `json:"user_id,omitempty"`
 	Email    string `json:"email,omitempty"`
@@ -131,6 +243,38 @@ func (m *GroupMember) UnmarshalJSON(data []byte) error {
 		m.UserId = v
 	}
 	return nil
+}
+
+func (x *GroupMember) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *GroupMember) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *GroupMember) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *GroupMember) GetAddedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AddedAt
 }
 
 type GroupDetail struct {
@@ -185,11 +329,99 @@ func (m *GroupDetail) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GroupDetail) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *GroupDetail) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *GroupDetail) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *GroupDetail) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *GroupDetail) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *GroupDetail) GetResourcePermissions() []*ResourcePermission {
+	if x == nil {
+		var zero []*ResourcePermission
+		return zero
+	}
+	return x.ResourcePermissions
+}
+
+func (x *GroupDetail) GetMemberCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MemberCount
+}
+
+func (x *GroupDetail) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *GroupDetail) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *GroupDetail) GetMembers() []*GroupMember {
+	if x == nil {
+		var zero []*GroupMember
+		return zero
+	}
+	return x.Members
+}
+
 type ListGroupsRequest struct {
 }
 
 type ListGroupsResponse struct {
 	Groups []*Group `json:"groups,omitempty"`
+}
+
+func (x *ListGroupsResponse) GetGroups() []*Group {
+	if x == nil {
+		var zero []*Group
+		return zero
+	}
+	return x.Groups
 }
 
 type CreateGroupRequest struct {
@@ -199,8 +431,48 @@ type CreateGroupRequest struct {
 	ResourcePermissions []*ResourcePermission `json:"resource_permissions,omitempty"`
 }
 
+func (x *CreateGroupRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateGroupRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateGroupRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *CreateGroupRequest) GetResourcePermissions() []*ResourcePermission {
+	if x == nil {
+		var zero []*ResourcePermission
+		return zero
+	}
+	return x.ResourcePermissions
+}
+
 type CreateGroupResponse struct {
 	Group *Group `json:"group,omitempty"`
+}
+
+func (x *CreateGroupResponse) GetGroup() *Group {
+	if x == nil {
+		var zero *Group
+		return zero
+	}
+	return x.Group
 }
 
 type GetGroupDetailRequest struct {
@@ -236,8 +508,24 @@ func (m *GetGroupDetailRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetGroupDetailRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetGroupDetailResponse struct {
 	Group *GroupDetail `json:"group,omitempty"`
+}
+
+func (x *GetGroupDetailResponse) GetGroup() *GroupDetail {
+	if x == nil {
+		var zero *GroupDetail
+		return zero
+	}
+	return x.Group
 }
 
 type UpdateGroupRequest struct {
@@ -277,8 +565,56 @@ func (m *UpdateGroupRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateGroupRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateGroupRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateGroupRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateGroupRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *UpdateGroupRequest) GetResourcePermissions() []*ResourcePermission {
+	if x == nil {
+		var zero []*ResourcePermission
+		return zero
+	}
+	return x.ResourcePermissions
+}
+
 type UpdateGroupResponse struct {
 	Group *Group `json:"group,omitempty"`
+}
+
+func (x *UpdateGroupResponse) GetGroup() *Group {
+	if x == nil {
+		var zero *Group
+		return zero
+	}
+	return x.Group
 }
 
 type DeleteGroupRequest struct {
@@ -314,8 +650,24 @@ func (m *DeleteGroupRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteGroupRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteGroupResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteGroupResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type AddGroupMembersRequest struct {
@@ -368,9 +720,41 @@ func (m *AddGroupMembersRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AddGroupMembersRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *AddGroupMembersRequest) GetUserIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.UserIds
+}
+
 type AddGroupMembersResponse struct {
 	Added   int32  `json:"added,omitempty"`
 	Message string `json:"message,omitempty"`
+}
+
+func (x *AddGroupMembersResponse) GetAdded() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Added
+}
+
+func (x *AddGroupMembersResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type RemoveGroupMemberRequest struct {
@@ -417,8 +801,32 @@ func (m *RemoveGroupMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RemoveGroupMemberRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RemoveGroupMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type RemoveGroupMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveGroupMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetUserGroupsRequest struct {
@@ -454,6 +862,22 @@ func (m *GetUserGroupsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetUserGroupsRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type GetUserGroupsResponse struct {
 	Groups []*GroupSummary `json:"groups,omitempty"`
+}
+
+func (x *GetUserGroupsResponse) GetGroups() []*GroupSummary {
+	if x == nil {
+		var zero []*GroupSummary
+		return zero
+	}
+	return x.Groups
 }

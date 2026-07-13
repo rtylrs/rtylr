@@ -65,9 +65,81 @@ func (m *CalendarAppointment) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CalendarAppointment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CalendarAppointment) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *CalendarAppointment) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *CalendarAppointment) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CalendarAppointment) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *CalendarAppointment) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *CalendarAppointment) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type CalendarDay struct {
 	Date         string                 `json:"date,omitempty"`
 	Appointments []*CalendarAppointment `json:"appointments,omitempty"`
+}
+
+func (x *CalendarDay) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *CalendarDay) GetAppointments() []*CalendarAppointment {
+	if x == nil {
+		var zero []*CalendarAppointment
+		return zero
+	}
+	return x.Appointments
 }
 
 type GetCalendarRequest struct {
@@ -75,6 +147,30 @@ type GetCalendarRequest struct {
 	To   string `json:"to,omitempty"`
 }
 
+func (x *GetCalendarRequest) GetFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.From
+}
+
+func (x *GetCalendarRequest) GetTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.To
+}
+
 type GetCalendarResponse struct {
 	Days []*CalendarDay `json:"days,omitempty"`
+}
+
+func (x *GetCalendarResponse) GetDays() []*CalendarDay {
+	if x == nil {
+		var zero []*CalendarDay
+		return zero
+	}
+	return x.Days
 }

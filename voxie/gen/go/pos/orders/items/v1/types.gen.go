@@ -10,6 +10,14 @@ type UpdateOrderItemStatusBody struct {
 	Status string `json:"status,omitempty"`
 }
 
+func (x *UpdateOrderItemStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type UpdateOrderItemStatusRequest struct {
 	OrderId int64                      `json:"order_id,omitempty"`
 	ItemId  int64                      `json:"item_id,omitempty"`
@@ -55,8 +63,40 @@ func (m *UpdateOrderItemStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateOrderItemStatusRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *UpdateOrderItemStatusRequest) GetItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ItemId
+}
+
+func (x *UpdateOrderItemStatusRequest) GetBody() *UpdateOrderItemStatusBody {
+	if x == nil {
+		var zero *UpdateOrderItemStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateOrderItemStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateOrderItemStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type VoidOrderItemRequest struct {
@@ -103,6 +143,30 @@ func (m *VoidOrderItemRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *VoidOrderItemRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *VoidOrderItemRequest) GetItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ItemId
+}
+
 type VoidOrderItemResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *VoidOrderItemResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

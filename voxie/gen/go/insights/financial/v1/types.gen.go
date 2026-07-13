@@ -8,6 +8,38 @@ type ExpenseAnalytics struct {
 	Trend      []*ExpensePoint      `json:"trend,omitempty"`
 }
 
+func (x *ExpenseAnalytics) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ExpenseAnalytics) GetChange() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Change
+}
+
+func (x *ExpenseAnalytics) GetByCategory() []*ExpenseByCategory {
+	if x == nil {
+		var zero []*ExpenseByCategory
+		return zero
+	}
+	return x.ByCategory
+}
+
+func (x *ExpenseAnalytics) GetTrend() []*ExpensePoint {
+	if x == nil {
+		var zero []*ExpensePoint
+		return zero
+	}
+	return x.Trend
+}
+
 type ExpenseByCategory struct {
 	Category    string  `json:"category,omitempty"`
 	Amount      float64 `json:"amount,omitempty"`
@@ -16,9 +48,65 @@ type ExpenseByCategory struct {
 	Utilization float64 `json:"utilization,omitempty"`
 }
 
+func (x *ExpenseByCategory) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *ExpenseByCategory) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *ExpenseByCategory) GetPercentage() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Percentage
+}
+
+func (x *ExpenseByCategory) GetBudget() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Budget
+}
+
+func (x *ExpenseByCategory) GetUtilization() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Utilization
+}
+
 type ExpensePoint struct {
 	Date   string  `json:"date,omitempty"`
 	Amount float64 `json:"amount,omitempty"`
+}
+
+func (x *ExpensePoint) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *ExpensePoint) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
 }
 
 type InvoiceAgingBucket struct {
@@ -27,9 +115,49 @@ type InvoiceAgingBucket struct {
 	Amount float64 `json:"amount,omitempty"`
 }
 
+func (x *InvoiceAgingBucket) GetBucket() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Bucket
+}
+
+func (x *InvoiceAgingBucket) GetCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Count
+}
+
+func (x *InvoiceAgingBucket) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
 type InvoiceAging struct {
 	TotalOutstanding float64               `json:"total_outstanding,omitempty"`
 	Buckets          []*InvoiceAgingBucket `json:"buckets,omitempty"`
+}
+
+func (x *InvoiceAging) GetTotalOutstanding() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalOutstanding
+}
+
+func (x *InvoiceAging) GetBuckets() []*InvoiceAgingBucket {
+	if x == nil {
+		var zero []*InvoiceAgingBucket
+		return zero
+	}
+	return x.Buckets
 }
 
 type CashFlowAnalytics struct {
@@ -39,6 +167,38 @@ type CashFlowAnalytics struct {
 	Trend    []*CashFlowPoint `json:"trend,omitempty"`
 }
 
+func (x *CashFlowAnalytics) GetInflows() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Inflows
+}
+
+func (x *CashFlowAnalytics) GetOutflows() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Outflows
+}
+
+func (x *CashFlowAnalytics) GetNet() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Net
+}
+
+func (x *CashFlowAnalytics) GetTrend() []*CashFlowPoint {
+	if x == nil {
+		var zero []*CashFlowPoint
+		return zero
+	}
+	return x.Trend
+}
+
 type CashFlowPoint struct {
 	Date    string  `json:"date,omitempty"`
 	Inflow  float64 `json:"inflow,omitempty"`
@@ -46,20 +206,84 @@ type CashFlowPoint struct {
 	Net     float64 `json:"net,omitempty"`
 }
 
+func (x *CashFlowPoint) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *CashFlowPoint) GetInflow() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Inflow
+}
+
+func (x *CashFlowPoint) GetOutflow() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Outflow
+}
+
+func (x *CashFlowPoint) GetNet() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Net
+}
+
 type GetCashFlowAnalyticsRequest struct {
 	Period string `json:"period,omitempty"`
+}
+
+func (x *GetCashFlowAnalyticsRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
 }
 
 type GetCashFlowAnalyticsResponse struct {
 	Analytics *CashFlowAnalytics `json:"analytics,omitempty"`
 }
 
+func (x *GetCashFlowAnalyticsResponse) GetAnalytics() *CashFlowAnalytics {
+	if x == nil {
+		var zero *CashFlowAnalytics
+		return zero
+	}
+	return x.Analytics
+}
+
 type GetExpenseAnalyticsRequest struct {
 	Period string `json:"period,omitempty"`
 }
 
+func (x *GetExpenseAnalyticsRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
 type GetExpenseAnalyticsResponse struct {
 	Analytics *ExpenseAnalytics `json:"analytics,omitempty"`
+}
+
+func (x *GetExpenseAnalyticsResponse) GetAnalytics() *ExpenseAnalytics {
+	if x == nil {
+		var zero *ExpenseAnalytics
+		return zero
+	}
+	return x.Analytics
 }
 
 type GetInvoiceAgingRequest struct {
@@ -67,4 +291,12 @@ type GetInvoiceAgingRequest struct {
 
 type GetInvoiceAgingResponse struct {
 	Aging *InvoiceAging `json:"aging,omitempty"`
+}
+
+func (x *GetInvoiceAgingResponse) GetAging() *InvoiceAging {
+	if x == nil {
+		var zero *InvoiceAging
+		return zero
+	}
+	return x.Aging
 }

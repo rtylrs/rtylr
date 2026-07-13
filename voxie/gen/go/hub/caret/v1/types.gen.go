@@ -10,10 +10,74 @@ type CaretTool struct {
 	Scope            string `json:"scope,omitempty"`
 }
 
+func (x *CaretTool) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CaretTool) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *CaretTool) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CaretTool) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *CaretTool) GetRequiresApproval() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.RequiresApproval
+}
+
+func (x *CaretTool) GetScope() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Scope
+}
+
 type ListCaretToolsRequest struct {
 	Mode string `json:"mode,omitempty"`
 }
 
+func (x *ListCaretToolsRequest) GetMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Mode
+}
+
 type ListCaretToolsResponse struct {
 	Tools []*CaretTool `json:"tools,omitempty"`
+}
+
+func (x *ListCaretToolsResponse) GetTools() []*CaretTool {
+	if x == nil {
+		var zero []*CaretTool
+		return zero
+	}
+	return x.Tools
 }

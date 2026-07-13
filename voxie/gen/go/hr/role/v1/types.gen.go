@@ -12,6 +12,30 @@ type PermissionPayload struct {
 	IsGranted bool   `json:"is_granted,omitempty"`
 }
 
+func (x *PermissionPayload) GetKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Key
+}
+
+func (x *PermissionPayload) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *PermissionPayload) GetIsGranted() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsGranted
+}
+
 type RolePayload struct {
 	Id          int64                `json:"id,omitempty"`
 	OwnerId     int64                `json:"owner_id,omitempty"`
@@ -81,8 +105,72 @@ func (m *RolePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RolePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RolePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *RolePayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *RolePayload) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
+}
+
+func (x *RolePayload) GetPermissions() []*PermissionPayload {
+	if x == nil {
+		var zero []*PermissionPayload
+		return zero
+	}
+	return x.Permissions
+}
+
+func (x *RolePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *RolePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListRolesResponse struct {
 	Roles []*RolePayload `json:"roles,omitempty"`
+}
+
+func (x *ListRolesResponse) GetRoles() []*RolePayload {
+	if x == nil {
+		var zero []*RolePayload
+		return zero
+	}
+	return x.Roles
 }
 
 type CreateRoleRequest struct {
@@ -90,13 +178,57 @@ type CreateRoleRequest struct {
 	Permissions []*PermissionPayload `json:"permissions,omitempty"`
 }
 
+func (x *CreateRoleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateRoleRequest) GetPermissions() []*PermissionPayload {
+	if x == nil {
+		var zero []*PermissionPayload
+		return zero
+	}
+	return x.Permissions
+}
+
 type CreateRoleResponse struct {
 	Role *RolePayload `json:"role,omitempty"`
+}
+
+func (x *CreateRoleResponse) GetRole() *RolePayload {
+	if x == nil {
+		var zero *RolePayload
+		return zero
+	}
+	return x.Role
 }
 
 type UpdateRoleBody struct {
 	Name        *string              `json:"name,omitempty"`
 	Permissions []*PermissionPayload `json:"permissions,omitempty"`
+}
+
+func (x *UpdateRoleBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
+}
+
+func (x *UpdateRoleBody) GetPermissions() []*PermissionPayload {
+	if x == nil {
+		var zero []*PermissionPayload
+		return zero
+	}
+	return x.Permissions
 }
 
 type UpdateRoleRequest struct {
@@ -133,8 +265,32 @@ func (m *UpdateRoleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateRoleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateRoleRequest) GetBody() *UpdateRoleBody {
+	if x == nil {
+		var zero *UpdateRoleBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateRoleResponse struct {
 	Role *RolePayload `json:"role,omitempty"`
+}
+
+func (x *UpdateRoleResponse) GetRole() *RolePayload {
+	if x == nil {
+		var zero *RolePayload
+		return zero
+	}
+	return x.Role
 }
 
 type AssignRoleRequest struct {
@@ -181,6 +337,30 @@ func (m *AssignRoleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AssignRoleRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *AssignRoleRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RoleId
+}
+
 type AssignRoleResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *AssignRoleResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

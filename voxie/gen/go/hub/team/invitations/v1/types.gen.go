@@ -14,6 +14,46 @@ type InviteUserRequest struct {
 	Password string   `json:"password,omitempty"`
 }
 
+func (x *InviteUserRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *InviteUserRequest) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *InviteUserRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *InviteUserRequest) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *InviteUserRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
 type InviteUserResponse struct {
 	UserId  int64  `json:"user_id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -46,6 +86,22 @@ func (m *InviteUserResponse) UnmarshalJSON(data []byte) error {
 		m.UserId = v
 	}
 	return nil
+}
+
+func (x *InviteUserResponse) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *InviteUserResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type BulkInviteRequest struct {
@@ -84,6 +140,38 @@ func (m *BulkInviteRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BulkInviteRequest) GetEmails() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Emails
+}
+
+func (x *BulkInviteRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *BulkInviteRequest) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *BulkInviteRequest) GetGroupId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.GroupId
+}
+
 type BulkInviteResult struct {
 	Email   string `json:"email,omitempty"`
 	UserId  int64  `json:"user_id,omitempty"`
@@ -120,13 +208,69 @@ func (m *BulkInviteResult) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BulkInviteResult) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *BulkInviteResult) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *BulkInviteResult) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *BulkInviteResult) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type BulkInviteResponse struct {
 	Results []*BulkInviteResult `json:"results,omitempty"`
 	Message string              `json:"message,omitempty"`
 }
 
+func (x *BulkInviteResponse) GetResults() []*BulkInviteResult {
+	if x == nil {
+		var zero []*BulkInviteResult
+		return zero
+	}
+	return x.Results
+}
+
+func (x *BulkInviteResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type VerifyInviteRequest struct {
 	Token string `json:"token,omitempty"`
+}
+
+func (x *VerifyInviteRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
 }
 
 type VerifyInviteResponse struct {
@@ -136,11 +280,67 @@ type VerifyInviteResponse struct {
 	Apps     []string `json:"apps,omitempty"`
 }
 
+func (x *VerifyInviteResponse) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *VerifyInviteResponse) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *VerifyInviteResponse) GetValid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Valid
+}
+
+func (x *VerifyInviteResponse) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
 type AcceptInviteRequest struct {
 	Token    string `json:"token,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 
+func (x *AcceptInviteRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *AcceptInviteRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
 type AcceptInviteResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *AcceptInviteResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -19,10 +19,14 @@ category_id?: string;
 message?: string;
 }
 
-export interface UpdateCategoryRequest {
-id?: string;
+export interface UpdateCategoryBody {
 name?: string;
 description?: string;
+}
+
+export interface UpdateCategoryRequest {
+id?: string;
+body?: UpdateCategoryBody;
 }
 
 export interface UpdateCategoryResponse {

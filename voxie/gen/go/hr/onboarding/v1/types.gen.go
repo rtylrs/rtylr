@@ -88,6 +88,86 @@ func (m *ChecklistItemPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ChecklistItemPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ChecklistItemPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ChecklistItemPayload) GetTemplateId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateId
+}
+
+func (x *ChecklistItemPayload) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *ChecklistItemPayload) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *ChecklistItemPayload) GetAssigneeRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AssigneeRole
+}
+
+func (x *ChecklistItemPayload) GetDueOffsetDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DueOffsetDays
+}
+
+func (x *ChecklistItemPayload) GetRequiresAttachment() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.RequiresAttachment
+}
+
+func (x *ChecklistItemPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ChecklistItemPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ChecklistTemplatePayload struct {
 	Id          int64                   `json:"id,omitempty"`
 	OwnerId     int64                   `json:"owner_id,omitempty"`
@@ -156,6 +236,74 @@ func (m *ChecklistTemplatePayload) UnmarshalJSON(data []byte) error {
 		m.UpdatedAt = v
 	}
 	return nil
+}
+
+func (x *ChecklistTemplatePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ChecklistTemplatePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ChecklistTemplatePayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ChecklistTemplatePayload) GetTriggerType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TriggerType
+}
+
+func (x *ChecklistTemplatePayload) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
+}
+
+func (x *ChecklistTemplatePayload) GetItems() []*ChecklistItemPayload {
+	if x == nil {
+		var zero []*ChecklistItemPayload
+		return zero
+	}
+	return x.Items
+}
+
+func (x *ChecklistTemplatePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ChecklistTemplatePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
 }
 
 type EmployeeChecklistItemPayload struct {
@@ -261,6 +409,102 @@ func (m *EmployeeChecklistItemPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EmployeeChecklistItemPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *EmployeeChecklistItemPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *EmployeeChecklistItemPayload) GetEmployeeChecklistId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeChecklistId
+}
+
+func (x *EmployeeChecklistItemPayload) GetChecklistItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ChecklistItemId
+}
+
+func (x *EmployeeChecklistItemPayload) GetAssignedToEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AssignedToEmployeeId
+}
+
+func (x *EmployeeChecklistItemPayload) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *EmployeeChecklistItemPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *EmployeeChecklistItemPayload) GetCompletedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CompletedAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CompletedAt
+}
+
+func (x *EmployeeChecklistItemPayload) GetAttachmentUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AttachmentUrl == nil {
+		var zero string
+		return zero
+	}
+	return *x.AttachmentUrl
+}
+
+func (x *EmployeeChecklistItemPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *EmployeeChecklistItemPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type EmployeeChecklistPayload struct {
 	Id          int64                           `json:"id,omitempty"`
 	OwnerId     int64                           `json:"owner_id,omitempty"`
@@ -361,8 +605,84 @@ func (m *EmployeeChecklistPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EmployeeChecklistPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *EmployeeChecklistPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *EmployeeChecklistPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *EmployeeChecklistPayload) GetTemplateId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateId
+}
+
+func (x *EmployeeChecklistPayload) GetTriggeredAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TriggeredAt
+}
+
+func (x *EmployeeChecklistPayload) GetItems() []*EmployeeChecklistItemPayload {
+	if x == nil {
+		var zero []*EmployeeChecklistItemPayload
+		return zero
+	}
+	return x.Items
+}
+
+func (x *EmployeeChecklistPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *EmployeeChecklistPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListChecklistTemplatesRequest struct {
 	TriggerType *string `json:"trigger_type,omitempty"`
+}
+
+func (x *ListChecklistTemplatesRequest) GetTriggerType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TriggerType == nil {
+		var zero string
+		return zero
+	}
+	return *x.TriggerType
 }
 
 type ListChecklistTemplatesResponse struct {
@@ -372,19 +692,111 @@ type ListChecklistTemplatesResponse struct {
 	Offset    int32                       `json:"offset,omitempty"`
 }
 
+func (x *ListChecklistTemplatesResponse) GetTemplates() []*ChecklistTemplatePayload {
+	if x == nil {
+		var zero []*ChecklistTemplatePayload
+		return zero
+	}
+	return x.Templates
+}
+
+func (x *ListChecklistTemplatesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListChecklistTemplatesResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListChecklistTemplatesResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
 type CreateChecklistTemplateRequest struct {
 	Name        string  `json:"name,omitempty"`
 	TriggerType *string `json:"trigger_type,omitempty"`
 	RoleId      *int64  `json:"role_id,omitempty"`
 }
 
+func (x *CreateChecklistTemplateRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateChecklistTemplateRequest) GetTriggerType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TriggerType == nil {
+		var zero string
+		return zero
+	}
+	return *x.TriggerType
+}
+
+func (x *CreateChecklistTemplateRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.RoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.RoleId
+}
+
 type CreateChecklistTemplateResponse struct {
 	Template *ChecklistTemplatePayload `json:"template,omitempty"`
+}
+
+func (x *CreateChecklistTemplateResponse) GetTemplate() *ChecklistTemplatePayload {
+	if x == nil {
+		var zero *ChecklistTemplatePayload
+		return zero
+	}
+	return x.Template
 }
 
 type UpdateChecklistTemplateBody struct {
 	Name        string  `json:"name,omitempty"`
 	TriggerType *string `json:"trigger_type,omitempty"`
+}
+
+func (x *UpdateChecklistTemplateBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateChecklistTemplateBody) GetTriggerType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TriggerType == nil {
+		var zero string
+		return zero
+	}
+	return *x.TriggerType
 }
 
 type UpdateChecklistTemplateRequest struct {
@@ -421,8 +833,32 @@ func (m *UpdateChecklistTemplateRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateChecklistTemplateRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RoleId
+}
+
+func (x *UpdateChecklistTemplateRequest) GetBody() *UpdateChecklistTemplateBody {
+	if x == nil {
+		var zero *UpdateChecklistTemplateBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateChecklistTemplateResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *UpdateChecklistTemplateResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type AddItemToChecklistTemplateRequest struct {
@@ -463,8 +899,80 @@ func (m *AddItemToChecklistTemplateRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AddItemToChecklistTemplateRequest) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RoleId
+}
+
+func (x *AddItemToChecklistTemplateRequest) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *AddItemToChecklistTemplateRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Description == nil {
+		var zero string
+		return zero
+	}
+	return *x.Description
+}
+
+func (x *AddItemToChecklistTemplateRequest) GetAssigneeRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AssigneeRole == nil {
+		var zero string
+		return zero
+	}
+	return *x.AssigneeRole
+}
+
+func (x *AddItemToChecklistTemplateRequest) GetDueOffsetDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DueOffsetDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DueOffsetDays
+}
+
+func (x *AddItemToChecklistTemplateRequest) GetRequiresAttachment() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.RequiresAttachment == nil {
+		var zero bool
+		return zero
+	}
+	return *x.RequiresAttachment
+}
+
 type AddItemToChecklistTemplateResponse struct {
 	Item *ChecklistItemPayload `json:"item,omitempty"`
+}
+
+func (x *AddItemToChecklistTemplateResponse) GetItem() *ChecklistItemPayload {
+	if x == nil {
+		var zero *ChecklistItemPayload
+		return zero
+	}
+	return x.Item
 }
 
 type ListEmployeeChecklistsRequest struct {
@@ -502,11 +1010,75 @@ func (m *ListEmployeeChecklistsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListEmployeeChecklistsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *ListEmployeeChecklistsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Limit == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Limit
+}
+
+func (x *ListEmployeeChecklistsRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Offset == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Offset
+}
+
 type ListEmployeeChecklistsResponse struct {
 	Checklists []*EmployeeChecklistPayload `json:"checklists,omitempty"`
 	Total      int64                       `json:"total,omitempty"`
 	Limit      int32                       `json:"limit,omitempty"`
 	Offset     int32                       `json:"offset,omitempty"`
+}
+
+func (x *ListEmployeeChecklistsResponse) GetChecklists() []*EmployeeChecklistPayload {
+	if x == nil {
+		var zero []*EmployeeChecklistPayload
+		return zero
+	}
+	return x.Checklists
+}
+
+func (x *ListEmployeeChecklistsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListEmployeeChecklistsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListEmployeeChecklistsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type GetEmployeeChecklistRequest struct {
@@ -542,8 +1114,24 @@ func (m *GetEmployeeChecklistRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetEmployeeChecklistRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
 type GetEmployeeChecklistResponse struct {
 	Checklist *EmployeeChecklistPayload `json:"checklist,omitempty"`
+}
+
+func (x *GetEmployeeChecklistResponse) GetChecklist() *EmployeeChecklistPayload {
+	if x == nil {
+		var zero *EmployeeChecklistPayload
+		return zero
+	}
+	return x.Checklist
 }
 
 type TriggerChecklistRequest struct {
@@ -591,8 +1179,40 @@ func (m *TriggerChecklistRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TriggerChecklistRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *TriggerChecklistRequest) GetTemplateId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateId
+}
+
+func (x *TriggerChecklistRequest) GetTriggerDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TriggerDate
+}
+
 type TriggerChecklistResponse struct {
 	Checklist *EmployeeChecklistPayload `json:"checklist,omitempty"`
+}
+
+func (x *TriggerChecklistResponse) GetChecklist() *EmployeeChecklistPayload {
+	if x == nil {
+		var zero *EmployeeChecklistPayload
+		return zero
+	}
+	return x.Checklist
 }
 
 type CompleteChecklistItemRequest struct {
@@ -600,4 +1220,12 @@ type CompleteChecklistItemRequest struct {
 
 type CompleteChecklistItemResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *CompleteChecklistItemResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

@@ -68,6 +68,86 @@ func (m *Bill) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Bill) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Bill) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Bill) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *Bill) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *Bill) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Bill) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *Bill) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Bill) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Bill) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Bill) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateBillRequest struct {
 	SupplierId  int64   `json:"supplier_id,omitempty"`
 	Amount      float64 `json:"amount,omitempty"`
@@ -106,6 +186,54 @@ func (m *CreateBillRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateBillRequest) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *CreateBillRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *CreateBillRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateBillRequest) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *CreateBillRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *CreateBillRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
 type CreateBillResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -138,6 +266,22 @@ func (m *CreateBillResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateBillResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateBillResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteBillRequest struct {
@@ -173,8 +317,24 @@ func (m *DeleteBillRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteBillRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteBillResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteBillResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetBillRequest struct {
@@ -210,8 +370,24 @@ func (m *GetBillRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetBillRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetBillResponse struct {
 	Bill *Bill `json:"bill,omitempty"`
+}
+
+func (x *GetBillResponse) GetBill() *Bill {
+	if x == nil {
+		var zero *Bill
+		return zero
+	}
+	return x.Bill
 }
 
 type ListBillsRequest struct {
@@ -219,6 +395,14 @@ type ListBillsRequest struct {
 
 type ListBillsResponse struct {
 	Bills []*Bill `json:"bills,omitempty"`
+}
+
+func (x *ListBillsResponse) GetBills() []*Bill {
+	if x == nil {
+		var zero []*Bill
+		return zero
+	}
+	return x.Bills
 }
 
 type UpdateBillBody struct {
@@ -259,6 +443,54 @@ func (m *UpdateBillBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateBillBody) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *UpdateBillBody) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *UpdateBillBody) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UpdateBillBody) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *UpdateBillBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateBillBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
 type UpdateBillRequest struct {
 	Id   int64           `json:"id,omitempty"`
 	Body *UpdateBillBody `json:"body,omitempty"`
@@ -293,6 +525,30 @@ func (m *UpdateBillRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateBillRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateBillRequest) GetBody() *UpdateBillBody {
+	if x == nil {
+		var zero *UpdateBillBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateBillResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateBillResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

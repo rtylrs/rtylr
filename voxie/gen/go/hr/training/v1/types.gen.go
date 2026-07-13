@@ -55,6 +55,62 @@ func (m *TrainingCourse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TrainingCourse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TrainingCourse) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *TrainingCourse) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *TrainingCourse) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *TrainingCourse) GetDurationHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DurationHours
+}
+
+func (x *TrainingCourse) GetIsRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsRequired
+}
+
+func (x *TrainingCourse) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListTrainingCoursesRequest struct {
 }
 
@@ -62,11 +118,51 @@ type ListTrainingCoursesResponse struct {
 	Courses []*TrainingCourse `json:"courses,omitempty"`
 }
 
+func (x *ListTrainingCoursesResponse) GetCourses() []*TrainingCourse {
+	if x == nil {
+		var zero []*TrainingCourse
+		return zero
+	}
+	return x.Courses
+}
+
 type CreateTrainingCourseRequest struct {
 	Name          string  `json:"name,omitempty"`
 	Description   string  `json:"description,omitempty"`
 	DurationHours float64 `json:"duration_hours,omitempty"`
 	IsRequired    bool    `json:"is_required,omitempty"`
+}
+
+func (x *CreateTrainingCourseRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateTrainingCourseRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateTrainingCourseRequest) GetDurationHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DurationHours
+}
+
+func (x *CreateTrainingCourseRequest) GetIsRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsRequired
 }
 
 type CreateTrainingCourseResponse struct {
@@ -101,4 +197,20 @@ func (m *CreateTrainingCourseResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateTrainingCourseResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateTrainingCourseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

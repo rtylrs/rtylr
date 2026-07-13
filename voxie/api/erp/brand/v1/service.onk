@@ -5,7 +5,7 @@ service BrandService {
 
   createBrand(CreateBrandRequest) -> CreateBrandResponse @post("/brands")
 
-  updateBrand(UpdateBrandRequest) -> UpdateBrandResponse @put("/brands/{id}")
+  updateBrand(UpdateBrandRequest) -> UpdateBrandResponse @put("/brands/{id}") @body("body")
 
   deleteBrand(DeleteBrandRequest) -> DeleteBrandResponse @delete("/brands/{id}")
 }

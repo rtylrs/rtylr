@@ -14,6 +14,46 @@ type BillingSummary struct {
 	NextBillingDate string  `json:"next_billing_date,omitempty"`
 }
 
+func (x *BillingSummary) GetPlan() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Plan
+}
+
+func (x *BillingSummary) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *BillingSummary) GetCurrentUsage() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrentUsage
+}
+
+func (x *BillingSummary) GetUsageLimit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UsageLimit
+}
+
+func (x *BillingSummary) GetNextBillingDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextBillingDate
+}
+
 type Invoice struct {
 	Id       int64   `json:"id,omitempty"`
 	Amount   float64 `json:"amount,omitempty"`
@@ -52,6 +92,54 @@ func (m *Invoice) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Invoice) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Invoice) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *Invoice) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Invoice) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Invoice) GetIssuedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IssuedAt
+}
+
+func (x *Invoice) GetPaidAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaidAt
+}
+
 type GetBillingSummaryRequest struct {
 }
 
@@ -59,9 +147,25 @@ type GetBillingSummaryResponse struct {
 	Summary *BillingSummary `json:"summary,omitempty"`
 }
 
+func (x *GetBillingSummaryResponse) GetSummary() *BillingSummary {
+	if x == nil {
+		var zero *BillingSummary
+		return zero
+	}
+	return x.Summary
+}
+
 type ListInvoicesRequest struct {
 }
 
 type ListInvoicesResponse struct {
 	Invoices []*Invoice `json:"invoices,omitempty"`
+}
+
+func (x *ListInvoicesResponse) GetInvoices() []*Invoice {
+	if x == nil {
+		var zero []*Invoice
+		return zero
+	}
+	return x.Invoices
 }

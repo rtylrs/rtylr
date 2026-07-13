@@ -42,6 +42,38 @@ func (m *MyLocation) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MyLocation) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *MyLocation) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *MyLocation) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *MyLocation) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
 type RosterEntry struct {
 	UserId    int64  `json:"user_id,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -77,6 +109,46 @@ func (m *RosterEntry) UnmarshalJSON(data []byte) error {
 		m.UserId = v
 	}
 	return nil
+}
+
+func (x *RosterEntry) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *RosterEntry) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *RosterEntry) GetHasPin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasPin
+}
+
+func (x *RosterEntry) GetIsManager() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsManager
+}
+
+func (x *RosterEntry) GetPosRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PosRole
 }
 
 type MemberLocationEntry struct {
@@ -126,6 +198,46 @@ func (m *MemberLocationEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MemberLocationEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *MemberLocationEntry) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *MemberLocationEntry) GetCanManagePosUsers() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanManagePosUsers
+}
+
+func (x *MemberLocationEntry) GetCanManageTerminals() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanManageTerminals
+}
+
+func (x *MemberLocationEntry) GetCanViewReports() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanViewReports
+}
+
 type AssignLocationRequest struct {
 	UserId             int64 `json:"user_id,omitempty"`
 	LocationId         int64 `json:"location_id,omitempty"`
@@ -173,6 +285,46 @@ func (m *AssignLocationRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AssignLocationRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *AssignLocationRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *AssignLocationRequest) GetCanManagePosUsers() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanManagePosUsers
+}
+
+func (x *AssignLocationRequest) GetCanManageTerminals() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanManageTerminals
+}
+
+func (x *AssignLocationRequest) GetCanViewReports() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanViewReports
+}
+
 type AssignLocationResponse struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -204,6 +356,14 @@ func (m *AssignLocationResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *AssignLocationResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
 type GetLocationRosterRequest struct {
@@ -239,8 +399,24 @@ func (m *GetLocationRosterRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetLocationRosterRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
 type GetLocationRosterResponse struct {
 	Roster []*RosterEntry `json:"roster,omitempty"`
+}
+
+func (x *GetLocationRosterResponse) GetRoster() []*RosterEntry {
+	if x == nil {
+		var zero []*RosterEntry
+		return zero
+	}
+	return x.Roster
 }
 
 type GetMemberLocationsRequest struct {
@@ -276,8 +452,24 @@ func (m *GetMemberLocationsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetMemberLocationsRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type GetMemberLocationsResponse struct {
 	Locations []*MemberLocationEntry `json:"locations,omitempty"`
+}
+
+func (x *GetMemberLocationsResponse) GetLocations() []*MemberLocationEntry {
+	if x == nil {
+		var zero []*MemberLocationEntry
+		return zero
+	}
+	return x.Locations
 }
 
 type GetMyLocationsRequest struct {
@@ -285,6 +477,14 @@ type GetMyLocationsRequest struct {
 
 type GetMyLocationsResponse struct {
 	Locations []*MyLocation `json:"locations,omitempty"`
+}
+
+func (x *GetMyLocationsResponse) GetLocations() []*MyLocation {
+	if x == nil {
+		var zero []*MyLocation
+		return zero
+	}
+	return x.Locations
 }
 
 type RemoveLocationRequest struct {
@@ -320,6 +520,22 @@ func (m *RemoveLocationRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RemoveLocationRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type RemoveLocationResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *RemoveLocationResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

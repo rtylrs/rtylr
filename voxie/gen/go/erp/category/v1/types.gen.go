@@ -54,9 +54,73 @@ func (m *Category) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Category) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Category) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Category) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Category) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Category) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Category) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateCategoryRequest struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
+}
+
+func (x *CreateCategoryRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateCategoryRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
 }
 
 type CreateCategoryResponse struct {
@@ -93,10 +157,46 @@ func (m *CreateCategoryResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type UpdateCategoryRequest struct {
-	Id          int64  `json:"id,omitempty"`
+func (x *CreateCategoryResponse) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *CreateCategoryResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+type UpdateCategoryBody struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
+}
+
+func (x *UpdateCategoryBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateCategoryBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+type UpdateCategoryRequest struct {
+	Id   int64               `json:"id,omitempty"`
+	Body *UpdateCategoryBody `json:"body,omitempty"`
 }
 
 func (m *UpdateCategoryRequest) MarshalJSON() ([]byte, error) {
@@ -128,8 +228,32 @@ func (m *UpdateCategoryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateCategoryRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateCategoryRequest) GetBody() *UpdateCategoryBody {
+	if x == nil {
+		var zero *UpdateCategoryBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateCategoryResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateCategoryResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteCategoryRequest struct {
@@ -165,8 +289,24 @@ func (m *DeleteCategoryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteCategoryRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteCategoryResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteCategoryResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListCategoriesRequest struct {
@@ -174,4 +314,12 @@ type ListCategoriesRequest struct {
 
 type ListCategoriesResponse struct {
 	Categories []*Category `json:"categories,omitempty"`
+}
+
+func (x *ListCategoriesResponse) GetCategories() []*Category {
+	if x == nil {
+		var zero []*Category
+		return zero
+	}
+	return x.Categories
 }

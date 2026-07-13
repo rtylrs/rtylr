@@ -59,6 +59,106 @@ func (m *Session) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Session) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Session) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Session) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *Session) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
+}
+
+func (x *Session) GetOpeningFloat() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OpeningFloat
+}
+
+func (x *Session) GetClosingFloat() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ClosingFloat
+}
+
+func (x *Session) GetTotalSales() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalSales
+}
+
+func (x *Session) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Session) GetOpenedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OpenedAt
+}
+
+func (x *Session) GetClosedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ClosedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.ClosedAt
+}
+
+func (x *Session) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CurrentSession struct {
 	Id          int64   `json:"id,omitempty"`
 	OwnerId     int64   `json:"owner_id,omitempty"`
@@ -131,6 +231,90 @@ func (m *CurrentSession) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CurrentSession) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CurrentSession) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *CurrentSession) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *CurrentSession) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *CurrentSession) GetOpeningCash() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OpeningCash
+}
+
+func (x *CurrentSession) GetClosingCash() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ClosingCash
+}
+
+func (x *CurrentSession) GetTotalSales() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalSales
+}
+
+func (x *CurrentSession) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *CurrentSession) GetOpenedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OpenedAt
+}
+
+func (x *CurrentSession) GetClosedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ClosedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.ClosedAt
+}
+
 type GetSessionRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -164,8 +348,24 @@ func (m *GetSessionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetSessionRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetSessionResponse struct {
 	Session *Session `json:"session,omitempty"`
+}
+
+func (x *GetSessionResponse) GetSession() *Session {
+	if x == nil {
+		var zero *Session
+		return zero
+	}
+	return x.Session
 }
 
 type GetCurrentSessionRequest struct {
@@ -175,11 +375,27 @@ type GetCurrentSessionResponse struct {
 	Session *CurrentSession `json:"session,omitempty"`
 }
 
+func (x *GetCurrentSessionResponse) GetSession() *CurrentSession {
+	if x == nil {
+		var zero *CurrentSession
+		return zero
+	}
+	return x.Session
+}
+
 type ListSessionsRequest struct {
 }
 
 type ListSessionsResponse struct {
 	Sessions []*Session `json:"sessions,omitempty"`
+}
+
+func (x *ListSessionsResponse) GetSessions() []*Session {
+	if x == nil {
+		var zero []*Session
+		return zero
+	}
+	return x.Sessions
 }
 
 type OpenSessionRequest struct {
@@ -227,6 +443,30 @@ func (m *OpenSessionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *OpenSessionRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *OpenSessionRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *OpenSessionRequest) GetOpeningFloat() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OpeningFloat
+}
+
 type OpenSessionResponse struct {
 	SessionId int64  `json:"session_id,omitempty"`
 	Message   string `json:"message,omitempty"`
@@ -259,6 +499,22 @@ func (m *OpenSessionResponse) UnmarshalJSON(data []byte) error {
 		m.SessionId = v
 	}
 	return nil
+}
+
+func (x *OpenSessionResponse) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *OpenSessionResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CloseSessionRequest struct {
@@ -295,6 +551,30 @@ func (m *CloseSessionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CloseSessionRequest) GetClosingFloat() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ClosingFloat
+}
+
+func (x *CloseSessionRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type CloseSessionResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *CloseSessionResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

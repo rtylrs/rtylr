@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type DeveloperServiceServer interface {
 	ListApiKeys(ctx context.Context, req *ListApiKeysRequest) (*ListApiKeysResponse, error)
 	CreateApiKey(ctx context.Context, req *CreateApiKeyRequest) (*CreateApiKeyResponse, error)
@@ -32,7 +44,15 @@ type DeveloperServiceServer interface {
 	DeleteWebhook(ctx context.Context, req *DeleteWebhookRequest) (*DeleteWebhookResponse, error)
 }
 
-func RegisterDeveloperServiceServer(mux *http.ServeMux, srv DeveloperServiceServer) {
+func RegisterDeveloperServiceServer(srv DeveloperServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterDeveloperServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /hub/developer/v1/api-keys", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListApiKeysRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -171,4 +191,5 @@ func RegisterDeveloperServiceServer(mux *http.ServeMux, srv DeveloperServiceServ
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

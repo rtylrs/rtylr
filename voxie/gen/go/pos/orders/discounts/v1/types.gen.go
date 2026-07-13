@@ -42,6 +42,46 @@ func (m *DiscountOrderRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DiscountOrderRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *DiscountOrderRequest) GetDiscountType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DiscountType
+}
+
+func (x *DiscountOrderRequest) GetDiscountValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountValue
+}
+
+func (x *DiscountOrderRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type DiscountOrderResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DiscountOrderResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

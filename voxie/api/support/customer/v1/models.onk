@@ -1,6 +1,6 @@
 package support.customer.v1
 
-message SupportCustomer {
+message Customer {
   id: int64
   business_id: int64
   name: string
@@ -11,22 +11,22 @@ message SupportCustomer {
   created_at: string
 }
 
-message ListSupportCustomersRequest {
+message ListCustomersRequest {
   page: int32 @query("page")
   page_size: int32 @query("page_size")
 }
 
-message ListSupportCustomersResponse {
-  customers: SupportCustomer[]
+message ListCustomersResponse {
+  customers: Customer[]
   total: int32
   page: int32
   page_size: int32
 }
 
-message GetSupportCustomerRequest {
+message GetCustomerRequest {
   id: int64 @required @gt(0)
 }
 
-message GetSupportCustomerResponse {
-  customer: SupportCustomer
+message GetCustomerResponse {
+  customer: Customer
 }

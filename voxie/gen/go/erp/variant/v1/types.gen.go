@@ -82,6 +82,118 @@ func (m *Variant) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Variant) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Variant) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Variant) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Variant) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *Variant) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Variant) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *Variant) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *Variant) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *Variant) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *Variant) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *Variant) GetAttributes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Attributes
+}
+
+func (x *Variant) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Variant) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Variant) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateVariantRequest struct {
 	ProductId     int64   `json:"product_id,omitempty"`
 	Name          string  `json:"name,omitempty"`
@@ -123,6 +235,78 @@ func (m *CreateVariantRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateVariantRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *CreateVariantRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateVariantRequest) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *CreateVariantRequest) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *CreateVariantRequest) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *CreateVariantRequest) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *CreateVariantRequest) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *CreateVariantRequest) GetAttributes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Attributes
+}
+
+func (x *CreateVariantRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type CreateVariantResponse struct {
 	VariantId int64  `json:"variant_id,omitempty"`
 	Message   string `json:"message,omitempty"`
@@ -155,6 +339,22 @@ func (m *CreateVariantResponse) UnmarshalJSON(data []byte) error {
 		m.VariantId = v
 	}
 	return nil
+}
+
+func (x *CreateVariantResponse) GetVariantId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.VariantId
+}
+
+func (x *CreateVariantResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteVariantRequest struct {
@@ -190,8 +390,24 @@ func (m *DeleteVariantRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteVariantRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteVariantResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteVariantResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListVariantsRequest struct {
@@ -227,8 +443,24 @@ func (m *ListVariantsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListVariantsRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
 type ListVariantsResponse struct {
 	Variants []*Variant `json:"variants,omitempty"`
+}
+
+func (x *ListVariantsResponse) GetVariants() []*Variant {
+	if x == nil {
+		var zero []*Variant
+		return zero
+	}
+	return x.Variants
 }
 
 type UpdateVariantBody struct {
@@ -272,6 +504,78 @@ func (m *UpdateVariantBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateVariantBody) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *UpdateVariantBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateVariantBody) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *UpdateVariantBody) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *UpdateVariantBody) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *UpdateVariantBody) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *UpdateVariantBody) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *UpdateVariantBody) GetAttributes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Attributes
+}
+
+func (x *UpdateVariantBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateVariantRequest struct {
 	Id   int64              `json:"id,omitempty"`
 	Body *UpdateVariantBody `json:"body,omitempty"`
@@ -306,6 +610,30 @@ func (m *UpdateVariantRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateVariantRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateVariantRequest) GetBody() *UpdateVariantBody {
+	if x == nil {
+		var zero *UpdateVariantBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateVariantResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateVariantResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

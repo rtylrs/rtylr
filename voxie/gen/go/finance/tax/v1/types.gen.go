@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type TaxSetting struct {
+type TaxConfig struct {
 	Id          int64   `json:"id,omitempty"`
 	OwnerId     int64   `json:"owner_id,omitempty"`
 	TaxName     string  `json:"tax_name,omitempty"`
@@ -17,8 +17,8 @@ type TaxSetting struct {
 	UpdatedAt   string  `json:"updated_at,omitempty"`
 }
 
-func (m *TaxSetting) MarshalJSON() ([]byte, error) {
-	type alias TaxSetting
+func (m *TaxConfig) MarshalJSON() ([]byte, error) {
+	type alias TaxConfig
 	aux := struct {
 		*alias
 		Id      string `json:"id,omitempty"`
@@ -29,8 +29,8 @@ func (m *TaxSetting) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *TaxSetting) UnmarshalJSON(data []byte) error {
-	type alias TaxSetting
+func (m *TaxConfig) UnmarshalJSON(data []byte) error {
+	type alias TaxConfig
 	aux := struct {
 		*alias
 		Id      string `json:"id,omitempty"`
@@ -56,11 +56,83 @@ func (m *TaxSetting) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TaxConfig) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TaxConfig) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *TaxConfig) GetTaxName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaxName
+}
+
+func (x *TaxConfig) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *TaxConfig) GetIsInclusive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsInclusive
+}
+
+func (x *TaxConfig) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *TaxConfig) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *TaxConfig) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type GetTaxConfigRequest struct {
 }
 
 type GetTaxConfigResponse struct {
-	Config *TaxSetting `json:"config,omitempty"`
+	Config *TaxConfig `json:"config,omitempty"`
+}
+
+func (x *GetTaxConfigResponse) GetConfig() *TaxConfig {
+	if x == nil {
+		var zero *TaxConfig
+		return zero
+	}
+	return x.Config
 }
 
 type UpdateTaxConfigRequest struct {
@@ -70,16 +142,88 @@ type UpdateTaxConfigRequest struct {
 	IsActive    bool    `json:"is_active,omitempty"`
 }
 
+func (x *UpdateTaxConfigRequest) GetTaxName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaxName
+}
+
+func (x *UpdateTaxConfigRequest) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *UpdateTaxConfigRequest) GetIsInclusive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsInclusive
+}
+
+func (x *UpdateTaxConfigRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateTaxConfigResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-type GetTaxPLReportRequest struct {
+func (x *UpdateTaxConfigResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
-type GetTaxPLReportResponse struct {
+type GetPLReportRequest struct {
+}
+
+type GetPLReportResponse struct {
 	TotalRevenue  float64 `json:"total_revenue,omitempty"`
 	TotalExpenses float64 `json:"total_expenses,omitempty"`
 	GrossProfit   float64 `json:"gross_profit,omitempty"`
 	NetProfit     float64 `json:"net_profit,omitempty"`
+}
+
+func (x *GetPLReportResponse) GetTotalRevenue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalRevenue
+}
+
+func (x *GetPLReportResponse) GetTotalExpenses() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalExpenses
+}
+
+func (x *GetPLReportResponse) GetGrossProfit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.GrossProfit
+}
+
+func (x *GetPLReportResponse) GetNetProfit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.NetProfit
 }

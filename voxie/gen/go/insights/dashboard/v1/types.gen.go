@@ -94,6 +94,54 @@ func (m *WorkloadEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *WorkloadEntry) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *WorkloadEntry) GetOpenTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OpenTasks
+}
+
+func (x *WorkloadEntry) GetInProgressTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InProgressTasks
+}
+
+func (x *WorkloadEntry) GetCompletedTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CompletedTasks
+}
+
+func (x *WorkloadEntry) GetOverdueTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OverdueTasks
+}
+
+func (x *WorkloadEntry) GetTotalActive() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalActive
+}
+
 type RoadmapProject struct {
 	ProjectId       int64   `json:"project_id,omitempty"`
 	ProjectName     string  `json:"project_name,omitempty"`
@@ -154,6 +202,70 @@ func (m *RoadmapProject) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RoadmapProject) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *RoadmapProject) GetProjectName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ProjectName
+}
+
+func (x *RoadmapProject) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *RoadmapProject) GetTotalTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalTasks
+}
+
+func (x *RoadmapProject) GetCompletedTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CompletedTasks
+}
+
+func (x *RoadmapProject) GetProgressPercent() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ProgressPercent
+}
+
+func (x *RoadmapProject) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *RoadmapProject) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
 type InsightsMetricCard struct {
 	Value    int64   `json:"value,omitempty"`
 	DeltaPct float64 `json:"delta_pct,omitempty"`
@@ -188,9 +300,41 @@ func (m *InsightsMetricCard) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InsightsMetricCard) GetValue() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Value
+}
+
+func (x *InsightsMetricCard) GetDeltaPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DeltaPct
+}
+
 type InsightsPctCard struct {
 	Value    float64 `json:"value,omitempty"`
 	DeltaPct float64 `json:"delta_pct,omitempty"`
+}
+
+func (x *InsightsPctCard) GetValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Value
+}
+
+func (x *InsightsPctCard) GetDeltaPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DeltaPct
 }
 
 type GetInsightsRequest struct {
@@ -285,6 +429,62 @@ func (m *GetInsightsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetInsightsResponse) GetTotalTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalTasks
+}
+
+func (x *GetInsightsResponse) GetCompletedTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CompletedTasks
+}
+
+func (x *GetInsightsResponse) GetInProgressTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InProgressTasks
+}
+
+func (x *GetInsightsResponse) GetOverdueTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OverdueTasks
+}
+
+func (x *GetInsightsResponse) GetAvgCycleTimeDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgCycleTimeDays
+}
+
+func (x *GetInsightsResponse) GetVelocity() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Velocity
+}
+
+func (x *GetInsightsResponse) GetVelocityChange() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.VelocityChange
+}
+
 type GetKPIsRequest struct {
 }
 
@@ -366,6 +566,54 @@ func (m *GetKPIsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetKPIsResponse) GetRevenue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Revenue
+}
+
+func (x *GetKPIsResponse) GetOrderCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderCount
+}
+
+func (x *GetKPIsResponse) GetStaffCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffCount
+}
+
+func (x *GetKPIsResponse) GetCustomerCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerCount
+}
+
+func (x *GetKPIsResponse) GetLowStockCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LowStockCount
+}
+
+func (x *GetKPIsResponse) GetActiveApps() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ActiveApps
+}
+
 type GetRoadmapRequest struct {
 }
 
@@ -373,11 +621,27 @@ type GetRoadmapResponse struct {
 	Projects []*RoadmapProject `json:"projects,omitempty"`
 }
 
+func (x *GetRoadmapResponse) GetProjects() []*RoadmapProject {
+	if x == nil {
+		var zero []*RoadmapProject
+		return zero
+	}
+	return x.Projects
+}
+
 type GetWorkloadRequest struct {
 }
 
 type GetWorkloadResponse struct {
 	Workload []*WorkloadEntry `json:"workload,omitempty"`
+}
+
+func (x *GetWorkloadResponse) GetWorkload() []*WorkloadEntry {
+	if x == nil {
+		var zero []*WorkloadEntry
+		return zero
+	}
+	return x.Workload
 }
 
 type GetDashboardSummaryRequest struct {
@@ -388,4 +652,36 @@ type GetDashboardSummaryResponse struct {
 	Customers *InsightsMetricCard `json:"customers,omitempty"`
 	Orders    *InsightsMetricCard `json:"orders,omitempty"`
 	Margin    *InsightsPctCard    `json:"margin,omitempty"`
+}
+
+func (x *GetDashboardSummaryResponse) GetRevenue() *InsightsMetricCard {
+	if x == nil {
+		var zero *InsightsMetricCard
+		return zero
+	}
+	return x.Revenue
+}
+
+func (x *GetDashboardSummaryResponse) GetCustomers() *InsightsMetricCard {
+	if x == nil {
+		var zero *InsightsMetricCard
+		return zero
+	}
+	return x.Customers
+}
+
+func (x *GetDashboardSummaryResponse) GetOrders() *InsightsMetricCard {
+	if x == nil {
+		var zero *InsightsMetricCard
+		return zero
+	}
+	return x.Orders
+}
+
+func (x *GetDashboardSummaryResponse) GetMargin() *InsightsPctCard {
+	if x == nil {
+		var zero *InsightsPctCard
+		return zero
+	}
+	return x.Margin
 }

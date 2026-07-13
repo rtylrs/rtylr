@@ -91,6 +91,122 @@ func (m *EquipmentRequestPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EquipmentRequestPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *EquipmentRequestPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *EquipmentRequestPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *EquipmentRequestPayload) GetEquipmentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EquipmentType
+}
+
+func (x *EquipmentRequestPayload) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *EquipmentRequestPayload) GetUrgency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Urgency
+}
+
+func (x *EquipmentRequestPayload) GetNeededByDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.NeededByDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.NeededByDate
+}
+
+func (x *EquipmentRequestPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *EquipmentRequestPayload) GetCurrentApprovalLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CurrentApprovalLevel
+}
+
+func (x *EquipmentRequestPayload) GetApprovedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApprovedBy == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApprovedBy
+}
+
+func (x *EquipmentRequestPayload) GetDeliveredAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.DeliveredAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DeliveredAt
+}
+
+func (x *EquipmentRequestPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *EquipmentRequestPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type AssetPayload struct {
 	Id           int64   `json:"id,omitempty"`
 	OwnerId      int64   `json:"owner_id,omitempty"`
@@ -173,9 +289,121 @@ func (m *AssetPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AssetPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *AssetPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *AssetPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *AssetPayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *AssetPayload) GetSerialNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SerialNumber == nil {
+		var zero string
+		return zero
+	}
+	return *x.SerialNumber
+}
+
+func (x *AssetPayload) GetAssignedDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AssignedDate
+}
+
+func (x *AssetPayload) GetReturnedDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ReturnedDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.ReturnedDate
+}
+
+func (x *AssetPayload) GetCondition() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Condition
+}
+
+func (x *AssetPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *AssetPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListAssetsRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Condition  *string `json:"condition,omitempty"`
+}
+
+func (x *ListAssetsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListAssetsRequest) GetCondition() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Condition == nil {
+		var zero string
+		return zero
+	}
+	return *x.Condition
 }
 
 type ListAssetsResponse struct {
@@ -185,9 +413,65 @@ type ListAssetsResponse struct {
 	Offset int32           `json:"offset,omitempty"`
 }
 
+func (x *ListAssetsResponse) GetAssets() []*AssetPayload {
+	if x == nil {
+		var zero []*AssetPayload
+		return zero
+	}
+	return x.Assets
+}
+
+func (x *ListAssetsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListAssetsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListAssetsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
 type ListEquipmentRequestsRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Status     *string `json:"status,omitempty"`
+}
+
+func (x *ListEquipmentRequestsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListEquipmentRequestsRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
 }
 
 type ListEquipmentRequestsResponse struct {
@@ -195,6 +479,38 @@ type ListEquipmentRequestsResponse struct {
 	Total    int64                      `json:"total,omitempty"`
 	Limit    int32                      `json:"limit,omitempty"`
 	Offset   int32                      `json:"offset,omitempty"`
+}
+
+func (x *ListEquipmentRequestsResponse) GetRequests() []*EquipmentRequestPayload {
+	if x == nil {
+		var zero []*EquipmentRequestPayload
+		return zero
+	}
+	return x.Requests
+}
+
+func (x *ListEquipmentRequestsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListEquipmentRequestsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListEquipmentRequestsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type CreateEquipmentRequestRequest struct {
@@ -234,12 +550,72 @@ func (m *CreateEquipmentRequestRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateEquipmentRequestRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CreateEquipmentRequestRequest) GetEquipmentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EquipmentType
+}
+
+func (x *CreateEquipmentRequestRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateEquipmentRequestRequest) GetUrgency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Urgency
+}
+
+func (x *CreateEquipmentRequestRequest) GetNeededByDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.NeededByDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.NeededByDate
+}
+
 type CreateEquipmentRequestResponse struct {
 	Request *EquipmentRequestPayload `json:"request,omitempty"`
 }
 
+func (x *CreateEquipmentRequestResponse) GetRequest() *EquipmentRequestPayload {
+	if x == nil {
+		var zero *EquipmentRequestPayload
+		return zero
+	}
+	return x.Request
+}
+
 type ApproveEquipmentBody struct {
 	Approved bool `json:"approved,omitempty"`
+}
+
+func (x *ApproveEquipmentBody) GetApproved() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Approved
 }
 
 type ApproveEquipmentRequest struct {
@@ -276,6 +652,30 @@ func (m *ApproveEquipmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApproveEquipmentRequest) GetEquipmentRequestId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EquipmentRequestId
+}
+
+func (x *ApproveEquipmentRequest) GetBody() *ApproveEquipmentBody {
+	if x == nil {
+		var zero *ApproveEquipmentBody
+		return zero
+	}
+	return x.Body
+}
+
 type ApproveEquipmentResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *ApproveEquipmentResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

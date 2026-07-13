@@ -381,7 +381,7 @@ func (c *ConsoleAdminServiceClient) ListBusinesses(ctx context.Context, req *Lis
 	return result, nil
 }
 
-func (c *ConsoleAdminServiceClient) UpdateBusiness(ctx context.Context, req *AdminUpdateBusinessRequest) (*AdminUpdateBusinessResponse, error) {
+func (c *ConsoleAdminServiceClient) UpdateBusiness(ctx context.Context, req *UpdateBusinessRequest) (*UpdateBusinessResponse, error) {
 	path := "/console/admin/v1/console/businesses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -406,7 +406,7 @@ func (c *ConsoleAdminServiceClient) UpdateBusiness(ctx context.Context, req *Adm
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(AdminUpdateBusinessResponse)
+	result := new(UpdateBusinessResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

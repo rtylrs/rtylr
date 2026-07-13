@@ -22,7 +22,7 @@ func NewCustomerServiceClient(baseURL string) *CustomerServiceClient {
 	return &CustomerServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}}
 }
 
-func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListSupportCustomersRequest) (*ListSupportCustomersResponse, error) {
+func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListCustomersRequest) (*ListCustomersResponse, error) {
 	path := "/support/customer/v1/customers"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -47,14 +47,14 @@ func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListSupp
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(ListSupportCustomersResponse)
+	result := new(ListCustomersResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetSupportCustomerRequest) (*GetSupportCustomerResponse, error) {
+func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetCustomerRequest) (*GetCustomerResponse, error) {
 	path := "/support/customer/v1/customers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -78,7 +78,7 @@ func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetSupport
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(GetSupportCustomerResponse)
+	result := new(GetCustomerResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

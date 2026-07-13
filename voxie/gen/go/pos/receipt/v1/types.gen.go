@@ -44,6 +44,54 @@ func (m *Receipt) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Receipt) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Receipt) GetOrderNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OrderNumber
+}
+
+func (x *Receipt) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *Receipt) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *Receipt) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *Receipt) GetPaidAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaidAt
+}
+
 type EmailReceiptRequest struct {
 	Id    int64  `json:"id,omitempty"`
 	Email string `json:"email,omitempty"`
@@ -78,8 +126,32 @@ func (m *EmailReceiptRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EmailReceiptRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *EmailReceiptRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
 type EmailReceiptResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *EmailReceiptResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListReceiptsRequest struct {
@@ -87,6 +159,30 @@ type ListReceiptsRequest struct {
 	To   string `json:"to,omitempty"`
 }
 
+func (x *ListReceiptsRequest) GetFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.From
+}
+
+func (x *ListReceiptsRequest) GetTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.To
+}
+
 type ListReceiptsResponse struct {
 	Receipts []*Receipt `json:"receipts,omitempty"`
+}
+
+func (x *ListReceiptsResponse) GetReceipts() []*Receipt {
+	if x == nil {
+		var zero []*Receipt
+		return zero
+	}
+	return x.Receipts
 }

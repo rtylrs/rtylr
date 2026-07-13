@@ -15,8 +15,64 @@ type IssueRequest struct {
 	CodeChallengeMethod string `json:"code_challenge_method,omitempty"`
 }
 
+func (x *IssueRequest) GetClientId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientId
+}
+
+func (x *IssueRequest) GetRedirectUri() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RedirectUri
+}
+
+func (x *IssueRequest) GetScope() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Scope
+}
+
+func (x *IssueRequest) GetState() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.State
+}
+
+func (x *IssueRequest) GetCodeChallenge() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CodeChallenge
+}
+
+func (x *IssueRequest) GetCodeChallengeMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CodeChallengeMethod
+}
+
 type IssueResponse struct {
 	RedirectUrl string `json:"redirect_url,omitempty"`
+}
+
+func (x *IssueResponse) GetRedirectUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RedirectUrl
 }
 
 type TokenRequest struct {
@@ -28,6 +84,54 @@ type TokenRequest struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
+func (x *TokenRequest) GetGrantType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GrantType
+}
+
+func (x *TokenRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+func (x *TokenRequest) GetCodeVerifier() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CodeVerifier
+}
+
+func (x *TokenRequest) GetRedirectUri() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RedirectUri
+}
+
+func (x *TokenRequest) GetClientId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientId
+}
+
+func (x *TokenRequest) GetRefreshToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RefreshToken
+}
+
 type TokenResponse struct {
 	AccessToken  string `json:"access_token,omitempty"`
 	RefreshToken string `json:"refresh_token,omitempty"`
@@ -35,13 +139,69 @@ type TokenResponse struct {
 	ExpiresIn    int32  `json:"expires_in,omitempty"`
 }
 
+func (x *TokenResponse) GetAccessToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AccessToken
+}
+
+func (x *TokenResponse) GetRefreshToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RefreshToken
+}
+
+func (x *TokenResponse) GetTokenType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TokenType
+}
+
+func (x *TokenResponse) GetExpiresIn() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ExpiresIn
+}
+
 type RevokeRequest struct {
 	Token    string `json:"token,omitempty"`
 	ClientId string `json:"client_id,omitempty"`
 }
 
+func (x *RevokeRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *RevokeRequest) GetClientId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientId
+}
+
 type RevokeResponse struct {
 	Ok bool `json:"ok,omitempty"`
+}
+
+func (x *RevokeResponse) GetOk() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Ok
 }
 
 type MeRequest struct {
@@ -90,4 +250,28 @@ func (m *MeResponse) UnmarshalJSON(data []byte) error {
 		m.BusinessId = v
 	}
 	return nil
+}
+
+func (x *MeResponse) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *MeResponse) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *MeResponse) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
 }

@@ -41,8 +41,32 @@ func (m *HoldOrderRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *HoldOrderRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *HoldOrderRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type HoldOrderResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *HoldOrderResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListHeldOrdersRequest struct {
@@ -50,4 +74,12 @@ type ListHeldOrdersRequest struct {
 
 type ListHeldOrdersResponse struct {
 	Orders []*pos_orders_v1.Order `json:"orders,omitempty"`
+}
+
+func (x *ListHeldOrdersResponse) GetOrders() []*pos_orders_v1.Order {
+	if x == nil {
+		var zero []*pos_orders_v1.Order
+		return zero
+	}
+	return x.Orders
 }

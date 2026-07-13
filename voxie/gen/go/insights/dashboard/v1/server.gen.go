@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type DashboardServiceServer interface {
 	GetInsights(ctx context.Context, req *GetInsightsRequest) (*GetInsightsResponse, error)
 	GetKPIs(ctx context.Context, req *GetKPIsRequest) (*GetKPIsResponse, error)
@@ -30,7 +42,15 @@ type DashboardServiceServer interface {
 	GetDashboardSummary(ctx context.Context, req *GetDashboardSummaryRequest) (*GetDashboardSummaryResponse, error)
 }
 
-func RegisterDashboardServiceServer(mux *http.ServeMux, srv DashboardServiceServer) {
+func RegisterDashboardServiceServer(srv DashboardServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterDashboardServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /insights/dashboard/v1/insights", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetInsightsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -111,4 +131,5 @@ func RegisterDashboardServiceServer(mux *http.ServeMux, srv DashboardServiceServ
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

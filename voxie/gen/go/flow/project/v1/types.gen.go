@@ -85,6 +85,142 @@ func (m *Project) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Project) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Project) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *Project) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Project) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Project) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Project) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *Project) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *Project) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Project) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *Project) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *Project) GetCreatedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedBy
+}
+
+func (x *Project) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Project) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *Project) GetTaskCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TaskCount
+}
+
+func (x *Project) GetCompletedCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CompletedCount
+}
+
+func (x *Project) GetMemberCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MemberCount
+}
+
+func (x *Project) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
 type ProjectColumn struct {
 	Id          int64  `json:"id,omitempty"`
 	ProjectId   int64  `json:"project_id,omitempty"`
@@ -143,6 +279,70 @@ func (m *ProjectColumn) UnmarshalJSON(data []byte) error {
 		m.WorkspaceId = v
 	}
 	return nil
+}
+
+func (x *ProjectColumn) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ProjectColumn) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *ProjectColumn) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *ProjectColumn) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ProjectColumn) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *ProjectColumn) GetSortOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SortOrder
+}
+
+func (x *ProjectColumn) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ProjectColumn) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
 }
 
 type ProjectMember struct {
@@ -215,6 +415,70 @@ func (m *ProjectMember) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ProjectMember) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ProjectMember) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *ProjectMember) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *ProjectMember) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ProjectMember) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *ProjectMember) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *ProjectMember) GetAddedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AddedBy
+}
+
+func (x *ProjectMember) GetAddedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AddedAt
+}
+
 type ListProjectsRequest struct {
 	WorkspaceId int64 `json:"workspace_id,omitempty"`
 }
@@ -248,8 +512,24 @@ func (m *ListProjectsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListProjectsRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type ListProjectsResponse struct {
 	Projects []*Project `json:"projects,omitempty"`
+}
+
+func (x *ListProjectsResponse) GetProjects() []*Project {
+	if x == nil {
+		var zero []*Project
+		return zero
+	}
+	return x.Projects
 }
 
 type CreateProjectRequest struct {
@@ -291,8 +571,72 @@ func (m *CreateProjectRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateProjectRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateProjectRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateProjectRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateProjectRequest) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *CreateProjectRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *CreateProjectRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *CreateProjectRequest) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
 type CreateProjectResponse struct {
 	Project *Project `json:"project,omitempty"`
+}
+
+func (x *CreateProjectResponse) GetProject() *Project {
+	if x == nil {
+		var zero *Project
+		return zero
+	}
+	return x.Project
 }
 
 type UpdateProjectBody struct {
@@ -303,6 +647,62 @@ type UpdateProjectBody struct {
 	Status      string `json:"status,omitempty"`
 	StartDate   string `json:"start_date,omitempty"`
 	DueDate     string `json:"due_date,omitempty"`
+}
+
+func (x *UpdateProjectBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateProjectBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateProjectBody) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *UpdateProjectBody) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *UpdateProjectBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateProjectBody) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *UpdateProjectBody) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
 }
 
 type UpdateProjectRequest struct {
@@ -339,8 +739,32 @@ func (m *UpdateProjectRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateProjectRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateProjectRequest) GetBody() *UpdateProjectBody {
+	if x == nil {
+		var zero *UpdateProjectBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateProjectResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateProjectResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteProjectRequest struct {
@@ -376,8 +800,24 @@ func (m *DeleteProjectRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteProjectRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteProjectResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteProjectResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListProjectColumnsRequest struct {
@@ -413,8 +853,24 @@ func (m *ListProjectColumnsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListProjectColumnsRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
 type ListProjectColumnsResponse struct {
 	Columns []*ProjectColumn `json:"columns,omitempty"`
+}
+
+func (x *ListProjectColumnsResponse) GetColumns() []*ProjectColumn {
+	if x == nil {
+		var zero []*ProjectColumn
+		return zero
+	}
+	return x.Columns
 }
 
 type CreateProjectColumnRequest struct {
@@ -464,8 +920,56 @@ func (m *CreateProjectColumnRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateProjectColumnRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *CreateProjectColumnRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateProjectColumnRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateProjectColumnRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *CreateProjectColumnRequest) GetSortOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SortOrder
+}
+
 type CreateProjectColumnResponse struct {
 	Column *ProjectColumn `json:"column,omitempty"`
+}
+
+func (x *CreateProjectColumnResponse) GetColumn() *ProjectColumn {
+	if x == nil {
+		var zero *ProjectColumn
+		return zero
+	}
+	return x.Column
 }
 
 type UpdateProjectColumnRequest struct {
@@ -504,8 +1008,48 @@ func (m *UpdateProjectColumnRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateProjectColumnRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateProjectColumnRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateProjectColumnRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *UpdateProjectColumnRequest) GetSortOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SortOrder
+}
+
 type UpdateProjectColumnResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateProjectColumnResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteProjectColumnRequest struct {
@@ -541,8 +1085,24 @@ func (m *DeleteProjectColumnRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteProjectColumnRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteProjectColumnResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteProjectColumnResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type MoveTaskToColumnRequest struct {
@@ -589,8 +1149,32 @@ func (m *MoveTaskToColumnRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MoveTaskToColumnRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *MoveTaskToColumnRequest) GetColumnId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ColumnId
+}
+
 type MoveTaskToColumnResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *MoveTaskToColumnResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListProjectMembersRequest struct {
@@ -626,8 +1210,24 @@ func (m *ListProjectMembersRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListProjectMembersRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
 type ListProjectMembersResponse struct {
 	Members []*ProjectMember `json:"members,omitempty"`
+}
+
+func (x *ListProjectMembersResponse) GetMembers() []*ProjectMember {
+	if x == nil {
+		var zero []*ProjectMember
+		return zero
+	}
+	return x.Members
 }
 
 type AddProjectMemberRequest struct {
@@ -675,8 +1275,40 @@ func (m *AddProjectMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AddProjectMemberRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *AddProjectMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *AddProjectMemberRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
 type AddProjectMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *AddProjectMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type RemoveProjectMemberRequest struct {
@@ -723,8 +1355,32 @@ func (m *RemoveProjectMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RemoveProjectMemberRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *RemoveProjectMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type RemoveProjectMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveProjectMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateProjectMemberRoleRequest struct {
@@ -772,8 +1428,40 @@ func (m *UpdateProjectMemberRoleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateProjectMemberRoleRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *UpdateProjectMemberRoleRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *UpdateProjectMemberRoleRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
 type UpdateProjectMemberRoleResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateProjectMemberRoleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type InviteProjectMemberRequest struct {
@@ -811,8 +1499,40 @@ func (m *InviteProjectMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InviteProjectMemberRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *InviteProjectMemberRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *InviteProjectMemberRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
 type InviteProjectMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *InviteProjectMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type TransferProjectOwnershipRequest struct {
@@ -859,8 +1579,32 @@ func (m *TransferProjectOwnershipRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TransferProjectOwnershipRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *TransferProjectOwnershipRequest) GetNewOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.NewOwnerId
+}
+
 type TransferProjectOwnershipResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *TransferProjectOwnershipResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type MoveProjectRequest struct {
@@ -907,6 +1651,30 @@ func (m *MoveProjectRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MoveProjectRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *MoveProjectRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type MoveProjectResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *MoveProjectResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

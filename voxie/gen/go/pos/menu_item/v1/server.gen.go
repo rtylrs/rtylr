@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type MenuItemServiceServer interface {
 	ListMenuItems(ctx context.Context, req *ListMenuItemsRequest) (*ListMenuItemsResponse, error)
 	ListPublicMenuItems(ctx context.Context, req *ListPublicMenuItemsRequest) (*ListPublicMenuItemsResponse, error)
@@ -29,7 +41,15 @@ type MenuItemServiceServer interface {
 	UpdateMenuItem(ctx context.Context, req *UpdateMenuItemRequest) (*UpdateMenuItemResponse, error)
 }
 
-func RegisterMenuItemServiceServer(mux *http.ServeMux, srv MenuItemServiceServer) {
+func RegisterMenuItemServiceServer(srv MenuItemServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterMenuItemServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /pos/menu-item/v1/menu-items", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListMenuItemsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -113,4 +133,5 @@ func RegisterMenuItemServiceServer(mux *http.ServeMux, srv MenuItemServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

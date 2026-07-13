@@ -10,10 +10,10 @@ loyalty_points?: string;
 loyalty_tier?: string;
 }
 
-export interface GetCrmDashboardRequest {
+export interface GetDashboardRequest {
 }
 
-export interface GetCrmDashboardResponse {
+export interface GetDashboardResponse {
 total_customers?: string;
 new_this_month?: string;
 active_loyalty_members?: string;

@@ -62,12 +62,164 @@ func (m *Quote) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Quote) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Quote) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Quote) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *Quote) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *Quote) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Quote) GetLines() []*QuoteLine {
+	if x == nil {
+		var zero []*QuoteLine
+		return zero
+	}
+	return x.Lines
+}
+
+func (x *Quote) GetSubtotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Subtotal
+}
+
+func (x *Quote) GetTax() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Tax
+}
+
+func (x *Quote) GetDiscount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Discount
+}
+
+func (x *Quote) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *Quote) GetValidUntil() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ValidUntil
+}
+
+func (x *Quote) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *Quote) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Quote) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type QuoteLine struct {
 	Description string  `json:"description,omitempty"`
 	Quantity    int32   `json:"quantity,omitempty"`
 	UnitPrice   float64 `json:"unit_price,omitempty"`
 	TaxRate     float64 `json:"tax_rate,omitempty"`
 	Total       float64 `json:"total,omitempty"`
+}
+
+func (x *QuoteLine) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *QuoteLine) GetQuantity() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *QuoteLine) GetUnitPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitPrice
+}
+
+func (x *QuoteLine) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *QuoteLine) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
 }
 
 type CreateQuoteRequest struct {
@@ -83,8 +235,96 @@ type CreateQuoteRequest struct {
 	Notes         string       `json:"notes,omitempty"`
 }
 
+func (x *CreateQuoteRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CreateQuoteRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *CreateQuoteRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *CreateQuoteRequest) GetLines() []*QuoteLine {
+	if x == nil {
+		var zero []*QuoteLine
+		return zero
+	}
+	return x.Lines
+}
+
+func (x *CreateQuoteRequest) GetSubtotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Subtotal
+}
+
+func (x *CreateQuoteRequest) GetTax() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Tax
+}
+
+func (x *CreateQuoteRequest) GetValidUntil() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ValidUntil
+}
+
+func (x *CreateQuoteRequest) GetDiscount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Discount
+}
+
+func (x *CreateQuoteRequest) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *CreateQuoteRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type CreateQuoteResponse struct {
 	Quote *Quote `json:"quote,omitempty"`
+}
+
+func (x *CreateQuoteResponse) GetQuote() *Quote {
+	if x == nil {
+		var zero *Quote
+		return zero
+	}
+	return x.Quote
 }
 
 type GetQuoteRequest struct {
@@ -120,13 +360,45 @@ func (m *GetQuoteRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetQuoteRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetQuoteResponse struct {
 	Quote *Quote `json:"quote,omitempty"`
+}
+
+func (x *GetQuoteResponse) GetQuote() *Quote {
+	if x == nil {
+		var zero *Quote
+		return zero
+	}
+	return x.Quote
 }
 
 type ListQuotesRequest struct {
 	Page     int64 `json:"page,omitempty"`
 	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListQuotesRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListQuotesRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListQuotesResponse struct {
@@ -136,8 +408,48 @@ type ListQuotesResponse struct {
 	HasMore  bool     `json:"has_more,omitempty"`
 }
 
+func (x *ListQuotesResponse) GetQuotes() []*Quote {
+	if x == nil {
+		var zero []*Quote
+		return zero
+	}
+	return x.Quotes
+}
+
+func (x *ListQuotesResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListQuotesResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListQuotesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
 type UpdateQuoteStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateQuoteStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateQuoteStatusRequest struct {
@@ -174,8 +486,32 @@ func (m *UpdateQuoteStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateQuoteStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateQuoteStatusRequest) GetBody() *UpdateQuoteStatusBody {
+	if x == nil {
+		var zero *UpdateQuoteStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateQuoteStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateQuoteStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ConvertQuoteRequest struct {
@@ -211,6 +547,14 @@ func (m *ConvertQuoteRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ConvertQuoteRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type ConvertQuoteResponse struct {
 	InvoiceId int64  `json:"invoice_id,omitempty"`
 	Message   string `json:"message,omitempty"`
@@ -243,4 +587,20 @@ func (m *ConvertQuoteResponse) UnmarshalJSON(data []byte) error {
 		m.InvoiceId = v
 	}
 	return nil
+}
+
+func (x *ConvertQuoteResponse) GetInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InvoiceId
+}
+
+func (x *ConvertQuoteResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

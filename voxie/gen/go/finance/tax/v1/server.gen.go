@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,13 +23,32 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type TaxServiceServer interface {
 	GetTaxConfig(ctx context.Context, req *GetTaxConfigRequest) (*GetTaxConfigResponse, error)
 	UpdateTaxConfig(ctx context.Context, req *UpdateTaxConfigRequest) (*UpdateTaxConfigResponse, error)
-	GetPLReport(ctx context.Context, req *GetTaxPLReportRequest) (*GetTaxPLReportResponse, error)
+	GetPLReport(ctx context.Context, req *GetPLReportRequest) (*GetPLReportResponse, error)
 }
 
-func RegisterTaxServiceServer(mux *http.ServeMux, srv TaxServiceServer) {
+func RegisterTaxServiceServer(srv TaxServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterTaxServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /finance/tax/v1/tax", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetTaxConfigRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -68,7 +88,7 @@ func RegisterTaxServiceServer(mux *http.ServeMux, srv TaxServiceServer) {
 		_ = json.NewEncoder(w).Encode(resp)
 	})
 	mux.HandleFunc("GET /finance/tax/v1/pl", func(w http.ResponseWriter, r *http.Request) {
-		req := new(GetTaxPLReportRequest)
+		req := new(GetPLReportRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -83,4 +103,5 @@ func RegisterTaxServiceServer(mux *http.ServeMux, srv TaxServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

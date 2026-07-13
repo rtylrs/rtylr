@@ -20,7 +20,7 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
-func (m *GetSupportCustomerRequest) Validate() error {
+func (m *GetCustomerRequest) Validate() error {
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")

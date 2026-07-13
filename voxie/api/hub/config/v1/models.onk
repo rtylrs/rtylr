@@ -48,7 +48,7 @@ message GetConfigRequest {}
 
 message GetConfigResponse {
   /// business is declared in hub.business.v1 - a cross-package reference.
-  business: Business
+  business: hub.business.v1.Business
   maintenance: bool
 }
 

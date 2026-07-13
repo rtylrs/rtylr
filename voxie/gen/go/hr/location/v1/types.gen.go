@@ -77,8 +77,92 @@ func (m *LocationPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LocationPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LocationPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LocationPayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *LocationPayload) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *LocationPayload) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Timezone == nil {
+		var zero string
+		return zero
+	}
+	return *x.Timezone
+}
+
+func (x *LocationPayload) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *LocationPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *LocationPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *LocationPayload) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
 type ListLocationsResponse struct {
 	Locations []*LocationPayload `json:"locations,omitempty"`
+}
+
+func (x *ListLocationsResponse) GetLocations() []*LocationPayload {
+	if x == nil {
+		var zero []*LocationPayload
+		return zero
+	}
+	return x.Locations
 }
 
 type CreateLocationRequest struct {
@@ -88,8 +172,56 @@ type CreateLocationRequest struct {
 	Slug     *string `json:"slug,omitempty"`
 }
 
+func (x *CreateLocationRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateLocationRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *CreateLocationRequest) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Timezone == nil {
+		var zero string
+		return zero
+	}
+	return *x.Timezone
+}
+
+func (x *CreateLocationRequest) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Slug == nil {
+		var zero string
+		return zero
+	}
+	return *x.Slug
+}
+
 type CreateLocationResponse struct {
 	Location *LocationPayload `json:"location,omitempty"`
+}
+
+func (x *CreateLocationResponse) GetLocation() *LocationPayload {
+	if x == nil {
+		var zero *LocationPayload
+		return zero
+	}
+	return x.Location
 }
 
 type UpdateLocationBody struct {
@@ -98,6 +230,66 @@ type UpdateLocationBody struct {
 	Timezone *string `json:"timezone,omitempty"`
 	IsActive *bool   `json:"is_active,omitempty"`
 	Slug     *string `json:"slug,omitempty"`
+}
+
+func (x *UpdateLocationBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
+}
+
+func (x *UpdateLocationBody) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Address == nil {
+		var zero string
+		return zero
+	}
+	return *x.Address
+}
+
+func (x *UpdateLocationBody) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Timezone == nil {
+		var zero string
+		return zero
+	}
+	return *x.Timezone
+}
+
+func (x *UpdateLocationBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
+}
+
+func (x *UpdateLocationBody) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Slug == nil {
+		var zero string
+		return zero
+	}
+	return *x.Slug
 }
 
 type UpdateLocationRequest struct {
@@ -134,6 +326,30 @@ func (m *UpdateLocationRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLocationRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateLocationRequest) GetBody() *UpdateLocationBody {
+	if x == nil {
+		var zero *UpdateLocationBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateLocationResponse struct {
 	Location *LocationPayload `json:"location,omitempty"`
+}
+
+func (x *UpdateLocationResponse) GetLocation() *LocationPayload {
+	if x == nil {
+		var zero *LocationPayload
+		return zero
+	}
+	return x.Location
 }

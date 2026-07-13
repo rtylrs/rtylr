@@ -41,6 +41,30 @@ func (m *ProcessRefundRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ProcessRefundRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *ProcessRefundRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *ProcessRefundRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type ProcessRefundResponse struct {
 	RefundId int64  `json:"refund_id,omitempty"`
 	Message  string `json:"message,omitempty"`
@@ -73,4 +97,20 @@ func (m *ProcessRefundResponse) UnmarshalJSON(data []byte) error {
 		m.RefundId = v
 	}
 	return nil
+}
+
+func (x *ProcessRefundResponse) GetRefundId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RefundId
+}
+
+func (x *ProcessRefundResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

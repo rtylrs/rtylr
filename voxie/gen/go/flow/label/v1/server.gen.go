@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type LabelServiceServer interface {
 	ListLabels(ctx context.Context, req *ListLabelsRequest) (*ListLabelsResponse, error)
 	CreateLabel(ctx context.Context, req *CreateLabelRequest) (*CreateLabelResponse, error)
@@ -30,7 +42,15 @@ type LabelServiceServer interface {
 	SetTaskLabels(ctx context.Context, req *SetTaskLabelsRequest) (*SetTaskLabelsResponse, error)
 }
 
-func RegisterLabelServiceServer(mux *http.ServeMux, srv LabelServiceServer) {
+func RegisterLabelServiceServer(srv LabelServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterLabelServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /flow/label/v1/labels", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListLabelsRequest)
 		if r.URL.Query().Get("workspace_id") != "" {
@@ -134,4 +154,5 @@ func RegisterLabelServiceServer(mux *http.ServeMux, srv LabelServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

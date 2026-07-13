@@ -46,6 +46,70 @@ func (m *InvoiceItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InvoiceItem) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *InvoiceItem) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *InvoiceItem) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *InvoiceItem) GetUnitPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitPrice
+}
+
+func (x *InvoiceItem) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *InvoiceItem) GetDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountPct
+}
+
+func (x *InvoiceItem) GetSortOrder() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SortOrder
+}
+
+func (x *InvoiceItem) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
 type InvoiceSummary struct {
 	Id            int64   `json:"id,omitempty"`
 	InvoiceNumber string  `json:"invoice_number,omitempty"`
@@ -88,6 +152,102 @@ func (m *InvoiceSummary) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *InvoiceSummary) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *InvoiceSummary) GetInvoiceNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.InvoiceNumber
+}
+
+func (x *InvoiceSummary) GetClientName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientName
+}
+
+func (x *InvoiceSummary) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *InvoiceSummary) GetIssueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IssueDate
+}
+
+func (x *InvoiceSummary) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *InvoiceSummary) GetPaidDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaidDate
+}
+
+func (x *InvoiceSummary) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *InvoiceSummary) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *InvoiceSummary) GetAmountPaid() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AmountPaid
+}
+
+func (x *InvoiceSummary) GetAmountDue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AmountDue
+}
+
+func (x *InvoiceSummary) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
 }
 
 type InvoiceDetail struct {
@@ -158,6 +318,214 @@ func (m *InvoiceDetail) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InvoiceDetail) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *InvoiceDetail) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *InvoiceDetail) GetInvoiceNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.InvoiceNumber
+}
+
+func (x *InvoiceDetail) GetClientName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientName
+}
+
+func (x *InvoiceDetail) GetClientEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientEmail
+}
+
+func (x *InvoiceDetail) GetClientAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientAddress
+}
+
+func (x *InvoiceDetail) GetClientTaxId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientTaxId
+}
+
+func (x *InvoiceDetail) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *InvoiceDetail) GetIssueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IssueDate
+}
+
+func (x *InvoiceDetail) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *InvoiceDetail) GetPaidDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaidDate
+}
+
+func (x *InvoiceDetail) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *InvoiceDetail) GetSubtotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Subtotal
+}
+
+func (x *InvoiceDetail) GetDiscountType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DiscountType
+}
+
+func (x *InvoiceDetail) GetDiscountValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountValue
+}
+
+func (x *InvoiceDetail) GetDiscountAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountAmount
+}
+
+func (x *InvoiceDetail) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *InvoiceDetail) GetTaxAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxAmount
+}
+
+func (x *InvoiceDetail) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *InvoiceDetail) GetAmountPaid() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AmountPaid
+}
+
+func (x *InvoiceDetail) GetAmountDue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AmountDue
+}
+
+func (x *InvoiceDetail) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *InvoiceDetail) GetTerms() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Terms
+}
+
+func (x *InvoiceDetail) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *InvoiceDetail) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *InvoiceDetail) GetItems() []*InvoiceItem {
+	if x == nil {
+		var zero []*InvoiceItem
+		return zero
+	}
+	return x.Items
+}
+
 type Payment struct {
 	Id          int64   `json:"id,omitempty"`
 	Amount      float64 `json:"amount,omitempty"`
@@ -195,6 +563,62 @@ func (m *Payment) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *Payment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Payment) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *Payment) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Payment) GetPaymentDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentDate
+}
+
+func (x *Payment) GetMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Method
+}
+
+func (x *Payment) GetReference() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reference
+}
+
+func (x *Payment) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
 }
 
 type RecordPaymentResponsePayload struct {
@@ -247,6 +671,70 @@ func (m *RecordPaymentResponsePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RecordPaymentResponsePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RecordPaymentResponsePayload) GetInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InvoiceId
+}
+
+func (x *RecordPaymentResponsePayload) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *RecordPaymentResponsePayload) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *RecordPaymentResponsePayload) GetPaymentDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentDate
+}
+
+func (x *RecordPaymentResponsePayload) GetMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Method
+}
+
+func (x *RecordPaymentResponsePayload) GetReference() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reference
+}
+
+func (x *RecordPaymentResponsePayload) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type CreateInvoiceRequest struct {
 	ClientName    string         `json:"client_name,omitempty"`
 	ClientEmail   string         `json:"client_email,omitempty"`
@@ -263,8 +751,120 @@ type CreateInvoiceRequest struct {
 	Items         []*InvoiceItem `json:"items,omitempty"`
 }
 
+func (x *CreateInvoiceRequest) GetClientName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientName
+}
+
+func (x *CreateInvoiceRequest) GetClientEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientEmail
+}
+
+func (x *CreateInvoiceRequest) GetClientAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientAddress
+}
+
+func (x *CreateInvoiceRequest) GetClientTaxId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientTaxId
+}
+
+func (x *CreateInvoiceRequest) GetIssueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IssueDate
+}
+
+func (x *CreateInvoiceRequest) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *CreateInvoiceRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateInvoiceRequest) GetDiscountType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DiscountType
+}
+
+func (x *CreateInvoiceRequest) GetDiscountValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountValue
+}
+
+func (x *CreateInvoiceRequest) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *CreateInvoiceRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreateInvoiceRequest) GetTerms() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Terms
+}
+
+func (x *CreateInvoiceRequest) GetItems() []*InvoiceItem {
+	if x == nil {
+		var zero []*InvoiceItem
+		return zero
+	}
+	return x.Items
+}
+
 type CreateInvoiceResponse struct {
 	Invoice *InvoiceDetail `json:"invoice,omitempty"`
+}
+
+func (x *CreateInvoiceResponse) GetInvoice() *InvoiceDetail {
+	if x == nil {
+		var zero *InvoiceDetail
+		return zero
+	}
+	return x.Invoice
 }
 
 type DeleteInvoiceRequest struct {
@@ -300,8 +900,24 @@ func (m *DeleteInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteInvoiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteInvoiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetInvoiceRequest struct {
@@ -337,9 +953,33 @@ func (m *GetInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetInvoiceResponse struct {
 	Invoice  *InvoiceDetail `json:"invoice,omitempty"`
 	Payments []*Payment     `json:"payments,omitempty"`
+}
+
+func (x *GetInvoiceResponse) GetInvoice() *InvoiceDetail {
+	if x == nil {
+		var zero *InvoiceDetail
+		return zero
+	}
+	return x.Invoice
+}
+
+func (x *GetInvoiceResponse) GetPayments() []*Payment {
+	if x == nil {
+		var zero []*Payment
+		return zero
+	}
+	return x.Payments
 }
 
 type ListInvoicesRequest struct {
@@ -351,11 +991,91 @@ type ListInvoicesRequest struct {
 	PageSize int64  `json:"page_size,omitempty"`
 }
 
+func (x *ListInvoicesRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ListInvoicesRequest) GetSearch() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Search
+}
+
+func (x *ListInvoicesRequest) GetDateFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateFrom
+}
+
+func (x *ListInvoicesRequest) GetDateTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateTo
+}
+
+func (x *ListInvoicesRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListInvoicesRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
 type ListInvoicesResponse struct {
 	Invoices []*InvoiceSummary `json:"invoices,omitempty"`
 	Page     int64             `json:"page,omitempty"`
 	PageSize int64             `json:"page_size,omitempty"`
 	HasMore  bool              `json:"has_more,omitempty"`
+}
+
+func (x *ListInvoicesResponse) GetInvoices() []*InvoiceSummary {
+	if x == nil {
+		var zero []*InvoiceSummary
+		return zero
+	}
+	return x.Invoices
+}
+
+func (x *ListInvoicesResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListInvoicesResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListInvoicesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
 }
 
 type SendInvoiceRequest struct {
@@ -391,8 +1111,24 @@ func (m *SendInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SendInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type SendInvoiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *SendInvoiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateInvoiceBody struct {
@@ -409,6 +1145,110 @@ type UpdateInvoiceBody struct {
 	Notes         string         `json:"notes,omitempty"`
 	Terms         string         `json:"terms,omitempty"`
 	Items         []*InvoiceItem `json:"items,omitempty"`
+}
+
+func (x *UpdateInvoiceBody) GetClientName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientName
+}
+
+func (x *UpdateInvoiceBody) GetClientEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientEmail
+}
+
+func (x *UpdateInvoiceBody) GetClientAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientAddress
+}
+
+func (x *UpdateInvoiceBody) GetClientTaxId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientTaxId
+}
+
+func (x *UpdateInvoiceBody) GetIssueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IssueDate
+}
+
+func (x *UpdateInvoiceBody) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *UpdateInvoiceBody) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UpdateInvoiceBody) GetDiscountType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DiscountType
+}
+
+func (x *UpdateInvoiceBody) GetDiscountValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountValue
+}
+
+func (x *UpdateInvoiceBody) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *UpdateInvoiceBody) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *UpdateInvoiceBody) GetTerms() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Terms
+}
+
+func (x *UpdateInvoiceBody) GetItems() []*InvoiceItem {
+	if x == nil {
+		var zero []*InvoiceItem
+		return zero
+	}
+	return x.Items
 }
 
 type UpdateInvoiceRequest struct {
@@ -445,12 +1285,44 @@ func (m *UpdateInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateInvoiceRequest) GetBody() *UpdateInvoiceBody {
+	if x == nil {
+		var zero *UpdateInvoiceBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateInvoiceResponse struct {
 	Invoice *InvoiceDetail `json:"invoice,omitempty"`
 }
 
+func (x *UpdateInvoiceResponse) GetInvoice() *InvoiceDetail {
+	if x == nil {
+		var zero *InvoiceDetail
+		return zero
+	}
+	return x.Invoice
+}
+
 type UpdateInvoiceStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateInvoiceStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateInvoiceStatusRequest struct {
@@ -487,6 +1359,30 @@ func (m *UpdateInvoiceStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateInvoiceStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateInvoiceStatusRequest) GetBody() *UpdateInvoiceStatusBody {
+	if x == nil {
+		var zero *UpdateInvoiceStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateInvoiceStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateInvoiceStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

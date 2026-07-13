@@ -108,7 +108,7 @@ func (m *GetUserSubscriptionRequest) Validate() error {
 	return nil
 }
 
-func (m *AdminUpdateBusinessRequest) Validate() error {
+func (m *UpdateBusinessRequest) Validate() error {
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")

@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,11 +23,30 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type OrderSplitServiceServer interface {
 	SplitOrder(ctx context.Context, req *SplitOrderRequest) (*SplitOrderResponse, error)
 }
 
-func RegisterOrderSplitServiceServer(mux *http.ServeMux, srv OrderSplitServiceServer) {
+func RegisterOrderSplitServiceServer(srv OrderSplitServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterOrderSplitServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("POST /pos/orders/splits/v1/orders/{order_id}/split", func(w http.ResponseWriter, r *http.Request) {
 		req := new(SplitOrderRequest)
 		if r.Body != nil {
@@ -50,4 +70,5 @@ func RegisterOrderSplitServiceServer(mux *http.ServeMux, srv OrderSplitServiceSe
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

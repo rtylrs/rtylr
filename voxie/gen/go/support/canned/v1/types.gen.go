@@ -55,6 +55,62 @@ func (m *CannedResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CannedResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CannedResponse) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *CannedResponse) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CannedResponse) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *CannedResponse) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *CannedResponse) GetShortcut() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Shortcut
+}
+
+func (x *CannedResponse) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListCannedResponsesRequest struct {
 }
 
@@ -62,11 +118,51 @@ type ListCannedResponsesResponse struct {
 	CannedResponses []*CannedResponse `json:"canned_responses,omitempty"`
 }
 
+func (x *ListCannedResponsesResponse) GetCannedResponses() []*CannedResponse {
+	if x == nil {
+		var zero []*CannedResponse
+		return zero
+	}
+	return x.CannedResponses
+}
+
 type CreateCannedResponseRequest struct {
 	Name     string `json:"name,omitempty"`
 	Body     string `json:"body,omitempty"`
 	Category string `json:"category,omitempty"`
 	Shortcut string `json:"shortcut,omitempty"`
+}
+
+func (x *CreateCannedResponseRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateCannedResponseRequest) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *CreateCannedResponseRequest) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *CreateCannedResponseRequest) GetShortcut() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Shortcut
 }
 
 type CreateCannedResponseResponse struct {
@@ -101,6 +197,22 @@ func (m *CreateCannedResponseResponse) UnmarshalJSON(data []byte) error {
 		m.CannedResponseId = v
 	}
 	return nil
+}
+
+func (x *CreateCannedResponseResponse) GetCannedResponseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CannedResponseId
+}
+
+func (x *CreateCannedResponseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateCannedResponseRequest struct {
@@ -140,8 +252,56 @@ func (m *UpdateCannedResponseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateCannedResponseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateCannedResponseRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateCannedResponseRequest) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *UpdateCannedResponseRequest) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *UpdateCannedResponseRequest) GetShortcut() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Shortcut
+}
+
 type UpdateCannedResponseResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateCannedResponseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteCannedResponseRequest struct {
@@ -177,6 +337,22 @@ func (m *DeleteCannedResponseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteCannedResponseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteCannedResponseResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteCannedResponseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

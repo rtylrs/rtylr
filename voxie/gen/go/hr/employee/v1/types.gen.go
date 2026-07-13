@@ -118,6 +118,182 @@ func (m *EmployeePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EmployeePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *EmployeePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *EmployeePayload) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *EmployeePayload) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DepartmentId
+}
+
+func (x *EmployeePayload) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *EmployeePayload) GetManagerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ManagerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ManagerId
+}
+
+func (x *EmployeePayload) GetContractType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ContractType
+}
+
+func (x *EmployeePayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *EmployeePayload) GetHireDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.HireDate
+}
+
+func (x *EmployeePayload) GetProbationEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ProbationEndDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.ProbationEndDate
+}
+
+func (x *EmployeePayload) GetTerminationDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TerminationDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.TerminationDate
+}
+
+func (x *EmployeePayload) GetHourlyRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.HourlyRate == nil {
+		var zero float64
+		return zero
+	}
+	return *x.HourlyRate
+}
+
+func (x *EmployeePayload) GetMonthlySalary() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.MonthlySalary == nil {
+		var zero float64
+		return zero
+	}
+	return *x.MonthlySalary
+}
+
+func (x *EmployeePayload) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *EmployeePayload) GetWorkScheduleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.WorkScheduleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.WorkScheduleId
+}
+
+func (x *EmployeePayload) GetAccountCreationMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AccountCreationMode
+}
+
+func (x *EmployeePayload) GetJobTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.JobTitle
+}
+
+func (x *EmployeePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *EmployeePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateEmployeeRequest struct {
 	DepartmentId   int64   `json:"department_id,omitempty"`
 	LocationId     int64   `json:"location_id,omitempty"`
@@ -183,8 +359,120 @@ func (m *CreateEmployeeRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateEmployeeRequest) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DepartmentId
+}
+
+func (x *CreateEmployeeRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *CreateEmployeeRequest) GetWorkScheduleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkScheduleId
+}
+
+func (x *CreateEmployeeRequest) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *CreateEmployeeRequest) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *CreateEmployeeRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *CreateEmployeeRequest) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *CreateEmployeeRequest) GetEmploymentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EmploymentType
+}
+
+func (x *CreateEmployeeRequest) GetSalary() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Salary
+}
+
+func (x *CreateEmployeeRequest) GetHourlyRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HourlyRate
+}
+
+func (x *CreateEmployeeRequest) GetOvertimeRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimeRate
+}
+
+func (x *CreateEmployeeRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *CreateEmployeeRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
 type CreateEmployeeResponse struct {
 	Employee *hr_staff_v1.Staff `json:"employee,omitempty"`
+}
+
+func (x *CreateEmployeeResponse) GetEmployee() *hr_staff_v1.Staff {
+	if x == nil {
+		var zero *hr_staff_v1.Staff
+		return zero
+	}
+	return x.Employee
 }
 
 type InviteEmployeeRequest struct {
@@ -221,6 +509,22 @@ func (m *InviteEmployeeRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InviteEmployeeRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *InviteEmployeeRequest) GetSendVia() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SendVia
+}
+
 type InviteEmployeeResponse struct {
 	InviteToken string `json:"invite_token,omitempty"`
 	ExpiresAt   int64  `json:"expires_at,omitempty"`
@@ -255,13 +559,53 @@ func (m *InviteEmployeeResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InviteEmployeeResponse) GetInviteToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.InviteToken
+}
+
+func (x *InviteEmployeeResponse) GetExpiresAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ExpiresAt
+}
+
 type AcceptInviteRequest struct {
 	Token    string `json:"token,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 
+func (x *AcceptInviteRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *AcceptInviteRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
 type AcceptInviteResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *AcceptInviteResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type ListEmployeesRequest struct {
@@ -272,11 +616,95 @@ type ListEmployeesRequest struct {
 	Offset       int32   `json:"offset,omitempty"`
 }
 
+func (x *ListEmployeesRequest) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
+}
+
+func (x *ListEmployeesRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *ListEmployeesRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
+}
+
+func (x *ListEmployeesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListEmployeesRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
 type ListEmployeesResponse struct {
 	Employees []*EmployeePayload `json:"employees,omitempty"`
 	Total     int64              `json:"total,omitempty"`
 	Limit     int32              `json:"limit,omitempty"`
 	Offset    int32              `json:"offset,omitempty"`
+}
+
+func (x *ListEmployeesResponse) GetEmployees() []*EmployeePayload {
+	if x == nil {
+		var zero []*EmployeePayload
+		return zero
+	}
+	return x.Employees
+}
+
+func (x *ListEmployeesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListEmployeesResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListEmployeesResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type UpdateEmployeeBody struct {
@@ -349,6 +777,150 @@ func (m *UpdateEmployeeBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateEmployeeBody) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DepartmentId
+}
+
+func (x *UpdateEmployeeBody) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *UpdateEmployeeBody) GetWorkScheduleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkScheduleId
+}
+
+func (x *UpdateEmployeeBody) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *UpdateEmployeeBody) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *UpdateEmployeeBody) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *UpdateEmployeeBody) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *UpdateEmployeeBody) GetEmploymentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EmploymentType
+}
+
+func (x *UpdateEmployeeBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateEmployeeBody) GetSalary() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Salary
+}
+
+func (x *UpdateEmployeeBody) GetHourlyRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HourlyRate
+}
+
+func (x *UpdateEmployeeBody) GetOvertimeRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimeRate
+}
+
+func (x *UpdateEmployeeBody) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *UpdateEmployeeBody) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
+func (x *UpdateEmployeeBody) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *UpdateEmployeeBody) GetEmergencyContactName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EmergencyContactName
+}
+
+func (x *UpdateEmployeeBody) GetEmergencyContactPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EmergencyContactPhone
+}
+
+func (x *UpdateEmployeeBody) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type UpdateEmployeeRequest struct {
 	Id   int64               `json:"id,omitempty"`
 	Body *UpdateEmployeeBody `json:"body,omitempty"`
@@ -383,6 +955,30 @@ func (m *UpdateEmployeeRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateEmployeeRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateEmployeeRequest) GetBody() *UpdateEmployeeBody {
+	if x == nil {
+		var zero *UpdateEmployeeBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateEmployeeResponse struct {
 	Employee *hr_staff_v1.Staff `json:"employee,omitempty"`
+}
+
+func (x *UpdateEmployeeResponse) GetEmployee() *hr_staff_v1.Staff {
+	if x == nil {
+		var zero *hr_staff_v1.Staff
+		return zero
+	}
+	return x.Employee
 }

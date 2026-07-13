@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type ExpensesServiceServer interface {
 	ListExpenses(ctx context.Context, req *ListExpensesRequest) (*ListExpensesResponse, error)
 	CreateExpense(ctx context.Context, req *CreateExpenseRequest) (*CreateExpenseResponse, error)
@@ -32,7 +44,15 @@ type ExpensesServiceServer interface {
 	ListExpenseCategories(ctx context.Context, req *ListExpenseCategoriesRequest) (*ListExpenseCategoriesResponse, error)
 }
 
-func RegisterExpensesServiceServer(mux *http.ServeMux, srv ExpensesServiceServer) {
+func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterExpensesServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /finance/expenses/v1/expenses", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListExpensesRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -167,4 +187,5 @@ func RegisterExpensesServiceServer(mux *http.ServeMux, srv ExpensesServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

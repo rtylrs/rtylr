@@ -89,6 +89,106 @@ func (m *CashMovement) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CashMovement) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CashMovement) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *CashMovement) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CashMovement) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
+}
+
+func (x *CashMovement) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *CashMovement) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CashMovement) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CashMovement) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *CashMovement) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Reason == nil {
+		var zero string
+		return zero
+	}
+	return *x.Reason
+}
+
+func (x *CashMovement) GetApprovedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApprovedBy == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApprovedBy
+}
+
+func (x *CashMovement) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CashAdjustRequest struct {
 	BranchId   int64   `json:"branch_id,omitempty"`
 	TerminalId int64   `json:"terminal_id,omitempty"`
@@ -157,6 +257,54 @@ func (m *CashAdjustRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CashAdjustRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CashAdjustRequest) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TerminalId
+}
+
+func (x *CashAdjustRequest) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *CashAdjustRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CashAdjustRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *CashAdjustRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type CashAdjustResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -189,6 +337,22 @@ func (m *CashAdjustResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *CashAdjustResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *CashAdjustResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CashDropRequest struct {
@@ -259,6 +423,54 @@ func (m *CashDropRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CashDropRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CashDropRequest) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TerminalId
+}
+
+func (x *CashDropRequest) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *CashDropRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CashDropRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *CashDropRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type CashDropResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -291,6 +503,22 @@ func (m *CashDropResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *CashDropResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *CashDropResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CashPickupRequest struct {
@@ -361,6 +589,54 @@ func (m *CashPickupRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CashPickupRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CashPickupRequest) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TerminalId
+}
+
+func (x *CashPickupRequest) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *CashPickupRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CashPickupRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *CashPickupRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type CashPickupResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -393,6 +669,22 @@ func (m *CashPickupResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *CashPickupResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *CashPickupResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListCashMovementsRequest struct {
@@ -428,6 +720,22 @@ func (m *ListCashMovementsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListCashMovementsRequest) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
 type ListCashMovementsResponse struct {
 	Movements []*CashMovement `json:"movements,omitempty"`
+}
+
+func (x *ListCashMovementsResponse) GetMovements() []*CashMovement {
+	if x == nil {
+		var zero []*CashMovement
+		return zero
+	}
+	return x.Movements
 }

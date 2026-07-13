@@ -55,18 +55,74 @@ func (m *TopCustomer) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type GetCrmDashboardRequest struct {
+func (x *TopCustomer) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
-type GetCrmDashboardResponse struct {
+func (x *TopCustomer) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *TopCustomer) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *TopCustomer) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *TopCustomer) GetTotalSpent() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalSpent
+}
+
+func (x *TopCustomer) GetLoyaltyPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LoyaltyPoints
+}
+
+func (x *TopCustomer) GetLoyaltyTier() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LoyaltyTier
+}
+
+type GetDashboardRequest struct {
+}
+
+type GetDashboardResponse struct {
 	TotalCustomers       int64          `json:"total_customers,omitempty"`
 	NewThisMonth         int64          `json:"new_this_month,omitempty"`
 	ActiveLoyaltyMembers int64          `json:"active_loyalty_members,omitempty"`
 	TopCustomers         []*TopCustomer `json:"top_customers,omitempty"`
 }
 
-func (m *GetCrmDashboardResponse) MarshalJSON() ([]byte, error) {
-	type alias GetCrmDashboardResponse
+func (m *GetDashboardResponse) MarshalJSON() ([]byte, error) {
+	type alias GetDashboardResponse
 	aux := struct {
 		*alias
 		TotalCustomers       string `json:"total_customers,omitempty"`
@@ -79,8 +135,8 @@ func (m *GetCrmDashboardResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *GetCrmDashboardResponse) UnmarshalJSON(data []byte) error {
-	type alias GetCrmDashboardResponse
+func (m *GetDashboardResponse) UnmarshalJSON(data []byte) error {
+	type alias GetDashboardResponse
 	aux := struct {
 		*alias
 		TotalCustomers       string `json:"total_customers,omitempty"`
@@ -112,4 +168,36 @@ func (m *GetCrmDashboardResponse) UnmarshalJSON(data []byte) error {
 		m.ActiveLoyaltyMembers = v
 	}
 	return nil
+}
+
+func (x *GetDashboardResponse) GetTotalCustomers() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalCustomers
+}
+
+func (x *GetDashboardResponse) GetNewThisMonth() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.NewThisMonth
+}
+
+func (x *GetDashboardResponse) GetActiveLoyaltyMembers() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ActiveLoyaltyMembers
+}
+
+func (x *GetDashboardResponse) GetTopCustomers() []*TopCustomer {
+	if x == nil {
+		var zero []*TopCustomer
+		return zero
+	}
+	return x.TopCustomers
 }

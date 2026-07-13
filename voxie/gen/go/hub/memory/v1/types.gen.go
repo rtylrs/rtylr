@@ -10,6 +10,54 @@ type ChatSummary struct {
 	Archived  bool   `json:"archived,omitempty"`
 }
 
+func (x *ChatSummary) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ChatSummary) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *ChatSummary) GetSummary() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Summary
+}
+
+func (x *ChatSummary) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *ChatSummary) GetPinned() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Pinned
+}
+
+func (x *ChatSummary) GetArchived() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Archived
+}
+
 type ChatMessage struct {
 	Id         string `json:"id,omitempty"`
 	Role       string `json:"role,omitempty"`
@@ -18,29 +66,125 @@ type ChatMessage struct {
 	TokensUsed int32  `json:"tokens_used,omitempty"`
 }
 
+func (x *ChatMessage) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ChatMessage) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *ChatMessage) GetContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Content
+}
+
+func (x *ChatMessage) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ChatMessage) GetTokensUsed() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TokensUsed
+}
+
 type ListChatsRequest struct {
 	Limit  int32 `json:"limit,omitempty"`
 	Offset int32 `json:"offset,omitempty"`
+}
+
+func (x *ListChatsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListChatsRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type ListChatsResponse struct {
 	Chats []*ChatSummary `json:"chats,omitempty"`
 }
 
+func (x *ListChatsResponse) GetChats() []*ChatSummary {
+	if x == nil {
+		var zero []*ChatSummary
+		return zero
+	}
+	return x.Chats
+}
+
 type GetChatMessagesRequest struct {
 	SessionId string `json:"session_id,omitempty"`
+}
+
+func (x *GetChatMessagesRequest) GetSessionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SessionId
 }
 
 type GetChatMessagesResponse struct {
 	Messages []*ChatMessage `json:"messages,omitempty"`
 }
 
+func (x *GetChatMessagesResponse) GetMessages() []*ChatMessage {
+	if x == nil {
+		var zero []*ChatMessage
+		return zero
+	}
+	return x.Messages
+}
+
 type DeleteChatRequest struct {
 	SessionId string `json:"session_id,omitempty"`
 }
 
+func (x *DeleteChatRequest) GetSessionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SessionId
+}
+
 type DeleteChatResponse struct {
 	Deleted bool `json:"deleted,omitempty"`
+}
+
+func (x *DeleteChatResponse) GetDeleted() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Deleted
 }
 
 type RenameChatRequest struct {
@@ -48,8 +192,32 @@ type RenameChatRequest struct {
 	Title     string `json:"title,omitempty"`
 }
 
+func (x *RenameChatRequest) GetSessionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *RenameChatRequest) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
 type RenameChatResponse struct {
 	Updated bool `json:"updated,omitempty"`
+}
+
+func (x *RenameChatResponse) GetUpdated() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Updated
 }
 
 type PinChatRequest struct {
@@ -57,6 +225,30 @@ type PinChatRequest struct {
 	Pinned    bool   `json:"pinned,omitempty"`
 }
 
+func (x *PinChatRequest) GetSessionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *PinChatRequest) GetPinned() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Pinned
+}
+
 type PinChatResponse struct {
 	Updated bool `json:"updated,omitempty"`
+}
+
+func (x *PinChatResponse) GetUpdated() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Updated
 }

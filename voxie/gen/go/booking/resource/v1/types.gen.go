@@ -66,11 +66,107 @@ func (m *Resource) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Resource) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Resource) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Resource) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Resource) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Resource) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Resource) GetCapacity() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *Resource) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Resource) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateResourceRequest struct {
 	Name     string `json:"name,omitempty"`
 	Type     string `json:"type,omitempty"`
 	Capacity int32  `json:"capacity,omitempty"`
 	IsActive bool   `json:"is_active,omitempty"`
+}
+
+func (x *CreateResourceRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateResourceRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateResourceRequest) GetCapacity() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *CreateResourceRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type CreateResourceResponse struct {
@@ -107,6 +203,22 @@ func (m *CreateResourceResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateResourceResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateResourceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteResourceRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -140,8 +252,24 @@ func (m *DeleteResourceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteResourceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteResourceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteResourceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListResourcesRequest struct {
@@ -149,6 +277,14 @@ type ListResourcesRequest struct {
 
 type ListResourcesResponse struct {
 	Resources []*Resource `json:"resources,omitempty"`
+}
+
+func (x *ListResourcesResponse) GetResources() []*Resource {
+	if x == nil {
+		var zero []*Resource
+		return zero
+	}
+	return x.Resources
 }
 
 type UpdateResourceRequest struct {
@@ -188,6 +324,54 @@ func (m *UpdateResourceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateResourceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateResourceRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateResourceRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *UpdateResourceRequest) GetCapacity() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *UpdateResourceRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateResourceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateResourceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

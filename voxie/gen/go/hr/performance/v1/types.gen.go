@@ -99,6 +99,102 @@ func (m *ReviewGoalPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ReviewGoalPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ReviewGoalPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ReviewGoalPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *ReviewGoalPayload) GetReviewCycleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReviewCycleId
+}
+
+func (x *ReviewGoalPayload) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *ReviewGoalPayload) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *ReviewGoalPayload) GetWeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.Weight == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Weight
+}
+
+func (x *ReviewGoalPayload) GetSuccessCriteria() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SuccessCriteria == nil {
+		var zero string
+		return zero
+	}
+	return *x.SuccessCriteria
+}
+
+func (x *ReviewGoalPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ReviewGoalPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ReviewGoalPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type PerformanceReviewPayload struct {
 	Id                   int64   `json:"id,omitempty"`
 	OwnerId              int64   `json:"owner_id,omitempty"`
@@ -203,6 +299,114 @@ func (m *PerformanceReviewPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PerformanceReviewPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PerformanceReviewPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *PerformanceReviewPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *PerformanceReviewPayload) GetReviewCycleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReviewCycleId
+}
+
+func (x *PerformanceReviewPayload) GetReviewerEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReviewerEmployeeId
+}
+
+func (x *PerformanceReviewPayload) GetReviewType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReviewType
+}
+
+func (x *PerformanceReviewPayload) GetOverallRating() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.OverallRating == nil {
+		var zero string
+		return zero
+	}
+	return *x.OverallRating
+}
+
+func (x *PerformanceReviewPayload) GetNarrative() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Narrative == nil {
+		var zero string
+		return zero
+	}
+	return *x.Narrative
+}
+
+func (x *PerformanceReviewPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *PerformanceReviewPayload) GetSharedWithEmployeeAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SharedWithEmployeeAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SharedWithEmployeeAt
+}
+
+func (x *PerformanceReviewPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *PerformanceReviewPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ReviewCyclePayload struct {
 	Id          int64  `json:"id,omitempty"`
 	OwnerId     int64  `json:"owner_id,omitempty"`
@@ -274,6 +478,78 @@ func (m *ReviewCyclePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ReviewCyclePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ReviewCyclePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ReviewCyclePayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ReviewCyclePayload) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *ReviewCyclePayload) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *ReviewCyclePayload) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
+func (x *ReviewCyclePayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ReviewCyclePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ReviewCyclePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListReviewCyclesRequest struct {
 }
 
@@ -284,6 +560,38 @@ type ListReviewCyclesResponse struct {
 	Offset int32                 `json:"offset,omitempty"`
 }
 
+func (x *ListReviewCyclesResponse) GetCycles() []*ReviewCyclePayload {
+	if x == nil {
+		var zero []*ReviewCyclePayload
+		return zero
+	}
+	return x.Cycles
+}
+
+func (x *ListReviewCyclesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListReviewCyclesResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListReviewCyclesResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
 type CreateReviewCycleRequest struct {
 	Name        string `json:"name,omitempty"`
 	Type        string `json:"type,omitempty"`
@@ -291,8 +599,48 @@ type CreateReviewCycleRequest struct {
 	PeriodEnd   string `json:"period_end,omitempty"`
 }
 
+func (x *CreateReviewCycleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateReviewCycleRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateReviewCycleRequest) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *CreateReviewCycleRequest) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
 type CreateReviewCycleResponse struct {
 	Cycle *ReviewCyclePayload `json:"cycle,omitempty"`
+}
+
+func (x *CreateReviewCycleResponse) GetCycle() *ReviewCyclePayload {
+	if x == nil {
+		var zero *ReviewCyclePayload
+		return zero
+	}
+	return x.Cycle
 }
 
 type OpenReviewCycleRequest struct {
@@ -328,8 +676,24 @@ func (m *OpenReviewCycleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *OpenReviewCycleRequest) GetCycleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CycleId
+}
+
 type OpenReviewCycleResponse struct {
 	Cycle *ReviewCyclePayload `json:"cycle,omitempty"`
+}
+
+func (x *OpenReviewCycleResponse) GetCycle() *ReviewCyclePayload {
+	if x == nil {
+		var zero *ReviewCyclePayload
+		return zero
+	}
+	return x.Cycle
 }
 
 type ListGoalsRequest struct {
@@ -337,11 +701,67 @@ type ListGoalsRequest struct {
 	ReviewCycleId *int64 `json:"review_cycle_id,omitempty"`
 }
 
+func (x *ListGoalsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListGoalsRequest) GetReviewCycleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ReviewCycleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ReviewCycleId
+}
+
 type ListGoalsResponse struct {
 	Goals  []*ReviewGoalPayload `json:"goals,omitempty"`
 	Total  int64                `json:"total,omitempty"`
 	Limit  int32                `json:"limit,omitempty"`
 	Offset int32                `json:"offset,omitempty"`
+}
+
+func (x *ListGoalsResponse) GetGoals() []*ReviewGoalPayload {
+	if x == nil {
+		var zero []*ReviewGoalPayload
+		return zero
+	}
+	return x.Goals
+}
+
+func (x *ListGoalsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListGoalsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListGoalsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type SubmitReviewRequest struct {
@@ -379,6 +799,38 @@ func (m *SubmitReviewRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SubmitReviewRequest) GetReviewId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReviewId
+}
+
+func (x *SubmitReviewRequest) GetOverallRating() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OverallRating
+}
+
+func (x *SubmitReviewRequest) GetNarrative() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Narrative
+}
+
 type SubmitReviewResponse struct {
 	Review *PerformanceReviewPayload `json:"review,omitempty"`
+}
+
+func (x *SubmitReviewResponse) GetReview() *PerformanceReviewPayload {
+	if x == nil {
+		var zero *PerformanceReviewPayload
+		return zero
+	}
+	return x.Review
 }

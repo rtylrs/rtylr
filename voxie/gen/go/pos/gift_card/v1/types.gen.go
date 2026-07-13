@@ -81,12 +81,156 @@ func (m *GiftCard) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GiftCard) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *GiftCard) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *GiftCard) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *GiftCard) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *GiftCard) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+func (x *GiftCard) GetInitialAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.InitialAmount
+}
+
+func (x *GiftCard) GetCurrentBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrentBalance
+}
+
+func (x *GiftCard) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *GiftCard) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *GiftCard) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *GiftCard) GetExpiresAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpiresAt
+}
+
+func (x *GiftCard) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *GiftCard) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateGiftCardRequest struct {
 	Code          string  `json:"code,omitempty"`
 	InitialAmount float64 `json:"initial_amount,omitempty"`
 	CustomerName  string  `json:"customer_name,omitempty"`
 	CustomerEmail string  `json:"customer_email,omitempty"`
 	ExpiresAt     string  `json:"expires_at,omitempty"`
+}
+
+func (x *CreateGiftCardRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+func (x *CreateGiftCardRequest) GetInitialAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.InitialAmount
+}
+
+func (x *CreateGiftCardRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CreateGiftCardRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *CreateGiftCardRequest) GetExpiresAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpiresAt
 }
 
 type CreateGiftCardResponse struct {
@@ -123,12 +267,44 @@ func (m *CreateGiftCardResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateGiftCardResponse) GetGiftCardId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.GiftCardId
+}
+
+func (x *CreateGiftCardResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type GetGiftCardByCodeRequest struct {
 	Code string `json:"code,omitempty"`
 }
 
+func (x *GetGiftCardByCodeRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
 type GetGiftCardByCodeResponse struct {
 	GiftCard *GiftCard `json:"gift_card,omitempty"`
+}
+
+func (x *GetGiftCardByCodeResponse) GetGiftCard() *GiftCard {
+	if x == nil {
+		var zero *GiftCard
+		return zero
+	}
+	return x.GiftCard
 }
 
 type ListGiftCardsRequest struct {
@@ -138,12 +314,52 @@ type ListGiftCardsResponse struct {
 	GiftCards []*GiftCard `json:"gift_cards,omitempty"`
 }
 
+func (x *ListGiftCardsResponse) GetGiftCards() []*GiftCard {
+	if x == nil {
+		var zero []*GiftCard
+		return zero
+	}
+	return x.GiftCards
+}
+
 type RedeemGiftCardRequest struct {
 	Code   string  `json:"code,omitempty"`
 	Amount float64 `json:"amount,omitempty"`
 }
 
+func (x *RedeemGiftCardRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+func (x *RedeemGiftCardRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
 type RedeemGiftCardResponse struct {
 	GiftCard *GiftCard `json:"gift_card,omitempty"`
 	Message  string    `json:"message,omitempty"`
+}
+
+func (x *RedeemGiftCardResponse) GetGiftCard() *GiftCard {
+	if x == nil {
+		var zero *GiftCard
+		return zero
+	}
+	return x.GiftCard
+}
+
+func (x *RedeemGiftCardResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

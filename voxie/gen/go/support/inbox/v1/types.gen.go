@@ -14,9 +14,105 @@ type InboxItem struct {
 	MessageCount  int32  `json:"message_count,omitempty"`
 }
 
+func (x *InboxItem) GetTicketId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TicketId
+}
+
+func (x *InboxItem) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *InboxItem) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *InboxItem) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *InboxItem) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *InboxItem) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *InboxItem) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *InboxItem) GetLastMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastMessage
+}
+
+func (x *InboxItem) GetLastMessageAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastMessageAt
+}
+
+func (x *InboxItem) GetMessageCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MessageCount
+}
+
 type ListInboxRequest struct {
 	Page     int32 `json:"page,omitempty"`
 	PageSize int32 `json:"page_size,omitempty"`
+}
+
+func (x *ListInboxRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListInboxRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListInboxResponse struct {
@@ -26,9 +122,49 @@ type ListInboxResponse struct {
 	PageSize int32        `json:"page_size,omitempty"`
 }
 
+func (x *ListInboxResponse) GetInbox() []*InboxItem {
+	if x == nil {
+		var zero []*InboxItem
+		return zero
+	}
+	return x.Inbox
+}
+
+func (x *ListInboxResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListInboxResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListInboxResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
 type GetUnreadCountRequest struct {
 }
 
 type GetUnreadCountResponse struct {
 	Count int32 `json:"count,omitempty"`
+}
+
+func (x *GetUnreadCountResponse) GetCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Count
 }

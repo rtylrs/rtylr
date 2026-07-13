@@ -77,8 +77,88 @@ func (m *AiQuotaStatus) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AiQuotaStatus) GetPlanSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanSlug
+}
+
+func (x *AiQuotaStatus) GetMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Mode
+}
+
+func (x *AiQuotaStatus) GetAllowanceTokens() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AllowanceTokens
+}
+
+func (x *AiQuotaStatus) GetUsedTokens() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UsedTokens
+}
+
+func (x *AiQuotaStatus) GetRemainingTokens() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RemainingTokens
+}
+
+func (x *AiQuotaStatus) GetOverageTokens() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OverageTokens
+}
+
+func (x *AiQuotaStatus) GetAllowOverage() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AllowOverage
+}
+
+func (x *AiQuotaStatus) GetBlocked() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Blocked
+}
+
+func (x *AiQuotaStatus) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
 type AiQuotaSettings struct {
 	Mode string `json:"mode,omitempty"`
+}
+
+func (x *AiQuotaSettings) GetMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Mode
 }
 
 type GetAiUsageRequest struct {
@@ -88,6 +168,14 @@ type GetAiUsageResponse struct {
 	Usage *AiQuotaStatus `json:"usage,omitempty"`
 }
 
+func (x *GetAiUsageResponse) GetUsage() *AiQuotaStatus {
+	if x == nil {
+		var zero *AiQuotaStatus
+		return zero
+	}
+	return x.Usage
+}
+
 type GetAiQuotaSettingsRequest struct {
 }
 
@@ -95,10 +183,34 @@ type GetAiQuotaSettingsResponse struct {
 	Settings *AiQuotaSettings `json:"settings,omitempty"`
 }
 
+func (x *GetAiQuotaSettingsResponse) GetSettings() *AiQuotaSettings {
+	if x == nil {
+		var zero *AiQuotaSettings
+		return zero
+	}
+	return x.Settings
+}
+
 type UpdateAiQuotaSettingsRequest struct {
 	Mode string `json:"mode,omitempty"`
 }
 
+func (x *UpdateAiQuotaSettingsRequest) GetMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Mode
+}
+
 type UpdateAiQuotaSettingsResponse struct {
 	Settings *AiQuotaSettings `json:"settings,omitempty"`
+}
+
+func (x *UpdateAiQuotaSettingsResponse) GetSettings() *AiQuotaSettings {
+	if x == nil {
+		var zero *AiQuotaSettings
+		return zero
+	}
+	return x.Settings
 }

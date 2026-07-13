@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type StaffServiceServer interface {
 	ListStaff(ctx context.Context, req *ListStaffRequest) (*ListStaffResponse, error)
 	CreateStaff(ctx context.Context, req *CreateStaffRequest) (*CreateStaffResponse, error)
@@ -32,7 +44,15 @@ type StaffServiceServer interface {
 	ClockOut(ctx context.Context, req *ClockOutRequest) (*ClockOutResponse, error)
 }
 
-func RegisterStaffServiceServer(mux *http.ServeMux, srv StaffServiceServer) {
+func RegisterStaffServiceServer(srv StaffServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterStaffServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /hr/staff/v1/staff", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListStaffRequest)
 		if r.URL.Query().Get("search") != "" {
@@ -181,4 +201,5 @@ func RegisterStaffServiceServer(mux *http.ServeMux, srv StaffServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

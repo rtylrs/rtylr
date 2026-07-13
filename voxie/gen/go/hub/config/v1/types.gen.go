@@ -34,11 +34,235 @@ type ConfigPayload struct {
 	Slug                   string   `json:"slug,omitempty"`
 }
 
+func (x *ConfigPayload) GetOwnerId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ConfigPayload) GetSiteName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SiteName
+}
+
+func (x *ConfigPayload) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *ConfigPayload) GetFaviconUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FaviconUrl
+}
+
+func (x *ConfigPayload) GetMetaTags() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.MetaTags
+}
+
+func (x *ConfigPayload) GetContactEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ContactEmail
+}
+
+func (x *ConfigPayload) GetContactNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ContactNumber
+}
+
+func (x *ConfigPayload) GetSenderEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SenderEmail
+}
+
+func (x *ConfigPayload) GetWebsite() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Website
+}
+
+func (x *ConfigPayload) GetMapsUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.MapsUrl
+}
+
+func (x *ConfigPayload) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *ConfigPayload) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *ConfigPayload) GetZipcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Zipcode
+}
+
+func (x *ConfigPayload) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *ConfigPayload) GetInstagram() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Instagram
+}
+
+func (x *ConfigPayload) GetMaintenanceMode() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.MaintenanceMode
+}
+
+func (x *ConfigPayload) GetMaintenanceNotice() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.MaintenanceNotice
+}
+
+func (x *ConfigPayload) GetAddonsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AddonsEnabled
+}
+
+func (x *ConfigPayload) GetEnableReviews() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.EnableReviews
+}
+
+func (x *ConfigPayload) GetEnableWishlist() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.EnableWishlist
+}
+
+func (x *ConfigPayload) GetEnableNewsletterSignup() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.EnableNewsletterSignup
+}
+
+func (x *ConfigPayload) GetAboutContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AboutContent
+}
+
+func (x *ConfigPayload) GetFooterSubText() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FooterSubText
+}
+
+func (x *ConfigPayload) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
 type CreateConfigRequest struct {
 	Owner       string `json:"owner,omitempty"`
 	Key         string `json:"key,omitempty"`
 	Value       string `json:"value,omitempty"`
 	Description string `json:"description,omitempty"`
+}
+
+func (x *CreateConfigRequest) GetOwner() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Owner
+}
+
+func (x *CreateConfigRequest) GetKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Key
+}
+
+func (x *CreateConfigRequest) GetValue() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Value
+}
+
+func (x *CreateConfigRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
 }
 
 type CreateConfigResponse struct {
@@ -75,6 +299,22 @@ func (m *CreateConfigResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateConfigResponse) GetConfigId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ConfigId
+}
+
+func (x *CreateConfigResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type GetConfigRequest struct {
 }
 
@@ -83,10 +323,50 @@ type GetConfigResponse struct {
 	Maintenance bool                      `json:"maintenance,omitempty"`
 }
 
+func (x *GetConfigResponse) GetBusiness() *hub_business_v1.Business {
+	if x == nil {
+		var zero *hub_business_v1.Business
+		return zero
+	}
+	return x.Business
+}
+
+func (x *GetConfigResponse) GetMaintenance() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Maintenance
+}
+
 type IndustryType struct {
 	Slug  string `json:"slug,omitempty"`
 	Label string `json:"label,omitempty"`
 	Icon  string `json:"icon,omitempty"`
+}
+
+func (x *IndustryType) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *IndustryType) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *IndustryType) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
 }
 
 type IndustryGroup struct {
@@ -94,11 +374,35 @@ type IndustryGroup struct {
 	Types    []*IndustryType `json:"types,omitempty"`
 }
 
+func (x *IndustryGroup) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *IndustryGroup) GetTypes() []*IndustryType {
+	if x == nil {
+		var zero []*IndustryType
+		return zero
+	}
+	return x.Types
+}
+
 type GetIndustriesRequest struct {
 }
 
 type GetIndustriesResponse struct {
 	Groups []*IndustryGroup `json:"groups,omitempty"`
+}
+
+func (x *GetIndustriesResponse) GetGroups() []*IndustryGroup {
+	if x == nil {
+		var zero []*IndustryGroup
+		return zero
+	}
+	return x.Groups
 }
 
 type UpdateConfigRequest struct {
@@ -125,7 +429,275 @@ type UpdateConfigRequest struct {
 	FooterSubText          *string `json:"footer_sub_text,omitempty"`
 }
 
+func (x *UpdateConfigRequest) GetSiteName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SiteName == nil {
+		var zero string
+		return zero
+	}
+	return *x.SiteName
+}
+
+func (x *UpdateConfigRequest) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.LogoUrl == nil {
+		var zero string
+		return zero
+	}
+	return *x.LogoUrl
+}
+
+func (x *UpdateConfigRequest) GetFaviconUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.FaviconUrl == nil {
+		var zero string
+		return zero
+	}
+	return *x.FaviconUrl
+}
+
+func (x *UpdateConfigRequest) GetContactEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ContactEmail == nil {
+		var zero string
+		return zero
+	}
+	return *x.ContactEmail
+}
+
+func (x *UpdateConfigRequest) GetContactNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ContactNumber == nil {
+		var zero string
+		return zero
+	}
+	return *x.ContactNumber
+}
+
+func (x *UpdateConfigRequest) GetSenderEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SenderEmail == nil {
+		var zero string
+		return zero
+	}
+	return *x.SenderEmail
+}
+
+func (x *UpdateConfigRequest) GetWebsite() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Website == nil {
+		var zero string
+		return zero
+	}
+	return *x.Website
+}
+
+func (x *UpdateConfigRequest) GetMapsUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.MapsUrl == nil {
+		var zero string
+		return zero
+	}
+	return *x.MapsUrl
+}
+
+func (x *UpdateConfigRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Address == nil {
+		var zero string
+		return zero
+	}
+	return *x.Address
+}
+
+func (x *UpdateConfigRequest) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.City == nil {
+		var zero string
+		return zero
+	}
+	return *x.City
+}
+
+func (x *UpdateConfigRequest) GetZipcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Zipcode == nil {
+		var zero string
+		return zero
+	}
+	return *x.Zipcode
+}
+
+func (x *UpdateConfigRequest) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Country == nil {
+		var zero string
+		return zero
+	}
+	return *x.Country
+}
+
+func (x *UpdateConfigRequest) GetInstagram() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Instagram == nil {
+		var zero string
+		return zero
+	}
+	return *x.Instagram
+}
+
+func (x *UpdateConfigRequest) GetMaintenanceMode() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.MaintenanceMode == nil {
+		var zero bool
+		return zero
+	}
+	return *x.MaintenanceMode
+}
+
+func (x *UpdateConfigRequest) GetMaintenanceNotice() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.MaintenanceNotice == nil {
+		var zero string
+		return zero
+	}
+	return *x.MaintenanceNotice
+}
+
+func (x *UpdateConfigRequest) GetAddonsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.AddonsEnabled == nil {
+		var zero bool
+		return zero
+	}
+	return *x.AddonsEnabled
+}
+
+func (x *UpdateConfigRequest) GetEnableReviews() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.EnableReviews == nil {
+		var zero bool
+		return zero
+	}
+	return *x.EnableReviews
+}
+
+func (x *UpdateConfigRequest) GetEnableWishlist() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.EnableWishlist == nil {
+		var zero bool
+		return zero
+	}
+	return *x.EnableWishlist
+}
+
+func (x *UpdateConfigRequest) GetEnableNewsletterSignup() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.EnableNewsletterSignup == nil {
+		var zero bool
+		return zero
+	}
+	return *x.EnableNewsletterSignup
+}
+
+func (x *UpdateConfigRequest) GetAboutContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AboutContent == nil {
+		var zero string
+		return zero
+	}
+	return *x.AboutContent
+}
+
+func (x *UpdateConfigRequest) GetFooterSubText() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.FooterSubText == nil {
+		var zero string
+		return zero
+	}
+	return *x.FooterSubText
+}
+
 type UpdateConfigResponse struct {
 	Message string         `json:"message,omitempty"`
 	Config  *ConfigPayload `json:"config,omitempty"`
+}
+
+func (x *UpdateConfigResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+func (x *UpdateConfigResponse) GetConfig() *ConfigPayload {
+	if x == nil {
+		var zero *ConfigPayload
+		return zero
+	}
+	return x.Config
 }

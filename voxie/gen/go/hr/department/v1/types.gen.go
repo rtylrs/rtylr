@@ -96,6 +96,70 @@ func (m *DepartmentPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DepartmentPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *DepartmentPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *DepartmentPayload) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *DepartmentPayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *DepartmentPayload) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *DepartmentPayload) GetManagerStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerStaffId
+}
+
+func (x *DepartmentPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *DepartmentPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateDepartmentRequest struct {
 	Name           string `json:"name,omitempty"`
 	Description    string `json:"description,omitempty"`
@@ -131,6 +195,30 @@ func (m *CreateDepartmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateDepartmentRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateDepartmentRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateDepartmentRequest) GetManagerStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerStaffId
+}
+
 type CreateDepartmentResponse struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -162,6 +250,14 @@ func (m *CreateDepartmentResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateDepartmentResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
 type DeleteDepartmentRequest struct {
@@ -197,8 +293,24 @@ func (m *DeleteDepartmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteDepartmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteDepartmentResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *DeleteDepartmentResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type ListDepartmentsRequest struct {
@@ -206,6 +318,14 @@ type ListDepartmentsRequest struct {
 
 type ListDepartmentsResponse struct {
 	Departments []*DepartmentPayload `json:"departments,omitempty"`
+}
+
+func (x *ListDepartmentsResponse) GetDepartments() []*DepartmentPayload {
+	if x == nil {
+		var zero []*DepartmentPayload
+		return zero
+	}
+	return x.Departments
 }
 
 type UpdateDepartmentBody struct {
@@ -243,6 +363,30 @@ func (m *UpdateDepartmentBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateDepartmentBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateDepartmentBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateDepartmentBody) GetManagerStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerStaffId
+}
+
 type UpdateDepartmentRequest struct {
 	Id   int64                 `json:"id,omitempty"`
 	Body *UpdateDepartmentBody `json:"body,omitempty"`
@@ -277,6 +421,30 @@ func (m *UpdateDepartmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateDepartmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateDepartmentRequest) GetBody() *UpdateDepartmentBody {
+	if x == nil {
+		var zero *UpdateDepartmentBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateDepartmentResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *UpdateDepartmentResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

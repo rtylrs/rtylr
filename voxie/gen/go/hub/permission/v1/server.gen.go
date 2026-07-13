@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type PermissionServiceServer interface {
 	GetPermissions(ctx context.Context, req *GetPermissionsRequest) (*GetPermissionsResponse, error)
 	ListRoles(ctx context.Context, req *ListRolesRequest) (*ListRolesResponse, error)
@@ -31,7 +43,15 @@ type PermissionServiceServer interface {
 	UpdatePermissionMatrix(ctx context.Context, req *UpdatePermissionMatrixRequest) (*UpdatePermissionMatrixResponse, error)
 }
 
-func RegisterPermissionServiceServer(mux *http.ServeMux, srv PermissionServiceServer) {
+func RegisterPermissionServiceServer(srv PermissionServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterPermissionServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /hub/permission/v1/permissions", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetPermissionsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -148,4 +168,5 @@ func RegisterPermissionServiceServer(mux *http.ServeMux, srv PermissionServiceSe
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

@@ -10,6 +10,14 @@ type VerifyPINRequest struct {
 	Pin string `json:"pin,omitempty"`
 }
 
+func (x *VerifyPINRequest) GetPin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Pin
+}
+
 type VerifyPINResponse struct {
 	Valid   bool   `json:"valid,omitempty"`
 	StaffId int64  `json:"staff_id,omitempty"`
@@ -43,4 +51,28 @@ func (m *VerifyPINResponse) UnmarshalJSON(data []byte) error {
 		m.StaffId = v
 	}
 	return nil
+}
+
+func (x *VerifyPINResponse) GetValid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Valid
+}
+
+func (x *VerifyPINResponse) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *VerifyPINResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

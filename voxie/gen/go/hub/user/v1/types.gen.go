@@ -60,18 +60,134 @@ func (m *GetMeResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetMeResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *GetMeResponse) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *GetMeResponse) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *GetMeResponse) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *GetMeResponse) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *GetMeResponse) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *GetMeResponse) GetBusinessName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessName
+}
+
+func (x *GetMeResponse) GetIsOwner() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsOwner
+}
+
+func (x *GetMeResponse) GetOnboarded() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Onboarded
+}
+
 type UpdateProfileRequest struct {
 	Name  string  `json:"name,omitempty"`
 	Email *string `json:"email,omitempty"`
+}
+
+func (x *UpdateProfileRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateProfileRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Email == nil {
+		var zero string
+		return zero
+	}
+	return *x.Email
 }
 
 type UpdateProfileResponse struct {
 	User *GetMeResponse `json:"user,omitempty"`
 }
 
+func (x *UpdateProfileResponse) GetUser() *GetMeResponse {
+	if x == nil {
+		var zero *GetMeResponse
+		return zero
+	}
+	return x.User
+}
+
 type ChangePasswordRequest struct {
 	CurrentPassword string `json:"current_password,omitempty"`
 	NewPassword     string `json:"new_password,omitempty"`
+}
+
+func (x *ChangePasswordRequest) GetCurrentPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CurrentPassword
+}
+
+func (x *ChangePasswordRequest) GetNewPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NewPassword
 }
 
 type ChangePasswordResponse struct {
@@ -110,6 +226,22 @@ func (m *SwitchBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SwitchBusinessRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
 type SwitchBusinessResponse struct {
 	Token string `json:"token,omitempty"`
+}
+
+func (x *SwitchBusinessResponse) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
 }

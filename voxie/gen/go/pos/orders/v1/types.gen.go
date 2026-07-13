@@ -72,6 +72,118 @@ func (m *OrderItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *OrderItem) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *OrderItem) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *OrderItem) GetMenuItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MenuItemId
+}
+
+func (x *OrderItem) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *OrderItem) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *OrderItem) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *OrderItem) GetUnitPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitPrice
+}
+
+func (x *OrderItem) GetDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountPct
+}
+
+func (x *OrderItem) GetDiscountAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountAmount
+}
+
+func (x *OrderItem) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *OrderItem) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *OrderItem) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *OrderItem) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *OrderItem) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type Order struct {
 	Id             int64        `json:"id,omitempty"`
 	OwnerId        int64        `json:"owner_id,omitempty"`
@@ -189,6 +301,206 @@ func (m *Order) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Order) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Order) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Order) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *Order) GetTableId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TableId
+}
+
+func (x *Order) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *Order) GetOrderNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OrderNumber
+}
+
+func (x *Order) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Order) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Order) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *Order) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *Order) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *Order) GetSubtotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Subtotal
+}
+
+func (x *Order) GetDiscountAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountAmount
+}
+
+func (x *Order) GetTaxAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxAmount
+}
+
+func (x *Order) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *Order) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *Order) GetPaymentStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentStatus
+}
+
+func (x *Order) GetAmountPaid() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AmountPaid
+}
+
+func (x *Order) GetChangeDue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ChangeDue
+}
+
+func (x *Order) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *Order) GetKitchenNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.KitchenNotes
+}
+
+func (x *Order) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Order) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *Order) GetPaidAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaidAt
+}
+
+func (x *Order) GetItems() []*OrderItem {
+	if x == nil {
+		var zero []*OrderItem
+		return zero
+	}
+	return x.Items
+}
+
 type CreateOrderItemInput struct {
 	MenuItemId  int64   `json:"menu_item_id,omitempty"`
 	Name        string  `json:"name,omitempty"`
@@ -229,6 +541,70 @@ func (m *CreateOrderItemInput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateOrderItemInput) GetMenuItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MenuItemId
+}
+
+func (x *CreateOrderItemInput) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateOrderItemInput) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *CreateOrderItemInput) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *CreateOrderItemInput) GetUnitPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitPrice
+}
+
+func (x *CreateOrderItemInput) GetDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountPct
+}
+
+func (x *CreateOrderItemInput) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *CreateOrderItemInput) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type SplitGroup struct {
 	ItemIds []int64 `json:"item_ids,omitempty"`
 }
@@ -266,6 +642,14 @@ func (m *SplitGroup) UnmarshalJSON(data []byte) error {
 		}
 	}
 	return nil
+}
+
+func (x *SplitGroup) GetItemIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.ItemIds
 }
 
 type CreateOrderRequest struct {
@@ -340,6 +724,86 @@ func (m *CreateOrderRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateOrderRequest) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *CreateOrderRequest) GetTableId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TableId
+}
+
+func (x *CreateOrderRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *CreateOrderRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateOrderRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *CreateOrderRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CreateOrderRequest) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *CreateOrderRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreateOrderRequest) GetKitchenNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.KitchenNotes
+}
+
+func (x *CreateOrderRequest) GetItems() []*CreateOrderItemInput {
+	if x == nil {
+		var zero []*CreateOrderItemInput
+		return zero
+	}
+	return x.Items
+}
+
 type CreateOrderResponse struct {
 	OrderId     int64  `json:"order_id,omitempty"`
 	OrderNumber string `json:"order_number,omitempty"`
@@ -373,6 +837,30 @@ func (m *CreateOrderResponse) UnmarshalJSON(data []byte) error {
 		m.OrderId = v
 	}
 	return nil
+}
+
+func (x *CreateOrderResponse) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *CreateOrderResponse) GetOrderNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OrderNumber
+}
+
+func (x *CreateOrderResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type PublicOrderItemInput struct {
@@ -410,6 +898,46 @@ func (m *PublicOrderItemInput) UnmarshalJSON(data []byte) error {
 		m.MenuItemId = v
 	}
 	return nil
+}
+
+func (x *PublicOrderItemInput) GetMenuItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MenuItemId
+}
+
+func (x *PublicOrderItemInput) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *PublicOrderItemInput) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *PublicOrderItemInput) GetUnitPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitPrice
+}
+
+func (x *PublicOrderItemInput) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
 }
 
 type CreatePublicOrderRequest struct {
@@ -450,6 +978,54 @@ func (m *CreatePublicOrderRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreatePublicOrderRequest) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *CreatePublicOrderRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CreatePublicOrderRequest) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *CreatePublicOrderRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *CreatePublicOrderRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreatePublicOrderRequest) GetItems() []*PublicOrderItemInput {
+	if x == nil {
+		var zero []*PublicOrderItemInput
+		return zero
+	}
+	return x.Items
+}
+
 type CreatePublicOrderResponse struct {
 	OrderId     int64  `json:"order_id,omitempty"`
 	OrderNumber string `json:"order_number,omitempty"`
@@ -485,6 +1061,30 @@ func (m *CreatePublicOrderResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreatePublicOrderResponse) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *CreatePublicOrderResponse) GetOrderNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OrderNumber
+}
+
+func (x *CreatePublicOrderResponse) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type GetOrderDetailRequest struct {
 	OrderId int64 `json:"order_id,omitempty"`
 }
@@ -518,8 +1118,24 @@ func (m *GetOrderDetailRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetOrderDetailRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
 type GetOrderDetailResponse struct {
 	Order *Order `json:"order,omitempty"`
+}
+
+func (x *GetOrderDetailResponse) GetOrder() *Order {
+	if x == nil {
+		var zero *Order
+		return zero
+	}
+	return x.Order
 }
 
 type GetPublicOrderStatusRequest struct {
@@ -566,6 +1182,22 @@ func (m *GetPublicOrderStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetPublicOrderStatusRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *GetPublicOrderStatusRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
 type GetPublicOrderStatusResponse struct {
 	OrderId     int64  `json:"order_id,omitempty"`
 	OrderNumber string `json:"order_number,omitempty"`
@@ -599,6 +1231,30 @@ func (m *GetPublicOrderStatusResponse) UnmarshalJSON(data []byte) error {
 		m.OrderId = v
 	}
 	return nil
+}
+
+func (x *GetPublicOrderStatusResponse) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *GetPublicOrderStatusResponse) GetOrderNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OrderNumber
+}
+
+func (x *GetPublicOrderStatusResponse) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type ListOrdersRequest struct {
@@ -640,12 +1296,108 @@ func (m *ListOrdersRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListOrdersRequest) GetSessionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SessionId
+}
+
+func (x *ListOrdersRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ListOrdersRequest) GetDateFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateFrom
+}
+
+func (x *ListOrdersRequest) GetDateTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateTo
+}
+
+func (x *ListOrdersRequest) GetSearch() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Search
+}
+
+func (x *ListOrdersRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListOrdersRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
 type ListOrdersResponse struct {
 	Orders   []*Order `json:"orders,omitempty"`
 	Total    int64    `json:"total,omitempty"`
 	HasMore  bool     `json:"has_more,omitempty"`
 	Page     int64    `json:"page,omitempty"`
 	PageSize int64    `json:"page_size,omitempty"`
+}
+
+func (x *ListOrdersResponse) GetOrders() []*Order {
+	if x == nil {
+		var zero []*Order
+		return zero
+	}
+	return x.Orders
+}
+
+func (x *ListOrdersResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListOrdersResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListOrdersResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListOrdersResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type SendToKitchenRequest struct {
@@ -681,8 +1433,24 @@ func (m *SendToKitchenRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SendToKitchenRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
 type SendToKitchenResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *SendToKitchenResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type TransferTableRequest struct {
@@ -729,12 +1497,44 @@ func (m *TransferTableRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TransferTableRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *TransferTableRequest) GetNewTableId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.NewTableId
+}
+
 type TransferTableResponse struct {
 	Success bool `json:"success,omitempty"`
 }
 
+func (x *TransferTableResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
+}
+
 type UpdateOrderStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateOrderStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateOrderStatusRequest struct {
@@ -771,8 +1571,32 @@ func (m *UpdateOrderStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateOrderStatusRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *UpdateOrderStatusRequest) GetBody() *UpdateOrderStatusBody {
+	if x == nil {
+		var zero *UpdateOrderStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateOrderStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateOrderStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type VoidOrderRequest struct {
@@ -809,6 +1633,30 @@ func (m *VoidOrderRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *VoidOrderRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *VoidOrderRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type VoidOrderResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *VoidOrderResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -86,3 +86,51 @@ func (m *GetKPIsResponse) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
+
+func (x *GetKPIsResponse) GetRevenue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Revenue
+}
+
+func (x *GetKPIsResponse) GetOrderCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderCount
+}
+
+func (x *GetKPIsResponse) GetStaffCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffCount
+}
+
+func (x *GetKPIsResponse) GetCustomerCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerCount
+}
+
+func (x *GetKPIsResponse) GetLowStockCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LowStockCount
+}
+
+func (x *GetKPIsResponse) GetActiveApps() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ActiveApps
+}

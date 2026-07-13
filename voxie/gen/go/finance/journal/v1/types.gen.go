@@ -46,6 +46,62 @@ func (m *JournalEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *JournalEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *JournalEntry) GetNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Number
+}
+
+func (x *JournalEntry) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *JournalEntry) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *JournalEntry) GetLines() []*JournalLine {
+	if x == nil {
+		var zero []*JournalLine
+		return zero
+	}
+	return x.Lines
+}
+
+func (x *JournalEntry) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *JournalEntry) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type JournalLine struct {
 	AccountId   int64   `json:"account_id,omitempty"`
 	AccountName string  `json:"account_name,omitempty"`
@@ -83,14 +139,86 @@ func (m *JournalLine) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *JournalLine) GetAccountId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AccountId
+}
+
+func (x *JournalLine) GetAccountName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AccountName
+}
+
+func (x *JournalLine) GetDebit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Debit
+}
+
+func (x *JournalLine) GetCredit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Credit
+}
+
+func (x *JournalLine) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
 type CreateJournalEntryRequest struct {
 	Date        string         `json:"date,omitempty"`
 	Description string         `json:"description,omitempty"`
 	Lines       []*JournalLine `json:"lines,omitempty"`
 }
 
+func (x *CreateJournalEntryRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *CreateJournalEntryRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateJournalEntryRequest) GetLines() []*JournalLine {
+	if x == nil {
+		var zero []*JournalLine
+		return zero
+	}
+	return x.Lines
+}
+
 type CreateJournalEntryResponse struct {
 	Entry *JournalEntry `json:"entry,omitempty"`
+}
+
+func (x *CreateJournalEntryResponse) GetEntry() *JournalEntry {
+	if x == nil {
+		var zero *JournalEntry
+		return zero
+	}
+	return x.Entry
 }
 
 type GetJournalEntryRequest struct {
@@ -126,8 +254,24 @@ func (m *GetJournalEntryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetJournalEntryRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetJournalEntryResponse struct {
 	Entry *JournalEntry `json:"entry,omitempty"`
+}
+
+func (x *GetJournalEntryResponse) GetEntry() *JournalEntry {
+	if x == nil {
+		var zero *JournalEntry
+		return zero
+	}
+	return x.Entry
 }
 
 type ListJournalEntriesRequest struct {
@@ -139,7 +283,71 @@ type ListJournalEntriesRequest struct {
 	ToDate   string `json:"to_date,omitempty"`
 }
 
+func (x *ListJournalEntriesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListJournalEntriesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListJournalEntriesRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListJournalEntriesRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
+func (x *ListJournalEntriesRequest) GetFromDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FromDate
+}
+
+func (x *ListJournalEntriesRequest) GetToDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ToDate
+}
+
 type ListJournalEntriesResponse struct {
 	Entries    []*JournalEntry                          `json:"entries,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListJournalEntriesResponse) GetEntries() []*JournalEntry {
+	if x == nil {
+		var zero []*JournalEntry
+		return zero
+	}
+	return x.Entries
+}
+
+func (x *ListJournalEntriesResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }

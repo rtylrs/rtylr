@@ -11,9 +11,9 @@ message TopCustomer {
   loyalty_tier: string
 }
 
-message GetCrmDashboardRequest {}
+message GetDashboardRequest {}
 
-message GetCrmDashboardResponse {
+message GetDashboardResponse {
   total_customers: int64
   new_this_month: int64
   active_loyalty_members: int64

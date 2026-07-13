@@ -66,11 +66,91 @@ func (m *Terminal) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Terminal) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Terminal) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Terminal) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *Terminal) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Terminal) GetDeviceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DeviceId == nil {
+		var zero string
+		return zero
+	}
+	return *x.DeviceId
+}
+
+func (x *Terminal) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Terminal) GetLastSeenAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.LastSeenAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.LastSeenAt
+}
+
+func (x *Terminal) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListTerminalsRequest struct {
 }
 
 type ListTerminalsResponse struct {
 	Terminals []*Terminal `json:"terminals,omitempty"`
+}
+
+func (x *ListTerminalsResponse) GetTerminals() []*Terminal {
+	if x == nil {
+		var zero []*Terminal
+		return zero
+	}
+	return x.Terminals
 }
 
 type CreateTerminalRequest struct {
@@ -108,6 +188,30 @@ func (m *CreateTerminalRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateTerminalRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CreateTerminalRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateTerminalRequest) GetDeviceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DeviceId
+}
+
 type CreateTerminalResponse struct {
 	TerminalId int64  `json:"terminal_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -140,6 +244,22 @@ func (m *CreateTerminalResponse) UnmarshalJSON(data []byte) error {
 		m.TerminalId = v
 	}
 	return nil
+}
+
+func (x *CreateTerminalResponse) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TerminalId
+}
+
+func (x *CreateTerminalResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateTerminalBody struct {
@@ -178,6 +298,38 @@ func (m *UpdateTerminalBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTerminalBody) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *UpdateTerminalBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateTerminalBody) GetDeviceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DeviceId
+}
+
+func (x *UpdateTerminalBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateTerminalRequest struct {
 	Id   int64               `json:"id,omitempty"`
 	Body *UpdateTerminalBody `json:"body,omitempty"`
@@ -212,8 +364,32 @@ func (m *UpdateTerminalRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTerminalRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateTerminalRequest) GetBody() *UpdateTerminalBody {
+	if x == nil {
+		var zero *UpdateTerminalBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateTerminalResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateTerminalResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type HeartbeatTerminalRequest struct {
@@ -249,6 +425,22 @@ func (m *HeartbeatTerminalRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *HeartbeatTerminalRequest) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TerminalId
+}
+
 type HeartbeatTerminalResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *HeartbeatTerminalResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

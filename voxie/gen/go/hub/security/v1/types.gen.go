@@ -6,12 +6,68 @@ type SecurityState struct {
 	ActiveSessions   []*ActiveSession `json:"active_sessions,omitempty"`
 }
 
+func (x *SecurityState) GetTwoFactorEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.TwoFactorEnabled
+}
+
+func (x *SecurityState) GetActiveSessions() []*ActiveSession {
+	if x == nil {
+		var zero []*ActiveSession
+		return zero
+	}
+	return x.ActiveSessions
+}
+
 type ActiveSession struct {
 	Id        string `json:"id,omitempty"`
 	Ip        string `json:"ip,omitempty"`
 	UserAgent string `json:"user_agent,omitempty"`
 	CreatedAt string `json:"created_at,omitempty"`
 	IsCurrent bool   `json:"is_current,omitempty"`
+}
+
+func (x *ActiveSession) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ActiveSession) GetIp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Ip
+}
+
+func (x *ActiveSession) GetUserAgent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UserAgent
+}
+
+func (x *ActiveSession) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ActiveSession) GetIsCurrent() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsCurrent
 }
 
 type LoginEntry struct {
@@ -23,11 +79,67 @@ type LoginEntry struct {
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
+func (x *LoginEntry) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *LoginEntry) GetMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Method
+}
+
+func (x *LoginEntry) GetIp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Ip
+}
+
+func (x *LoginEntry) GetUserAgent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UserAgent
+}
+
+func (x *LoginEntry) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
+}
+
+func (x *LoginEntry) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type GetSecurityStateRequest struct {
 }
 
 type GetSecurityStateResponse struct {
 	State *SecurityState `json:"state,omitempty"`
+}
+
+func (x *GetSecurityStateResponse) GetState() *SecurityState {
+	if x == nil {
+		var zero *SecurityState
+		return zero
+	}
+	return x.State
 }
 
 type LoginHistoryRequest struct {
@@ -37,6 +149,14 @@ type LoginHistoryResponse struct {
 	History []*LoginEntry `json:"history,omitempty"`
 }
 
+func (x *LoginHistoryResponse) GetHistory() []*LoginEntry {
+	if x == nil {
+		var zero []*LoginEntry
+		return zero
+	}
+	return x.History
+}
+
 type InvalidateSessionsRequest struct {
 }
 
@@ -44,10 +164,34 @@ type InvalidateSessionsResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *InvalidateSessionsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type Update2FARequest struct {
 	Enabled bool `json:"enabled,omitempty"`
 }
 
+func (x *Update2FARequest) GetEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Enabled
+}
+
 type Update2FAResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *Update2FAResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

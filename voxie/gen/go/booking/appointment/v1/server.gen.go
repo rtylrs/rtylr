@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type AppointmentServiceServer interface {
 	ListAppointments(ctx context.Context, req *ListAppointmentsRequest) (*ListAppointmentsResponse, error)
 	ListTodayAppointments(ctx context.Context, req *ListTodayAppointmentsRequest) (*ListTodayAppointmentsResponse, error)
@@ -30,7 +42,15 @@ type AppointmentServiceServer interface {
 	DeleteAppointment(ctx context.Context, req *DeleteAppointmentRequest) (*DeleteAppointmentResponse, error)
 }
 
-func RegisterAppointmentServiceServer(mux *http.ServeMux, srv AppointmentServiceServer) {
+func RegisterAppointmentServiceServer(srv AppointmentServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterAppointmentServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /booking/appointment/v1/appointments", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListAppointmentsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -125,4 +145,5 @@ func RegisterAppointmentServiceServer(mux *http.ServeMux, srv AppointmentService
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

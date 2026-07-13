@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type PosCustomer struct {
+type Customer struct {
 	Id        int64  `json:"id,omitempty"`
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`
@@ -14,8 +14,8 @@ type PosCustomer struct {
 	Phone     string `json:"phone,omitempty"`
 }
 
-func (m *PosCustomer) MarshalJSON() ([]byte, error) {
-	type alias PosCustomer
+func (m *Customer) MarshalJSON() ([]byte, error) {
+	type alias Customer
 	aux := struct {
 		*alias
 		Id string `json:"id,omitempty"`
@@ -24,8 +24,8 @@ func (m *PosCustomer) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *PosCustomer) UnmarshalJSON(data []byte) error {
-	type alias PosCustomer
+func (m *Customer) UnmarshalJSON(data []byte) error {
+	type alias Customer
 	aux := struct {
 		*alias
 		Id string `json:"id,omitempty"`
@@ -43,10 +43,66 @@ func (m *PosCustomer) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Customer) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Customer) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *Customer) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *Customer) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *Customer) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
 type SearchCustomersRequest struct {
 	Query string `json:"query,omitempty"`
 }
 
+func (x *SearchCustomersRequest) GetQuery() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Query
+}
+
 type SearchCustomersResponse struct {
-	Customers []*PosCustomer `json:"customers,omitempty"`
+	Customers []*Customer `json:"customers,omitempty"`
+}
+
+func (x *SearchCustomersResponse) GetCustomers() []*Customer {
+	if x == nil {
+		var zero []*Customer
+		return zero
+	}
+	return x.Customers
 }

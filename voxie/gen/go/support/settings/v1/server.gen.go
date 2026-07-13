@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,14 +23,33 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
-type SettingsServiceServer interface {
-	GetSettings(ctx context.Context, req *GetSupportSettingsRequest) (*GetSupportSettingsResponse, error)
-	UpdateSettings(ctx context.Context, req *UpdateSupportSettingsRequest) (*UpdateSupportSettingsResponse, error)
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
 }
 
-func RegisterSettingsServiceServer(mux *http.ServeMux, srv SettingsServiceServer) {
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
+type SettingsServiceServer interface {
+	GetSettings(ctx context.Context, req *GetSettingsRequest) (*GetSettingsResponse, error)
+	UpdateSettings(ctx context.Context, req *UpdateSettingsRequest) (*UpdateSettingsResponse, error)
+}
+
+func RegisterSettingsServiceServer(srv SettingsServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterSettingsServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /support/settings/v1/settings", func(w http.ResponseWriter, r *http.Request) {
-		req := new(GetSupportSettingsRequest)
+		req := new(GetSettingsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -45,7 +65,7 @@ func RegisterSettingsServiceServer(mux *http.ServeMux, srv SettingsServiceServer
 		_ = json.NewEncoder(w).Encode(resp)
 	})
 	mux.HandleFunc("PUT /support/settings/v1/settings", func(w http.ResponseWriter, r *http.Request) {
-		req := new(UpdateSupportSettingsRequest)
+		req := new(UpdateSettingsRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
 				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
@@ -66,4 +86,5 @@ func RegisterSettingsServiceServer(mux *http.ServeMux, srv SettingsServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

@@ -5,5 +5,5 @@ service TaxService {
 
   updateTaxConfig(UpdateTaxConfigRequest) -> UpdateTaxConfigResponse @put("/tax")
 
-  getPLReport(GetTaxPLReportRequest) -> GetTaxPLReportResponse @get("/pl")
+  getPLReport(GetPLReportRequest) -> GetPLReportResponse @get("/pl")
 }

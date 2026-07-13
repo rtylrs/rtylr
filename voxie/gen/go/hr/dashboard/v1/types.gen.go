@@ -72,6 +72,38 @@ func (m *DashboardStats) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DashboardStats) GetTotalStaff() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalStaff
+}
+
+func (x *DashboardStats) GetOnShiftToday() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OnShiftToday
+}
+
+func (x *DashboardStats) GetPendingTimeOff() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PendingTimeOff
+}
+
+func (x *DashboardStats) GetPayrollDraft() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PayrollDraft
+}
+
 type DashboardWidgetPayload struct {
 	Id         int64  `json:"id,omitempty"`
 	OwnerId    int64  `json:"owner_id,omitempty"`
@@ -155,9 +187,113 @@ func (m *DashboardWidgetPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DashboardWidgetPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *DashboardWidgetPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *DashboardWidgetPayload) GetRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RoleId
+}
+
+func (x *DashboardWidgetPayload) GetWidgetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WidgetType
+}
+
+func (x *DashboardWidgetPayload) GetPositionX() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PositionX
+}
+
+func (x *DashboardWidgetPayload) GetPositionY() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PositionY
+}
+
+func (x *DashboardWidgetPayload) GetWidth() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Width
+}
+
+func (x *DashboardWidgetPayload) GetHeight() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Height
+}
+
+func (x *DashboardWidgetPayload) GetConfig() []byte {
+	if x == nil {
+		var zero []byte
+		return zero
+	}
+	return x.Config
+}
+
+func (x *DashboardWidgetPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *DashboardWidgetPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type DashboardDataPayload struct {
 	WidgetType string `json:"widget_type,omitempty"`
 	Data       []byte `json:"data,omitempty"`
+}
+
+func (x *DashboardDataPayload) GetWidgetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WidgetType
+}
+
+func (x *DashboardDataPayload) GetData() []byte {
+	if x == nil {
+		var zero []byte
+		return zero
+	}
+	return x.Data
 }
 
 type GetHRDashboardRequest struct {
@@ -165,6 +301,14 @@ type GetHRDashboardRequest struct {
 
 type GetHRDashboardResponse struct {
 	Stats *DashboardStats `json:"stats,omitempty"`
+}
+
+func (x *GetHRDashboardResponse) GetStats() *DashboardStats {
+	if x == nil {
+		var zero *DashboardStats
+		return zero
+	}
+	return x.Stats
 }
 
 type GetDashboardWidgetsRequest struct {
@@ -175,10 +319,42 @@ type GetDashboardWidgetsResponse struct {
 	Data    map[string]*DashboardDataPayload `json:"data,omitempty"`
 }
 
+func (x *GetDashboardWidgetsResponse) GetWidgets() []*DashboardWidgetPayload {
+	if x == nil {
+		var zero []*DashboardWidgetPayload
+		return zero
+	}
+	return x.Widgets
+}
+
+func (x *GetDashboardWidgetsResponse) GetData() map[string]*DashboardDataPayload {
+	if x == nil {
+		var zero map[string]*DashboardDataPayload
+		return zero
+	}
+	return x.Data
+}
+
 type UpdateDashboardWidgetsRequest struct {
 	Widgets []*DashboardWidgetPayload `json:"widgets,omitempty"`
 }
 
+func (x *UpdateDashboardWidgetsRequest) GetWidgets() []*DashboardWidgetPayload {
+	if x == nil {
+		var zero []*DashboardWidgetPayload
+		return zero
+	}
+	return x.Widgets
+}
+
 type UpdateDashboardWidgetsResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *UpdateDashboardWidgetsResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

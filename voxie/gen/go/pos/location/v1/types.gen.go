@@ -56,11 +56,111 @@ func (m *Location) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Location) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Location) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Location) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Location) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *Location) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *Location) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Location) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Location) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateLocationRequest struct {
 	Name     string `json:"name,omitempty"`
 	Address  string `json:"address,omitempty"`
 	Phone    string `json:"phone,omitempty"`
 	IsActive *bool  `json:"is_active,omitempty"`
+}
+
+func (x *CreateLocationRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateLocationRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *CreateLocationRequest) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *CreateLocationRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
 }
 
 type CreateLocationResponse struct {
@@ -97,6 +197,22 @@ func (m *CreateLocationResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateLocationResponse) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *CreateLocationResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListLocationsRequest struct {
 }
 
@@ -104,11 +220,55 @@ type ListLocationsResponse struct {
 	Locations []*Location `json:"locations,omitempty"`
 }
 
+func (x *ListLocationsResponse) GetLocations() []*Location {
+	if x == nil {
+		var zero []*Location
+		return zero
+	}
+	return x.Locations
+}
+
 type UpdateLocationBody struct {
 	Name     string `json:"name,omitempty"`
 	Address  string `json:"address,omitempty"`
 	Phone    string `json:"phone,omitempty"`
 	IsActive *bool  `json:"is_active,omitempty"`
+}
+
+func (x *UpdateLocationBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateLocationBody) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *UpdateLocationBody) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *UpdateLocationBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
 }
 
 type UpdateLocationRequest struct {
@@ -145,6 +305,30 @@ func (m *UpdateLocationRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLocationRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateLocationRequest) GetBody() *UpdateLocationBody {
+	if x == nil {
+		var zero *UpdateLocationBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateLocationResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateLocationResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -80,8 +80,112 @@ func (m *WorkSchedulePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *WorkSchedulePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *WorkSchedulePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *WorkSchedulePayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *WorkSchedulePayload) GetWorkingDays() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.WorkingDays
+}
+
+func (x *WorkSchedulePayload) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *WorkSchedulePayload) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *WorkSchedulePayload) GetBreakMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BreakMinutes
+}
+
+func (x *WorkSchedulePayload) GetContractedHoursPerWeek() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ContractedHoursPerWeek
+}
+
+func (x *WorkSchedulePayload) GetDailyOtThresholdMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DailyOtThresholdMinutes
+}
+
+func (x *WorkSchedulePayload) GetWeeklyOtThresholdMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.WeeklyOtThresholdMinutes
+}
+
+func (x *WorkSchedulePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *WorkSchedulePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListWorkSchedulesResponse struct {
 	Schedules []*WorkSchedulePayload `json:"schedules,omitempty"`
+}
+
+func (x *ListWorkSchedulesResponse) GetSchedules() []*WorkSchedulePayload {
+	if x == nil {
+		var zero []*WorkSchedulePayload
+		return zero
+	}
+	return x.Schedules
 }
 
 type CreateWorkScheduleRequest struct {
@@ -95,8 +199,80 @@ type CreateWorkScheduleRequest struct {
 	WeeklyOtThresholdMinutes int32    `json:"weekly_ot_threshold_minutes,omitempty"`
 }
 
+func (x *CreateWorkScheduleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateWorkScheduleRequest) GetWorkingDays() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.WorkingDays
+}
+
+func (x *CreateWorkScheduleRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *CreateWorkScheduleRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *CreateWorkScheduleRequest) GetBreakMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BreakMinutes
+}
+
+func (x *CreateWorkScheduleRequest) GetContractedHoursPerWeek() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ContractedHoursPerWeek
+}
+
+func (x *CreateWorkScheduleRequest) GetDailyOtThresholdMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DailyOtThresholdMinutes
+}
+
+func (x *CreateWorkScheduleRequest) GetWeeklyOtThresholdMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.WeeklyOtThresholdMinutes
+}
+
 type CreateWorkScheduleResponse struct {
 	Schedule *WorkSchedulePayload `json:"schedule,omitempty"`
+}
+
+func (x *CreateWorkScheduleResponse) GetSchedule() *WorkSchedulePayload {
+	if x == nil {
+		var zero *WorkSchedulePayload
+		return zero
+	}
+	return x.Schedule
 }
 
 type UpdateWorkScheduleBody struct {
@@ -108,6 +284,98 @@ type UpdateWorkScheduleBody struct {
 	ContractedHoursPerWeek   *float64 `json:"contracted_hours_per_week,omitempty"`
 	DailyOtThresholdMinutes  *int32   `json:"daily_ot_threshold_minutes,omitempty"`
 	WeeklyOtThresholdMinutes *int32   `json:"weekly_ot_threshold_minutes,omitempty"`
+}
+
+func (x *UpdateWorkScheduleBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
+}
+
+func (x *UpdateWorkScheduleBody) GetWorkingDays() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.WorkingDays
+}
+
+func (x *UpdateWorkScheduleBody) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.StartTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.StartTime
+}
+
+func (x *UpdateWorkScheduleBody) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndTime
+}
+
+func (x *UpdateWorkScheduleBody) GetBreakMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.BreakMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.BreakMinutes
+}
+
+func (x *UpdateWorkScheduleBody) GetContractedHoursPerWeek() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.ContractedHoursPerWeek == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ContractedHoursPerWeek
+}
+
+func (x *UpdateWorkScheduleBody) GetDailyOtThresholdMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DailyOtThresholdMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DailyOtThresholdMinutes
+}
+
+func (x *UpdateWorkScheduleBody) GetWeeklyOtThresholdMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.WeeklyOtThresholdMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.WeeklyOtThresholdMinutes
 }
 
 type UpdateWorkScheduleRequest struct {
@@ -144,6 +412,30 @@ func (m *UpdateWorkScheduleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateWorkScheduleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateWorkScheduleRequest) GetBody() *UpdateWorkScheduleBody {
+	if x == nil {
+		var zero *UpdateWorkScheduleBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateWorkScheduleResponse struct {
 	Schedule *WorkSchedulePayload `json:"schedule,omitempty"`
+}
+
+func (x *UpdateWorkScheduleResponse) GetSchedule() *WorkSchedulePayload {
+	if x == nil {
+		var zero *WorkSchedulePayload
+		return zero
+	}
+	return x.Schedule
 }

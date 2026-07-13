@@ -16,6 +16,74 @@ type ReportRequestPayload struct {
 	Format       string `json:"format,omitempty"`
 }
 
+func (x *ReportRequestPayload) GetReportType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReportType
+}
+
+func (x *ReportRequestPayload) GetDateFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateFrom
+}
+
+func (x *ReportRequestPayload) GetDateTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateTo
+}
+
+func (x *ReportRequestPayload) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *ReportRequestPayload) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
+}
+
+func (x *ReportRequestPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ReportRequestPayload) GetFormat() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Format
+}
+
 type ReportPayload struct {
 	ReportType  string `json:"report_type,omitempty"`
 	GeneratedAt int64  `json:"generated_at,omitempty"`
@@ -52,10 +120,58 @@ func (m *ReportPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ReportPayload) GetReportType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReportType
+}
+
+func (x *ReportPayload) GetGeneratedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.GeneratedAt
+}
+
+func (x *ReportPayload) GetData() []byte {
+	if x == nil {
+		var zero []byte
+		return zero
+	}
+	return x.Data
+}
+
+func (x *ReportPayload) GetFormat() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Format
+}
+
 type GenerateReportRequest struct {
 	Request *ReportRequestPayload `json:"request,omitempty"`
 }
 
+func (x *GenerateReportRequest) GetRequest() *ReportRequestPayload {
+	if x == nil {
+		var zero *ReportRequestPayload
+		return zero
+	}
+	return x.Request
+}
+
 type GenerateReportResponse struct {
 	Report *ReportPayload `json:"report,omitempty"`
+}
+
+func (x *GenerateReportResponse) GetReport() *ReportPayload {
+	if x == nil {
+		var zero *ReportPayload
+		return zero
+	}
+	return x.Report
 }

@@ -22,12 +22,172 @@ type PayrollRecord struct {
 	CreatedAt     string  `json:"created_at,omitempty"`
 }
 
+func (x *PayrollRecord) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PayrollRecord) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *PayrollRecord) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *PayrollRecord) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *PayrollRecord) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
+func (x *PayrollRecord) GetPeriodLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodLabel
+}
+
+func (x *PayrollRecord) GetRegularHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.RegularHours
+}
+
+func (x *PayrollRecord) GetOvertimeHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimeHours
+}
+
+func (x *PayrollRecord) GetBasePay() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.BasePay
+}
+
+func (x *PayrollRecord) GetOvertimePay() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimePay
+}
+
+func (x *PayrollRecord) GetBonuses() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Bonuses
+}
+
+func (x *PayrollRecord) GetDeductions() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Deductions
+}
+
+func (x *PayrollRecord) GetTaxWithheld() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxWithheld
+}
+
+func (x *PayrollRecord) GetNetPay() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.NetPay
+}
+
+func (x *PayrollRecord) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *PayrollRecord) GetPaidAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaidAt
+}
+
+func (x *PayrollRecord) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *PayrollRecord) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListPayrollRequest struct {
 	PeriodLabel string `json:"period_label,omitempty"`
 }
 
+func (x *ListPayrollRequest) GetPeriodLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodLabel
+}
+
 type ListPayrollResponse struct {
 	Records []*PayrollRecord `json:"records,omitempty"`
+}
+
+func (x *ListPayrollResponse) GetRecords() []*PayrollRecord {
+	if x == nil {
+		var zero []*PayrollRecord
+		return zero
+	}
+	return x.Records
 }
 
 type RunPayrollRequest struct {
@@ -36,14 +196,62 @@ type RunPayrollRequest struct {
 	PeriodLabel string `json:"period_label,omitempty"`
 }
 
+func (x *RunPayrollRequest) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *RunPayrollRequest) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
+func (x *RunPayrollRequest) GetPeriodLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodLabel
+}
+
 type RunPayrollResponse struct {
 	RecordsCreated int32 `json:"records_created,omitempty"`
+}
+
+func (x *RunPayrollResponse) GetRecordsCreated() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.RecordsCreated
 }
 
 type MarkPayrollPaidRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
 
+func (x *MarkPayrollPaidRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type MarkPayrollPaidResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *MarkPayrollPaidResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

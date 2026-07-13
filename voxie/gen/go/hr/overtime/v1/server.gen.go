@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,13 +23,32 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type OvertimeServiceServer interface {
 	ListOvertimeRequests(ctx context.Context, req *ListOvertimeRequestsRequest) (*ListOvertimeRequestsResponse, error)
 	CreateOvertimeRequest(ctx context.Context, req *CreateOvertimeRequestRequest) (*CreateOvertimeRequestResponse, error)
 	ApproveOvertime(ctx context.Context, req *ApproveOvertimeRequest) (*ApproveOvertimeResponse, error)
 }
 
-func RegisterOvertimeServiceServer(mux *http.ServeMux, srv OvertimeServiceServer) {
+func RegisterOvertimeServiceServer(srv OvertimeServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterOvertimeServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /hr/overtime/v1/requests", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListOvertimeRequestsRequest)
 		if r.URL.Query().Get("employee_id") != "" {
@@ -98,4 +118,5 @@ func RegisterOvertimeServiceServer(mux *http.ServeMux, srv OvertimeServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

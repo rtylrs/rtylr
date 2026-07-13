@@ -45,6 +45,62 @@ func (m *Notification) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Notification) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Notification) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *Notification) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *Notification) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Notification) GetRead() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Read
+}
+
+func (x *Notification) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Notification) GetLink() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Link
+}
+
 type ListNotificationsRequest struct {
 }
 
@@ -52,11 +108,27 @@ type ListNotificationsResponse struct {
 	Notifications []*Notification `json:"notifications,omitempty"`
 }
 
+func (x *ListNotificationsResponse) GetNotifications() []*Notification {
+	if x == nil {
+		var zero []*Notification
+		return zero
+	}
+	return x.Notifications
+}
+
 type MarkAllReadRequest struct {
 }
 
 type MarkAllReadResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *MarkAllReadResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type MarkNotificationReadRequest struct {
@@ -92,8 +164,24 @@ func (m *MarkNotificationReadRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MarkNotificationReadRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type MarkNotificationReadResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *MarkNotificationReadResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type MarkNotificationsReadRequest struct {
@@ -135,6 +223,22 @@ func (m *MarkNotificationsReadRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MarkNotificationsReadRequest) GetIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.Ids
+}
+
 type MarkNotificationsReadResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *MarkNotificationsReadResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

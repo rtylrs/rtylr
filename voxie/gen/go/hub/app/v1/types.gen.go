@@ -9,6 +9,46 @@ type App struct {
 	IsEnabled   bool   `json:"is_enabled,omitempty"`
 }
 
+func (x *App) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *App) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *App) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *App) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *App) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
 type Addon struct {
 	Id          string  `json:"id,omitempty"`
 	Name        string  `json:"name,omitempty"`
@@ -21,11 +61,99 @@ type Addon struct {
 	DisabledAt  *string `json:"disabled_at,omitempty"`
 }
 
+func (x *Addon) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Addon) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Addon) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Addon) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *Addon) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *Addon) GetIsFree() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsFree
+}
+
+func (x *Addon) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
+func (x *Addon) GetEnabledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EnabledAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.EnabledAt
+}
+
+func (x *Addon) GetDisabledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DisabledAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.DisabledAt
+}
+
 type ListAppsRequest struct {
 }
 
 type ListAppsResponse struct {
 	Apps []*App `json:"apps,omitempty"`
+}
+
+func (x *ListAppsResponse) GetApps() []*App {
+	if x == nil {
+		var zero []*App
+		return zero
+	}
+	return x.Apps
 }
 
 type ListAddonsRequest struct {
@@ -35,26 +163,82 @@ type ListAddonsResponse struct {
 	Addons []*Addon `json:"addons,omitempty"`
 }
 
+func (x *ListAddonsResponse) GetAddons() []*Addon {
+	if x == nil {
+		var zero []*Addon
+		return zero
+	}
+	return x.Addons
+}
+
 type AddonStatusRequest struct {
 	AddonId string `json:"addon_id,omitempty"`
+}
+
+func (x *AddonStatusRequest) GetAddonId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AddonId
 }
 
 type AddonStatusResponse struct {
 	IsEnabled bool `json:"is_enabled,omitempty"`
 }
 
+func (x *AddonStatusResponse) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
 type EnableAddonRequest struct {
 	AddonId string `json:"addon_id,omitempty"`
+}
+
+func (x *EnableAddonRequest) GetAddonId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AddonId
 }
 
 type EnableAddonResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *EnableAddonResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DisableAddonRequest struct {
 	AddonId string `json:"addon_id,omitempty"`
 }
 
+func (x *DisableAddonRequest) GetAddonId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AddonId
+}
+
 type DisableAddonResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DisableAddonResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

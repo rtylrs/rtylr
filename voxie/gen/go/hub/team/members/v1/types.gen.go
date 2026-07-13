@@ -46,6 +46,62 @@ func (m *StaffUserPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *StaffUserPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *StaffUserPayload) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *StaffUserPayload) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *StaffUserPayload) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *StaffUserPayload) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *StaffUserPayload) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *StaffUserPayload) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type StaffUserWithGroups struct {
 	Id        int64                              `json:"id,omitempty"`
 	Email     string                             `json:"email,omitempty"`
@@ -86,11 +142,83 @@ func (m *StaffUserWithGroups) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *StaffUserWithGroups) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *StaffUserWithGroups) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *StaffUserWithGroups) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *StaffUserWithGroups) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *StaffUserWithGroups) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *StaffUserWithGroups) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *StaffUserWithGroups) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *StaffUserWithGroups) GetGroups() []*hub_team_groups_v1.GroupSummary {
+	if x == nil {
+		var zero []*hub_team_groups_v1.GroupSummary
+		return zero
+	}
+	return x.Groups
+}
+
 type ListTeamRequest struct {
 }
 
 type ListTeamResponse struct {
 	Users []*StaffUserPayload `json:"users,omitempty"`
+}
+
+func (x *ListTeamResponse) GetUsers() []*StaffUserPayload {
+	if x == nil {
+		var zero []*StaffUserPayload
+		return zero
+	}
+	return x.Users
 }
 
 type GetMemberRequest struct {
@@ -126,8 +254,24 @@ func (m *GetMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type GetMemberResponse struct {
 	User *StaffUserWithGroups `json:"user,omitempty"`
+}
+
+func (x *GetMemberResponse) GetUser() *StaffUserWithGroups {
+	if x == nil {
+		var zero *StaffUserWithGroups
+		return zero
+	}
+	return x.User
 }
 
 type RemoveMemberRequest struct {
@@ -163,6 +307,22 @@ func (m *RemoveMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RemoveMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type RemoveMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

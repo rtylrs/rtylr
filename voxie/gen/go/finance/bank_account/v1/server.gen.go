@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,13 +23,32 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type BankAccountServiceServer interface {
 	ListBankAccounts(ctx context.Context, req *ListBankAccountsRequest) (*ListBankAccountsResponse, error)
 	CreateBankAccount(ctx context.Context, req *CreateBankAccountRequest) (*CreateBankAccountResponse, error)
 	GetBankAccount(ctx context.Context, req *GetBankAccountRequest) (*GetBankAccountResponse, error)
 }
 
-func RegisterBankAccountServiceServer(mux *http.ServeMux, srv BankAccountServiceServer) {
+func RegisterBankAccountServiceServer(srv BankAccountServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterBankAccountServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /finance/bank-account/v1/bank-accounts", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListBankAccountsRequest)
 		if r.URL.Query().Get("page") != "" {
@@ -96,4 +116,5 @@ func RegisterBankAccountServiceServer(mux *http.ServeMux, srv BankAccountService
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

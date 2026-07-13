@@ -68,10 +68,110 @@ func (m *Segment) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Segment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Segment) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Segment) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Segment) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Segment) GetFilters() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filters
+}
+
+func (x *Segment) GetCustomerCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerCount
+}
+
+func (x *Segment) GetLastCalculatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.LastCalculatedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.LastCalculatedAt
+}
+
+func (x *Segment) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Segment) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateSegmentRequest struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Filters     string `json:"filters,omitempty"`
+}
+
+func (x *CreateSegmentRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateSegmentRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateSegmentRequest) GetFilters() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filters
 }
 
 type CreateSegmentResponse struct {
@@ -108,6 +208,22 @@ func (m *CreateSegmentResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateSegmentResponse) GetSegmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SegmentId
+}
+
+func (x *CreateSegmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteSegmentRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -141,8 +257,24 @@ func (m *DeleteSegmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteSegmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteSegmentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteSegmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetSegmentCustomersRequest struct {
@@ -198,6 +330,30 @@ func (m *GetSegmentCustomersRequest) UnmarshalJSON(data []byte) error {
 		m.PageSize = v
 	}
 	return nil
+}
+
+func (x *GetSegmentCustomersRequest) GetSegmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SegmentId
+}
+
+func (x *GetSegmentCustomersRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *GetSegmentCustomersRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type GetSegmentCustomersResponse struct {
@@ -256,6 +412,38 @@ func (m *GetSegmentCustomersResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetSegmentCustomersResponse) GetCustomers() []*crm_customer_v1.Customer {
+	if x == nil {
+		var zero []*crm_customer_v1.Customer
+		return zero
+	}
+	return x.Customers
+}
+
+func (x *GetSegmentCustomersResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *GetSegmentCustomersResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *GetSegmentCustomersResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
 type GetSegmentDetailRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -289,9 +477,33 @@ func (m *GetSegmentDetailRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetSegmentDetailRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetSegmentDetailResponse struct {
 	Segment   *Segment                    `json:"segment,omitempty"`
 	Customers []*crm_customer_v1.Customer `json:"customers,omitempty"`
+}
+
+func (x *GetSegmentDetailResponse) GetSegment() *Segment {
+	if x == nil {
+		var zero *Segment
+		return zero
+	}
+	return x.Segment
+}
+
+func (x *GetSegmentDetailResponse) GetCustomers() []*crm_customer_v1.Customer {
+	if x == nil {
+		var zero []*crm_customer_v1.Customer
+		return zero
+	}
+	return x.Customers
 }
 
 type ListSegmentsRequest struct {
@@ -301,10 +513,42 @@ type ListSegmentsResponse struct {
 	Segments []*Segment `json:"segments,omitempty"`
 }
 
+func (x *ListSegmentsResponse) GetSegments() []*Segment {
+	if x == nil {
+		var zero []*Segment
+		return zero
+	}
+	return x.Segments
+}
+
 type UpdateSegmentBody struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Filters     string `json:"filters,omitempty"`
+}
+
+func (x *UpdateSegmentBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateSegmentBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateSegmentBody) GetFilters() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filters
 }
 
 type UpdateSegmentRequest struct {
@@ -341,6 +585,30 @@ func (m *UpdateSegmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateSegmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateSegmentRequest) GetBody() *UpdateSegmentBody {
+	if x == nil {
+		var zero *UpdateSegmentBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateSegmentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateSegmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

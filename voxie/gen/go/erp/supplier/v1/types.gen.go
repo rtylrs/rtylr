@@ -62,6 +62,118 @@ func (m *Supplier) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Supplier) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Supplier) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Supplier) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Supplier) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *Supplier) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *Supplier) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *Supplier) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *Supplier) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *Supplier) GetTaxId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaxId
+}
+
+func (x *Supplier) GetPaymentTerms() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentTerms
+}
+
+func (x *Supplier) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *Supplier) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Supplier) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Supplier) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateSupplierRequest struct {
 	Name         string `json:"name,omitempty"`
 	Email        string `json:"email,omitempty"`
@@ -73,6 +185,86 @@ type CreateSupplierRequest struct {
 	PaymentTerms string `json:"payment_terms,omitempty"`
 	Notes        string `json:"notes,omitempty"`
 	IsActive     bool   `json:"is_active,omitempty"`
+}
+
+func (x *CreateSupplierRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateSupplierRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *CreateSupplierRequest) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *CreateSupplierRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *CreateSupplierRequest) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *CreateSupplierRequest) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *CreateSupplierRequest) GetTaxId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaxId
+}
+
+func (x *CreateSupplierRequest) GetPaymentTerms() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentTerms
+}
+
+func (x *CreateSupplierRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreateSupplierRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type CreateSupplierResponse struct {
@@ -109,6 +301,22 @@ func (m *CreateSupplierResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateSupplierResponse) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *CreateSupplierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteSupplierRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -142,8 +350,24 @@ func (m *DeleteSupplierRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteSupplierRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteSupplierResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteSupplierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListSuppliersRequest struct {
@@ -151,11 +375,59 @@ type ListSuppliersRequest struct {
 	PageSize int32 `json:"page_size,omitempty"`
 }
 
+func (x *ListSuppliersRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListSuppliersRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
 type ListSuppliersResponse struct {
 	Suppliers []*Supplier `json:"suppliers,omitempty"`
 	HasMore   bool        `json:"has_more,omitempty"`
 	Page      int32       `json:"page,omitempty"`
 	PageSize  int32       `json:"page_size,omitempty"`
+}
+
+func (x *ListSuppliersResponse) GetSuppliers() []*Supplier {
+	if x == nil {
+		var zero []*Supplier
+		return zero
+	}
+	return x.Suppliers
+}
+
+func (x *ListSuppliersResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListSuppliersResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListSuppliersResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
 }
 
 type UpdateSupplierBody struct {
@@ -169,6 +441,86 @@ type UpdateSupplierBody struct {
 	PaymentTerms string `json:"payment_terms,omitempty"`
 	Notes        string `json:"notes,omitempty"`
 	IsActive     bool   `json:"is_active,omitempty"`
+}
+
+func (x *UpdateSupplierBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateSupplierBody) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *UpdateSupplierBody) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *UpdateSupplierBody) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *UpdateSupplierBody) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *UpdateSupplierBody) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *UpdateSupplierBody) GetTaxId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaxId
+}
+
+func (x *UpdateSupplierBody) GetPaymentTerms() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentTerms
+}
+
+func (x *UpdateSupplierBody) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *UpdateSupplierBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type UpdateSupplierRequest struct {
@@ -205,6 +557,30 @@ func (m *UpdateSupplierRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateSupplierRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateSupplierRequest) GetBody() *UpdateSupplierBody {
+	if x == nil {
+		var zero *UpdateSupplierBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateSupplierResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateSupplierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

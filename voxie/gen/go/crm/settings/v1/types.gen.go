@@ -57,11 +57,91 @@ func (m *Settings) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Settings) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Settings) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Settings) GetDefaultConsent() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.DefaultConsent
+}
+
+func (x *Settings) GetFromEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FromEmail
+}
+
+func (x *Settings) GetFromName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FromName
+}
+
+func (x *Settings) GetSmsSenderId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SmsSenderId
+}
+
+func (x *Settings) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
+func (x *Settings) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Settings) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type GetSettingsRequest struct {
 }
 
 type GetSettingsResponse struct {
 	Settings *Settings `json:"settings,omitempty"`
+}
+
+func (x *GetSettingsResponse) GetSettings() *Settings {
+	if x == nil {
+		var zero *Settings
+		return zero
+	}
+	return x.Settings
 }
 
 type UpdateSettingsRequest struct {
@@ -72,6 +152,54 @@ type UpdateSettingsRequest struct {
 	Timezone       string `json:"timezone,omitempty"`
 }
 
+func (x *UpdateSettingsRequest) GetDefaultConsent() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.DefaultConsent
+}
+
+func (x *UpdateSettingsRequest) GetFromEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FromEmail
+}
+
+func (x *UpdateSettingsRequest) GetFromName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FromName
+}
+
+func (x *UpdateSettingsRequest) GetSmsSenderId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SmsSenderId
+}
+
+func (x *UpdateSettingsRequest) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
 type UpdateSettingsResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateSettingsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

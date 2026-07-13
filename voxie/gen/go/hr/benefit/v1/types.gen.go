@@ -57,6 +57,78 @@ func (m *BenefitPlan) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BenefitPlan) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BenefitPlan) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *BenefitPlan) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *BenefitPlan) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *BenefitPlan) GetProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Provider
+}
+
+func (x *BenefitPlan) GetCostEmployer() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostEmployer
+}
+
+func (x *BenefitPlan) GetCostEmployee() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostEmployee
+}
+
+func (x *BenefitPlan) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *BenefitPlan) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateBenefitRequest struct {
 	Name         string  `json:"name,omitempty"`
 	Type         string  `json:"type,omitempty"`
@@ -64,6 +136,54 @@ type CreateBenefitRequest struct {
 	CostEmployer float64 `json:"cost_employer,omitempty"`
 	CostEmployee float64 `json:"cost_employee,omitempty"`
 	IsActive     bool    `json:"is_active,omitempty"`
+}
+
+func (x *CreateBenefitRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateBenefitRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateBenefitRequest) GetProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Provider
+}
+
+func (x *CreateBenefitRequest) GetCostEmployer() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostEmployer
+}
+
+func (x *CreateBenefitRequest) GetCostEmployee() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostEmployee
+}
+
+func (x *CreateBenefitRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type CreateBenefitResponse struct {
@@ -100,9 +220,33 @@ func (m *CreateBenefitResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateBenefitResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateBenefitResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListBenefitsRequest struct {
 }
 
 type ListBenefitsResponse struct {
 	Plans []*BenefitPlan `json:"plans,omitempty"`
+}
+
+func (x *ListBenefitsResponse) GetPlans() []*BenefitPlan {
+	if x == nil {
+		var zero []*BenefitPlan
+		return zero
+	}
+	return x.Plans
 }

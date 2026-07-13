@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type TableServiceServer interface {
 	ListTables(ctx context.Context, req *ListTablesRequest) (*ListTablesResponse, error)
 	CreateTable(ctx context.Context, req *CreateTableRequest) (*CreateTableResponse, error)
@@ -29,7 +41,15 @@ type TableServiceServer interface {
 	DeleteTable(ctx context.Context, req *DeleteTableRequest) (*DeleteTableResponse, error)
 }
 
-func RegisterTableServiceServer(mux *http.ServeMux, srv TableServiceServer) {
+func RegisterTableServiceServer(srv TableServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterTableServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /pos/table/v1/tables", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListTablesRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -108,4 +128,5 @@ func RegisterTableServiceServer(mux *http.ServeMux, srv TableServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

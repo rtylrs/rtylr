@@ -46,7 +46,79 @@ func (m *RecordPaymentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RecordPaymentRequest) GetInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InvoiceId
+}
+
+func (x *RecordPaymentRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *RecordPaymentRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *RecordPaymentRequest) GetPaymentDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentDate
+}
+
+func (x *RecordPaymentRequest) GetMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Method
+}
+
+func (x *RecordPaymentRequest) GetReference() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reference
+}
+
+func (x *RecordPaymentRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type RecordPaymentResponse struct {
 	Payment *finance_invoices_v1.RecordPaymentResponsePayload `json:"payment,omitempty"`
 	Message string                                            `json:"message,omitempty"`
+}
+
+func (x *RecordPaymentResponse) GetPayment() *finance_invoices_v1.RecordPaymentResponsePayload {
+	if x == nil {
+		var zero *finance_invoices_v1.RecordPaymentResponsePayload
+		return zero
+	}
+	return x.Payment
+}
+
+func (x *RecordPaymentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

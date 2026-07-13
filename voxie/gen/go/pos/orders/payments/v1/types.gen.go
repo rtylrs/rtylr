@@ -41,6 +41,38 @@ func (m *ProcessPaymentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ProcessPaymentRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *ProcessPaymentRequest) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *ProcessPaymentRequest) GetAmountPaid() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AmountPaid
+}
+
 type ProcessPaymentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *ProcessPaymentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

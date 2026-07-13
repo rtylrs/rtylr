@@ -7,3 +7,11 @@ type MarkOnboardedRequest struct {
 type MarkOnboardedResponse struct {
 	Message string `json:"message,omitempty"`
 }
+
+func (x *MarkOnboardedResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}

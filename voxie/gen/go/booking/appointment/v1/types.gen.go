@@ -103,6 +103,126 @@ func (m *Appointment) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Appointment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Appointment) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Appointment) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Appointment) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *Appointment) GetResourceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ResourceId
+}
+
+func (x *Appointment) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *Appointment) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *Appointment) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *Appointment) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *Appointment) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *Appointment) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *Appointment) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Appointment) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *Appointment) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Appointment) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateAppointmentRequest struct {
 	ServiceId     int64  `json:"service_id,omitempty"`
 	ResourceId    int64  `json:"resource_id,omitempty"`
@@ -165,6 +285,86 @@ func (m *CreateAppointmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateAppointmentRequest) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *CreateAppointmentRequest) GetResourceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ResourceId
+}
+
+func (x *CreateAppointmentRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *CreateAppointmentRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CreateAppointmentRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *CreateAppointmentRequest) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *CreateAppointmentRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *CreateAppointmentRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *CreateAppointmentRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *CreateAppointmentRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type CreateAppointmentResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -197,6 +397,22 @@ func (m *CreateAppointmentResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateAppointmentResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateAppointmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteAppointmentRequest struct {
@@ -232,8 +448,24 @@ func (m *DeleteAppointmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteAppointmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteAppointmentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteAppointmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListAppointmentsRequest struct {
@@ -243,11 +475,27 @@ type ListAppointmentsResponse struct {
 	Appointments []*Appointment `json:"appointments,omitempty"`
 }
 
+func (x *ListAppointmentsResponse) GetAppointments() []*Appointment {
+	if x == nil {
+		var zero []*Appointment
+		return zero
+	}
+	return x.Appointments
+}
+
 type ListTodayAppointmentsRequest struct {
 }
 
 type ListTodayAppointmentsResponse struct {
 	Appointments []*Appointment `json:"appointments,omitempty"`
+}
+
+func (x *ListTodayAppointmentsResponse) GetAppointments() []*Appointment {
+	if x == nil {
+		var zero []*Appointment
+		return zero
+	}
+	return x.Appointments
 }
 
 type UpdateAppointmentRequest struct {
@@ -323,6 +571,102 @@ func (m *UpdateAppointmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateAppointmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateAppointmentRequest) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *UpdateAppointmentRequest) GetResourceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ResourceId
+}
+
+func (x *UpdateAppointmentRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *UpdateAppointmentRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *UpdateAppointmentRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *UpdateAppointmentRequest) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *UpdateAppointmentRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *UpdateAppointmentRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *UpdateAppointmentRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateAppointmentRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type UpdateAppointmentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateAppointmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

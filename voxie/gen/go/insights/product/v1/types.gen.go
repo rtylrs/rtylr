@@ -52,6 +52,38 @@ func (m *BestSeller) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BestSeller) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *BestSeller) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *BestSeller) GetUnitsSold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitsSold
+}
+
+func (x *BestSeller) GetRevenueMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RevenueMinorUnits
+}
+
 type SlowMover struct {
 	ProductId     int64   `json:"product_id,omitempty"`
 	Name          string  `json:"name,omitempty"`
@@ -85,6 +117,30 @@ func (m *SlowMover) UnmarshalJSON(data []byte) error {
 		m.ProductId = v
 	}
 	return nil
+}
+
+func (x *SlowMover) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *SlowMover) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *SlowMover) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
 }
 
 type MarginBucket struct {
@@ -121,6 +177,38 @@ func (m *MarginBucket) UnmarshalJSON(data []byte) error {
 		m.ProductCount = v
 	}
 	return nil
+}
+
+func (x *MarginBucket) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *MarginBucket) GetLowerPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowerPct
+}
+
+func (x *MarginBucket) GetUpperPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UpperPct
+}
+
+func (x *MarginBucket) GetProductCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductCount
 }
 
 type CategorySales struct {
@@ -169,12 +257,60 @@ func (m *CategorySales) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CategorySales) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *CategorySales) GetCategoryName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CategoryName
+}
+
+func (x *CategorySales) GetUnitsSold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitsSold
+}
+
+func (x *CategorySales) GetRevenueMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RevenueMinorUnits
+}
+
 type GetBestSellersRequest struct {
 	Limit int32 `json:"limit,omitempty"`
 }
 
+func (x *GetBestSellersRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
 type GetBestSellersResponse struct {
 	Products []*BestSeller `json:"products,omitempty"`
+}
+
+func (x *GetBestSellersResponse) GetProducts() []*BestSeller {
+	if x == nil {
+		var zero []*BestSeller
+		return zero
+	}
+	return x.Products
 }
 
 type GetCategoryPerformanceRequest struct {
@@ -184,11 +320,27 @@ type GetCategoryPerformanceResponse struct {
 	Categories []*CategorySales `json:"categories,omitempty"`
 }
 
+func (x *GetCategoryPerformanceResponse) GetCategories() []*CategorySales {
+	if x == nil {
+		var zero []*CategorySales
+		return zero
+	}
+	return x.Categories
+}
+
 type GetProductMarginsRequest struct {
 }
 
 type GetProductMarginsResponse struct {
 	Buckets []*MarginBucket `json:"buckets,omitempty"`
+}
+
+func (x *GetProductMarginsResponse) GetBuckets() []*MarginBucket {
+	if x == nil {
+		var zero []*MarginBucket
+		return zero
+	}
+	return x.Buckets
 }
 
 type GetProductPerformanceRequest struct {
@@ -250,10 +402,58 @@ func (m *GetProductPerformanceResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetProductPerformanceResponse) GetTotalSkus() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalSkus
+}
+
+func (x *GetProductPerformanceResponse) GetActiveSkus() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ActiveSkus
+}
+
+func (x *GetProductPerformanceResponse) GetOutOfStock() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OutOfStock
+}
+
+func (x *GetProductPerformanceResponse) GetAvgMarginPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgMarginPct
+}
+
 type GetSlowMoversRequest struct {
 	Days int32 `json:"days,omitempty"`
 }
 
+func (x *GetSlowMoversRequest) GetDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Days
+}
+
 type GetSlowMoversResponse struct {
 	Products []*SlowMover `json:"products,omitempty"`
+}
+
+func (x *GetSlowMoversResponse) GetProducts() []*SlowMover {
+	if x == nil {
+		var zero []*SlowMover
+		return zero
+	}
+	return x.Products
 }

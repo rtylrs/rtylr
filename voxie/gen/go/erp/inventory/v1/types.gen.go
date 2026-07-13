@@ -49,6 +49,94 @@ func (m *InventoryReportItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *InventoryReportItem) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *InventoryReportItem) GetProductName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ProductName
+}
+
+func (x *InventoryReportItem) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *InventoryReportItem) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *InventoryReportItem) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *InventoryReportItem) GetLowStockThreshold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowStockThreshold
+}
+
+func (x *InventoryReportItem) GetReorderQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderQuantity
+}
+
+func (x *InventoryReportItem) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *InventoryReportItem) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *InventoryReportItem) GetStockValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockValue
+}
+
+func (x *InventoryReportItem) GetIsLowStock() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsLowStock
+}
+
 type ValuationItem struct {
 	CategoryName  string  `json:"category_name,omitempty"`
 	WarehouseName string  `json:"warehouse_name,omitempty"`
@@ -84,6 +172,46 @@ func (m *ValuationItem) UnmarshalJSON(data []byte) error {
 		m.TotalItems = v
 	}
 	return nil
+}
+
+func (x *ValuationItem) GetCategoryName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CategoryName
+}
+
+func (x *ValuationItem) GetWarehouseName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WarehouseName
+}
+
+func (x *ValuationItem) GetTotalItems() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalItems
+}
+
+func (x *ValuationItem) GetTotalValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalValue
+}
+
+func (x *ValuationItem) GetTotalCost() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalCost
 }
 
 type AdjustInventoryRequest struct {
@@ -122,8 +250,48 @@ func (m *AdjustInventoryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AdjustInventoryRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *AdjustInventoryRequest) GetChange() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Change
+}
+
+func (x *AdjustInventoryRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *AdjustInventoryRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type AdjustInventoryResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *AdjustInventoryResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetInventoryReportRequest struct {
@@ -134,6 +302,22 @@ type GetInventoryReportResponse struct {
 	TotalValue float64                `json:"total_value,omitempty"`
 }
 
+func (x *GetInventoryReportResponse) GetItems() []*InventoryReportItem {
+	if x == nil {
+		var zero []*InventoryReportItem
+		return zero
+	}
+	return x.Items
+}
+
+func (x *GetInventoryReportResponse) GetTotalValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalValue
+}
+
 type GetLowStockRequest struct {
 }
 
@@ -142,10 +326,42 @@ type GetLowStockResponse struct {
 	Count int64                  `json:"count,omitempty"`
 }
 
+func (x *GetLowStockResponse) GetItems() []*InventoryReportItem {
+	if x == nil {
+		var zero []*InventoryReportItem
+		return zero
+	}
+	return x.Items
+}
+
+func (x *GetLowStockResponse) GetCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Count
+}
+
 type GetValuationRequest struct {
 }
 
 type GetValuationResponse struct {
 	Items      []*ValuationItem `json:"items,omitempty"`
 	TotalValue float64          `json:"total_value,omitempty"`
+}
+
+func (x *GetValuationResponse) GetItems() []*ValuationItem {
+	if x == nil {
+		var zero []*ValuationItem
+		return zero
+	}
+	return x.Items
+}
+
+func (x *GetValuationResponse) GetTotalValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalValue
 }

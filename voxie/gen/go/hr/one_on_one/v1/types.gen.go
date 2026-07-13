@@ -77,11 +77,91 @@ func (m *OneOnOne) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *OneOnOne) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *OneOnOne) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *OneOnOne) GetManagerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerId
+}
+
+func (x *OneOnOne) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *OneOnOne) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScheduledAt
+}
+
+func (x *OneOnOne) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *OneOnOne) GetActionItems() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActionItems
+}
+
+func (x *OneOnOne) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *OneOnOne) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListOneOnOnesRequest struct {
 }
 
 type ListOneOnOnesResponse struct {
 	OneOnOnes []*OneOnOne `json:"one_on_ones,omitempty"`
+}
+
+func (x *ListOneOnOnesResponse) GetOneOnOnes() []*OneOnOne {
+	if x == nil {
+		var zero []*OneOnOne
+		return zero
+	}
+	return x.OneOnOnes
 }
 
 type CreateOneOnOneRequest struct {
@@ -132,6 +212,54 @@ func (m *CreateOneOnOneRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateOneOnOneRequest) GetManagerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerId
+}
+
+func (x *CreateOneOnOneRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *CreateOneOnOneRequest) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScheduledAt
+}
+
+func (x *CreateOneOnOneRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreateOneOnOneRequest) GetActionItems() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActionItems
+}
+
+func (x *CreateOneOnOneRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type CreateOneOnOneResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -164,4 +292,20 @@ func (m *CreateOneOnOneResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateOneOnOneResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateOneOnOneResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

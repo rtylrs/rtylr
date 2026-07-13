@@ -47,7 +47,91 @@ func (m *User) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type AdminBusiness struct {
+func (x *User) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *User) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *User) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *User) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.BusinessId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BusinessId
+}
+
+func (x *User) GetIsConsoleAdmin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsConsoleAdmin
+}
+
+func (x *User) GetIsBanned() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsBanned
+}
+
+func (x *User) GetBanReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.BanReason == nil {
+		var zero string
+		return zero
+	}
+	return *x.BanReason
+}
+
+func (x *User) GetBannedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.BannedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.BannedAt
+}
+
+func (x *User) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+type Business struct {
 	Id        int64  `json:"id,omitempty"`
 	OwnerId   int64  `json:"owner_id,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -55,8 +139,8 @@ type AdminBusiness struct {
 	CreatedAt string `json:"created_at,omitempty"`
 }
 
-func (m *AdminBusiness) MarshalJSON() ([]byte, error) {
-	type alias AdminBusiness
+func (m *Business) MarshalJSON() ([]byte, error) {
+	type alias Business
 	aux := struct {
 		*alias
 		Id      string `json:"id,omitempty"`
@@ -67,8 +151,8 @@ func (m *AdminBusiness) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *AdminBusiness) UnmarshalJSON(data []byte) error {
-	type alias AdminBusiness
+func (m *Business) UnmarshalJSON(data []byte) error {
+	type alias Business
 	aux := struct {
 		*alias
 		Id      string `json:"id,omitempty"`
@@ -92,6 +176,46 @@ func (m *AdminBusiness) UnmarshalJSON(data []byte) error {
 		m.OwnerId = v
 	}
 	return nil
+}
+
+func (x *Business) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Business) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Business) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Business) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *Business) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
 }
 
 type Subscription struct {
@@ -168,6 +292,214 @@ func (m *Subscription) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Subscription) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Subscription) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Subscription) GetOwnerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OwnerName
+}
+
+func (x *Subscription) GetOwnerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OwnerEmail
+}
+
+func (x *Subscription) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.BusinessId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.BusinessId
+}
+
+func (x *Subscription) GetBusinessName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessName
+}
+
+func (x *Subscription) GetPlanId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PlanId
+}
+
+func (x *Subscription) GetPlanName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanName
+}
+
+func (x *Subscription) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Subscription) GetSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SeatCount
+}
+
+func (x *Subscription) GetActiveSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ActiveSeatCount
+}
+
+func (x *Subscription) GetIncludedSeatLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatLimit
+}
+
+func (x *Subscription) GetIncludedSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatCount
+}
+
+func (x *Subscription) GetBillableSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BillableSeatCount
+}
+
+func (x *Subscription) GetTrialEndsAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TrialEndsAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.TrialEndsAt
+}
+
+func (x *Subscription) GetNextBillingDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.NextBillingDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.NextBillingDate
+}
+
+func (x *Subscription) GetCurrentPeriodEndsAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.CurrentPeriodEndsAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.CurrentPeriodEndsAt
+}
+
+func (x *Subscription) GetPaddleSubscriptionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PaddleSubscriptionId == nil {
+		var zero string
+		return zero
+	}
+	return *x.PaddleSubscriptionId
+}
+
+func (x *Subscription) GetPaddleCustomerId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PaddleCustomerId == nil {
+		var zero string
+		return zero
+	}
+	return *x.PaddleCustomerId
+}
+
+func (x *Subscription) GetDaysRemaining() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DaysRemaining == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DaysRemaining
+}
+
+func (x *Subscription) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Subscription) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.UpdatedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.UpdatedAt
+}
+
 type Plan struct {
 	Id                      int64  `json:"id,omitempty"`
 	Name                    string `json:"name,omitempty"`
@@ -204,6 +536,54 @@ func (m *Plan) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *Plan) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Plan) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Plan) GetPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PricePerSeatCents
+}
+
+func (x *Plan) GetAnnualPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.AnnualPricePerSeatCents
+}
+
+func (x *Plan) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Plan) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
 }
 
 type Stats struct {
@@ -305,11 +685,75 @@ func (m *Stats) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Stats) GetTotalUsers() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalUsers
+}
+
+func (x *Stats) GetBannedUsers() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BannedUsers
+}
+
+func (x *Stats) GetActiveSubscriptions() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ActiveSubscriptions
+}
+
+func (x *Stats) GetTotalBusinesses() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalBusinesses
+}
+
+func (x *Stats) GetTotalGrants() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TotalGrants
+}
+
+func (x *Stats) GetManualAddonGrants() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManualAddonGrants
+}
+
+func (x *Stats) GetConsoleAdmins() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ConsoleAdmins
+}
+
 type GetStatsRequest struct {
 }
 
 type GetStatsResponse struct {
 	Stats *Stats `json:"stats,omitempty"`
+}
+
+func (x *GetStatsResponse) GetStats() *Stats {
+	if x == nil {
+		var zero *Stats
+		return zero
+	}
+	return x.Stats
 }
 
 type ListUsersRequest struct {
@@ -318,6 +762,50 @@ type ListUsersRequest struct {
 	Id     *int64 `json:"id,omitempty"`
 	Email  string `json:"email,omitempty"`
 	Name   string `json:"name,omitempty"`
+}
+
+func (x *ListUsersRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListUsersRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListUsersRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
+}
+
+func (x *ListUsersRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *ListUsersRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
 }
 
 type ListUsersResponse struct {
@@ -354,6 +842,22 @@ func (m *ListUsersResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListUsersResponse) GetUsers() []*User {
+	if x == nil {
+		var zero []*User
+		return zero
+	}
+	return x.Users
+}
+
+func (x *ListUsersResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
 type GetUserRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -387,8 +891,24 @@ func (m *GetUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetUserResponse struct {
 	User *User `json:"user,omitempty"`
+}
+
+func (x *GetUserResponse) GetUser() *User {
+	if x == nil {
+		var zero *User
+		return zero
+	}
+	return x.User
 }
 
 type CreateUserRequest struct {
@@ -398,9 +918,57 @@ type CreateUserRequest struct {
 	IsConsoleAdmin bool   `json:"is_console_admin,omitempty"`
 }
 
+func (x *CreateUserRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *CreateUserRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
+func (x *CreateUserRequest) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *CreateUserRequest) GetIsConsoleAdmin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsConsoleAdmin
+}
+
 type CreateUserResponse struct {
 	User    *User  `json:"user,omitempty"`
 	Message string `json:"message,omitempty"`
+}
+
+func (x *CreateUserResponse) GetUser() *User {
+	if x == nil {
+		var zero *User
+		return zero
+	}
+	return x.User
+}
+
+func (x *CreateUserResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateUserRequest struct {
@@ -438,8 +1006,48 @@ func (m *UpdateUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateUserRequest) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.FullName == nil {
+		var zero string
+		return zero
+	}
+	return *x.FullName
+}
+
+func (x *UpdateUserRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Email == nil {
+		var zero string
+		return zero
+	}
+	return *x.Email
+}
+
 type UpdateUserResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateUserResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteUserRequest struct {
@@ -475,8 +1083,24 @@ func (m *DeleteUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteUserResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteUserResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type BanUserRequest struct {
@@ -513,8 +1137,32 @@ func (m *BanUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BanUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BanUserRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type BanUserResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *BanUserResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UnbanUserRequest struct {
@@ -550,8 +1198,24 @@ func (m *UnbanUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UnbanUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type UnbanUserResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UnbanUserResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type SetConsoleAdminRequest struct {
@@ -588,8 +1252,32 @@ func (m *SetConsoleAdminRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SetConsoleAdminRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *SetConsoleAdminRequest) GetIsConsoleAdmin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsConsoleAdmin
+}
+
 type SetConsoleAdminResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *SetConsoleAdminResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetUserSubscriptionRequest struct {
@@ -625,8 +1313,24 @@ func (m *GetUserSubscriptionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetUserSubscriptionRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type GetUserSubscriptionResponse struct {
 	Subscription *Subscription `json:"subscription,omitempty"`
+}
+
+func (x *GetUserSubscriptionResponse) GetSubscription() *Subscription {
+	if x == nil {
+		var zero *Subscription
+		return zero
+	}
+	return x.Subscription
 }
 
 type ListBusinessesRequest struct {
@@ -637,9 +1341,57 @@ type ListBusinessesRequest struct {
 	OwnerId *int64 `json:"owner_id,omitempty"`
 }
 
+func (x *ListBusinessesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListBusinessesRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListBusinessesRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
+}
+
+func (x *ListBusinessesRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ListBusinessesRequest) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.OwnerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.OwnerId
+}
+
 type ListBusinessesResponse struct {
-	Businesses []*AdminBusiness `json:"businesses,omitempty"`
-	Total      int64            `json:"total,omitempty"`
+	Businesses []*Business `json:"businesses,omitempty"`
+	Total      int64       `json:"total,omitempty"`
 }
 
 func (m *ListBusinessesResponse) MarshalJSON() ([]byte, error) {
@@ -671,13 +1423,29 @@ func (m *ListBusinessesResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type AdminUpdateBusinessRequest struct {
+func (x *ListBusinessesResponse) GetBusinesses() []*Business {
+	if x == nil {
+		var zero []*Business
+		return zero
+	}
+	return x.Businesses
+}
+
+func (x *ListBusinessesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+type UpdateBusinessRequest struct {
 	Id   int64  `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 }
 
-func (m *AdminUpdateBusinessRequest) MarshalJSON() ([]byte, error) {
-	type alias AdminUpdateBusinessRequest
+func (m *UpdateBusinessRequest) MarshalJSON() ([]byte, error) {
+	type alias UpdateBusinessRequest
 	aux := struct {
 		*alias
 		Id string `json:"id,omitempty"`
@@ -686,8 +1454,8 @@ func (m *AdminUpdateBusinessRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *AdminUpdateBusinessRequest) UnmarshalJSON(data []byte) error {
-	type alias AdminUpdateBusinessRequest
+func (m *UpdateBusinessRequest) UnmarshalJSON(data []byte) error {
+	type alias UpdateBusinessRequest
 	aux := struct {
 		*alias
 		Id string `json:"id,omitempty"`
@@ -705,8 +1473,32 @@ func (m *AdminUpdateBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type AdminUpdateBusinessResponse struct {
+func (x *UpdateBusinessRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateBusinessRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+type UpdateBusinessResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateBusinessResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteBusinessRequest struct {
@@ -742,8 +1534,24 @@ func (m *DeleteBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteBusinessRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteBusinessResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteBusinessResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CreateBusinessOwnerRequest struct {
@@ -761,17 +1569,177 @@ type CreateBusinessOwnerRequest struct {
 	GrantDays          *int32 `json:"grant_days,omitempty"`
 }
 
+func (x *CreateBusinessOwnerRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *CreateBusinessOwnerRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
+func (x *CreateBusinessOwnerRequest) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FullName
+}
+
+func (x *CreateBusinessOwnerRequest) GetBusinessName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessName
+}
+
+func (x *CreateBusinessOwnerRequest) GetIndustry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Industry
+}
+
+func (x *CreateBusinessOwnerRequest) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *CreateBusinessOwnerRequest) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
+func (x *CreateBusinessOwnerRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateBusinessOwnerRequest) GetGrantPlan() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.GrantPlan
+}
+
+func (x *CreateBusinessOwnerRequest) GetPlanId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.PlanId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.PlanId
+}
+
+func (x *CreateBusinessOwnerRequest) GetSubscriptionStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SubscriptionStatus
+}
+
+func (x *CreateBusinessOwnerRequest) GetGrantDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.GrantDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.GrantDays
+}
+
 type CreateBusinessOwnerResponse struct {
-	Owner        *User          `json:"owner,omitempty"`
-	Business     *AdminBusiness `json:"business,omitempty"`
-	Subscription *Subscription  `json:"subscription,omitempty"`
-	Message      string         `json:"message,omitempty"`
+	Owner        *User         `json:"owner,omitempty"`
+	Business     *Business     `json:"business,omitempty"`
+	Subscription *Subscription `json:"subscription,omitempty"`
+	Message      string        `json:"message,omitempty"`
+}
+
+func (x *CreateBusinessOwnerResponse) GetOwner() *User {
+	if x == nil {
+		var zero *User
+		return zero
+	}
+	return x.Owner
+}
+
+func (x *CreateBusinessOwnerResponse) GetBusiness() *Business {
+	if x == nil {
+		var zero *Business
+		return zero
+	}
+	return x.Business
+}
+
+func (x *CreateBusinessOwnerResponse) GetSubscription() *Subscription {
+	if x == nil {
+		var zero *Subscription
+		return zero
+	}
+	return x.Subscription
+}
+
+func (x *CreateBusinessOwnerResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListSubscriptionsRequest struct {
 	Limit  int32  `json:"limit,omitempty"`
 	Offset int32  `json:"offset,omitempty"`
 	Status string `json:"status,omitempty"`
+}
+
+func (x *ListSubscriptionsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListSubscriptionsRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListSubscriptionsRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type ListSubscriptionsResponse struct {
@@ -806,6 +1774,22 @@ func (m *ListSubscriptionsResponse) UnmarshalJSON(data []byte) error {
 		m.Total = v
 	}
 	return nil
+}
+
+func (x *ListSubscriptionsResponse) GetSubscriptions() []*Subscription {
+	if x == nil {
+		var zero []*Subscription
+		return zero
+	}
+	return x.Subscriptions
+}
+
+func (x *ListSubscriptionsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }
 
 type UpsertSubscriptionRequest struct {
@@ -860,8 +1844,124 @@ func (m *UpsertSubscriptionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpsertSubscriptionRequest) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *UpsertSubscriptionRequest) GetPlanId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PlanId
+}
+
+func (x *UpsertSubscriptionRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpsertSubscriptionRequest) GetSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.SeatCount == nil {
+		var zero int32
+		return zero
+	}
+	return *x.SeatCount
+}
+
+func (x *UpsertSubscriptionRequest) GetTrialEndsAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TrialEndsAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.TrialEndsAt
+}
+
+func (x *UpsertSubscriptionRequest) GetNextBillingDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.NextBillingDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.NextBillingDate
+}
+
+func (x *UpsertSubscriptionRequest) GetCurrentPeriodEndsAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.CurrentPeriodEndsAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.CurrentPeriodEndsAt
+}
+
+func (x *UpsertSubscriptionRequest) GetTotalDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.TotalDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.TotalDays
+}
+
+func (x *UpsertSubscriptionRequest) GetPaddleSubscriptionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PaddleSubscriptionId == nil {
+		var zero string
+		return zero
+	}
+	return *x.PaddleSubscriptionId
+}
+
+func (x *UpsertSubscriptionRequest) GetPaddleCustomerId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PaddleCustomerId == nil {
+		var zero string
+		return zero
+	}
+	return *x.PaddleCustomerId
+}
+
 type UpsertSubscriptionResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpsertSubscriptionResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteSubscriptionRequest struct {
@@ -897,8 +1997,24 @@ func (m *DeleteSubscriptionRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteSubscriptionRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteSubscriptionResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteSubscriptionResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListPlansRequest struct {
@@ -906,6 +2022,14 @@ type ListPlansRequest struct {
 
 type ListPlansResponse struct {
 	Plans []*Plan `json:"plans,omitempty"`
+}
+
+func (x *ListPlansResponse) GetPlans() []*Plan {
+	if x == nil {
+		var zero []*Plan
+		return zero
+	}
+	return x.Plans
 }
 
 type UpdatePlanRequest struct {
@@ -945,6 +2069,70 @@ func (m *UpdatePlanRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdatePlanRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdatePlanRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
+}
+
+func (x *UpdatePlanRequest) GetPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.PricePerSeatCents == nil {
+		var zero int32
+		return zero
+	}
+	return *x.PricePerSeatCents
+}
+
+func (x *UpdatePlanRequest) GetAnnualPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.AnnualPricePerSeatCents == nil {
+		var zero int32
+		return zero
+	}
+	return *x.AnnualPricePerSeatCents
+}
+
+func (x *UpdatePlanRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
+}
+
 type UpdatePlanResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdatePlanResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

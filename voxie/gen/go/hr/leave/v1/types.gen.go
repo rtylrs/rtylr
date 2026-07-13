@@ -80,6 +80,110 @@ func (m *LeaveTypePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LeaveTypePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LeaveTypePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LeaveTypePayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *LeaveTypePayload) GetIsPaid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPaid
+}
+
+func (x *LeaveTypePayload) GetRequiresApproval() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.RequiresApproval
+}
+
+func (x *LeaveTypePayload) GetAccrualRule() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AccrualRule == nil {
+		var zero string
+		return zero
+	}
+	return *x.AccrualRule
+}
+
+func (x *LeaveTypePayload) GetMaxCarryoverDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MaxCarryoverDays
+}
+
+func (x *LeaveTypePayload) GetMinNoticeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MinNoticeDays
+}
+
+func (x *LeaveTypePayload) GetRequiresDocumentationAfterDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.RequiresDocumentationAfterDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.RequiresDocumentationAfterDays
+}
+
+func (x *LeaveTypePayload) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *LeaveTypePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *LeaveTypePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type LeaveRequestPayload struct {
 	Id                   int64   `json:"id,omitempty"`
 	OwnerId              int64   `json:"owner_id,omitempty"`
@@ -175,6 +279,118 @@ func (m *LeaveRequestPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LeaveRequestPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LeaveRequestPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LeaveRequestPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *LeaveRequestPayload) GetLeaveTypeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LeaveTypeId
+}
+
+func (x *LeaveRequestPayload) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *LeaveRequestPayload) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
+func (x *LeaveRequestPayload) GetTotalDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalDays
+}
+
+func (x *LeaveRequestPayload) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Notes == nil {
+		var zero string
+		return zero
+	}
+	return *x.Notes
+}
+
+func (x *LeaveRequestPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *LeaveRequestPayload) GetCurrentApprovalLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CurrentApprovalLevel
+}
+
+func (x *LeaveRequestPayload) GetRejectionReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RejectionReason == nil {
+		var zero string
+		return zero
+	}
+	return *x.RejectionReason
+}
+
+func (x *LeaveRequestPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *LeaveRequestPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type LeaveBalancePayload struct {
 	Id            int64   `json:"id,omitempty"`
 	OwnerId       int64   `json:"owner_id,omitempty"`
@@ -268,9 +484,121 @@ func (m *LeaveBalancePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LeaveBalancePayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LeaveBalancePayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LeaveBalancePayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *LeaveBalancePayload) GetLeaveTypeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LeaveTypeId
+}
+
+func (x *LeaveBalancePayload) GetYear() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Year
+}
+
+func (x *LeaveBalancePayload) GetEntitledDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.EntitledDays
+}
+
+func (x *LeaveBalancePayload) GetUsedDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UsedDays
+}
+
+func (x *LeaveBalancePayload) GetPendingDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PendingDays
+}
+
+func (x *LeaveBalancePayload) GetRemainingDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.RemainingDays
+}
+
+func (x *LeaveBalancePayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *LeaveBalancePayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListLeaveRequestsRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Status     *string `json:"status,omitempty"`
+}
+
+func (x *ListLeaveRequestsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListLeaveRequestsRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
 }
 
 type ListLeaveRequestsResponse struct {
@@ -278,6 +606,38 @@ type ListLeaveRequestsResponse struct {
 	Total    int64                  `json:"total,omitempty"`
 	Limit    int32                  `json:"limit,omitempty"`
 	Offset   int32                  `json:"offset,omitempty"`
+}
+
+func (x *ListLeaveRequestsResponse) GetRequests() []*LeaveRequestPayload {
+	if x == nil {
+		var zero []*LeaveRequestPayload
+		return zero
+	}
+	return x.Requests
+}
+
+func (x *ListLeaveRequestsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListLeaveRequestsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListLeaveRequestsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type CreateLeaveRequestRequest struct {
@@ -328,13 +688,93 @@ func (m *CreateLeaveRequestRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateLeaveRequestRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CreateLeaveRequestRequest) GetLeaveTypeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LeaveTypeId
+}
+
+func (x *CreateLeaveRequestRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *CreateLeaveRequestRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
+func (x *CreateLeaveRequestRequest) GetTotalDays() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalDays
+}
+
+func (x *CreateLeaveRequestRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Notes == nil {
+		var zero string
+		return zero
+	}
+	return *x.Notes
+}
+
 type CreateLeaveRequestResponse struct {
 	Request *LeaveRequestPayload `json:"request,omitempty"`
+}
+
+func (x *CreateLeaveRequestResponse) GetRequest() *LeaveRequestPayload {
+	if x == nil {
+		var zero *LeaveRequestPayload
+		return zero
+	}
+	return x.Request
 }
 
 type ApproveLeaveBody struct {
 	Approved        bool    `json:"approved,omitempty"`
 	RejectionReason *string `json:"rejection_reason,omitempty"`
+}
+
+func (x *ApproveLeaveBody) GetApproved() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Approved
+}
+
+func (x *ApproveLeaveBody) GetRejectionReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RejectionReason == nil {
+		var zero string
+		return zero
+	}
+	return *x.RejectionReason
 }
 
 type ApproveLeaveRequest struct {
@@ -371,8 +811,32 @@ func (m *ApproveLeaveRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApproveLeaveRequest) GetRequestId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RequestId
+}
+
+func (x *ApproveLeaveRequest) GetBody() *ApproveLeaveBody {
+	if x == nil {
+		var zero *ApproveLeaveBody
+		return zero
+	}
+	return x.Body
+}
+
 type ApproveLeaveResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *ApproveLeaveResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type ListLeaveTypesRequest struct {
@@ -385,6 +849,38 @@ type ListLeaveTypesResponse struct {
 	Offset     int32               `json:"offset,omitempty"`
 }
 
+func (x *ListLeaveTypesResponse) GetLeaveTypes() []*LeaveTypePayload {
+	if x == nil {
+		var zero []*LeaveTypePayload
+		return zero
+	}
+	return x.LeaveTypes
+}
+
+func (x *ListLeaveTypesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListLeaveTypesResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListLeaveTypesResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
 type CreateLeaveTypeRequest struct {
 	Name                           string  `json:"name,omitempty"`
 	IsPaid                         bool    `json:"is_paid,omitempty"`
@@ -395,8 +891,80 @@ type CreateLeaveTypeRequest struct {
 	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days,omitempty"`
 }
 
+func (x *CreateLeaveTypeRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateLeaveTypeRequest) GetIsPaid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPaid
+}
+
+func (x *CreateLeaveTypeRequest) GetRequiresApproval() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.RequiresApproval
+}
+
+func (x *CreateLeaveTypeRequest) GetAccrualRule() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AccrualRule == nil {
+		var zero string
+		return zero
+	}
+	return *x.AccrualRule
+}
+
+func (x *CreateLeaveTypeRequest) GetMaxCarryoverDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MaxCarryoverDays
+}
+
+func (x *CreateLeaveTypeRequest) GetMinNoticeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MinNoticeDays
+}
+
+func (x *CreateLeaveTypeRequest) GetRequiresDocumentationAfterDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.RequiresDocumentationAfterDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.RequiresDocumentationAfterDays
+}
+
 type CreateLeaveTypeResponse struct {
 	LeaveType *LeaveTypePayload `json:"leave_type,omitempty"`
+}
+
+func (x *CreateLeaveTypeResponse) GetLeaveType() *LeaveTypePayload {
+	if x == nil {
+		var zero *LeaveTypePayload
+		return zero
+	}
+	return x.LeaveType
 }
 
 type UpdateLeaveTypeBody struct {
@@ -408,6 +976,102 @@ type UpdateLeaveTypeBody struct {
 	MinNoticeDays                  *int32  `json:"min_notice_days,omitempty"`
 	RequiresDocumentationAfterDays *int32  `json:"requires_documentation_after_days,omitempty"`
 	IsActive                       *bool   `json:"is_active,omitempty"`
+}
+
+func (x *UpdateLeaveTypeBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
+}
+
+func (x *UpdateLeaveTypeBody) GetIsPaid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsPaid == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsPaid
+}
+
+func (x *UpdateLeaveTypeBody) GetRequiresApproval() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.RequiresApproval == nil {
+		var zero bool
+		return zero
+	}
+	return *x.RequiresApproval
+}
+
+func (x *UpdateLeaveTypeBody) GetAccrualRule() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.AccrualRule == nil {
+		var zero string
+		return zero
+	}
+	return *x.AccrualRule
+}
+
+func (x *UpdateLeaveTypeBody) GetMaxCarryoverDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.MaxCarryoverDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MaxCarryoverDays
+}
+
+func (x *UpdateLeaveTypeBody) GetMinNoticeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.MinNoticeDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MinNoticeDays
+}
+
+func (x *UpdateLeaveTypeBody) GetRequiresDocumentationAfterDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.RequiresDocumentationAfterDays == nil {
+		var zero int32
+		return zero
+	}
+	return *x.RequiresDocumentationAfterDays
+}
+
+func (x *UpdateLeaveTypeBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
 }
 
 type UpdateLeaveTypeRequest struct {
@@ -444,8 +1108,32 @@ func (m *UpdateLeaveTypeRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLeaveTypeRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateLeaveTypeRequest) GetBody() *UpdateLeaveTypeBody {
+	if x == nil {
+		var zero *UpdateLeaveTypeBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateLeaveTypeResponse struct {
 	LeaveType *LeaveTypePayload `json:"leave_type,omitempty"`
+}
+
+func (x *UpdateLeaveTypeResponse) GetLeaveType() *LeaveTypePayload {
+	if x == nil {
+		var zero *LeaveTypePayload
+		return zero
+	}
+	return x.LeaveType
 }
 
 type ListLeaveBalancesRequest struct {
@@ -453,9 +1141,65 @@ type ListLeaveBalancesRequest struct {
 	Year       *int32 `json:"year,omitempty"`
 }
 
+func (x *ListLeaveBalancesRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListLeaveBalancesRequest) GetYear() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Year == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Year
+}
+
 type ListLeaveBalancesResponse struct {
 	Balances []*LeaveBalancePayload `json:"balances,omitempty"`
 	Total    int64                  `json:"total,omitempty"`
 	Limit    int32                  `json:"limit,omitempty"`
 	Offset   int32                  `json:"offset,omitempty"`
+}
+
+func (x *ListLeaveBalancesResponse) GetBalances() []*LeaveBalancePayload {
+	if x == nil {
+		var zero []*LeaveBalancePayload
+		return zero
+	}
+	return x.Balances
+}
+
+func (x *ListLeaveBalancesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListLeaveBalancesResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListLeaveBalancesResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }

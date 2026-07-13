@@ -76,6 +76,70 @@ func (m *Reminder) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Reminder) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Reminder) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Reminder) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Reminder) GetAppointmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AppointmentId
+}
+
+func (x *Reminder) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Reminder) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScheduledAt
+}
+
+func (x *Reminder) GetSentAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SentAt
+}
+
+func (x *Reminder) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateReminderRequest struct {
 	AppointmentId int64  `json:"appointment_id,omitempty"`
 	Type          string `json:"type,omitempty"`
@@ -109,6 +173,30 @@ func (m *CreateReminderRequest) UnmarshalJSON(data []byte) error {
 		m.AppointmentId = v
 	}
 	return nil
+}
+
+func (x *CreateReminderRequest) GetAppointmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AppointmentId
+}
+
+func (x *CreateReminderRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateReminderRequest) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScheduledAt
 }
 
 type CreateReminderResponse struct {
@@ -145,9 +233,33 @@ func (m *CreateReminderResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateReminderResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateReminderResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListRemindersRequest struct {
 }
 
 type ListRemindersResponse struct {
 	Reminders []*Reminder `json:"reminders,omitempty"`
+}
+
+func (x *ListRemindersResponse) GetReminders() []*Reminder {
+	if x == nil {
+		var zero []*Reminder
+		return zero
+	}
+	return x.Reminders
 }

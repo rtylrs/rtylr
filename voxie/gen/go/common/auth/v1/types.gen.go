@@ -14,6 +14,54 @@ type RegisterRequest struct {
 	PlanSlug     *string `json:"plan_slug,omitempty"`
 }
 
+func (x *RegisterRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *RegisterRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
+func (x *RegisterRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *RegisterRequest) GetBusinessName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.BusinessName == nil {
+		var zero string
+		return zero
+	}
+	return *x.BusinessName
+}
+
+func (x *RegisterRequest) GetPlanSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PlanSlug == nil {
+		var zero string
+		return zero
+	}
+	return *x.PlanSlug
+}
+
 type RegisterResponse struct {
 	Token   string `json:"token,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -51,9 +99,65 @@ func (m *RegisterResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RegisterResponse) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *RegisterResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+func (x *RegisterResponse) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *RegisterResponse) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *RegisterResponse) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
 type LoginRequest struct {
 	Email    string `json:"email,omitempty"`
 	Password string `json:"password,omitempty"`
+}
+
+func (x *LoginRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *LoginRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
 }
 
 type LoginResponse struct {
@@ -94,9 +198,77 @@ func (m *LoginResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LoginResponse) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *LoginResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+func (x *LoginResponse) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *LoginResponse) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *LoginResponse) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *LoginResponse) GetIsConsoleAdmin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsConsoleAdmin
+}
+
 type GoogleAuthRequest struct {
 	BusinessName *string `json:"business_name,omitempty"`
 	Code         string  `json:"code,omitempty"`
+}
+
+func (x *GoogleAuthRequest) GetBusinessName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.BusinessName == nil {
+		var zero string
+		return zero
+	}
+	return *x.BusinessName
+}
+
+func (x *GoogleAuthRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
 }
 
 type GoogleAuthResponse struct {
@@ -104,12 +276,44 @@ type GoogleAuthResponse struct {
 	IsNew bool   `json:"is_new,omitempty"`
 }
 
+func (x *GoogleAuthResponse) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *GoogleAuthResponse) GetIsNew() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsNew
+}
+
 type ResetPasswordRequest struct {
 	Email string `json:"email,omitempty"`
 }
 
+func (x *ResetPasswordRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
 type ResetPasswordResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *ResetPasswordResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ResetPasswordConfirmRequest struct {
@@ -117,12 +321,44 @@ type ResetPasswordConfirmRequest struct {
 	Password string `json:"password,omitempty"`
 }
 
+func (x *ResetPasswordConfirmRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *ResetPasswordConfirmRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
+}
+
 type ResetPasswordConfirmResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *ResetPasswordConfirmResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type VerifyEmailRequest struct {
 	Token string `json:"token,omitempty"`
+}
+
+func (x *VerifyEmailRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
 }
 
 type VerifyEmailResponse struct {
@@ -130,8 +366,32 @@ type VerifyEmailResponse struct {
 	Message  string `json:"message,omitempty"`
 }
 
+func (x *VerifyEmailResponse) GetVerified() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Verified
+}
+
+func (x *VerifyEmailResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ResendVerificationRequest struct {
 	Email string `json:"email,omitempty"`
+}
+
+func (x *ResendVerificationRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
 }
 
 type ResendVerificationResponse struct {
@@ -139,27 +399,99 @@ type ResendVerificationResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *ResendVerificationResponse) GetOk() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Ok
+}
+
+func (x *ResendVerificationResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type InviteAcceptRequest struct {
 	Token    string `json:"token,omitempty"`
 	Password string `json:"password,omitempty"`
+}
+
+func (x *InviteAcceptRequest) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
+func (x *InviteAcceptRequest) GetPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Password
 }
 
 type InviteAcceptResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *InviteAcceptResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type CheckEmailExistsRequest struct {
 	Email string `json:"email,omitempty"`
+}
+
+func (x *CheckEmailExistsRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
 }
 
 type CheckEmailExistsResponse struct {
 	Exists bool `json:"exists,omitempty"`
 }
 
+func (x *CheckEmailExistsResponse) GetExists() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Exists
+}
+
 type SocialAuthorizeRequest struct {
 	Provider string `json:"provider,omitempty"`
 }
 
+func (x *SocialAuthorizeRequest) GetProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Provider
+}
+
 type SocialAuthorizeResponse struct {
 	Url string `json:"url,omitempty"`
+}
+
+func (x *SocialAuthorizeResponse) GetUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Url
 }

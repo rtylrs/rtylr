@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type SubscriptionServiceServer interface {
 	GetMySubscription(ctx context.Context, req *GetMySubscriptionRequest) (*GetMySubscriptionResponse, error)
 	ListPlans(ctx context.Context, req *ListPlansRequest) (*ListPlansResponse, error)
@@ -31,7 +43,15 @@ type SubscriptionServiceServer interface {
 	CreateCheckout(ctx context.Context, req *CreateCheckoutRequest) (*CreateCheckoutResponse, error)
 }
 
-func RegisterSubscriptionServiceServer(mux *http.ServeMux, srv SubscriptionServiceServer) {
+func RegisterSubscriptionServiceServer(srv SubscriptionServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterSubscriptionServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /hub/subscription/v1/my", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetMySubscriptionRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -140,4 +160,5 @@ func RegisterSubscriptionServiceServer(mux *http.ServeMux, srv SubscriptionServi
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

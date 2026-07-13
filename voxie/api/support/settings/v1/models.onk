@@ -1,6 +1,6 @@
 package support.settings.v1
 
-message SupportSettings {
+message Settings {
   id: int64
   business_id: int64
   auto_assign: bool
@@ -11,19 +11,19 @@ message SupportSettings {
   updated_at: string
 }
 
-message GetSupportSettingsRequest {}
+message GetSettingsRequest {}
 
-message GetSupportSettingsResponse {
-  settings: SupportSettings
+message GetSettingsResponse {
+  settings: Settings
 }
 
-message UpdateSupportSettingsRequest {
+message UpdateSettingsRequest {
   auto_assign: bool
   sla_hours: int32 @required @gt(0) @lte(1000)
   business_hours: string
   notification_email: string
 }
 
-message UpdateSupportSettingsResponse {
+message UpdateSettingsResponse {
   message: string
 }

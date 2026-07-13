@@ -31,13 +31,21 @@ func (m *CreateBrandRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateBrandBody) Validate() error {
+	var violations []string
+	if m.Name == "" {
+		violations = append(violations, "name is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateBrandRequest) Validate() error {
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
-	}
-	if m.Name == "" {
-		violations = append(violations, "name is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
