@@ -1,0 +1,11 @@
+package booking.service.v1
+
+service BookingServiceService {
+  listServices(ListServicesRequest) -> ListServicesResponse @get("/services")
+
+  createService(CreateServiceRequest) -> CreateServiceResponse @post("/services")
+
+  updateService(UpdateServiceRequest) -> UpdateServiceResponse @put("/services/{id}")
+
+  deleteService(DeleteServiceRequest) -> DeleteServiceResponse @delete("/services/{id}")
+}

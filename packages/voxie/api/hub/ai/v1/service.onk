@@ -1,0 +1,9 @@
+package hub.ai.v1
+
+service AiService {
+  getAiUsage(GetAiUsageRequest) -> GetAiUsageResponse @get("/usage")
+
+  getAiQuotaSettings(GetAiQuotaSettingsRequest) -> GetAiQuotaSettingsResponse @get("/quota-settings")
+
+  updateAiQuotaSettings(UpdateAiQuotaSettingsRequest) -> UpdateAiQuotaSettingsResponse @put("/quota-settings")
+}

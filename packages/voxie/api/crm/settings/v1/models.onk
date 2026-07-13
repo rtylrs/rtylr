@@ -1,0 +1,32 @@
+package crm.settings.v1
+
+/// Settings holds CRM-wide messaging defaults for a business.
+message Settings {
+  id: int64
+  owner_id: int64
+  default_consent: bool
+  from_email: string
+  from_name: string
+  sms_sender_id: string
+  timezone: string
+  created_at: string
+  updated_at: string
+}
+
+message GetSettingsRequest {}
+
+message GetSettingsResponse {
+  settings: Settings
+}
+
+message UpdateSettingsRequest {
+  default_consent: bool
+  from_email: string
+  from_name: string
+  sms_sender_id: string
+  timezone: string
+}
+
+message UpdateSettingsResponse {
+  message: string
+}

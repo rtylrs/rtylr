@@ -1,0 +1,40 @@
+package flow.cycle.v1
+
+message Cycle {
+  id: int64
+  workspace_id: int64
+  name: string
+  start_date: string
+  end_date: string
+  status: string
+  scope: int32
+  completed: int32
+}
+
+message ListCyclesRequest {
+  workspace_id: string @query("workspace_id")
+}
+
+message ListCyclesResponse {
+  cycles: Cycle[]
+}
+
+message CreateCycleRequest {
+  name: string @required
+  workspace_id: string
+  start_date: string
+  end_date: string
+}
+
+message CreateCycleResponse {
+  cycle: Cycle
+}
+
+message UpdateCycleRequest {
+  id: int64
+  name: string
+  status: string
+  end_date: string
+}
+
+message UpdateCycleResponse {}

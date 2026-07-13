@@ -1,0 +1,11 @@
+package pos.manager.v1
+
+message VerifyPINRequest {
+  pin: string @required
+}
+
+message VerifyPINResponse {
+  valid: bool
+  staff_id: int64
+  message: string
+}

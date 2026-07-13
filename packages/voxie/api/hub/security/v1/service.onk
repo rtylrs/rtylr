@@ -1,0 +1,16 @@
+package hub.security.v1
+
+/// SecurityService defines hub security endpoints.
+service SecurityService {
+  /// Returns the current security settings.
+  getSecurityState(GetSecurityStateRequest) -> GetSecurityStateResponse @get("/state")
+
+  /// Returns recent login events.
+  loginHistory(LoginHistoryRequest) -> LoginHistoryResponse @get("/login-history")
+
+  /// Revokes all active sessions.
+  invalidateSessions(InvalidateSessionsRequest) -> InvalidateSessionsResponse @post("/invalidate-sessions")
+
+  /// Toggles two-factor authentication.
+  update2FA(Update2FARequest) -> Update2FAResponse @patch("/2fa")
+}

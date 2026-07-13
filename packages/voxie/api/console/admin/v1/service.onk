@@ -1,0 +1,41 @@
+package console.admin.v1
+
+service ConsoleAdminService {
+  getStats(GetStatsRequest) -> GetStatsResponse @get("/console/stats")
+
+  listUsers(ListUsersRequest) -> ListUsersResponse @get("/console/users")
+
+  getUser(GetUserRequest) -> GetUserResponse @get("/console/users/{id}")
+
+  createUser(CreateUserRequest) -> CreateUserResponse @post("/console/users")
+
+  updateUser(UpdateUserRequest) -> UpdateUserResponse @put("/console/users/{id}")
+
+  deleteUser(DeleteUserRequest) -> DeleteUserResponse @delete("/console/users/{id}")
+
+  banUser(BanUserRequest) -> BanUserResponse @post("/console/users/{id}/ban")
+
+  unbanUser(UnbanUserRequest) -> UnbanUserResponse @post("/console/users/{id}/unban")
+
+  setConsoleAdmin(SetConsoleAdminRequest) -> SetConsoleAdminResponse @post("/console/users/{id}/set-console-admin")
+
+  getUserSubscription(GetUserSubscriptionRequest) -> GetUserSubscriptionResponse @get("/console/users/{user_id}/subscription")
+
+  listBusinesses(ListBusinessesRequest) -> ListBusinessesResponse @get("/console/businesses")
+
+  updateBusiness(UpdateBusinessRequest) -> UpdateBusinessResponse @put("/console/businesses/{id}")
+
+  deleteBusiness(DeleteBusinessRequest) -> DeleteBusinessResponse @delete("/console/businesses/{id}")
+
+  createBusinessOwner(CreateBusinessOwnerRequest) -> CreateBusinessOwnerResponse @post("/console/internal-onboarding/business-owner")
+
+  listSubscriptions(ListSubscriptionsRequest) -> ListSubscriptionsResponse @get("/console/subscriptions")
+
+  upsertSubscription(UpsertSubscriptionRequest) -> UpsertSubscriptionResponse @post("/console/subscriptions/upsert")
+
+  deleteSubscription(DeleteSubscriptionRequest) -> DeleteSubscriptionResponse @delete("/console/subscriptions/{id}")
+
+  listPlans(ListPlansRequest) -> ListPlansResponse @get("/console/plans")
+
+  updatePlan(UpdatePlanRequest) -> UpdatePlanResponse @put("/console/plans/{id}")
+}

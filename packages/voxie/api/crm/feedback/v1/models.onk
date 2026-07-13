@@ -1,0 +1,46 @@
+package crm.feedback.v1
+
+/// Feedback is a single NPS score or written review from a customer.
+message Feedback {
+  id: int64
+  owner_id: int64
+  customer_id: int64
+  /// "nps" or "review" — score's scale and meaning depend on this.
+  type: string
+  /// NPS score (0-10) when type is "nps"; star rating (1-5) when type is "review".
+  score: int32
+  comment: string
+  source: string
+  created_at: string
+  /// Display name of the customer this feedback belongs to.
+  customer_name: string
+}
+
+message CreateFeedbackRequest {
+  customer_id: int64
+  type: string @required
+  score: int32
+  comment: string
+  source: string
+}
+
+message CreateFeedbackResponse {
+  feedback_id: int64
+  message: string
+}
+
+message ListFeedbackRequest {
+  type: string @query("type")
+  source: string @query("source")
+  min_score: int32? @query("min_score")
+  max_score: int32? @query("max_score")
+  page: int32 @query("page")
+  page_size: int32 @query("page_size")
+}
+
+message ListFeedbackResponse {
+  feedback: Feedback[]
+  total: int32
+  page: int32
+  page_size: int32
+}

@@ -1,0 +1,10 @@
+package hr.location.v1
+
+/// LocationService defines HR location endpoints.
+service LocationService {
+  /// CreateLocation creates a new location.
+  createLocation(CreateLocationRequest) -> CreateLocationResponse @post("/locations")
+
+  /// UpdateLocation updates an existing location.
+  updateLocation(UpdateLocationRequest) -> UpdateLocationResponse @put("/locations/{id}") @body("body")
+}

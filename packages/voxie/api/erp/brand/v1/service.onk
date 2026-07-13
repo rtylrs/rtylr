@@ -1,0 +1,11 @@
+package erp.brand.v1
+
+service BrandService {
+  listBrands(ListBrandsRequest) -> ListBrandsResponse @get("/brands")
+
+  createBrand(CreateBrandRequest) -> CreateBrandResponse @post("/brands")
+
+  updateBrand(UpdateBrandRequest) -> UpdateBrandResponse @put("/brands/{id}") @body("body")
+
+  deleteBrand(DeleteBrandRequest) -> DeleteBrandResponse @delete("/brands/{id}")
+}

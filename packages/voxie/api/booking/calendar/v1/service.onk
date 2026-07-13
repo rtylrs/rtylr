@@ -1,0 +1,5 @@
+package booking.calendar.v1
+
+service CalendarService {
+  getCalendar(GetCalendarRequest) -> GetCalendarResponse @get("/calendar")
+}

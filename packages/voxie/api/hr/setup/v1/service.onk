@@ -1,0 +1,7 @@
+package hr.setup.v1
+
+/// SetupService defines HR setup wizard endpoints.
+service SetupService {
+  /// Marks a setup step complete.
+  completeSetupStep(CompleteSetupStepRequest) -> CompleteSetupStepResponse @post("/steps")
+}

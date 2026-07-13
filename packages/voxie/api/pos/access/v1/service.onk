@@ -1,0 +1,19 @@
+package pos.access.v1
+
+/// AccessService defines POS location access endpoints.
+service AccessService {
+  /// Returns the locations assigned to the current staff member.
+  getMyLocations(GetMyLocationsRequest) -> GetMyLocationsResponse @get("/my-locations")
+
+  /// Returns the locations assigned to a given staff member.
+  getMemberLocations(GetMemberLocationsRequest) -> GetMemberLocationsResponse @get("/member-locations")
+
+  /// Returns the staff roster for a given location.
+  getLocationRoster(GetLocationRosterRequest) -> GetLocationRosterResponse @get("/location-roster")
+
+  /// Assigns a staff member to a location.
+  assignLocation(AssignLocationRequest) -> AssignLocationResponse @post("/assign")
+
+  /// Removes a staff member's location assignment.
+  removeLocation(RemoveLocationRequest) -> RemoveLocationResponse @post("/remove")
+}

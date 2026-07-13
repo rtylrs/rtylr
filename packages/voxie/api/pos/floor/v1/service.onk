@@ -1,0 +1,16 @@
+package pos.floor.v1
+
+/// FloorService defines POS floor plan endpoints.
+service FloorService {
+  /// Returns floors, optionally filtered by branch.
+  listFloors(ListFloorsRequest) -> ListFloorsResponse @get("/floors")
+
+  /// Creates a new floor.
+  createFloor(CreateFloorRequest) -> CreateFloorResponse @post("/floors")
+
+  /// Updates an existing floor.
+  updateFloor(UpdateFloorRequest) -> UpdateFloorResponse @put("/floors/{id}") @body("body")
+
+  /// Removes a floor by ID.
+  deleteFloor(DeleteFloorRequest) -> DeleteFloorResponse @delete("/floors/{id}")
+}

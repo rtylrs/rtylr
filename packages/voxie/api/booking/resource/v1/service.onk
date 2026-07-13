@@ -1,0 +1,11 @@
+package booking.resource.v1
+
+service ResourceService {
+  listResources(ListResourcesRequest) -> ListResourcesResponse @get("/resources")
+
+  createResource(CreateResourceRequest) -> CreateResourceResponse @post("/resources")
+
+  updateResource(UpdateResourceRequest) -> UpdateResourceResponse @put("/resources/{id}")
+
+  deleteResource(DeleteResourceRequest) -> DeleteResourceResponse @delete("/resources/{id}")
+}

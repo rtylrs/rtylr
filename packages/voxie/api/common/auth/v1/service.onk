@@ -1,0 +1,34 @@
+package common.auth.v1
+
+/// AuthService defines the public authentication endpoints.
+service AuthService {
+  /// Register creates a new owner account and optional first business.
+  register(RegisterRequest) -> RegisterResponse @post("/register")
+
+  /// Login authenticates an email and password pair.
+  login(LoginRequest) -> LoginResponse @post("/login")
+
+  /// GoogleAuth completes social authentication with an OAuth code.
+  googleAuth(GoogleAuthRequest) -> GoogleAuthResponse @post("/register/google")
+
+  /// ResetPassword starts a password reset flow.
+  resetPassword(ResetPasswordRequest) -> ResetPasswordResponse @post("/password-reset/request")
+
+  /// ResetPasswordConfirm completes a password reset flow.
+  resetPasswordConfirm(ResetPasswordConfirmRequest) -> ResetPasswordConfirmResponse @post("/password-reset/confirm")
+
+  /// VerifyEmail verifies an account email using a token.
+  verifyEmail(VerifyEmailRequest) -> VerifyEmailResponse @post("/verify-email")
+
+  /// ResendVerification sends a fresh email verification message.
+  resendVerification(ResendVerificationRequest) -> ResendVerificationResponse @post("/resend-verification")
+
+  /// InviteAccept lets an invited user activate their account.
+  inviteAccept(InviteAcceptRequest) -> InviteAcceptResponse @post("/invite/accept")
+
+  /// CheckEmailExists probes whether an email is already registered.
+  checkEmailExists(CheckEmailExistsRequest) -> CheckEmailExistsResponse @get("/email-exists")
+
+  /// SocialAuthorize returns the WorkOS-hosted consent URL for a provider.
+  socialAuthorize(SocialAuthorizeRequest) -> SocialAuthorizeResponse @get("/social/authorize")
+}

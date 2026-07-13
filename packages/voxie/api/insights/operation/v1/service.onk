@@ -1,0 +1,19 @@
+package insights.operation.v1
+
+/// OperationService defines insights operations analytics endpoints.
+service OperationService {
+  /// Returns headcount metrics for a period.
+  getHeadcountMetrics(GetHeadcountMetricsRequest) -> GetHeadcountMetricsResponse @get("/headcount")
+
+  /// Returns shift metrics for a period.
+  getShiftMetrics(GetShiftMetricsRequest) -> GetShiftMetricsResponse @get("/shifts")
+
+  /// Returns time-off metrics for a period.
+  getTimeOffMetrics(GetTimeOffMetricsRequest) -> GetTimeOffMetricsResponse @get("/time-off")
+
+  /// Returns utilization metrics for a period.
+  getUtilization(GetUtilizationRequest) -> GetUtilizationResponse @get("/utilization")
+
+  /// Returns headline HR operations KPI counters.
+  getOperationsSummary(GetOperationsSummaryRequest) -> GetOperationsSummaryResponse @get("/summary")
+}

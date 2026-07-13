@@ -1,0 +1,7 @@
+package support.customer.v1
+
+service CustomerService {
+  listCustomers(ListCustomersRequest) -> ListCustomersResponse @get("/customers")
+
+  getCustomer(GetCustomerRequest) -> GetCustomerResponse @get("/customers/{id}")
+}

@@ -1,0 +1,12 @@
+package erp.supplier.v1
+
+/// SupplierService defines ERP supplier endpoints.
+service SupplierService {
+  listSuppliers(ListSuppliersRequest) -> ListSuppliersResponse @get("/suppliers")
+
+  createSupplier(CreateSupplierRequest) -> CreateSupplierResponse @post("/suppliers")
+
+  updateSupplier(UpdateSupplierRequest) -> UpdateSupplierResponse @put("/suppliers/{id}")
+
+  deleteSupplier(DeleteSupplierRequest) -> DeleteSupplierResponse @delete("/suppliers/{id}")
+}

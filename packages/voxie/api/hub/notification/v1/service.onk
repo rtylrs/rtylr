@@ -1,0 +1,13 @@
+package hub.notification.v1
+
+/// NotificationService defines hub notification endpoints.
+service NotificationService {
+  /// Returns notifications for the current user.
+  listNotifications(ListNotificationsRequest) -> ListNotificationsResponse @get("/notifications")
+
+  /// Marks all notifications as read.
+  markAllRead(MarkAllReadRequest) -> MarkAllReadResponse @patch("/notifications/read-all")
+
+  /// Marks a single notification as read.
+  markNotificationRead(MarkNotificationReadRequest) -> MarkNotificationReadResponse @patch("/notifications/{id}/read")
+}

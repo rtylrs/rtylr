@@ -1,0 +1,7 @@
+package support.inbox.v1
+
+service InboxService {
+  listInbox(ListInboxRequest) -> ListInboxResponse @get("/inbox")
+
+  getUnreadCount(GetUnreadCountRequest) -> GetUnreadCountResponse @get("/inbox/unread-count")
+}

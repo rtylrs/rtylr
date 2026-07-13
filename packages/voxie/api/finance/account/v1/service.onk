@@ -1,0 +1,14 @@
+package finance.account.v1
+
+/// AccountService defines chart-of-accounts endpoints.
+service AccountService {
+  listAccounts(ListAccountsRequest) -> ListAccountsResponse @get("/accounts")
+
+  createAccount(CreateAccountRequest) -> CreateAccountResponse @post("/accounts")
+
+  updateAccount(UpdateAccountRequest) -> UpdateAccountResponse @put("/accounts/{id}") @body("body")
+
+  deleteAccount(DeleteAccountRequest) -> DeleteAccountResponse @delete("/accounts/{id}")
+
+  getChartOfAccounts(GetChartOfAccountsRequest) -> GetChartOfAccountsResponse @get("/chart-of-accounts")
+}

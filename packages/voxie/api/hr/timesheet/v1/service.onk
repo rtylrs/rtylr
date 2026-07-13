@@ -1,0 +1,5 @@
+package hr.timesheet.v1
+
+service TimesheetService {
+  listTimesheets(ListTimesheetsRequest) -> ListTimesheetsResponse @get("/timesheets")
+}

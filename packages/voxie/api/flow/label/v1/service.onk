@@ -1,0 +1,13 @@
+package flow.label.v1
+
+service LabelService {
+  listLabels(ListLabelsRequest) -> ListLabelsResponse @get("/labels")
+
+  createLabel(CreateLabelRequest) -> CreateLabelResponse @post("/labels")
+
+  updateLabel(UpdateLabelRequest) -> UpdateLabelResponse @put("/labels/{id}")
+
+  deleteLabel(DeleteLabelRequest) -> DeleteLabelResponse @delete("/labels/{id}")
+
+  setTaskLabels(SetTaskLabelsRequest) -> SetTaskLabelsResponse @put("/tasks/labels")
+}

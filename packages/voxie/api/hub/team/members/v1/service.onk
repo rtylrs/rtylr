@@ -1,0 +1,13 @@
+package hub.team.members.v1
+
+/// MembersService defines hub team member endpoints.
+service MembersService {
+  /// Returns team members for the active business.
+  listTeam(ListTeamRequest) -> ListTeamResponse @get("/members")
+
+  /// Returns a single team member by ID.
+  getMember(GetMemberRequest) -> GetMemberResponse @get("/members/{user_id}")
+
+  /// Removes a member from the team.
+  removeMember(RemoveMemberRequest) -> RemoveMemberResponse @delete("/members/{user_id}")
+}

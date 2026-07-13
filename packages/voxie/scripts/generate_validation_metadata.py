@@ -225,7 +225,14 @@ def iter_message_fields(proto: Path) -> tuple[str, dict[str, dict[str, object]]]
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate frontend validation metadata from voxie proto files.")
-    parser.add_argument("--proto-root", type=Path, default=DEFAULT_ROOT / "proto")
+    # Every service has been migrated off .proto onto api/*.onk (see
+    # README.md), so proto/ no longer exists and this always scans zero
+    # files - the generated metadata is now permanently empty (but still
+    # type-checks; see the comment on contractValidationMetadata's type
+    # annotation below). This script has no .onk-aware equivalent yet: it
+    # only understands proto's buf.validate syntax. Frontend field validation
+    # metadata is a known gap until an onk-decorator-aware generator exists.
+    parser.add_argument("--proto-root", type=Path, default=DEFAULT_ROOT / "api")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_ROOT / "src" / "validation")
     return parser.parse_args()
 
@@ -293,8 +300,16 @@ def main() -> None:
         "  protoName: string;\n"
         "  message: string;\n"
         "};\n\n"
-        f"export const contractValidationMetadata = {json.dumps(request_messages, indent=2, sort_keys=True)} as const satisfies ContractValidationMetadata;\n\n"
-        f"export const contractValidationOneofMetadata = {json.dumps(request_oneofs, indent=2, sort_keys=True)} as const satisfies ContractOneofValidationMetadata;\n\n"
+        # An explicit type annotation (rather than relying solely on `as const
+        # satisfies` inference) is required here: when the underlying dict is
+        # empty (e.g. every oneof-validated proto message has since been
+        # migrated to .onk, which has no equivalent decorator), TypeScript
+        # infers the bare object literal `{}` as its own zero-key type, so
+        # `keyof typeof metadata` collapses to `never` and callers indexing
+        # into it break. Annotating the declared type keeps `keyof` as
+        # `string` regardless of how many keys are actually present.
+        f"export const contractValidationMetadata: ContractValidationMetadata = {json.dumps(request_messages, indent=2, sort_keys=True)} as const;\n\n"
+        f"export const contractValidationOneofMetadata: ContractOneofValidationMetadata = {json.dumps(request_oneofs, indent=2, sort_keys=True)} as const;\n\n"
         "export function getContractValidation(messageName: string) {\n"
         "  return contractValidationMetadata[messageName as keyof typeof contractValidationMetadata];\n"
         "}\n"

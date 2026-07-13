@@ -1,0 +1,16 @@
+package pos.terminal.v1
+
+/// TerminalService defines POS terminal device endpoints.
+service TerminalService {
+  /// Returns terminals for the active business.
+  listTerminals(ListTerminalsRequest) -> ListTerminalsResponse @get("/terminals")
+
+  /// Registers a new terminal.
+  createTerminal(CreateTerminalRequest) -> CreateTerminalResponse @post("/terminals")
+
+  /// Updates an existing terminal.
+  updateTerminal(UpdateTerminalRequest) -> UpdateTerminalResponse @put("/terminals/{id}") @body("body")
+
+  /// Records a terminal heartbeat.
+  heartbeatTerminal(HeartbeatTerminalRequest) -> HeartbeatTerminalResponse @post("/terminals/heartbeat")
+}
